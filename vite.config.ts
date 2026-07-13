@@ -40,5 +40,10 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Inside a Lovable sandbox build, the preset is forced to cloudflare-module regardless.
+  // Outside Lovable (e.g. GitHub Actions building for Netlify), this override applies and
+  // Nitro emits a Netlify Functions bundle for SSR + server functions.
+  // NITRO_PRESET=netlify in the CI env also wins if set.
+  nitro: { preset: "netlify" },
   plugins: [disableTanstackDevtoolsInjectSource(), imagetools(), mcpPlugin()],
 });
