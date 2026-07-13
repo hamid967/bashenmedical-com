@@ -1168,6 +1168,7 @@ function DoctorBranchesTab({
               <Link
                 to="/branches/$slug"
                 params={{ slug: b.slug }}
+                search={{}}
                 className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary transition"
               >
                 {ar ? "تفاصيل الفرع" : "Branch details"}
