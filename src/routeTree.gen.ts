@@ -102,6 +102,7 @@ import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authenticated/patients.index'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedPortalSettingsRouteImport } from './routes/_authenticated/portal.settings'
+import { Route as AuthenticatedPortalScheduleRouteImport } from './routes/_authenticated/portal.schedule'
 import { Route as AuthenticatedPortalRecordsRouteImport } from './routes/_authenticated/portal.records'
 import { Route as AuthenticatedPortalRadiologyRouteImport } from './routes/_authenticated/portal.radiology'
 import { Route as AuthenticatedPortalProfileRouteImport } from './routes/_authenticated/portal.profile'
@@ -619,6 +620,12 @@ const AuthenticatedPortalSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedPortalScheduleRoute =
+  AuthenticatedPortalScheduleRouteImport.update({
+    id: '/schedule',
+    path: '/schedule',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedPortalRecordsRoute =
   AuthenticatedPortalRecordsRouteImport.update({
     id: '/records',
@@ -869,6 +876,7 @@ export interface FileRoutesByFullPath {
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/radiology': typeof AuthenticatedPortalRadiologyRoute
   '/portal/records': typeof AuthenticatedPortalRecordsRoute
+  '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
@@ -987,6 +995,7 @@ export interface FileRoutesByTo {
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/radiology': typeof AuthenticatedPortalRadiologyRoute
   '/portal/records': typeof AuthenticatedPortalRecordsRoute
+  '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
@@ -1108,6 +1117,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/radiology': typeof AuthenticatedPortalRadiologyRoute
   '/_authenticated/portal/records': typeof AuthenticatedPortalRecordsRoute
+  '/_authenticated/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
@@ -1229,6 +1239,7 @@ export interface FileRouteTypes {
     | '/portal/profile'
     | '/portal/radiology'
     | '/portal/records'
+    | '/portal/schedule'
     | '/portal/settings'
     | '/media/stories/$slug'
     | '/patients/'
@@ -1347,6 +1358,7 @@ export interface FileRouteTypes {
     | '/portal/profile'
     | '/portal/radiology'
     | '/portal/records'
+    | '/portal/schedule'
     | '/portal/settings'
     | '/media/stories/$slug'
     | '/patients'
@@ -1467,6 +1479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/profile'
     | '/_authenticated/portal/radiology'
     | '/_authenticated/portal/records'
+    | '/_authenticated/portal/schedule'
     | '/_authenticated/portal/settings'
     | '/media/stories/$slug'
     | '/_authenticated/patients/'
@@ -2194,6 +2207,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalSettingsRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/schedule': {
+      id: '/_authenticated/portal/schedule'
+      path: '/schedule'
+      fullPath: '/portal/schedule'
+      preLoaderRoute: typeof AuthenticatedPortalScheduleRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/_authenticated/portal/records': {
       id: '/_authenticated/portal/records'
       path: '/records'
@@ -2415,6 +2435,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalProfileRoute: typeof AuthenticatedPortalProfileRoute
   AuthenticatedPortalRadiologyRoute: typeof AuthenticatedPortalRadiologyRoute
   AuthenticatedPortalRecordsRoute: typeof AuthenticatedPortalRecordsRoute
+  AuthenticatedPortalScheduleRoute: typeof AuthenticatedPortalScheduleRoute
   AuthenticatedPortalSettingsRoute: typeof AuthenticatedPortalSettingsRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
 }
@@ -2433,6 +2454,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalProfileRoute: AuthenticatedPortalProfileRoute,
   AuthenticatedPortalRadiologyRoute: AuthenticatedPortalRadiologyRoute,
   AuthenticatedPortalRecordsRoute: AuthenticatedPortalRecordsRoute,
+  AuthenticatedPortalScheduleRoute: AuthenticatedPortalScheduleRoute,
   AuthenticatedPortalSettingsRoute: AuthenticatedPortalSettingsRoute,
   AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
 }
