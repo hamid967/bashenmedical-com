@@ -552,8 +552,10 @@ function StepTime({ doctorId, date, value, onPick, onBack }: {
 
 /* ---------------- Step 4: Patient ---------------- */
 
-function StepPatient({ patient, onChange, onNext, onBack }: {
+function StepPatient({ patient, insurance, doctorId, onChange, onInsuranceChange, onNext, onBack }: {
   patient: Patient; onChange: (p: Partial<Patient>) => void;
+  insurance: Insurance; doctorId: string | null;
+  onInsuranceChange: (p: Partial<Insurance>) => void;
   onNext: () => void; onBack: () => void;
 }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
