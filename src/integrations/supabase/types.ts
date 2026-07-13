@@ -925,6 +925,7 @@ export type Database = {
           name_en: string
           photo_url: string | null
           photos: string[]
+          profile_id: string | null
           ratings_count: number
           slug: string | null
           sort_order: number
@@ -952,6 +953,7 @@ export type Database = {
           name_en: string
           photo_url?: string | null
           photos?: string[]
+          profile_id?: string | null
           ratings_count?: number
           slug?: string | null
           sort_order?: number
@@ -979,6 +981,7 @@ export type Database = {
           name_en?: string
           photo_url?: string | null
           photos?: string[]
+          profile_id?: string | null
           ratings_count?: number
           slug?: string | null
           sort_order?: number
@@ -993,6 +996,13 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctors_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -3677,6 +3687,7 @@ export type Database = {
       }
       enqueue_appointment_reminders: { Args: never; Returns: Json }
       generate_mrn: { Args: { _branch_id: string }; Returns: string }
+      get_my_doctor_id: { Args: never; Returns: string }
       get_my_patient_id: { Args: never; Returns: string }
       get_order_by_ref: {
         Args: { _kind: string; _phone: string; _ref: string }
