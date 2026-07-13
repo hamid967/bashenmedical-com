@@ -216,7 +216,7 @@ function Page() {
       <header className="border-b border-border/50 bg-background/80 backdrop-blur sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex flex-wrap items-center gap-3">
           <Link
-            to="/_authenticated/command-center"
+            to="/command-center"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="w-4 h-4" />
