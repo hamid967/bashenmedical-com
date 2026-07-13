@@ -59,30 +59,59 @@ type Patient = {
   gender: "male" | "female" | null; reason: string;
 };
 
+type Insurance = {
+  useInsurance: boolean;
+  providerId: string | null;
+  policyNumber: string;
+  memberId: string;
+  verify: null | {
+    eligible: boolean;
+    reason: string;
+    message: string;
+    coverage_percent: number | null;
+    consultation_fee: number | null;
+    covered_amount: number | null;
+    estimated_cost: number | null;
+    patient_share: number | null;
+  };
+};
+
+const INITIAL_INSURANCE: Insurance = {
+  useInsurance: false,
+  providerId: null,
+  policyNumber: "",
+  memberId: "",
+  verify: null,
+};
+
 type State = {
   step: number;
   doctorId: string | null;
   date: string | null;
   time: string | null;
   patient: Patient;
+  insurance: Insurance;
   result: { ok: true; reference: string } | null;
 };
 
 const INITIAL: State = {
   step: 1, doctorId: null, date: null, time: null,
   patient: { name: "", phone: "", nationalId: "", gender: null, reason: "" },
+  insurance: INITIAL_INSURANCE,
   result: null,
 };
 
 type Action =
   | { t: "set"; p: Partial<State> }
   | { t: "patient"; p: Partial<Patient> }
+  | { t: "insurance"; p: Partial<Insurance> }
   | { t: "goto"; step: number };
 
 function reducer(s: State, a: Action): State {
   switch (a.t) {
     case "set": return { ...s, ...a.p };
     case "patient": return { ...s, patient: { ...s.patient, ...a.p } };
+    case "insurance": return { ...s, insurance: { ...s.insurance, ...a.p } };
     case "goto": return { ...s, step: Math.max(1, Math.min(5, a.step)) };
   }
 }
