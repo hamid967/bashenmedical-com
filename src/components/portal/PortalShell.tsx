@@ -21,6 +21,7 @@ import {
   Sparkles,
   Menu,
   MessageSquareWarning,
+  CalendarClock,
 } from "lucide-react";
 import { useState } from "react";
 
