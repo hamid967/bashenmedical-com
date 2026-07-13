@@ -48,6 +48,7 @@ import { Route as HealthIndexRouteImport } from './routes/health.index'
 import { Route as DoctorsIndexRouteImport } from './routes/doctors.index'
 import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
 import { Route as SettingsGithubRouteImport } from './routes/settings.github'
+import { Route as ReservationsNewRouteImport } from './routes/reservations.new'
 import { Route as OrdersRefRouteImport } from './routes/orders.$ref'
 import { Route as MediaStoriesRouteImport } from './routes/media.stories'
 import { Route as MediaNewsRouteImport } from './routes/media.news'
@@ -319,6 +320,11 @@ const SettingsGithubRoute = SettingsGithubRouteImport.update({
   id: '/settings/github',
   path: '/settings/github',
   getParentRoute: () => rootRouteImport,
+} as any)
+const ReservationsNewRoute = ReservationsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => ReservationsRoute,
 } as any)
 const OrdersRefRoute = OrdersRefRouteImport.update({
   id: '/orders/$ref',
@@ -779,7 +785,7 @@ export interface FileRoutesByFullPath {
   '/pharmacy': typeof PharmacyRoute
   '/programs': typeof ProgramsRoute
   '/rate': typeof RateRoute
-  '/reservations': typeof ReservationsRoute
+  '/reservations': typeof ReservationsRouteWithChildren
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -834,6 +840,7 @@ export interface FileRoutesByFullPath {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
   '/doctors/': typeof DoctorsIndexRoute
@@ -896,7 +903,7 @@ export interface FileRoutesByTo {
   '/pharmacy': typeof PharmacyRoute
   '/programs': typeof ProgramsRoute
   '/rate': typeof RateRoute
-  '/reservations': typeof ReservationsRoute
+  '/reservations': typeof ReservationsRouteWithChildren
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -950,6 +957,7 @@ export interface FileRoutesByTo {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
   '/doctors': typeof DoctorsIndexRoute
@@ -1014,7 +1022,7 @@ export interface FileRoutesById {
   '/pharmacy': typeof PharmacyRoute
   '/programs': typeof ProgramsRoute
   '/rate': typeof RateRoute
-  '/reservations': typeof ReservationsRoute
+  '/reservations': typeof ReservationsRouteWithChildren
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -1069,6 +1077,7 @@ export interface FileRoutesById {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
   '/doctors/': typeof DoctorsIndexRoute
@@ -1188,6 +1197,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
     | '/doctors/'
@@ -1304,6 +1314,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
     | '/doctors'
@@ -1422,6 +1433,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
     | '/doctors/'
@@ -1486,7 +1498,7 @@ export interface RootRouteChildren {
   PharmacyRoute: typeof PharmacyRoute
   ProgramsRoute: typeof ProgramsRoute
   RateRoute: typeof RateRoute
-  ReservationsRoute: typeof ReservationsRoute
+  ReservationsRoute: typeof ReservationsRouteWithChildren
   SecondOpinionRoute: typeof SecondOpinionRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -1791,6 +1803,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/github'
       preLoaderRoute: typeof SettingsGithubRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/reservations/new': {
+      id: '/reservations/new'
+      path: '/new'
+      fullPath: '/reservations/new'
+      preLoaderRoute: typeof ReservationsNewRouteImport
+      parentRoute: typeof ReservationsRoute
     }
     '/orders/$ref': {
       id: '/orders/$ref'
@@ -2527,6 +2546,18 @@ const ExcellenceRouteWithChildren = ExcellenceRoute._addFileChildren(
   ExcellenceRouteChildren,
 )
 
+interface ReservationsRouteChildren {
+  ReservationsNewRoute: typeof ReservationsNewRoute
+}
+
+const ReservationsRouteChildren: ReservationsRouteChildren = {
+  ReservationsNewRoute: ReservationsNewRoute,
+}
+
+const ReservationsRouteWithChildren = ReservationsRoute._addFileChildren(
+  ReservationsRouteChildren,
+)
+
 interface MediaStoriesRouteChildren {
   MediaStoriesSlugRoute: typeof MediaStoriesSlugRoute
 }
@@ -2567,7 +2598,7 @@ const rootRouteChildren: RootRouteChildren = {
   PharmacyRoute: PharmacyRoute,
   ProgramsRoute: ProgramsRoute,
   RateRoute: RateRoute,
-  ReservationsRoute: ReservationsRoute,
+  ReservationsRoute: ReservationsRouteWithChildren,
   SecondOpinionRoute: SecondOpinionRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
