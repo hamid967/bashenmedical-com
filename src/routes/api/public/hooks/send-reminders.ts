@@ -38,12 +38,145 @@ const DEFAULT_STAFF_ROLES = ["admin", "reception", "super_admin"] as const;
 
 const MAX_PENDING_PER_RUN = 200;
 
+function normalizePhone(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+  if (raw.trim().startsWith("+")) return `+${digits}`;
+  if (digits.startsWith("00")) return `+${digits.slice(2)}`;
+  if (digits.startsWith("966")) return `+${digits}`;
+  if (digits.startsWith("0") && digits.length === 10) return `+966${digits.slice(1)}`;
+  return `+${digits}`;
+}
+
+async function sendTwilioMessage(opts: {
+  to: string;
+  body: string;
+  channel: "sms" | "whatsapp";
+}): Promise<{ ok: true } | { ok: false; error: string; skipped?: boolean }> {
+  const sid = process.env.TWILIO_ACCOUNT_SID;
+  const token = process.env.TWILIO_AUTH_TOKEN;
+  const fromSms = process.env.TWILIO_SMS_FROM;
+  const fromWa = process.env.TWILIO_WHATSAPP_FROM;
+
+  if (!sid || !token) {
+    return { ok: false, error: "twilio credentials not configured", skipped: true };
+  }
+  const from = opts.channel === "whatsapp" ? fromWa : fromSms;
+  if (!from) {
+    return {
+      ok: false,
+      error: `sender number missing (${opts.channel})`,
+      skipped: true,
+    };
+  }
+  const to = normalizePhone(opts.to);
+  if (!to) return { ok: false, error: "empty recipient", skipped: true };
+
+  const params = new URLSearchParams({
+    To: opts.channel === "whatsapp" ? `whatsapp:${to}` : to,
+    From: opts.channel === "whatsapp" ? (from.startsWith("whatsapp:") ? from : `whatsapp:${from}`) : from,
+    Body: opts.body,
+  });
+
+  try {
+    const res = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      return { ok: false, error: `twilio ${res.status}: ${text.slice(0, 300)}` };
+    }
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+
+async function sendMessagingRun(admin: ReturnType<typeof createClient>): Promise<{
+  sms_sent: number;
+  sms_failed: number;
+  sms_skipped: number;
+  whatsapp_sent: number;
+  whatsapp_failed: number;
+  whatsapp_skipped: number;
+}> {
+  const stats = {
+    sms_sent: 0,
+    sms_failed: 0,
+    sms_skipped: 0,
+    whatsapp_sent: 0,
+    whatsapp_failed: 0,
+    whatsapp_skipped: 0,
+  };
+
+  const { data: pending, error } = await admin
+    .from("notifications")
+    .select("id, channel, body, recipient")
+    .in("channel", ["sms", "whatsapp"])
+    .eq("send_status", "pending")
+    .order("created_at", { ascending: true })
+    .limit(MAX_PENDING_PER_RUN);
+  if (error) {
+    console.error("messaging pending fetch failed:", error);
+    return stats;
+  }
+
+  for (const row of pending ?? []) {
+    const channel = row.channel as "sms" | "whatsapp";
+    const to = (row.recipient as string | null) ?? "";
+    const body = (row.body as string | null) ?? "";
+    if (!to || !body) {
+      await admin
+        .from("notifications")
+        .update({ send_status: "skipped", last_error: "missing recipient or body" })
+        .eq("id", row.id as string);
+      if (channel === "sms") stats.sms_skipped++;
+      else stats.whatsapp_skipped++;
+      continue;
+    }
+
+    const result = await sendTwilioMessage({ to, body, channel });
+    if (result.ok) {
+      await admin
+        .from("notifications")
+        .update({ send_status: "sent", sent_at: new Date().toISOString(), last_error: null })
+        .eq("id", row.id as string);
+      if (channel === "sms") stats.sms_sent++;
+      else stats.whatsapp_sent++;
+    } else if (result.skipped) {
+      await admin
+        .from("notifications")
+        .update({ send_status: "skipped", last_error: result.error })
+        .eq("id", row.id as string);
+      if (channel === "sms") stats.sms_skipped++;
+      else stats.whatsapp_skipped++;
+    } else {
+      await admin
+        .from("notifications")
+        .update({ send_status: "failed", last_error: result.error })
+        .eq("id", row.id as string);
+      if (channel === "sms") stats.sms_failed++;
+      else stats.whatsapp_failed++;
+    }
+  }
+  return stats;
+}
+
 async function sendPushRun(): Promise<{
   enqueue: unknown;
   sent: number;
   failed: number;
   expired: number;
   no_subscription: number;
+  messaging: Awaited<ReturnType<typeof sendMessagingRun>>;
 }> {
   const url = process.env.SUPABASE_URL!;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
