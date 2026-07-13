@@ -593,7 +593,7 @@ function BookPage() {
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           {lang === "ar" ? "لديك حجز مسبق؟" : "Already booked?"}{" "}
-          <Link to="/track" className="text-primary hover:underline">
+          <Link to="/track" search={{}} className="text-primary hover:underline">
             {lang === "ar" ? "تتبع حجزك" : "Track your booking"}
           </Link>
         </p>
