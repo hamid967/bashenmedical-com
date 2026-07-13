@@ -59,6 +59,9 @@ const bookingCreateSchema = z.object({
     .nullable(),
   reminder_24h: z.boolean().optional(),
   reminder_2h: z.boolean().optional(),
+  insurance_provider_id: z.string().uuid("جهة تأمين غير صالحة").optional().nullable(),
+  insurance_policy_number: z.string().trim().max(64, "رقم البوليصة طويل").optional().nullable(),
+  insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
 });
 
 function json(status: number, body: Record<string, unknown>) {
