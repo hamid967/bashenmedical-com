@@ -315,6 +315,7 @@ function InlineBookingWidget({
         <div className="mt-4 flex flex-col gap-2">
           <Link
             to="/track"
+            search={{}}
             className="w-full inline-flex items-center justify-center gap-1 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-bold hover:opacity-90"
           >
             {ar ? "تتبع الحجز" : "Track booking"}
@@ -1167,6 +1168,7 @@ function DoctorBranchesTab({
               <Link
                 to="/branches/$slug"
                 params={{ slug: b.slug }}
+                search={{}}
                 className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary transition"
               >
                 {ar ? "تفاصيل الفرع" : "Branch details"}

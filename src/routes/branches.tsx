@@ -170,6 +170,7 @@ function BranchesPage() {
                   <Link
                     to="/branches/$slug"
                     params={{ slug: b.slug }}
+                    search={{}}
                     className="flex-1 text-center rounded-md bg-primary text-primary-foreground px-3 py-2 text-sm font-semibold hover:opacity-95"
                   >
                     التفاصيل والحجز
