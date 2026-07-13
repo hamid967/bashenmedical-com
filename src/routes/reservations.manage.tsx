@@ -9,11 +9,12 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
-import { ArrowRight, Search, CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
+import { ArrowRight, Search, CheckCircle2, XCircle, Loader2, AlertCircle, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSessionProfile } from "@/hooks/use-session-profile";
 
 const searchSchema = z.object({
   ref: fallback(z.string(), "").default(""),
@@ -69,6 +70,8 @@ function ManageReservationPage() {
   const [phoneForCancel, setPhoneForCancel] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [showCancel, setShowCancel] = useState(false);
+  const { profile } = useSessionProfile();
+
 
   const track = useMutation({ mutationFn: trackBooking });
   const cancel = useMutation({ mutationFn: cancelBooking });
@@ -107,6 +110,34 @@ function ManageReservationPage() {
       </header>
 
       <div className="container-modern mx-auto max-w-3xl px-4 py-8 space-y-6">
+        {/* Portal CTA */}
+        <div className="rounded-xl border bg-primary/5 p-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <LayoutDashboard className="h-5 w-5 text-primary" />
+            <div className="text-sm">
+              {profile
+                ? "لديك حساب مريض — تابع كل حجوزاتك من لوحة تحكم واحدة."
+                : "لديك حساب مريض؟ سجّل الدخول لعرض جميع حجوزاتك في مكان واحد."}
+            </div>
+          </div>
+          {profile ? (
+            <Link
+              to="/portal"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 h-9 text-xs font-semibold hover:bg-primary/90"
+            >
+              فتح البوابة
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              search={{ redirect: "/portal" }}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-4 h-9 text-xs font-semibold hover:bg-primary/90"
+            >
+              دخول
+            </Link>
+          )}
+        </div>
+
         {/* Lookup form */}
         <div className="bg-card border rounded-2xl p-6 md:p-8 shadow-sm">
           <h1 className="text-xl font-bold mb-1">تتبّع حجزك</h1>

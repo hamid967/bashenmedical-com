@@ -32,6 +32,7 @@ import {
   NAME_MIN, NAME_MAX, PHONE_MIN, PHONE_MAX, REASON_MAX,
   SA_PHONE_RE, NAME_RE, SA_NID_RE,
 } from "@/lib/booking-limits";
+import { useSessionProfile } from "@/hooks/use-session-profile";
 
 const searchSchema = z.object({
   doctor: z.string().optional(),
@@ -144,6 +145,8 @@ function NewReservationPage() {
     queryKey: ["res-doctors"], queryFn: fetchDoctors, staleTime: 5 * 60_000,
   });
 
+  const { profile } = useSessionProfile();
+
   const doctor = useMemo(
     () => doctors.find((d) => d.id === state.doctorId) ?? null,
     [doctors, state.doctorId],
@@ -154,18 +157,49 @@ function NewReservationPage() {
     navigate({ search: { doctor: state.doctorId ?? undefined, step: state.step }, replace: true });
   }, [state.step, state.doctorId, navigate]);
 
+  // Prefill patient data from the signed-in profile (only when fields are still blank)
+  useEffect(() => {
+    if (!profile) return;
+    const p = state.patient;
+    const patch: Partial<Patient> = {};
+    if (!p.name.trim() && profile.full_name) patch.name = profile.full_name;
+    if (!p.phone.trim() && profile.phone) patch.phone = profile.phone;
+    if (!p.nationalId.trim() && profile.national_id) patch.nationalId = profile.national_id;
+    if (!p.gender && profile.gender) patch.gender = profile.gender;
+    if (Object.keys(patch).length > 0) dispatch({ t: "patient", p: patch });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.userId]);
+
+
   const goto = (step: number) => dispatch({ t: "goto", step });
 
   return (
     <div dir="rtl" className="min-h-screen bg-muted/30">
       <header className="bg-card border-b">
-        <div className="container-modern mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
+        <div className="container-modern mx-auto max-w-5xl px-4 py-4 flex items-center justify-between gap-3">
           <Link to="/reservations" className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5">
             <ArrowRight className="h-4 w-4" /> عودة للحجوزات
           </Link>
-          <div className="text-sm font-semibold">حجز موعد جديد</div>
+          <div className="text-sm font-semibold hidden sm:block">حجز موعد جديد</div>
+          {profile ? (
+            <Link
+              to="/portal"
+              className="inline-flex items-center gap-1.5 rounded-full border bg-primary/5 text-primary px-3 h-9 text-xs font-semibold hover:bg-primary/10"
+            >
+              بوابة المريض
+            </Link>
+          ) : (
+            <Link
+              to="/auth"
+              search={{ redirect: typeof window !== "undefined" ? window.location.pathname + window.location.search : "/reservations/new" }}
+              className="inline-flex items-center gap-1.5 rounded-full border bg-card px-3 h-9 text-xs font-semibold hover:bg-muted"
+            >
+              دخول
+            </Link>
+          )}
         </div>
       </header>
+
 
       <div className="container-modern mx-auto max-w-5xl px-4 py-8">
         <Steps step={state.step} />
@@ -204,10 +238,12 @@ function NewReservationPage() {
               time={state.time}
               patient={state.patient}
               result={state.result}
+              signedIn={!!profile}
               onSuccess={(reference) => dispatch({ t: "set", p: { result: { ok: true, reference } } })}
               onBack={() => goto(4)}
             />
           )}
+
           {state.step === 2 && !doctor && <EmptyPick onBack={() => goto(1)} />}
           {state.step >= 3 && (!doctor || !state.date) && <EmptyPick onBack={() => goto(1)} />}
         </div>
@@ -547,9 +583,10 @@ function StepPatient({ patient, onChange, onNext, onBack }: {
 
 /* ---------------- Step 5: Confirm ---------------- */
 
-function StepConfirm({ doctor, date, time, patient, result, onSuccess, onBack }: {
+function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess, onBack }: {
   doctor: Doctor; date: string; time: string; patient: Patient;
-  result: State["result"]; onSuccess: (ref: string) => void; onBack: () => void;
+  result: State["result"]; signedIn: boolean;
+  onSuccess: (ref: string) => void; onBack: () => void;
 }) {
   const mut = useMutation({
     mutationFn: submitBooking,
@@ -576,8 +613,9 @@ function StepConfirm({ doctor, date, time, patient, result, onSuccess, onBack }:
   };
 
   if (result) {
-    return <BookingSuccess reference={result.reference} doctor={doctor} date={dateLabel} time={time} phone={patient.phone} />;
+    return <BookingSuccess reference={result.reference} doctor={doctor} date={dateLabel} time={time} phone={patient.phone} signedIn={signedIn} />;
   }
+
 
   const errorMsg = mut.data && !mut.data.ok ? mut.data.message : mut.error instanceof Error ? mut.error.message : null;
 
@@ -632,8 +670,8 @@ function Row({ label, value, dir }: { label: string; value: string; dir?: "ltr" 
 
 /* ---------------- Success ---------------- */
 
-function BookingSuccess({ reference, doctor, date, time, phone }: {
-  reference: string; doctor: Doctor; date: string; time: string; phone: string;
+function BookingSuccess({ reference, doctor, date, time, phone, signedIn }: {
+  reference: string; doctor: Doctor; date: string; time: string; phone: string; signedIn: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
@@ -671,16 +709,28 @@ function BookingSuccess({ reference, doctor, date, time, phone }: {
         احتفظ برقم المرجع لإدارة حجزك لاحقًا.
       </p>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
+        {signedIn ? (
+          <Link to="/portal"
+            className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90">
+            فتح بوابة المريض
+          </Link>
+        ) : (
+          <Link to="/auth" search={{ redirect: "/portal" }}
+            className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90">
+            سجّل الدخول لإدارة حجوزاتك
+          </Link>
+        )}
         <Link to="/reservations/manage" search={{ ref: reference }}
           className="flex-1 inline-flex items-center justify-center rounded-lg border bg-card px-4 py-2.5 text-sm font-semibold hover:bg-muted">
-          إدارة حجزي
+          تتبع بالمرجع
         </Link>
         <Link to="/reservations"
-          className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90">
+          className="flex-1 inline-flex items-center justify-center rounded-lg border bg-card px-4 py-2.5 text-sm font-semibold hover:bg-muted">
           حجز جديد
         </Link>
       </div>
+
     </div>
   );
 }
