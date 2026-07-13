@@ -100,7 +100,7 @@ async function sendTwilioMessage(opts: {
   }
 }
 
-async function sendMessagingRun(admin: ReturnType<typeof createClient>): Promise<{
+async function sendMessagingRun(admin: any): Promise<{
   sms_sent: number;
   sms_failed: number;
   sms_skipped: number;
