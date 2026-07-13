@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -15,7 +15,9 @@ import { I18nProvider } from "@/lib/i18n";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "sonner";
-import { IntroOverlay } from "@/components/IntroOverlay";
+const IntroOverlay = lazy(() =>
+  import("@/components/IntroOverlay").then((m) => ({ default: m.IntroOverlay })),
+);
 import { ChatbotBubble } from "@/components/ChatbotBubble";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
 
