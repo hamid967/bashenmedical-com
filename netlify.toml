@@ -1,11 +1,11 @@
+# Nitro's `netlify` preset (set in vite.config.ts) auto-generates the
+# functions bundle at .netlify/functions-internal/server/ and static assets
+# at dist/. It also emits its own SPA-fallback redirect through the server
+# function, so no manual [[redirects]] block is needed.
 [build]
   command = "bun run build"
   publish = "dist"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
 [build.environment]
   NODE_VERSION = "20"
+  NITRO_PRESET = "netlify"
