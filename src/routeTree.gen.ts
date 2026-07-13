@@ -49,6 +49,7 @@ import { Route as DoctorsIndexRouteImport } from './routes/doctors.index'
 import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
 import { Route as SettingsGithubRouteImport } from './routes/settings.github'
 import { Route as ReservationsNewRouteImport } from './routes/reservations.new'
+import { Route as ReservationsManageRouteImport } from './routes/reservations.manage'
 import { Route as OrdersRefRouteImport } from './routes/orders.$ref'
 import { Route as MediaStoriesRouteImport } from './routes/media.stories'
 import { Route as MediaNewsRouteImport } from './routes/media.news'
@@ -324,6 +325,11 @@ const SettingsGithubRoute = SettingsGithubRouteImport.update({
 const ReservationsNewRoute = ReservationsNewRouteImport.update({
   id: '/new',
   path: '/new',
+  getParentRoute: () => ReservationsRoute,
+} as any)
+const ReservationsManageRoute = ReservationsManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
   getParentRoute: () => ReservationsRoute,
 } as any)
 const OrdersRefRoute = OrdersRefRouteImport.update({
@@ -840,6 +846,7 @@ export interface FileRoutesByFullPath {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/reservations/manage': typeof ReservationsManageRoute
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
@@ -957,6 +964,7 @@ export interface FileRoutesByTo {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/reservations/manage': typeof ReservationsManageRoute
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
@@ -1077,6 +1085,7 @@ export interface FileRoutesById {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/reservations/manage': typeof ReservationsManageRoute
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
@@ -1197,6 +1206,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/reservations/manage'
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
@@ -1314,6 +1324,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/reservations/manage'
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
@@ -1433,6 +1444,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/reservations/manage'
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
@@ -1809,6 +1821,13 @@ declare module '@tanstack/react-router' {
       path: '/new'
       fullPath: '/reservations/new'
       preLoaderRoute: typeof ReservationsNewRouteImport
+      parentRoute: typeof ReservationsRoute
+    }
+    '/reservations/manage': {
+      id: '/reservations/manage'
+      path: '/manage'
+      fullPath: '/reservations/manage'
+      preLoaderRoute: typeof ReservationsManageRouteImport
       parentRoute: typeof ReservationsRoute
     }
     '/orders/$ref': {
@@ -2547,10 +2566,12 @@ const ExcellenceRouteWithChildren = ExcellenceRoute._addFileChildren(
 )
 
 interface ReservationsRouteChildren {
+  ReservationsManageRoute: typeof ReservationsManageRoute
   ReservationsNewRoute: typeof ReservationsNewRoute
 }
 
 const ReservationsRouteChildren: ReservationsRouteChildren = {
+  ReservationsManageRoute: ReservationsManageRoute,
   ReservationsNewRoute: ReservationsNewRoute,
 }
 
