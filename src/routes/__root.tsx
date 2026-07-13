@@ -4,27 +4,20 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { AnimatePresence } from "framer-motion";
 import { useEffect, type ReactNode } from "react";
 
-import { lazy, Suspense } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "@/lib/i18n";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "sonner";
-import bmcLogoAsset from "@/assets/baeshen-logo.asset.json";
-const IntroOverlay = lazy(() => import("@/components/IntroOverlay").then((m) => ({ default: m.IntroOverlay })));
-const WelcomeSplash = lazy(() => import("@/components/WelcomeSplash").then((m) => ({ default: m.WelcomeSplash })));
+import { IntroOverlay } from "@/components/IntroOverlay";
 import { ChatbotBubble } from "@/components/ChatbotBubble";
-import { MotionToggle } from "@/components/MotionToggle";
-import { PageTransition } from "@/components/motion/PageTransition";
-
+import { WhatsAppFab } from "@/components/WhatsAppFab";
 
 function NotFoundComponent() {
   return (
@@ -88,37 +81,34 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "مجمع باعشن الطبي — رعايتك تبدأ هنا | Baeshen Medical" },
+      { title: "مجمع باعشن الطبي  Baeshen Medical" },
       {
         name: "description",
         content:
           "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية.",
       },
       { name: "author", content: "Baeshen Medical Complex" },
-      { property: "og:title", content: "مجمع باعشن الطبي — رعايتك تبدأ هنا | Baeshen Medical" },
+      { property: "og:title", content: "مجمع باعشن الطبي  Baeshen Medical" },
       {
         property: "og:description",
-        content: "خدمات طبية تخصصية في صبيا، جازان. احجز موعدك أو اطلب دواءك أونلاين.",
+        content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "مجمع باعشن الطبي — رعايتك تبدأ هنا | Baeshen Medical" },
-      { name: "description", content: "احجز موعدك مع أطباء استشاريين في صبيا، جازان أو اطلب دواءك من صيدليات باعشن. مجمع طبي معتمد من CBAHI." },
-      { property: "og:description", content: "احجز موعدك مع أطباء استشاريين في صبيا، جازان أو اطلب دواءك من صيدليات باعشن. مجمع طبي معتمد من CBAHI." },
-      { name: "twitter:description", content: "احجز موعدك مع أطباء استشاريين في صبيا، جازان أو اطلب دواءك من صيدليات باعشن. مجمع طبي معتمد من CBAHI." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/da5ecdb6-8fc6-4806-a4f3-419040820761/id-preview-7a856abf--550c7bc5-80b4-4118-853f-28cc7bd42f26.lovable.app-1783385951418.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/da5ecdb6-8fc6-4806-a4f3-419040820761/id-preview-7a856abf--550c7bc5-80b4-4118-853f-28cc7bd42f26.lovable.app-1783385951418.png" },
+      { name: "twitter:title", content: "مجمع باعشن الطبي  Baeshen Medical" },
+      { name: "description", content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية." },
+      { property: "og:description", content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية." },
+      { name: "twitter:description", content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/FBXlxP8Z7qYcHGabM3FUOXAfZsq2/social-images/social-1783966358675-images.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/FBXlxP8Z7qYcHGabM3FUOXAfZsq2/social-images/social-1783966358675-images.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      // Preload the Baeshen logo so the intro overlay renders instantly without a network wait
-      { rel: "preload", as: "image", href: bmcLogoAsset.url, fetchpriority: "high" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Tajawal:wght@400;500;700;800;900&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Work+Sans:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
   }),
@@ -129,14 +119,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 });
 
 function RootShell({ children }: { children: ReactNode }) {
-  const themeInitScript = `(function(){try{var s=localStorage.getItem('baeshen-theme');var d=s?s==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl">
       <head>
         <HeadContent />
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
-      <body suppressHydrationWarning>
+      <body>
         {children}
         <Scripts />
       </body>
@@ -146,33 +134,21 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <Suspense fallback={null}>
-          <IntroOverlay theme="dark" />
-        </Suspense>
-        <Suspense fallback={null}>
-          <WelcomeSplash />
-        </Suspense>
+        <IntroOverlay theme="dark" />
         <div className="min-h-screen flex flex-col">
           <Header />
           <main className="flex-1">
-            <AnimatePresence mode="wait" initial={false}>
-              <PageTransition key={pathname}>
-                <Outlet />
-              </PageTransition>
-            </AnimatePresence>
+            <Outlet />
           </main>
           <Footer />
           <Toaster position="top-center" richColors closeButton />
           <ChatbotBubble />
-          <MotionToggle />
-
+          <WhatsAppFab />
         </div>
       </I18nProvider>
     </QueryClientProvider>
   );
 }
-
