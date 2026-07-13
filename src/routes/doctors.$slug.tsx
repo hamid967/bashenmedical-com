@@ -315,6 +315,7 @@ function InlineBookingWidget({
         <div className="mt-4 flex flex-col gap-2">
           <Link
             to="/track"
+            search={{}}
             className="w-full inline-flex items-center justify-center gap-1 rounded-lg bg-primary text-primary-foreground px-4 py-2 text-sm font-bold hover:opacity-90"
           >
             {ar ? "تتبع الحجز" : "Track booking"}
