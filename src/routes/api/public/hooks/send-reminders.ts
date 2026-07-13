@@ -337,7 +337,8 @@ async function sendPushRun(): Promise<{
     else failed++;
   }
 
-  return { enqueue: enqueueResult ?? null, sent, failed, expired, no_subscription: noSub };
+  const messaging = await sendMessagingRun(admin);
+  return { enqueue: enqueueResult ?? null, sent, failed, expired, no_subscription: noSub, messaging };
 }
 
 async function handle(request: Request): Promise<Response> {
