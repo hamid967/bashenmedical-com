@@ -1,68 +1,80 @@
-# خطة تطوير خدمة «احجز موعدك»
+## السياق والتحذير
 
-اخترت الأربعة نطاقات (تجربة/أداء/موثوقية/ميزات)، لذا الخطة تجمع تحسينات صغيرة مركّزة بدل إعادة بناء كامل، مع الحفاظ على المعمار الحالي (Wizard 9 خطوات + Public API).
+اخترتَ «بناء نظام حجوزات جديد من الصفر (استبدال الحالي)». قبل التنفيذ يجب أن تعرف ما سيُهدم:
 
-## 1) تحسين تجربة المستخدم (UI/UX)
+**سيتم حذفه/استبداله:**
+- `src/routes/book.tsx` ومكوّناته (`src/components/booking/*` — 12 مكوّنًا)
+- `src/routes/api/public/book/*` (availability, create, cancel, waitlist, month-availability, track)
+- `src/lib/booking-limits.ts`, `src/lib/portal/booking.functions.ts`
+- الروابط الداخلية من `/doctors`, `/branches/*`, `/specialties/*`, `Header`, `QuickBar`, `HeroComplex` … إلخ
 
-- **StepTime**: 
-  - إبراز أول وقت متاح تلقائيًا كاقتراح، مع زر «أقرب موعد متاح».
-  - إظهار المنطقة الزمنية (Asia/Riyadh) وتاريخ اليوم المختار أعلى الشبكة.
-  - أيقونات ☀️/🌤️/🌙 لمجموعات الصباح/العصر/المساء.
-- **StepPatient**: 
-  - تنسيق مباشر لرقم الجوال (٠٥X XXX XXXX) وتحقق فوري inline بدل الانتظار للـblur.
-  - عدّاد أحرف لسبب الزيارة (`REASON_MAX`).
-  - حفظ آخر جوال/اسم/هوية في `localStorage` (بعد موافقة صريحة) لتعبئة أسرع.
-- **Stepper**: تعطيل الخطوات غير المتاحة بصريًا (مع tooltip يوضح السبب).
-- **زر «التالي» ثابت على الجوال (sticky bottom)** لتقليل التمرير.
-- رسالة تأكيد قبل «حجز جديد» على شاشة النجاح تفاديًا للفقد العرضي للمرجع.
+**سيتوقف عن العمل (كسر مباشر):**
+- ~40 اختبار e2e/RLS/unit مرتبط بـ book (tests/e2e/book-*, tests/rls/appt-*, tests/rls/book-*, tests/react/booking.test.tsx …)
+- تدفق الإدارة `/appointments-queue`, `/admin`, `/orders/$ref`, `/track`, `/lookup`, `/waitlist`, `/booking-confirmation`
+- تكامل MCP (`src/lib/mcp/tools/create-appointment.ts`)
+- بوابة المريض `/my-orders` وأدوات التذكير `/api/public/hooks/send-reminders`
+- الـ CI (pre-push RLS checks, perf budget, lint guardrails على `book`)
 
-## 2) الأداء والسرعة
+**ما لن يُلمَس (بقرارٍ متعمَّد):**
+- جداول قاعدة البيانات: `appointments`, `availability`, `doctor_leaves`, `appointment_audit`, `appointment_waitlist`, `patients`, `doctors`, `branches`, `specialties` — تبقى كما هي مع الـ RLS الحالي. النظام الجديد يستخدم نفس المخطط.
+- المصادقة والـ profiles و user_roles.
 
-- **Prefetch الاستعلامات التالية**: عند اختيار طبيب، prefetch للـavailability لليوم الحالي مباشرة؛ عند اختيار تاريخ، prefetch لليوم التالي والسابق.
-- **staleTime أطول** للفروع/التخصصات (30 دقيقة بدل 5)، ودمج `list_public_doctors` في استعلام واحد مُخزَّن.
-- **month-availability**: استخدامه في StepDate لتعطيل الأيام الكاملة بلا شبكة إضافية عند التنقّل بين الأشهر.
-- **debounce** لتحديث URL في `goto` عند الضغط السريع.
-- تحويل `StepReview` و`StepSuccess` إلى `lazy import` (يظهران في آخر الرحلة فقط).
+---
 
-## 3) التحقق والموثوقية
+## الخطة
 
-- **منع الحجز المزدوج**: إعادة التحقق من توفر الوقت قبل الإرسال مباشرة (كما في `createMyAppointment`) وعرض بديل تلقائي إن أُخذ.
-- **رسائل الأخطاء**: خريطة موحّدة (`conflict/db/network/timeout`) مع اقتراح إجراء (إعادة المحاولة / اختيار وقت / اتصال بالاستقبال) بدل رسالة نصية فقط.
-- **إعادة المحاولة الذكية**: زر «حاول مرة أخرى» في `SubmitErrorBanner` لأخطاء `network/timeout` (بدون إرسال مكرر لأخطاء `validation/conflict`).
-- **حارس idempotency**: توليد `idempotency_key` (UUID) في `submitBooking` وتمريره كـheader؛ الخادم يرفض التكرار خلال نافذة قصيرة (يحتاج تعديل `create.ts`).
-- **حماية من فقد البيانات**: `beforeunload` warning عند وجود بيانات مريض مُدخلة ولم يُرسل الطلب بعد.
-- **تحقّق تاريخ/وقت الماضي على العميل** قبل الإرسال (StepTime يمنع، لكن نضيف حارسًا نهائيًا).
+### 1) صفحة تصفح جديدة `/reservations` (شبيهة udh.sa)
+- تبويبان: **«اختر العيادة»** و **«ابحث بالطبيب»**
+- شريط بحث + شبكة بطاقات (طبيب: صورة/أحرف، اسم، لقب، تخصص، فرع، زر «احجز الآن»)
+- بطاقات التخصصات تفتح شبكة الأطباء لهذا التخصص
+- قسم «أطباء انضموا حديثًا» + شريط «رعايتك أولويتنا» (زيارة منزلية)
+- زر «احجز الآن» يوجّه إلى `/booking/new?doctor=...` (المعالج الجديد)
 
-## 4) ميزات جديدة صغيرة
+### 2) معالج حجز جديد `/booking/new` (بديل `/book`)
+تدفّق مبسّط من 5 خطوات بدل 9 (على غرار udh):
+```
+1. طبيب/تخصص (مُعبَّأ مسبقًا من الرابط)
+2. اختيار الفرع (إن كان الطبيب يخدم أكثر من فرع)
+3. تاريخ + وقت في شاشة واحدة (تقويم + شبكة أوقات)
+4. بيانات المريض
+5. تأكيد
+```
+- استخدام React Query + `useReducer` + مزامنة URL كما في `book.tsx` الحالي.
+- إعادة استخدام مكوّنات UI جديدة تحت `src/components/reservations/*`.
 
-- **اختيار طبيب بديل**: إذا كان الطبيب المختار بدون مواعيد في الأسبوع القادم، اقتراح أطباء نفس التخصص مع أقرب موعد لكل واحد.
-- **مشاركة الحجز**: زر «مشاركة عبر واتساب» في `StepSuccess` (رابط `orders/$ref` + المرجع).
-- **إضافة للتقويم**: تحسين ملف `.ics` القائم ليشمل تنبيه ٢٤ساعة و٢ساعة تلقائيًا حسب تفضيل المريض.
-- **تتبّع الحجز بدون تسجيل**: عرض رابط `/lookup?ref=...` مباشرة في `StepSuccess`.
+### 3) واجهات API جديدة تحت `/api/public/reservations/*`
+- `GET availability?doctor_id&date` — نفس منطق `book/availability` (نسخ مبسّط).
+- `GET month-availability?doctor_id&month` — لتلوين التقويم.
+- `POST create` — إنشاء `appointments` مع كل التحققات (Zod, حدود مشتركة، مضاد سباق).
+- `POST cancel?ref` — إلغاء بمرجع + رقم جوال.
+- منطق نظيف يستخدم جداول القاعدة الحالية.
 
-## القسم التقني (للمرجع)
+### 4) صفحة إدارة حجوزاتي `/reservations/my`
+- إدخال رقم الجوال + رمز التتبع → قائمة الحجوزات → إلغاء/إعادة جدولة.
 
-- الملفات الرئيسية المتأثرة:
-  - `src/routes/book.tsx` — prefetch, sticky nav, beforeunload guard
-  - `src/components/booking/StepTime.tsx` — أقرب موعد، أيقونات، منطقة زمنية
-  - `src/components/booking/StepPatient.tsx` — تنسيق فوري + عدّاد
-  - `src/components/booking/StepDate.tsx` — دمج month-availability
-  - `src/components/booking/StepSuccess.tsx` — مشاركة + tracking link
-  - `src/lib/booking-submit.ts` — idempotency key + تصنيف أوضح للأخطاء
-  - `src/routes/api/public/book/create.ts` — قبول واحترام `Idempotency-Key`
-  - `src/routes/api/public/book/availability.ts` — لا تغيير (مستخدم كما هو)
-- بلا تغييرات على المخطط (schema) أو RLS.
-- الاختبارات القائمة تحت `tests/e2e/book-*.py` و`tests/rls/appt-*.test.ts` تبقى كما هي؛ سنضيف اختبارًا لـidempotency فقط.
+### 5) الهدم والتنظيف
+- حذف كل الملفات المذكورة في «سيتم حذفه».
+- إزالة الروابط من Header/QuickBar/الصفحات وتحديثها لتشير إلى `/reservations` و `/booking/new`.
+- حذف الاختبارات المرتبطة بـ book القديمة.
+- تحديث `mcp/create-appointment` ليستخدم نفس المسار الجديد أو حذفه إن لم يُطلب.
 
-## الترتيب المقترح للتنفيذ
+### تفاصيل تقنية
 
-1. الموثوقية (منع الحجز المزدوج + idempotency + رسائل أوضح) — أعلى قيمة.
-2. تحسينات StepTime وStepPatient (UX فوري ملموس).
-3. Prefetch وlazy لتقليل زمن التفاعل.
-4. الميزات الصغيرة (المشاركة، الطبيب البديل).
+- **الجداول:** لا migrations. نستخدم `appointments`, `doctors`, `specialties`, `branches`, `availability`, `doctor_leaves` كما هي.
+- **المنطقة الزمنية:** `src/lib/riyadh-date.ts` يبقى ويُعاد استخدامه.
+- **الحدود:** `booking-limits.ts` يُنقل إلى `reservation-limits.ts` بنفس القيم.
+- **مسار الملف (TanStack):** `src/routes/reservations.tsx` (index)، `src/routes/reservations.my.tsx`، `src/routes/booking.new.tsx`، `src/routes/api/public/reservations/*.ts`.
 
-## ما أحتاج تأكيده منك قبل التنفيذ
+---
 
-- هل تريد تنفيذ **كل** ما سبق دفعة واحدة، أم البدء بالمرحلة (١) الموثوقية فقط ثم المتابعة؟
-- هل ميزة **«اقتراح طبيب بديل»** مقبولة الآن أم نؤجّلها؟
-- زر **«مشاركة واتساب»** في شاشة النجاح: للمريض نفسه أم يشمل تنبيه مرافقين (يحتاج حقل جديد)؟
+## قرار مطلوب منك
+
+هذا استبدال ضخم (≈ 40 ملف مصدر + 40 ملف اختبار)، وسيكسر CI حتى انتهاء التنفيذ. أنصح بشدة بأحد البدائل قبل الشروع:
+
+**البديل أ (موصى به):** إضافة صفحة تصفح `/reservations` جديدة فقط تعيد استخدام `/book` الموجود عبر الروابط العميقة (`/book?doctor=…`). ينجز نفس تجربة udh.sa بدون كسر أي شيء — يوم عمل واحد.
+
+**البديل ب:** بناء `/reservations` + `/booking/new` جنبًا إلى جنب مع `/book` القديم، وتحويل الروابط تدريجيًا، ثم حذف القديم لاحقًا بعد استقرار الجديد.
+
+**البديل ج (ما اخترتَه):** الاستبدال الكامل كما هو مخطَّط أعلاه — 3–4 أيام عمل، كسر مؤقت لعشرات الاختبارات والصفحات الإدارية، إعادة كتابة كاملة.
+
+أيّها تريد؟
