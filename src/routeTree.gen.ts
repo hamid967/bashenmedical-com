@@ -119,6 +119,7 @@ import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
@@ -720,6 +721,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicInsuranceVerifyRoute =
+  ApiPublicInsuranceVerifyRouteImport.update({
+    id: '/api/public/insurance/verify',
+    path: '/api/public/insurance/verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSendRemindersRoute =
   ApiPublicHooksSendRemindersRouteImport.update({
     id: '/api/public/hooks/send-reminders',
@@ -889,6 +896,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
 }
 export interface FileRoutesByTo {
@@ -1008,6 +1016,7 @@ export interface FileRoutesByTo {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
 }
 export interface FileRoutesById {
@@ -1130,6 +1139,7 @@ export interface FileRoutesById {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
 }
 export interface FileRouteTypes {
@@ -1252,6 +1262,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/insurance/verify'
     | '/portal/orders/$kind/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1371,6 +1382,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/insurance/verify'
     | '/portal/orders/$kind/$id'
   id:
     | '__root__'
@@ -1492,6 +1504,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/insurance/verify'
     | '/_authenticated/portal/orders/$kind/$id'
   fileRoutesById: FileRoutesById
 }
@@ -1552,6 +1565,7 @@ export interface RootRouteChildren {
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
+  ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2326,6 +2340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/insurance/verify': {
+      id: '/api/public/insurance/verify'
+      path: '/api/public/insurance/verify'
+      fullPath: '/api/public/insurance/verify'
+      preLoaderRoute: typeof ApiPublicInsuranceVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-reminders': {
       id: '/api/public/hooks/send-reminders'
       path: '/api/public/hooks/send-reminders'
@@ -2671,6 +2692,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
+  ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
