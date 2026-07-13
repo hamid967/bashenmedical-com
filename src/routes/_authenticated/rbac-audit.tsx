@@ -228,7 +228,7 @@ function Page() {
           </div>
           <div className="ms-auto flex items-center gap-2">
             <Link
-              to="/_authenticated/audit-log"
+              to="/audit-log"
               className="inline-flex items-center gap-1 text-xs px-3 py-1.5 rounded-md border border-border hover:bg-muted"
             >
               السجل العام
