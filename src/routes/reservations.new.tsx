@@ -59,30 +59,59 @@ type Patient = {
   gender: "male" | "female" | null; reason: string;
 };
 
+type Insurance = {
+  useInsurance: boolean;
+  providerId: string | null;
+  policyNumber: string;
+  memberId: string;
+  verify: null | {
+    eligible: boolean;
+    reason: string;
+    message: string;
+    coverage_percent: number | null;
+    consultation_fee: number | null;
+    covered_amount: number | null;
+    estimated_cost: number | null;
+    patient_share: number | null;
+  };
+};
+
+const INITIAL_INSURANCE: Insurance = {
+  useInsurance: false,
+  providerId: null,
+  policyNumber: "",
+  memberId: "",
+  verify: null,
+};
+
 type State = {
   step: number;
   doctorId: string | null;
   date: string | null;
   time: string | null;
   patient: Patient;
+  insurance: Insurance;
   result: { ok: true; reference: string } | null;
 };
 
 const INITIAL: State = {
   step: 1, doctorId: null, date: null, time: null,
   patient: { name: "", phone: "", nationalId: "", gender: null, reason: "" },
+  insurance: INITIAL_INSURANCE,
   result: null,
 };
 
 type Action =
   | { t: "set"; p: Partial<State> }
   | { t: "patient"; p: Partial<Patient> }
+  | { t: "insurance"; p: Partial<Insurance> }
   | { t: "goto"; step: number };
 
 function reducer(s: State, a: Action): State {
   switch (a.t) {
     case "set": return { ...s, ...a.p };
     case "patient": return { ...s, patient: { ...s.patient, ...a.p } };
+    case "insurance": return { ...s, insurance: { ...s.insurance, ...a.p } };
     case "goto": return { ...s, step: Math.max(1, Math.min(5, a.step)) };
   }
 }
@@ -121,6 +150,9 @@ async function submitBooking(payload: {
   appointment_date: string; appointment_time: string;
   patient_name: string; patient_phone: string; national_id: string | null;
   gender: "male" | "female"; reason: string | null;
+  insurance_provider_id: string | null;
+  insurance_policy_number: string | null;
+  insurance_member_id: string | null;
 }) {
   const res = await fetch("/api/public/book/create", {
     method: "POST",
@@ -128,6 +160,39 @@ async function submitBooking(payload: {
     body: JSON.stringify({ ...payload, reminder_24h: true, reminder_2h: true }),
   });
   return (await res.json()) as { ok: boolean; message?: string; reference?: string };
+}
+
+type InsuranceProvider = {
+  id: string; name_ar: string; name_en: string | null;
+  coverage_tier: "comprehensive" | "basic" | "limited";
+  coverage_percent: number; notes_ar: string | null;
+};
+
+async function fetchInsuranceProviders(): Promise<InsuranceProvider[]> {
+  const { data, error } = await supabase
+    .from("insurance_providers")
+    .select("id, name_ar, name_en, coverage_tier, coverage_percent, notes_ar")
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as InsuranceProvider[];
+}
+
+async function verifyInsurance(payload: {
+  doctor_id: string; provider_id: string;
+  policy_number: string | null; member_id: string | null;
+}) {
+  const res = await fetch("/api/public/insurance/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return (await res.json()) as {
+    ok: boolean; eligible?: boolean; reason?: string; message?: string;
+    coverage_percent: number | null; consultation_fee: number | null;
+    covered_amount: number | null; estimated_cost: number | null;
+    patient_share: number | null;
+  };
 }
 
 /* ---------------- Component ---------------- */
@@ -226,7 +291,10 @@ function NewReservationPage() {
           {state.step === 4 && (
             <StepPatient
               patient={state.patient}
+              insurance={state.insurance}
+              doctorId={state.doctorId}
               onChange={(p) => dispatch({ t: "patient", p })}
+              onInsuranceChange={(p) => dispatch({ t: "insurance", p })}
               onNext={() => goto(5)}
               onBack={() => goto(3)}
             />
@@ -237,6 +305,7 @@ function NewReservationPage() {
               date={state.date}
               time={state.time}
               patient={state.patient}
+              insurance={state.insurance}
               result={state.result}
               signedIn={!!profile}
               onSuccess={(reference) => dispatch({ t: "set", p: { result: { ok: true, reference } } })}
@@ -483,8 +552,10 @@ function StepTime({ doctorId, date, value, onPick, onBack }: {
 
 /* ---------------- Step 4: Patient ---------------- */
 
-function StepPatient({ patient, onChange, onNext, onBack }: {
+function StepPatient({ patient, insurance, doctorId, onChange, onInsuranceChange, onNext, onBack }: {
   patient: Patient; onChange: (p: Partial<Patient>) => void;
+  insurance: Insurance; doctorId: string | null;
+  onInsuranceChange: (p: Partial<Insurance>) => void;
   onNext: () => void; onBack: () => void;
 }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -573,6 +644,12 @@ function StepPatient({ patient, onChange, onNext, onBack }: {
           {errors.reason && <div className="text-xs text-destructive mt-1">{errors.reason}</div>}
         </div>
 
+        <InsuranceSection
+          value={insurance}
+          doctorId={doctorId}
+          onChange={onInsuranceChange}
+        />
+
         <Button onClick={handleNext} className="w-full h-11 mt-4">
           متابعة إلى المراجعة
         </Button>
@@ -581,10 +658,157 @@ function StepPatient({ patient, onChange, onNext, onBack }: {
   );
 }
 
+/* ---------------- Insurance section (inside Step 4) ---------------- */
+
+function InsuranceSection({ value, doctorId, onChange }: {
+  value: Insurance; doctorId: string | null;
+  onChange: (p: Partial<Insurance>) => void;
+}) {
+  const { data: providers = [], isLoading } = useQuery({
+    queryKey: ["insurance-providers"],
+    queryFn: fetchInsuranceProviders,
+    staleTime: 10 * 60_000,
+  });
+
+  const verifyMut = useMutation({
+    mutationFn: verifyInsurance,
+    onSuccess: (r) => {
+      if (r.ok) {
+        onChange({
+          verify: {
+            eligible: r.eligible ?? false,
+            reason: r.reason ?? "unknown",
+            message: r.message ?? "",
+            coverage_percent: r.coverage_percent,
+            consultation_fee: r.consultation_fee,
+            covered_amount: r.covered_amount,
+            estimated_cost: r.estimated_cost,
+            patient_share: r.patient_share,
+          },
+        });
+      }
+    },
+  });
+
+  const provider = providers.find((p) => p.id === value.providerId) ?? null;
+
+  return (
+    <div className="rounded-xl border bg-muted/20 p-4 space-y-3">
+      <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold">
+        <input
+          type="checkbox"
+          checked={value.useInsurance}
+          onChange={(e) => onChange({
+            useInsurance: e.target.checked,
+            ...(e.target.checked ? {} : { providerId: null, policyNumber: "", memberId: "", verify: null }),
+          })}
+          className="h-4 w-4 rounded border-input"
+        />
+        لديّ بطاقة تأمين طبي
+      </label>
+
+      {value.useInsurance && (
+        <div className="space-y-3 pt-1">
+          <div>
+            <Label htmlFor="ins-provider">جهة التأمين *</Label>
+            <select
+              id="ins-provider"
+              value={value.providerId ?? ""}
+              onChange={(e) => onChange({ providerId: e.target.value || null, verify: null })}
+              className="mt-1.5 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              disabled={isLoading}
+            >
+              <option value="">— اختر جهة التأمين —</option>
+              {providers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name_ar} {p.notes_ar ? `— ${p.notes_ar}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="ins-policy">رقم البوليصة</Label>
+              <Input id="ins-policy" dir="ltr" value={value.policyNumber}
+                onChange={(e) => onChange({ policyNumber: e.target.value, verify: null })}
+                placeholder="POL-XXXXXX" maxLength={64} className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="ins-member">رقم العضو (اختياري)</Label>
+              <Input id="ins-member" dir="ltr" value={value.memberId}
+                onChange={(e) => onChange({ memberId: e.target.value, verify: null })}
+                placeholder="MEMBER-ID" maxLength={64} className="mt-1.5" />
+            </div>
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!value.providerId || !doctorId || verifyMut.isPending}
+              onClick={() => {
+                if (!value.providerId || !doctorId) return;
+                verifyMut.mutate({
+                  doctor_id: doctorId,
+                  provider_id: value.providerId,
+                  policy_number: value.policyNumber.trim() || null,
+                  member_id: value.memberId.trim() || null,
+                });
+              }}
+            >
+              {verifyMut.isPending ? <><Loader2 className="h-3.5 w-3.5 animate-spin ml-1.5" /> جارٍ التحقق…</> : "تحقّق من الأهلية"}
+            </Button>
+            {provider && (
+              <span className="text-xs text-muted-foreground">
+                تغطية افتراضية: {provider.coverage_percent}%
+              </span>
+            )}
+          </div>
+
+          {value.verify && (
+            <div className={`rounded-lg border p-3 text-sm ${
+              value.verify.eligible
+                ? "border-emerald-500/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
+                : "border-amber-500/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
+            }`}>
+              <div className="font-semibold mb-1">
+                {value.verify.eligible ? "✓ التأمين مؤهل" : "! يحتاج مراجعة"}
+              </div>
+              <div className="text-xs opacity-90 mb-2">{value.verify.message}</div>
+              {value.verify.estimated_cost !== null && (
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                  <span className="text-muted-foreground">قيمة الاستشارة:</span>
+                  <span className="font-mono text-left">{value.verify.estimated_cost} ر.س</span>
+                  {value.verify.coverage_percent !== null && (
+                    <>
+                      <span className="text-muted-foreground">التغطية:</span>
+                      <span className="font-mono text-left">{value.verify.coverage_percent}%</span>
+                    </>
+                  )}
+                  {value.verify.patient_share !== null && (
+                    <>
+                      <span className="text-muted-foreground font-semibold">حصة المريض:</span>
+                      <span className="font-mono text-left font-semibold">{value.verify.patient_share} ر.س</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 /* ---------------- Step 5: Confirm ---------------- */
 
-function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess, onBack }: {
+function StepConfirm({ doctor, date, time, patient, insurance, result, signedIn, onSuccess, onBack }: {
   doctor: Doctor; date: string; time: string; patient: Patient;
+  insurance: Insurance;
   result: State["result"]; signedIn: boolean;
   onSuccess: (ref: string) => void; onBack: () => void;
 }) {
@@ -609,6 +833,9 @@ function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess,
       national_id: patient.nationalId?.trim() || null,
       gender: patient.gender!,
       reason: patient.reason.trim() || null,
+      insurance_provider_id: insurance.useInsurance ? insurance.providerId : null,
+      insurance_policy_number: insurance.useInsurance ? (insurance.policyNumber.trim() || null) : null,
+      insurance_member_id: insurance.useInsurance ? (insurance.memberId.trim() || null) : null,
     });
   };
 
@@ -618,6 +845,8 @@ function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess,
 
 
   const errorMsg = mut.data && !mut.data.ok ? mut.data.message : mut.error instanceof Error ? mut.error.message : null;
+
+  const v = insurance.verify;
 
   return (
     <div>
@@ -643,6 +872,28 @@ function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess,
           <Row label="الجنس" value={patient.gender === "male" ? "ذكر" : "أنثى"} />
           {patient.reason && <Row label="السبب" value={patient.reason} />}
         </div>
+
+        {insurance.useInsurance && insurance.providerId && (
+          <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+            <Row label="التأمين" value={v?.eligible ? "مؤهل" : "قيد المراجعة"} />
+            {insurance.policyNumber && <Row label="رقم البوليصة" value={insurance.policyNumber} dir="ltr" />}
+            {v?.coverage_percent !== null && v?.coverage_percent !== undefined && (
+              <Row label="نسبة التغطية" value={`${v.coverage_percent}%`} />
+            )}
+            {v?.estimated_cost !== null && v?.estimated_cost !== undefined && (
+              <Row label="قيمة الاستشارة" value={`${v.estimated_cost} ر.س`} />
+            )}
+            {v?.patient_share !== null && v?.patient_share !== undefined && (
+              <Row label="حصة المريض" value={`${v.patient_share} ر.س`} />
+            )}
+            {!v && (
+              <p className="text-xs text-muted-foreground">
+                لم يتم التحقق من الأهلية بعد. سيتم مراجعة تأمينك عند الاستقبال.
+              </p>
+            )}
+          </div>
+        )}
+
 
         {errorMsg && (
           <div className="rounded-lg border border-destructive/50 bg-destructive/5 text-destructive text-sm p-3">

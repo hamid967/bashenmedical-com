@@ -220,15 +220,22 @@ export type Database = {
           cancelled_at: string | null
           created_at: string
           doctor_id: string | null
+          estimated_cost_sar: number | null
           gender: string | null
           id: string
           idempotency_key: string | null
+          insurance_coverage_percent: number | null
+          insurance_member_id: string | null
+          insurance_policy_number: string | null
+          insurance_provider_id: string | null
+          insurance_status: string
           national_id: string | null
           notes: string | null
           patient_email: string | null
           patient_id: string | null
           patient_name: string
           patient_phone: string
+          patient_share_sar: number | null
           reason: string | null
           reminder_24h: boolean
           reminder_2h: boolean
@@ -245,15 +252,22 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           doctor_id?: string | null
+          estimated_cost_sar?: number | null
           gender?: string | null
           id?: string
           idempotency_key?: string | null
+          insurance_coverage_percent?: number | null
+          insurance_member_id?: string | null
+          insurance_policy_number?: string | null
+          insurance_provider_id?: string | null
+          insurance_status?: string
           national_id?: string | null
           notes?: string | null
           patient_email?: string | null
           patient_id?: string | null
           patient_name: string
           patient_phone: string
+          patient_share_sar?: number | null
           reason?: string | null
           reminder_24h?: boolean
           reminder_2h?: boolean
@@ -270,15 +284,22 @@ export type Database = {
           cancelled_at?: string | null
           created_at?: string
           doctor_id?: string | null
+          estimated_cost_sar?: number | null
           gender?: string | null
           id?: string
           idempotency_key?: string | null
+          insurance_coverage_percent?: number | null
+          insurance_member_id?: string | null
+          insurance_policy_number?: string | null
+          insurance_provider_id?: string | null
+          insurance_status?: string
           national_id?: string | null
           notes?: string | null
           patient_email?: string | null
           patient_id?: string | null
           patient_name?: string
           patient_phone?: string
+          patient_share_sar?: number | null
           reason?: string | null
           reminder_24h?: boolean
           reminder_2h?: boolean
@@ -301,6 +322,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_insurance_provider_id_fkey"
+            columns: ["insurance_provider_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
             referencedColumns: ["id"]
           },
           {
@@ -912,6 +940,7 @@ export type Database = {
           bio_en: string | null
           booking_enabled: boolean
           branch_id: string | null
+          consultation_fee_sar: number | null
           created_at: string
           education_ar: string | null
           education_en: string | null
@@ -940,6 +969,7 @@ export type Database = {
           bio_en?: string | null
           booking_enabled?: boolean
           branch_id?: string | null
+          consultation_fee_sar?: number | null
           created_at?: string
           education_ar?: string | null
           education_en?: string | null
@@ -968,6 +998,7 @@ export type Database = {
           bio_en?: string | null
           booking_enabled?: boolean
           branch_id?: string | null
+          consultation_fee_sar?: number | null
           created_at?: string
           education_ar?: string | null
           education_en?: string | null
@@ -1342,6 +1373,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      insurance_providers: {
+        Row: {
+          active: boolean
+          coverage_percent: number
+          coverage_tier: string
+          created_at: string
+          id: string
+          name_ar: string
+          name_en: string | null
+          notes_ar: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          coverage_percent?: number
+          coverage_tier?: string
+          created_at?: string
+          id?: string
+          name_ar: string
+          name_en?: string | null
+          notes_ar?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          coverage_percent?: number
+          coverage_tier?: string
+          created_at?: string
+          id?: string
+          name_ar?: string
+          name_en?: string | null
+          notes_ar?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       intro_settings: {
         Row: {
@@ -3686,6 +3756,10 @@ export type Database = {
         }[]
       }
       enqueue_appointment_reminders: { Args: never; Returns: Json }
+      estimate_appointment_cost: {
+        Args: { _doctor_id: string; _provider_id: string }
+        Returns: Json
+      }
       generate_mrn: { Args: { _branch_id: string }; Returns: string }
       get_my_doctor_id: { Args: never; Returns: string }
       get_my_patient_id: { Args: never; Returns: string }

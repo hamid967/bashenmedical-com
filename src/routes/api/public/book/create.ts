@@ -59,6 +59,9 @@ const bookingCreateSchema = z.object({
     .nullable(),
   reminder_24h: z.boolean().optional(),
   reminder_2h: z.boolean().optional(),
+  insurance_provider_id: z.string().uuid("جهة تأمين غير صالحة").optional().nullable(),
+  insurance_policy_number: z.string().trim().max(64, "رقم البوليصة طويل").optional().nullable(),
+  insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
 });
 
 function json(status: number, body: Record<string, unknown>) {
@@ -67,6 +70,69 @@ function json(status: number, body: Record<string, unknown>) {
     headers: { "Content-Type": "application/json; charset=utf-8" },
   });
 }
+
+type InsuranceInput = {
+  doctor_id?: string | null;
+  insurance_provider_id?: string | null;
+  insurance_policy_number?: string | null;
+  insurance_member_id?: string | null;
+};
+
+// Estimate cost using the same DB function the /verify endpoint uses so the
+// stored numbers on the appointment stay consistent with what the wizard
+// showed the patient. Failure to estimate must not block the booking — we
+// just persist the provider selection with `insurance_status = 'pending'`.
+async function buildInsurancePatch(
+  supa: any,
+  data: InsuranceInput,
+): Promise<Record<string, unknown>> {
+  const providerId = data.insurance_provider_id ?? null;
+  const policy = (data.insurance_policy_number ?? "").trim() || null;
+  const member = (data.insurance_member_id ?? "").trim() || null;
+
+  if (!providerId) {
+    return {
+      insurance_status: "none",
+    };
+  }
+
+  const patch: Record<string, unknown> = {
+    insurance_provider_id: providerId,
+    insurance_policy_number: policy,
+    insurance_member_id: member,
+    insurance_status: "pending",
+  };
+
+  if (!data.doctor_id) return patch;
+
+  try {
+    const { data: estRaw, error } = await supa.rpc("estimate_appointment_cost", {
+      _doctor_id: data.doctor_id,
+      _provider_id: providerId,
+    });
+    if (error) return patch;
+    const est = (estRaw ?? {}) as {
+      eligible?: boolean;
+      coverage_percent?: number | null;
+      estimated_cost?: number | null;
+      patient_share?: number | null;
+    };
+    if (est.eligible === true) patch.insurance_status = "eligible";
+    if (typeof est.coverage_percent === "number") {
+      patch.insurance_coverage_percent = est.coverage_percent;
+    }
+    if (typeof est.estimated_cost === "number") {
+      patch.estimated_cost_sar = est.estimated_cost;
+    }
+    if (typeof est.patient_share === "number") {
+      patch.patient_share_sar = est.patient_share;
+    }
+  } catch {
+    /* keep pending */
+  }
+  return patch;
+}
+
 
 export const Route = createFileRoute("/api/public/book/create")({
   server: {
@@ -200,6 +266,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           ...(parsed.data.reminder_2h !== undefined
             ? { reminder_2h: parsed.data.reminder_2h }
             : {}),
+          ...(await buildInsurancePatch(supa, parsed.data)),
         });
 
         if (error) {
