@@ -644,6 +644,12 @@ function StepPatient({ patient, insurance, doctorId, onChange, onInsuranceChange
           {errors.reason && <div className="text-xs text-destructive mt-1">{errors.reason}</div>}
         </div>
 
+        <InsuranceSection
+          value={insurance}
+          doctorId={doctorId}
+          onChange={onInsuranceChange}
+        />
+
         <Button onClick={handleNext} className="w-full h-11 mt-4">
           متابعة إلى المراجعة
         </Button>
@@ -651,6 +657,152 @@ function StepPatient({ patient, insurance, doctorId, onChange, onInsuranceChange
     </div>
   );
 }
+
+/* ---------------- Insurance section (inside Step 4) ---------------- */
+
+function InsuranceSection({ value, doctorId, onChange }: {
+  value: Insurance; doctorId: string | null;
+  onChange: (p: Partial<Insurance>) => void;
+}) {
+  const { data: providers = [], isLoading } = useQuery({
+    queryKey: ["insurance-providers"],
+    queryFn: fetchInsuranceProviders,
+    staleTime: 10 * 60_000,
+  });
+
+  const verifyMut = useMutation({
+    mutationFn: verifyInsurance,
+    onSuccess: (r) => {
+      if (r.ok) {
+        onChange({
+          verify: {
+            eligible: r.eligible ?? false,
+            reason: r.reason ?? "unknown",
+            message: r.message ?? "",
+            coverage_percent: r.coverage_percent,
+            consultation_fee: r.consultation_fee,
+            covered_amount: r.covered_amount,
+            estimated_cost: r.estimated_cost,
+            patient_share: r.patient_share,
+          },
+        });
+      }
+    },
+  });
+
+  const provider = providers.find((p) => p.id === value.providerId) ?? null;
+
+  return (
+    <div className="rounded-xl border bg-muted/20 p-4 space-y-3">
+      <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold">
+        <input
+          type="checkbox"
+          checked={value.useInsurance}
+          onChange={(e) => onChange({
+            useInsurance: e.target.checked,
+            ...(e.target.checked ? {} : { providerId: null, policyNumber: "", memberId: "", verify: null }),
+          })}
+          className="h-4 w-4 rounded border-input"
+        />
+        لديّ بطاقة تأمين طبي
+      </label>
+
+      {value.useInsurance && (
+        <div className="space-y-3 pt-1">
+          <div>
+            <Label htmlFor="ins-provider">جهة التأمين *</Label>
+            <select
+              id="ins-provider"
+              value={value.providerId ?? ""}
+              onChange={(e) => onChange({ providerId: e.target.value || null, verify: null })}
+              className="mt-1.5 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              disabled={isLoading}
+            >
+              <option value="">— اختر جهة التأمين —</option>
+              {providers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name_ar} {p.notes_ar ? `— ${p.notes_ar}` : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="ins-policy">رقم البوليصة</Label>
+              <Input id="ins-policy" dir="ltr" value={value.policyNumber}
+                onChange={(e) => onChange({ policyNumber: e.target.value, verify: null })}
+                placeholder="POL-XXXXXX" maxLength={64} className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="ins-member">رقم العضو (اختياري)</Label>
+              <Input id="ins-member" dir="ltr" value={value.memberId}
+                onChange={(e) => onChange({ memberId: e.target.value, verify: null })}
+                placeholder="MEMBER-ID" maxLength={64} className="mt-1.5" />
+            </div>
+          </div>
+
+          <div className="flex gap-2 items-center">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={!value.providerId || !doctorId || verifyMut.isPending}
+              onClick={() => {
+                if (!value.providerId || !doctorId) return;
+                verifyMut.mutate({
+                  doctor_id: doctorId,
+                  provider_id: value.providerId,
+                  policy_number: value.policyNumber.trim() || null,
+                  member_id: value.memberId.trim() || null,
+                });
+              }}
+            >
+              {verifyMut.isPending ? <><Loader2 className="h-3.5 w-3.5 animate-spin ml-1.5" /> جارٍ التحقق…</> : "تحقّق من الأهلية"}
+            </Button>
+            {provider && (
+              <span className="text-xs text-muted-foreground">
+                تغطية افتراضية: {provider.coverage_percent}%
+              </span>
+            )}
+          </div>
+
+          {value.verify && (
+            <div className={`rounded-lg border p-3 text-sm ${
+              value.verify.eligible
+                ? "border-emerald-500/40 bg-emerald-500/5 text-emerald-800 dark:text-emerald-300"
+                : "border-amber-500/40 bg-amber-500/5 text-amber-800 dark:text-amber-300"
+            }`}>
+              <div className="font-semibold mb-1">
+                {value.verify.eligible ? "✓ التأمين مؤهل" : "! يحتاج مراجعة"}
+              </div>
+              <div className="text-xs opacity-90 mb-2">{value.verify.message}</div>
+              {value.verify.estimated_cost !== null && (
+                <div className="grid grid-cols-2 gap-1 text-xs">
+                  <span className="text-muted-foreground">قيمة الاستشارة:</span>
+                  <span className="font-mono text-left">{value.verify.estimated_cost} ر.س</span>
+                  {value.verify.coverage_percent !== null && (
+                    <>
+                      <span className="text-muted-foreground">التغطية:</span>
+                      <span className="font-mono text-left">{value.verify.coverage_percent}%</span>
+                    </>
+                  )}
+                  {value.verify.patient_share !== null && (
+                    <>
+                      <span className="text-muted-foreground font-semibold">حصة المريض:</span>
+                      <span className="font-mono text-left font-semibold">{value.verify.patient_share} ر.س</span>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 /* ---------------- Step 5: Confirm ---------------- */
 
