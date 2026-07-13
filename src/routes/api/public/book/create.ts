@@ -83,7 +83,7 @@ type InsuranceInput = {
 // showed the patient. Failure to estimate must not block the booking — we
 // just persist the provider selection with `insurance_status = 'pending'`.
 async function buildInsurancePatch(
-  supa: ReturnType<typeof createClient>,
+  supa: any,
   data: InsuranceInput,
 ): Promise<Record<string, unknown>> {
   const providerId = data.insurance_provider_id ?? null;
