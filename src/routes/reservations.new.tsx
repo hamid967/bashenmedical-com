@@ -150,8 +150,50 @@ async function submitBooking(payload: {
   appointment_date: string; appointment_time: string;
   patient_name: string; patient_phone: string; national_id: string | null;
   gender: "male" | "female"; reason: string | null;
+  insurance_provider_id: string | null;
+  insurance_policy_number: string | null;
+  insurance_member_id: string | null;
 }) {
   const res = await fetch("/api/public/book/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...payload, reminder_24h: true, reminder_2h: true }),
+  });
+  return (await res.json()) as { ok: boolean; message?: string; reference?: string };
+}
+
+type InsuranceProvider = {
+  id: string; name_ar: string; name_en: string | null;
+  coverage_tier: "comprehensive" | "basic" | "limited";
+  coverage_percent: number; notes_ar: string | null;
+};
+
+async function fetchInsuranceProviders(): Promise<InsuranceProvider[]> {
+  const { data, error } = await supabase
+    .from("insurance_providers")
+    .select("id, name_ar, name_en, coverage_tier, coverage_percent, notes_ar")
+    .eq("active", true)
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as InsuranceProvider[];
+}
+
+async function verifyInsurance(payload: {
+  doctor_id: string; provider_id: string;
+  policy_number: string | null; member_id: string | null;
+}) {
+  const res = await fetch("/api/public/insurance/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  return (await res.json()) as {
+    ok: boolean; eligible?: boolean; reason?: string; message?: string;
+    coverage_percent: number | null; consultation_fee: number | null;
+    covered_amount: number | null; estimated_cost: number | null;
+    patient_share: number | null;
+  };
+}
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ ...payload, reminder_24h: true, reminder_2h: true }),
