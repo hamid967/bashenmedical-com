@@ -9,8 +9,6 @@ import {
   Mail,
   Lock,
   User as UserIcon,
-  Fingerprint,
-  ScanFace,
   Sparkles,
   Loader2,
   Eye,
@@ -100,6 +98,26 @@ function AuthPage() {
   const [otpStep, setOtpStep] = useState<"enter" | "verify">("enter");
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpCooldown, setOtpCooldown] = useState(0);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  async function handlePasswordReset() {
+    if (!email || !email.includes("@")) {
+      toast.error("أدخل بريدك الإلكتروني أولًا");
+      return;
+    }
+    setResetLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      if (error) throw error;
+      toast.success("أرسلنا رابط استعادة كلمة المرور إلى بريدك");
+    } catch (err: any) {
+      toast.error(err?.message ?? "تعذر إرسال رابط الاستعادة");
+    } finally {
+      setResetLoading(false);
+    }
+  }
 
   useEffect(() => {
     if (otpCooldown <= 0) return;
@@ -403,24 +421,6 @@ function AuthPage() {
             </button>
           </div>
 
-          {/* Biometric row (visual) */}
-          <div className="relative grid grid-cols-2 gap-3 mb-6">
-            <button
-              type="button"
-              onClick={() => toast.info("تسجيل الدخول بالبصمة قيد التطوير")}
-              className="flex items-center justify-center gap-2 h-10 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/10 text-xs font-medium text-white/70 transition-all"
-            >
-              <Fingerprint className="h-4 w-4" /> البصمة
-            </button>
-            <button
-              type="button"
-              onClick={() => toast.info("Face ID قيد التطوير")}
-              className="flex items-center justify-center gap-2 h-10 rounded-xl bg-white/[0.03] border border-white/10 hover:bg-white/10 text-xs font-medium text-white/70 transition-all"
-            >
-              <ScanFace className="h-4 w-4" /> Face ID
-            </button>
-          </div>
-
           {/* Divider */}
           <div className="relative flex items-center mb-5">
             <div className="flex-grow border-t border-white/10" />
@@ -486,10 +486,11 @@ function AuthPage() {
                   {mode === "signin" && (
                     <button
                       type="button"
-                      onClick={() => toast.info("إعادة تعيين كلمة المرور — قريبًا")}
+                      onClick={handlePasswordReset}
+                      disabled={resetLoading}
                       className="text-[10px] text-white/40 hover:text-white transition-colors"
                     >
-                      نسيت كلمة المرور؟
+                      {resetLoading ? "جارٍ الإرسال…" : "نسيت كلمة المرور؟"}
                     </button>
                   )}
                 </div>
@@ -683,8 +684,14 @@ function AuthPage() {
             </p>
           </div>
 
-          <div className="relative mt-4 text-center">
-            <Link to="/" className="text-xs text-white/40 hover:text-[#48C7FF] transition-colors">
+          <div className="mt-4 text-center">
+            <div className="mb-3 rounded-xl bg-[color:var(--portal-gradient-soft)] px-3 py-2 text-[11px] text-[color:var(--portal-ink-2)]">
+              بعد الدخول يمكنك متابعة الحجوزات والتقارير الطبية ونتائج المختبر والأشعة والوصفات.
+            </div>
+            <Link
+              to="/"
+              className="text-xs text-[color:var(--portal-ink-3)] hover:text-[color:var(--portal-primary)]"
+            >
               ← العودة للموقع الرئيسي
             </Link>
           </div>
