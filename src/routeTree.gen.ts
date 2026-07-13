@@ -15,6 +15,7 @@ import { Route as TelemedicineRouteImport } from './routes/telemedicine'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SecondOpinionRouteImport } from './routes/second-opinion'
+import { Route as ReservationsRouteImport } from './routes/reservations'
 import { Route as RateRouteImport } from './routes/rate'
 import { Route as ProgramsRouteImport } from './routes/programs'
 import { Route as PharmacyRouteImport } from './routes/pharmacy'
@@ -153,6 +154,11 @@ const ServicesRoute = ServicesRouteImport.update({
 const SecondOpinionRoute = SecondOpinionRouteImport.update({
   id: '/second-opinion',
   path: '/second-opinion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReservationsRoute = ReservationsRouteImport.update({
+  id: '/reservations',
+  path: '/reservations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RateRoute = RateRouteImport.update({
@@ -773,6 +779,7 @@ export interface FileRoutesByFullPath {
   '/pharmacy': typeof PharmacyRoute
   '/programs': typeof ProgramsRoute
   '/rate': typeof RateRoute
+  '/reservations': typeof ReservationsRoute
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -889,6 +896,7 @@ export interface FileRoutesByTo {
   '/pharmacy': typeof PharmacyRoute
   '/programs': typeof ProgramsRoute
   '/rate': typeof RateRoute
+  '/reservations': typeof ReservationsRoute
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -1006,6 +1014,7 @@ export interface FileRoutesById {
   '/pharmacy': typeof PharmacyRoute
   '/programs': typeof ProgramsRoute
   '/rate': typeof RateRoute
+  '/reservations': typeof ReservationsRoute
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -1124,6 +1133,7 @@ export interface FileRouteTypes {
     | '/pharmacy'
     | '/programs'
     | '/rate'
+    | '/reservations'
     | '/second-opinion'
     | '/services'
     | '/sitemap.xml'
@@ -1240,6 +1250,7 @@ export interface FileRouteTypes {
     | '/pharmacy'
     | '/programs'
     | '/rate'
+    | '/reservations'
     | '/second-opinion'
     | '/services'
     | '/sitemap.xml'
@@ -1356,6 +1367,7 @@ export interface FileRouteTypes {
     | '/pharmacy'
     | '/programs'
     | '/rate'
+    | '/reservations'
     | '/second-opinion'
     | '/services'
     | '/sitemap.xml'
@@ -1474,6 +1486,7 @@ export interface RootRouteChildren {
   PharmacyRoute: typeof PharmacyRoute
   ProgramsRoute: typeof ProgramsRoute
   RateRoute: typeof RateRoute
+  ReservationsRoute: typeof ReservationsRoute
   SecondOpinionRoute: typeof SecondOpinionRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -1546,6 +1559,13 @@ declare module '@tanstack/react-router' {
       path: '/second-opinion'
       fullPath: '/second-opinion'
       preLoaderRoute: typeof SecondOpinionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reservations': {
+      id: '/reservations'
+      path: '/reservations'
+      fullPath: '/reservations'
+      preLoaderRoute: typeof ReservationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/rate': {
@@ -2547,6 +2567,7 @@ const rootRouteChildren: RootRouteChildren = {
   PharmacyRoute: PharmacyRoute,
   ProgramsRoute: ProgramsRoute,
   RateRoute: RateRoute,
+  ReservationsRoute: ReservationsRoute,
   SecondOpinionRoute: SecondOpinionRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
