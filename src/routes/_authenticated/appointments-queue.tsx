@@ -8,6 +8,7 @@ import {
   CalendarPlus,
   Check,
   Copy,
+  Download,
   Filter,
   Loader2,
   Phone,
@@ -182,6 +183,24 @@ function AppointmentsQueuePage() {
     return acc;
   }, [scopedRows]);
 
+  function exportVisibleCsv() {
+    const quote = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
+    const header = ["رقم الحجز", "المراجع", "الجوال", "التاريخ", "الوقت", "التخصص", "الطبيب", "الحالة"];
+    const lines = filtered.map((r) => [
+      shortRef(r.id), r.patient_name, r.patient_phone, r.appointment_date,
+      r.appointment_time?.slice(0, 5), r.specialties?.name_ar, r.doctors?.name_ar,
+      STATUS_META[r.status].label,
+    ]);
+    const csv = "\uFEFF" + [header, ...lines].map((line) => line.map(quote).join(",")).join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `baashen-appointments-${todayIso()}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success(`تم تصدير ${filtered.length} حجز`);
+  }
+
   return (
     <div className="container-app py-8">
       <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
@@ -192,6 +211,13 @@ function AppointmentsQueuePage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <button
+            onClick={exportVisibleCsv}
+            disabled={filtered.length === 0}
+            className="inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm font-semibold hover:bg-muted disabled:opacity-50"
+          >
+            <Download className="h-4 w-4" /> تصدير
+          </button>
           <button
             onClick={() => refetch()}
             disabled={isFetching}
@@ -207,6 +233,13 @@ function AppointmentsQueuePage() {
             لوحة الإدارة
           </Link>
         </div>
+      </div>
+
+      <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <QueueMetric label="مواعيد اليوم" value={scopeCounts.today} tone="text-primary" />
+        <QueueMetric label="بانتظار التأكيد" value={scopeCounts.pending} tone="text-blue-600" />
+        <QueueMetric label="القادمة" value={scopeCounts.upcoming} tone="text-emerald-600" />
+        <QueueMetric label="لم يحضر" value={rows.filter((r) => r.status === "no_show").length} tone="text-amber-600" />
       </div>
 
       {/* Scope tabs — the primary lens for the queue. */}
@@ -339,6 +372,15 @@ function AppointmentsQueuePage() {
           }}
         />
       )}
+    </div>
+  );
+}
+
+function QueueMetric({ label, value, tone }: { label: string; value: number; tone: string }) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+      <div className="text-xs text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-2xl font-black ${tone}`}>{value}</div>
     </div>
   );
 }

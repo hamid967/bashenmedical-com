@@ -78,6 +78,10 @@ import {
   FileText,
   HelpCircle,
   Info,
+  Crown,
+  Settings,
+  UserCog,
+  ClipboardList,
 } from "lucide-react";
 
 const adminSearchSchema = z.object({
@@ -242,7 +246,16 @@ function AdminDashboard() {
     <div className="container-app py-10">
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">لوحة التحكم</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold">
+              {isSuperAdmin ? "مركز قيادة السوبر أدمن" : "لوحة التحكم"}
+            </h1>
+            {isSuperAdmin && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
+                <Crown className="h-3.5 w-3.5" /> صلاحية كاملة
+              </span>
+            )}
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             أدوارك:{" "}
             {roles.map((r) => (
@@ -449,7 +462,7 @@ function AdminDashboard() {
         ))}
       </div>
 
-      {tab === "overview" && <OverviewTab />}
+      {tab === "overview" && <OverviewTab isSuperAdmin={isSuperAdmin} />}
       {tab === "appointments" && canSeeAppts && <AppointmentsTab />}
       {tab === "orders" && canSeeOrders && <OrdersTab />}
       {tab === "doctors" && isAdmin && <DoctorsTab />}
@@ -494,19 +507,58 @@ function StatCard({
   );
 }
 
-function OverviewTab() {
+function OverviewTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
   const fn = useServerFn(getAdminStats);
   const { data, isLoading } = useQuery({ queryKey: ["admin-stats"], queryFn: () => fn() });
   if (isLoading) return <div className="text-muted-foreground">جارٍ تحميل الإحصائيات…</div>;
   if (!data) return null;
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <StatCard label="إجمالي المواعيد" value={data.appointmentsTotal} icon={CalendarDays} />
-      <StatCard label="مواعيد اليوم" value={data.appointmentsToday} icon={Clock} />
-      <StatCard label="مواعيد جديدة" value={data.appointmentsPending} icon={Users} />
-      <StatCard label="إجمالي طلبات الأدوية" value={data.ordersTotal} icon={Pill} />
-      <StatCard label="طلبات جديدة" value={data.ordersPending} icon={Pill} />
-      <StatCard label="الأطباء النشطون" value={data.doctorsActive} icon={Stethoscope} />
+    <div className="space-y-6">
+      {isSuperAdmin && (
+        <section className="overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-l from-primary/10 via-card to-card p-5">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 text-primary">
+                <Crown className="h-5 w-5" />
+                <h2 className="font-bold">التحكم المركزي</h2>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                إدارة المستخدمين والصلاحيات والإعدادات والسجلات من نقطة واحدة.
+              </p>
+            </div>
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+              النظام متصل
+            </span>
+          </div>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              { to: "/rbac", label: "المستخدمون والصلاحيات", icon: UserCog },
+              { to: "/appointments-queue", label: "تشغيل الحجوزات", icon: CalendarDays },
+              { to: "/audit-log", label: "سجل التدقيق والأمان", icon: ClipboardList },
+              { to: "/clinic-settings", label: "إعدادات المجمع", icon: Settings },
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                className="group flex items-center gap-3 rounded-xl border border-border bg-background/80 p-3 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md"
+              >
+                <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
+                  <item.icon className="h-4 w-4" />
+                </span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <StatCard label="إجمالي المواعيد" value={data.appointmentsTotal} icon={CalendarDays} />
+        <StatCard label="مواعيد اليوم" value={data.appointmentsToday} icon={Clock} />
+        <StatCard label="مواعيد تحتاج إجراء" value={data.appointmentsPending} icon={Users} />
+        <StatCard label="إجمالي طلبات الأدوية" value={data.ordersTotal} icon={Pill} />
+        <StatCard label="طلبات جديدة" value={data.ordersPending} icon={Pill} />
+        <StatCard label="الأطباء النشطون" value={data.doctorsActive} icon={Stethoscope} />
+      </div>
     </div>
   );
 }
