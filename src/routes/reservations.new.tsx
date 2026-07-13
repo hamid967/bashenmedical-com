@@ -291,7 +291,10 @@ function NewReservationPage() {
           {state.step === 4 && (
             <StepPatient
               patient={state.patient}
+              insurance={state.insurance}
+              doctorId={state.doctorId}
               onChange={(p) => dispatch({ t: "patient", p })}
+              onInsuranceChange={(p) => dispatch({ t: "insurance", p })}
               onNext={() => goto(5)}
               onBack={() => goto(3)}
             />
@@ -302,6 +305,7 @@ function NewReservationPage() {
               date={state.date}
               time={state.time}
               patient={state.patient}
+              insurance={state.insurance}
               result={state.result}
               signedIn={!!profile}
               onSuccess={(reference) => dispatch({ t: "set", p: { result: { ok: true, reference } } })}
