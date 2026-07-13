@@ -194,12 +194,6 @@ async function verifyInsurance(payload: {
     patient_share: number | null;
   };
 }
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...payload, reminder_24h: true, reminder_2h: true }),
-  });
-  return (await res.json()) as { ok: boolean; message?: string; reference?: string };
-}
 
 /* ---------------- Component ---------------- */
 
