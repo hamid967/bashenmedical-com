@@ -10,9 +10,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-async function requireMyDoctorId(sb: {
-  rpc: (name: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
-}): Promise<string> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function requireMyDoctorId(sb: any): Promise<string> {
   const { data, error } = await sb.rpc("get_my_doctor_id");
   if (error) throw new Error(error.message);
   const id = data as string | null;
