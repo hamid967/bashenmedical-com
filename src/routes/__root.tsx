@@ -139,7 +139,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <IntroOverlay theme="dark" />
+        <Suspense fallback={null}>
+          <IntroOverlay theme="dark" />
+        </Suspense>
         <div className="min-h-screen flex flex-col">
           <Header />
           <main className="flex-1">
