@@ -709,16 +709,28 @@ function BookingSuccess({ reference, doctor, date, time, phone, signedIn }: {
         احتفظ برقم المرجع لإدارة حجزك لاحقًا.
       </p>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
+        {signedIn ? (
+          <Link to="/portal"
+            className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90">
+            فتح بوابة المريض
+          </Link>
+        ) : (
+          <Link to="/auth" search={{ redirect: "/portal" }}
+            className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90">
+            سجّل الدخول لإدارة حجوزاتك
+          </Link>
+        )}
         <Link to="/reservations/manage" search={{ ref: reference }}
           className="flex-1 inline-flex items-center justify-center rounded-lg border bg-card px-4 py-2.5 text-sm font-semibold hover:bg-muted">
-          إدارة حجزي
+          تتبع بالمرجع
         </Link>
         <Link to="/reservations"
-          className="flex-1 inline-flex items-center justify-center rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:bg-primary/90">
+          className="flex-1 inline-flex items-center justify-center rounded-lg border bg-card px-4 py-2.5 text-sm font-semibold hover:bg-muted">
           حجز جديد
         </Link>
       </div>
+
     </div>
   );
 }
