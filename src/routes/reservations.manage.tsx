@@ -70,6 +70,8 @@ function ManageReservationPage() {
   const [phoneForCancel, setPhoneForCancel] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [showCancel, setShowCancel] = useState(false);
+  const { profile } = useSessionProfile();
+
 
   const track = useMutation({ mutationFn: trackBooking });
   const cancel = useMutation({ mutationFn: cancelBooking });
