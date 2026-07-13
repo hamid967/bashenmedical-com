@@ -10,10 +10,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Stethoscope, User, MapPin, ArrowRight } from "lucide-react";
+import { Search, Stethoscope, User, MapPin, ArrowRight, LogIn, LayoutDashboard } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useSessionProfile } from "@/hooks/use-session-profile";
 
 export const Route = createFileRoute("/reservations")({
   head: () => ({
@@ -85,6 +86,8 @@ function ReservationsPage() {
   const [tab, setTab] = useState<Tab>("specialty");
   const [q, setQ] = useState("");
   const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
+  const { profile } = useSessionProfile();
+
 
   const { data: doctors = [], isLoading: docsLoading } = useQuery({
     queryKey: ["reservations", "doctors"],
@@ -136,7 +139,37 @@ function ReservationsPage() {
             <p className="text-muted-foreground">
               اختر العيادة أو ابحث باسم الطبيب واحجز موعدك بضغطة زر.
             </p>
+
+            {profile ? (
+              <div className="mt-5 inline-flex flex-wrap items-center justify-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm">
+                <span className="text-sm">
+                  مرحبًا {profile.full_name ?? "بك"} 👋 يمكنك إدارة كل حجوزاتك من بوابة المريض.
+                </span>
+                <Link
+                  to="/portal"
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3.5 h-9 text-xs font-semibold hover:bg-primary/90"
+                >
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  فتح البوابة
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-5 inline-flex flex-wrap items-center justify-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-sm">
+                <span className="text-sm text-muted-foreground">
+                  لديك حساب؟ سجّل الدخول لتُدار جميع حجوزاتك من مكان واحد.
+                </span>
+                <Link
+                  to="/auth"
+                  search={{ redirect: "/reservations" }}
+                  className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3.5 h-9 text-xs font-semibold hover:bg-primary/90"
+                >
+                  <LogIn className="h-3.5 w-3.5" />
+                  دخول بوابة المريض
+                </Link>
+              </div>
+            )}
           </div>
+
 
           {/* Tabs */}
           <div className="mt-8 flex justify-center">
