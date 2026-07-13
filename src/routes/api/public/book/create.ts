@@ -203,6 +203,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           ...(parsed.data.reminder_2h !== undefined
             ? { reminder_2h: parsed.data.reminder_2h }
             : {}),
+          ...(await buildInsurancePatch(supa, parsed.data)),
         });
 
         if (error) {
