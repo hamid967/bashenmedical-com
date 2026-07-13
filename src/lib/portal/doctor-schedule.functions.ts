@@ -374,3 +374,154 @@ export const listMyUpcomingAppointments = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+/* --------------------- calendar view (month/day range) --------------------- */
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+export const listMyCalendar = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ fromDate: z.string().regex(DATE_RE), toDate: z.string().regex(DATE_RE) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const doctorId = await requireMyDoctorId(context.supabase);
+    const [apptRes, slotRes, leaveRes] = await Promise.all([
+      context.supabase
+        .from("appointments")
+        .select("id, appointment_date, appointment_time, status, reason, patient_name, patient_phone, notes")
+        .eq("doctor_id", doctorId)
+        .gte("appointment_date", data.fromDate)
+        .lte("appointment_date", data.toDate)
+        .order("appointment_date", { ascending: true })
+        .order("appointment_time", { ascending: true })
+        .limit(1000),
+      context.supabase
+        .from("availability_slots")
+        .select("id, slot_date, start_time, end_time, status, appointment_id")
+        .eq("doctor_id", doctorId)
+        .gte("slot_date", data.fromDate)
+        .lte("slot_date", data.toDate)
+        .order("slot_date", { ascending: true })
+        .order("start_time", { ascending: true })
+        .limit(2000),
+      context.supabase
+        .from("doctor_leaves")
+        .select("id, start_date, end_date, all_day, reason")
+        .eq("doctor_id", doctorId)
+        .lte("start_date", data.toDate)
+        .gte("end_date", data.fromDate)
+        .limit(200),
+    ]);
+    if (apptRes.error) throw new Error(apptRes.error.message);
+    if (slotRes.error) throw new Error(slotRes.error.message);
+    if (leaveRes.error) throw new Error(leaveRes.error.message);
+    return {
+      appointments: apptRes.data ?? [],
+      slots: slotRes.data ?? [],
+      leaves: leaveRes.data ?? [],
+    };
+  });
+
+export const updateMyAppointmentStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      status: z.enum(["new", "confirmed", "completed", "cancelled", "no_show"]),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const doctorId = await requireMyDoctorId(context.supabase);
+    const patch: { status: typeof data.status; cancelled_at?: string | null } = { status: data.status };
+    if (data.status === "cancelled") patch.cancelled_at = new Date().toISOString();
+    const { error } = await context.supabase
+      .from("appointments")
+      .update(patch)
+      .eq("id", data.id)
+      .eq("doctor_id", doctorId);
+    if (error) throw new Error(error.message);
+    // Free the linked slot if the appointment is cancelled/no_show
+    if (data.status === "cancelled" || data.status === "no_show") {
+      await context.supabase
+        .from("availability_slots")
+        .update({ status: "available", appointment_id: null })
+        .eq("appointment_id", data.id)
+        .eq("doctor_id", doctorId);
+    }
+    return { ok: true };
+  });
+
+export const rescheduleMyAppointment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      date: z.string().regex(DATE_RE),
+      time: z.string().regex(HHMM),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const doctorId = await requireMyDoctorId(context.supabase);
+    // Free any previously linked slot
+    await context.supabase
+      .from("availability_slots")
+      .update({ status: "available", appointment_id: null })
+      .eq("appointment_id", data.id)
+      .eq("doctor_id", doctorId);
+    // Try to book an available slot at the new time (if one exists)
+    const { data: match } = await context.supabase
+      .from("availability_slots")
+      .select("id, status")
+      .eq("doctor_id", doctorId)
+      .eq("slot_date", data.date)
+      .eq("start_time", `${data.time}:00`)
+      .maybeSingle();
+    if (match && match.status !== "available") {
+      throw new Error("هذه الفترة غير متاحة. اختر وقتاً آخر.");
+    }
+    const { error } = await context.supabase
+      .from("appointments")
+      .update({
+        appointment_date: data.date,
+        appointment_time: `${data.time}:00`,
+        status: "confirmed",
+      })
+      .eq("id", data.id)
+      .eq("doctor_id", doctorId);
+    if (error) throw new Error(error.message);
+    if (match) {
+      await context.supabase
+        .from("availability_slots")
+        .update({ status: "booked", appointment_id: data.id })
+        .eq("id", match.id);
+    }
+    return { ok: true };
+  });
+
+export const setMySlotStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({
+      id: z.string().uuid(),
+      status: z.enum(["available", "blocked"]),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    const doctorId = await requireMyDoctorId(context.supabase);
+    const { data: row } = await context.supabase
+      .from("availability_slots")
+      .select("status")
+      .eq("id", data.id)
+      .eq("doctor_id", doctorId)
+      .maybeSingle();
+    if (!row) throw new Error("لم يتم العثور على الفترة.");
+    if (row.status === "booked") throw new Error("لا يمكن تعديل فترة محجوزة.");
+    const { error } = await context.supabase
+      .from("availability_slots")
+      .update({ status: data.status })
+      .eq("id", data.id)
+      .eq("doctor_id", doctorId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
