@@ -806,8 +806,9 @@ function InsuranceSection({ value, doctorId, onChange }: {
 
 /* ---------------- Step 5: Confirm ---------------- */
 
-function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess, onBack }: {
+function StepConfirm({ doctor, date, time, patient, insurance, result, signedIn, onSuccess, onBack }: {
   doctor: Doctor; date: string; time: string; patient: Patient;
+  insurance: Insurance;
   result: State["result"]; signedIn: boolean;
   onSuccess: (ref: string) => void; onBack: () => void;
 }) {
@@ -832,6 +833,9 @@ function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess,
       national_id: patient.nationalId?.trim() || null,
       gender: patient.gender!,
       reason: patient.reason.trim() || null,
+      insurance_provider_id: insurance.useInsurance ? insurance.providerId : null,
+      insurance_policy_number: insurance.useInsurance ? (insurance.policyNumber.trim() || null) : null,
+      insurance_member_id: insurance.useInsurance ? (insurance.memberId.trim() || null) : null,
     });
   };
 
@@ -841,6 +845,8 @@ function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess,
 
 
   const errorMsg = mut.data && !mut.data.ok ? mut.data.message : mut.error instanceof Error ? mut.error.message : null;
+
+  const v = insurance.verify;
 
   return (
     <div>
@@ -866,6 +872,28 @@ function StepConfirm({ doctor, date, time, patient, result, signedIn, onSuccess,
           <Row label="الجنس" value={patient.gender === "male" ? "ذكر" : "أنثى"} />
           {patient.reason && <Row label="السبب" value={patient.reason} />}
         </div>
+
+        {insurance.useInsurance && insurance.providerId && (
+          <div className="rounded-xl border bg-muted/30 p-4 space-y-3">
+            <Row label="التأمين" value={v?.eligible ? "مؤهل" : "قيد المراجعة"} />
+            {insurance.policyNumber && <Row label="رقم البوليصة" value={insurance.policyNumber} dir="ltr" />}
+            {v?.coverage_percent !== null && v?.coverage_percent !== undefined && (
+              <Row label="نسبة التغطية" value={`${v.coverage_percent}%`} />
+            )}
+            {v?.estimated_cost !== null && v?.estimated_cost !== undefined && (
+              <Row label="قيمة الاستشارة" value={`${v.estimated_cost} ر.س`} />
+            )}
+            {v?.patient_share !== null && v?.patient_share !== undefined && (
+              <Row label="حصة المريض" value={`${v.patient_share} ر.س`} />
+            )}
+            {!v && (
+              <p className="text-xs text-muted-foreground">
+                لم يتم التحقق من الأهلية بعد. سيتم مراجعة تأمينك عند الاستقبال.
+              </p>
+            )}
+          </div>
+        )}
+
 
         {errorMsg && (
           <div className="rounded-lg border border-destructive/50 bg-destructive/5 text-destructive text-sm p-3">
