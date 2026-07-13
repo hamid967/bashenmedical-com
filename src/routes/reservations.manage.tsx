@@ -9,11 +9,12 @@ import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
-import { ArrowRight, Search, CheckCircle2, XCircle, Loader2, AlertCircle } from "lucide-react";
+import { ArrowRight, Search, CheckCircle2, XCircle, Loader2, AlertCircle, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useSessionProfile } from "@/hooks/use-session-profile";
 
 const searchSchema = z.object({
   ref: fallback(z.string(), "").default(""),
