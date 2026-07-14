@@ -16,7 +16,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 
 export const listCorporateRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { status?: CorporateRequestStatus | "all" } | undefined) =>
+  .validator((input: { status?: CorporateRequestStatus | "all" } | undefined) =>
     z
       .object({ status: z.enum([...STATUSES, "all"]).optional() })
       .optional()
@@ -36,7 +36,7 @@ export const listCorporateRequests = createServerFn({ method: "GET" })
 
 export const updateCorporateRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: {
+  .validator((input: {
     id: string;
     status?: CorporateRequestStatus;
     admin_notes?: string | null;

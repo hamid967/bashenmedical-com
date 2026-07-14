@@ -38,7 +38,7 @@ export const listPatientStories = createServerFn({ method: "GET" }).handler(
 );
 
 export const getPatientStory = createServerFn({ method: "GET" })
-  .inputValidator((input: { slug: string }) => {
+  .validator((input: { slug: string }) => {
     if (!input?.slug || typeof input.slug !== "string") throw new Error("slug required");
     return { slug: input.slug.trim().toLowerCase() };
   })

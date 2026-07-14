@@ -56,7 +56,7 @@ const FileSchema = z.object({ path: z.string().min(1).max(1024) });
 
 export const getRadiologyFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileSchema.parse(i))
+  .validator((i: unknown) => FileSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const p = await supabase.from("patients").select("id").eq("profile_id", userId).maybeSingle();

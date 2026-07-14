@@ -55,7 +55,7 @@ const submitSchema = z.object({
 });
 
 export const submitComplaint = createServerFn({ method: "POST" })
-  .inputValidator((raw: unknown) => submitSchema.parse(raw))
+  .validator((raw: unknown) => submitSchema.parse(raw))
   .handler(async ({ data }) => {
     const supabase = serverPublicClient();
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -83,7 +83,7 @@ export const submitComplaint = createServerFn({ method: "POST" })
 // listMyComplaints and RLS lets the patient read it back.
 export const submitMyComplaint = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => submitSchema.parse(raw))
+  .validator((raw: unknown) => submitSchema.parse(raw))
   .handler(async ({ data, context }) => {
     // Enforce path ownership on attachments — every stored path must live
     // under the caller's uid folder. Prevents cross-user path forgery.
@@ -119,7 +119,7 @@ const editMySchema = z.object({
 
 export const editMyComplaint = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => editMySchema.parse(raw))
+  .validator((raw: unknown) => editMySchema.parse(raw))
   .handler(async ({ data, context }) => {
     const { data: existing, error: readErr } = await context.supabase
       .from("complaints")
@@ -156,7 +156,7 @@ const trackSchema = z.object({
 });
 
 export const trackComplaint = createServerFn({ method: "POST" })
-  .inputValidator((raw: unknown) => trackSchema.parse(raw))
+  .validator((raw: unknown) => trackSchema.parse(raw))
   .handler(async ({ data }) => {
     const supabase = serverPublicClient();
     const { data: rows, error } = await supabase.rpc("lookup_complaint", {
@@ -194,7 +194,7 @@ const signUrlsSchema = z.object({ id: z.string().uuid() });
 
 export const getMyComplaintAttachmentUrls = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => signUrlsSchema.parse(raw))
+  .validator((raw: unknown) => signUrlsSchema.parse(raw))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("complaints")
@@ -231,7 +231,7 @@ const listAllSchema = z
 
 export const listAllComplaints = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => listAllSchema.parse(raw) ?? {})
+  .validator((raw: unknown) => listAllSchema.parse(raw) ?? {})
   .handler(async ({ data, context }) => {
     const { data: allowed } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,
@@ -274,7 +274,7 @@ const updateSchema = z.object({
 
 export const updateComplaint = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => updateSchema.parse(raw))
+  .validator((raw: unknown) => updateSchema.parse(raw))
   .handler(async ({ data, context }) => {
     const { data: isAdmin } = await context.supabase.rpc("has_role", {
       _user_id: context.userId,

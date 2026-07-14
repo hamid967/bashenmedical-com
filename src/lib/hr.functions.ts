@@ -104,7 +104,7 @@ const EmpUpsert = z.object({
 
 export const upsertEmployee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => EmpUpsert.parse(d))
+  .validator((d: unknown) => EmpUpsert.parse(d))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     if (id) {
@@ -121,7 +121,7 @@ export const upsertEmployee = createServerFn({ method: "POST" })
 
 export const deleteEmployee = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("employees" as never)
       .update({ is_active: false } as never).eq("id", data.id);
@@ -138,7 +138,7 @@ const AttListInput = z.object({
 
 export const listAttendance = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => AttListInput.parse(d))
+  .validator((d: unknown) => AttListInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase.from("attendance_records" as never)
       .select("*").order("work_date", { ascending: false }).limit(500);
@@ -172,7 +172,7 @@ const AttUpsert = z.object({
 
 export const upsertAttendance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => AttUpsert.parse(d))
+  .validator((d: unknown) => AttUpsert.parse(d))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     if (id) {
@@ -195,7 +195,7 @@ const LeaveListInput = z.object({
 
 export const listLeaves = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => LeaveListInput.parse(d))
+  .validator((d: unknown) => LeaveListInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase.from("leave_requests" as never)
       .select("*").order("created_at", { ascending: false }).limit(200);
@@ -224,7 +224,7 @@ const LeaveCreate = z.object({
 
 export const createLeave = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => LeaveCreate.parse(d))
+  .validator((d: unknown) => LeaveCreate.parse(d))
   .handler(async ({ data, context }) => {
     const days = Math.max(1, Math.floor((new Date(data.to_date).getTime() - new Date(data.from_date).getTime()) / 86_400_000) + 1);
     const { data: row, error } = await context.supabase.from("leave_requests" as never)
@@ -241,7 +241,7 @@ const LeaveReview = z.object({
 
 export const reviewLeave = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => LeaveReview.parse(d))
+  .validator((d: unknown) => LeaveReview.parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("leave_requests" as never)
       .update({
@@ -292,7 +292,7 @@ const PayrollCreate = z.object({
 
 export const createPayrollRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PayrollCreate.parse(d))
+  .validator((d: unknown) => PayrollCreate.parse(d))
   .handler(async ({ data, context }) => {
     // Insert run
     const { data: run, error } = await context.supabase.from("payroll_runs" as never)
@@ -330,7 +330,7 @@ const PayrollItemUpdate = z.object({
 
 export const updatePayrollItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PayrollItemUpdate.parse(d))
+  .validator((d: unknown) => PayrollItemUpdate.parse(d))
   .handler(async ({ data, context }) => {
     const { data: cur, error: gErr } = await context.supabase.from("payroll_items" as never)
       .select("run_id,base_salary").eq("id", data.id).single();
@@ -347,7 +347,7 @@ export const updatePayrollItem = createServerFn({ method: "POST" })
 
 export const finalizePayrollRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("payroll_runs" as never)
       .update({ status: "finalized", finalized_by: context.userId, finalized_at: new Date().toISOString() } as never)
@@ -358,7 +358,7 @@ export const finalizePayrollRun = createServerFn({ method: "POST" })
 
 export const deletePayrollRun = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("payroll_runs" as never)
       .delete().eq("id", data.id);

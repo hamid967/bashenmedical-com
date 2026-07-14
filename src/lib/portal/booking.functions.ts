@@ -65,7 +65,7 @@ function fromMinutes(mins: number) {
 
 export const getDoctorAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => SlotsSchema.parse(i))
+  .validator((i: unknown) => SlotsSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase } = context;
     const dateObj = new Date(`${data.date}T00:00:00`);
@@ -151,7 +151,7 @@ const CreateSchema = z.object({
 
 export const createMyAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => CreateSchema.parse(i))
+  .validator((i: unknown) => CreateSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 

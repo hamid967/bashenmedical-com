@@ -43,7 +43,7 @@ export type CalendarAppointment = {
 
 export const listAppointmentsRange = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => RangeInput.parse(d))
+  .validator((d) => RangeInput.parse(d))
   .handler(async ({ data, context }): Promise<CalendarAppointment[]> => {
     const sb = context.supabase;
     const roles = await getRoles(sb, context.userId);
@@ -75,7 +75,7 @@ const RescheduleInput = z.object({
 
 export const rescheduleAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => RescheduleInput.parse(d))
+  .validator((d) => RescheduleInput.parse(d))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
     const roles = await getRoles(sb, context.userId);

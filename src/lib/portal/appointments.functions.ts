@@ -49,7 +49,7 @@ const ListSchema = z
 
 export const listMyAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ListSchema.parse(i ?? {}))
+  .validator((i: unknown) => ListSchema.parse(i ?? {}))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const scope = await resolveScope(supabase, userId);
@@ -176,7 +176,7 @@ async function loadOwnedAppointment(supabase: any, userId: string, id: string) {
 
 export const confirmMyAttendance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
@@ -196,7 +196,7 @@ export const confirmMyAttendance = createServerFn({ method: "POST" })
 
 export const cancelMyAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) =>
+  .validator((i: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -231,7 +231,7 @@ const RescheduleSchema = z.object({
 
 export const reschedulePatientAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => RescheduleSchema.parse(i))
+  .validator((i: unknown) => RescheduleSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
@@ -284,7 +284,7 @@ const FollowUpSchema = z.object({
 
 export const requestFollowUp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FollowUpSchema.parse(i))
+  .validator((i: unknown) => FollowUpSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { appt, scope } = await loadOwnedAppointment(

@@ -224,7 +224,7 @@ function finalize(x: {
 
 export const verifyMyInsurance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => VerifySchema.parse(i))
+  .validator((i: unknown) => VerifySchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 
@@ -330,7 +330,7 @@ const AttachSchema = z.object({
 
 export const attachVerificationToAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => AttachSchema.parse(i))
+  .validator((i: unknown) => AttachSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     // Confirm the appointment belongs to this user (patient_id → patients.user_id)
@@ -366,7 +366,7 @@ const ListSchema = z.object({
 
 export const listMyInsuranceVerifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ListSchema.parse(i ?? {}))
+  .validator((i: unknown) => ListSchema.parse(i ?? {}))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     let q = supabase

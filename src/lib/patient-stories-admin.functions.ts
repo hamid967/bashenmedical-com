@@ -16,7 +16,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 
 export const listPatientStoriesAdmin = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { status?: PatientStoryStatus | "all" } | undefined) =>
+  .validator((input: { status?: PatientStoryStatus | "all" } | undefined) =>
     z
       .object({ status: z.enum([...STATUSES, "all"]).optional() })
       .optional()
@@ -38,7 +38,7 @@ export const listPatientStoriesAdmin = createServerFn({ method: "GET" })
 
 export const setPatientStoryStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; status: PatientStoryStatus }) =>
+  .validator((input: { id: string; status: PatientStoryStatus }) =>
     z.object({ id: z.string().uuid(), status: z.enum(STATUSES) }).parse(input),
   )
   .handler(async ({ data, context }) => {

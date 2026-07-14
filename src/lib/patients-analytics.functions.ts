@@ -73,7 +73,7 @@ function ageGroup(age: number | null): string {
 
 export const getPatientAnalytics = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => Input.parse(d))
+  .validator((d) => Input.parse(d))
   .handler(async ({ data, context }): Promise<PatientAnalytics> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -266,7 +266,7 @@ function emptyPerTarget(): Record<StatusKey, number> {
 
 export const getPatientTransitions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => TransitionsInput.parse(d))
+  .validator((d) => TransitionsInput.parse(d))
   .handler(async ({ data, context }): Promise<PatientTransitions> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -447,7 +447,7 @@ export type RecentStatusEvent = {
 
 export const listRecentStatusChanges = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => RecentEventsInput.parse(d))
+  .validator((d) => RecentEventsInput.parse(d))
   .handler(async ({ data, context }): Promise<RecentStatusEvent[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -597,7 +597,7 @@ export type KpiPatientRow = {
 
 export const listPatientsForKpi = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => KpiPatientsInput.parse(d))
+  .validator((d) => KpiPatientsInput.parse(d))
   .handler(async ({ data, context }): Promise<KpiPatientRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -680,7 +680,7 @@ export type PatientTransitionsPage = {
 
 export const listPatientTransitionRows = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => TransitionRowsInput.parse(d))
+  .validator((d) => TransitionRowsInput.parse(d))
   .handler(async ({ data, context }): Promise<PatientTransitionsPage> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -874,7 +874,7 @@ export type TransitionsStats = {
 
 export const getTransitionsStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => TransitionsStatsInput.parse(d))
+  .validator((d) => TransitionsStatsInput.parse(d))
   .handler(async ({ data, context }): Promise<TransitionsStats> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;

@@ -45,7 +45,7 @@ const ListInput = z.object({
 
 export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListInput.parse(d ?? {}))
+  .validator((d: unknown) => ListInput.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
@@ -84,7 +84,7 @@ export type NotificationDeliveryStats = {
 
 export const getNotificationDeliveryStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => StatsInput.parse(d ?? {}))
+  .validator((d: unknown) => StatsInput.parse(d ?? {}))
   .handler(async ({ data, context }): Promise<NotificationDeliveryStats> => {
     await assertAdmin(context);
     const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();

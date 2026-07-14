@@ -54,7 +54,7 @@ const listFilters = z.object({
 
 export const listAdminInquiries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => listFilters.parse(d ?? {}))
+  .validator((d: unknown) => listFilters.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
 
@@ -123,7 +123,7 @@ export const listAdminInquiries = createServerFn({ method: "GET" })
 
 export const getInquiryDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
     const [row, timeline] = await Promise.all([
@@ -191,7 +191,7 @@ export const listAssignableStaff = createServerFn({ method: "GET" })
 
 export const assignInquiry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -227,7 +227,7 @@ export const assignInquiry = createServerFn({ method: "POST" })
 
 export const updateInquiryStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -265,7 +265,7 @@ export const updateInquiryStatus = createServerFn({ method: "POST" })
 
 export const addInquiryNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -290,7 +290,7 @@ export const addInquiryNote = createServerFn({ method: "POST" })
 
 export const notifyInquiryPatient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         id: z.string().uuid(),
@@ -338,7 +338,7 @@ export const notifyInquiryPatient = createServerFn({ method: "POST" })
 
 export const closeInquiry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         id: z.string().uuid(),

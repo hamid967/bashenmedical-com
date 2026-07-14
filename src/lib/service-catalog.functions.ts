@@ -38,7 +38,7 @@ export const listServiceCatalog = createServerFn({ method: "GET" })
 
 export const upsertServiceCatalog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => upsertSchema.parse(d))
+  .validator((d) => upsertSchema.parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
     const payload = {
@@ -68,7 +68,7 @@ export const upsertServiceCatalog = createServerFn({ method: "POST" })
 
 export const toggleServiceActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     await ensureAdmin(context.supabase, context.userId);
     const { error } = await context.supabase
@@ -81,7 +81,7 @@ export const toggleServiceActive = createServerFn({ method: "POST" })
 
 export const reorderServiceCatalog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         items: z

@@ -38,7 +38,7 @@ const listSchema = z.object({
 });
 
 export const listAvailableSlots = createServerFn({ method: "GET" })
-  .inputValidator((raw: unknown) => listSchema.parse(raw))
+  .validator((raw: unknown) => listSchema.parse(raw))
   .handler(async ({ data }) => {
     const sb = serverPublicClient();
     let q = sb
@@ -93,7 +93,7 @@ function friendlyRpcError(msg: string | undefined): string {
 }
 
 export const bookSlot = createServerFn({ method: "POST" })
-  .inputValidator((raw: unknown) => bookSchema.parse(raw))
+  .validator((raw: unknown) => bookSchema.parse(raw))
   .handler(async ({ data }) => {
     const sb = serverPublicClient();
     const { data: apptId, error } = await sb.rpc("book_slot", {
@@ -116,7 +116,7 @@ export const bookSlot = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 export const releaseSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({ appointmentId: z.string().uuid() }).parse(raw),
   )
   .handler(async ({ data, context }) => {
@@ -137,7 +137,7 @@ const cancelSchema = z.object({
 
 export const cancelMyAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => cancelSchema.parse(raw))
+  .validator((raw: unknown) => cancelSchema.parse(raw))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
 
@@ -208,7 +208,7 @@ function toHHMMSS(mins: number): string {
 
 export const generateSlots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => generateSchema.parse(raw))
+  .validator((raw: unknown) => generateSchema.parse(raw))
   .handler(async ({ data, context }) => {
     // Authorize: only admin/reception/doctor can generate slots
     const roleChecks = await Promise.all(
@@ -313,7 +313,7 @@ export const generateSlots = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 export const listSlotsAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z
       .object({
         doctorId: z.string().uuid(),
@@ -351,7 +351,7 @@ export const listSlotsAdmin = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 export const deleteSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({ slotId: z.string().uuid() }).parse(raw),
   )
   .handler(async ({ data, context }) => {

@@ -77,7 +77,7 @@ const UpdateInput = z.object({
 
 export const updateMyReminderPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpdateInput.parse(d))
+  .validator((d: unknown) => UpdateInput.parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("reminder_preferences")

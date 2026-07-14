@@ -48,7 +48,7 @@ const OverviewInput = z
 
 export const listDoctorsOverview = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => OverviewInput.parse(d))
+  .validator((d: unknown) => OverviewInput.parse(d))
   .handler(async ({ data, context }): Promise<DoctorOccupancy[]> => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -64,7 +64,7 @@ export const listDoctorsOverview = createServerFn({ method: "POST" })
 /* -------- Availability schedule -------- */
 export const listDoctorAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ doctorId: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ doctorId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -80,7 +80,7 @@ export const listDoctorAvailability = createServerFn({ method: "POST" })
 
 export const createDoctorAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         doctorId: z.string().uuid(),
@@ -110,7 +110,7 @@ export const createDoctorAvailability = createServerFn({ method: "POST" })
 
 export const deleteDoctorAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureAdmin(roles);
@@ -134,7 +134,7 @@ export type DoctorLeave = {
 
 export const listDoctorLeaves = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -160,7 +160,7 @@ export const listDoctorLeaves = createServerFn({ method: "POST" })
 
 export const createDoctorLeave = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         doctorId: z.string().uuid(),
@@ -191,7 +191,7 @@ export const createDoctorLeave = createServerFn({ method: "POST" })
 
 export const deleteDoctorLeave = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureAdmin(roles);

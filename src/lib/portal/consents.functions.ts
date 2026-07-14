@@ -289,7 +289,7 @@ export const listMyConsents = createServerFn({ method: "POST" })
  */
 export const grantConsent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         consent_type: ConsentTypeSchema,
@@ -340,7 +340,7 @@ export const grantConsent = createServerFn({ method: "POST" })
  */
 export const withdrawConsent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         record_id: z.string().uuid(),

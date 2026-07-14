@@ -253,7 +253,7 @@ const SetFlagSchema = z.object({
 
 export const setFeatureFlag = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => SetFlagSchema.parse(input))
+  .validator((input: unknown) => SetFlagSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await assertPermission(supabase, userId, "system.flags.manage");
@@ -292,7 +292,7 @@ const DeleteFlagSchema = z.object({ key: z.string().trim().min(1) });
 
 export const deleteFeatureFlag = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => DeleteFlagSchema.parse(input))
+  .validator((input: unknown) => DeleteFlagSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await assertPermission(supabase, userId, "system.flags.manage");

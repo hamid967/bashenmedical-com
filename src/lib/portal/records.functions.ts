@@ -259,7 +259,7 @@ const FileSchema = z.object({
 
 export const getRecordFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileSchema.parse(i))
+  .validator((i: unknown) => FileSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 

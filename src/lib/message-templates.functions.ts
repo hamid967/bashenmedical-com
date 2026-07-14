@@ -60,7 +60,7 @@ const CHANNEL = z.enum(["in_app", "web_push", "sms", "whatsapp", "email"]);
 /* -------- List templates -------- */
 export const listMessageTemplates = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         channel: CHANNEL.nullable().optional(),
@@ -103,7 +103,7 @@ const UpsertInput = z.object({
 
 export const upsertMessageTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpsertInput.parse(d))
+  .validator((d: unknown) => UpsertInput.parse(d))
   .handler(async ({ data, context }): Promise<MessageTemplate> => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -139,7 +139,7 @@ export const upsertMessageTemplate = createServerFn({ method: "POST" })
 /* -------- Delete template -------- */
 export const deleteMessageTemplate = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureAdmin(roles);

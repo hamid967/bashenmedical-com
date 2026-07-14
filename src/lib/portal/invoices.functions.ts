@@ -36,7 +36,7 @@ const ListSchema = z.object({
 
 export const listMyInvoices = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => ListSchema.parse(input ?? {}))
+  .validator((input: unknown) => ListSchema.parse(input ?? {}))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patientId = await resolvePatientId(supabase, userId);
@@ -107,7 +107,7 @@ export const listMyInvoices = createServerFn({ method: "GET" })
 
 export const getMyInvoice = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patientId = await resolvePatientId(supabase, userId);
@@ -221,7 +221,7 @@ const PaySchema = z.object({
 
 export const createDemoInvoicePayment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => PaySchema.parse(input))
+  .validator((input: unknown) => PaySchema.parse(input))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patientId = await resolvePatientId(supabase, userId);

@@ -82,7 +82,7 @@ const InvListInput = z
 
 export const listInventoryItems = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => InvListInput.parse(d))
+  .validator((d: unknown) => InvListInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("inventory_items" as never)
@@ -123,7 +123,7 @@ const InvUpsertInput = z.object({
 
 export const upsertInventoryItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => InvUpsertInput.parse(d))
+  .validator((d: unknown) => InvUpsertInput.parse(d))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     if (id) {
@@ -145,7 +145,7 @@ export const upsertInventoryItem = createServerFn({ method: "POST" })
 
 export const deleteInventoryItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     // Soft-delete via is_active flag (safer against FK from movements)
     const { error } = await context.supabase
@@ -168,7 +168,7 @@ const MovementListInput = z
 
 export const listStockMovements = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => MovementListInput.parse(d))
+  .validator((d: unknown) => MovementListInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("stock_movements" as never)
@@ -195,7 +195,7 @@ const MoveCreateInput = z.object({
 
 export const createStockMovement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => MoveCreateInput.parse(d))
+  .validator((d: unknown) => MoveCreateInput.parse(d))
   .handler(async ({ data, context }) => {
     // Sign: in -> +, out/waste -> -, adjust/transfer keep user-signed magnitude
     let delta = data.quantity;
@@ -229,7 +229,7 @@ const RxListInput = z
 
 export const listPharmacyPrescriptions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => RxListInput.parse(d))
+  .validator((d: unknown) => RxListInput.parse(d))
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase.rpc("list_pharmacy_prescriptions" as never, {
       _branch_id: data.branchId ?? null,
@@ -249,7 +249,7 @@ const ReviewInput = z.object({
 
 export const reviewPrescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ReviewInput.parse(d))
+  .validator((d: unknown) => ReviewInput.parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc("pharmacy_review_prescription" as never, {
       _id: data.id,

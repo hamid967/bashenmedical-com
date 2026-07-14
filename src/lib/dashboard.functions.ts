@@ -59,7 +59,7 @@ export type DashboardKpis = {
 
 export const getDashboardKpis = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchInput.parse(input))
+  .validator((input: unknown) => BranchInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_kpis", {
@@ -71,7 +71,7 @@ export const getDashboardKpis = createServerFn({ method: "POST" })
 
 export const getDashboardDaily = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchDaysInput.parse(input))
+  .validator((input: unknown) => BranchDaysInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_appointments_daily", {
@@ -90,7 +90,7 @@ export const getDashboardDaily = createServerFn({ method: "POST" })
 
 export const getDashboardStatusBreakdown = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchDaysInput.parse(input))
+  .validator((input: unknown) => BranchDaysInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_status_breakdown", {
@@ -103,7 +103,7 @@ export const getDashboardStatusBreakdown = createServerFn({ method: "POST" })
 
 export const getDashboardBySpecialty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchDaysInput.parse(input))
+  .validator((input: unknown) => BranchDaysInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_by_specialty", {
@@ -121,7 +121,7 @@ export const getDashboardBySpecialty = createServerFn({ method: "POST" })
 
 export const getDashboardPeakHours = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchDaysInput.parse(input))
+  .validator((input: unknown) => BranchDaysInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_peak_hours", {
@@ -134,7 +134,7 @@ export const getDashboardPeakHours = createServerFn({ method: "POST" })
 
 export const getDashboardUpcoming = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchInput.parse(input))
+  .validator((input: unknown) => BranchInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_upcoming", {
@@ -156,7 +156,7 @@ export const getDashboardUpcoming = createServerFn({ method: "POST" })
 
 export const getDashboardRecentActivity = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => BranchInput.parse(input))
+  .validator((input: unknown) => BranchInput.parse(input))
   .handler(async ({ data, context }) => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
     const { data: res, error } = await rpc.call(context.supabase, "dashboard_recent_activity", {

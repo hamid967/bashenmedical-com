@@ -93,7 +93,7 @@ export const listMyAvailability = createServerFn({ method: "GET" })
 
 export const createMyAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         weekday: z.number().int().min(0).max(6),
@@ -139,7 +139,7 @@ export const createMyAvailability = createServerFn({ method: "POST" })
 
 export const deleteMyAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireMyDoctorId(context.supabase);
     const { error } = await context.supabase
@@ -168,7 +168,7 @@ export const listMyLeaves = createServerFn({ method: "GET" })
 
 export const createMyLeave = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -205,7 +205,7 @@ export const createMyLeave = createServerFn({ method: "POST" })
 
 export const deleteMyLeave = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireMyDoctorId(context.supabase);
     const { error } = await context.supabase
@@ -220,7 +220,7 @@ export const deleteMyLeave = createServerFn({ method: "POST" })
 
 export const listMySlots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -245,7 +245,7 @@ export const listMySlots = createServerFn({ method: "POST" })
 
 export const generateMySlots = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
@@ -335,7 +335,7 @@ export const generateMySlots = createServerFn({ method: "POST" })
 
 export const deleteMySlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireMyDoctorId(context.supabase);
     // Guard: can't delete a booked slot
@@ -381,7 +381,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const listMyCalendar = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ fromDate: z.string().regex(DATE_RE), toDate: z.string().regex(DATE_RE) }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -425,7 +425,7 @@ export const listMyCalendar = createServerFn({ method: "POST" })
 
 export const updateMyAppointmentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({
       id: z.string().uuid(),
       status: z.enum(["new", "confirmed", "completed", "cancelled", "no_show"]),
@@ -454,7 +454,7 @@ export const updateMyAppointmentStatus = createServerFn({ method: "POST" })
 
 export const rescheduleMyAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({
       id: z.string().uuid(),
       date: z.string().regex(DATE_RE),
@@ -501,7 +501,7 @@ export const rescheduleMyAppointment = createServerFn({ method: "POST" })
 
 export const setMySlotStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({
       id: z.string().uuid(),
       status: z.enum(["available", "blocked"]),

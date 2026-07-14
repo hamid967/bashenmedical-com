@@ -83,7 +83,7 @@ const RequestSchema = z.object({
 
 export const requestRefund = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => RequestSchema.parse(input))
+  .validator((input: unknown) => RequestSchema.parse(input))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patientId = await resolvePatientId(supabase, userId);
@@ -163,7 +163,7 @@ export const requestRefund = createServerFn({ method: "POST" })
 
 export const cancelMyRefund = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
+  .validator((input: unknown) => z.object({ id: z.string().uuid() }).parse(input))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     // RLS allows UPDATE only when requested_by = auth.uid() and status = 'pending'
@@ -181,7 +181,7 @@ export const cancelMyRefund = createServerFn({ method: "POST" })
 
 export const logRefundReceiptDownload = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) =>
+  .validator((input: unknown) =>
     z
       .object({
         refund_id: z.string().uuid(),

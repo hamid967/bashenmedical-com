@@ -56,7 +56,7 @@ export const listAlertRules = createServerFn({ method: "GET" })
 
 export const createAlertRule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => RuleInput.parse(d))
+  .validator((d) => RuleInput.parse(d))
   .handler(async ({ data, context }): Promise<AlertRule> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -81,7 +81,7 @@ const UpdateInput = RuleInput.partial().extend({ id: z.string().uuid() });
 
 export const updateAlertRule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => UpdateInput.parse(d))
+  .validator((d) => UpdateInput.parse(d))
   .handler(async ({ data, context }): Promise<AlertRule> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -104,7 +104,7 @@ export const updateAlertRule = createServerFn({ method: "POST" })
 
 export const deleteAlertRule = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;

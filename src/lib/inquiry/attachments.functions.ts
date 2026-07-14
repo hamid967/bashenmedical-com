@@ -58,7 +58,7 @@ async function assertAccessibleInquiry(
  */
 export const requestInquiryUploadUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         inquiry_id: z.string().uuid(),
@@ -114,7 +114,7 @@ export const requestInquiryUploadUrl = createServerFn({ method: "POST" })
  */
 export const registerInquiryAttachment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         inquiry_id: z.string().uuid(),
@@ -184,7 +184,7 @@ export const registerInquiryAttachment = createServerFn({ method: "POST" })
 /** List attachments with fresh signed download URLs (5-minute TTL). */
 export const listInquiryAttachments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ inquiry_id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ inquiry_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     await assertAccessibleInquiry(supabase, userId, data.inquiry_id);
@@ -236,7 +236,7 @@ export const listInquiryAttachments = createServerFn({ method: "GET" })
 
 export const deleteInquiryAttachment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -422,7 +422,7 @@ function scanBuffer(
  */
 export const scanInquiryAttachment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
 

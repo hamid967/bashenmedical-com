@@ -58,7 +58,7 @@ const ListInput = z
 
 export const getRatingsSummary = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(SummaryInput.parse)
+  .validator(SummaryInput.parse)
   .handler(async ({ data, context }) => {
     const rpc = context.supabase.rpc as unknown as Rpc;
     const { data: rows, error } = await rpc("get_ratings_summary", {
@@ -72,7 +72,7 @@ export const getRatingsSummary = createServerFn({ method: "GET" })
 
 export const listRatings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(ListInput.parse)
+  .validator(ListInput.parse)
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("patient_ratings" as never)
@@ -115,7 +115,7 @@ export const listRatings = createServerFn({ method: "GET" })
 
 export const deleteRating = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
+  .validator((data: { id: string }) => z.object({ id: z.string().uuid() }).parse(data))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("patient_ratings" as never)
@@ -127,7 +127,7 @@ export const deleteRating = createServerFn({ method: "POST" })
 
 export const replyToRating = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: { id: string; reply: string | null }) =>
+  .validator((data: { id: string; reply: string | null }) =>
     z.object({ id: z.string().uuid(), reply: z.string().max(1000).nullable() }).parse(data),
   )
   .handler(async ({ data, context }) => {

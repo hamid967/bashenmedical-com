@@ -21,7 +21,7 @@ export type PatientNotification = {
 
 export const listMyNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ limit: z.number().int().min(1).max(200).optional() }).default({}).parse(d),
   )
   .handler(async ({ data, context }): Promise<PatientNotification[]> => {
@@ -43,7 +43,7 @@ export const listMyNotifications = createServerFn({ method: "POST" })
 
 export const markMyNotificationsRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({ ids: z.array(z.string().uuid()).max(200).optional() })
       .default({})
