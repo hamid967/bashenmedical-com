@@ -307,7 +307,7 @@ function MyAppointmentsPage() {
               a={a}
               scope={scope}
               onConfirm={() => confirmMut.mutate(a.id)}
-              onCheckIn={() => checkInMut.mutate(a.id)}
+              onCheckIn={() => checkInMut.mutate({ id: a.id, doctor: a.doctor?.name_ar ?? null, branch: a.branch?.name_ar ?? null })}
               onCancel={() =>
                 setCancelFor({
                   id: a.id,
