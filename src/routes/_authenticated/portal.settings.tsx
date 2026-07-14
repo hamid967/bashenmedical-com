@@ -12,6 +12,7 @@ import {
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { MutationErrorBanner } from "@/components/portal/MutationErrorBanner";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const profileQuery = queryOptions({
   queryKey: ["portal", "my-profile-full"],
@@ -51,9 +52,49 @@ function SettingsPage() {
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
-  const setP = <K extends keyof Prefs>(k: K, v: boolean) => {
-    setPrefs((s) => ({ ...s, [k]: v }));
-    setDirty(true);
+  const push = usePushNotifications(true);
+
+  // Auto-save one preference and roll back on failure.
+  const [savingKey, setSavingKey] = useState<keyof Prefs | null>(null);
+  const CHANNEL_LABEL: Record<keyof Prefs, string> = {
+    email: "البريد الإلكتروني",
+    sms: "الرسائل النصية",
+    whatsapp: "واتساب",
+    push: "إشعارات المتصفح",
+  };
+  const savePref = async (k: keyof Prefs, v: boolean) => {
+    const prev = prefs;
+    const next = { ...prev, [k]: v };
+    setPrefs(next);
+    setSavingKey(k);
+    try {
+      await updateMyProfile({ data: { notification_prefs: next } });
+      qc.invalidateQueries({ queryKey: ["portal", "my-profile-full"] });
+      qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
+      toast.success(v ? `تم تفعيل ${CHANNEL_LABEL[k]}` : `تم إيقاف ${CHANNEL_LABEL[k]}`);
+    } catch (e) {
+      setPrefs(prev);
+      toast.error(e instanceof Error ? e.message : "تعذّر حفظ التفضيل");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const onPushToggle = async (v: boolean) => {
+    // Real browser activation: request permission and register/remove subscription
+    // before persisting the preference so a saved "on" always matches a live sub.
+    try {
+      if (v) {
+        await push.subscribe();
+        if (Notification.permission !== "granted") return; // subscribe already toasted
+      } else {
+        await push.unsubscribe();
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّر تحديث حالة الإشعارات");
+      return;
+    }
+    await savePref("push", v);
   };
 
   const mut = useMutation({
@@ -109,13 +150,26 @@ function SettingsPage() {
         <section className="glass-card p-5 sm:p-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
           <Toggle icon={<Mail className="h-4 w-4" />} label="البريد الإلكتروني" desc="تذكيرات المواعيد وتحديثات التقارير"
-            value={prefs.email} onChange={(v) => setP("email", v)} />
+            value={prefs.email} busy={savingKey === "email"} onChange={(v) => savePref("email", v)} />
           <Toggle icon={<MessageSquare className="h-4 w-4" />} label="الرسائل النصية (SMS)" desc="تنبيهات فورية على جوالك"
-            value={prefs.sms} onChange={(v) => setP("sms", v)} />
+            value={prefs.sms} busy={savingKey === "sms"} onChange={(v) => savePref("sms", v)} />
           <Toggle icon={<Smartphone className="h-4 w-4" />} label="واتساب" desc="رسائل تأكيد وتذكير عبر واتساب"
-            value={prefs.whatsapp} onChange={(v) => setP("whatsapp", v)} />
-          <Toggle icon={<Bell className="h-4 w-4" />} label="إشعارات المتصفح (Push)" desc="تنبيه لحظي داخل المتصفح"
-            value={prefs.push} onChange={(v) => setP("push", v)} />
+            value={prefs.whatsapp} busy={savingKey === "whatsapp"} onChange={(v) => savePref("whatsapp", v)} />
+          <Toggle
+            icon={<Bell className="h-4 w-4" />}
+            label="إشعارات المتصفح (Push)"
+            desc={
+              push.state === "unsupported"
+                ? "غير مدعوم في هذا المتصفح"
+                : push.state === "denied"
+                  ? "الإذن مرفوض — فعّل الإشعارات من إعدادات المتصفح"
+                  : "تنبيه لحظي داخل المتصفح"
+            }
+            value={prefs.push && push.subscribed}
+            disabled={push.state === "unsupported" || push.state === "denied"}
+            busy={push.busy || savingKey === "push"}
+            onChange={onPushToggle}
+          />
         </section>
 
         <section className="glass-card p-5 sm:p-6 mt-6 space-y-4">
@@ -181,9 +235,19 @@ function SettingsPage() {
   );
 }
 
-function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode; label: string; desc: string; value: boolean; onChange: (v: boolean) => void }) {
+function Toggle({
+  icon, label, desc, value, onChange, busy, disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  desc: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+  busy?: boolean;
+  disabled?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3">
+    <div className={`flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 ${disabled ? "opacity-60" : ""}`}>
       <div className="flex items-start gap-3">
         <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
         <div>
@@ -191,14 +255,17 @@ function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode;
           <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
         </div>
       </div>
-      <Switch value={value} onChange={onChange} />
+      <div className="flex items-center gap-2">
+        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--portal-ink-2)]" />}
+        <Switch value={value} onChange={onChange} disabled={disabled || busy} />
+      </div>
     </div>
   );
 }
-function Switch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+function Switch({ value, onChange, disabled }: { value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
-      className={`h-6 w-11 rounded-full transition relative ${value ? "bg-emerald-500" : "bg-slate-300"}`}>
+    <button type="button" role="switch" aria-checked={value} disabled={disabled} onClick={() => onChange(!value)}
+      className={`h-6 w-11 rounded-full transition relative disabled:cursor-not-allowed ${value ? "bg-emerald-500" : "bg-slate-300"}`}>
       <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${value ? "right-0.5" : "right-[calc(100%-1.375rem)]"}`} />
     </button>
   );
