@@ -313,6 +313,8 @@ function DependentCard({
     .map((s) => s[0])
     .join("");
   const rel = t(RELATIONSHIP_LABELS[row.relationship], lang);
+  const missing = dependentMissingForBooking(row);
+  const canBook = missing.length === 0;
   return (
     <div className="glass-card p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
