@@ -233,7 +233,7 @@ export const listFeatureFlags = createServerFn({ method: "GET" })
       .maybeSingle();
     if (error) throw new Error(error.message);
 
-    const payload = ((data?.value ?? {}) as FlagsPayload) ?? {};
+    const payload = ((data?.value ?? {}) as FlagsPayload);
     return Object.entries(payload)
       .map(([key, v]) => ({
         key,
@@ -265,7 +265,7 @@ export const setFeatureFlag = createServerFn({ method: "POST" })
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
 
-    const current = ((existing?.value ?? {}) as FlagsPayload) ?? {};
+    const current = ((existing?.value ?? {}) as FlagsPayload);
     const next: FlagsPayload = {
       ...current,
       [data.key]: {
@@ -304,7 +304,7 @@ export const deleteFeatureFlag = createServerFn({ method: "POST" })
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
 
-    const current = ((existing?.value ?? {}) as FlagsPayload) ?? {};
+    const current = ((existing?.value ?? {}) as FlagsPayload);
     if (!(data.key in current)) return { ok: true as const };
     delete current[data.key];
 
