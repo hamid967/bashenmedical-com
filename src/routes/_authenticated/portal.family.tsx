@@ -15,9 +15,11 @@ import {
   deleteDependent,
   listDependentAppointments,
   countDependentAppointments,
+  cancelDependentActiveAppointments,
   type Dependent,
   type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
+
 
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui/button";
