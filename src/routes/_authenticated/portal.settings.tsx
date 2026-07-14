@@ -235,9 +235,19 @@ function SettingsPage() {
   );
 }
 
-function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode; label: string; desc: string; value: boolean; onChange: (v: boolean) => void }) {
+function Toggle({
+  icon, label, desc, value, onChange, busy, disabled,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  desc: string;
+  value: boolean;
+  onChange: (v: boolean) => void;
+  busy?: boolean;
+  disabled?: boolean;
+}) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3">
+    <div className={`flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 ${disabled ? "opacity-60" : ""}`}>
       <div className="flex items-start gap-3">
         <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
         <div>
@@ -245,14 +255,17 @@ function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode;
           <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
         </div>
       </div>
-      <Switch value={value} onChange={onChange} />
+      <div className="flex items-center gap-2">
+        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--portal-ink-2)]" />}
+        <Switch value={value} onChange={onChange} disabled={disabled || busy} />
+      </div>
     </div>
   );
 }
-function Switch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+function Switch({ value, onChange, disabled }: { value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
-    <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
-      className={`h-6 w-11 rounded-full transition relative ${value ? "bg-emerald-500" : "bg-slate-300"}`}>
+    <button type="button" role="switch" aria-checked={value} disabled={disabled} onClick={() => onChange(!value)}
+      className={`h-6 w-11 rounded-full transition relative disabled:cursor-not-allowed ${value ? "bg-emerald-500" : "bg-slate-300"}`}>
       <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${value ? "right-0.5" : "right-[calc(100%-1.375rem)]"}`} />
     </button>
   );
