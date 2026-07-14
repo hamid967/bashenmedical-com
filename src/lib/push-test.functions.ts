@@ -12,6 +12,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+// Bounded, JSON-safe primitive tree — prevents unbounded/huge payloads and
+// non-serializable values from reaching the push service.
+const DataPrimitive = z.union([z.string().max(500), z.number(), z.boolean(), z.null()]);
+const DataValue: z.ZodType<unknown> = z.lazy(() =>
+  z.union([DataPrimitive, z.array(DataValue).max(20), z.record(z.string().max(64), DataValue)]),
+);
+
 const TestPushInput = z.object({
   title: z.string().trim().min(1).max(120).optional(),
   body: z.string().trim().min(1).max(400).optional(),
@@ -22,6 +29,7 @@ const TestPushInput = z.object({
     .regex(/^\/[^\s]*$/, "Path must start with /")
     .optional(),
   requireInteraction: z.boolean().optional(),
+  data: z.record(z.string().max(64), DataValue).optional(),
 });
 
 type DeliveryResult = {
@@ -64,6 +72,13 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
     const webpush = (await import("web-push")).default;
     webpush.setVapidDetails(subject, publicKey, privateKey);
 
+    // Merge user-supplied data into metadata; `url` stays authoritative from
+    // the validated top-level field so the SW's click handler keeps working.
+    const metadata: Record<string, unknown> = {
+      ...(data.data ?? {}),
+      url: data.url ?? (data.data as { url?: string } | undefined)?.url ?? "/portal/notifications",
+    };
+
     const payload = JSON.stringify({
       title: data.title ?? "إشعار تجريبي — Test push",
       body: data.body ?? "هذا اختبار حقيقي عبر web-push من الخادم.",
@@ -71,8 +86,9 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
       badge: "/favicon-32.png",
       tag: "push-test-server",
       requireInteraction: data.requireInteraction ?? false,
-      metadata: { url: data.url ?? "/portal/notifications" },
+      metadata,
     });
+
 
     const results: DeliveryResult[] = [];
     const staleEndpoints: string[] = [];

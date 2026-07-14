@@ -92,7 +92,9 @@ export function PushSubscriptionCard() {
     body: "هذا اختبار حقيقي عبر web-push من الخادم.",
     url: "/portal/notifications",
     requireInteraction: false,
+    dataJson: '{\n  "kind": "test",\n  "source": "portal"\n}',
   });
+  const [dataError, setDataError] = useState<string | null>(null);
   const [swDiag, setSwDiag] = useState<SwDiag>(initialSwDiag);
   const [swRefreshing, setSwRefreshing] = useState(false);
   const sendServer = useServerFn(sendTestPushToMe);
@@ -299,6 +301,34 @@ export function PushSubscriptionCard() {
   }, []);
 
   const sendServerTest = useCallback(async () => {
+    // Parse & validate the optional data JSON before any network call.
+    let dataObj: Record<string, unknown> | undefined;
+    const raw = payload.dataJson.trim();
+    if (raw.length > 0) {
+      if (raw.length > 4000) {
+        setDataError("الحمولة أكبر من 4000 حرف");
+        toast.error("حمولة data كبيرة جدًا");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+          setDataError("يجب أن تكون data كائنًا JSON ({ ... })");
+          toast.error("data يجب أن تكون كائن JSON");
+          return;
+        }
+        dataObj = parsed as Record<string, unknown>;
+        setDataError(null);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "JSON غير صالح";
+        setDataError(msg);
+        toast.error("JSON غير صالح", { description: msg });
+        return;
+      }
+    } else {
+      setDataError(null);
+    }
+
     setServerSending(true);
     try {
       const res = await sendServer({
@@ -307,6 +337,7 @@ export function PushSubscriptionCard() {
           body: payload.body.trim() || undefined,
           url: payload.url.trim() || undefined,
           requireInteraction: payload.requireInteraction,
+          data: dataObj,
         },
       });
       if (res.ok) {
@@ -330,6 +361,7 @@ export function PushSubscriptionCard() {
       setServerSending(false);
     }
   }, [sendServer, payload]);
+
 
 
 
@@ -536,6 +568,57 @@ export function PushSubscriptionCard() {
             />
             <span>يتطلّب تفاعل المستخدم للإخفاء (requireInteraction)</span>
           </label>
+
+          <label className="block space-y-1 text-xs">
+            <span className="flex items-center justify-between">
+              <span className="font-semibold text-muted-foreground">
+                بيانات إضافية — data (JSON اختياري)
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                {payload.dataJson.length}/4000
+              </span>
+            </span>
+            <textarea
+              value={payload.dataJson}
+              maxLength={4000}
+              rows={5}
+              spellCheck={false}
+              dir="ltr"
+              onChange={(e) => {
+                const v = e.target.value;
+                setPayload((p) => ({ ...p, dataJson: v }));
+                if (!v.trim()) {
+                  setDataError(null);
+                  return;
+                }
+                try {
+                  const parsed = JSON.parse(v);
+                  if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+                    setDataError("يجب أن تكون كائن JSON");
+                  } else {
+                    setDataError(null);
+                  }
+                } catch (err) {
+                  setDataError(err instanceof Error ? err.message : "JSON غير صالح");
+                }
+              }}
+              className={`w-full resize-y rounded-md border bg-background px-3 py-2 font-mono text-[11px] ${
+                dataError ? "border-rose-400 focus:outline-rose-500" : "border-input"
+              }`}
+              placeholder='{ "kind": "appointment", "id": 42 }'
+            />
+            {dataError ? (
+              <span className="block text-[11px] text-rose-600 dark:text-rose-400">
+                {dataError}
+              </span>
+            ) : (
+              <span className="block text-[11px] text-muted-foreground">
+                تُدمج في <code className="rounded bg-background px-1">metadata</code> وتصل إلى{" "}
+                <code className="rounded bg-background px-1">event.notification.data</code> داخل الـ SW.
+              </span>
+            )}
+          </label>
+
           <p className="text-[11px] leading-relaxed text-muted-foreground">
             هذه الحمولة تُرسَل عبر VAPID إلى مزوّد المتصفح (FCM/APNs/Mozilla)، ويلتقطها{" "}
             <code className="rounded bg-background px-1">push</code> event في{" "}
