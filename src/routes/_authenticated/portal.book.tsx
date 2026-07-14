@@ -47,7 +47,12 @@ const profileQuery = queryOptions({
   staleTime: 60_000,
 });
 
+const SearchSchema = z.object({
+  forDependent: z.string().uuid().optional(),
+});
+
 export const Route = createFileRoute("/_authenticated/portal/book")({
+  validateSearch: (s) => SearchSchema.parse(s),
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(optionsQuery),
