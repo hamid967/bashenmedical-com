@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -17,16 +17,32 @@ import {
   AlertTriangle,
   Loader2,
   Inbox,
+  Info,
+  Calendar,
+  MapPin,
+  User as UserIcon,
+  History as HistoryIcon,
 } from "lucide-react";
 import {
   listMyMedicalReports,
   getMyMedicalReportFileUrl,
+  getMyMedicalReportDetail,
+  getMyMedicalReportVersionFileUrl,
   type MyMedicalReport,
+  type MyMedicalReportDetail,
   type ReportType,
 } from "@/lib/portal/reports.functions";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DemoBadge } from "@/components/DemoBadge";
 
 const reportsQuery = queryOptions({
@@ -93,6 +109,7 @@ function ReportsPage() {
   const [type, setType] = useState<ReportType | "all">("all");
   const [q, setQ] = useState("");
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: reports.length };
@@ -239,7 +256,7 @@ function ReportsPage() {
                         {r.summary}
                       </p>
                     )}
-                    <div className="mt-3">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         variant={r.file_path ? "default" : "outline"}
@@ -255,6 +272,14 @@ function ReportsPage() {
                           {r.file_path ? "تنزيل PDF" : "لا يوجد ملف"}
                         </span>
                       </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDetailId(r.id)}
+                      >
+                        <Info className="h-4 w-4" />
+                        <span className="ms-2">التفاصيل</span>
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -263,9 +288,275 @@ function ReportsPage() {
           })}
         </ul>
       )}
+
+      <ReportDetailDialog
+        reportId={detailId}
+        onClose={() => setDetailId(null)}
+      />
     </div>
   );
 }
+
+function ReportDetailDialog({
+  reportId,
+  onClose,
+}: {
+  reportId: string | null;
+  onClose: () => void;
+}) {
+  const getDetail = useServerFn(getMyMedicalReportDetail);
+  const getMainUrl = useServerFn(getMyMedicalReportFileUrl);
+  const getVersionUrl = useServerFn(getMyMedicalReportVersionFileUrl);
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ["portal", "medical-report-detail", reportId],
+    queryFn: () => getDetail({ data: { id: reportId! } }),
+    enabled: !!reportId,
+    staleTime: 30_000,
+  });
+
+  const meta = data ? TYPE_META[data.report_type] ?? TYPE_META.other : null;
+
+  async function downloadMain(d: MyMedicalReportDetail) {
+    if (!d.file_path) {
+      toast.info("لا يوجد ملف رئيسي.");
+      return;
+    }
+    setBusy("main");
+    try {
+      const { url } = await getMainUrl({ data: { id: d.id } });
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error(e?.message ?? "تعذّر التنزيل.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function downloadVersion(d: MyMedicalReportDetail, versionNumber: number) {
+    setBusy(`v-${versionNumber}`);
+    try {
+      const { url } = await getVersionUrl({
+        data: { report_id: d.id, version_number: versionNumber },
+      });
+      window.open(url, "_blank", "noopener,noreferrer");
+    } catch (e: any) {
+      toast.error(e?.message ?? "تعذّر تنزيل النسخة.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <Dialog open={!!reportId} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent dir="rtl" className="max-w-xl max-h-[85vh] overflow-y-auto">
+        {isLoading && (
+          <div className="py-12 text-center text-sm text-muted-foreground">
+            <Loader2 className="mx-auto h-6 w-6 animate-spin" />
+            <p className="mt-2">جارٍ تحميل تفاصيل التقرير…</p>
+          </div>
+        )}
+
+        {error && !isLoading && (
+          <div className="py-8 text-center">
+            <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
+            <p className="mt-2 text-sm">{(error as Error).message}</p>
+            <Button size="sm" variant="outline" className="mt-3" onClick={() => refetch()}>
+              إعادة المحاولة
+            </Button>
+          </div>
+        )}
+
+        {data && meta && !isLoading && !error && (
+          <>
+            <DialogHeader className="text-right">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge
+                  variant="outline"
+                  className={`${meta.tint} ${meta.bg} border-0 text-[11px]`}
+                >
+                  {meta.label}
+                </Badge>
+                <DemoBadge show={data.is_demo} />
+                <Badge variant="secondary" className="text-[10px]">
+                  {data.status === "published" ? "منشور" : data.status}
+                </Badge>
+              </div>
+              <DialogTitle className="mt-1 text-right">
+                {data.title_ar ?? data.title_en ?? "تقرير طبي"}
+              </DialogTitle>
+              {data.title_en && data.title_ar && (
+                <DialogDescription className="text-right" dir="ltr">
+                  {data.title_en}
+                </DialogDescription>
+              )}
+            </DialogHeader>
+
+            <div className="space-y-5 text-sm">
+              <section className="grid grid-cols-2 gap-3 text-xs">
+                <MetaRow
+                  Icon={Calendar}
+                  label="تاريخ النشر"
+                  value={
+                    data.published_at
+                      ? format(new Date(data.published_at), "d MMMM yyyy — HH:mm", {
+                          locale: arLocale,
+                        })
+                      : "—"
+                  }
+                />
+                <MetaRow
+                  Icon={Calendar}
+                  label="آخر تحديث"
+                  value={format(new Date(data.updated_at), "d MMMM yyyy", { locale: arLocale })}
+                />
+                <MetaRow
+                  Icon={UserIcon}
+                  label="الطبيب"
+                  value={data.doctor_name_ar ?? "—"}
+                />
+                <MetaRow
+                  Icon={MapPin}
+                  label="الفرع"
+                  value={data.branch_name_ar ?? "—"}
+                />
+                {data.appointment_date && (
+                  <MetaRow
+                    Icon={Calendar}
+                    label="تاريخ الزيارة"
+                    value={format(new Date(data.appointment_date), "d MMMM yyyy", {
+                      locale: arLocale,
+                    })}
+                  />
+                )}
+              </section>
+
+              {data.summary && (
+                <section>
+                  <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">
+                    الوصف
+                  </h4>
+                  <p className="whitespace-pre-line leading-relaxed text-sm">
+                    {data.summary}
+                  </p>
+                </section>
+              )}
+
+              <section>
+                <h4 className="mb-2 text-xs font-semibold text-muted-foreground">
+                  روابط التحميل
+                </h4>
+                <div className="rounded-lg border border-border divide-y">
+                  <div className="flex items-center justify-between p-2.5">
+                    <div className="flex items-center gap-2 text-sm">
+                      <FileText className="h-4 w-4 text-primary" />
+                      <span>النسخة الحالية (PDF)</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant={data.file_path ? "default" : "outline"}
+                      disabled={!data.file_path || busy === "main"}
+                      onClick={() => downloadMain(data)}
+                    >
+                      {busy === "main" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Download className="h-4 w-4" />
+                      )}
+                      <span className="ms-1.5">
+                        {data.file_path ? "تنزيل" : "غير متاح"}
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              </section>
+
+              {data.versions.length > 0 && (
+                <section>
+                  <h4 className="mb-2 text-xs font-semibold text-muted-foreground inline-flex items-center gap-1.5">
+                    <HistoryIcon className="h-3.5 w-3.5" />
+                    النسخ السابقة ({data.versions.length})
+                  </h4>
+                  <ul className="rounded-lg border border-border divide-y">
+                    {data.versions.map((v) => (
+                      <li
+                        key={v.version_number}
+                        className="flex items-center justify-between gap-2 p-2.5"
+                      >
+                        <div className="min-w-0">
+                          <div className="text-sm font-medium">
+                            نسخة #{v.version_number}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {format(new Date(v.changed_at), "d MMMM yyyy — HH:mm", {
+                              locale: arLocale,
+                            })}
+                          </div>
+                          {v.summary && (
+                            <div className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                              {v.summary}
+                            </div>
+                          )}
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={!v.has_file || busy === `v-${v.version_number}`}
+                          onClick={() => downloadVersion(data, v.version_number)}
+                        >
+                          {busy === `v-${v.version_number}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )}
+
+              <section className="text-[11px] text-muted-foreground">
+                معرّف التقرير:{" "}
+                <span className="font-mono">{data.id.slice(0, 8)}…</span>
+              </section>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={onClose}>
+                إغلاق
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MetaRow({
+  Icon,
+  label,
+  value,
+}: {
+  Icon: typeof FileText;
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="flex items-start gap-2">
+      <Icon className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+          {label}
+        </div>
+        <div className="text-sm truncate">{value}</div>
+      </div>
+    </div>
+  );
+}
+
 
 function EmptyState({ hasReports, onReset }: { hasReports: boolean; onReset: () => void }) {
   return (

@@ -103,3 +103,117 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { url: signed.signedUrl, expiresIn: 300 };
   });
+
+export type MyMedicalReportDetail = MyMedicalReport & {
+  created_at: string;
+  updated_at: string;
+  appointment_id: string | null;
+  appointment_date: string | null;
+  branch_name_ar: string | null;
+  versions: Array<{
+    version_number: number;
+    changed_at: string;
+    summary: string | null;
+    has_file: boolean;
+  }>;
+};
+
+export const getMyMedicalReportDetail = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => FileInput.parse(i))
+  .handler(async ({ context, data }): Promise<MyMedicalReportDetail> => {
+    const { supabase, userId } = context;
+
+    const patientRes = await supabase
+      .from("patients")
+      .select("id")
+      .eq("profile_id", userId)
+      .maybeSingle();
+    const patientId = patientRes.data?.id;
+    if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
+
+    const { data: r, error } = await supabase
+      .from("medical_reports")
+      .select(
+        "id, report_type, title_ar, title_en, summary, file_path, status, published_at, is_demo, created_at, updated_at, appointment_id, patient_id, doctors:doctor_id(name_ar), appointments:appointment_id(appointment_date, branches:branch_id(name_ar))",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!r || (r as any).patient_id !== patientId) throw new Error("التقرير غير موجود.");
+    if ((r as any).status !== "published") throw new Error("التقرير غير متاح.");
+
+    // Versions are staff-only via RLS; read with admin after ownership check above.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: versions } = await supabaseAdmin
+      .from("report_versions")
+      .select("version_number, changed_at, summary, file_path")
+      .eq("report_id", data.id)
+      .order("version_number", { ascending: false });
+
+    return {
+      id: (r as any).id,
+      report_type: (r as any).report_type,
+      title_ar: (r as any).title_ar,
+      title_en: (r as any).title_en,
+      summary: (r as any).summary,
+      file_path: (r as any).file_path,
+      status: (r as any).status,
+      published_at: (r as any).published_at,
+      is_demo: !!(r as any).is_demo,
+      doctor_name_ar: (r as any).doctors?.name_ar ?? null,
+      created_at: (r as any).created_at,
+      updated_at: (r as any).updated_at,
+      appointment_id: (r as any).appointment_id,
+      appointment_date: (r as any).appointments?.appointment_date ?? null,
+      branch_name_ar: (r as any).appointments?.branches?.name_ar ?? null,
+      versions: (versions ?? []).map((v: any) => ({
+        version_number: v.version_number,
+        changed_at: v.changed_at,
+        summary: v.summary,
+        has_file: !!v.file_path,
+      })),
+    };
+  });
+
+const VersionInput = z.object({
+  report_id: z.string().uuid(),
+  version_number: z.number().int().min(1),
+});
+
+export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => VersionInput.parse(i))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const patientRes = await supabase
+      .from("patients")
+      .select("id")
+      .eq("profile_id", userId)
+      .maybeSingle();
+    const patientId = patientRes.data?.id;
+    if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
+
+    const reportRes = await supabase
+      .from("medical_reports")
+      .select("patient_id, status, revoked_at")
+      .eq("id", data.report_id)
+      .maybeSingle();
+    const rr = reportRes.data as any;
+    if (!rr || rr.patient_id !== patientId) throw new Error("التقرير غير موجود.");
+    if (rr.status !== "published" || rr.revoked_at) throw new Error("التقرير غير متاح.");
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: v } = await supabaseAdmin
+      .from("report_versions")
+      .select("file_path")
+      .eq("report_id", data.report_id)
+      .eq("version_number", data.version_number)
+      .maybeSingle();
+    if (!v?.file_path) throw new Error("لا يوجد ملف لهذه النسخة.");
+    const { data: signed, error: sErr } = await supabaseAdmin.storage
+      .from("medical-reports")
+      .createSignedUrl(v.file_path, 300);
+    if (sErr) throw new Error(sErr.message);
+    return { url: signed.signedUrl, expiresIn: 300 };
+  });
