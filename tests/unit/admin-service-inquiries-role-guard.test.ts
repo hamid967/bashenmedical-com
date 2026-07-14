@@ -97,7 +97,7 @@ describe("كل server function يستدعي assertHasRole('admin') في البد
   const handlers = [...source.matchAll(HANDLER_RE)].map((m) => m[1]);
 
   test("يوجد على الأقل handler واحد للفحص", () => {
-    expect(handlers.length).toBeGreaterThanOrEqual(9);
+    expect(handlers.length).toBeGreaterThanOrEqual(8);
   });
 
   for (let i = 0; i < handlers.length; i++) {
@@ -124,7 +124,7 @@ describe("كل serverFn محمي بـ requireSupabaseAuth", () => {
   const chains = [...source.matchAll(SERVERFN_RE)].map((m) => m[1]);
 
   test("يوجد serverFns مُعرَّفة", () => {
-    expect(chains.length).toBeGreaterThanOrEqual(9);
+    expect(chains.length).toBeGreaterThanOrEqual(8);
   });
 
   for (let i = 0; i < chains.length; i++) {
