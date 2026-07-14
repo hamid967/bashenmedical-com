@@ -503,26 +503,22 @@ function BookPage() {
                 {(findingAlt || suggestion) && (
                   <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 md:p-4 text-sm">
                     {findingAlt && !suggestion && (
-                      <span className="text-muted-foreground">
-                        {lang === "ar" ? "جارٍ البحث عن طبيب بديل بأقرب موعد…" : "Looking for an alternative doctor…"}
-                      </span>
+                      <span className="text-muted-foreground">{t("page.lookingAlt")}</span>
                     )}
                     {suggestion && (
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                         <div>
                           <div className="font-medium">
-                            {lang === "ar" ? "طبيب بديل متاح:" : "Alternative doctor available:"} {suggestion.doctorName}
+                            {t("page.altAvailable")} {suggestion.doctorName}
                           </div>
                           <div className="text-muted-foreground">
-                            {lang === "ar" ? "أقرب موعد" : "Earliest slot"}: {suggestion.time}
+                            {t("page.earliestSlot")}: {suggestion.time}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={acceptSuggestion}>
-                            {lang === "ar" ? "احجز مع البديل" : "Book alternative"}
-                          </Button>
+                          <Button size="sm" onClick={acceptSuggestion}>{t("page.bookAlt")}</Button>
                           <Button size="sm" variant="ghost" onClick={() => setSuggestion(null)}>
-                            {lang === "ar" ? "تجاهل" : "Dismiss"}
+                            {t("page.dismiss")}
                           </Button>
                         </div>
                       </div>
@@ -568,7 +564,7 @@ function BookPage() {
               onClick={() => goto(state.step - 1)}
               className="gap-1"
             >
-              {lang === "ar" ? <><ChevronRight className="h-4 w-4"/>السابق</> : <><ChevronLeft className="h-4 w-4"/>Back</>}
+              {lang === "ar" ? <><ChevronRight className="h-4 w-4"/>{t("page.back")}</> : <><ChevronLeft className="h-4 w-4"/>{t("page.back")}</>}
             </Button>
 
             {state.step < 8 && (
@@ -577,16 +573,16 @@ function BookPage() {
                 onClick={() => goto(state.step + 1)}
                 className="gap-1"
               >
-                {lang === "ar" ? <>التالي<ChevronLeft className="h-4 w-4"/></> : <>Next<ChevronRight className="h-4 w-4"/></>}
+                {lang === "ar" ? <>{t("page.next")}<ChevronLeft className="h-4 w-4"/></> : <>{t("page.next")}<ChevronRight className="h-4 w-4"/></>}
               </Button>
             )}
           </div>
         )}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          {lang === "ar" ? "لديك حجز مسبق؟" : "Already booked?"}{" "}
+          {t("page.alreadyBooked")}{" "}
           <Link to="/track" search={{ ref: undefined, phone4: undefined }} className="text-primary hover:underline">
-            {lang === "ar" ? "تتبع حجزك" : "Track your booking"}
+            {t("page.trackBooking")}
           </Link>
         </p>
       </div>
