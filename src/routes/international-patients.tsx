@@ -17,9 +17,9 @@ export const Route = createFileRoute("/international-patients")({
       },
       { property: "og:title", content: "International Patients — Baeshen Medical" },
       { property: "og:description", content: "End-to-end support for international patients in Jazan, Saudi Arabia." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/international-patients" },
+      { property: "og:url", content: "https://bashenmedical.com/international-patients" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/international-patients" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/international-patients" }],
   }),
   component: IntlPage,
 });

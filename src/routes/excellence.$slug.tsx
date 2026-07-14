@@ -15,7 +15,7 @@ export const Route = createFileRoute("/excellence/$slug")({
     const c = loaderData?.center;
     if (!c) return { meta: [
       ...bmcOgImageMeta(),{ title: "مركز غير موجود — مجمع باعشن الطبي" }] };
-    const url = `https://happy-hugger-fluff.lovable.app/excellence/${c.slug}`;
+    const url = `https://bashenmedical.com/excellence/${c.slug}`;
     const title = `${c.name} — مراكز التميز | مجمع باعشن الطبي`;
     return {
       meta: [

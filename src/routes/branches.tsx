@@ -19,9 +19,9 @@ export const Route = createFileRoute("/branches")({
       { name: "description", content: "تعرّف على فروع مجمع باعشن الطبي مع الصور، الخريطة، ساعات العمل وأرقام الطوارئ لكل فرع." },
       { property: "og:title", content: "مستشفياتنا وفروعنا — مجمع باعشن الطبي" },
       { property: "og:description", content: "قائمة فروع مجمع باعشن الطبي بالخريطة وساعات العمل." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/branches" },
+      { property: "og:url", content: "https://bashenmedical.com/branches" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/branches" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/branches" }],
   }),
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(branchesQuery());

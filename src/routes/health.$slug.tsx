@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Calendar, Clock, ArrowLeft, MapPin, Phone } from "lucide-react";
 import { SITE } from "@/lib/site";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 
 type Article = {
   id: string;

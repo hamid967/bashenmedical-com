@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { Calendar, Clock, ArrowLeft, BookOpen, Search } from "lucide-react";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 
 type Category = {
   id: string;

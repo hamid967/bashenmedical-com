@@ -6,7 +6,7 @@ import { useI18n } from "@/lib/i18n";
 import { accreditationQuery, accreditationsQuery, type Accreditation } from "@/lib/accreditations";
 import { trackEvent } from "@/lib/analytics";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 
 export const Route = createFileRoute("/accreditations/$id")({
   loader: async ({ context, params }) => {

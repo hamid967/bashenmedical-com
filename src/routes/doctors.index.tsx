@@ -44,7 +44,7 @@ const searchSchema = z.object({
 
 type SearchParams = z.infer<typeof searchSchema>;
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/doctors`;
 const PAGE_TITLE = "أطباؤنا | مجمع باعشن الطبي";
 const PAGE_DESC =

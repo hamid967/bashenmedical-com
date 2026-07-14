@@ -16,7 +16,7 @@ import {
 import { PageHero } from "@/components/PageShell";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/programs`;
 const TITLE = "برامج مجمع باعشن الطبي — رعاية متكاملة لكل مرحلة";
 const DESC =

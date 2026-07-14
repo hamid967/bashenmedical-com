@@ -11,9 +11,9 @@ export const Route = createFileRoute("/excellence")({
       { name: "description", content: "مراكز التميز في مجمع باعشن الطبي: القلب، العظام، العيون، النساء والولادة، طب الأسنان، الأعصاب، الجهاز الهضمي والجراحة التجميلية." },
       { property: "og:title", content: "مراكز التميز — مجمع باعشن الطبي" },
       { property: "og:description", content: "رعاية متخصصة في ثمانية مجالات طبية." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/excellence" },
+      { property: "og:url", content: "https://bashenmedical.com/excellence" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/excellence" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/excellence" }],
   }),
   component: ExcellencePage,
 });

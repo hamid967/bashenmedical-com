@@ -1,7 +1,7 @@
 import { SITE } from "./site";
 import type { ClinicSettings } from "./clinicSettings";
 
-export const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+export const SITE_URL = "https://bashenmedical.com";
 export const CLINIC_ID = `${SITE_URL}/#clinic`;
 
 type SchemaOpts = {

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/app")({
         content: "احجز موعدك واتابع ملفك الطبي من جوالك.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/app" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/app" }],
   }),
   component: AppPage,
 });

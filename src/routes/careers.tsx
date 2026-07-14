@@ -11,9 +11,9 @@ export const Route = createFileRoute("/careers")({
       { name: "description", content: "انضم إلى فريق مجمع باعشن الطبي — فرص وظيفية للأطباء والممرضين والفنيين والإداريين في محافظة صبيا." },
       { property: "og:title", content: "الوظائف — مجمع باعشن الطبي" },
       { property: "og:description", content: "فرص عمل في القطاع الطبي." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/careers" },
+      { property: "og:url", content: "https://bashenmedical.com/careers" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/careers" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/careers" }],
   }),
   component: CareersPage,
 });
