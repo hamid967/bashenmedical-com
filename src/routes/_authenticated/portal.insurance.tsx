@@ -12,6 +12,7 @@ import {
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { getBookingOptions } from "@/lib/portal/booking.functions";
 import { listMyInsuranceVerifications } from "@/lib/portal/insurance.functions";
+import { MutationErrorBanner } from "@/components/portal/MutationErrorBanner";
 
 const profileQuery = queryOptions({
   queryKey: ["portal", "my-profile-full"],
