@@ -159,3 +159,80 @@ export const deleteDependent = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/* -------------------- listDependentAppointments -------------------- */
+
+export type DependentAppointment = {
+  id: string;
+  appointment_date: string;
+  appointment_time: string;
+  status: string;
+  reason: string | null;
+  doctor_name_ar: string | null;
+  doctor_name_en: string | null;
+  branch_name_ar: string | null;
+  specialty_name_ar: string | null;
+};
+
+export const listDependentAppointments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z
+      .object({
+        dependent_id: z.string().uuid(),
+        limit: z.number().int().min(1).max(50).optional(),
+      })
+      .parse(raw),
+  )
+  .handler(async ({ context, data }): Promise<DependentAppointment[]> => {
+    const { supabase, userId } = context;
+
+    // Verify ownership through RLS-safe query on dependents.
+    const { data: dep, error: depErr } = await supabase
+      .from("dependents")
+      .select("id, patient_id")
+      .eq("id", data.dependent_id)
+      .eq("guardian_user_id", userId)
+      .maybeSingle();
+    if (depErr) throw new Error(depErr.message);
+    if (!dep) throw new Error("Not found");
+
+    // Guardian's phone-scoped RLS won't return dependent rows whose
+    // patient_phone belongs to the dependent, so read with the service role.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const marker = `dependent:${dep.id}`;
+    let query = supabaseAdmin
+      .from("appointments")
+      .select(
+        "id, appointment_date, appointment_time, status, reason, notes, patient_id, " +
+          "doctors:doctor_id(name_ar, name_en), " +
+          "branches:branch_id(name_ar), " +
+          "specialties:specialty_id(name_ar)",
+      )
+      .order("appointment_date", { ascending: false })
+      .order("appointment_time", { ascending: false })
+      .limit(data.limit ?? 20);
+
+    // Rows linked via notes marker OR direct patient_id when the dependent
+    // already has a patient record.
+    query = dep.patient_id
+      ? query.or(`notes.ilike.${marker}%,patient_id.eq.${dep.patient_id}`)
+      : query.ilike("notes", `${marker}%`);
+
+    const { data: rows, error } = await query;
+    if (error) throw new Error(error.message);
+
+    return (rows ?? []).map((r: any) => ({
+      id: r.id,
+      appointment_date: r.appointment_date,
+      appointment_time: r.appointment_time,
+      status: r.status,
+      reason: r.reason ?? null,
+      doctor_name_ar: r.doctors?.name_ar ?? null,
+      doctor_name_en: r.doctors?.name_en ?? null,
+      branch_name_ar: r.branches?.name_ar ?? null,
+      specialty_name_ar: r.specialties?.name_ar ?? null,
+    }));
+  });
+
