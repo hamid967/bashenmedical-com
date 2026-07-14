@@ -234,7 +234,7 @@ export function PortalShell({
       {/* AI FAB */}
       <button
         aria-label={isAr ? "المساعد الذكي" : "AI Assistant"}
-        className="fixed bottom-5 end-5 z-30 h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_20px_60px_-15px_rgba(15,108,189,0.55)] hover:scale-105 transition-transform"
+        className="fixed bottom-24 lg:bottom-5 end-5 z-40 h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_20px_60px_-15px_rgba(15,108,189,0.55)] hover:scale-105 transition-transform"
         style={{ background: "var(--portal-gradient)" }}
       >
         <Sparkles className="h-6 w-6" />
