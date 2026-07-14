@@ -61,6 +61,26 @@ function ProfilePage() {
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
+  // Warn on browser tab close/refresh with unsaved changes.
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
+
+  // Warn on in-app navigation with unsaved changes.
+  useBlocker({
+    shouldBlockFn: () => {
+      if (!dirty) return false;
+      return !window.confirm("لديك تغييرات غير محفوظة في الملف الشخصي. هل تريد المغادرة دون حفظها؟");
+    },
+    enableBeforeUnload: false,
+  });
+
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) => {
     setForm((f) => ({ ...f, [k]: v }));
     setDirty(true);
