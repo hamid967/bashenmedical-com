@@ -27,6 +27,7 @@ import {
   SectionError,
 } from "@/components/home/HomeSkeletons";
 import ogHomeAsset from "@/assets/og-home-bmc.jpg.asset.json";
+import { JazanPattern } from "@/components/jazan/JazanPattern";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE =
