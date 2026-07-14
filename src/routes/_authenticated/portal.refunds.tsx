@@ -63,7 +63,9 @@ type ReceiptField = {
 };
 
 const RECEIPT_FIELDS: ReceiptField[] = [
-  { key: "request_id", label: "معرّف الطلب", group: "identifiers",
+  { key: "reference", label: "الرقم المرجعي للإيصال", group: "identifiers",
+    isAvailable: (r) => !!r.receipt_reference, defaultOn: (r) => !!r.receipt_reference },
+  { key: "request_id", label: "معرّف الطلب (UUID)", group: "identifiers",
     isAvailable: () => true, defaultOn: () => true },
   { key: "invoice", label: "رقم الفاتورة", group: "identifiers",
     isAvailable: (r) => !!r.invoice_number, defaultOn: (r) => !!r.invoice_number },
