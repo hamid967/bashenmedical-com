@@ -61,7 +61,7 @@ export const listAdminInquiries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => listFilters.parse(d ?? {}))
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
 
     let q = context.supabase
       .from("service_inquiries")
@@ -130,7 +130,7 @@ export const getInquiryDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const [row, timeline] = await Promise.all([
       context.supabase
         .from("service_inquiries")
@@ -172,7 +172,7 @@ export const getInquiryDetail = createServerFn({ method: "GET" })
 export const listAssignableStaff = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const { data, error } = await context.supabase
       .from("user_roles")
       .select("user_id, role, profiles:user_id(full_name)")
@@ -205,7 +205,7 @@ export const assignInquiry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
@@ -242,7 +242,7 @@ export const updateInquiryStatus = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
@@ -280,7 +280,7 @@ export const addInquiryNote = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const isPublic = data.visibility === "public";
     const { error } = await context.supabase.from("service_inquiry_updates").insert({
       inquiry_id: data.id,
@@ -305,7 +305,7 @@ export const notifyInquiryPatient = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
     const { data: row, error } = await sb
       .from("service_inquiries")
@@ -353,7 +353,7 @@ export const closeInquiry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await ensureStaff(context.supabase, context.userId);
+    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
