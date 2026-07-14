@@ -58,8 +58,10 @@ export default defineConfig({
       filename: "sw.js",
       devOptions: { enabled: false },
       workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
+        // The new SW waits until the user clicks "Update" (SKIP_WAITING message).
+        // This prevents mid-session reloads and enables the in-app update prompt.
+        clientsClaim: false,
+        skipWaiting: false,
         cleanupOutdatedCaches: true,
         navigateFallback: "/",
         navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/sw-push\.js$/, /^\/sw\.js$/],
