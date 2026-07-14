@@ -2336,6 +2336,57 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_delivery_logs: {
+        Row: {
+          attempt: number
+          channel: string
+          created_at: string
+          error_message: string | null
+          id: string
+          metadata: Json
+          notification_id: string | null
+          provider: string | null
+          recipient: string | null
+          status: string
+          subject: string | null
+          template: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          attempt?: number
+          channel: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          notification_id?: string | null
+          provider?: string | null
+          recipient?: string | null
+          status: string
+          subject?: string | null
+          template?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          attempt?: number
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          metadata?: Json
+          notification_id?: string | null
+          provider?: string | null
+          recipient?: string | null
+          status?: string
+          subject?: string | null
+          template?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           appointment_id: string | null
@@ -3959,7 +4010,9 @@ export type Database = {
           appointment_lead_minutes: number
           channel_email: boolean
           channel_in_app: boolean
+          channel_push: boolean
           channel_sms: boolean
+          channel_whatsapp: boolean
           created_at: string
           daily_repeat_days: number
           frequency: string
@@ -3975,7 +4028,9 @@ export type Database = {
           appointment_lead_minutes?: number
           channel_email?: boolean
           channel_in_app?: boolean
+          channel_push?: boolean
           channel_sms?: boolean
+          channel_whatsapp?: boolean
           created_at?: string
           daily_repeat_days?: number
           frequency?: string
@@ -3991,7 +4046,9 @@ export type Database = {
           appointment_lead_minutes?: number
           channel_email?: boolean
           channel_in_app?: boolean
+          channel_push?: boolean
           channel_sms?: boolean
+          channel_whatsapp?: boolean
           created_at?: string
           daily_repeat_days?: number
           frequency?: string

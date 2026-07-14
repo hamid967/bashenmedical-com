@@ -6,7 +6,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AlertTriangle, Bell, Loader2, Mail, MessageSquare, RefreshCw, Save, Smartphone } from "lucide-react";
+import { AlertTriangle, Bell, BellRing, Loader2, Mail, MessageCircle, MessageSquare, RefreshCw, Save, Smartphone } from "lucide-react";
 import {
   getMyReminderPreferences,
   updateMyReminderPreferences,
@@ -61,7 +61,10 @@ function PrefsPage() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.channel_in_app && !form.channel_email && !form.channel_sms) {
+    const anyChannel =
+      form.channel_in_app || form.channel_email || form.channel_sms ||
+      form.channel_whatsapp || form.channel_push;
+    if (!anyChannel) {
       toast.error("اختر قناة إشعار واحدة على الأقل");
       return;
     }
@@ -82,13 +85,20 @@ function PrefsPage() {
         </header>
 
         <form onSubmit={submit} className="glass-card p-5 sm:p-6 space-y-8">
-          <Section title="قنوات الإشعار" hint="اختر قناة واحدة على الأقل.">
+          <Section title="قنوات الإشعار" hint="اختر قناة واحدة على الأقل. سنستخدم القنوات المفعّلة معًا حسب توفّرها.">
             <ChannelToggle
               icon={<Bell className="h-4 w-4" />}
               label="داخل التطبيق"
               hint="إشعارات فورية داخل بوابة المريض."
               checked={form.channel_in_app}
               onChange={(v) => set("channel_in_app", v)}
+            />
+            <ChannelToggle
+              icon={<BellRing className="h-4 w-4" />}
+              label="إشعارات المتصفح (Push)"
+              hint="تظهر على جهازك حتى وإن لم تكن البوابة مفتوحة."
+              checked={form.channel_push}
+              onChange={(v) => set("channel_push", v)}
             />
             <ChannelToggle
               icon={<Mail className="h-4 w-4" />}
@@ -100,9 +110,16 @@ function PrefsPage() {
             <ChannelToggle
               icon={<MessageSquare className="h-4 w-4" />}
               label="رسالة SMS"
-              hint="عند توفر رقم جوالك."
+              hint="عند توفر رقم جوالك المُتحقق منه."
               checked={form.channel_sms}
               onChange={(v) => set("channel_sms", v)}
+            />
+            <ChannelToggle
+              icon={<MessageCircle className="h-4 w-4" />}
+              label="واتساب"
+              hint="نرسل عبر واتساب الأعمال عند توفّر تكامل الرسائل."
+              checked={form.channel_whatsapp}
+              onChange={(v) => set("channel_whatsapp", v)}
             />
           </Section>
 
