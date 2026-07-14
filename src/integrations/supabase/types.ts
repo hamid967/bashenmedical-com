@@ -1602,6 +1602,82 @@ export type Database = {
         }
         Relationships: []
       }
+      insurance_verifications: {
+        Row: {
+          appointment_id: string | null
+          consultation_fee: number | null
+          coverage_percent: number | null
+          covered_amount: number | null
+          created_at: string
+          doctor_id: string | null
+          eligible: boolean
+          estimated_cost: number | null
+          id: string
+          message: string | null
+          patient_share: number | null
+          policy_hint: string | null
+          provider_id: string | null
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          consultation_fee?: number | null
+          coverage_percent?: number | null
+          covered_amount?: number | null
+          created_at?: string
+          doctor_id?: string | null
+          eligible: boolean
+          estimated_cost?: number | null
+          id?: string
+          message?: string | null
+          patient_share?: number | null
+          policy_hint?: string | null
+          provider_id?: string | null
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          consultation_fee?: number | null
+          coverage_percent?: number | null
+          covered_amount?: number | null
+          created_at?: string
+          doctor_id?: string | null
+          eligible?: boolean
+          estimated_cost?: number | null
+          id?: string
+          message?: string | null
+          patient_share?: number | null
+          policy_hint?: string | null
+          provider_id?: string | null
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_verifications_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_verifications_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_verifications_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       integration_logs: {
         Row: {
           created_at: string
