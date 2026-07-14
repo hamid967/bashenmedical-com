@@ -75,42 +75,54 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
   .inputValidator((i: unknown) => FileInput.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-
-    const patientRes = await supabase
-      .from("patients")
-      .select("id")
-      .eq("profile_id", userId)
-      .maybeSingle();
-    const patientId = patientRes.data?.id;
-    if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
-
-    const reportRes = await supabase
-      .from("medical_reports")
-      .select("file_path, status, revoked_at, patient_id, report_type, title_ar")
-      .eq("id", data.id)
-      .maybeSingle();
-    const r = reportRes.data as any;
-    if (!r || r.patient_id !== patientId) throw new Error("التقرير غير موجود.");
-    if (r.status !== "published" || r.revoked_at) throw new Error("التقرير غير متاح للتنزيل.");
-    if (!r.file_path) throw new Error("لا يوجد ملف مرفق بهذا التقرير.");
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const downloadName = buildDownloadName(r.title_ar, r.report_type, r.file_path);
-    const { data: signed, error } = await supabaseAdmin.storage
-      .from("medical-reports")
-      .createSignedUrl(r.file_path, 60, { download: downloadName });
-    if (error) throw new Error(error.message);
 
-    await supabaseAdmin.from("audit_logs").insert({
-      actor_id: userId,
-      actor_role: "patient",
-      action: "medical_report.download",
-      entity_type: "medical_report",
-      entity_id: data.id,
-      metadata: { version: "current", ttl_seconds: 60 },
-    });
+    const logAttempt = async (status: "success" | "failure", reason?: string, extra?: Record<string, unknown>) => {
+      try {
+        await supabaseAdmin.from("audit_logs").insert({
+          actor_id: userId,
+          actor_role: "patient",
+          action: "medical_report.download",
+          entity_type: "medical_report",
+          entity_id: data.id,
+          metadata: { version: "current", ttl_seconds: 60, status, reason: reason ?? null, ...extra },
+        });
+      } catch {
+        /* audit logging is best-effort */
+      }
+    };
 
-    return { url: signed.signedUrl, expiresIn: 60 };
+    try {
+      const patientRes = await supabase
+        .from("patients")
+        .select("id")
+        .eq("profile_id", userId)
+        .maybeSingle();
+      const patientId = patientRes.data?.id;
+      if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
+
+      const reportRes = await supabase
+        .from("medical_reports")
+        .select("file_path, status, revoked_at, patient_id, report_type, title_ar")
+        .eq("id", data.id)
+        .maybeSingle();
+      const r = reportRes.data as any;
+      if (!r || r.patient_id !== patientId) throw new Error("التقرير غير موجود.");
+      if (r.status !== "published" || r.revoked_at) throw new Error("التقرير غير متاح للتنزيل.");
+      if (!r.file_path) throw new Error("لا يوجد ملف مرفق بهذا التقرير.");
+
+      const downloadName = buildDownloadName(r.title_ar, r.report_type, r.file_path);
+      const { data: signed, error } = await supabaseAdmin.storage
+        .from("medical-reports")
+        .createSignedUrl(r.file_path, 60, { download: downloadName });
+      if (error) throw new Error(error.message);
+
+      await logAttempt("success");
+      return { url: signed.signedUrl, expiresIn: 60 };
+    } catch (err: any) {
+      await logAttempt("failure", err?.message ?? "unknown");
+      throw err;
+    }
   });
 
 function buildDownloadName(title: string | null, type: string, path: string): string {
