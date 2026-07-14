@@ -1,0 +1,144 @@
+/**
+ * Public API — /api/public/book/hold
+ *
+ * POST   → create or refresh a 5-minute slot hold for the current session.
+ *          Body: { doctor_id, appointment_date, appointment_time, branch_id?, session_id }
+ *          Returns: { ok, id, expires_at } | { ok:false, kind, message }
+ *
+ * DELETE → release a hold owned by the current session.
+ *          Body: { session_id, id? }
+ *          Returns: { ok:true, released:number }
+ *
+ * Holds are short-lived reservations shown to the patient as a visible
+ * countdown while they finish the wizard. The authoritative anti-double-book
+ * guard is still the partial UNIQUE index on `appointments`; holds are a UX
+ * layer that also prevents a second visitor from picking a slot someone is
+ * actively booking (see availability.ts, which treats active holds as busy).
+ *
+ * Uses the admin client so the anon RLS policies stay narrow while the
+ * endpoint remains callable from the public /book wizard.
+ */
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+
+const HOLD_MINUTES = 5;
+
+const holdSchema = z.object({
+  doctor_id: z.string().uuid(),
+  branch_id: z.string().uuid().optional().nullable(),
+  appointment_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  appointment_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  session_id: z.string().min(8).max(128),
+});
+
+const releaseSchema = z.object({
+  session_id: z.string().min(8).max(128),
+  id: z.string().uuid().optional(),
+});
+
+function json(status: number, body: Record<string, unknown>) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8" },
+  });
+}
+
+export const Route = createFileRoute("/api/public/book/hold")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        let body: unknown;
+        try { body = await request.json(); } catch { return json(400, { ok: false, kind: "validation", message: "invalid_json" }); }
+        const parsed = holdSchema.safeParse(body);
+        if (!parsed.success) {
+          return json(400, { ok: false, kind: "validation", message: parsed.error.issues[0]?.message ?? "invalid" });
+        }
+        const { doctor_id, branch_id, appointment_date, appointment_time, session_id } = parsed.data;
+        const timeHHMMSS = appointment_time.length === 5 ? `${appointment_time}:00` : appointment_time;
+        const expires_at = new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString();
+
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+          // Best-effort cleanup: mark this session's older active holds as released
+          // so a user browsing several slots doesn't accumulate a queue of holds.
+          await supabaseAdmin
+            .from("slot_holds")
+            .update({ released_at: new Date().toISOString() })
+            .eq("session_id", session_id)
+            .is("released_at", null);
+
+          // If the same slot already has an unexpired hold owned by a different
+          // session, block. A real appointment on that slot also blocks.
+          const nowIso = new Date().toISOString();
+          const { data: activeHolds } = await supabaseAdmin
+            .from("slot_holds")
+            .select("id,session_id,expires_at")
+            .eq("doctor_id", doctor_id)
+            .eq("appointment_date", appointment_date)
+            .eq("appointment_time", timeHHMMSS)
+            .is("released_at", null)
+            .gt("expires_at", nowIso);
+          const foreign = (activeHolds ?? []).find((h) => h.session_id !== session_id);
+          if (foreign) {
+            return json(409, { ok: false, kind: "conflict", message: "held_by_other" });
+          }
+
+          const { data: appts } = await supabaseAdmin
+            .from("appointments")
+            .select("id,status")
+            .eq("doctor_id", doctor_id)
+            .eq("appointment_date", appointment_date)
+            .eq("appointment_time", timeHHMMSS);
+          const taken = (appts ?? []).some(
+            (a) => a.status !== "cancelled" && a.status !== "no_show",
+          );
+          if (taken) {
+            return json(409, { ok: false, kind: "conflict", message: "already_booked" });
+          }
+
+          const { data: inserted, error } = await supabaseAdmin
+            .from("slot_holds")
+            .insert({
+              doctor_id,
+              branch_id: branch_id ?? null,
+              appointment_date,
+              appointment_time: timeHHMMSS,
+              session_id,
+              expires_at,
+            })
+            .select("id,expires_at")
+            .maybeSingle();
+
+          if (error || !inserted) {
+            return json(500, { ok: false, kind: "db", message: error?.message ?? "hold_failed" });
+          }
+          return json(200, { ok: true, id: inserted.id, expires_at: inserted.expires_at });
+        } catch (e) {
+          return json(500, { ok: false, kind: "db", message: (e as Error)?.message ?? "unknown" });
+        }
+      },
+
+      DELETE: async ({ request }) => {
+        let body: unknown;
+        try { body = await request.json(); } catch { return json(400, { ok: false, message: "invalid_json" }); }
+        const parsed = releaseSchema.safeParse(body);
+        if (!parsed.success) return json(400, { ok: false, message: "invalid" });
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          let q = supabaseAdmin
+            .from("slot_holds")
+            .update({ released_at: new Date().toISOString() })
+            .eq("session_id", parsed.data.session_id)
+            .is("released_at", null);
+          if (parsed.data.id) q = q.eq("id", parsed.data.id);
+          const { data, error } = await q.select("id");
+          if (error) return json(500, { ok: false, message: error.message });
+          return json(200, { ok: true, released: data?.length ?? 0 });
+        } catch (e) {
+          return json(500, { ok: false, message: (e as Error)?.message ?? "unknown" });
+        }
+      },
+    },
+  },
+});

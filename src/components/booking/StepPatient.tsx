@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 import { Field } from "./Field";
+import { DependentPicker, type SelfOrDependent } from "./DependentPicker";
 import { NAME_MAX, PHONE_MAX, REASON_MAX, type PatientErrors, type State } from "./types";
 
 export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "en"; value: State["patient"]; errors: PatientErrors; onChange: (p: Partial<State["patient"]>) => void }) {
@@ -11,9 +12,26 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
   const show = (k: keyof PatientErrors) => (touched[k] ? errors[k] : undefined);
   const allValid = Object.keys(errors).length === 0;
 
+  function applyPicker(v: SelfOrDependent) {
+    onChange({
+      name: v.name || value.name,
+      phone: v.phone || value.phone,
+      nationalId: v.nationalId || value.nationalId,
+      gender: v.gender ?? value.gender,
+    });
+    setTouched({ name: true, phone: true, gender: !!v.gender });
+  }
+
   return (
     <StepShell lang={lang} title={t("patient.title")}>
       <div className="grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto">
+        <DependentPicker
+          lang={lang}
+          currentName={value.name}
+          currentPhone={value.phone}
+          onApply={applyPicker}
+        />
+
         <Field label={t("patient.fullName")} required error={show("name")}>
           <input
             value={value.name}

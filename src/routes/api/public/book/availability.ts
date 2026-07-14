@@ -138,7 +138,8 @@ export const Route = createFileRoute("/api/public/book/availability")({
         // is bucketed only per full day (safe) but same-day results include
         // an implicit "now" cutoff — we keep the TTL tight (20s) so that
         // cutoff can only drift by ~one slot's fraction at worst.
-        const cacheKey = `${date}|${doctorId ?? ""}|${specialtyId ?? ""}|${branchId ?? ""}`;
+        const sessionParam = url.searchParams.get("session") ?? "";
+        const cacheKey = `${date}|${doctorId ?? ""}|${specialtyId ?? ""}|${branchId ?? ""}|${sessionParam}`;
         const cached = memoGet(cacheKey);
         if (cached) {
           const etag = `W/"${cacheKey}:${(cached as { _v?: number })._v ?? 0}"`;
@@ -222,6 +223,29 @@ export const Route = createFileRoute("/api/public/book/availability")({
             if (!busyByDoctor.has(key)) busyByDoctor.set(key, new Set());
             busyByDoctor.get(key)!.add(t);
           }
+
+          // 4b) Active (unexpired) slot holds count as busy too, so a second
+          //     visitor can't pick the exact slot someone is actively booking.
+          //     The hold owner still sees it as free — the wizard identifies
+          //     itself via the `session` query param, and we skip that
+          //     session's own holds here.
+          const sessionId = sessionParam;
+          const nowIso = new Date().toISOString();
+          const { data: holds } = await supabaseAdmin
+            .from("slot_holds")
+            .select("doctor_id,appointment_time,session_id")
+            .in("doctor_id", candidateDoctorIds)
+            .eq("appointment_date", date)
+            .is("released_at", null)
+            .gt("expires_at", nowIso);
+          for (const h of holds ?? []) {
+            if (sessionId && h.session_id === sessionId) continue;
+            const key = String(h.doctor_id);
+            const t = String(h.appointment_time).slice(0, 5);
+            if (!busyByDoctor.has(key)) busyByDoctor.set(key, new Set());
+            busyByDoctor.get(key)!.add(t);
+          }
+
 
           // 5) Expand availability into per-doctor slot sets and aggregate.
           //    We track two things per slot: how many doctors CAN work it,
