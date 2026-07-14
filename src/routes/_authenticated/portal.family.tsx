@@ -1100,7 +1100,8 @@ function DeleteDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            disabled={mut.isPending}
+            disabled={busy}
+
             className="font-semibold border-2"
             autoFocus
           >
