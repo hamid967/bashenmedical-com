@@ -763,24 +763,24 @@ html.reduce-motion .pulse-soft {
    Scoped to `.admin-console` (layout root)
    ===================================================================== */
 .admin-console {
-  --ac-bg: #f6f8fb;
+  --ac-bg: #FCFDFB;
   --ac-surface: #ffffff;
-  --ac-subtle: #f1f4f9;
-  --ac-line: #e5eaf1;
-  --ac-line-strong: #d3dbe6;
-  --ac-ink: #0f172a;
-  --ac-ink-2: #334155;
-  --ac-ink-3: #64748b;
-  --ac-muted: #94a3b8;
-  --ac-accent: #2563eb;
-  --ac-accent-ink: #1d4ed8;
-  --ac-accent-soft: #eff4ff;
-  --ac-success: #059669;
-  --ac-warning: #d97706;
-  --ac-danger: #dc2626;
+  --ac-subtle: #F1F6F5;
+  --ac-line: #DCEAE8;
+  --ac-line-strong: #C7DAD6;
+  --ac-ink: #173B42;
+  --ac-ink-2: #3A555B;
+  --ac-ink-3: #64777C;
+  --ac-muted: #8B9A9E;
+  --ac-accent: #0B8585;
+  --ac-accent-ink: #075E63;
+  --ac-accent-soft: #ECF8F5;
+  --ac-success: #16A34A;
+  --ac-warning: #D97706;
+  --ac-danger: #C0392B;
   --ac-radius: 14px;
-  --ac-shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 24px -18px rgba(15,23,42,.16);
-  font-family: "Figtree", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --ac-shadow: 0 1px 2px rgba(7,94,99,.04), 0 6px 24px -18px rgba(7,94,99,.16);
+  font-family: "Cairo", "Figtree", ui-sans-serif, system-ui, sans-serif;
   color: var(--ac-ink);
   background: var(--ac-bg);
 }
