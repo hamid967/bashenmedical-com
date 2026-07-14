@@ -122,6 +122,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const meta = statusMeta(r.status);
   const has = (k: ReceiptFieldKey) => selected.has(k);
   const rows: Array<[string, string]> = [];
+  if (has("reference") && r.receipt_reference) rows.push(["الرقم المرجعي", r.receipt_reference]);
   if (has("request_id")) rows.push(["معرّف الطلب", r.id]);
   if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"]);
   if (has("status")) rows.push(["حالة الطلب", meta.label]);
