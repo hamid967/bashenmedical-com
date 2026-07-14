@@ -1,6 +1,7 @@
 /**
  * JazanDivider — decorative section divider with a heritage ornament center.
- * Purely decorative (aria-hidden).
+ * Purely decorative (aria-hidden). Symmetric so it renders identically in
+ * LTR and RTL. Vertical spacing scales with viewport.
  */
 import { cn } from "@/lib/utils";
 
@@ -10,27 +11,30 @@ type Props = {
 };
 
 export function JazanDivider({ className, variant = "standard" }: Props) {
-  const lineColor =
-    variant === "subtle"
-      ? "var(--jazan-teal, #075E63)"
-      : "var(--jazan-teal, #075E63)";
+  const lineColor = "var(--jazan-teal, #075E63)";
   const lineOpacity = variant === "subtle" ? 0.18 : 0.35;
   return (
     <div
       aria-hidden="true"
       className={cn(
-        "flex items-center justify-center gap-3 w-full my-6 text-[var(--jazan-teal,#075E63)]",
+        "flex items-center justify-center gap-2 sm:gap-3 w-full",
+        "my-4 sm:my-6 md:my-8",
+        "text-[var(--jazan-teal,#075E63)]",
         className,
       )}
     >
       <span
-        className="h-px flex-1"
+        className="h-px flex-1 min-w-0"
         style={{
           background: `linear-gradient(90deg, transparent, ${lineColor} 40%, ${lineColor} 60%, transparent)`,
           opacity: lineOpacity,
         }}
       />
-      <svg viewBox="0 0 40 16" className="h-4 w-10 shrink-0" aria-hidden="true">
+      <svg
+        viewBox="0 0 40 16"
+        className="h-3 w-8 sm:h-4 sm:w-10 shrink-0"
+        aria-hidden="true"
+      >
         <path
           d="M2 8 L8 8"
           stroke="currentColor"
@@ -64,7 +68,7 @@ export function JazanDivider({ className, variant = "standard" }: Props) {
         />
       </svg>
       <span
-        className="h-px flex-1"
+        className="h-px flex-1 min-w-0"
         style={{
           background: `linear-gradient(90deg, transparent, ${lineColor} 40%, ${lineColor} 60%, transparent)`,
           opacity: lineOpacity,
