@@ -193,8 +193,19 @@ const T = {
   // language
   lang_toggle_to_en: { ar: "English", en: "English" },
   lang_toggle_to_ar: { ar: "العربية", en: "العربية" },
+  lang_switch_aria:  { ar: "التبديل إلى العربية", en: "Switch to English" },
   lang_saved:        { ar: "تم حفظ لغة الحساب.", en: "Account language saved." },
   lang_error:        { ar: "تعذّر حفظ اللغة.", en: "Could not save language." },
+  // page-level
+  page_error_title:   { ar: "تعذّر تحميل الصفحة", en: "Could not load the page" },
+  page_error_generic: { ar: "خطأ غير متوقع.", en: "Unexpected error." },
+  page_error_retry:   { ar: "إعادة المحاولة", en: "Retry" },
+  member_label:       { ar: "الفرد:", en: "Member:" },
+  // save toasts
+  saved_created:      { ar: "تم إضافة الفرد بنجاح.", en: "Family member added." },
+  saved_updated:      { ar: "تم تحديث بيانات الفرد.", en: "Family member updated." },
+  // list join separator (locale-appropriate punctuation)
+  list_separator:     { ar: "، ", en: ", " },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
@@ -271,7 +282,7 @@ function FamilyPage() {
             onClick={() => langMutation.mutate(nextLang)}
             disabled={langMutation.isPending}
             className="rounded-full font-semibold"
-            aria-label={nextLang === "en" ? "Switch to English" : "التبديل إلى العربية"}
+            aria-label={T.lang_switch_aria[lang]}
           >
             {langMutation.isPending ? (
               <Loader2 className="h-4 w-4 ms-2 animate-spin" />
@@ -456,7 +467,7 @@ function DependentCard({
               toast.warning(t("incomplete_title", lang), {
                 description: `${t("incomplete_body", lang)} ${missing
                   .map((k) => t(k, lang))
-                  .join("، ")}`,
+                  .join(T.list_separator[lang])}`,
               });
               onEdit();
             }}
@@ -705,7 +716,7 @@ function DependentDialog({
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
-      toast.success(mode === "edit" ? T.f_name[lang] + " ✓" : T.form_add_title[lang]);
+      toast.success(mode === "edit" ? T.saved_updated[lang] : T.saved_created[lang]);
       onClose();
     },
     onError: (err: unknown) => {
@@ -933,7 +944,7 @@ function DeleteDialog({
                 </div>
               </div>
               <div className="text-foreground">
-                <span className="text-muted-foreground">{lang === "ar" ? "الفرد:" : "Member:"} </span>
+                <span className="text-muted-foreground">{T.member_label[lang]} </span>
                 <span className="font-semibold">{row?.full_name}</span>
               </div>
               <div className="text-muted-foreground">{T.del_body[lang]}</div>
@@ -975,14 +986,22 @@ function DeleteDialog({
 
 function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
+  const qc = useQueryClient();
+  const cached = qc.getQueryData(profileQuery.queryKey) as
+    | { preferred_language?: string | null }
+    | undefined;
+  const docLang =
+    typeof document !== "undefined" ? document.documentElement.lang : "ar";
+  const lang: Lang = ((cached?.preferred_language as Lang | undefined) ??
+    (docLang === "en" ? "en" : "ar")) as Lang;
   return (
-    <div className="glass-card max-w-md mx-auto p-8 text-center">
+    <div className="glass-card max-w-md mx-auto p-8 text-center" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
         <AlertTriangle className="h-7 w-7" />
       </div>
-      <h3 className="text-lg font-bold">تعذّر تحميل الصفحة</h3>
+      <h3 className="text-lg font-bold">{T.page_error_title[lang]}</h3>
       <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 break-words">
-        {error.message || "خطأ غير متوقع."}
+        {error.message || T.page_error_generic[lang]}
       </p>
       <button
         onClick={() => {
@@ -993,7 +1012,7 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" />
-        إعادة المحاولة
+        {T.page_error_retry[lang]}
       </button>
     </div>
   );
