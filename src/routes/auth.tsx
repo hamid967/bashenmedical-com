@@ -276,7 +276,6 @@ function AuthPage() {
   }
 
   async function handleVerifyOtp(e: React.FormEvent) {
-    e.prevent Default?.();
     e.preventDefault();
     if (otp.trim().length < 4) {
       toast.error("أدخل رمز التحقق كاملًا");
