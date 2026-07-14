@@ -153,7 +153,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     font-family: "Noto Naskh Arabic", "SF Arabic", "Geeza Pro", "Segoe UI", Tahoma, Arial, sans-serif;
     color: #0f172a;
     margin: 0;
-    padding: 24px;
+    background: #e2e8f0;
     line-height: 1.85;
     font-size: 13.5px;
     text-align: right;
@@ -170,6 +170,61 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     white-space: nowrap;
     letter-spacing: 0;
   }
+
+  /* ---- Preview shell (screen only) ---- */
+  .toolbar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; padding: 12px 20px;
+    background: rgba(15, 23, 42, 0.95); color: #f8fafc;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+    font-family: "Noto Kufi Arabic", "SF Arabic", sans-serif;
+  }
+  .toolbar .title { font-size: 13px; font-weight: 700; opacity: 0.95; }
+  .toolbar .title .hint { font-weight: 400; font-size: 11px; opacity: 0.7; margin-inline-start: 8px; }
+  .toolbar .group { display: inline-flex; align-items: center; gap: 8px; }
+  .tbtn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.1); color: #f8fafc;
+    border: 1px solid rgba(255,255,255,0.15);
+    font-weight: 600; font-size: 12.5px; cursor: pointer;
+    font-family: inherit; transition: background .15s;
+  }
+  .tbtn:hover { background: rgba(255,255,255,0.18); }
+  .tbtn.primary { background: #f8fafc; color: #0f172a; border-color: #f8fafc; font-weight: 700; }
+  .tbtn.primary:hover { background: #fff; }
+  .tbtn.icon { padding: 8px 10px; }
+  .zoom-lbl { font-size: 12px; opacity: 0.8; min-width: 42px; text-align: center; }
+
+  .preview-stage {
+    padding: 28px 20px 48px;
+    display: flex; justify-content: center;
+    overflow: auto;
+  }
+  .sheet-wrap {
+    transform-origin: top center;
+    transition: transform .15s ease;
+  }
+  /* A4 sheet: 210mm x 297mm with 16/14mm margins baked in as padding */
+  .sheet {
+    width: 210mm; min-height: 297mm;
+    padding: 16mm 14mm;
+    background: #fff;
+    box-shadow: 0 8px 40px rgba(15, 23, 42, 0.18), 0 2px 6px rgba(15, 23, 42, 0.08);
+    border-radius: 2px;
+    position: relative;
+  }
+  .rtl-badge {
+    position: absolute; top: 10px; inset-inline-start: 10px;
+    padding: 3px 8px; border-radius: 6px;
+    background: #f1f5f9; color: #64748b;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    font-family: "SFMono-Regular", ui-monospace, monospace;
+  }
+
+  /* ---- Sheet content ---- */
   .hd {
     display: flex; justify-content: space-between; align-items: flex-end;
     border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 22px;
@@ -213,57 +268,104 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     line-height: 1.9; text-align: justify; text-justify: inter-word;
     page-break-inside: avoid; break-inside: avoid;
   }
-  .actions { text-align: center; margin-bottom: 20px; }
-  .btn {
-    display: inline-block; padding: 10px 22px; background: #0f172a; color: #fff;
-    border-radius: 999px; font-weight: 700; text-decoration: none;
-    font-size: 13px; border: none; cursor: pointer;
-    font-family: "Noto Kufi Arabic", "SF Arabic", sans-serif;
-  }
+
   @media print {
+    body { background: #fff; }
     .noprint { display: none !important; }
-    body { padding: 0; }
+    .preview-stage { padding: 0; display: block; overflow: visible; }
+    .sheet-wrap { transform: none !important; }
+    .sheet { width: auto; min-height: 0; padding: 0; box-shadow: none; border-radius: 0; }
+    .rtl-badge { display: none; }
     a { color: inherit; text-decoration: none; }
+  }
+  @media (max-width: 820px) {
+    .toolbar { flex-wrap: wrap; padding: 10px 12px; }
+    .toolbar .title { font-size: 12px; }
+    .preview-stage { padding: 16px 8px 32px; }
   }
 </style></head>
 <body>
-  <div class="actions noprint">
-    <button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>
+  <div class="toolbar noprint" role="toolbar" aria-label="أدوات معاينة الإيصال">
+    <div class="title">
+      معاينة الإيصال قبل الطباعة
+      <span class="hint">اتجاه RTL · مقاس A4</span>
+    </div>
+    <div class="group">
+      <button class="tbtn icon" type="button" onclick="zoom(-0.1)" aria-label="تصغير">−</button>
+      <span class="zoom-lbl" id="zoomLbl">100%</span>
+      <button class="tbtn icon" type="button" onclick="zoom(0.1)" aria-label="تكبير">+</button>
+      <button class="tbtn" type="button" onclick="fitWidth()" title="ملاءمة العرض">ملاءمة</button>
+      <button class="tbtn primary" type="button" onclick="window.print()">طباعة / حفظ PDF</button>
+      <button class="tbtn" type="button" onclick="window.close()" aria-label="إغلاق">إغلاق</button>
+    </div>
   </div>
-  <div class="hd">
-    <div style="min-width:0;flex:1">
-      <div class="brand">إيصال طلب استرداد</div>
-      ${r.receipt_reference ? `<div class="sub">المرجع: <span class="ref">${r.receipt_reference}</span></div>` : ""}
-      <div class="sub">مستخرج بتاريخ <span class="num">${fmtDateTime(new Date().toISOString())}</span></div>
+
+  <div class="preview-stage" id="stage">
+    <div class="sheet-wrap" id="wrap">
+      <article class="sheet" dir="rtl" lang="ar">
+        <span class="rtl-badge" aria-hidden="true">RTL · A4</span>
+        <div class="hd">
+          <div style="min-width:0;flex:1">
+            <div class="brand">إيصال طلب استرداد</div>
+            ${r.receipt_reference ? `<div class="sub">المرجع: <span class="ref">${r.receipt_reference}</span></div>` : ""}
+            <div class="sub">مستخرج بتاريخ <span class="num">${fmtDateTime(new Date().toISOString())}</span></div>
+          </div>
+          <span class="badge">${meta.label}</span>
+        </div>
+        ${showHero ? `<div class="amount">
+          <div>
+            <div class="lbl">المبلغ المُسترد</div>
+            <div class="val num">${fmtSAR(r.amount, r.currency)}</div>
+          </div>
+          <div class="side">
+            <div class="lbl">من دفعة أصلية</div>
+            <div class="val-sm num">${fmtSAR(r.payment_amount, r.currency)}</div>
+          </div>
+        </div>` : ""}
+        ${rows.length ? `<table class="grid">
+          ${rows.map(([k, v]) => {
+            const safe = String(v).replace(/</g, "&lt;");
+            const isNumeric = /^[\d\s.,+\-/:%#SARر\.س]+$/.test(safe.trim()) && safe.trim().length > 0;
+            const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(safe.trim());
+            const cls = looksRef ? "ref" : isNumeric ? "num" : "";
+            const inner = cls ? `<span class="${cls}">${safe}</span>` : safe;
+            return `<tr><td class="k">${k}</td><td class="v">${inner}</td></tr>`;
+          }).join("")}
+        </table>` : ""}
+        ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
+        <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
+      </article>
     </div>
-    <span class="badge">${meta.label}</span>
   </div>
-  ${showHero ? `<div class="amount">
-    <div>
-      <div class="lbl">المبلغ المُسترد</div>
-      <div class="val num">${fmtSAR(r.amount, r.currency)}</div>
-    </div>
-    <div class="side">
-      <div class="lbl">من دفعة أصلية</div>
-      <div class="val-sm num">${fmtSAR(r.payment_amount, r.currency)}</div>
-    </div>
-  </div>` : ""}
-  ${rows.length ? `<table class="grid">
-    ${rows.map(([k, v]) => {
-      const safe = String(v).replace(/</g, "&lt;");
-      const isNumeric = /^[\d\s.,+\-/:%#SARر\.س]+$/.test(safe.trim()) && safe.trim().length > 0;
-      const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(safe.trim());
-      const cls = looksRef ? "ref" : isNumeric ? "num" : "";
-      const inner = cls ? `<span class="${cls}">${safe}</span>` : safe;
-      return `<tr><td class="k">${k}</td><td class="v">${inner}</td></tr>`;
-    }).join("")}
-  </table>` : ""}
-  ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
-  <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
+
   <script>
-    document.fonts && document.fonts.ready
-      ? document.fonts.ready.then(() => setTimeout(() => window.print(), 250))
-      : window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+    (function () {
+      var scale = 1;
+      var wrap = document.getElementById('wrap');
+      var stage = document.getElementById('stage');
+      var lbl = document.getElementById('zoomLbl');
+      function apply() {
+        wrap.style.transform = 'scale(' + scale + ')';
+        lbl.textContent = Math.round(scale * 100) + '%';
+      }
+      window.zoom = function (d) {
+        scale = Math.min(2, Math.max(0.5, scale + d));
+        apply();
+      };
+      window.fitWidth = function () {
+        var sheetPx = 210 * (96 / 25.4); // A4 width in px @96dpi
+        var avail = stage.clientWidth - 32;
+        scale = Math.max(0.5, Math.min(1.4, avail / sheetPx));
+        apply();
+      };
+      // Initial fit once fonts settle
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(function () { setTimeout(window.fitWidth, 60); });
+      } else {
+        window.addEventListener('load', function () { setTimeout(window.fitWidth, 200); });
+      }
+      window.addEventListener('resize', function () { setTimeout(window.fitWidth, 80); });
+    })();
   <\/script>
 </body></html>`;
   const w = window.open("", "_blank", "width=820,height=900");
