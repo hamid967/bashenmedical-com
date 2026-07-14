@@ -4868,17 +4868,29 @@ export type Database = {
           status: string
         }[]
       }
-      track_orders_by_phone: {
-        Args: { _phone: string }
-        Returns: {
-          created_at: string
-          kind: string
-          reference: string
-          scheduled_at: string
-          status: string
-          title: string
-        }[]
-      }
+      track_orders_by_phone:
+        | {
+            Args: { _phone: string }
+            Returns: {
+              created_at: string
+              kind: string
+              reference: string
+              scheduled_at: string
+              status: string
+              title: string
+            }[]
+          }
+        | {
+            Args: { _phone: string; _reference?: string }
+            Returns: {
+              created_at: string
+              kind: string
+              reference: string
+              scheduled_at: string
+              status: string
+              title: string
+            }[]
+          }
       update_appointment_notes: {
         Args: { _id: string; _notes: string; _reason?: string }
         Returns: undefined
