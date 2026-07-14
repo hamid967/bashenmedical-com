@@ -293,8 +293,10 @@ function SettingsPage() {
   );
 }
 
+type TestResult = { ok: boolean; msg: string; at: number };
+
 function Toggle({
-  icon, label, desc, value, onChange, busy, disabled,
+  icon, label, desc, value, onChange, busy, disabled, onTest, testing, result,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -303,23 +305,53 @@ function Toggle({
   onChange: (v: boolean) => void;
   busy?: boolean;
   disabled?: boolean;
+  onTest?: () => void;
+  testing?: boolean;
+  result?: TestResult;
 }) {
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 ${disabled ? "opacity-60" : ""}`}>
-      <div className="flex items-start gap-3">
-        <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
-        <div>
-          <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
-          <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
+    <div className={`rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 ${disabled ? "opacity-60" : ""}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
+          <div>
+            <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
+            <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {onTest && (
+            <button
+              type="button"
+              onClick={onTest}
+              disabled={disabled || testing || !value}
+              title={!value ? "فعّل القناة أولاً" : "إرسال إشعار اختبار"}
+              className="inline-flex items-center gap-1 h-8 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-xs font-semibold text-[color:var(--portal-ink)] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              اختبار
+            </button>
+          )}
+          {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--portal-ink-2)]" />}
+          <Switch value={value} onChange={onChange} disabled={disabled || busy} />
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--portal-ink-2)]" />}
-        <Switch value={value} onChange={onChange} disabled={disabled || busy} />
-      </div>
+      {result && (
+        <div
+          role="status"
+          className={`mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-xs ${
+            result.ok ? "bg-emerald-50 text-emerald-800 border border-emerald-100" : "bg-red-50 text-red-800 border border-red-100"
+          }`}
+        >
+          {result.ok ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <XCircle className="h-4 w-4 shrink-0" />}
+          <span className="flex-1">{result.msg}</span>
+          <span className="text-[10px] opacity-70">{new Date(result.at).toLocaleTimeString("ar-SA")}</span>
+        </div>
+      )}
     </div>
   );
 }
+
 function Switch({ value, onChange, disabled }: { value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <button type="button" role="switch" aria-checked={value} disabled={disabled} onClick={() => onChange(!value)}
