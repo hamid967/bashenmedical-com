@@ -94,7 +94,7 @@ const adminSearchSchema = z.object({
 
 export const Route = createFileRoute("/_authenticated/admin/classic")({
   head: () => ({
-    meta: [{ title: "لوحة التحكم | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
+    meta: [{ title: "لوحة التحكم (الكلاسيكية) | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   validateSearch: zodValidator(adminSearchSchema),
   component: AdminDashboard,
