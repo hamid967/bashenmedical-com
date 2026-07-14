@@ -236,3 +236,64 @@ export const listDependentAppointments = createServerFn({ method: "POST" })
     }));
   });
 
+/* -------------------- countDependentAppointments -------------------- */
+
+/**
+ * Counts appointments linked to a dependent, splitting active (bookings
+ * that are still on the schedule) from historical rows so the delete
+ * dialog can block removal while there are commitments outstanding.
+ */
+export const countDependentAppointments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ dependent_id: z.string().uuid() }).parse(raw),
+  )
+  .handler(
+    async ({
+      context,
+      data,
+    }): Promise<{ total: number; active: number }> => {
+      const { supabase, userId } = context;
+
+      const { data: dep, error: depErr } = await supabase
+        .from("dependents")
+        .select("id, patient_id")
+        .eq("id", data.dependent_id)
+        .eq("guardian_user_id", userId)
+        .maybeSingle();
+      if (depErr) throw new Error(depErr.message);
+      if (!dep) throw new Error("Not found");
+
+      const { supabaseAdmin } = await import(
+        "@/integrations/supabase/client.server"
+      );
+
+      const marker = `dependent:${dep.id}`;
+      const filter = dep.patient_id
+        ? `notes.ilike.${marker}%,patient_id.eq.${dep.patient_id}`
+        : null;
+
+      const buildQuery = () => {
+        let q = supabaseAdmin
+          .from("appointments")
+          .select("id", { count: "exact", head: true });
+        if (filter) q = q.or(filter);
+        else q = q.ilike("notes", `${marker}%`);
+        return q;
+      };
+
+      const totalRes = await buildQuery();
+      if (totalRes.error) throw new Error(totalRes.error.message);
+
+      const activeRes = await buildQuery().in("status", ["new", "confirmed"]);
+
+      if (activeRes.error) throw new Error(activeRes.error.message);
+
+      return {
+        total: totalRes.count ?? 0,
+        active: activeRes.count ?? 0,
+      };
+    },
+  );
+
+

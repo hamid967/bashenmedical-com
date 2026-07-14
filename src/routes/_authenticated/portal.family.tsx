@@ -14,9 +14,11 @@ import {
   updateDependent,
   deleteDependent,
   listDependentAppointments,
+  countDependentAppointments,
   type Dependent,
   type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
+
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +161,20 @@ const T = {
   },
   del_ok:           { ar: "نعم، احذف", en: "Yes, delete" },
   del_keep:         { ar: "لا، احتفظ به", en: "No, keep it" },
+  del_counting:     { ar: "جارٍ التحقق من المواعيد المرتبطة…", en: "Checking linked appointments…" },
+  del_count_error:  { ar: "تعذّر التحقق من المواعيد المرتبطة.", en: "Could not check linked appointments." },
+  del_total_label:  { ar: "إجمالي المواعيد المرتبطة", en: "Total linked appointments" },
+  del_active_label: { ar: "مواعيد نشطة (قادمة/قيد التأكيد)", en: "Active appointments (upcoming/pending)" },
+  del_blocked_title:{ ar: "لا يمكن الحذف حاليًا", en: "Deletion currently blocked" },
+  del_blocked_body: {
+    ar: "يوجد لدى هذا الفرد مواعيد نشطة. الرجاء إلغاؤها أو إتمامها أولًا قبل حذفه.",
+    en: "This member has active appointments. Please cancel or complete them before deleting.",
+  },
+  del_history_note: {
+    ar: "توجد مواعيد سابقة لهذا الفرد. سيتم الاحتفاظ بسجلها ولن تُحذف.",
+    en: "This member has past appointments. Their history will be kept and not deleted.",
+  },
+
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
   e_name_too_long:  { ar: "الاسم طويل جدًا.", en: "Name is too long." },
@@ -918,6 +934,13 @@ function DeleteDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const countQ = useQuery({
+    queryKey: ["portal", "dependent-appt-count", row?.id],
+    queryFn: () =>
+      countDependentAppointments({ data: { dependent_id: row!.id } }),
+    enabled: !!row,
+    staleTime: 15_000,
+  });
   const mut = useMutation({
     mutationFn: (id: string) => deleteDependent({ data: { id } }),
     onSuccess: () => {
@@ -927,6 +950,13 @@ function DeleteDialog({
     },
     onError: () => toast.error(T.e_generic[lang]),
   });
+
+  const activeCount = countQ.data?.active ?? 0;
+  const totalCount = countQ.data?.total ?? 0;
+  const blocked = activeCount > 0;
+  const hasHistory = !blocked && totalCount > 0;
+  const canDelete = countQ.isSuccess && !blocked && !mut.isPending;
+
   return (
     <AlertDialog open={!!row} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
@@ -947,6 +977,51 @@ function DeleteDialog({
                 <span className="text-muted-foreground">{T.member_label[lang]} </span>
                 <span className="font-semibold">{row?.full_name}</span>
               </div>
+
+              {/* Linked-appointments summary */}
+              {countQ.isLoading ? (
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>{T.del_counting[lang]}</span>
+                </div>
+              ) : countQ.isError ? (
+                <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900/60 p-3 text-amber-800 dark:text-amber-200">
+                  {T.del_count_error[lang]}
+                </div>
+              ) : (
+                <div className="rounded-lg border border-border bg-muted/40 p-3 space-y-1.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">{T.del_total_label[lang]}</span>
+                    <span className="font-semibold tabular-nums">{totalCount}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-muted-foreground">{T.del_active_label[lang]}</span>
+                    <span
+                      className={`font-semibold tabular-nums ${
+                        activeCount > 0 ? "text-red-600 dark:text-red-400" : ""
+                      }`}
+                    >
+                      {activeCount}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {blocked && (
+                <div className="rounded-lg border border-red-300 bg-red-100/70 dark:bg-red-950/50 dark:border-red-800 p-3 flex items-start gap-2">
+                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 dark:text-red-300 shrink-0" aria-hidden />
+                  <div className="text-red-900 dark:text-red-100">
+                    <div className="font-semibold">{T.del_blocked_title[lang]}</div>
+                    <div className="mt-0.5">{T.del_blocked_body[lang]}</div>
+                  </div>
+                </div>
+              )}
+              {hasHistory && (
+                <div className="text-xs text-muted-foreground">
+                  {T.del_history_note[lang]}
+                </div>
+              )}
+
               <div className="text-muted-foreground">{T.del_body[lang]}</div>
             </div>
           </AlertDialogDescription>
@@ -960,12 +1035,13 @@ function DeleteDialog({
             {T.del_keep[lang]}
           </AlertDialogCancel>
           <AlertDialogAction
-            disabled={mut.isPending}
+            disabled={!canDelete}
             onClick={(e) => {
               e.preventDefault();
+              if (!canDelete) return;
               if (row) mut.mutate(row.id);
             }}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold"
+            className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {mut.isPending ? (
               <>
@@ -981,6 +1057,7 @@ function DeleteDialog({
     </AlertDialog>
   );
 }
+
 
 /* ---------------- error boundary ---------------- */
 
