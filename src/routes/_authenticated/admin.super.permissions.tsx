@@ -169,10 +169,17 @@ function SuperPermissionsPage() {
             تحرير الصلاحيات لكل دور — التعديل يُطبَّق مباشرةً على نظام RBAC.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline">{catalog.length} صلاحية</Badge>
           <Badge variant="outline">{ALL_ROLES.length} دور</Badge>
           <Badge variant="outline">{enabledCount} مُفعّلة</Badge>
+          <Link
+            to="/admin/super/permissions/audit"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full border border-border bg-card hover:bg-accent px-3 h-8"
+          >
+            <History className="h-3.5 w-3.5" />
+            سجل التدقيق
+          </Link>
         </div>
       </header>
 
