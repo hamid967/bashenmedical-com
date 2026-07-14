@@ -817,7 +817,14 @@ function BookPage() {
 
               </div>
             )}
+            {verify?.id && (
+              <p className="mt-2 text-[11px] text-[color:var(--portal-ink-2)] flex items-center gap-1.5">
+                <BadgeCheck className="h-3 w-3 text-emerald-600" />
+                سيتم حفظ نتيجة التحقق وربطها بالموعد تلقائيًا عند التأكيد.
+              </p>
+            )}
           </div>
+
 
           {/* Verification history */}
           {doctorId && (historyQ.data?.length ?? 0) > 0 && (
