@@ -198,6 +198,17 @@ const RELATIONSHIP_LABELS: Record<Dependent["relationship"], keyof typeof T> = {
   other: "r_other",
 };
 
+/**
+ * Returns the labels of required-but-missing fields on a dependent for
+ * booking. National ID + mobile are the payer/registration prerequisites.
+ */
+export function dependentMissingForBooking(row: Dependent): Array<keyof typeof T> {
+  const missing: Array<keyof typeof T> = [];
+  if (!row.national_id || !/^\d{10}$/.test(row.national_id)) missing.push("f_nid");
+  if (!row.phone || !/^(?:\+?966|0)?5\d{8}$/.test(row.phone)) missing.push("f_phone");
+  return missing;
+}
+
 /* ---------------- page ---------------- */
 
 function FamilyPage() {
