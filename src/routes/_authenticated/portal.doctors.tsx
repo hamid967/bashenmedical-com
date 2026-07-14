@@ -46,12 +46,22 @@ function MyDoctorsPage() {
           <div className="h-11 w-11 rounded-2xl grid place-items-center text-white" style={{ background: "var(--portal-gradient)" }}>
             <Stethoscope className="h-5 w-5" />
           </div>
-          <div>
+          <div className="flex-1">
             <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">أطبائي</h1>
             <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">
               الأطباء الذين لديك تاريخ زيارات معهم — {doctors.length} طبيب
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => q.refetch()}
+            disabled={q.isFetching}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-xs font-semibold text-[color:var(--portal-ink)] hover:bg-slate-50 disabled:opacity-60"
+            aria-label="تحديث"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
+            تحديث
+          </button>
         </header>
 
         {doctors.length === 0 ? (
