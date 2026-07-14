@@ -115,9 +115,18 @@ function fullDate(iso: string): string {
 }
 
 /** Deep-link into other portal areas from the notification metadata. */
-function actionFor(n: PatientNotification): { to: string; label: string } | null {
+type NotificationAction =
+  | { to: "/portal/inquiries"; label: string; search?: { ref?: string } }
+  | { to: string; label: string; search?: Record<string, string> };
+
+function actionFor(n: PatientNotification): NotificationAction | null {
   const meta = (n.metadata ?? {}) as Record<string, unknown>;
   const k = n.kind.toLowerCase();
+  if (k.includes("inquiry")) {
+    const rn = meta["request_number"];
+    const ref = typeof rn === "string" && rn ? rn : undefined;
+    return { to: "/portal/inquiries", label: "عرض الاستفسار", search: ref ? { ref } : undefined };
+  }
   if (n.appointment_id || k.includes("appointment") || k.startsWith("reminder_")) {
     return { to: "/portal/appointments", label: "عرض المواعيد" };
   }
