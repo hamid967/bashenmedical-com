@@ -639,7 +639,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
           </section>
         </div>
 
-        {canCancel && (
+        {(canCancel || isFinalized(r.status)) && (
           <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
             <button
               onClick={onClose}
@@ -647,14 +647,25 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             >
               إغلاق
             </button>
-            <button
-              onClick={() => mutation.mutate()}
-              disabled={mutation.isPending}
-              className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-            >
-              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
-              إلغاء طلب الاسترداد
-            </button>
+            {isFinalized(r.status) && (
+              <button
+                onClick={() => openRefundReceipt(r)}
+                className="flex-1 h-11 rounded-full text-sm font-semibold border border-[color:var(--mag-line)] bg-white text-[color:var(--mag-ink-1)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center justify-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                تنزيل الإيصال (PDF)
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending}
+                className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              >
+                {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+                إلغاء طلب الاسترداد
+              </button>
+            )}
           </div>
         )}
       </div>
