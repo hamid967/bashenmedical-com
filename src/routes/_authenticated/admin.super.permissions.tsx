@@ -11,7 +11,7 @@ import {
   type AppRole,
 } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { Download, History, Loader2, Search, ShieldCheck, Upload } from "lucide-react";
+import { Download, History, Info, Loader2, Search, ShieldCheck, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
