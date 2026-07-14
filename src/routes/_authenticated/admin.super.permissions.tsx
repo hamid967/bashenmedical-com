@@ -344,6 +344,32 @@ function SuperPermissionsPage() {
           <Badge variant="outline">{catalog.length} صلاحية</Badge>
           <Badge variant="outline">{ALL_ROLES.length} دور</Badge>
           <Badge variant="outline">{enabledCount} مُفعّلة</Badge>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={handleExportCsv}
+          >
+            <Download className="h-3.5 w-3.5" />
+            تصدير CSV
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => {
+              setImportError(null);
+              setImportPayload(null);
+              setImportFileName(null);
+              setImportMode("merge");
+              setImportOpen(true);
+            }}
+          >
+            <Upload className="h-3.5 w-3.5" />
+            استيراد CSV
+          </Button>
           <Link
             to="/admin/super/permissions/audit"
             className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full border border-border bg-card hover:bg-accent px-3 h-8"
