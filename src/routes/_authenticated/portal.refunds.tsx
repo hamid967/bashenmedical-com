@@ -1,4 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { queryOptions, useSuspenseQuery, useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -23,6 +25,8 @@ import {
   Send,
   FileText,
   ChevronLeft,
+  ArrowDownWideNarrow,
+  ArrowUpWideNarrow,
 } from "lucide-react";
 
 const refundsQuery = queryOptions({
@@ -36,7 +40,13 @@ const paymentsQuery = queryOptions({
   staleTime: 30_000,
 });
 
+const searchSchema = z.object({
+  status: fallback(z.string(), "all").default("all"),
+  sort: fallback(z.string(), "updated_desc").default("updated_desc"),
+});
+
 export const Route = createFileRoute("/_authenticated/portal/refunds")({
+  validateSearch: zodValidator(searchSchema),
   loader: async ({ context }) =>
     context.queryClient.ensureQueryData(refundsQuery),
   head: () => ({
@@ -90,11 +100,31 @@ function statusMeta(s: string) {
 
 /* ---------------- page ---------------- */
 
+const STATUS_TABS: Array<{ key: string; label: string }> = [
+  { key: "all", label: "الكل" },
+  { key: "pending", label: "قيد المراجعة" },
+  { key: "approved", label: "معتمدة" },
+  { key: "processed", label: "مُستردة" },
+  { key: "rejected", label: "مرفوضة" },
+  { key: "canceled", label: "ملغاة" },
+];
+const SORT_OPTIONS: Array<{ key: string; label: string; icon: any }> = [
+  { key: "updated_desc", label: "آخر تحديث (الأحدث)", icon: ArrowDownWideNarrow },
+  { key: "updated_asc", label: "آخر تحديث (الأقدم)", icon: ArrowUpWideNarrow },
+  { key: "created_desc", label: "تاريخ الطلب (الأحدث)", icon: ArrowDownWideNarrow },
+  { key: "created_asc", label: "تاريخ الطلب (الأقدم)", icon: ArrowUpWideNarrow },
+];
+
 function PortalRefundsPage() {
   const { data } = useSuspenseQuery(refundsQuery);
+  const { status, sort } = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
   const [openNew, setOpenNew] = useState(false);
   const [prefillPaymentId, setPrefillPaymentId] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
+
+  const safeStatus = STATUS_TABS.some((t) => t.key === status) ? status : "all";
+  const safeSort = SORT_OPTIONS.some((s) => s.key === sort) ? sort : "updated_desc";
 
   const kpis = useMemo(() => {
     const list = data.refunds;
@@ -104,10 +134,38 @@ function PortalRefundsPage() {
     return { count: list.length, pending, refunded: refundedTotal };
   }, [data.refunds]);
 
+  const statusCounts = useMemo(() => {
+    const map: Record<string, number> = { all: data.refunds.length };
+    for (const r of data.refunds) map[r.status] = (map[r.status] ?? 0) + 1;
+    return map;
+  }, [data.refunds]);
+
+  const visible = useMemo(() => {
+    const filtered = safeStatus === "all"
+      ? data.refunds
+      : data.refunds.filter((r) => r.status === safeStatus);
+    const lastAt = (r: RefundRow) => new Date(r.processed_at ?? r.updated_at).getTime();
+    const createdAt = (r: RefundRow) => new Date(r.created_at).getTime();
+    const sorted = [...filtered];
+    switch (safeSort) {
+      case "updated_asc": sorted.sort((a, b) => lastAt(a) - lastAt(b)); break;
+      case "created_desc": sorted.sort((a, b) => createdAt(b) - createdAt(a)); break;
+      case "created_asc": sorted.sort((a, b) => createdAt(a) - createdAt(b)); break;
+      case "updated_desc":
+      default: sorted.sort((a, b) => lastAt(b) - lastAt(a));
+    }
+    return sorted;
+  }, [data.refunds, safeStatus, safeSort]);
+
   const selected = useMemo(
     () => data.refunds.find((r) => r.id === detailsId) ?? null,
     [data.refunds, detailsId],
   );
+
+  const setStatus = (key: string) =>
+    navigate({ search: (prev: any) => ({ ...prev, status: key }), replace: true });
+  const setSort = (key: string) =>
+    navigate({ search: (prev: any) => ({ ...prev, sort: key }), replace: true });
 
   return (
     <div className="portal-magazine min-h-full">
@@ -140,12 +198,67 @@ function PortalRefundsPage() {
           <KpiCard icon={CheckCircle2} label="مبالغ مُستردة" value={fmtSAR(kpis.refunded)} tone="success" />
         </section>
 
+        {/* Filters + sort */}
+        {data.refunds.length > 0 && (
+          <section className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap gap-2" role="tablist" aria-label="فلترة حسب الحالة">
+              {STATUS_TABS.map((t) => {
+                const active = safeStatus === t.key;
+                const count = statusCounts[t.key] ?? 0;
+                return (
+                  <button
+                    key={t.key}
+                    role="tab"
+                    aria-selected={active}
+                    onClick={() => setStatus(t.key)}
+                    className={[
+                      "h-9 px-3 rounded-full text-xs font-semibold border inline-flex items-center gap-1.5 transition-colors",
+                      active
+                        ? "bg-[color:var(--mag-accent)] text-white border-[color:var(--mag-accent)]"
+                        : "bg-white text-[color:var(--mag-ink-2)] border-[color:var(--mag-line)] hover:bg-[color:var(--mag-subtle)]",
+                    ].join(" ")}
+                  >
+                    {t.label}
+                    <span className={[
+                      "min-w-5 h-5 px-1.5 grid place-items-center rounded-full text-[10px] font-bold",
+                      active ? "bg-white/20 text-white" : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-3)]",
+                    ].join(" ")}>{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+            <label className="inline-flex items-center gap-2 text-xs text-[color:var(--mag-ink-3)]">
+              <span>الفرز:</span>
+              <select
+                value={safeSort}
+                onChange={(e) => setSort(e.target.value)}
+                className="h-9 ps-3 pe-8 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] outline-none focus:border-[color:var(--mag-accent)]"
+                aria-label="ترتيب النتائج"
+              >
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.key} value={o.key}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+          </section>
+        )}
+
         {/* List */}
         {data.refunds.length === 0 ? (
           <EmptyState onNew={() => { setPrefillPaymentId(null); setOpenNew(true); }} />
+        ) : visible.length === 0 ? (
+          <div className="mag-card p-8 text-center text-sm text-[color:var(--mag-ink-2)]">
+            لا توجد طلبات تطابق الفلتر الحالي.
+            <button
+              onClick={() => setStatus("all")}
+              className="ms-2 underline text-[color:var(--mag-accent)] font-semibold"
+            >
+              عرض الكل
+            </button>
+          </div>
         ) : (
           <ul className="space-y-3">
-            {data.refunds.map((r) => (
+            {visible.map((r) => (
               <RefundRow key={r.id} r={r} onOpen={() => setDetailsId(r.id)} />
             ))}
           </ul>
