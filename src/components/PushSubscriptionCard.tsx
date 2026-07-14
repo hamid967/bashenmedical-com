@@ -211,6 +211,30 @@ export function PushSubscriptionCard() {
     }
   }, [readSwState]);
 
+  const [retryingPermission, setRetryingPermission] = useState(false);
+  const retryPermission = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    setRetryingPermission(true);
+    try {
+      const current = typeof Notification !== "undefined" ? Notification.permission : "default";
+      if (current === "granted") {
+        await push.subscribe();
+        toast.success("تم منح الإذن — جاري إنشاء الاشتراك");
+      } else if (current === "denied") {
+        toast.error("الإذن ما زال مرفوضًا", {
+          description: "افتح إعدادات الموقع في المتصفح واسمح بالإشعارات، ثم أعد المحاولة.",
+        });
+      } else {
+        await push.subscribe();
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّرت إعادة المحاولة");
+    } finally {
+      setRetryingPermission(false);
+    }
+  }, [push]);
+
+
 
   // Refresh subscription details whenever the subscribed state changes.
   useEffect(() => {
