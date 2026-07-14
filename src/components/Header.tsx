@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
+import { JazanPattern } from "@/components/jazan/JazanPattern";
 
 const bmcLogo = bmcLogoAsset.url;
 
@@ -236,6 +237,17 @@ export function Header() {
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
         </div>
+      </div>
+
+      {/* Jazan heritage strip — subtle decorative line under the nav */}
+      <div
+        aria-hidden="true"
+        className="relative h-1.5 w-full bg-[var(--jazan-ivory,#FCF9F2)] border-t border-[var(--jazan-gold,#C7A46B)]/25"
+      >
+        <JazanPattern
+          variant="subtle"
+          className="absolute inset-0 h-full w-full"
+        />
       </div>
 
       {open && (
