@@ -125,6 +125,8 @@ function MyInquiriesPage() {
       if (claimed > 0) {
         toast.success(`تم ربط ${claimed} من طلباتك السابقة بحسابك`);
         qc.invalidateQueries({ queryKey: ["portal", "my-inquiries"] });
+        qc.invalidateQueries({ queryKey: ["portal", "my-notifications"] });
+        qc.invalidateQueries({ queryKey: ["notifications"] });
       }
       setClaiming(false);
     })();
