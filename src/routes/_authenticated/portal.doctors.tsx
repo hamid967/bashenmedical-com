@@ -118,14 +118,43 @@ function DoctorCard({ d }: { d: MyDoctor }) {
             الملف التعريفي
           </Link>
         ) : <span />}
-        <Link to="/portal/book" className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white"
-          style={{ background: "var(--portal-gradient)" }}>
+        <Link
+          to="/portal/book"
+          search={{ doctorId: d.id, date: suggestNextDate(d.last_visit_date) }}
+          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white"
+          style={{ background: "var(--portal-gradient)" }}
+          aria-label={`احجز موعدًا جديدًا مع ${d.name_ar}`}
+        >
           <CalendarPlus className="h-3.5 w-3.5" />
-          حجز جديد
+          احجز مع هذا الطبيب
         </Link>
       </div>
     </article>
   );
+}
+
+/**
+ * Suggest a booking date: last visit + ~90 days, but never in the past;
+ * fall back to a week from today when there is no prior visit.
+ */
+function suggestNextDate(lastVisit: string | null): string {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const minDate = new Date(today);
+  minDate.setDate(minDate.getDate() + 3);
+  let candidate = minDate;
+  if (lastVisit) {
+    const from = new Date(`${lastVisit}T00:00:00`);
+    if (!isNaN(from.getTime())) {
+      from.setDate(from.getDate() + 90);
+      if (from > candidate) candidate = from;
+    }
+  } else {
+    const wk = new Date(today);
+    wk.setDate(wk.getDate() + 7);
+    if (wk > candidate) candidate = wk;
+  }
+  return candidate.toISOString().slice(0, 10);
 }
 function Stat({ label, value, tone, span }: { label: string; value: string; tone?: "ok" | "muted"; span?: boolean }) {
   const cls = tone === "ok"
