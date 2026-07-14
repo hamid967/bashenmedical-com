@@ -95,6 +95,7 @@ import { Route as AuthenticatedAvailabilityManagementRouteImport } from './route
 import { Route as AuthenticatedAuditLogRouteImport } from './routes/_authenticated/audit-log'
 import { Route as AuthenticatedAuditExportRouteImport } from './routes/_authenticated/audit-export'
 import { Route as AuthenticatedAppointmentsQueueRouteImport } from './routes/_authenticated/appointments-queue'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
@@ -588,6 +589,11 @@ const AuthenticatedAppointmentsQueueRoute =
     path: '/appointments-queue',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const Char91DotwellKnownChar93OauthProtectedResourceRoute =
   Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
     id: '/.well-known/oauth-protected-resource',
@@ -738,9 +744,9 @@ const AuthenticatedPatientsPatientIdRoute =
   } as any)
 const AuthenticatedAdminClassicRoute =
   AuthenticatedAdminClassicRouteImport.update({
-    id: '/admin/classic',
-    path: '/admin/classic',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/classic',
+    path: '/classic',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
@@ -811,9 +817,9 @@ const AuthenticatedOrdersUnifiedKindIdRoute =
   } as any)
 const AuthenticatedAdminSuperPermissionsRoute =
   AuthenticatedAdminSuperPermissionsRouteImport.update({
-    id: '/admin/super/permissions',
-    path: '/admin/super/permissions',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/super/permissions',
+    path: '/super/permissions',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedPortalOrdersKindIdRoute =
   AuthenticatedPortalOrdersKindIdRouteImport.update({
@@ -864,6 +870,7 @@ export interface FileRoutesByFullPath {
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appointments-queue': typeof AuthenticatedAppointmentsQueueRoute
   '/audit-export': typeof AuthenticatedAuditExportRoute
   '/audit-log': typeof AuthenticatedAuditLogRoute
@@ -992,6 +999,7 @@ export interface FileRoutesByTo {
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appointments-queue': typeof AuthenticatedAppointmentsQueueRoute
   '/audit-export': typeof AuthenticatedAuditExportRoute
   '/audit-log': typeof AuthenticatedAuditLogRoute
@@ -1121,6 +1129,7 @@ export interface FileRoutesById {
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/appointments-queue': typeof AuthenticatedAppointmentsQueueRoute
   '/_authenticated/audit-export': typeof AuthenticatedAuditExportRoute
   '/_authenticated/audit-log': typeof AuthenticatedAuditLogRoute
@@ -1251,6 +1260,7 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin'
     | '/appointments-queue'
     | '/audit-export'
     | '/audit-log'
@@ -1379,6 +1389,7 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/admin'
     | '/appointments-queue'
     | '/audit-export'
     | '/audit-log'
@@ -1507,6 +1518,7 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
+    | '/_authenticated/admin'
     | '/_authenticated/appointments-queue'
     | '/_authenticated/audit-export'
     | '/_authenticated/audit-log'
@@ -2264,6 +2276,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppointmentsQueueRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/.well-known/oauth-protected-resource': {
       id: '/.well-known/oauth-protected-resource'
       path: '/.well-known/oauth-protected-resource'
@@ -2441,10 +2460,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/classic': {
       id: '/_authenticated/admin/classic'
-      path: '/admin/classic'
+      path: '/classic'
       fullPath: '/admin/classic'
       preLoaderRoute: typeof AuthenticatedAdminClassicRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
@@ -2532,10 +2551,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/super/permissions': {
       id: '/_authenticated/admin/super/permissions'
-      path: '/admin/super/permissions'
+      path: '/super/permissions'
       fullPath: '/admin/super/permissions'
       preLoaderRoute: typeof AuthenticatedAdminSuperPermissionsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/portal/orders/$kind/$id': {
       id: '/_authenticated/portal/orders/$kind/$id'
@@ -2553,6 +2572,35 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthenticatedAdminSuperPermissionsRouteChildren {
+  AuthenticatedAdminSuperPermissionsAuditRoute: typeof AuthenticatedAdminSuperPermissionsAuditRoute
+}
+
+const AuthenticatedAdminSuperPermissionsRouteChildren: AuthenticatedAdminSuperPermissionsRouteChildren =
+  {
+    AuthenticatedAdminSuperPermissionsAuditRoute:
+      AuthenticatedAdminSuperPermissionsAuditRoute,
+  }
+
+const AuthenticatedAdminSuperPermissionsRouteWithChildren =
+  AuthenticatedAdminSuperPermissionsRoute._addFileChildren(
+    AuthenticatedAdminSuperPermissionsRouteChildren,
+  )
+
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
+  AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
+  AuthenticatedAdminSuperPermissionsRoute:
+    AuthenticatedAdminSuperPermissionsRouteWithChildren,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
 interface AuthenticatedOrdersUnifiedRouteChildren {
   AuthenticatedOrdersUnifiedKindIdRoute: typeof AuthenticatedOrdersUnifiedKindIdRoute
@@ -2647,22 +2695,8 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
 const AuthenticatedPortalRouteWithChildren =
   AuthenticatedPortalRoute._addFileChildren(AuthenticatedPortalRouteChildren)
 
-interface AuthenticatedAdminSuperPermissionsRouteChildren {
-  AuthenticatedAdminSuperPermissionsAuditRoute: typeof AuthenticatedAdminSuperPermissionsAuditRoute
-}
-
-const AuthenticatedAdminSuperPermissionsRouteChildren: AuthenticatedAdminSuperPermissionsRouteChildren =
-  {
-    AuthenticatedAdminSuperPermissionsAuditRoute:
-      AuthenticatedAdminSuperPermissionsAuditRoute,
-  }
-
-const AuthenticatedAdminSuperPermissionsRouteWithChildren =
-  AuthenticatedAdminSuperPermissionsRoute._addFileChildren(
-    AuthenticatedAdminSuperPermissionsRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppointmentsQueueRoute: typeof AuthenticatedAppointmentsQueueRoute
   AuthenticatedAuditExportRoute: typeof AuthenticatedAuditExportRoute
   AuthenticatedAuditLogRoute: typeof AuthenticatedAuditLogRoute
@@ -2699,13 +2733,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTransitionAlertsRoute: typeof AuthenticatedTransitionAlertsRoute
   AuthenticatedTransitionsStatsRoute: typeof AuthenticatedTransitionsStatsRoute
-  AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedPatientsPatientIdRoute: typeof AuthenticatedPatientsPatientIdRoute
   AuthenticatedPatientsIndexRoute: typeof AuthenticatedPatientsIndexRoute
-  AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppointmentsQueueRoute: AuthenticatedAppointmentsQueueRoute,
   AuthenticatedAuditExportRoute: AuthenticatedAuditExportRoute,
   AuthenticatedAuditLogRoute: AuthenticatedAuditLogRoute,
@@ -2744,11 +2777,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTransitionAlertsRoute: AuthenticatedTransitionAlertsRoute,
   AuthenticatedTransitionsStatsRoute: AuthenticatedTransitionsStatsRoute,
-  AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedPatientsPatientIdRoute: AuthenticatedPatientsPatientIdRoute,
   AuthenticatedPatientsIndexRoute: AuthenticatedPatientsIndexRoute,
-  AuthenticatedAdminSuperPermissionsRoute:
-    AuthenticatedAdminSuperPermissionsRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
