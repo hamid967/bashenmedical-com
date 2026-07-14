@@ -91,7 +91,11 @@ function AboutPage() {
     <div>
       <PageHero
         eyebrow={lang === "ar" ? "من نحن" : "About us"}
-        title={t("about_title")}
+        title={
+          lang === "ar"
+            ? "عن مجمع باعشن الطبي في صبيا، جازان"
+            : "About Baeshen Medical Complex — Sabya, Jazan"
+        }
         subtitle={
           (lang === "ar" ? heroSub?.body_ar : heroSub?.body_en) ??
           (lang === "ar"

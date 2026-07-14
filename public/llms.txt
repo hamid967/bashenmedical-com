@@ -1,0 +1,37 @@
+# Baeshen Medical Complex (مجمع باعشن الطبي)
+
+> CBAHI-accredited private medical complex in Sabya, Jazan (Saudi Arabia). Specialist clinics, in-house pharmacy with delivery, telemedicine, home care, and online booking.
+
+## Pages
+
+- [Home](/): Overview of Baeshen Medical Complex — specialist care in Sabya, Jazan.
+- [About](/about): Mission, accreditation, and leadership of the complex.
+- [The Complex](/complex): Facility tour — clinics, pharmacy, and amenities.
+- [Branches](/branches): All Baeshen Medical branches and locations.
+- [Specialties](/specialties): Medical specialties offered (internal medicine, pediatrics, OB-GYN, dentistry, ophthalmology, and more).
+- [Doctors](/doctors): Consultants and specialists directory.
+- [Book Appointment](/book): Book an appointment with a doctor online.
+- [Packages](/packages): Preventive and check-up packages.
+- [Telemedicine](/telemedicine): Remote consultations with our doctors.
+- [Home Care](/home-care): In-home nursing and medical services.
+- [Pharmacy](/pharmacy): Order and deliver medications in Sabya and Jazan.
+- [Insurance](/insurance): Accepted insurance providers.
+- [International Patients](/international-patients): Services for international patients.
+- [Emergency](/emergency): Emergency contact and services.
+- [Health Library](/health): Health articles and patient education.
+- [News](/media/news): Latest news from Baeshen Medical.
+- [Patient Stories](/media/stories): Real patient experiences.
+- [Accreditations](/accreditations): CBAHI and other certifications.
+- [Centers of Excellence](/excellence): Specialized centers of care.
+- [Second Opinion](/second-opinion): Request a medical second opinion.
+- [Corporate](/corporate): Corporate healthcare agreements.
+- [Programs](/programs): Community and preventive programs.
+- [FAQ](/faq): Frequently asked questions.
+- [Contact](/contact): Phone, WhatsApp, email, and address.
+- [Careers](/careers): Job openings at Baeshen Medical.
+- [Complaints](/complaints): Submit a complaint or feedback.
+- [Lookup](/lookup): Look up an appointment or order by reference.
+
+## Optional
+
+- [Emergency Guide](/emergency): When to visit ER vs urgent care.

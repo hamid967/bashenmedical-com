@@ -17,8 +17,10 @@ export const Route = createFileRoute("/corporate")({
       },
       { property: "og:title", content: "خدمات الشركات — مجمع باعشن" },
       { property: "og:description", content: "اتفاقيات طبية مخصّصة للشركات في جازان." },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://bashenmedical.com/corporate" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/corporate" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/corporate" }],
   }),
   component: CorporatePage,
 });

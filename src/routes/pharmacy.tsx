@@ -16,7 +16,14 @@ export const Route = createFileRoute("/pharmacy")({
           "اطلب أدويتك من صيدليات باعشن مع خدمة التوصيل داخل صبيا، جازان. ارفع صورة الوصفة الطبية.",
       },
       { property: "og:title", content: "طلب دواء — صيدليات باعشن" },
+      {
+        property: "og:description",
+        content: "خدمة توصيل الأدوية من صيدليات باعشن داخل صبيا وجازان مع رفع الوصفة الطبية.",
+      },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://bashenmedical.com/pharmacy" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/pharmacy" }],
   }),
   component: PharmacyPage,
 });

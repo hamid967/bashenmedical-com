@@ -138,7 +138,7 @@ function QrModal({
         <div class="clinic">${esc(CLINIC_NAME)}</div>
         <h1>${esc(heading)}</h1>
         <div class="sub">${esc(sub)}</div>
-        <img src="${dataUrl}" alt="QR" />
+        <img src="${dataUrl}" alt="Patient appointment QR code" />
         <div class="hint">${esc(hint)}</div>
         <div class="footer">${esc(branchNameAr ?? CLINIC_NAME)}</div>
       </div>
@@ -209,7 +209,7 @@ function QrModal({
           )}
           <div className="mt-5 mx-auto w-56 h-56 bg-white rounded-xl p-3 shadow-inner grid place-items-center">
             {dataUrl ? (
-              <img src={dataUrl} alt="QR" className="w-full h-full" />
+              <img src={dataUrl} alt="Patient appointment QR code" className="w-full h-full" />
             ) : (
               <p className="text-xs text-muted-foreground">جارٍ توليد الرمز…</p>
             )}

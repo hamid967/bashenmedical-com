@@ -196,12 +196,14 @@ function ComplexPage() {
             />
             <div className="min-w-0">
               <h1 className="text-2xl md:text-4xl font-black tracking-tight">
-                {ar ? SITE.nameAr : SITE.nameEn}
+                {ar
+                  ? `${SITE.nameAr} — مجمع طبي متكامل في صبيا، جازان`
+                  : `${SITE.nameEn} — Full-service Medical Complex in Sabya, Jazan`}
               </h1>
               <p className="mt-1 text-sm md:text-base text-muted-foreground">
                 {ar
-                  ? "رعاية طبية متكاملة في قلب صبيا، جازان"
-                  : "Comprehensive medical care in central Sabya, Jazan"}
+                  ? "عيادات تخصصية، صيدلية داخلية، وخدمات طوارئ باعتماد CBAHI"
+                  : "Specialist clinics, in-house pharmacy, and emergency services — CBAHI accredited"}
               </p>
             </div>
           </div>
