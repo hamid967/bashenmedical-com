@@ -486,6 +486,7 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
   const Icon = meta.icon;
   const canCancel = r.status === "pending";
   const lastUpdate = r.processed_at ?? r.updated_at;
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () => cancelFn({ data: { id: r.id } }),
