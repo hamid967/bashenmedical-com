@@ -230,9 +230,36 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
       .eq("version_number", data.version_number)
       .maybeSingle();
     if (!v?.file_path) throw new Error("لا يوجد ملف لهذه النسخة.");
+
+    const { data: meta } = await supabaseAdmin
+      .from("medical_reports")
+      .select("title_ar, report_type")
+      .eq("id", data.report_id)
+      .maybeSingle();
+    const baseName = buildDownloadName(
+      (meta as any)?.title_ar ?? null,
+      (meta as any)?.report_type ?? "report",
+      v.file_path,
+    );
+    const dotIdx = baseName.lastIndexOf(".");
+    const downloadName =
+      dotIdx > 0
+        ? `${baseName.slice(0, dotIdx)}-v${data.version_number}${baseName.slice(dotIdx)}`
+        : `${baseName}-v${data.version_number}`;
+
     const { data: signed, error: sErr } = await supabaseAdmin.storage
       .from("medical-reports")
-      .createSignedUrl(v.file_path, 300);
+      .createSignedUrl(v.file_path, 60, { download: downloadName });
     if (sErr) throw new Error(sErr.message);
-    return { url: signed.signedUrl, expiresIn: 300 };
+
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_id: userId,
+      actor_role: "patient",
+      action: "medical_report.download",
+      entity_type: "medical_report",
+      entity_id: data.report_id,
+      metadata: { version: data.version_number, ttl_seconds: 60 },
+    });
+
+    return { url: signed.signedUrl, expiresIn: 60 };
   });
