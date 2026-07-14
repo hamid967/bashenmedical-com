@@ -3,7 +3,7 @@ import { Instagram, MapPin, Phone, Mail, Clock, ShieldCheck, Award, Siren } from
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
-import { JazanDivider, JazanPattern } from "@/components/jazan";
+import { JazanDivider, JazanPattern, JazanSectionLabel, JazanIconFrame } from "@/components/jazan";
 
 const bmcLogo = bmcLogoAsset.url;
 
@@ -17,17 +17,19 @@ export function Footer() {
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B), var(--jazan-terracotta,#B85C3C), var(--jazan-gold,#C7A46B), transparent)", opacity: 0.45 }} />
       <div className="container-app py-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <img
-              src={bmcLogo}
-              alt={isAr ? SITE.nameAr : SITE.nameEn}
-              width={44}
-              height={44}
-              className="h-11 w-11 object-contain"
-              loading="lazy"
-              decoding="async"
-            />
+        <div className="rounded-2xl p-4 bg-background/50 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25">
+          <div className="flex items-center gap-3 mb-3">
+            <JazanIconFrame size="sm">
+              <img
+                src={bmcLogo}
+                alt={isAr ? SITE.nameAr : SITE.nameEn}
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+                loading="lazy"
+                decoding="async"
+              />
+            </JazanIconFrame>
             <div className="text-sm font-bold">{isAr ? SITE.nameAr : SITE.nameEn}</div>
           </div>
           <p className="text-sm text-muted-foreground leading-6 mb-4">
@@ -36,10 +38,10 @@ export function Footer() {
               : "Integrated CBAHI-accredited healthcare in Sabya — general and specialty medicine, pharmacy, home care and telemedicine."}
           </p>
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 rounded-md bg-background border border-border px-2 py-1 text-[11px] font-medium">
+            <span className="inline-flex items-center gap-1 rounded-md bg-background border border-[var(--jazan-gold,#C7A46B)]/40 px-2 py-1 text-[11px] font-medium">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" /> CBAHI
             </span>
-            <span className="inline-flex items-center gap-1 rounded-md bg-background border border-border px-2 py-1 text-[11px] font-medium">
+            <span className="inline-flex items-center gap-1 rounded-md bg-background border border-[var(--jazan-gold,#C7A46B)]/40 px-2 py-1 text-[11px] font-medium">
               <Award className="h-3.5 w-3.5 text-primary" /> {isAr ? "وزارة الصحة" : "MOH"}
             </span>
           </div>
@@ -47,7 +49,7 @@ export function Footer() {
 
         {/* Services */}
         <div>
-          <h4 className="text-sm font-semibold mb-3">{isAr ? "خدماتنا" : "Services"}</h4>
+          <JazanSectionLabel className="mb-3">{isAr ? "خدماتنا" : "Services"}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/specialties" className="hover:text-primary">{t("nav_specialties")}</Link></li>
             <li><Link to="/doctors" className="hover:text-primary">{t("nav_doctors")}</Link></li>
@@ -62,7 +64,7 @@ export function Footer() {
 
         {/* Patient portal */}
         <div>
-          <h4 className="text-sm font-semibold mb-3">{isAr ? "بوابة المريض" : "Patient Portal"}</h4>
+          <JazanSectionLabel className="mb-3">{isAr ? "بوابة المريض" : "Patient Portal"}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/book" className="hover:text-primary">{t("nav_book")}</Link></li>
             <li><Link to="/lookup" className="hover:text-primary">{t("nav_lookup")}</Link></li>
@@ -77,7 +79,7 @@ export function Footer() {
 
         {/* Contact */}
         <div>
-          <h4 className="text-sm font-semibold mb-3">{t("footer_contact")}</h4>
+          <JazanSectionLabel className="mb-3">{t("footer_contact")}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <Siren className="h-4 w-4 text-destructive" />
