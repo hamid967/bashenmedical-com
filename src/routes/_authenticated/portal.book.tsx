@@ -326,6 +326,16 @@ function BookPage() {
     staleTime: 30_000,
   });
 
+  // Surface a toast when the verification-history fetch fails, so the
+  // failure is not silent for the user even if the collapsible is closed.
+  useEffect(() => {
+    if (historyQ.isError) {
+      toast.error("تعذّر تحميل سجل عمليات التحقق", {
+        description: (historyQ.error as Error | null)?.message ?? "يرجى إعادة المحاولة.",
+      });
+    }
+  }, [historyQ.isError, historyQ.error]);
+
   // Reset verification when the doctor or provider changes.
   useEffect(() => {
     setVerify(null);
