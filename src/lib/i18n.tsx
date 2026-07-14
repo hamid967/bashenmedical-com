@@ -1,258 +1,52 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
+import { I18nextProvider, useTranslation } from "react-i18next";
 
-export type Lang = "ar" | "en";
-type Ctx = {
-  lang: Lang;
-  dir: "rtl" | "ltr";
-  setLang: (l: Lang) => void;
-  t: (k: keyof (typeof STRINGS)["ar"]) => string;
-};
+import i18n, { DEFAULT_LANG, SUPPORTED_LANGS, type Lang } from "@/lib/i18n/config";
 
-const STRINGS = {
-  ar: {
-    nav_home: "الرئيسية",
-    nav_specialties: "التخصصات",
-    nav_complex: "المجمع",
-    nav_doctors: "الأطباء",
-    nav_book: "احجز موعدًا",
-    nav_pharmacy: "اطلب دواء",
-    nav_about: "من نحن",
-    nav_contact: "تواصل معنا",
-    nav_faq: "الأسئلة الشائعة",
-    nav_health: "المدونة الصحية",
-    cta_book: "احجز موعدًا",
-    cta_medicine: "اطلب دواء",
-    hero_title: "رعايتك تبدأ هنا",
-    hero_sub:
-      "مجمع طبي معتمد من CBAHI في صبيا، جازان — خدمات تخصصية وصيدلية داخلية على مدار الأسبوع.",
-    why_title: "لماذا باعشن",
-    why_1_title: "معتمد من CBAHI",
-    why_1_desc: "منشأة صحية معتمدة من المركز السعودي لاعتماد المنشآت الصحية.",
-    why_2_title: "صيدلية داخلية",
-    why_2_desc: "صيدليات باعشن تخدم مراجعينا مع خيار توصيل الأدوية.",
-    why_3_title: "فريق متخصص",
-    why_3_desc: "أطباء استشاريون وأخصائيون في مختلف التخصصات.",
-    specialties_title: "تخصصاتنا",
-    specialties_sub: "اختر التخصص المناسب لك واحجز موعدك مباشرة.",
-    doctors_title: "أطباؤنا",
-    doctors_sub: "نخبة من الأطباء الاستشاريين والأخصائيين.",
-    book_with_doctor: "احجز مع الطبيب",
-    all_specialties: "كل التخصصات",
-    search: "ابحث",
-    footer_hours: "ساعات العمل",
-    footer_hours_val: "السبت – الأربعاء: 9 ص – 9 م | الخميس: 9 ص – 1 م",
-    footer_contact: "تواصل",
-    footer_address: "العنوان",
-    footer_rights: "جميع الحقوق محفوظة",
-    lang_switch: "English",
-    step: "الخطوة",
-    of: "من",
-    next: "التالي",
-    back: "السابق",
-    submit: "تأكيد الحجز",
-    choose_specialty: "اختر التخصص",
-    choose_doctor: "اختر الطبيب",
-    any_available: "أي طبيب متاح",
-    choose_datetime: "اختر التاريخ والوقت",
-    patient_info: "بيانات المريض",
-    name: "الاسم",
-    phone: "رقم الجوال",
-    national_id: "رقم الهوية / الإقامة (اختياري)",
-    gender: "الجنس",
-    male: "ذكر",
-    female: "أنثى",
-    reason: "سبب الزيارة",
-    date: "التاريخ",
-    time: "الوقت",
-    booking_success: "تم استلام طلب الحجز",
-    booking_success_desc: "سيتواصل معك فريقنا لتأكيد الموعد.",
-    booking_ref: "رقم الحجز",
-    med_title: "طلب توصيل دواء",
-    med_sub: "ارفع صورة الوصفة أو اكتب أسماء الأدوية، وسنتواصل معك للتأكيد.",
-    prescription_image: "صورة الوصفة (اختياري)",
-    medicines_list: "قائمة الأدوية",
-    address: "العنوان",
-    district: "الحي",
-    delivery_type: "طريقة الاستلام",
-    delivery: "توصيل للمنزل",
-    pickup: "استلام من الصيدلية",
-    notes: "ملاحظات",
-    submit_order: "إرسال الطلب",
-    order_success: "تم استلام طلبك",
-    order_success_desc: "سيتصل بك فريق الصيدلية لتأكيد الطلب.",
-    about_title: "عن المجمع",
-    contact_title: "تواصل معنا",
-    faq_title: "الأسئلة الشائعة",
-    required: "مطلوب",
-    loading: "جارٍ التحميل…",
-    no_doctors: "لا يوجد أطباء في هذا التخصص حاليًا.",
-    nav_my: "بوابة المراجعين",
-    nav_lookup: "تتبع حجز",
-    add_to_calendar: "أضِف إلى التقويم",
-    share_whatsapp: "مشاركة عبر واتساب",
-    track_booking: "تتبع حجزك",
-    my_appointments: "مواعيدي",
-    my_appointments_desc: "جميع حجوزاتك المرتبطة برقم الجوال في حسابك.",
-    no_appointments: "لا توجد حجوزات مسجّلة برقم جوالك.",
-    update_phone_hint: "لعرض حجوزاتك، حدّث رقم جوالك في الملف الشخصي.",
-    lookup_title: "تتبع حجزك",
-    lookup_desc: "أدخل رقم الحجز ورقم الجوال المسجّل لعرض حالة موعدك.",
-    lookup_ref: "رقم الحجز",
-    lookup_phone: "رقم الجوال",
-    lookup_check: "استعراض",
-    lookup_not_found: "لم يتم العثور على حجز مطابق. تأكّد من رقم الحجز والجوال.",
-    cancel_booking: "إلغاء الحجز",
-    cancel_confirm: "هل أنت متأكد من إلغاء هذا الموعد؟",
-    cancel_reason_ph: "سبب الإلغاء (اختياري)",
-    cancelled_ok: "تم إلغاء الموعد.",
-    status_new: "قيد المراجعة",
-    status_confirmed: "مؤكد",
-    status_completed: "مكتمل",
-    status_cancelled: "ملغى",
-    status_no_show: "لم يحضر",
-    upcoming: "القادمة",
-    past: "السابقة",
-  },
-  en: {
-    nav_home: "Home",
-    nav_specialties: "Specialties",
-    nav_complex: "Complex",
-    nav_doctors: "Doctors",
-    nav_book: "Book Appointment",
-    nav_pharmacy: "Order Medicine",
-    nav_about: "About",
-    nav_contact: "Contact",
-    nav_faq: "FAQ",
-    nav_health: "Health Blog",
-    cta_book: "Book an Appointment",
-    cta_medicine: "Order Medicine",
-    hero_title: "Your Care Starts Here",
-    hero_sub:
-      "A CBAHI-accredited medical complex in Sabya, Jazan — specialty care and in-house pharmacy, all week.",
-    why_title: "Why Baeshen",
-    why_1_title: "CBAHI Accredited",
-    why_1_desc:
-      "Accredited by the Saudi Central Board for Accreditation of Healthcare Institutions.",
-    why_2_title: "In-House Pharmacy",
-    why_2_desc: "Baeshen Pharmacies serve our patients with a home delivery option.",
-    why_3_title: "Specialist Team",
-    why_3_desc: "Consultant and specialist doctors across a wide range of fields.",
-    specialties_title: "Our Specialties",
-    specialties_sub: "Choose the right specialty and book your appointment directly.",
-    doctors_title: "Our Doctors",
-    doctors_sub: "A selection of consultants and specialists.",
-    book_with_doctor: "Book with doctor",
-    all_specialties: "All specialties",
-    search: "Search",
-    footer_hours: "Working Hours",
-    footer_hours_val: "Sat – Wed: 9am – 9pm | Thu: 9am – 1pm",
-    footer_contact: "Contact",
-    footer_address: "Address",
-    footer_rights: "All rights reserved",
-    lang_switch: "العربية",
-    step: "Step",
-    of: "of",
-    next: "Next",
-    back: "Back",
-    submit: "Confirm Booking",
-    choose_specialty: "Choose specialty",
-    choose_doctor: "Choose doctor",
-    any_available: "Any available doctor",
-    choose_datetime: "Choose date & time",
-    patient_info: "Patient information",
-    name: "Full name",
-    phone: "Phone number",
-    national_id: "National / Iqama ID (optional)",
-    gender: "Gender",
-    male: "Male",
-    female: "Female",
-    reason: "Reason for visit",
-    date: "Date",
-    time: "Time",
-    booking_success: "Booking request received",
-    booking_success_desc: "Our team will contact you to confirm the appointment.",
-    booking_ref: "Booking ref",
-    med_title: "Medicine Delivery Request",
-    med_sub: "Upload a prescription image or list medicines, and we'll contact you to confirm.",
-    prescription_image: "Prescription image (optional)",
-    medicines_list: "Medicines list",
-    address: "Address",
-    district: "District",
-    delivery_type: "Fulfillment",
-    delivery: "Home delivery",
-    pickup: "Pickup from pharmacy",
-    notes: "Notes",
-    submit_order: "Submit order",
-    order_success: "Order received",
-    order_success_desc: "The pharmacy team will contact you to confirm.",
-    about_title: "About the Complex",
-    contact_title: "Contact Us",
-    faq_title: "Frequently Asked Questions",
-    required: "required",
-    loading: "Loading…",
-    no_doctors: "No doctors currently listed in this specialty.",
-    nav_my: "My Portal",
-    nav_lookup: "Track Booking",
-    add_to_calendar: "Add to calendar",
-    share_whatsapp: "Share via WhatsApp",
-    track_booking: "Track your booking",
-    my_appointments: "My appointments",
-    my_appointments_desc: "All bookings linked to the phone in your profile.",
-    no_appointments: "No bookings found under your phone number.",
-    update_phone_hint: "To see your bookings, add your phone in your profile.",
-    lookup_title: "Track your booking",
-    lookup_desc: "Enter your booking reference and phone to see your appointment status.",
-    lookup_ref: "Booking reference",
-    lookup_phone: "Phone number",
-    lookup_check: "Check",
-    lookup_not_found: "No matching booking found. Double-check the reference and phone.",
-    cancel_booking: "Cancel booking",
-    cancel_confirm: "Are you sure you want to cancel this appointment?",
-    cancel_reason_ph: "Cancellation reason (optional)",
-    cancelled_ok: "Appointment cancelled.",
-    status_new: "Pending",
-    status_confirmed: "Confirmed",
-    status_completed: "Completed",
-    status_cancelled: "Cancelled",
-    status_no_show: "No-show",
-    upcoming: "Upcoming",
-    past: "Past",
-  },
-} as const;
+export type { Lang };
+export { SUPPORTED_LANGS, DEFAULT_LANG };
 
-const I18nCtx = createContext<Ctx | null>(null);
+function normalizeLang(raw: string | undefined): Lang {
+  if (!raw) return DEFAULT_LANG;
+  const short = raw.toLowerCase().split("-")[0];
+  return (SUPPORTED_LANGS as readonly string[]).includes(short) ? (short as Lang) : DEFAULT_LANG;
+}
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [lang, setLangState] = useState<Lang>("ar");
+  return (
+    <I18nextProvider i18n={i18n}>
+      <I18nHtmlSync />
+      {children}
+    </I18nextProvider>
+  );
+}
 
-  useEffect(() => {
-    const saved =
-      (typeof window !== "undefined" && (localStorage.getItem("lang") as Lang | null)) || "ar";
-    setLangState(saved);
-  }, []);
-
+function I18nHtmlSync() {
+  const { i18n: inst } = useTranslation();
+  const lang = normalizeLang(inst.language);
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.documentElement.lang = lang;
     document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
   }, [lang]);
-
-  const setLang = (l: Lang) => {
-    setLangState(l);
-    if (typeof window !== "undefined") localStorage.setItem("lang", l);
-  };
-
-  const value: Ctx = {
-    lang,
-    dir: lang === "ar" ? "rtl" : "ltr",
-    setLang,
-    t: (k) => STRINGS[lang][k],
-  };
-  return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
+  return null;
 }
 
+/**
+ * Backwards-compatible hook used across the app.
+ * Under the hood this is now powered by i18next + JSON locale files
+ * under `src/locales/{lang}/common.json`.
+ */
 export function useI18n() {
-  const ctx = useContext(I18nCtx);
-  if (!ctx) throw new Error("useI18n must be used inside I18nProvider");
-  return ctx;
+  const { t, i18n: inst } = useTranslation("common");
+  const lang = normalizeLang(inst.language);
+  return {
+    lang,
+    dir: (lang === "ar" ? "rtl" : "ltr") as "rtl" | "ltr",
+    setLang: (l: Lang) => {
+      void inst.changeLanguage(l);
+      if (typeof window !== "undefined") localStorage.setItem("lang", l);
+    },
+    t: (key: string) => t(key) as string,
+  };
 }
