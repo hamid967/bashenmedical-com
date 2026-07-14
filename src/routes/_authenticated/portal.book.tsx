@@ -671,6 +671,13 @@ function BookPage() {
           </div>
 
           <div className="mt-5 rounded-2xl bg-[color:var(--portal-primary)]/5 border border-[color:var(--portal-primary)]/15 p-4 grid gap-2 sm:grid-cols-2">
+            {dependent && (
+              <div className="sm:col-span-2 -mx-1 -mt-1 mb-1 px-3 py-2 rounded-xl bg-[color:var(--portal-primary)] text-white text-sm font-semibold flex items-center gap-2">
+                <UserRound className="h-4 w-4" />
+                <span>حجز نيابةً عن:</span>
+                <span className="font-bold">{dependent.full_name}</span>
+              </div>
+            )}
             <SummaryRow icon={<UserRound className="h-4 w-4" />} label="الطبيب" value={selectedDoctor?.name_ar ?? "—"} />
             {selectedBranch && (
               <SummaryRow icon={<MapPin className="h-4 w-4" />} label="الفرع" value={selectedBranch.name_ar} />
@@ -685,6 +692,7 @@ function BookPage() {
             />
             <SummaryRow icon={<Clock className="h-4 w-4" />} label="الوقت" value={slot} />
           </div>
+
 
           {/* Appointment cost & insurance eligibility */}
           <div className="mt-5 rounded-2xl border border-[color:var(--portal-border)] bg-white p-4">
