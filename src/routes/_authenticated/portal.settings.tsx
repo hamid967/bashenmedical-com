@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { MutationErrorBanner } from "@/components/portal/MutationErrorBanner";
 
 const profileQuery = queryOptions({
   queryKey: ["portal", "my-profile-full"],
@@ -94,6 +95,16 @@ function SettingsPage() {
             <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">قنوات التنبيه، اللغة، ومظهر البوابة</p>
           </div>
         </header>
+
+        {mut.isError && (
+          <div className="mb-4">
+            <MutationErrorBanner
+              message={mut.error instanceof Error ? mut.error.message : "تعذّر حفظ الإعدادات"}
+              onRetry={() => mut.mutate()}
+              retrying={mut.isPending}
+            />
+          </div>
+        )}
 
         <section className="glass-card p-5 sm:p-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
@@ -217,9 +228,14 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
         <AlertTriangle className="mx-auto h-10 w-10 text-red-500 mb-2" />
         <h2 className="text-lg font-bold">تعذّر تحميل الإعدادات</h2>
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">{error.message}</p>
-        <button onClick={() => { router.invalidate(); reset(); }} className="mt-4 h-10 px-4 rounded-full text-white text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
-          <RefreshCw className="inline h-4 w-4 ms-1" />حاول مجددًا
-        </button>
+        <div className="mt-4 flex justify-center gap-2">
+          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-white text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
+            <RefreshCw className="inline h-4 w-4 ms-1" />حاول مجددًا
+          </button>
+          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm inline-flex items-center gap-1">
+            <ArrowLeft className="h-4 w-4" />العودة
+          </Link>
+        </div>
       </div>
     </div>
   );
