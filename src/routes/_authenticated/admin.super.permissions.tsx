@@ -589,6 +589,162 @@ function SuperPermissionsPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <PermissionDetailDialog
+        permKey={detailKey}
+        onClose={() => setDetailKey(null)}
+        catalog={catalog}
+        enabledSet={enabledSet}
+      />
     </div>
+  );
+}
+
+function PermissionDetailDialog({
+  permKey,
+  onClose,
+  catalog,
+  enabledSet,
+}: {
+  permKey: string | null;
+  onClose: () => void;
+  catalog: Array<{
+    key: string;
+    category: string;
+    description_ar: string;
+    description_en: string | null;
+  }>;
+  enabledSet: Set<string>;
+}) {
+  const perm = permKey ? catalog.find((p) => p.key === permKey) ?? null : null;
+  const enabledRoles = useMemo<AppRole[]>(() => {
+    if (!perm) return [];
+    return ALL_ROLES.filter(
+      (r) => r === "super_admin" || enabledSet.has(`${r}::${perm.key}`),
+    );
+  }, [perm, enabledSet]);
+
+  const constraints = useMemo<string[]>(() => {
+    if (!perm) return [];
+    const list: string[] = [
+      "دور super_admin يمتلك هذه الصلاحية دائمًا ولا يمكن تعطيلها.",
+      "تعديل صلاحيات دور admin يتطلب صلاحية super_admin.",
+      "يُسجَّل كل تغيير في سجل التدقيق مع تحديد المُنفِّذ ووقت التنفيذ.",
+    ];
+    if (/^rbac\./.test(perm.key)) {
+      list.push("صلاحية حسّاسة: تمنح التحكم في نظام الأدوار والصلاحيات نفسه.");
+    }
+    if (/\.delete$|\.remove$/.test(perm.key)) {
+      list.push("عملية حذف — لا يمكن التراجع عنها تلقائيًا.");
+    }
+    if (/audit|log/i.test(perm.key)) {
+      list.push("تخصّ سجلات التدقيق — يُنصح بقصرها على أدوار الرقابة.");
+    }
+    return list;
+  }, [perm]);
+
+  return (
+    <Dialog open={!!perm} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent dir="rtl" className="max-w-lg">
+        {perm && (
+          <>
+            <DialogHeader>
+              <DialogTitle className="text-right">{perm.description_ar}</DialogTitle>
+              <DialogDescription className="text-right">
+                <span className="font-mono text-xs">{perm.key}</span>
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-5 text-sm">
+              <section>
+                <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">
+                  التصنيف
+                </h4>
+                <Badge variant="secondary">{perm.category}</Badge>
+              </section>
+
+              {perm.description_en && (
+                <section>
+                  <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">
+                    الوصف (EN)
+                  </h4>
+                  <p dir="ltr" className="text-sm leading-relaxed">
+                    {perm.description_en}
+                  </p>
+                </section>
+              )}
+
+              <section>
+                <h4 className="mb-2 text-xs font-semibold text-muted-foreground">
+                  الأدوار التي تمتلكها حاليًا ({enabledRoles.length})
+                </h4>
+                {enabledRoles.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">
+                    لا يمتلك أي دور هذه الصلاحية حاليًا.
+                  </p>
+                ) : (
+                  <div className="flex flex-wrap gap-1.5">
+                    {enabledRoles.map((r) => (
+                      <Badge
+                        key={r}
+                        variant={r === "super_admin" ? "default" : "outline"}
+                        className="gap-1"
+                      >
+                        <span>{ROLE_LABEL[r]}</span>
+                        <span className="font-mono text-[10px] opacity-70">{r}</span>
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              <section>
+                <h4 className="mb-2 text-xs font-semibold text-muted-foreground">
+                  الاستخدامات في التطبيق
+                </h4>
+                <ul className="space-y-1.5 text-xs text-muted-foreground">
+                  <li>
+                    حماية الواجهات:{" "}
+                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                      {`<RequirePermission anyOf="${perm.key}">`}
+                    </code>
+                  </li>
+                  <li>
+                    فحص برمجي:{" "}
+                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                      {`hasPermission("${perm.key}")`}
+                    </code>
+                  </li>
+                  <li>
+                    تطبيقها على الخادم عبر سياسات RLS ودوال{" "}
+                    <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px]">
+                      has_permission()
+                    </code>
+                    .
+                  </li>
+                </ul>
+              </section>
+
+              <section>
+                <h4 className="mb-2 text-xs font-semibold text-muted-foreground">
+                  القيود المرتبطة
+                </h4>
+                <ul className="list-disc space-y-1 pr-5 text-xs">
+                  {constraints.map((c, i) => (
+                    <li key={i}>{c}</li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={onClose}>
+                إغلاق
+              </Button>
+            </DialogFooter>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
