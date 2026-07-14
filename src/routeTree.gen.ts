@@ -117,6 +117,7 @@ import { Route as AuthenticatedPortalNotificationsRouteImport } from './routes/_
 import { Route as AuthenticatedPortalLaboratoryRouteImport } from './routes/_authenticated/portal.laboratory'
 import { Route as AuthenticatedPortalInvoicesRouteImport } from './routes/_authenticated/portal.invoices'
 import { Route as AuthenticatedPortalInsuranceRouteImport } from './routes/_authenticated/portal.insurance'
+import { Route as AuthenticatedPortalInquiriesRouteImport } from './routes/_authenticated/portal.inquiries'
 import { Route as AuthenticatedPortalFamilyRouteImport } from './routes/_authenticated/portal.family'
 import { Route as AuthenticatedPortalDoctorsRouteImport } from './routes/_authenticated/portal.doctors'
 import { Route as AuthenticatedPortalConsentsRouteImport } from './routes/_authenticated/portal.consents'
@@ -724,6 +725,12 @@ const AuthenticatedPortalInsuranceRoute =
     path: '/insurance',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedPortalInquiriesRoute =
+  AuthenticatedPortalInquiriesRouteImport.update({
+    id: '/inquiries',
+    path: '/inquiries',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedPortalFamilyRoute =
   AuthenticatedPortalFamilyRouteImport.update({
     id: '/family',
@@ -976,6 +983,7 @@ export interface FileRoutesByFullPath {
   '/portal/consents': typeof AuthenticatedPortalConsentsRoute
   '/portal/doctors': typeof AuthenticatedPortalDoctorsRoute
   '/portal/family': typeof AuthenticatedPortalFamilyRoute
+  '/portal/inquiries': typeof AuthenticatedPortalInquiriesRoute
   '/portal/insurance': typeof AuthenticatedPortalInsuranceRoute
   '/portal/invoices': typeof AuthenticatedPortalInvoicesRoute
   '/portal/laboratory': typeof AuthenticatedPortalLaboratoryRoute
@@ -1109,6 +1117,7 @@ export interface FileRoutesByTo {
   '/portal/consents': typeof AuthenticatedPortalConsentsRoute
   '/portal/doctors': typeof AuthenticatedPortalDoctorsRoute
   '/portal/family': typeof AuthenticatedPortalFamilyRoute
+  '/portal/inquiries': typeof AuthenticatedPortalInquiriesRoute
   '/portal/insurance': typeof AuthenticatedPortalInsuranceRoute
   '/portal/invoices': typeof AuthenticatedPortalInvoicesRoute
   '/portal/laboratory': typeof AuthenticatedPortalLaboratoryRoute
@@ -1246,6 +1255,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/consents': typeof AuthenticatedPortalConsentsRoute
   '/_authenticated/portal/doctors': typeof AuthenticatedPortalDoctorsRoute
   '/_authenticated/portal/family': typeof AuthenticatedPortalFamilyRoute
+  '/_authenticated/portal/inquiries': typeof AuthenticatedPortalInquiriesRoute
   '/_authenticated/portal/insurance': typeof AuthenticatedPortalInsuranceRoute
   '/_authenticated/portal/invoices': typeof AuthenticatedPortalInvoicesRoute
   '/_authenticated/portal/laboratory': typeof AuthenticatedPortalLaboratoryRoute
@@ -1383,6 +1393,7 @@ export interface FileRouteTypes {
     | '/portal/consents'
     | '/portal/doctors'
     | '/portal/family'
+    | '/portal/inquiries'
     | '/portal/insurance'
     | '/portal/invoices'
     | '/portal/laboratory'
@@ -1516,6 +1527,7 @@ export interface FileRouteTypes {
     | '/portal/consents'
     | '/portal/doctors'
     | '/portal/family'
+    | '/portal/inquiries'
     | '/portal/insurance'
     | '/portal/invoices'
     | '/portal/laboratory'
@@ -1652,6 +1664,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/consents'
     | '/_authenticated/portal/doctors'
     | '/_authenticated/portal/family'
+    | '/_authenticated/portal/inquiries'
     | '/_authenticated/portal/insurance'
     | '/_authenticated/portal/invoices'
     | '/_authenticated/portal/laboratory'
@@ -2507,6 +2520,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalInsuranceRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/inquiries': {
+      id: '/_authenticated/portal/inquiries'
+      path: '/inquiries'
+      fullPath: '/portal/inquiries'
+      preLoaderRoute: typeof AuthenticatedPortalInquiriesRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/_authenticated/portal/family': {
       id: '/_authenticated/portal/family'
       path: '/family'
@@ -2775,6 +2795,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalConsentsRoute: typeof AuthenticatedPortalConsentsRoute
   AuthenticatedPortalDoctorsRoute: typeof AuthenticatedPortalDoctorsRoute
   AuthenticatedPortalFamilyRoute: typeof AuthenticatedPortalFamilyRoute
+  AuthenticatedPortalInquiriesRoute: typeof AuthenticatedPortalInquiriesRoute
   AuthenticatedPortalInsuranceRoute: typeof AuthenticatedPortalInsuranceRoute
   AuthenticatedPortalInvoicesRoute: typeof AuthenticatedPortalInvoicesRoute
   AuthenticatedPortalLaboratoryRoute: typeof AuthenticatedPortalLaboratoryRoute
@@ -2800,6 +2821,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalConsentsRoute: AuthenticatedPortalConsentsRoute,
   AuthenticatedPortalDoctorsRoute: AuthenticatedPortalDoctorsRoute,
   AuthenticatedPortalFamilyRoute: AuthenticatedPortalFamilyRoute,
+  AuthenticatedPortalInquiriesRoute: AuthenticatedPortalInquiriesRoute,
   AuthenticatedPortalInsuranceRoute: AuthenticatedPortalInsuranceRoute,
   AuthenticatedPortalInvoicesRoute: AuthenticatedPortalInvoicesRoute,
   AuthenticatedPortalLaboratoryRoute: AuthenticatedPortalLaboratoryRoute,

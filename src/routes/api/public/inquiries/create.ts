@@ -152,6 +152,10 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
         }
         const requestNumber = String(refData);
 
+        // One-time link token: returned only in this response and stored
+        // in-DB so the patient can later claim the inquiry from the portal.
+        const linkToken = crypto.randomUUID();
+
         const { data: inserted, error: insErr } = await supabaseAdmin
           .from("service_inquiries")
           .insert({
@@ -173,6 +177,7 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
             source: d.source,
             submitter_ip_hash: ipHash,
             user_agent: ua,
+            link_token: linkToken,
           })
           .select("id, request_number")
           .single();
@@ -185,9 +190,6 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
           });
         }
 
-        // Log the creation event (append-only). Best-effort; created via
-        // service role so RLS insert policy (staff-only) doesn't apply here
-        // — service_role bypasses RLS.
         await supabaseAdmin.from("service_inquiry_updates").insert({
           inquiry_id: inserted.id,
           update_type: "created",
@@ -197,6 +199,7 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
         return json(200, {
           ok: true,
           request_number: requestNumber,
+          link_token: linkToken,
         });
       },
     },

@@ -236,11 +236,26 @@ export function ServiceInquiryDialog({
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         request_number?: string;
+        link_token?: string;
         message?: string;
       };
       if (!res.ok || !body.ok || !body.request_number) {
         toast.error(body.message ?? "تعذّر إرسال الطلب. حاول مرة أخرى.", { id: toastId });
         return;
+      }
+
+      // Persist the one-time link token so the portal can auto-claim
+      // this inquiry once the patient signs in.
+      if (body.link_token) {
+        try {
+          const KEY = "bmc:pending_inquiry_links";
+          const prev = JSON.parse(localStorage.getItem(KEY) ?? "[]") as Array<{ request_number: string; link_token: string }>;
+          const next = [
+            { request_number: body.request_number, link_token: body.link_token },
+            ...prev.filter((r) => r.request_number !== body.request_number),
+          ].slice(0, 20);
+          localStorage.setItem(KEY, JSON.stringify(next));
+        } catch { /* ignore */ }
       }
 
       const svc = services.find((s) => s.id === form.service_id);
@@ -591,13 +606,13 @@ function ConfirmationView({
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <a
-            href={`/auth?intent=link_inquiry&ref=${encodeURIComponent(c.request_number)}&tab=signup`}
+            href={`/auth?redirect=${encodeURIComponent(`/portal/inquiries?ref=${c.request_number}`)}`}
             className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             أنشئ حسابك لمتابعة الطلب
           </a>
           <a
-            href={`/auth?intent=link_inquiry&ref=${encodeURIComponent(c.request_number)}&tab=signin`}
+            href={`/auth?redirect=${encodeURIComponent(`/portal/inquiries?ref=${c.request_number}`)}`}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-semibold hover:bg-muted"
           >
             لدي حساب بالفعل
