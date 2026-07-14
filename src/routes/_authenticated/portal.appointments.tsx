@@ -592,6 +592,13 @@ function AppointmentCard({
           </a>
         )}
         <button
+          type="button"
+          onClick={onTimeline}
+          className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
+        >
+          <History className="h-4 w-4" /> سجل الحالة
+        </button>
+        <button
           onClick={() => window.print()}
           className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
         >
