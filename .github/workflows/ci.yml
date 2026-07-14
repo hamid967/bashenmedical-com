@@ -348,6 +348,15 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:8080
         run: python tests/e2e/admin_redirect_when_not_admin.py
 
+      - name: Ensure E2E admin user exists (auto-confirm + grant admin role)
+        if: steps.verify_secrets.outputs.has_secrets == 'true' && secrets.E2E_ADMIN_EMAIL != '' && secrets.E2E_ADMIN_PASSWORD != ''
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: python scripts/ci/ensure-e2e-admin.py
+
       - name: Run admin opens for admin user E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
@@ -355,6 +364,7 @@ jobs:
           E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
         run: python tests/e2e/admin_opens_for_admin_user.py
+
 
 
 
