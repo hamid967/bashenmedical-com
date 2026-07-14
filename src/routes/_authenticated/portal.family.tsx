@@ -716,7 +716,7 @@ function DependentDialog({
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
-      toast.success(mode === "edit" ? T.f_name[lang] + " ✓" : T.form_add_title[lang]);
+      toast.success(mode === "edit" ? T.saved_updated[lang] : T.saved_created[lang]);
       onClose();
     },
     onError: (err: unknown) => {
