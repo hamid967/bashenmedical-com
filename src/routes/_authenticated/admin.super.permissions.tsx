@@ -1,18 +1,35 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  importRolePermissions,
   listPermissionsCatalog,
   listRolePermissionsMatrix,
   setRolePermission,
   type AppRole,
 } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { History, Loader2, Search, ShieldCheck } from "lucide-react";
+import { Download, History, Loader2, Search, ShieldCheck, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ALL_ROLES: AppRole[] = [
   "super_admin",
@@ -85,8 +102,16 @@ function SuperPermissionsPage() {
   const { data: catalog } = useSuspenseQuery(catalogQuery);
   const { data: matrix } = useSuspenseQuery(matrixQuery);
   const setPerm = useServerFn(setRolePermission);
+  const importFn = useServerFn(importRolePermissions);
   const [filter, setFilter] = useState("");
   const [pending, setPending] = useState<Set<string>>(new Set());
+  const [importOpen, setImportOpen] = useState(false);
+  const [importMode, setImportMode] = useState<"merge" | "replace">("merge");
+  const [importFileName, setImportFileName] = useState<string | null>(null);
+  const [importPayload, setImportPayload] = useState<Record<string, string[]> | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const enabledSet = useMemo(
     () => new Set(matrix.map((r) => `${r.role}::${r.permission_key}`)),
@@ -156,6 +181,152 @@ function SuperPermissionsPage() {
 
   const enabledCount = matrix.length;
 
+  function csvEscape(s: string) {
+    if (s == null) return "";
+    const needs = /[",\n\r]/.test(s);
+    const v = String(s).replace(/"/g, '""');
+    return needs ? `"${v}"` : v;
+  }
+
+  function handleExportCsv() {
+    const header = [
+      "permission_key",
+      "category",
+      "description_ar",
+      "description_en",
+      ...ALL_ROLES,
+    ];
+    const lines = [header.map(csvEscape).join(",")];
+    const sorted = [...catalog].sort((a, b) =>
+      a.category.localeCompare(b.category, "ar") || a.key.localeCompare(b.key),
+    );
+    for (const p of sorted) {
+      const row = [
+        p.key,
+        p.category,
+        p.description_ar ?? "",
+        p.description_en ?? "",
+        ...ALL_ROLES.map((r) =>
+          r === "super_admin" ? "1" : enabledSet.has(`${r}::${p.key}`) ? "1" : "0",
+        ),
+      ];
+      lines.push(row.map((v) => csvEscape(String(v))).join(","));
+    }
+    const csv = "\uFEFF" + lines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    a.href = url;
+    a.download = `rbac-permissions-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("تم تصدير المصفوفة");
+  }
+
+  function parseCsv(text: string): string[][] {
+    const rows: string[][] = [];
+    let cur: string[] = [];
+    let val = "";
+    let inQ = false;
+    const t = text.replace(/^\uFEFF/, "");
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (inQ) {
+        if (c === '"') {
+          if (t[i + 1] === '"') {
+            val += '"';
+            i++;
+          } else inQ = false;
+        } else val += c;
+      } else {
+        if (c === '"') inQ = true;
+        else if (c === ",") {
+          cur.push(val);
+          val = "";
+        } else if (c === "\n" || c === "\r") {
+          if (c === "\r" && t[i + 1] === "\n") i++;
+          cur.push(val);
+          rows.push(cur);
+          cur = [];
+          val = "";
+        } else val += c;
+      }
+    }
+    if (val.length || cur.length) {
+      cur.push(val);
+      rows.push(cur);
+    }
+    return rows.filter((r) => r.length && r.some((c) => c.trim() !== ""));
+  }
+
+  async function handleFilePicked(file: File) {
+    setImportError(null);
+    setImportFileName(file.name);
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length < 2) throw new Error("الملف فارغ.");
+      const header = rows[0].map((h) => h.trim());
+      const keyIdx = header.indexOf("permission_key");
+      if (keyIdx < 0) throw new Error("عمود permission_key مفقود.");
+      const roleCols: { role: AppRole; idx: number }[] = [];
+      for (let i = 0; i < header.length; i++) {
+        if (ALL_ROLES.includes(header[i] as AppRole)) {
+          roleCols.push({ role: header[i] as AppRole, idx: i });
+        }
+      }
+      if (roleCols.length === 0) throw new Error("لا توجد أعمدة أدوار في الملف.");
+      const payload: Record<string, string[]> = {};
+      for (const { role } of roleCols) payload[role] = [];
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        const key = (row[keyIdx] ?? "").trim();
+        if (!key) continue;
+        for (const { role, idx } of roleCols) {
+          const v = (row[idx] ?? "").trim().toLowerCase();
+          if (v === "1" || v === "true" || v === "yes" || v === "y" || v === "x") {
+            payload[role].push(key);
+          }
+        }
+      }
+      setImportPayload(payload);
+    } catch (err: any) {
+      setImportPayload(null);
+      setImportError(err?.message ?? "تعذّر قراءة الملف.");
+    }
+  }
+
+  async function handleConfirmImport() {
+    if (!importPayload) return;
+    setImporting(true);
+    try {
+      const res: any = await importFn({
+        data: {
+          mode: importMode,
+          payload: { version: 1, roles: importPayload },
+        },
+      });
+      const parts = [`أُضيف: ${res.added ?? 0}`, `أُلغي: ${res.removed ?? 0}`];
+      if (res.skipped_unknown?.length) parts.push(`تُخطّي غير معروف: ${res.skipped_unknown.length}`);
+      if (res.skipped_roles?.length) parts.push(`تُخطّي أدوار: ${res.skipped_roles.length}`);
+      if (res.errors?.length) parts.push(`أخطاء: ${res.errors.length}`);
+      toast.success("تم الاستيراد — " + parts.join("، "));
+      setImportOpen(false);
+      setImportPayload(null);
+      setImportFileName(null);
+      if (fileRef.current) fileRef.current.value = "";
+      qc.invalidateQueries({ queryKey: ["rbac", "role-permissions-matrix"] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "تعذّر الاستيراد");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+
   return (
     <div className="container-app py-8 space-y-6" dir="rtl">
       <header className="flex flex-wrap items-start justify-between gap-4">
@@ -173,6 +344,32 @@ function SuperPermissionsPage() {
           <Badge variant="outline">{catalog.length} صلاحية</Badge>
           <Badge variant="outline">{ALL_ROLES.length} دور</Badge>
           <Badge variant="outline">{enabledCount} مُفعّلة</Badge>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={handleExportCsv}
+          >
+            <Download className="h-3.5 w-3.5" />
+            تصدير CSV
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1.5"
+            onClick={() => {
+              setImportError(null);
+              setImportPayload(null);
+              setImportFileName(null);
+              setImportMode("merge");
+              setImportOpen(true);
+            }}
+          >
+            <Upload className="h-3.5 w-3.5" />
+            استيراد CSV
+          </Button>
           <Link
             to="/admin/super/permissions/audit"
             className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full border border-border bg-card hover:bg-accent px-3 h-8"
@@ -276,6 +473,80 @@ function SuperPermissionsPage() {
         ملاحظة: <b>super_admin</b> يمتلك كامل الصلاحيات ولا يمكن تعديله. تعديل صلاحيات
         <b> admin</b> يتطلب أن تكون super_admin. تُسجَّل جميع التغييرات في سجل التدقيق.
       </p>
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent dir="rtl" className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>استيراد مصفوفة الصلاحيات من CSV</DialogTitle>
+            <DialogDescription>
+              اختر ملف CSV بنفس صيغة التصدير (أعمدة: <code>permission_key</code> ثم أعمدة الأدوار
+              بقيم 1/0). لن يتم تعديل دور <b>super_admin</b>. يتطلب تعديل دور <b>admin</b> صلاحية
+              super_admin.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">وضع التطبيق</label>
+              <Select value={importMode} onValueChange={(v) => setImportMode(v as any)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="merge">
+                    دمج — إضافة الصلاحيات المفعّلة فقط (لا يُلغى شيء)
+                  </SelectItem>
+                  <SelectItem value="replace">
+                    استبدال — مطابقة كاملة (يُلغى ما ليس في الملف)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">ملف CSV</label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFilePicked(f);
+                }}
+                className="block w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border file:border-border file:bg-muted file:text-foreground"
+              />
+              {importFileName && (
+                <p className="text-xs text-muted-foreground">
+                  الملف: <span className="font-mono">{importFileName}</span>
+                </p>
+              )}
+              {importError && (
+                <p className="text-xs text-destructive">{importError}</p>
+              )}
+              {importPayload && (
+                <div className="rounded-md border border-border bg-muted/30 p-2 text-xs">
+                  معاينة: {Object.keys(importPayload).length} دور،{" "}
+                  {Object.values(importPayload).reduce((a, b) => a + b.length, 0)} صلاحية مُفعّلة.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)} disabled={importing}>
+              إلغاء
+            </Button>
+            <Button
+              onClick={handleConfirmImport}
+              disabled={!importPayload || importing}
+              className="gap-1.5"
+            >
+              {importing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              تطبيق الاستيراد
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
