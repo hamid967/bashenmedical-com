@@ -3,9 +3,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  CalendarDays, ChevronLeft, ChevronRight, Loader2, AlertTriangle,
+  CalendarDays, CalendarPlus, ChevronLeft, ChevronRight, Loader2, AlertTriangle,
   CheckCircle2, XCircle, Clock, UserCheck, RefreshCw, Ban, Unlock,
-  CalendarClock, Phone, StickyNote,
+  CalendarClock, Phone, StickyNote, Stethoscope, MapPin,
 } from "lucide-react";
 import {
   listMyCalendar,
@@ -13,20 +13,40 @@ import {
   rescheduleMyAppointment,
   setMySlotStatus,
   deleteMySlot,
+  getMyDoctorSummary,
 } from "@/lib/portal/doctor-schedule.functions";
+import { listMyAppointments } from "@/lib/portal/appointments.functions";
 
 export const Route = createFileRoute("/_authenticated/portal/calendar")({
   head: () => ({
     meta: [
-      { title: "تقويمي البصري | بوابة الطبيب" },
-      { name: "description", content: "تقويم بصري للطبيب لعرض وإدارة المواعيد والفترات." },
+      { title: "تقويمي | بوابة المريض" },
+      { name: "description", content: "تقويم شهري يعرض مواعيدك القادمة والسابقة." },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: DoctorCalendarPage,
+  component: CalendarRouter,
   errorComponent: CalendarError,
   notFoundComponent: () => null,
 });
+
+function CalendarRouter() {
+  const roleQ = useQuery({
+    queryKey: ["portal", "role-probe"],
+    queryFn: () => getMyDoctorSummary(),
+    staleTime: 5 * 60_000,
+  });
+  if (roleQ.isLoading) {
+    return (
+      <div className="h-64 grid place-items-center text-[color:var(--portal-ink-2)]">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+  if (roleQ.data?.linked) return <DoctorCalendarPage />;
+  return <PatientCalendarPage />;
+}
+
 
 const WEEKDAYS = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 const MONTHS = [
