@@ -40,7 +40,13 @@ const paymentsQuery = queryOptions({
   staleTime: 30_000,
 });
 
+const searchSchema = z.object({
+  status: fallback(z.string(), "all").default("all"),
+  sort: fallback(z.string(), "updated_desc").default("updated_desc"),
+});
+
 export const Route = createFileRoute("/_authenticated/portal/refunds")({
+  validateSearch: zodValidator(searchSchema),
   loader: async ({ context }) =>
     context.queryClient.ensureQueryData(refundsQuery),
   head: () => ({
