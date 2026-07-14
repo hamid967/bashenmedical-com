@@ -17,7 +17,7 @@ export function Footer() {
       <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B), var(--jazan-terracotta,#B85C3C), var(--jazan-gold,#C7A46B), transparent)", opacity: 0.45 }} />
       <div className="container-app py-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
-        <div className="rounded-2xl p-4 bg-background/50 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25">
+        <div className="rounded-2xl p-4 bg-background/50 jazan-hairline">
           <div className="flex items-center gap-3 mb-3">
             <JazanIconFrame size="sm">
               <img
