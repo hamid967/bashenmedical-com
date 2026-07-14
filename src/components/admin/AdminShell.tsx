@@ -50,6 +50,7 @@ const NAV: NavGroup[] = [
       { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
       { to: "/orders-unified", label: "الطلبات الموحدة", icon: Package, roles: ["admin", "reception", "pharmacy"] },
       { to: "/complaints-admin", label: "الشكاوى", icon: MessageSquare, roles: ["admin", "reception"] },
+      { to: "/admin/service-inquiries", label: "طلبات الواتساب", icon: MessageSquare, roles: ["admin", "reception"] },
     ],
   },
   {
