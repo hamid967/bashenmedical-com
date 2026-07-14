@@ -1059,12 +1059,6 @@ function DeleteDialog({
         onEscapeKeyDown={(e) => {
           if (busy) e.preventDefault();
         }}
-        onPointerDownOutside={(e) => {
-          if (busy) e.preventDefault();
-        }}
-        onInteractOutside={(e) => {
-          if (busy) e.preventDefault();
-        }}
         onOpenAutoFocus={(e) => {
           // Move initial focus to the safe (Cancel/keep) button
           e.preventDefault();
@@ -1074,6 +1068,7 @@ function DeleteDialog({
           el?.focus();
         }}
       >
+
 
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
