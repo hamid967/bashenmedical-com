@@ -450,9 +450,10 @@ function BookPage() {
     navigate({ to: "/book", search: { step: 1 } });
   }
 
-  const STEPS = lang === "ar"
-    ? ["نوع الخدمة", "الفرع", "التخصص", "الطبيب", "التاريخ", "الوقت", "بياناتك", "المراجعة", "التأكيد"]
-    : ["Service", "Branch", "Specialty", "Doctor", "Date", "Time", "Your info", "Review", "Confirmed"];
+  const STEPS = [
+    t("steps.service"), t("steps.branch"), t("steps.specialty"), t("steps.doctor"),
+    t("steps.date"), t("steps.time"), t("steps.yourInfo"), t("steps.review"), t("steps.confirmed"),
+  ];
 
   // Displayed step for the indicator/progress bar — never allowed to exceed
   // the highest step whose prerequisites are met. Prevents a transient flash
@@ -467,14 +468,8 @@ function BookPage() {
     <div className="min-h-screen bg-muted/30">
       <div className="container-app py-8 md:py-12 max-w-5xl">
         <header className="mb-6 md:mb-8 text-center">
-          <h1 className="text-2xl md:text-4xl font-bold">
-            {lang === "ar" ? "احجز موعدك" : "Book an appointment"}
-          </h1>
-          <p className="mt-2 text-sm md:text-base text-muted-foreground">
-            {lang === "ar"
-              ? "اتبع الخطوات لإتمام حجز موعدك — يمكنك الرجوع في أي وقت."
-              : "Follow the steps to complete your booking — you can go back anytime."}
-          </p>
+          <h1 className="text-2xl md:text-4xl font-bold">{t("page.title")}</h1>
+          <p className="mt-2 text-sm md:text-base text-muted-foreground">{t("page.subtitle")}</p>
         </header>
 
         <Stepper steps={STEPS} current={displayedStep} onJump={(i) => {
@@ -491,9 +486,7 @@ function BookPage() {
               />
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground text-center">
-              {lang === "ar"
-                ? `الخطوة ${displayedStep} من 8`
-                : `Step ${displayedStep} of 8`}
+              {t("page.stepOf", { current: displayedStep, total: 8 })}
             </div>
           </div>
         )}
