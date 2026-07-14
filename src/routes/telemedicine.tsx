@@ -28,9 +28,9 @@ export const Route = createFileRoute("/telemedicine")({
       },
       { property: "og:title", content: "الاستشارة الطبية عن بُعد" },
       { property: "og:description", content: "استشر طبيبك أونلاين بالفيديو." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/telemedicine" },
+      { property: "og:url", content: "https://bashenmedical.com/telemedicine" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/telemedicine" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/telemedicine" }],
   }),
   component: TelemedicinePage,
 });

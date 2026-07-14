@@ -23,7 +23,7 @@ export const Route = createFileRoute("/media/stories")({
       { property: "og:title", content: "قصص المرضى — مجمع باعشن" },
       { property: "og:description", content: "تجارب علاج ملهمة من مرضانا." },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/media/stories" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/media/stories" }],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(storiesQuery);

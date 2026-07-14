@@ -9,7 +9,7 @@ import { PageHero } from "@/components/PageShell";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/specialties`;
 const PAGE_TITLE_AR = "التخصصات الطبية — مجمع باعشن الطبي بصبيا، جازان";
 const PAGE_DESC_AR =

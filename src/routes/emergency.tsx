@@ -12,9 +12,9 @@ export const Route = createFileRoute("/emergency")({
       { name: "description", content: "أرقام الطوارئ والاتصال العاجل بمجمع باعشن الطبي في صبيا، مع إرشادات السلامة قبل وصول الإسعاف." },
       { property: "og:title", content: "الطوارئ 24/7 — مجمع باعشن الطبي" },
       { property: "og:description", content: "أرقام وإرشادات الطوارئ." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/emergency" },
+      { property: "og:url", content: "https://bashenmedical.com/emergency" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/emergency" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/emergency" }],
   }),
   component: EmergencyPage,
 });

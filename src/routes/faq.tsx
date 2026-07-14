@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/faq`;
 const PAGE_TITLE_AR = "الأسئلة الشائعة — مجمع باعشن الطبي";
 const PAGE_DESC_AR =

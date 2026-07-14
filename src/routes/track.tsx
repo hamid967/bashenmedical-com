@@ -85,9 +85,9 @@ export const Route = createFileRoute("/track")({
       },
       { property: "og:title", content: "تتبع طلب الحجز — مجمع باعشن الطبي" },
       { property: "og:description", content: "تعرّف على حالة موعدك بسرعة." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/track" },
+      { property: "og:url", content: "https://bashenmedical.com/track" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/track" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/track" }],
   }),
   component: TrackPage,
 });

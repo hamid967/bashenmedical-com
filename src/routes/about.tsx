@@ -7,7 +7,7 @@ import { ShieldCheck, MapPin, Users, Award } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/about`;
 const PAGE_TITLE_AR = "من نحن — مجمع باعشن الطبي في صبيا، جازان";
 const PAGE_DESC_AR =

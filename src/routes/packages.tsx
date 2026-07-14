@@ -11,9 +11,9 @@ export const Route = createFileRoute("/packages")({
       { name: "description", content: "باقات فحص شامل، ما قبل الزواج، ما قبل التوظيف، صحة القلب، والسكري بأسعار تنافسية." },
       { property: "og:title", content: "الباقات الطبية والفحوصات الشاملة" },
       { property: "og:description", content: "باقات فحص طبية شاملة بأسعار تنافسية." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/packages" },
+      { property: "og:url", content: "https://bashenmedical.com/packages" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/packages" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/packages" }],
   }),
   component: PackagesPage,
 });

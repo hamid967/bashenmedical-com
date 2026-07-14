@@ -11,9 +11,9 @@ export const Route = createFileRoute("/media/news")({
       { name: "description", content: "آخر أخبار وفعاليات مجمع باعشن الطبي: افتتاحات، شراكات، حملات توعية، وإنجازات طبية." },
       { property: "og:title", content: "المركز الإعلامي — أخبار باعشن" },
       { property: "og:description", content: "متابعة أخبار مجمع باعشن الطبي." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/media/news" },
+      { property: "og:url", content: "https://bashenmedical.com/media/news" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/media/news" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/media/news" }],
   }),
   component: NewsPage,
 });

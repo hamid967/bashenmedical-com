@@ -35,11 +35,11 @@ export const Route = createFileRoute("/second-opinion")({
       },
       {
         property: "og:url",
-        content: "https://happy-hugger-fluff.lovable.app/second-opinion",
+        content: "https://bashenmedical.com/second-opinion",
       },
     ],
     links: [
-      { rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/second-opinion" },
+      { rel: "canonical", href: "https://bashenmedical.com/second-opinion" },
     ],
   }),
   component: SecondOpinionPage,

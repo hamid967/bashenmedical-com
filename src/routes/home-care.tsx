@@ -16,9 +16,9 @@ export const Route = createFileRoute("/home-care")({
       },
       { property: "og:title", content: "الرعاية المنزلية — مجمع باعشن الطبي" },
       { property: "og:description", content: "رعاية طبية متكاملة بمنزلك." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/home-care" },
+      { property: "og:url", content: "https://bashenmedical.com/home-care" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/home-care" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/home-care" }],
   }),
   component: HomeCarePage,
 });

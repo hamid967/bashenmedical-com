@@ -96,7 +96,9 @@ export function CentersStrip() {
                   {isAr ? c.short_ar : c.short_en}
                 </p>
                 <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white/90">
-                  {isAr ? "اعرف المزيد" : "Learn more"}
+                  {isAr
+                    ? `تفاصيل مركز ${c.name_ar}`
+                    : `Explore ${c.name_en}`}
                   {isAr ? <ArrowLeft className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                 </span>
               </div>

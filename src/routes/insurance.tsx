@@ -16,9 +16,9 @@ export const Route = createFileRoute("/insurance")({
       },
       { property: "og:title", content: "شركات التأمين المعتمدة" },
       { property: "og:description", content: "اطّلع على شركات التأمين الصحي المعتمدة." },
-      { property: "og:url", content: "https://happy-hugger-fluff.lovable.app/insurance" },
+      { property: "og:url", content: "https://bashenmedical.com/insurance" },
     ],
-    links: [{ rel: "canonical", href: "https://happy-hugger-fluff.lovable.app/insurance" }],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/insurance" }],
   }),
   component: InsurancePage,
 });

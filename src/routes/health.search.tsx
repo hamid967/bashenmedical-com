@@ -7,7 +7,7 @@ import { useMemo, useState, useEffect } from "react";
 import { z } from "zod";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
-const SITE_URL = "https://happy-hugger-fluff.lovable.app";
+const SITE_URL = "https://bashenmedical.com";
 
 const searchSchema = z.object({
   q: z.string().optional().default(""),

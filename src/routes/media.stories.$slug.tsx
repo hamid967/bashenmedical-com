@@ -30,7 +30,7 @@ export const Route = createFileRoute("/media/stories/$slug")({
         ...(s.hero_image_url ? [{ property: "og:image" as const, content: s.hero_image_url }] : []),
       ],
       links: [
-        { rel: "canonical", href: `https://happy-hugger-fluff.lovable.app/media/stories/${s.slug}` },
+        { rel: "canonical", href: `https://bashenmedical.com/media/stories/${s.slug}` },
       ],
     };
   },

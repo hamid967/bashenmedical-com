@@ -33,10 +33,9 @@ import { JazanDivider } from "@/components/jazan/JazanDivider";
 import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 
 const HOME_URL = "https://bashenmedical.com/";
-const HOME_TITLE =
-  "مجمع باعشن الطبي بصبيا جازان — حجز أطباء استشاريين وصيدلية | Baeshen Medical";
+const HOME_TITLE = "مجمع باعشن الطبي بصبيا جازان | Baeshen Medical";
 const HOME_DESC =
-  "مجمع باعشن الطبي في صبيا، جازان — معتمد من CBAHI. احجز موعدك مع استشاريين في الباطنة والأطفال والنساء والولادة والأسنان والعيون، واطلب دواءك من صيدلياتنا مع خدمة رعاية منزلية.";
+  "مجمع باعشن الطبي في صبيا، جازان — معتمد من CBAHI. احجز مع استشاريين في الباطنة والأطفال والنساء والأسنان، واطلب دواءك مع رعاية منزلية.";
 const HOME_OG_IMAGE = `https://bashenmedical.com${ogHomeAsset.url}`;
 const OG_IMAGE_ALT_AR =
   "بطاقة مشاركة مجمع باعشن الطبي في صبيا، جازان — معتمد من CBAHI مع اسم المجمع وشعار الهلال والسمّاعة";

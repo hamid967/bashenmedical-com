@@ -47,7 +47,7 @@ export const Route = createFileRoute("/branches/$slug")({
     ]
       .filter(Boolean)
       .join("، ");
-    const url = `https://happy-hugger-fluff.lovable.app/branches/${params.slug}`;
+    const url = `https://bashenmedical.com/branches/${params.slug}`;
     const image = b.hero_image_url ?? undefined;
 
     const jsonLd: Record<string, unknown> = {
