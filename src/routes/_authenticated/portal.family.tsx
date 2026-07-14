@@ -467,7 +467,7 @@ function DependentCard({
               toast.warning(t("incomplete_title", lang), {
                 description: `${t("incomplete_body", lang)} ${missing
                   .map((k) => t(k, lang))
-                  .join("، ")}`,
+                  .join(T.list_separator[lang])}`,
               });
               onEdit();
             }}
