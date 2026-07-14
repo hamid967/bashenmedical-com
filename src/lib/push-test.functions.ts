@@ -12,6 +12,13 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+// Bounded, JSON-safe primitive tree — prevents unbounded/huge payloads and
+// non-serializable values from reaching the push service.
+const DataPrimitive = z.union([z.string().max(500), z.number(), z.boolean(), z.null()]);
+const DataValue: z.ZodType<unknown> = z.lazy(() =>
+  z.union([DataPrimitive, z.array(DataValue).max(20), z.record(z.string().max(64), DataValue)]),
+);
+
 const TestPushInput = z.object({
   title: z.string().trim().min(1).max(120).optional(),
   body: z.string().trim().min(1).max(400).optional(),
@@ -22,6 +29,7 @@ const TestPushInput = z.object({
     .regex(/^\/[^\s]*$/, "Path must start with /")
     .optional(),
   requireInteraction: z.boolean().optional(),
+  data: z.record(z.string().max(64), DataValue).optional(),
 });
 
 type DeliveryResult = {
