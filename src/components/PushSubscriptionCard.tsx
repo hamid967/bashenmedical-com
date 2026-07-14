@@ -515,9 +515,7 @@ export function PushSubscriptionCard() {
 
 
       {push.state === "denied" && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          تم رفض الإذن سابقًا. افتح إعدادات الموقع في المتصفح واسمح بالإشعارات ثم أعد المحاولة.
-        </p>
+        <PermissionDeniedGuide onRetry={retryPermission} retrying={retryingPermission} />
       )}
     </div>
   );
