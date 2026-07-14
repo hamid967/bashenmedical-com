@@ -197,7 +197,7 @@ export const logRefundReceiptDownload = createServerFn({ method: "POST" })
     // Verify the refund belongs to the caller before logging (RLS on refunds enforces this too)
     const { data: refund, error: refundErr } = await supabase
       .from("refunds")
-      .select("id, requested_by, payment_id, amount, status")
+      .select("id, requested_by, payment_id, amount, status, receipt_reference")
       .eq("id", data.refund_id)
       .maybeSingle();
     if (refundErr) throw new Error(refundErr.message);
@@ -205,9 +205,6 @@ export const logRefundReceiptDownload = createServerFn({ method: "POST" })
       throw new Error("Not authorized to log this refund receipt.");
     }
 
-    const req = (globalThis as any).Request
-      ? undefined
-      : undefined;
     // Best-effort user agent / IP capture
     let userAgent: string | null = null;
     let ipAddress: string | null = null;
@@ -238,6 +235,7 @@ export const logRefundReceiptDownload = createServerFn({ method: "POST" })
         field_count: data.field_count,
         payment_id: refund.payment_id,
         refund_amount: refund.amount,
+        receipt_reference: refund.receipt_reference,
         downloaded_at: new Date().toISOString(),
       },
     });
