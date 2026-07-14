@@ -1167,13 +1167,14 @@ function DeleteDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
+            data-dep-del-cancel="true"
             disabled={busy}
-
-            className="font-semibold border-2"
-            autoFocus
+            aria-disabled={busy}
+            className="font-semibold border-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {T.del_keep[lang]}
           </AlertDialogCancel>
+
           <AlertDialogAction
             disabled={!canDelete}
             onClick={(e) => {
