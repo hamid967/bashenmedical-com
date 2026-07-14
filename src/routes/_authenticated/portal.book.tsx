@@ -135,6 +135,19 @@ function BookPage() {
     date: string;
     time: string;
   }>(null);
+  const [providerId, setProviderId] = useState<string>("");
+  const [policyNumber, setPolicyNumber] = useState<string>("");
+  const [verify, setVerify] = useState<null | {
+    ok: boolean;
+    eligible: boolean;
+    message: string;
+    consultation_fee: number | null;
+    coverage_percent: number | null;
+    covered_amount: number | null;
+    estimated_cost: number | null;
+    patient_share: number | null;
+  }>(null);
+
 
   // When a dependent is selected via query param, prefill the patient fields
   // with their info (and keep them in sync if the dependent switches).
