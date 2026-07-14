@@ -83,6 +83,33 @@ function InsurancePage() {
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
+  const [errors, setErrors] = useState<{ provider?: string; policyNo?: string; customName?: string }>({});
+
+  /** Return validation errors keyed by field, empty when valid. */
+  const validate = (): typeof errors => {
+    const e: typeof errors = {};
+    const hasProvider = providerId !== "";
+    const isCustom = providerId === "__custom__";
+    const trimmedCustom = customName.trim();
+    const trimmedPolicy = policyNo.trim().toUpperCase();
+
+    if (isCustom) {
+      if (trimmedCustom.length < 2) e.customName = "اسم الشركة قصير جدًا (حد أدنى حرفان)";
+      else if (trimmedCustom.length > 120) e.customName = "اسم الشركة طويل جدًا";
+    }
+
+    if (hasProvider) {
+      if (!trimmedPolicy) e.policyNo = "رقم البوليصة مطلوب عند اختيار جهة تأمين";
+      else if (trimmedPolicy.length < 4) e.policyNo = "رقم البوليصة قصير جدًا (حد أدنى ٤ خانات)";
+      else if (trimmedPolicy.length > 64) e.policyNo = "رقم البوليصة طويل جدًا";
+      else if (!/^[A-Z0-9][A-Z0-9\-/]{2,63}$/.test(trimmedPolicy))
+        e.policyNo = "يُسمح بالأحرف الإنجليزية والأرقام والشرطات فقط (مثال: POL-123456)";
+    } else if (trimmedPolicy) {
+      e.policyNo = "اختر جهة التأمين أو احذف رقم البوليصة";
+    }
+    return e;
+  };
+
   const mut = useMutation({
     mutationFn: () => {
       const providerName =
@@ -92,7 +119,7 @@ function InsurancePage() {
       return updateMyProfile({
         data: {
           insurance_provider: (providerId ? providerName : null) as unknown as string,
-          insurance_policy_no: (policyNo.trim() || null) as unknown as string,
+          insurance_policy_no: (policyNo.trim().toUpperCase() || null) as unknown as string,
         },
       });
     },
@@ -101,9 +128,20 @@ function InsurancePage() {
       qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
       toast.success("تم حفظ بيانات التأمين");
       setDirty(false);
+      setErrors({});
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
   });
+
+  const onSave = () => {
+    const eMap = validate();
+    setErrors(eMap);
+    if (Object.keys(eMap).length > 0) {
+      toast.error("تحقّق من الحقول المميّزة بالأحمر");
+      return;
+    }
+    mut.mutate();
+  };
 
   const removeMut = useMutation({
     mutationFn: () =>
@@ -156,23 +194,62 @@ function InsurancePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block">
               <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">جهة التأمين</span>
-              <select value={providerId} onChange={(e) => { setProviderId(e.target.value); setDirty(true); }} className={inputCls}>
+              <select
+                value={providerId}
+                onChange={(e) => {
+                  setProviderId(e.target.value);
+                  setDirty(true);
+                  setErrors((x) => ({ ...x, provider: undefined, policyNo: undefined, customName: undefined }));
+                }}
+                className={`${inputCls} ${errors.provider ? "border-red-400 ring-1 ring-red-200" : ""}`}
+                aria-invalid={!!errors.provider}
+              >
                 <option value="">— بدون تأمين —</option>
                 {opts.providers.map((pr) => (
                   <option key={pr.id} value={pr.id}>{pr.name_ar}</option>
                 ))}
                 <option value="__custom__">أخرى…</option>
               </select>
+              {errors.provider && <FieldError msg={errors.provider} />}
             </label>
             <label className="block">
               <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">رقم البوليصة</span>
-              <input value={policyNo} onChange={(e) => { setPolicyNo(e.target.value); setDirty(true); }} maxLength={64}
-                dir="ltr" className={inputCls} placeholder="POL-XXXXXX" />
+              <input
+                value={policyNo}
+                onChange={(e) => {
+                  // Strip Arabic spaces and force to uppercase Latin/digits/-/ as typed.
+                  const v = e.target.value.replace(/\s+/g, "").toUpperCase();
+                  setPolicyNo(v);
+                  setDirty(true);
+                  setErrors((x) => ({ ...x, policyNo: undefined }));
+                }}
+                maxLength={64}
+                dir="ltr"
+                className={`${inputCls} ${errors.policyNo ? "border-red-400 ring-1 ring-red-200" : ""}`}
+                placeholder="POL-XXXXXX"
+                aria-invalid={!!errors.policyNo}
+                inputMode="text"
+                autoComplete="off"
+              />
+              {errors.policyNo
+                ? <FieldError msg={errors.policyNo} />
+                : <p className="mt-1 text-[10px] text-[color:var(--portal-ink-2)]">أحرف إنجليزية وأرقام وشرطات فقط، ٤-٦٤ خانة.</p>}
             </label>
             {providerId === "__custom__" && (
               <label className="block sm:col-span-2">
                 <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">اسم شركة التأمين</span>
-                <input value={customName} onChange={(e) => { setCustomName(e.target.value); setDirty(true); }} maxLength={120} className={inputCls} />
+                <input
+                  value={customName}
+                  onChange={(e) => {
+                    setCustomName(e.target.value);
+                    setDirty(true);
+                    setErrors((x) => ({ ...x, customName: undefined }));
+                  }}
+                  maxLength={120}
+                  className={`${inputCls} ${errors.customName ? "border-red-400 ring-1 ring-red-200" : ""}`}
+                  aria-invalid={!!errors.customName}
+                />
+                {errors.customName && <FieldError msg={errors.customName} />}
               </label>
             )}
           </div>
@@ -184,7 +261,7 @@ function InsurancePage() {
                 <ShieldOff className="h-4 w-4" />إزالة
               </button>
             )}
-            <button type="button" onClick={() => mut.mutate()} disabled={!dirty || mut.isPending}
+            <button type="button" onClick={onSave} disabled={!dirty || mut.isPending}
               className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white disabled:opacity-60"
               style={{ background: "var(--portal-gradient)" }}>
               {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -243,6 +320,9 @@ function InsurancePage() {
 const inputCls =
   "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30";
 
+function FieldError({ msg }: { msg: string }) {
+  return <p role="alert" className="mt-1 text-[11px] font-semibold text-red-600">{msg}</p>;
+}
 function Metric({ label, value, tone }: { label: string; value: string; tone?: "warn" }) {
   return (
     <div className={`rounded-lg border px-2 py-1.5 ${tone === "warn" ? "bg-amber-50 border-amber-100 text-amber-800" : "bg-slate-50 border-slate-200 text-[color:var(--portal-ink)]"}`}>
