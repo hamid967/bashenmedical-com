@@ -31,6 +31,7 @@ import {
   type PatientNotification,
 } from "@/lib/portal/notifications.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
 
 /* ----------------------------- query --------------------------------- */
 
