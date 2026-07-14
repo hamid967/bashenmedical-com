@@ -372,6 +372,11 @@ export function PushSubscriptionCard() {
         </div>
       )}
 
+      {/* Service Worker diagnostic panel */}
+      <SwDiagnosticPanel diag={swDiag} onRefresh={forceSwUpdate} refreshing={swRefreshing} />
+
+
+
       {/* Actions */}
       <div className="flex flex-wrap gap-2">
         {!push.subscribed ? (
