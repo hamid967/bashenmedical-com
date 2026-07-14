@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { Instagram, MapPin, Phone, Mail, Clock, ShieldCheck, Award, Siren } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
+import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
+
+const bmcLogo = bmcLogoAsset.url;
 
 export function Footer() {
   const { t, lang } = useI18n();
@@ -13,9 +16,15 @@ export function Footer() {
         {/* Brand */}
         <div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground font-black">
-              ب
-            </div>
+            <img
+              src={bmcLogo}
+              alt={isAr ? SITE.nameAr : SITE.nameEn}
+              width={44}
+              height={44}
+              className="h-11 w-11 object-contain"
+              loading="lazy"
+              decoding="async"
+            />
             <div className="text-sm font-bold">{isAr ? SITE.nameAr : SITE.nameEn}</div>
           </div>
           <p className="text-sm text-muted-foreground leading-6 mb-4">
