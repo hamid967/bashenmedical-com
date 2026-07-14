@@ -60,6 +60,8 @@ const profileQuery = queryOptions({
 
 const SearchSchema = z.object({
   forDependent: z.string().uuid().optional(),
+  doctorId: z.string().uuid().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/portal/book")({
