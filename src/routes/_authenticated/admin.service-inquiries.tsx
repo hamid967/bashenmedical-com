@@ -27,6 +27,7 @@ import {
   notifyInquiryPatient,
   closeInquiry,
 } from "@/lib/admin/service-inquiries.functions";
+import { InquiryAttachments } from "@/components/inquiry/InquiryAttachments";
 
 export const Route = createFileRoute("/_authenticated/admin/service-inquiries")({
   head: () => ({
