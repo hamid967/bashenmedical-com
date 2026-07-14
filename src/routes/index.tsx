@@ -489,11 +489,11 @@ function HomePage() {
                   <Link
                     to="/book"
                     search={{ specialty: s.slug }}
-                    className="glass-fut neon-glow-hover group block h-full p-5"
+                    className="glass-fut neon-glow-hover group block h-full p-5 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25 hover:ring-[var(--jazan-gold,#C7A46B)]/60 transition"
                   >
-                    <div className="grid h-11 w-11 place-items-center rounded-xl border border-[var(--fut-border)] bg-white/[0.04] text-[color:var(--neon-teal)] transition group-hover:border-[var(--neon-teal)]">
+                    <JazanIconFrame size="sm">
                       <Stethoscope className="h-5 w-5" />
-                    </div>
+                    </JazanIconFrame>
                     <div className="mt-3 text-sm font-semibold text-[color:var(--fut-ink)]">
                       {isAr ? s.name_ar : s.name_en}
                     </div>
@@ -506,6 +506,7 @@ function HomePage() {
             </StaggerReveal>
           </SkeletonSwap>
         </div>
+        <div className="container-app"><JazanDivider variant="subtle" className="mt-16" /></div>
       </section>
 
       {/* ===== ANNOUNCEMENTS ===== */}
