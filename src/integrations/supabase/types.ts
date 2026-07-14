@@ -5391,6 +5391,11 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_show"
+        | "held"
+        | "pending_verification"
+        | "pending_payment"
+        | "checked_in"
+        | "in_progress"
       attachment_category:
         | "lab"
         | "imaging"
@@ -5613,6 +5618,11 @@ export const Constants = {
         "completed",
         "cancelled",
         "no_show",
+        "held",
+        "pending_verification",
+        "pending_payment",
+        "checked_in",
+        "in_progress",
       ],
       attachment_category: [
         "lab",
