@@ -405,7 +405,38 @@ export function PushSubscriptionCard() {
 
 
 
+      {/* Stale subscription banner — expired or endpoint rotated */}
+      {push.stale && (
+        <div className="mb-4 flex flex-wrap items-start justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50/70 p-3 dark:border-amber-900 dark:bg-amber-950/30">
+          <div className="flex items-start gap-2">
+            <RotateCcw className="mt-0.5 size-4 text-amber-700 dark:text-amber-300" />
+            <div className="text-xs text-amber-900 dark:text-amber-100">
+              <div className="font-semibold">
+                {push.stale === "expired"
+                  ? "انتهت صلاحية الاشتراك"
+                  : "تغيّر endpoint الاشتراك"}
+              </div>
+              <div className="mt-0.5 text-amber-800/80 dark:text-amber-200/80">
+                {push.stale === "expired"
+                  ? "لن تصل الإشعارات حتى يتم تجديد الاشتراك مع مزوّد المتصفح."
+                  : "قام المتصفح بتدوير endpoint الدفع. أعد الاشتراك لتحديث الحفظ على الخادم."}
+              </div>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => void push.resubscribe()}
+            disabled={push.busy}
+            className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {push.busy ? <Loader2 className="size-3.5 animate-spin" /> : <RotateCcw className="size-3.5" />}
+            إعادة الاشتراك
+          </button>
+        </div>
+      )}
+
       {/* Actions */}
+
       <div className="flex flex-wrap gap-2">
         {!push.subscribed ? (
           <button
