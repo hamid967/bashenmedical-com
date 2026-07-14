@@ -190,7 +190,7 @@ export const logRefundReceiptDownload = createServerFn({ method: "POST" })
     // Verify the refund belongs to the caller before logging (RLS on refunds enforces this too)
     const { data: refund, error: refundErr } = await supabase
       .from("refunds")
-      .select("id, requested_by, invoice_id, amount, status")
+      .select("id, requested_by, payment_id, amount, status")
       .eq("id", data.refund_id)
       .maybeSingle();
     if (refundErr) throw new Error(refundErr.message);
