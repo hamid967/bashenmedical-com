@@ -11,6 +11,7 @@ import {
   type RecordsAiSummary,
 } from "@/lib/portal/records.functions";
 import { Badge } from "@/components/ui/badge";
+import { DemoBadge } from "@/components/DemoBadge";
 import {
   Activity,
   AlertTriangle,
