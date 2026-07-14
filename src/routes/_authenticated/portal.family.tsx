@@ -232,7 +232,7 @@ function FamilyPage() {
   const langMutation = useMutation({
     mutationFn: (next: Lang) => updateMyProfile({ data: { preferred_language: next } }),
     onSuccess: (_data, next) => {
-      qc.setQueryData(profileQuery.queryKey, (old: typeof profile) =>
+      qc.setQueryData(profileQuery.queryKey, (old) =>
         old ? { ...old, preferred_language: next } : old,
       );
       qc.invalidateQueries({ queryKey: ["portal"] });
