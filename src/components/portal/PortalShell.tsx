@@ -53,6 +53,7 @@ const NAV: NavItem[] = [
   { to: "/portal/complaints", icon: MessageSquareWarning, label_ar: "الشكاوى والمقترحات", label_en: "Complaints" },
   { to: "/portal/consents", icon: ShieldCheck, label_ar: "الموافقات والخصوصية", label_en: "Consents & Privacy" },
   { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
+  { to: "/portal/sessions", icon: ShieldCheck, label_ar: "الجلسات النشطة", label_en: "Active Sessions" },
   { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
 ];
 

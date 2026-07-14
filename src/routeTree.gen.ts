@@ -104,6 +104,7 @@ import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedPortalSettingsRouteImport } from './routes/_authenticated/portal.settings'
+import { Route as AuthenticatedPortalSessionsRouteImport } from './routes/_authenticated/portal.sessions'
 import { Route as AuthenticatedPortalScheduleRouteImport } from './routes/_authenticated/portal.schedule'
 import { Route as AuthenticatedPortalReportsRouteImport } from './routes/_authenticated/portal.reports'
 import { Route as AuthenticatedPortalReminderPreferencesRouteImport } from './routes/_authenticated/portal.reminder-preferences'
@@ -651,6 +652,12 @@ const AuthenticatedPortalSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedPortalSessionsRoute =
+  AuthenticatedPortalSessionsRouteImport.update({
+    id: '/sessions',
+    path: '/sessions',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedPortalScheduleRoute =
   AuthenticatedPortalScheduleRouteImport.update({
     id: '/schedule',
@@ -1029,6 +1036,7 @@ export interface FileRoutesByFullPath {
   '/portal/reminder-preferences': typeof AuthenticatedPortalReminderPreferencesRoute
   '/portal/reports': typeof AuthenticatedPortalReportsRouteWithChildren
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
+  '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1167,6 +1175,7 @@ export interface FileRoutesByTo {
   '/portal/reminder-preferences': typeof AuthenticatedPortalReminderPreferencesRoute
   '/portal/reports': typeof AuthenticatedPortalReportsRouteWithChildren
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
+  '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -1309,6 +1318,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/reminder-preferences': typeof AuthenticatedPortalReminderPreferencesRoute
   '/_authenticated/portal/reports': typeof AuthenticatedPortalReportsRouteWithChildren
   '/_authenticated/portal/schedule': typeof AuthenticatedPortalScheduleRoute
+  '/_authenticated/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -1451,6 +1461,7 @@ export interface FileRouteTypes {
     | '/portal/reminder-preferences'
     | '/portal/reports'
     | '/portal/schedule'
+    | '/portal/sessions'
     | '/portal/settings'
     | '/media/stories/$slug'
     | '/admin/'
@@ -1589,6 +1600,7 @@ export interface FileRouteTypes {
     | '/portal/reminder-preferences'
     | '/portal/reports'
     | '/portal/schedule'
+    | '/portal/sessions'
     | '/portal/settings'
     | '/media/stories/$slug'
     | '/admin'
@@ -1730,6 +1742,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/reminder-preferences'
     | '/_authenticated/portal/reports'
     | '/_authenticated/portal/schedule'
+    | '/_authenticated/portal/sessions'
     | '/_authenticated/portal/settings'
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
@@ -2481,6 +2494,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalSettingsRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/sessions': {
+      id: '/_authenticated/portal/sessions'
+      path: '/sessions'
+      fullPath: '/portal/sessions'
+      preLoaderRoute: typeof AuthenticatedPortalSessionsRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/_authenticated/portal/schedule': {
       id: '/_authenticated/portal/schedule'
       path: '/schedule'
@@ -2896,6 +2916,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalReminderPreferencesRoute: typeof AuthenticatedPortalReminderPreferencesRoute
   AuthenticatedPortalReportsRoute: typeof AuthenticatedPortalReportsRouteWithChildren
   AuthenticatedPortalScheduleRoute: typeof AuthenticatedPortalScheduleRoute
+  AuthenticatedPortalSessionsRoute: typeof AuthenticatedPortalSessionsRoute
   AuthenticatedPortalSettingsRoute: typeof AuthenticatedPortalSettingsRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
 }
@@ -2925,6 +2946,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
     AuthenticatedPortalReminderPreferencesRoute,
   AuthenticatedPortalReportsRoute: AuthenticatedPortalReportsRouteWithChildren,
   AuthenticatedPortalScheduleRoute: AuthenticatedPortalScheduleRoute,
+  AuthenticatedPortalSessionsRoute: AuthenticatedPortalSessionsRoute,
   AuthenticatedPortalSettingsRoute: AuthenticatedPortalSettingsRoute,
   AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
 }
