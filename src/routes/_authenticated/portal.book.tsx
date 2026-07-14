@@ -408,6 +408,53 @@ function BookPage() {
     );
   }
 
+  // Guard: booking for a dependent whose required data is incomplete.
+  const dependentMissing: string[] = dependent
+    ? [
+        ...(!dependent.national_id || !/^\d{10}$/.test(dependent.national_id) ? ["رقم الهوية"] : []),
+        ...(!dependent.phone || !/^(?:\+?966|0)?5\d{8}$/.test(dependent.phone) ? ["رقم الجوال"] : []),
+      ]
+    : [];
+  if (dependent && dependentMissing.length > 0) {
+    return (
+      <div className="max-w-2xl mx-auto">
+        <div className="glass-card p-8 text-center">
+          <div className="mx-auto h-16 w-16 rounded-2xl grid place-items-center bg-amber-50 text-amber-600 mb-4">
+            <ShieldAlert className="h-9 w-9" />
+          </div>
+          <h2 className="text-2xl font-bold">بيانات المُعال ناقصة</h2>
+          <p className="mt-2 text-[color:var(--portal-ink-2)]">
+            لا يمكن متابعة الحجز نيابةً عن <span className="font-semibold text-[color:var(--portal-ink)]">{dependent.full_name}</span> قبل استكمال الحقول التالية:
+          </p>
+          <ul className="mt-3 inline-block text-right list-disc pr-6 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
+            {dependentMissing.map((m) => (
+              <li key={m}>{m}</li>
+            ))}
+          </ul>
+          <div className="mt-6 flex justify-center gap-3 flex-wrap">
+            <Link
+              to="/portal/family"
+              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              <UserRound className="h-4 w-4" />
+              استكمل بيانات المُعال
+            </Link>
+            <Link
+              to="/portal/book"
+              search={{}}
+              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-white"
+            >
+              حجز لنفسي بدلًا من ذلك
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
     <div className="space-y-6 pb-24 md:pb-6">
       <header className="flex items-center justify-between gap-3 flex-wrap">
