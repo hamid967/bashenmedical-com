@@ -8,6 +8,7 @@ import {
   SITE_URL,
 } from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
+import { PageHero } from "@/components/PageShell";
 
 const CONTACT_URL = `${SITE_URL}/contact`;
 
