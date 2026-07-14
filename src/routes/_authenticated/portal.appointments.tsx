@@ -332,6 +332,14 @@ function MyAppointmentsPage() {
               onFollowUp={() =>
                 setFollowFor({ id: a.id, doctor: a.doctor?.name_ar ?? null })
               }
+              onTimeline={() =>
+                setTimelineFor({
+                  id: a.id,
+                  doctor: a.doctor?.name_ar ?? null,
+                  date: a.appointment_date,
+                  time: hhmm(a.appointment_time),
+                })
+              }
               pending={confirmMut.isPending || cancelMut.isPending || reschedMut.isPending || checkInMut.isPending}
             />
           ))}
