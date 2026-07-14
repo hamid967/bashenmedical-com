@@ -26,6 +26,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { submitBooking, clearBookingIdempotencyKey } from "@/lib/booking-submit";
+import { getBookingSessionId } from "@/lib/booking-hold";
 import { Button } from "@/components/ui/button";
 
 import { fallback } from "@tanstack/zod-adapter";
