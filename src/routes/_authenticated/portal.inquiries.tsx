@@ -145,6 +145,8 @@ function MyInquiriesPage() {
     onSuccess: () => {
       toast.success("تم ربط الطلب بحسابك بنجاح");
       qc.invalidateQueries({ queryKey: ["portal", "my-inquiries"] });
+      qc.invalidateQueries({ queryKey: ["portal", "my-notifications"] });
+      qc.invalidateQueries({ queryKey: ["notifications"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
