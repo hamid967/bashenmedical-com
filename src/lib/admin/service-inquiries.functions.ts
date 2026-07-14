@@ -13,12 +13,24 @@ type Role =
   | "support_agent"
   | "reception";
 
+async function assertHasRole(
+  supabase: any,
+  userId: string,
+  role: Role = "admin",
+) {
+  const { data, error } = await supabase.rpc("has_role", {
+    _user_id: userId,
+    _role: role,
+  });
+  if (error) throw new Error("تعذّر التحقق من الصلاحية.");
+  if (!data) throw new Error("ليست لديك الصلاحية لإدارة استفسارات الخدمات.");
+  return true;
+}
+
 async function ensureStaff(supabase: any, userId: string) {
+  await assertHasRole(supabase, userId, "admin");
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (data ?? []).map((r: any) => r.role as Role);
-  const ok = roles.some((r: Role) => ["admin", "super_admin", "support_agent", "reception"].includes(r));
-  if (!ok) throw new Error("ليست لديك الصلاحية لإدارة استفسارات الخدمات.");
-  return roles;
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 
 const STATUSES = [
