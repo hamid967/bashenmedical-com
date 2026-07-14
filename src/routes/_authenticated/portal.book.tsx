@@ -364,6 +364,12 @@ function BookPage() {
             <CheckCircle2 className="h-9 w-9" />
           </div>
           <h2 className="text-2xl font-bold">تم تأكيد حجزك</h2>
+          {dependent && (
+            <div className="mt-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-primary)]">
+              <UserRound className="h-3.5 w-3.5" />
+              حجز نيابةً عن: <span className="font-bold">{dependent.full_name}</span>
+            </div>
+          )}
           <p className="mt-2 text-[color:var(--portal-ink-2)]">
             سنرسل لك تذكيرًا قبل الموعد. يمكنك متابعة تفاصيل الحجز من الأسفل.
           </p>
