@@ -344,20 +344,10 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { appt, scope } = await loadOwnedAppointment(supabase, userId, data.id);
 
-    if (appt.status === "cancelled" || appt.status === "completed" || appt.status === "no_show") {
-      throw new Error("لا يمكن تسجيل الحضور لهذا الموعد.");
-    }
-
-    // Riyadh time (UTC+3) window
-    const [y, mo, d] = String(appt.appointment_date).split("-").map(Number);
-    const [hh, mm] = String(appt.appointment_time).slice(0, 5).split(":").map(Number);
-    const apptUTC = Date.UTC(y, mo - 1, d, hh - 3, mm);
-    const now = Date.now();
-    const diffMin = (now - apptUTC) / 60000;
-    if (diffMin < -60) throw new Error("تسجيل الحضور متاح قبل الموعد بـ 60 دقيقة.");
-    if (diffMin > 30) throw new Error("انتهت نافذة تسجيل الحضور. يرجى مراجعة الاستقبال.");
-
-    // Idempotent: return existing check-in if present
+    // 1) Idempotency first: if a check-in row already exists for this
+    // appointment, return it — do not create a duplicate and do not
+    // re-evaluate the time window (a patient who checked in on time
+    // should still get their number back even after the window closes).
     const existing = await supabase
       .from("patient_check_ins")
       .select("id, queue_number, status, checked_in_at")
@@ -375,6 +365,47 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
         checked_in_at: existing.data.checked_in_at as string,
       };
     }
+
+    // 2) Eligibility by appointment status
+    if (appt.status === "cancelled") {
+      throw new Error("لا يمكن تسجيل الحضور: هذا الموعد ملغى.");
+    }
+    if (appt.status === "completed") {
+      throw new Error("لا يمكن تسجيل الحضور: هذا الموعد مكتمل بالفعل.");
+    }
+    if (appt.status === "no_show") {
+      throw new Error("لا يمكن تسجيل الحضور: تم تسجيل عدم الحضور لهذا الموعد.");
+    }
+    if (appt.status === "checked_in" || appt.status === "in_progress") {
+      // Defensive: appointment marked checked_in but no check-in row exists.
+      throw new Error("تم تسجيل حضورك مسبقًا لهذا الموعد.");
+    }
+    if (appt.status !== "new" && appt.status !== "confirmed") {
+      throw new Error("هذا الموعد غير مؤهّل لتسجيل الحضور حاليًا.");
+    }
+
+    // 3) Time window: Riyadh (UTC+3), −60 min → +30 min
+    const [y, mo, d] = String(appt.appointment_date).split("-").map(Number);
+    const [hh, mm] = String(appt.appointment_time).slice(0, 5).split(":").map(Number);
+    const apptUTC = Date.UTC(y, mo - 1, d, hh - 3, mm);
+    const now = Date.now();
+    const diffMin = (now - apptUTC) / 60000;
+    if (diffMin < -60) {
+      const untilOpen = Math.ceil(-diffMin - 60);
+      const h = Math.floor(untilOpen / 60);
+      const m = untilOpen % 60;
+      const pretty =
+        h > 0 ? `${h} ساعة${m ? ` و${m} دقيقة` : ""}` : `${m} دقيقة`;
+      throw new Error(
+        `تسجيل الحضور يفتح قبل الموعد بـ 60 دقيقة. تبقّى ${pretty}.`,
+      );
+    }
+    if (diffMin > 30) {
+      throw new Error(
+        "انتهت نافذة تسجيل الحضور الرقمي. يرجى التوجّه إلى الاستقبال لتسجيل الحضور يدويًا.",
+      );
+    }
+
 
     // Compute next queue number for the doctor/branch today
     const { data: existingToday } = await supabase
