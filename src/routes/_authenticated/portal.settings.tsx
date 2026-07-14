@@ -12,6 +12,7 @@ import {
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { MutationErrorBanner } from "@/components/portal/MutationErrorBanner";
+import { usePushNotifications } from "@/hooks/usePushNotifications";
 
 const profileQuery = queryOptions({
   queryKey: ["portal", "my-profile-full"],
