@@ -199,12 +199,13 @@ function KpiCard({
 
 type RefundRow = Awaited<ReturnType<typeof listMyRefunds>>["refunds"][number];
 
-function RefundRow({ r }: { r: RefundRow }) {
+function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
   const qc = useQueryClient();
   const cancelFn = useServerFn(cancelMyRefund);
   const meta = statusMeta(r.status);
   const Icon = meta.icon;
   const canCancel = r.status === "pending";
+  const lastUpdate = r.processed_at ?? r.updated_at;
 
   const mutation = useMutation({
     mutationFn: () => cancelFn({ data: { id: r.id } }),
@@ -217,10 +218,14 @@ function RefundRow({ r }: { r: RefundRow }) {
 
   return (
     <li className="mag-card mag-card-hover p-4 sm:p-5 flex flex-wrap items-center gap-4">
-      <div className={`h-11 w-11 rounded-xl grid place-items-center ${meta.cls}`}>
+      <button
+        onClick={onOpen}
+        className={`h-11 w-11 rounded-xl grid place-items-center ${meta.cls} hover:opacity-90`}
+        aria-label="تفاصيل الطلب"
+      >
         <Icon className="h-5 w-5" />
-      </div>
-      <div className="flex-1 min-w-[220px]">
+      </button>
+      <button onClick={onOpen} className="flex-1 min-w-[220px] text-start">
         <div className="font-semibold flex items-center gap-2">
           <ReceiptText className="h-4 w-4 text-[color:var(--mag-ink-3)]" />
           {r.invoice_number ? `فاتورة #${r.invoice_number}` : "دفعة"}
@@ -233,10 +238,11 @@ function RefundRow({ r }: { r: RefundRow }) {
             السبب: {r.reason}
           </div>
         )}
-        <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-1">
-          طُلب في {fmtDate(r.created_at)}
+        <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <span>طُلب في {fmtDate(r.created_at)}</span>
+          <span>· آخر تحديث: {fmtDateTime(lastUpdate)}</span>
         </div>
-      </div>
+      </button>
       <div className="text-end">
         <div className="text-lg font-bold">{fmtSAR(r.amount, r.currency)}</div>
         <div className="text-xs text-[color:var(--mag-ink-3)]">
@@ -244,6 +250,14 @@ function RefundRow({ r }: { r: RefundRow }) {
         </div>
       </div>
       <span className={`mag-chip ${meta.cls}`}>{meta.label}</span>
+      <button
+        onClick={onOpen}
+        className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
+      >
+        <FileText className="h-3.5 w-3.5" />
+        التفاصيل
+        <ChevronLeft className="h-3.5 w-3.5" />
+      </button>
       {canCancel && (
         <button
           onClick={() => mutation.mutate()}
@@ -255,6 +269,197 @@ function RefundRow({ r }: { r: RefundRow }) {
         </button>
       )}
     </li>
+  );
+}
+
+/* ---------------- details drawer with timeline ---------------- */
+
+type TimelineStep = {
+  key: string;
+  title: string;
+  at: string | null;
+  note?: string | null;
+  state: "done" | "current" | "upcoming" | "skipped" | "failed";
+  icon: any;
+};
+
+function buildTimeline(r: RefundRow): TimelineStep[] {
+  const status = r.status as Status;
+  const lastAt = r.processed_at ?? r.updated_at;
+
+  const submitted: TimelineStep = {
+    key: "submitted",
+    title: "تم إرسال الطلب",
+    at: r.created_at,
+    note: r.reason ? `سبب الطلب: ${r.reason}` : null,
+    state: "done",
+    icon: Send,
+  };
+
+  if (status === "pending") {
+    return [
+      submitted,
+      { key: "review", title: "قيد مراجعة المحاسبة", at: null, state: "current", icon: Clock,
+        note: "سيتم مراجعة الطلب خلال أيام العمل الرسمية." },
+      { key: "processed", title: "المعالجة والصرف", at: null, state: "upcoming", icon: CheckCircle2 },
+    ];
+  }
+
+  if (status === "approved") {
+    return [
+      submitted,
+      { key: "review", title: "تمت الموافقة على الطلب", at: lastAt, state: "done", icon: CheckCircle2,
+        note: r.decision_reason ?? null },
+      { key: "processed", title: "قيد الصرف", at: null, state: "current", icon: RotateCcw,
+        note: "جارٍ تحويل المبلغ إلى وسيلة الدفع الأصلية." },
+    ];
+  }
+
+  if (status === "processed") {
+    return [
+      submitted,
+      { key: "review", title: "تمت الموافقة على الطلب", at: null, state: "done", icon: CheckCircle2 },
+      { key: "processed", title: "تمت معالجة الاسترداد", at: lastAt, state: "done", icon: CheckCircle2,
+        note: r.decision_reason ?? "تم إعادة المبلغ إلى وسيلة الدفع الأصلية." },
+    ];
+  }
+
+  if (status === "rejected") {
+    return [
+      submitted,
+      { key: "review", title: "تم رفض الطلب", at: lastAt, state: "failed", icon: XCircle,
+        note: r.decision_reason ?? "لم يتم ذكر سبب. يرجى التواصل مع قسم المحاسبة." },
+      { key: "processed", title: "لن تتم المعالجة", at: null, state: "skipped", icon: Ban },
+    ];
+  }
+
+  // canceled
+  return [
+    submitted,
+    { key: "review", title: "تم إلغاء الطلب", at: lastAt, state: "failed", icon: Ban,
+      note: r.decision_reason ?? "تم إلغاء الطلب قبل اكتمال المراجعة." },
+    { key: "processed", title: "لن تتم المعالجة", at: null, state: "skipped", icon: Ban },
+  ];
+}
+
+function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void }) {
+  const qc = useQueryClient();
+  const cancelFn = useServerFn(cancelMyRefund);
+  const meta = statusMeta(r.status);
+  const steps = useMemo(() => buildTimeline(r), [r]);
+  const canCancel = r.status === "pending";
+
+  const mutation = useMutation({
+    mutationFn: () => cancelFn({ data: { id: r.id } }),
+    onSuccess: () => {
+      toast.success("تم إلغاء الطلب");
+      qc.invalidateQueries({ queryKey: ["portal", "refunds"] });
+      onClose();
+    },
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر إلغاء الطلب"),
+  });
+
+  return (
+    <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
+      <div className="relative ms-auto h-full w-full max-w-lg bg-white shadow-xl flex flex-col">
+        <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
+          <div className="font-bold">تفاصيل طلب الاسترداد</div>
+          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+          {/* Summary */}
+          <section className="mag-card p-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm text-[color:var(--mag-ink-3)]">
+                {r.invoice_number ? `فاتورة #${r.invoice_number}` : "دفعة"}
+              </div>
+              <span className={`mag-chip ${meta.cls}`}>{meta.label}</span>
+            </div>
+            <div className="flex items-end justify-between gap-3">
+              <div>
+                <div className="text-[11px] text-[color:var(--mag-ink-3)]">المبلغ المطلوب استرداده</div>
+                <div className="text-2xl font-bold">{fmtSAR(r.amount, r.currency)}</div>
+              </div>
+              <div className="text-end">
+                <div className="text-[11px] text-[color:var(--mag-ink-3)]">من دفعة</div>
+                <div className="text-sm font-semibold">{fmtSAR(r.payment_amount, r.currency)}</div>
+                <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
+                  {r.payment_method ?? "—"} · دُفعت في {fmtDate(r.payment_paid_at)}
+                </div>
+              </div>
+            </div>
+            <div className="pt-2 mt-1 border-t border-[color:var(--mag-line)] text-[11px] text-[color:var(--mag-ink-3)] flex flex-wrap gap-x-4 gap-y-1">
+              <span>معرّف الطلب: <span className="font-mono">{r.id.slice(0, 8)}…</span></span>
+              <span>آخر تحديث: {fmtDateTime(r.processed_at ?? r.updated_at)}</span>
+            </div>
+          </section>
+
+          {/* Timeline */}
+          <section>
+            <div className="text-sm font-semibold mb-3">مراحل الطلب</div>
+            <ol className="relative ms-3 border-s-2 border-[color:var(--mag-line)] space-y-5 ps-5">
+              {steps.map((s) => {
+                const Icon = s.icon;
+                const dot =
+                  s.state === "done" ? "bg-emerald-500 text-white"
+                  : s.state === "current" ? "bg-amber-500 text-white animate-pulse"
+                  : s.state === "failed" ? "bg-[color:var(--mag-danger)] text-white"
+                  : s.state === "skipped" ? "bg-slate-200 text-slate-400"
+                  : "bg-white text-[color:var(--mag-ink-3)] border border-[color:var(--mag-line)]";
+                const titleCls =
+                  s.state === "upcoming" || s.state === "skipped"
+                    ? "text-[color:var(--mag-ink-3)]"
+                    : "text-[color:var(--mag-ink-1)]";
+                return (
+                  <li key={s.key} className="relative">
+                    <span className={`absolute -start-[34px] top-0 h-7 w-7 rounded-full grid place-items-center ${dot}`}>
+                      <Icon className="h-3.5 w-3.5" />
+                    </span>
+                    <div className={`font-semibold text-sm ${titleCls}`}>{s.title}</div>
+                    <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
+                      {s.at ? fmtDateTime(s.at) : s.state === "current" ? "الآن" : "—"}
+                    </div>
+                    {s.note && (
+                      <div className={[
+                        "mt-2 text-xs rounded-lg p-3",
+                        s.state === "failed"
+                          ? "bg-red-50 text-[color:var(--mag-danger)]"
+                          : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]",
+                      ].join(" ")}>
+                        {s.note}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+            </ol>
+          </section>
+        </div>
+
+        {canCancel && (
+          <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
+            <button
+              onClick={onClose}
+              className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold"
+            >
+              إغلاق
+            </button>
+            <button
+              onClick={() => mutation.mutate()}
+              disabled={mutation.isPending}
+              className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+            >
+              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+              إلغاء طلب الاسترداد
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
