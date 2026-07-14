@@ -12,17 +12,16 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
+import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
 
 const bmcLogo = bmcLogoAsset.url;
 
 const STORAGE_KEY = "bmc_jazan_intro_last_v1";
 
-/** Editable defaults. A Super Admin panel can override these later. */
+/** Fallback defaults; live values come from JazanSettingsProvider. */
 export const INTRO_CONFIG = {
   enabled: true,
-  /** Show again after this many hours since last view (0 = every visit). */
   cooldownHours: 24 * 7,
-  /** Total cinematic length in ms (8–12s recommended). */
   durationMs: 10_000,
   textAr: {
     tagline: "من جازان… نعتني بصحتكم",
@@ -34,13 +33,13 @@ export const INTRO_CONFIG = {
   },
 };
 
-function shouldShow(): boolean {
-  if (!INTRO_CONFIG.enabled) return false;
+function shouldShow(enabled: boolean, cooldownHours: number): boolean {
+  if (!enabled) return false;
   try {
     const last = localStorage.getItem(STORAGE_KEY);
     if (!last) return true;
     const ageMs = Date.now() - Number(last);
-    return ageMs > INTRO_CONFIG.cooldownHours * 3_600_000;
+    return ageMs > cooldownHours * 3_600_000;
   } catch {
     return true;
   }
@@ -77,6 +76,8 @@ function readLang(): "ar" | "en" {
 }
 
 export function JazanIntro() {
+  const settings = useJazanSettings();
+  const introCfg = settings.intro;
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState<0 | 1 | 2 | 3 | 4>(0);
@@ -85,34 +86,32 @@ export function JazanIntro() {
 
   useEffect(() => {
     setLang(readLang());
-    if (!shouldShow()) return;
+    if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) return;
     setMounted(true);
-    // next frame → trigger fade-in
     requestAnimationFrame(() => setVisible(true));
-  }, []);
+  }, [introCfg.enabled, introCfg.cooldownHours]);
 
   useEffect(() => {
     if (!mounted) return;
     if (reduced) {
-      // Static poster: auto-dismiss after 3s
       const t = window.setTimeout(dismiss, 3_000);
       return () => window.clearTimeout(t);
     }
-    // Cinematic sequence: pattern → landscape → logo → tagline → brand → out
+    const total = Math.max(4_000, introCfg.durationMs);
     const seq: Array<{ t: number; phase: 0 | 1 | 2 | 3 | 4 }> = [
-      { t: 400, phase: 1 },
-      { t: 2_400, phase: 2 },
-      { t: 5_000, phase: 3 },
-      { t: 7_400, phase: 4 },
+      { t: Math.round(total * 0.04), phase: 1 },
+      { t: Math.round(total * 0.24), phase: 2 },
+      { t: Math.round(total * 0.5), phase: 3 },
+      { t: Math.round(total * 0.74), phase: 4 },
     ];
     const timers = seq.map(({ t, phase }) => window.setTimeout(() => setPhase(phase), t));
-    const end = window.setTimeout(dismiss, INTRO_CONFIG.durationMs);
+    const end = window.setTimeout(dismiss, total);
     return () => {
       timers.forEach(window.clearTimeout);
       window.clearTimeout(end);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mounted, reduced]);
+  }, [mounted, reduced, introCfg.durationMs]);
 
   const dismiss = () => {
     markSeen();
@@ -122,7 +121,10 @@ export function JazanIntro() {
 
   if (!mounted) return null;
   const isAr = lang === "ar";
-  const text = isAr ? INTRO_CONFIG.textAr : INTRO_CONFIG.textEn;
+  const text = isAr
+    ? { tagline: introCfg.taglineAr, brand: introCfg.headlineAr }
+    : { tagline: introCfg.taglineEn, brand: introCfg.headlineEn };
+  const logoSrc = introCfg.logoUrl?.trim() || bmcLogo;
 
   return (
     <div
@@ -162,7 +164,7 @@ export function JazanIntro() {
         <div className="absolute inset-0 grid place-items-center text-center px-6">
           <div className="max-w-md">
             <img
-              src={bmcLogo}
+              src={logoSrc}
               alt=""
               width={96}
               height={96}
@@ -177,7 +179,7 @@ export function JazanIntro() {
           </div>
         </div>
       ) : (
-        <CinematicStage phase={phase} text={text} />
+        <CinematicStage phase={phase} text={text} logoSrc={logoSrc} />
       )}
     </div>
   );
@@ -186,9 +188,11 @@ export function JazanIntro() {
 function CinematicStage({
   phase,
   text,
+  logoSrc,
 }: {
   phase: 0 | 1 | 2 | 3 | 4;
   text: { tagline: string; brand: string };
+  logoSrc: string;
 }) {
   return (
     <div className="absolute inset-0 grid place-items-center px-6 overflow-hidden">
@@ -294,7 +298,7 @@ function CinematicStage({
           }}
         >
           <img
-            src={bmcLogo}
+            src={logoSrc}
             alt=""
             width={96}
             height={96}

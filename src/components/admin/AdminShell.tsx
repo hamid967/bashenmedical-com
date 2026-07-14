@@ -84,6 +84,7 @@ const NAV: NavGroup[] = [
       { to: "/admin/super/monitoring", label: "صحة النظام (Super)", icon: Gauge, roles: ["admin"] },
       { to: "/admin/notification-logs", label: "سجلات الإشعارات", icon: Bell, roles: ["admin"] },
       { to: "/admin/super/permissions", label: "مصفوفة الصلاحيات (Super)", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/super/jazan-visual", label: "الهوية البصرية جازان (Super)", icon: Settings, roles: ["admin"] },
       { to: "/audit-log", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
       { to: "/clinic-settings", label: "إعدادات المجمع", icon: Settings, roles: ["admin"] },
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Settings, roles: ["admin"] },

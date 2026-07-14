@@ -149,6 +149,7 @@ import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './route
 import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_authenticated/orders-unified.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
+import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
 
@@ -918,6 +919,12 @@ const AuthenticatedAdminSuperMonitoringRoute =
     path: '/super/monitoring',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSuperJazanVisualRoute =
+  AuthenticatedAdminSuperJazanVisualRouteImport.update({
+    id: '/super/jazan-visual',
+    path: '/super/jazan-visual',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedPortalOrdersKindIdRoute =
   AuthenticatedPortalOrdersKindIdRouteImport.update({
     id: '/$kind/$id',
@@ -1057,6 +1064,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
@@ -1198,6 +1206,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
+  '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
@@ -1343,6 +1352,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/_authenticated/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
@@ -1488,6 +1498,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/patients/'
     | '/portal/'
+    | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
     | '/orders-unified/$kind/$id'
@@ -1629,6 +1640,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/patients'
     | '/portal'
+    | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
     | '/orders-unified/$kind/$id'
@@ -1773,6 +1785,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
+    | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
     | '/_authenticated/orders-unified/$kind/$id'
@@ -2835,6 +2848,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuperMonitoringRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/super/jazan-visual': {
+      id: '/_authenticated/admin/super/jazan-visual'
+      path: '/super/jazan-visual'
+      fullPath: '/admin/super/jazan-visual'
+      preLoaderRoute: typeof AuthenticatedAdminSuperJazanVisualRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/portal/orders/$kind/$id': {
       id: '/_authenticated/portal/orders/$kind/$id'
       path: '/$kind/$id'
@@ -2873,6 +2893,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminSuperJazanVisualRoute: typeof AuthenticatedAdminSuperJazanVisualRoute
   AuthenticatedAdminSuperMonitoringRoute: typeof AuthenticatedAdminSuperMonitoringRoute
   AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
 }
@@ -2885,6 +2906,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminSuperJazanVisualRoute:
+    AuthenticatedAdminSuperJazanVisualRoute,
   AuthenticatedAdminSuperMonitoringRoute:
     AuthenticatedAdminSuperMonitoringRoute,
   AuthenticatedAdminSuperPermissionsRoute:
