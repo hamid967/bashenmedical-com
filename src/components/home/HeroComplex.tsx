@@ -1,13 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
-// Desktop / landscape (16:9-ish)
-import heroAvif from "@/assets/baeshen-hero-complex.jpg?w=960;1280;1600;1920&format=avif&as=srcset";
-import heroWebp from "@/assets/baeshen-hero-complex.jpg?w=960;1280;1600;1920&format=webp&as=srcset";
-import heroJpg from "@/assets/baeshen-hero-complex.jpg?w=1600&format=jpg";
-// Mobile / portrait — art-directed vertical crop
-import heroMobileAvif from "@/assets/baeshen-hero-complex-mobile.jpg?w=480;640;800;960&format=avif&as=srcset";
-import heroMobileWebp from "@/assets/baeshen-hero-complex-mobile.jpg?w=480;640;800;960&format=webp&as=srcset";
-import heroMobileJpg from "@/assets/baeshen-hero-complex-mobile.jpg?w=800&format=jpg";
+// Doctors hero — matches Baeshen Medical Company reference design
+import heroAvif from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&format=avif&as=srcset";
+import heroWebp from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&format=webp&as=srcset";
+import heroJpg from "@/assets/baeshen-hero-doctors.jpg?w=1600&format=jpg";
+import heroMobileAvif from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&format=avif&as=srcset";
+import heroMobileWebp from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&format=webp&as=srcset";
+import heroMobileJpg from "@/assets/baeshen-hero-doctors.jpg?w=800&format=jpg";
 import { CalendarCheck, Phone } from "lucide-react";
 import { MedicalMotifs } from "./MedicalMotifs";
 

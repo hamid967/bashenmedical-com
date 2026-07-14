@@ -19,6 +19,9 @@ import { SITE } from "@/lib/site";
 import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
+
+const bmcLogo = bmcLogoAsset.url;
 
 type NavItem = {
   to: string;
@@ -118,9 +121,15 @@ export function Header() {
       {/* Main bar */}
       <div className="container-app flex h-16 items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 group shrink-0">
-          <div className="grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent text-primary-foreground font-black text-lg shadow-sm">
-            ب
-          </div>
+          <img
+            src={bmcLogo}
+            alt={isAr ? SITE.nameAr : SITE.nameEn}
+            width={44}
+            height={44}
+            className="h-11 w-11 object-contain"
+            loading="eager"
+            decoding="async"
+          />
           <div className="leading-tight">
             <div className="text-sm font-bold text-foreground">
               {isAr ? SITE.nameAr : SITE.nameEn}

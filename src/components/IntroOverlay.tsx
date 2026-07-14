@@ -9,7 +9,7 @@ import {
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
-import bmcLogoAsset from "@/assets/baeshen-logo-transparent.png.asset.json";
+import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import introNarrationAsset from "@/assets/intro-narration-ar.mp3.asset.json";
 import {
   DEFAULT_INTRO_SETTINGS, resolveIcon,

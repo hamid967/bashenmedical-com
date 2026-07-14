@@ -24,7 +24,7 @@ import heroImg from "@/assets/complex-hero.jpg";
 import lobbyImg from "@/assets/complex-lobby.jpg";
 import clinicImg from "@/assets/complex-clinic.jpg";
 import pharmacyImg from "@/assets/complex-pharmacy.jpg";
-import logoAsset from "@/assets/baeshen-logo.asset.json";
+import logoAsset from "@/assets/bmc-logo.jpg.asset.json";
 
 const logoImg = logoAsset.url;
 
