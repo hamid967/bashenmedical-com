@@ -72,6 +72,13 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
     const webpush = (await import("web-push")).default;
     webpush.setVapidDetails(subject, publicKey, privateKey);
 
+    // Merge user-supplied data into metadata; `url` stays authoritative from
+    // the validated top-level field so the SW's click handler keeps working.
+    const metadata: Record<string, unknown> = {
+      ...(data.data ?? {}),
+      url: data.url ?? (data.data as { url?: string } | undefined)?.url ?? "/portal/notifications",
+    };
+
     const payload = JSON.stringify({
       title: data.title ?? "إشعار تجريبي — Test push",
       body: data.body ?? "هذا اختبار حقيقي عبر web-push من الخادم.",
@@ -79,8 +86,9 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
       badge: "/favicon-32.png",
       tag: "push-test-server",
       requireInteraction: data.requireInteraction ?? false,
-      metadata: { url: data.url ?? "/portal/notifications" },
+      metadata,
     });
+
 
     const results: DeliveryResult[] = [];
     const staleEndpoints: string[] = [];
