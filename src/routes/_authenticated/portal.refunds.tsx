@@ -192,7 +192,38 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
 <title>إيصال استرداد ${r.receipt_reference ?? r.invoice_number ?? r.id.slice(0, 8)}</title>
 <style>${fontFaceCss}</style>
 <style>
-  @page { size: A4; margin: 16mm 14mm; }
+  /* A4 page with reserved bottom margin for the unified footer.
+     Chromium/Edge/Safari-TP support @page margin boxes with counter(page)/counter(pages). */
+  @page {
+    size: A4;
+    margin: 16mm 14mm 22mm;
+    @bottom-right {
+      content: "صفحة " counter(page, arabic-indic) " / " counter(pages, arabic-indic);
+      font-family: "Noto Naskh Arabic", "SF Arabic", "Segoe UI", Tahoma, sans-serif;
+      font-size: 10px; color: #64748b;
+      direction: rtl; unicode-bidi: isolate;
+      padding-top: 6mm;
+    }
+    @bottom-left {
+      content: "المرجع: ${refDisplay ?? "—"}";
+      font-family: "Noto Naskh Arabic", "SF Arabic", "Segoe UI", Tahoma, sans-serif;
+      font-size: 10px; color: #64748b;
+      direction: rtl; unicode-bidi: isolate;
+      padding-top: 6mm;
+    }
+    @bottom-center {
+      content: "Bashen Medical · بوابة المريض";
+      font-family: "Noto Kufi Arabic", "Noto Naskh Arabic", sans-serif;
+      font-size: 9.5px; color: #94a3b8;
+      padding-top: 6mm;
+    }
+    @top-right {
+      content: "إيصال طلب استرداد";
+      font-family: "Noto Kufi Arabic", "Noto Naskh Arabic", sans-serif;
+      font-size: 9.5px; color: #cbd5e1;
+      padding-bottom: 4mm;
+    }
+  }
   html, body { direction: rtl; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
