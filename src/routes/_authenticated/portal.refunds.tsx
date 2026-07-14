@@ -642,6 +642,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
   const meta = statusMeta(r.status);
   const steps = useMemo(() => buildTimeline(r), [r]);
   const canCancel = r.status === "pending";
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () => cancelFn({ data: { id: r.id } }),
