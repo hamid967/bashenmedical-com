@@ -14,7 +14,10 @@ import {
   reschedulePatientAppointment,
   requestFollowUp,
   performSelfCheckIn,
+  getAppointmentTimeline,
 } from "@/lib/portal/appointments.functions";
+import { useQuery } from "@tanstack/react-query";
+import { History } from "lucide-react";
 
 type Scope = "upcoming" | "past";
 type ApptStatus =
