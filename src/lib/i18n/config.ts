@@ -40,23 +40,34 @@ if (!i18n.isInitialized) {
 }
 
 /**
- * Read the visitor's preferred language from localStorage / navigator and
- * apply it. MUST only be called after hydration (from `useEffect`), never
- * during SSR or synchronous render.
+ * Read the visitor's stored language and apply it. MUST only be called from
+ * `useEffect` after hydration, never during SSR or synchronous render.
+ *
+ * Intentionally:
+ *  - ONLY honors an explicit `localStorage["lang"]` — never `navigator.language`.
+ *    Navigator-based detection creates unavoidable SSR/hydration mismatches
+ *    because the server cannot know the visitor's browser locale, and any
+ *    Arabic-default page would flash to English for en-* browsers.
+ *  - Defers the actual `changeLanguage` call via `setTimeout(..., 0)` so it
+ *    runs strictly AFTER React has committed the initial hydration pass,
+ *    even when nested Suspense boundaries hydrate progressively.
  */
 export function syncClientLanguage(): void {
   if (typeof window === "undefined") return;
+  let stored: string | null = null;
   try {
-    const stored = window.localStorage.getItem("lang");
-    const nav = window.navigator.language?.toLowerCase().split("-")[0];
-    const candidate = stored ?? nav ?? DEFAULT_LANG;
-    const next = (SUPPORTED_LANGS as readonly string[]).includes(candidate)
-      ? (candidate as Lang)
-      : DEFAULT_LANG;
-    if (i18n.language !== next) void i18n.changeLanguage(next);
+    stored = window.localStorage.getItem("lang");
   } catch {
-    /* localStorage may be blocked; keep DEFAULT_LANG */
+    /* localStorage may be blocked */
   }
+  if (!stored) return; // no explicit preference → keep DEFAULT_LANG
+  const next = (SUPPORTED_LANGS as readonly string[]).includes(stored)
+    ? (stored as Lang)
+    : DEFAULT_LANG;
+  if (i18n.language === next) return;
+  window.setTimeout(() => {
+    if (i18n.language !== next) void i18n.changeLanguage(next);
+  }, 0);
 }
 // Keep the LanguageDetector import referenced so tree-shaking / typecheck is
 // stable if we later re-introduce it; we intentionally don't wire it into i18n
