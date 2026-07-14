@@ -52,7 +52,10 @@ export default defineConfig({
     mcpPlugin(),
     VitePWA({
       strategies: "generateSW",
-      registerType: "autoUpdate",
+      // "prompt" tells vite-plugin-pwa to inject a SKIP_WAITING message
+      // listener into the generated SW so our in-app update prompt can
+      // activate the waiting worker on demand.
+      registerType: "prompt",
       injectRegister: null,
       manifest: false, // we ship /site.webmanifest manually
       filename: "sw.js",
