@@ -133,6 +133,7 @@ import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/publ
 import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_authenticated/orders-unified.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
+import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
 
 const WaitlistRoute = WaitlistRouteImport.update({
   id: '/waitlist',
@@ -805,6 +806,12 @@ const AuthenticatedPortalOrdersKindIdRoute =
     path: '/$kind/$id',
     getParentRoute: () => AuthenticatedPortalOrdersRoute,
   } as any)
+const AuthenticatedAdminSuperPermissionsAuditRoute =
+  AuthenticatedAdminSuperPermissionsAuditRouteImport.update({
+    id: '/audit',
+    path: '/audit',
+    getParentRoute: () => AuthenticatedAdminSuperPermissionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -919,7 +926,7 @@ export interface FileRoutesByFullPath {
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
-  '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRoute
+  '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
@@ -929,6 +936,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
 }
 export interface FileRoutesByTo {
@@ -1043,7 +1051,7 @@ export interface FileRoutesByTo {
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
-  '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRoute
+  '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
@@ -1053,6 +1061,7 @@ export interface FileRoutesByTo {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
 }
 export interface FileRoutesById {
@@ -1170,7 +1179,7 @@ export interface FileRoutesById {
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
-  '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRoute
+  '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/_authenticated/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
@@ -1180,6 +1189,7 @@ export interface FileRoutesById {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
 }
 export interface FileRouteTypes {
@@ -1307,6 +1317,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
     | '/api/public/insurance/verify'
+    | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1431,6 +1442,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
     | '/api/public/insurance/verify'
+    | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
   id:
     | '__root__'
@@ -1557,6 +1569,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
     | '/api/public/insurance/verify'
+    | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
   fileRoutesById: FileRoutesById
 }
@@ -2490,16 +2503,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalOrdersKindIdRouteImport
       parentRoute: typeof AuthenticatedPortalOrdersRoute
     }
+    '/_authenticated/admin/super/permissions/audit': {
+      id: '/_authenticated/admin/super/permissions/audit'
+      path: '/audit'
+      fullPath: '/admin/super/permissions/audit'
+      preLoaderRoute: typeof AuthenticatedAdminSuperPermissionsAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminSuperPermissionsRoute
+    }
   }
 }
 
+interface AuthenticatedAdminSuperPermissionsRouteChildren {
+  AuthenticatedAdminSuperPermissionsAuditRoute: typeof AuthenticatedAdminSuperPermissionsAuditRoute
+}
+
+const AuthenticatedAdminSuperPermissionsRouteChildren: AuthenticatedAdminSuperPermissionsRouteChildren =
+  {
+    AuthenticatedAdminSuperPermissionsAuditRoute:
+      AuthenticatedAdminSuperPermissionsAuditRoute,
+  }
+
+const AuthenticatedAdminSuperPermissionsRouteWithChildren =
+  AuthenticatedAdminSuperPermissionsRoute._addFileChildren(
+    AuthenticatedAdminSuperPermissionsRouteChildren,
+  )
+
 interface AuthenticatedAdminRouteChildren {
-  AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRoute
+  AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminSuperPermissionsRoute:
-    AuthenticatedAdminSuperPermissionsRoute,
+    AuthenticatedAdminSuperPermissionsRouteWithChildren,
 }
 
 const AuthenticatedAdminRouteWithChildren =

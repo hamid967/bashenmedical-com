@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import {
   type AppRole,
 } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { Loader2, Search, ShieldCheck } from "lucide-react";
+import { History, Loader2, Search, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
@@ -169,10 +169,17 @@ function SuperPermissionsPage() {
             تحرير الصلاحيات لكل دور — التعديل يُطبَّق مباشرةً على نظام RBAC.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline">{catalog.length} صلاحية</Badge>
           <Badge variant="outline">{ALL_ROLES.length} دور</Badge>
           <Badge variant="outline">{enabledCount} مُفعّلة</Badge>
+          <Link
+            to="/admin/super/permissions/audit"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full border border-border bg-card hover:bg-accent px-3 h-8"
+          >
+            <History className="h-3.5 w-3.5" />
+            سجل التدقيق
+          </Link>
         </div>
       </header>
 
