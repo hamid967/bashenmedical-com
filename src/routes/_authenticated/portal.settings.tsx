@@ -6,8 +6,8 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@ta
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle, ArrowLeft, Bell, CheckCircle2, Globe, Loader2, Mail, MessageSquare, Moon,
-  RefreshCw, Save, Send, Settings as SettingsIcon, ShieldCheck, Smartphone, Sun, XCircle,
+  AlertTriangle, ArrowLeft, Bell, CheckCircle2, Globe, Loader2, Mail, MessageSquare,
+  RefreshCw, Save, Send, Settings as SettingsIcon, ShieldCheck, Smartphone, XCircle,
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,7 +48,6 @@ function SettingsPage() {
   };
   const [prefs, setPrefs] = useState<Prefs>(initial);
   const [lang, setLang] = useState<"ar" | "en">((p?.preferred_language as "ar" | "en") ?? "ar");
-  const [dark, setDark] = useState<boolean>(!!p?.dark_mode);
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
@@ -153,7 +152,6 @@ function SettingsPage() {
       updateMyProfile({
         data: {
           preferred_language: lang,
-          dark_mode: dark,
           notification_prefs: prefs,
         },
       }),
@@ -252,16 +250,6 @@ function SettingsPage() {
                 );
               })}
             </div>
-          </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {dark ? <Moon className="h-4 w-4 text-[color:var(--portal-ink-2)]" /> : <Sun className="h-4 w-4 text-[color:var(--portal-ink-2)]" />}
-              <div>
-                <div className="text-sm font-semibold text-[color:var(--portal-ink)]">الوضع الداكن</div>
-                <div className="text-xs text-[color:var(--portal-ink-2)]">راحة أفضل للعين ليلاً</div>
-              </div>
-            </div>
-            <Switch value={dark} onChange={(v) => { setDark(v); setDirty(true); }} />
           </div>
         </section>
 
