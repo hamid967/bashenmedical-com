@@ -653,6 +653,10 @@ function InquiryDrawer({
               )}
             </section>
 
+            <section className="space-y-2">
+              <InquiryAttachments inquiryId={id} />
+            </section>
+
             {/* Audit timeline */}
             <section className="space-y-2">
               <h3 className="text-sm font-bold flex items-center gap-2">
