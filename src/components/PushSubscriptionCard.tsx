@@ -12,6 +12,7 @@
  * still need a backend to POST to the endpoint with VAPID auth.
  */
 import { useCallback, useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import {
   Bell,
@@ -20,11 +21,13 @@ import {
   CheckCircle2,
   Copy,
   Loader2,
+  Send,
   ShieldAlert,
   ShieldCheck,
   XCircle,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { sendTestPushToMe } from "@/lib/push-test.functions";
 
 type SubDetails = {
   endpoint: string;
