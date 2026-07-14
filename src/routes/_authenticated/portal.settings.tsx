@@ -150,13 +150,26 @@ function SettingsPage() {
         <section className="glass-card p-5 sm:p-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
           <Toggle icon={<Mail className="h-4 w-4" />} label="البريد الإلكتروني" desc="تذكيرات المواعيد وتحديثات التقارير"
-            value={prefs.email} onChange={(v) => setP("email", v)} />
+            value={prefs.email} busy={savingKey === "email"} onChange={(v) => savePref("email", v)} />
           <Toggle icon={<MessageSquare className="h-4 w-4" />} label="الرسائل النصية (SMS)" desc="تنبيهات فورية على جوالك"
-            value={prefs.sms} onChange={(v) => setP("sms", v)} />
+            value={prefs.sms} busy={savingKey === "sms"} onChange={(v) => savePref("sms", v)} />
           <Toggle icon={<Smartphone className="h-4 w-4" />} label="واتساب" desc="رسائل تأكيد وتذكير عبر واتساب"
-            value={prefs.whatsapp} onChange={(v) => setP("whatsapp", v)} />
-          <Toggle icon={<Bell className="h-4 w-4" />} label="إشعارات المتصفح (Push)" desc="تنبيه لحظي داخل المتصفح"
-            value={prefs.push} onChange={(v) => setP("push", v)} />
+            value={prefs.whatsapp} busy={savingKey === "whatsapp"} onChange={(v) => savePref("whatsapp", v)} />
+          <Toggle
+            icon={<Bell className="h-4 w-4" />}
+            label="إشعارات المتصفح (Push)"
+            desc={
+              push.state === "unsupported"
+                ? "غير مدعوم في هذا المتصفح"
+                : push.state === "denied"
+                  ? "الإذن مرفوض — فعّل الإشعارات من إعدادات المتصفح"
+                  : "تنبيه لحظي داخل المتصفح"
+            }
+            value={prefs.push && push.subscribed}
+            disabled={push.state === "unsupported" || push.state === "denied"}
+            busy={push.busy || savingKey === "push"}
+            onChange={onPushToggle}
+          />
         </section>
 
         <section className="glass-card p-5 sm:p-6 mt-6 space-y-4">
