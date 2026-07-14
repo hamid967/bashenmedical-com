@@ -19,6 +19,7 @@ export type State = {
   patient: {
     name: string;
     phone: string;
+    email: string;
     nationalId: string;
     gender: Gender | null;
     reason: string;
@@ -38,6 +39,7 @@ export const INITIAL: State = {
   patient: {
     name: "",
     phone: "",
+    email: "",
     nationalId: "",
     gender: null,
     reason: "",
@@ -143,6 +145,14 @@ export const patientSchema = z.object({
     .min(PHONE_MIN, "رقم الجوال قصير جدًا")
     .max(PHONE_MAX, "رقم الجوال طويل جدًا")
     .refine((v) => SA_PHONE_RE.test(v.replace(/[\s\-()]/g, "")), "رقم جوال سعودي غير صالح (مثال: 05XXXXXXXX)"),
+  email: z
+    .string()
+    .trim()
+    .max(255, "البريد الإلكتروني طويل جدًا")
+    .refine(
+      (v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+      "بريد إلكتروني غير صالح",
+    ),
   nationalId: z
     .string()
     .trim()
@@ -151,12 +161,13 @@ export const patientSchema = z.object({
   reason: z.string().trim().max(REASON_MAX, `السبب طويل جدًا (الحد ${REASON_MAX} حرفًا)`),
 });
 
-export type PatientErrors = Partial<Record<"name" | "phone" | "nationalId" | "gender" | "reason", string>>;
+export type PatientErrors = Partial<Record<"name" | "phone" | "email" | "nationalId" | "gender" | "reason", string>>;
 
 export function validatePatient(p: State["patient"]): { ok: boolean; errors: PatientErrors } {
   const r = patientSchema.safeParse({
     name: p.name,
     phone: p.phone,
+    email: p.email,
     nationalId: p.nationalId,
     gender: p.gender ?? undefined,
     reason: p.reason,

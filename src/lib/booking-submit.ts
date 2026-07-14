@@ -14,6 +14,7 @@
 export type BookingSubmitPayload = {
   patient_name: string;
   patient_phone: string;
+  patient_email?: string | null;
   appointment_date: string;
   appointment_time: string;
   reason?: string;

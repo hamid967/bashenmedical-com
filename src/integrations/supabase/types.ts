@@ -5020,6 +5020,13 @@ export type Database = {
         Returns: boolean
       }
       is_inquiry_staff: { Args: { _user_id: string }; Returns: boolean }
+      link_guest_appointments: {
+        Args: never
+        Returns: {
+          linked_count: number
+          patient_id: string
+        }[]
+      }
       list_appointment_audit_by_ref: {
         Args: { _phone: string; _ref: string }
         Returns: {

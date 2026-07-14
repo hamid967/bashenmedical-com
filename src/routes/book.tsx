@@ -218,11 +218,12 @@ function BookPage() {
   // Without this, reload would drop `result` (React-only) and step=9 would
   // render an empty card even though state.step=9 persisted.
   const RESULT_KEY = "booking:result";
-  const [result, setResult] = useState<{ reference: string | null; phone: string } | null>(() => {
+  type BookingResult = { reference: string | null; phone: string; email?: string | null };
+  const [result, setResult] = useState<BookingResult | null>(() => {
     if (typeof window === "undefined") return null;
     try {
       const raw = sessionStorage.getItem(RESULT_KEY);
-      return raw ? (JSON.parse(raw) as { reference: string | null; phone: string }) : null;
+      return raw ? (JSON.parse(raw) as BookingResult) : null;
     } catch { return null; }
   });
   useEffect(() => {
@@ -430,6 +431,7 @@ function BookPage() {
     const res = await submitBooking({
       patient_name: p.name.trim(),
       patient_phone: p.phone.trim(),
+      patient_email: p.email.trim().toLowerCase() || null,
       appointment_date: state.date!,
       appointment_time: state.time!,
       reason: p.reason.trim() || undefined,
@@ -446,7 +448,7 @@ function BookPage() {
       if (slotHold.holdId) void releaseHold(slotHold.holdId);
       try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
       toast.success(t("page.created"));
-      setResult({ reference: res.reference, phone: p.phone.trim() });
+      setResult({ reference: res.reference, phone: p.phone.trim(), email: p.email.trim().toLowerCase() || null });
       goto(9);
     } else {
       setErrorMsg(res.message);
@@ -570,7 +572,7 @@ function BookPage() {
             )}
             {state.step === 7 && <StepPatient lang={lang} value={state.patient} errors={patientValidation.errors} onChange={(p) => dispatch({ t: "setPatient", p })}/>}
             {state.step === 8 && <StepReview lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} errorMsg={errorMsg} submitting={submitting} onSubmit={handleSubmit} patientValid={patientValidation.ok} onEditPatient={() => goto(7)}/>}
-            {state.step === 9 && result && <StepSuccess lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} reference={result.reference} phone={result.phone} onNewBooking={handleReset}/>}
+            {state.step === 9 && result && <StepSuccess lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} reference={result.reference} phone={result.phone} email={result.email ?? null} onNewBooking={handleReset}/>}
           </div>
 
           {state.step >= 2 && state.step <= 8 && (

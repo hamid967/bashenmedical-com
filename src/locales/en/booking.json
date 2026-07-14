@@ -79,6 +79,8 @@
     "fullNamePlaceholder": "Full name",
     "mobile": "Mobile",
     "nationalIdOptional": "National ID (optional)",
+    "emailOptional": "Email (optional)",
+    "emailHint": "Used to create your account and manage bookings later.",
     "gender": "Gender",
     "male": "Male",
     "female": "Female",
