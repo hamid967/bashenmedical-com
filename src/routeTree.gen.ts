@@ -130,6 +130,7 @@ import { Route as ApiPublicBookMonthAvailabilityRouteImport } from './routes/api
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
 import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/book/cancel'
 import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/public/book/availability'
+import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './routes/_authenticated/portal.reports.downloads'
 import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_authenticated/orders-unified.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
@@ -788,6 +789,12 @@ const ApiPublicBookAvailabilityRoute =
     path: '/api/public/book/availability',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedPortalReportsDownloadsRoute =
+  AuthenticatedPortalReportsDownloadsRouteImport.update({
+    id: '/downloads',
+    path: '/downloads',
+    getParentRoute: () => AuthenticatedPortalReportsRoute,
+  } as any)
 const AuthenticatedOrdersUnifiedKindIdRoute =
   AuthenticatedOrdersUnifiedKindIdRouteImport.update({
     id: '/$kind/$id',
@@ -920,7 +927,7 @@ export interface FileRoutesByFullPath {
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/radiology': typeof AuthenticatedPortalRadiologyRoute
   '/portal/records': typeof AuthenticatedPortalRecordsRoute
-  '/portal/reports': typeof AuthenticatedPortalReportsRoute
+  '/portal/reports': typeof AuthenticatedPortalReportsRouteWithChildren
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
@@ -928,6 +935,7 @@ export interface FileRoutesByFullPath {
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1045,7 +1053,7 @@ export interface FileRoutesByTo {
   '/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/portal/radiology': typeof AuthenticatedPortalRadiologyRoute
   '/portal/records': typeof AuthenticatedPortalRecordsRoute
-  '/portal/reports': typeof AuthenticatedPortalReportsRoute
+  '/portal/reports': typeof AuthenticatedPortalReportsRouteWithChildren
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
@@ -1053,6 +1061,7 @@ export interface FileRoutesByTo {
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1173,7 +1182,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/profile': typeof AuthenticatedPortalProfileRoute
   '/_authenticated/portal/radiology': typeof AuthenticatedPortalRadiologyRoute
   '/_authenticated/portal/records': typeof AuthenticatedPortalRecordsRoute
-  '/_authenticated/portal/reports': typeof AuthenticatedPortalReportsRoute
+  '/_authenticated/portal/reports': typeof AuthenticatedPortalReportsRouteWithChildren
   '/_authenticated/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
@@ -1181,6 +1190,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/_authenticated/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/_authenticated/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1309,6 +1319,7 @@ export interface FileRouteTypes {
     | '/portal/'
     | '/admin/super/permissions'
     | '/orders-unified/$kind/$id'
+    | '/portal/reports/downloads'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -1434,6 +1445,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/admin/super/permissions'
     | '/orders-unified/$kind/$id'
+    | '/portal/reports/downloads'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -1561,6 +1573,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/'
     | '/_authenticated/admin/super/permissions'
     | '/_authenticated/orders-unified/$kind/$id'
+    | '/_authenticated/portal/reports/downloads'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2482,6 +2495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBookAvailabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/portal/reports/downloads': {
+      id: '/_authenticated/portal/reports/downloads'
+      path: '/downloads'
+      fullPath: '/portal/reports/downloads'
+      preLoaderRoute: typeof AuthenticatedPortalReportsDownloadsRouteImport
+      parentRoute: typeof AuthenticatedPortalReportsRoute
+    }
     '/_authenticated/orders-unified/$kind/$id': {
       id: '/_authenticated/orders-unified/$kind/$id'
       path: '/$kind/$id'
@@ -2569,6 +2589,21 @@ const AuthenticatedPortalOrdersRouteWithChildren =
     AuthenticatedPortalOrdersRouteChildren,
   )
 
+interface AuthenticatedPortalReportsRouteChildren {
+  AuthenticatedPortalReportsDownloadsRoute: typeof AuthenticatedPortalReportsDownloadsRoute
+}
+
+const AuthenticatedPortalReportsRouteChildren: AuthenticatedPortalReportsRouteChildren =
+  {
+    AuthenticatedPortalReportsDownloadsRoute:
+      AuthenticatedPortalReportsDownloadsRoute,
+  }
+
+const AuthenticatedPortalReportsRouteWithChildren =
+  AuthenticatedPortalReportsRoute._addFileChildren(
+    AuthenticatedPortalReportsRouteChildren,
+  )
+
 interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalBookRoute: typeof AuthenticatedPortalBookRoute
   AuthenticatedPortalCalendarRoute: typeof AuthenticatedPortalCalendarRoute
@@ -2585,7 +2620,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalProfileRoute: typeof AuthenticatedPortalProfileRoute
   AuthenticatedPortalRadiologyRoute: typeof AuthenticatedPortalRadiologyRoute
   AuthenticatedPortalRecordsRoute: typeof AuthenticatedPortalRecordsRoute
-  AuthenticatedPortalReportsRoute: typeof AuthenticatedPortalReportsRoute
+  AuthenticatedPortalReportsRoute: typeof AuthenticatedPortalReportsRouteWithChildren
   AuthenticatedPortalScheduleRoute: typeof AuthenticatedPortalScheduleRoute
   AuthenticatedPortalSettingsRoute: typeof AuthenticatedPortalSettingsRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
@@ -2607,7 +2642,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalProfileRoute: AuthenticatedPortalProfileRoute,
   AuthenticatedPortalRadiologyRoute: AuthenticatedPortalRadiologyRoute,
   AuthenticatedPortalRecordsRoute: AuthenticatedPortalRecordsRoute,
-  AuthenticatedPortalReportsRoute: AuthenticatedPortalReportsRoute,
+  AuthenticatedPortalReportsRoute: AuthenticatedPortalReportsRouteWithChildren,
   AuthenticatedPortalScheduleRoute: AuthenticatedPortalScheduleRoute,
   AuthenticatedPortalSettingsRoute: AuthenticatedPortalSettingsRoute,
   AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
