@@ -526,14 +526,15 @@ html.reduce-motion *::after {
   }
 }
 
-/* Glassmorphism panel — dark, neon-edged. */
+/* Glassmorphism panel — light surface with a subtle teal edge. */
 @utility glass-fut {
-  background: color-mix(in oklab, #0a1a2f 55%, transparent);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--fut-border);
-  backdrop-filter: blur(22px) saturate(160%);
+  backdrop-filter: blur(14px) saturate(140%);
   border-radius: 1.25rem;
   box-shadow: var(--fut-shadow-glass);
   transition: transform .3s ease, border-color .3s ease, box-shadow .3s ease;
+  color: var(--fut-ink);
 }
 .glass-fut:hover {
   border-color: var(--fut-border-strong);
@@ -541,7 +542,7 @@ html.reduce-motion *::after {
   box-shadow: var(--fut-shadow-glass), var(--fut-glow-teal);
 }
 
-/* Neon-glow border on hover — for buttons/cards. */
+/* Soft teal outline on hover — for buttons/cards. */
 @utility neon-glow-hover {
   transition: box-shadow .3s ease, transform .2s ease, border-color .3s ease;
   &:hover {
@@ -557,7 +558,7 @@ html.reduce-motion *::after {
   }
 }
 
-/* Magnetic button — solid neon with soft glow, elevates on hover. */
+/* Primary CTA — solid deep teal on light. */
 @utility btn-magnetic {
   display: inline-flex;
   align-items: center;
@@ -566,24 +567,24 @@ html.reduce-motion *::after {
   padding: 0.75rem 1.5rem;
   border-radius: 9999px;
   font-weight: 700;
-  color: #04121a;
+  color: #FCFDFB;
   background: var(--fut-gradient-neon);
-  box-shadow: 0 8px 24px -12px rgba(0, 217, 192, 0.5);
+  box-shadow: 0 6px 20px -10px rgba(7, 94, 99, 0.35);
   transition: transform .2s ease, box-shadow .3s ease, filter .2s ease;
   cursor: pointer;
   border: 0;
 }
 .btn-magnetic:hover {
   transform: translateY(-2px);
-  box-shadow: var(--fut-glow-teal);
-  filter: brightness(1.08);
+  box-shadow: 0 10px 28px -10px rgba(7, 94, 99, 0.45);
+  filter: brightness(1.04);
 }
 .btn-magnetic:active { transform: translateY(0); }
-.btn-magnetic:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.4); }
+.btn-magnetic:disabled { opacity: .55; cursor: not-allowed; filter: grayscale(.3); }
 
-/* Input with luminous focus ring. */
+/* Input on light surface with teal focus ring. */
 @utility input-glow {
-  background: color-mix(in oklab, #0a1a2f 70%, transparent);
+  background: #FFFFFF;
   border: 1px solid var(--fut-border);
   color: var(--fut-ink);
   border-radius: 0.875rem;
@@ -594,9 +595,10 @@ html.reduce-motion *::after {
 .input-glow::placeholder { color: var(--fut-ink-dim); }
 .input-glow:focus {
   border-color: var(--neon-teal);
-  box-shadow: 0 0 0 3px rgba(0, 217, 192, 0.22), var(--fut-glow-teal);
-  background: color-mix(in oklab, #0a1a2f 85%, transparent);
+  box-shadow: 0 0 0 3px rgba(11, 133, 133, 0.15);
+  background: #FFFFFF;
 }
+
 
 /* Gradient neon text — for hero headings. */
 @utility text-neon {
