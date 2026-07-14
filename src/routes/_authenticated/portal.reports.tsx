@@ -103,13 +103,77 @@ const FILTER_ORDER: (ReportType | "all")[] = [
   "other",
 ];
 
+type AttachmentFilter = "all" | "has_file" | "no_file";
+type DemoFilter = "all" | "real" | "demo";
+
+const FILTERS_STORAGE_KEY = "portal.reports.filters.v1";
+
+type PersistedFilters = {
+  type: ReportType | "all";
+  q: string;
+  from: string;
+  to: string;
+  attachment: AttachmentFilter;
+  demo: DemoFilter;
+};
+
+const DEFAULT_FILTERS: PersistedFilters = {
+  type: "all",
+  q: "",
+  from: "",
+  to: "",
+  attachment: "all",
+  demo: "all",
+};
+
+function loadPersistedFilters(): PersistedFilters {
+  if (typeof window === "undefined") return DEFAULT_FILTERS;
+  try {
+    const raw = window.localStorage.getItem(FILTERS_STORAGE_KEY);
+    if (!raw) return DEFAULT_FILTERS;
+    const parsed = JSON.parse(raw) as Partial<PersistedFilters>;
+    return { ...DEFAULT_FILTERS, ...parsed };
+  } catch {
+    return DEFAULT_FILTERS;
+  }
+}
+
 function ReportsPage() {
   const { data: reports } = useSuspenseQuery(reportsQuery);
   const getUrl = useServerFn(getMyMedicalReportFileUrl);
-  const [type, setType] = useState<ReportType | "all">("all");
-  const [q, setQ] = useState("");
+  const [type, setType] = useState<ReportType | "all">(DEFAULT_FILTERS.type);
+  const [q, setQ] = useState(DEFAULT_FILTERS.q);
+  const [from, setFrom] = useState(DEFAULT_FILTERS.from);
+  const [to, setTo] = useState(DEFAULT_FILTERS.to);
+  const [attachment, setAttachment] = useState<AttachmentFilter>(DEFAULT_FILTERS.attachment);
+  const [demo, setDemo] = useState<DemoFilter>(DEFAULT_FILTERS.demo);
   const [downloading, setDownloading] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+
+  // Hydrate persisted filters on mount (client-only to avoid SSR hydration mismatch).
+  useEffect(() => {
+    const p = loadPersistedFilters();
+    setType(p.type);
+    setQ(p.q);
+    setFrom(p.from);
+    setTo(p.to);
+    setAttachment(p.attachment);
+    setDemo(p.demo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Persist any change.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        FILTERS_STORAGE_KEY,
+        JSON.stringify({ type, q, from, to, attachment, demo }),
+      );
+    } catch {
+      /* quota/private mode — ignore */
+    }
+  }, [type, q, from, to, attachment, demo]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: reports.length };
@@ -117,10 +181,24 @@ function ReportsPage() {
     return c;
   }, [reports]);
 
+  const fromTs = from ? new Date(from + "T00:00:00").getTime() : null;
+  const toTs = to ? new Date(to + "T23:59:59").getTime() : null;
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();
     return reports.filter((r) => {
       if (type !== "all" && r.report_type !== type) return false;
+      if (attachment === "has_file" && !r.file_path) return false;
+      if (attachment === "no_file" && r.file_path) return false;
+      const isDemo = r.is_demo || /\(DEMO\)/i.test(r.title_ar ?? "");
+      if (demo === "demo" && !isDemo) return false;
+      if (demo === "real" && isDemo) return false;
+      if (fromTs || toTs) {
+        const ts = r.published_at ? new Date(r.published_at).getTime() : null;
+        if (ts == null) return false;
+        if (fromTs && ts < fromTs) return false;
+        if (toTs && ts > toTs) return false;
+      }
       if (!needle) return true;
       return (
         (r.title_ar ?? "").toLowerCase().includes(needle) ||
@@ -129,7 +207,24 @@ function ReportsPage() {
         (r.doctor_name_ar ?? "").toLowerCase().includes(needle)
       );
     });
-  }, [reports, type, q]);
+  }, [reports, type, q, attachment, demo, fromTs, toTs]);
+
+  const activeFilterCount =
+    (type !== "all" ? 1 : 0) +
+    (q.trim() ? 1 : 0) +
+    (from ? 1 : 0) +
+    (to ? 1 : 0) +
+    (attachment !== "all" ? 1 : 0) +
+    (demo !== "all" ? 1 : 0);
+
+  const resetFilters = () => {
+    setType("all");
+    setQ("");
+    setFrom("");
+    setTo("");
+    setAttachment("all");
+    setDemo("all");
+  };
 
   const onDownload = async (r: MyMedicalReport) => {
     if (!r.file_path) {
