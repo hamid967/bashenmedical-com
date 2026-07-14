@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertTriangle, CalendarDays, CalendarPlus, CheckCircle2, ChevronLeft,
-  Clock, Filter, Loader2, MapPin, Phone, Printer, RefreshCw, Repeat,
+  Clock, Filter, Loader2, LogIn, MapPin, Phone, Printer, RefreshCw, Repeat,
   Search, Stethoscope, User2, XCircle,
 } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
   cancelMyAppointment,
   reschedulePatientAppointment,
   requestFollowUp,
+  performSelfCheckIn,
 } from "@/lib/portal/appointments.functions";
 
 type Scope = "upcoming" | "past";
