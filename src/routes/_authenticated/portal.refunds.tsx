@@ -27,7 +27,93 @@ import {
   ChevronLeft,
   ArrowDownWideNarrow,
   ArrowUpWideNarrow,
+  Download,
 } from "lucide-react";
+
+/* ---------------- PDF receipt (print window) ---------------- */
+
+function isFinalized(status: string) {
+  return status === "processed" || status === "refunded" || status === "canceled" || status === "rejected";
+}
+
+function openRefundReceipt(r: RefundRow) {
+  const meta = statusMeta(r.status);
+  const lastAt = r.processed_at ?? r.updated_at;
+  const rows: Array<[string, string]> = [
+    ["معرّف الطلب", r.id],
+    ["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"],
+    ["حالة الطلب", meta.label],
+    ["المبلغ المُسترد", fmtSAR(r.amount, r.currency)],
+    ["قيمة الدفعة الأصلية", fmtSAR(r.payment_amount, r.currency)],
+    ["وسيلة الدفع", r.payment_method ?? "—"],
+    ["تاريخ الدفعة", fmtDate(r.payment_paid_at)],
+    ["تاريخ الطلب", fmtDateTime(r.created_at)],
+    ["آخر تحديث", fmtDateTime(lastAt)],
+    ["سبب الطلب", r.reason || "—"],
+    ["قرار المحاسبة", r.decision_reason || "—"],
+  ];
+  const html = `<!doctype html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"/>
+<title>إيصال استرداد ${r.invoice_number ?? r.id.slice(0, 8)}</title>
+<style>
+  @page { size: A4; margin: 18mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "SF Pro Text", "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; }
+  .hd { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:20px; }
+  .brand { font-size:20px; font-weight:800; letter-spacing:-.01em; }
+  .sub { font-size:11px; color:#64748b; margin-top:4px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .badge { display:inline-block; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; background:#f1f5f9; color:#0f172a; }
+  .grid { width:100%; border-collapse:collapse; margin-top:16px; }
+  .grid td { padding:10px 12px; border-bottom:1px solid #e2e8f0; font-size:13px; vertical-align:top; }
+  .grid td.k { width:40%; color:#64748b; font-weight:600; }
+  .grid td.v { color:#0f172a; font-weight:600; }
+  .amount { margin-top:20px; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; display:flex; justify-content:space-between; align-items:center; }
+  .amount .lbl { font-size:12px; color:#64748b; }
+  .amount .val { font-size:26px; font-weight:800; }
+  .ft { margin-top:28px; padding-top:12px; border-top:1px solid #e2e8f0; font-size:10.5px; color:#94a3b8; text-align:center; }
+  .note { margin-top:12px; padding:10px 12px; font-size:11.5px; color:#475569; background:#f8fafc; border-radius:8px; }
+  @media print { .noprint { display:none; } body { padding:0; } }
+  .actions { text-align:center; margin-bottom:20px; }
+  .btn { display:inline-block; padding:10px 20px; background:#0f172a; color:#fff; border-radius:999px; font-weight:700; text-decoration:none; font-size:13px; border:none; cursor:pointer; }
+</style></head>
+<body>
+  <div class="actions noprint">
+    <button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>
+  </div>
+  <div class="hd">
+    <div>
+      <div class="brand">إيصال طلب استرداد</div>
+      <div class="sub">مستخرج بتاريخ ${fmtDateTime(new Date().toISOString())}</div>
+    </div>
+    <span class="badge">${meta.label}</span>
+  </div>
+  <div class="amount">
+    <div>
+      <div class="lbl">المبلغ المُسترد</div>
+      <div class="val">${fmtSAR(r.amount, r.currency)}</div>
+    </div>
+    <div style="text-align:end">
+      <div class="lbl">من دفعة أصلية</div>
+      <div style="font-weight:700">${fmtSAR(r.payment_amount, r.currency)}</div>
+    </div>
+  </div>
+  <table class="grid">
+    ${rows.map(([k, v]) => `<tr><td class="k">${k}</td><td class="v">${String(v).replace(/</g, "&lt;")}</td></tr>`).join("")}
+  </table>
+  <div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>
+  <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
+  <script>window.addEventListener('load', () => setTimeout(() => window.print(), 300));<\/script>
+</body></html>`;
+  const w = window.open("", "_blank", "width=820,height=900");
+  if (!w) {
+    toast.error("متصفحك يمنع النوافذ المنبثقة. فعّلها لتنزيل الإيصال.");
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
 
 const refundsQuery = queryOptions({
   queryKey: ["portal", "refunds"],
@@ -371,6 +457,16 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
         التفاصيل
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
+      {isFinalized(r.status) && (
+        <button
+          onClick={() => openRefundReceipt(r)}
+          className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
+          title="تنزيل إيصال PDF"
+        >
+          <Download className="h-3.5 w-3.5" />
+          الإيصال
+        </button>
+      )}
       {canCancel && (
         <button
           onClick={() => mutation.mutate()}
@@ -553,7 +649,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
           </section>
         </div>
 
-        {canCancel && (
+        {(canCancel || isFinalized(r.status)) && (
           <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
             <button
               onClick={onClose}
@@ -561,14 +657,25 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             >
               إغلاق
             </button>
-            <button
-              onClick={() => mutation.mutate()}
-              disabled={mutation.isPending}
-              className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
-            >
-              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
-              إلغاء طلب الاسترداد
-            </button>
+            {isFinalized(r.status) && (
+              <button
+                onClick={() => openRefundReceipt(r)}
+                className="flex-1 h-11 rounded-full text-sm font-semibold border border-[color:var(--mag-line)] bg-white text-[color:var(--mag-ink-1)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center justify-center gap-2"
+              >
+                <Download className="h-4 w-4" />
+                تنزيل الإيصال (PDF)
+              </button>
+            )}
+            {canCancel && (
+              <button
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending}
+                className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              >
+                {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+                إلغاء طلب الاسترداد
+              </button>
+            )}
           </div>
         )}
       </div>
