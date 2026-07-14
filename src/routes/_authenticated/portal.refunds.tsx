@@ -694,6 +694,9 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
               </div>
             </div>
             <div className="pt-2 mt-1 border-t border-[color:var(--mag-line)] text-[11px] text-[color:var(--mag-ink-3)] flex flex-wrap gap-x-4 gap-y-1">
+              {r.receipt_reference && (
+                <span>الرقم المرجعي: <span className="font-mono font-semibold text-[color:var(--mag-ink-1)]">{r.receipt_reference}</span></span>
+              )}
               <span>معرّف الطلب: <span className="font-mono">{r.id.slice(0, 8)}…</span></span>
               <span>آخر تحديث: {fmtDateTime(r.processed_at ?? r.updated_at)}</span>
             </div>
