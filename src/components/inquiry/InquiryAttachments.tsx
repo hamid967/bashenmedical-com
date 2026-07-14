@@ -46,6 +46,7 @@ export function InquiryAttachments({
   const signFn = useServerFn(requestInquiryUploadUrl);
   const registerFn = useServerFn(registerInquiryAttachment);
   const deleteFn = useServerFn(deleteInquiryAttachment);
+  const scanFn = useServerFn(scanInquiryAttachment);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -55,6 +56,16 @@ export function InquiryAttachments({
     queryKey: listKey,
     queryFn: () => listFn({ data: { inquiry_id: inquiryId } }),
     staleTime: 60_000,
+    // Poll every 3s while any attachment is still being scanned.
+    refetchInterval: (query) => {
+      const rows = query.state.data as
+        | Array<{ scan_status: string }>
+        | undefined;
+      const busy = rows?.some(
+        (r) => r.scan_status === "pending" || r.scan_status === "scanning",
+      );
+      return busy ? 3000 : false;
+    },
   });
 
   const remaining = useMemo(
@@ -104,7 +115,7 @@ export function InquiryAttachments({
         if (!put.ok) {
           throw new Error(`تعذّر رفع الملف (${put.status}).`);
         }
-        await registerFn({
+        const reg = await registerFn({
           data: {
             inquiry_id: inquiryId,
             storage_path: signed.storage_path,
@@ -113,7 +124,21 @@ export function InquiryAttachments({
             size_bytes: file.size,
           },
         });
-        toast.success(`تم رفع: ${file.name}`);
+        toast.success(`تم رفع: ${file.name} — جارٍ فحص الفيروسات…`);
+        // Kick off the scan asynchronously; polling will surface the result.
+        scanFn({ data: { id: reg.id } })
+          .then((res) => {
+            if (res.scan_status === "infected") {
+              toast.error(`تم حجب ${file.name} بعد اكتشاف محتوى مشبوه.`);
+            } else if (res.scan_status === "clean") {
+              toast.success(`اجتاز ${file.name} فحص الفيروسات.`);
+            }
+            qc.invalidateQueries({ queryKey: listKey });
+          })
+          .catch((e: any) => {
+            toast.error(`تعذّر إتمام فحص ${file.name}: ${e?.message ?? ""}`);
+            qc.invalidateQueries({ queryKey: listKey });
+          });
       } catch (e: any) {
         toast.error(e?.message ?? `تعذّر رفع ${file.name}`);
       } finally {
@@ -123,6 +148,48 @@ export function InquiryAttachments({
     qc.invalidateQueries({ queryKey: listKey });
     if (inputRef.current) inputRef.current.value = "";
   }
+
+  function ScanBadge({
+    status,
+    reason,
+  }: {
+    status: "pending" | "scanning" | "clean" | "infected" | "error";
+    reason?: string | null;
+  }) {
+    if (status === "clean") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <ShieldCheck className="h-3 w-3" /> سليم
+        </span>
+      );
+    }
+    if (status === "infected") {
+      return (
+        <span
+          title={reason ?? undefined}
+          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200"
+        >
+          <ShieldAlert className="h-3 w-3" /> محجوب — {reason ?? "محتوى مشبوه"}
+        </span>
+      );
+    }
+    if (status === "error") {
+      return (
+        <span
+          title={reason ?? undefined}
+          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200"
+        >
+          <ShieldQuestion className="h-3 w-3" /> تعذّر الفحص
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+        <Loader2 className="h-3 w-3 animate-spin" /> قيد الفحص
+      </span>
+    );
+  }
+
 
   return (
     <div className={compact ? "space-y-2" : "space-y-3"}>
