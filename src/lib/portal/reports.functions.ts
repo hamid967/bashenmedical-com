@@ -217,61 +217,153 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
   .inputValidator((i: unknown) => VersionInput.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const patientRes = await supabase
-      .from("patients")
-      .select("id")
-      .eq("profile_id", userId)
-      .maybeSingle();
-    const patientId = patientRes.data?.id;
-    if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
-
-    const reportRes = await supabase
-      .from("medical_reports")
-      .select("patient_id, status, revoked_at")
-      .eq("id", data.report_id)
-      .maybeSingle();
-    const rr = reportRes.data as any;
-    if (!rr || rr.patient_id !== patientId) throw new Error("التقرير غير موجود.");
-    if (rr.status !== "published" || rr.revoked_at) throw new Error("التقرير غير متاح.");
-
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: v } = await supabaseAdmin
-      .from("report_versions")
-      .select("file_path")
-      .eq("report_id", data.report_id)
-      .eq("version_number", data.version_number)
-      .maybeSingle();
-    if (!v?.file_path) throw new Error("لا يوجد ملف لهذه النسخة.");
 
-    const { data: meta } = await supabaseAdmin
-      .from("medical_reports")
-      .select("title_ar, report_type")
-      .eq("id", data.report_id)
-      .maybeSingle();
-    const baseName = buildDownloadName(
-      (meta as any)?.title_ar ?? null,
-      (meta as any)?.report_type ?? "report",
-      v.file_path,
-    );
-    const dotIdx = baseName.lastIndexOf(".");
-    const downloadName =
-      dotIdx > 0
-        ? `${baseName.slice(0, dotIdx)}-v${data.version_number}${baseName.slice(dotIdx)}`
-        : `${baseName}-v${data.version_number}`;
+    const logAttempt = async (status: "success" | "failure", reason?: string) => {
+      try {
+        await supabaseAdmin.from("audit_logs").insert({
+          actor_id: userId,
+          actor_role: "patient",
+          action: "medical_report.download",
+          entity_type: "medical_report",
+          entity_id: data.report_id,
+          metadata: { version: data.version_number, ttl_seconds: 60, status, reason: reason ?? null },
+        });
+      } catch {
+        /* best-effort */
+      }
+    };
 
-    const { data: signed, error: sErr } = await supabaseAdmin.storage
-      .from("medical-reports")
-      .createSignedUrl(v.file_path, 60, { download: downloadName });
-    if (sErr) throw new Error(sErr.message);
+    try {
+      const patientRes = await supabase
+        .from("patients")
+        .select("id")
+        .eq("profile_id", userId)
+        .maybeSingle();
+      const patientId = patientRes.data?.id;
+      if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
 
-    await supabaseAdmin.from("audit_logs").insert({
-      actor_id: userId,
-      actor_role: "patient",
-      action: "medical_report.download",
-      entity_type: "medical_report",
-      entity_id: data.report_id,
-      metadata: { version: data.version_number, ttl_seconds: 60 },
-    });
+      const reportRes = await supabase
+        .from("medical_reports")
+        .select("patient_id, status, revoked_at")
+        .eq("id", data.report_id)
+        .maybeSingle();
+      const rr = reportRes.data as any;
+      if (!rr || rr.patient_id !== patientId) throw new Error("التقرير غير موجود.");
+      if (rr.status !== "published" || rr.revoked_at) throw new Error("التقرير غير متاح.");
 
-    return { url: signed.signedUrl, expiresIn: 60 };
+      const { data: v } = await supabaseAdmin
+        .from("report_versions")
+        .select("file_path")
+        .eq("report_id", data.report_id)
+        .eq("version_number", data.version_number)
+        .maybeSingle();
+      if (!v?.file_path) throw new Error("لا يوجد ملف لهذه النسخة.");
+
+      const { data: meta } = await supabaseAdmin
+        .from("medical_reports")
+        .select("title_ar, report_type")
+        .eq("id", data.report_id)
+        .maybeSingle();
+      const baseName = buildDownloadName(
+        (meta as any)?.title_ar ?? null,
+        (meta as any)?.report_type ?? "report",
+        v.file_path,
+      );
+      const dotIdx = baseName.lastIndexOf(".");
+      const downloadName =
+        dotIdx > 0
+          ? `${baseName.slice(0, dotIdx)}-v${data.version_number}${baseName.slice(dotIdx)}`
+          : `${baseName}-v${data.version_number}`;
+
+      const { data: signed, error: sErr } = await supabaseAdmin.storage
+        .from("medical-reports")
+        .createSignedUrl(v.file_path, 60, { download: downloadName });
+      if (sErr) throw new Error(sErr.message);
+
+      await logAttempt("success");
+      return { url: signed.signedUrl, expiresIn: 60 };
+    } catch (err: any) {
+      await logAttempt("failure", err?.message ?? "unknown");
+      throw err;
+    }
+  });
+
+export type MyReportDownloadEntry = {
+  id: string;
+  created_at: string;
+  report_id: string | null;
+  report_title_ar: string | null;
+  report_type: ReportType | null;
+  version: string | number;
+  status: "success" | "failure" | "unknown";
+  reason: string | null;
+};
+
+const DownloadsInput = z.object({
+  limit: z.number().int().min(1).max(200).default(100).optional(),
+  status: z.enum(["all", "success", "failure"]).default("all").optional(),
+  from: z.string().datetime().optional(),
+  to: z.string().datetime().optional(),
+  q: z.string().max(120).optional(),
+});
+
+export const listMyReportDownloads = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => DownloadsInput.parse(i ?? {}))
+  .handler(async ({ context, data }): Promise<MyReportDownloadEntry[]> => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let q = supabaseAdmin
+      .from("audit_logs")
+      .select("id, created_at, entity_id, metadata")
+      .eq("actor_id", userId)
+      .eq("action", "medical_report.download")
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 100);
+    if (data.from) q = q.gte("created_at", data.from);
+    if (data.to) q = q.lte("created_at", data.to);
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.entity_id).filter(Boolean)));
+    let titles = new Map<string, { title_ar: string | null; report_type: ReportType | null }>();
+    if (ids.length) {
+      const { data: reps } = await supabaseAdmin
+        .from("medical_reports")
+        .select("id, title_ar, report_type")
+        .in("id", ids);
+      titles = new Map((reps ?? []).map((r: any) => [r.id, { title_ar: r.title_ar, report_type: r.report_type }]));
+    }
+
+    const needle = data.q?.trim().toLowerCase() ?? "";
+    return (rows ?? [])
+      .map((r: any): MyReportDownloadEntry => {
+        const m = (r.metadata ?? {}) as Record<string, unknown>;
+        const t = r.entity_id ? titles.get(r.entity_id) : undefined;
+        const status = (m.status as string) === "success" || (m.status as string) === "failure"
+          ? (m.status as "success" | "failure")
+          : "unknown";
+        return {
+          id: r.id,
+          created_at: r.created_at,
+          report_id: r.entity_id ?? null,
+          report_title_ar: t?.title_ar ?? null,
+          report_type: t?.report_type ?? null,
+          version: (m.version as string | number) ?? "current",
+          status,
+          reason: (m.reason as string) ?? null,
+        };
+      })
+      .filter((e) => {
+        if (data.status && data.status !== "all" && e.status !== data.status) return false;
+        if (!needle) return true;
+        return (
+          (e.report_title_ar ?? "").toLowerCase().includes(needle) ||
+          (e.report_type ?? "").toLowerCase().includes(needle) ||
+          (e.reason ?? "").toLowerCase().includes(needle)
+        );
+      });
   });
