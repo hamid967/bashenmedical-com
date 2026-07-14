@@ -282,7 +282,7 @@ function FamilyPage() {
             onClick={() => langMutation.mutate(nextLang)}
             disabled={langMutation.isPending}
             className="rounded-full font-semibold"
-            aria-label={nextLang === "en" ? "Switch to English" : "التبديل إلى العربية"}
+            aria-label={T.lang_switch_aria[lang]}
           >
             {langMutation.isPending ? (
               <Loader2 className="h-4 w-4 ms-2 animate-spin" />
