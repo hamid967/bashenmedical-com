@@ -456,6 +456,53 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
     // Move appointment to checked_in
     await supabase.from("appointments").update({ status: "checked_in" }).eq("id", data.id);
 
+    // Fire WhatsApp notification (best-effort, never blocks response).
+    try {
+      const [{ data: patientRow }, { data: doctorRow }, { data: branchRow }] = await Promise.all([
+        scope.patientId
+          ? supabase
+              .from("patients")
+              .select("full_name_ar, phone")
+              .eq("id", scope.patientId)
+              .maybeSingle()
+          : Promise.resolve({ data: null as { full_name_ar: string; phone: string } | null }),
+        appt.doctor_id
+          ? supabase.from("doctors").select("name_ar").eq("id", appt.doctor_id).maybeSingle()
+          : Promise.resolve({ data: null as { name_ar: string } | null }),
+        appt.branch_id
+          ? supabase
+              .from("branches")
+              .select("name_ar, lat, lng, map_embed_url")
+              .eq("id", appt.branch_id)
+              .maybeSingle()
+          : Promise.resolve({
+              data: null as {
+                name_ar: string;
+                lat: number | null;
+                lng: number | null;
+                map_embed_url: string | null;
+              } | null,
+            }),
+      ]);
+
+      const { sendCheckInWhatsApp } = await import("@/lib/notifications/whatsapp.server");
+      await sendCheckInWhatsApp({
+        toPhone: patientRow?.phone ?? appt.patient_phone ?? scope.phone ?? null,
+        patientName: patientRow?.full_name_ar || "مريضنا العزيز",
+        queueNumber: (ins.data.queue_number as number | null) ?? null,
+        checkedInAt: ins.data.checked_in_at as string,
+        appointmentId: data.id,
+        doctorName: doctorRow?.name_ar ?? null,
+        branchName: branchRow?.name_ar ?? null,
+        branchLat: branchRow?.lat ?? null,
+        branchLng: branchRow?.lng ?? null,
+        branchMapEmbedUrl: branchRow?.map_embed_url ?? null,
+        locale: "ar",
+      });
+    } catch (e) {
+      console.error("[performSelfCheckIn] whatsapp notify failed", (e as Error).message);
+    }
+
     return {
       ok: true,
       already: false as const,
