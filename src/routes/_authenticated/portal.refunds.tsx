@@ -36,22 +36,104 @@ function isFinalized(status: string) {
   return status === "processed" || status === "refunded" || status === "canceled" || status === "rejected";
 }
 
-function openRefundReceipt(r: RefundRow) {
+type ReceiptFieldKey =
+  | "request_id"
+  | "invoice"
+  | "status"
+  | "refund_amount"
+  | "original_amount"
+  | "payment_method"
+  | "payment_paid_at"
+  | "created_at"
+  | "updated_at"
+  | "processed_at"
+  | "reason"
+  | "decision_reason"
+  | "amount_hero"
+  | "footer_note";
+
+type ReceiptField = {
+  key: ReceiptFieldKey;
+  label: string;
+  group: "identifiers" | "amounts" | "dates" | "reasons" | "layout";
+  isAvailable: (r: RefundRow) => boolean;
+  defaultOn: (r: RefundRow) => boolean;
+};
+
+const RECEIPT_FIELDS: ReceiptField[] = [
+  { key: "request_id", label: "معرّف الطلب", group: "identifiers",
+    isAvailable: () => true, defaultOn: () => true },
+  { key: "invoice", label: "رقم الفاتورة", group: "identifiers",
+    isAvailable: (r) => !!r.invoice_number, defaultOn: (r) => !!r.invoice_number },
+  { key: "status", label: "حالة الطلب", group: "identifiers",
+    isAvailable: () => true, defaultOn: () => true },
+
+  { key: "amount_hero", label: "بطاقة المبلغ البارزة (أعلى الإيصال)", group: "layout",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status === "processed" || r.status === "refunded" },
+  { key: "refund_amount", label: "المبلغ المُسترد", group: "amounts",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status !== "canceled" },
+  { key: "original_amount", label: "قيمة الدفعة الأصلية", group: "amounts",
+    isAvailable: () => true, defaultOn: () => true },
+  { key: "payment_method", label: "وسيلة الدفع", group: "amounts",
+    isAvailable: (r) => !!r.payment_method, defaultOn: (r) => !!r.payment_method },
+
+  { key: "payment_paid_at", label: "تاريخ الدفعة الأصلية", group: "dates",
+    isAvailable: (r) => !!r.payment_paid_at, defaultOn: (r) => !!r.payment_paid_at },
+  { key: "created_at", label: "تاريخ تقديم الطلب", group: "dates",
+    isAvailable: () => true, defaultOn: () => true },
+  { key: "updated_at", label: "آخر تحديث", group: "dates",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status !== "processed" },
+  { key: "processed_at", label: "تاريخ المعالجة/الصرف", group: "dates",
+    isAvailable: (r) => !!r.processed_at,
+    defaultOn: (r) => !!r.processed_at && (r.status === "processed" || r.status === "refunded") },
+
+  { key: "reason", label: "سبب طلبك للاسترداد", group: "reasons",
+    isAvailable: (r) => !!r.reason, defaultOn: (r) => !!r.reason },
+  { key: "decision_reason", label: "قرار وملاحظة المحاسبة", group: "reasons",
+    isAvailable: (r) => !!r.decision_reason,
+    defaultOn: (r) => !!r.decision_reason },
+
+  { key: "footer_note", label: "الملاحظة القانونية في الأسفل", group: "layout",
+    isAvailable: () => true, defaultOn: () => true },
+];
+
+const GROUP_LABELS: Record<ReceiptField["group"], string> = {
+  identifiers: "معلومات الطلب",
+  amounts: "المبالغ ووسيلة الدفع",
+  dates: "التواريخ",
+  reasons: "السبب وقرار المحاسبة",
+  layout: "تنسيق الإيصال",
+};
+
+function defaultReceiptSelection(r: RefundRow): Set<ReceiptFieldKey> {
+  return new Set(
+    RECEIPT_FIELDS.filter((f) => f.isAvailable(r) && f.defaultOn(r)).map((f) => f.key),
+  );
+}
+
+function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const meta = statusMeta(r.status);
-  const lastAt = r.processed_at ?? r.updated_at;
-  const rows: Array<[string, string]> = [
-    ["معرّف الطلب", r.id],
-    ["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"],
-    ["حالة الطلب", meta.label],
-    ["المبلغ المُسترد", fmtSAR(r.amount, r.currency)],
-    ["قيمة الدفعة الأصلية", fmtSAR(r.payment_amount, r.currency)],
-    ["وسيلة الدفع", r.payment_method ?? "—"],
-    ["تاريخ الدفعة", fmtDate(r.payment_paid_at)],
-    ["تاريخ الطلب", fmtDateTime(r.created_at)],
-    ["آخر تحديث", fmtDateTime(lastAt)],
-    ["سبب الطلب", r.reason || "—"],
-    ["قرار المحاسبة", r.decision_reason || "—"],
-  ];
+  const has = (k: ReceiptFieldKey) => selected.has(k);
+  const rows: Array<[string, string]> = [];
+  if (has("request_id")) rows.push(["معرّف الطلب", r.id]);
+  if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"]);
+  if (has("status")) rows.push(["حالة الطلب", meta.label]);
+  if (has("refund_amount")) rows.push(["المبلغ المُسترد", fmtSAR(r.amount, r.currency)]);
+  if (has("original_amount")) rows.push(["قيمة الدفعة الأصلية", fmtSAR(r.payment_amount, r.currency)]);
+  if (has("payment_method")) rows.push(["وسيلة الدفع", r.payment_method ?? "—"]);
+  if (has("payment_paid_at")) rows.push(["تاريخ الدفعة", fmtDate(r.payment_paid_at)]);
+  if (has("created_at")) rows.push(["تاريخ الطلب", fmtDateTime(r.created_at)]);
+  if (has("updated_at")) rows.push(["آخر تحديث", fmtDateTime(r.updated_at)]);
+  if (has("processed_at") && r.processed_at) rows.push(["تاريخ المعالجة", fmtDateTime(r.processed_at)]);
+  if (has("reason")) rows.push(["سبب الطلب", r.reason || "—"]);
+  if (has("decision_reason")) rows.push(["قرار المحاسبة", r.decision_reason || "—"]);
+
+  const showHero = has("amount_hero");
+  const showNote = has("footer_note");
+
   const html = `<!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"/>
 <title>إيصال استرداد ${r.invoice_number ?? r.id.slice(0, 8)}</title>
@@ -62,7 +144,6 @@ function openRefundReceipt(r: RefundRow) {
   .hd { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:20px; }
   .brand { font-size:20px; font-weight:800; letter-spacing:-.01em; }
   .sub { font-size:11px; color:#64748b; margin-top:4px; }
-  h1 { font-size:22px; margin:0 0 4px; }
   .badge { display:inline-block; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; background:#f1f5f9; color:#0f172a; }
   .grid { width:100%; border-collapse:collapse; margin-top:16px; }
   .grid td { padding:10px 12px; border-bottom:1px solid #e2e8f0; font-size:13px; vertical-align:top; }
@@ -88,7 +169,7 @@ function openRefundReceipt(r: RefundRow) {
     </div>
     <span class="badge">${meta.label}</span>
   </div>
-  <div class="amount">
+  ${showHero ? `<div class="amount">
     <div>
       <div class="lbl">المبلغ المُسترد</div>
       <div class="val">${fmtSAR(r.amount, r.currency)}</div>
@@ -97,11 +178,11 @@ function openRefundReceipt(r: RefundRow) {
       <div class="lbl">من دفعة أصلية</div>
       <div style="font-weight:700">${fmtSAR(r.payment_amount, r.currency)}</div>
     </div>
-  </div>
-  <table class="grid">
+  </div>` : ""}
+  ${rows.length ? `<table class="grid">
     ${rows.map(([k, v]) => `<tr><td class="k">${k}</td><td class="v">${String(v).replace(/</g, "&lt;")}</td></tr>`).join("")}
-  </table>
-  <div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>
+  </table>` : ""}
+  ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
   <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
   <script>window.addEventListener('load', () => setTimeout(() => window.print(), 300));<\/script>
 </body></html>`;
