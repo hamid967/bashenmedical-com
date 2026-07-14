@@ -31,6 +31,10 @@ import {
   Sparkles,
   Loader2,
   Link2,
+  CheckCircle2,
+  Circle,
+  CircleDot,
+  XCircle,
 } from "lucide-react";
 
 const LS_KEY = "bmc:pending_inquiry_links";
@@ -264,6 +268,7 @@ const HANDOFF_LABEL: Record<string, string> = {
 };
 
 function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean }) {
+  const qc = useQueryClient();
   const created = useMemo(() => new Date(i.created_at).toLocaleString("ar-SA"), [i.created_at]);
   return (
     <li
@@ -275,18 +280,28 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
           <div className="text-[10px] text-muted-foreground">رقم الطلب</div>
           <div className="font-mono text-base font-bold tracking-wider">{i.request_number}</div>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            navigator.clipboard?.writeText(i.request_number).then(
-              () => toast.success("تم نسخ رقم الطلب"),
-              () => toast.error("تعذّر النسخ"),
-            );
-          }}
-          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-        >
-          <Copy className="h-3 w-3" /> نسخ
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => qc.invalidateQueries({ queryKey: ["portal", "my-inquiries"] })}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground hover:text-primary"
+            title="تحديث الحالة"
+          >
+            <RefreshCw className="h-3 w-3" /> تحديث
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              navigator.clipboard?.writeText(i.request_number).then(
+                () => toast.success("تم نسخ رقم الطلب"),
+                () => toast.error("تعذّر النسخ"),
+              );
+            }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+          >
+            <Copy className="h-3 w-3" /> نسخ
+          </button>
+        </div>
       </div>
 
       <div className="mt-3 space-y-1.5 text-sm">
@@ -308,6 +323,9 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
         )}
       </div>
 
+      {/* شريط الحالة: قيد الربط → قيد المراجعة → مكتمل */}
+      <StatusStepper inquiry={i} />
+
       <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
         <Badge tone="primary">{STATUS_LABEL[i.internal_status] ?? i.internal_status}</Badge>
         <Badge tone="muted">واتساب: {HANDOFF_LABEL[i.whatsapp_handoff_status] ?? i.whatsapp_handoff_status}</Badge>
@@ -315,6 +333,135 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
 
       <div className="mt-3 text-[10px] text-muted-foreground">أُرسل في {created}</div>
     </li>
+  );
+}
+
+type StepState = "done" | "current" | "pending" | "failed";
+type Step = { key: string; label: string; state: StepState; date: string | null };
+
+function fmtDate(iso: string | null): string | null {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleDateString("ar-SA-u-nu-latn", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  } catch {
+    return iso.slice(0, 10);
+  }
+}
+
+function StatusStepper({ inquiry: i }: { inquiry: MyInquiry }) {
+  const status = i.internal_status;
+  const isCancelled = status === "cancelled";
+  const isCompleted = status === "closed" || status === "completed" || status === "scheduled";
+  const isReviewing =
+    status === "in_progress" || status === "contacted";
+  const isLinked = !!i.linked_at;
+
+  const steps: Step[] = [
+    {
+      key: "submitted",
+      label: "مُرسل",
+      state: "done",
+      date: fmtDate(i.created_at),
+    },
+    {
+      key: "linked",
+      label: isLinked ? "مرتبط بحسابك" : "قيد الربط",
+      state: isLinked ? "done" : "current",
+      date: fmtDate(i.linked_at),
+    },
+    {
+      key: "review",
+      label: "قيد المراجعة",
+      state: isCancelled
+        ? "failed"
+        : isCompleted
+          ? "done"
+          : isReviewing
+            ? "current"
+            : isLinked
+              ? "current"
+              : "pending",
+      date: null,
+    },
+    {
+      key: "completed",
+      label: isCancelled ? "ملغى" : "مكتمل",
+      state: isCancelled ? "failed" : isCompleted ? "done" : "pending",
+      date: null,
+    },
+  ];
+
+  return (
+    <ol className="mt-4 flex items-start justify-between gap-1" aria-label="مراحل الاستفسار">
+      {steps.map((s, idx) => (
+        <li key={s.key} className="flex-1 flex flex-col items-center text-center relative min-w-0">
+          {idx > 0 && (
+            <span
+              aria-hidden
+              className={
+                "absolute top-3 h-0.5 ltr:left-0 ltr:right-1/2 rtl:right-0 rtl:left-1/2 " +
+                (s.state === "done" || s.state === "current"
+                  ? "bg-primary"
+                  : s.state === "failed"
+                    ? "bg-red-300"
+                    : "bg-muted")
+              }
+            />
+          )}
+          <StepIcon state={s.state} />
+          <span
+            className={
+              "mt-1 text-[10px] font-semibold truncate max-w-full px-0.5 " +
+              (s.state === "done"
+                ? "text-primary"
+                : s.state === "current"
+                  ? "text-foreground"
+                  : s.state === "failed"
+                    ? "text-red-600"
+                    : "text-muted-foreground")
+            }
+          >
+            {s.label}
+          </span>
+          {s.date && (
+            <span className="text-[9px] text-muted-foreground tabular-nums leading-tight">
+              {s.date}
+            </span>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function StepIcon({ state }: { state: StepState }) {
+  const base = "relative h-6 w-6 rounded-full grid place-items-center bg-background border-2";
+  if (state === "done")
+    return (
+      <span className={`${base} border-primary text-primary`}>
+        <CheckCircle2 className="h-3.5 w-3.5" />
+      </span>
+    );
+  if (state === "current")
+    return (
+      <span className={`${base} border-primary text-primary`}>
+        <CircleDot className="h-3.5 w-3.5" />
+      </span>
+    );
+  if (state === "failed")
+    return (
+      <span className={`${base} border-red-400 text-red-500`}>
+        <XCircle className="h-3.5 w-3.5" />
+      </span>
+    );
+  return (
+    <span className={`${base} border-muted text-muted-foreground`}>
+      <Circle className="h-3.5 w-3.5" />
+    </span>
   );
 }
 
