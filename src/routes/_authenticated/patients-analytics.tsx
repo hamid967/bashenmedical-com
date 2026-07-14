@@ -595,9 +595,9 @@ function Kpi({
 }) {
   const toneClass: Record<string, string> = {
     primary: "text-primary from-primary/10",
-    success: "text-emerald-600 dark:text-emerald-400 from-emerald-500/10",
-    info: "text-sky-600 dark:text-sky-400 from-sky-500/10",
-    warning: "text-amber-600 dark:text-amber-400 from-amber-500/10",
+    success: "text-emerald-600 from-emerald-500/10",
+    info: "text-teal-600 from-teal-500/10",
+    warning: "text-amber-600 from-amber-500/10",
   };
   const clickable = typeof onClick === "function";
   return (
@@ -844,8 +844,8 @@ function DeltaBadge({ value, suffix }: { value: number; suffix?: string }) {
   const cls = zero
     ? "bg-muted text-muted-foreground"
     : up
-      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-      : "bg-red-500/10 text-red-600 dark:text-red-400";
+      ? "bg-emerald-500/10 text-emerald-600"
+      : "bg-red-500/10 text-red-600";
   const sign = up ? "+" : "";
   return (
     <span
@@ -973,9 +973,9 @@ function AiSummarySection({
 
 function PriorityBadge({ p }: { p: "high" | "medium" | "low" }) {
   const map = {
-    high: { label: "عالية", cls: "bg-red-500/10 text-red-600 dark:text-red-400" },
-    medium: { label: "متوسطة", cls: "bg-amber-500/10 text-amber-600 dark:text-amber-400" },
-    low: { label: "منخفضة", cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" },
+    high: { label: "عالية", cls: "bg-red-500/10 text-red-600" },
+    medium: { label: "متوسطة", cls: "bg-amber-500/10 text-amber-600" },
+    low: { label: "منخفضة", cls: "bg-emerald-500/10 text-emerald-600" },
   } as const;
   const { label, cls } = map[p];
   return (
@@ -1070,7 +1070,7 @@ function RecentStatusEventsSection({
                     )}
                     <StatusChip s={e.to} />
                     {e.count > 1 && (
-                      <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                      <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
                         جماعي · {e.count} مريض
                       </span>
                     )}
@@ -1136,13 +1136,13 @@ function StatusChip({ s, muted }: { s: string; muted?: boolean }) {
   const cls = muted
     ? "bg-muted text-muted-foreground"
     : s === "active"
-      ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+      ? "bg-emerald-500/10 text-emerald-600"
       : s === "inactive"
-        ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+        ? "bg-amber-500/10 text-amber-600"
         : s === "archived"
-          ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+          ? "bg-teal-500/10 text-teal-600"
           : s === "deceased"
-            ? "bg-red-500/10 text-red-600 dark:text-red-400"
+            ? "bg-red-500/10 text-red-600"
             : "bg-muted text-muted-foreground";
   return (
     <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${cls}`}>{label}</span>
@@ -1442,7 +1442,7 @@ function EventsDrilldown({
                 )}
                 <StatusChip s={e.to} />
                 {e.count > 1 && (
-                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
                     جماعي · {e.count}
                   </span>
                 )}
@@ -1803,7 +1803,7 @@ function PatientTransitionsTable({
                   <td className="p-2 font-medium">
                     <HighlightText text={r.patient_name} query={debouncedSearch} />
                     {r.bulk && (
-                      <span className="ms-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600 dark:text-amber-400">
+                      <span className="ms-1 rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[10px] text-amber-600">
                         جماعي
                       </span>
                     )}
@@ -1978,7 +1978,7 @@ function TransitionDetailModal({
                 )}
                 <StatusChip s={row.to} />
                 {row.bulk && (
-                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-400">
+                  <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-600">
                     جماعي
                   </span>
                 )}

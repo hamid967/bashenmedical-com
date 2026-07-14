@@ -36,7 +36,7 @@ const STATUS_LABELS: Record<SecondOpinionStatus, string> = {
 };
 
 const STATUS_STYLES: Record<SecondOpinionStatus, string> = {
-  received: "bg-blue-100 text-blue-800",
+  received: "bg-teal-100 text-teal-800",
   reviewing: "bg-amber-100 text-amber-800",
   accepted: "bg-emerald-100 text-emerald-800",
   rejected: "bg-rose-100 text-rose-800",

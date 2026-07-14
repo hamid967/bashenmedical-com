@@ -37,15 +37,15 @@ export const Route = createFileRoute("/_authenticated/notifications-queue")({
 });
 
 const CHANNEL_LABEL: Record<string, { label: string; Icon: any; color: string }> = {
-  sms: { label: "SMS", Icon: MessageSquare, color: "bg-sky-100 text-sky-900" },
+  sms: { label: "SMS", Icon: MessageSquare, color: "bg-teal-100 text-teal-900" },
   whatsapp: { label: "WhatsApp", Icon: MessageCircle, color: "bg-emerald-100 text-emerald-900" },
-  email: { label: "Email", Icon: Mail, color: "bg-violet-100 text-violet-900" },
+  email: { label: "Email", Icon: Mail, color: "bg-teal-100 text-teal-900" },
   in_app: { label: "داخل النظام", Icon: Bell, color: "bg-slate-100 text-slate-700" },
 };
 
 const STATUS_LABEL: Record<string, { label: string; color: string }> = {
   pending: { label: "قيد الانتظار", color: "bg-amber-100 text-amber-900 border-amber-300" },
-  queued: { label: "في الطابور", color: "bg-blue-100 text-blue-900 border-blue-300" },
+  queued: { label: "في الطابور", color: "bg-teal-100 text-teal-900 border-teal-300" },
   sent: { label: "مُرسل", color: "bg-emerald-100 text-emerald-900 border-emerald-300" },
   failed: { label: "فشل", color: "bg-rose-100 text-rose-900 border-rose-300" },
   skipped: { label: "متجاوز", color: "bg-slate-100 text-slate-700 border-slate-300" },
@@ -261,7 +261,7 @@ function NotificationsQueuePage() {
                         <button
                           onClick={() => update.mutate({ id: n.id, status: "pending" })}
                           title="إعادة الجدولة"
-                          className="rounded p-1 text-blue-700 hover:bg-blue-50"
+                          className="rounded p-1 text-teal-700 hover:bg-teal-50"
                         >
                           <RefreshCw className="h-4 w-4" />
                         </button>

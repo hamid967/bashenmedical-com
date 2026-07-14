@@ -205,7 +205,7 @@ function McpStatusPage() {
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{t.name}</span>
                   {t.annotations?.readOnlyHint && (
-                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+                    <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
                       read-only
                     </span>
                   )}
@@ -441,7 +441,7 @@ function ToolInvocationsSection({ toolNames }: { toolNames: string[] }) {
                           فشل
                         </span>
                       ) : (
-                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700 dark:text-emerald-400">
+                        <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
                           نجاح
                         </span>
                       )

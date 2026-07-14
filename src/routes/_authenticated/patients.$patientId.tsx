@@ -491,7 +491,7 @@ const SEVERITY_LABEL: Record<string, string> = {
   life_threatening: "مهدد للحياة",
 };
 const SEVERITY_COLOR: Record<string, string> = {
-  mild: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+  mild: "bg-teal-500/10 text-teal-700 border-teal-500/30",
   moderate: "bg-amber-500/10 text-amber-700 border-amber-500/30",
   severe: "bg-orange-500/10 text-orange-700 border-orange-500/30",
   life_threatening: "bg-red-500/10 text-red-700 border-red-500/30",

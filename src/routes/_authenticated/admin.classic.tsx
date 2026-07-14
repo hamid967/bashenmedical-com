@@ -251,7 +251,7 @@ function AdminDashboard() {
               {isSuperAdmin ? "مركز قيادة السوبر أدمن" : "لوحة التحكم"}
             </h1>
             {isSuperAdmin && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-700 dark:text-amber-300">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-1 text-xs font-bold text-amber-700">
                 <Crown className="h-3.5 w-3.5" /> صلاحية كاملة
               </span>
             )}
@@ -526,7 +526,7 @@ function OverviewTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
                 إدارة المستخدمين والصلاحيات والإعدادات والسجلات من نقطة واحدة.
               </p>
             </div>
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700">
               النظام متصل
             </span>
           </div>
@@ -566,7 +566,7 @@ function OverviewTab({ isSuperAdmin }: { isSuperAdmin: boolean }) {
 type ApptStatus = "new" | "confirmed" | "completed" | "cancelled" | "no_show";
 
 const APPT_STATUS_STYLES: Record<ApptStatus, string> = {
-  new: "bg-blue-500/10 text-blue-600 border-blue-500/20",
+  new: "bg-teal-500/10 text-teal-600 border-teal-500/20",
   confirmed: "bg-primary/10 text-primary border-primary/20",
   completed: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
   cancelled: "bg-destructive/10 text-destructive border-destructive/20",
@@ -1936,10 +1936,10 @@ const CHANNEL_LABEL_AR: Record<string, string> = {
 };
 
 const STATUS_LABEL_AR: Record<string, { label: string; cls: string }> = {
-  pending: { label: "قيد الانتظار", cls: "bg-amber-500/10 text-amber-700 dark:text-amber-300" },
-  queued: { label: "في الطابور", cls: "bg-blue-500/10 text-blue-700 dark:text-blue-300" },
-  sent: { label: "مُرسل", cls: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" },
-  failed: { label: "فشل", cls: "bg-rose-500/10 text-rose-700 dark:text-rose-300" },
+  pending: { label: "قيد الانتظار", cls: "bg-amber-500/10 text-amber-700" },
+  queued: { label: "في الطابور", cls: "bg-teal-500/10 text-teal-700" },
+  sent: { label: "مُرسل", cls: "bg-emerald-500/10 text-emerald-700" },
+  failed: { label: "فشل", cls: "bg-rose-500/10 text-rose-700" },
   skipped: { label: "متجاوز", cls: "bg-muted text-muted-foreground" },
 };
 
@@ -2985,7 +2985,7 @@ function DeliveryTrendChart({
             <span className="h-2.5 w-2.5 rounded-sm bg-destructive" /> فشلت
           </span>
           <span className="inline-flex items-center gap-1.5">
-            <span className="h-0.5 w-4 bg-sky-500" /> معدل النجاح
+            <span className="h-0.5 w-4 bg-teal-500" /> معدل النجاح
           </span>
         </div>
       </div>
@@ -3198,9 +3198,9 @@ const SOURCE_LABEL: Record<string, string> = {
 };
 
 const SOURCE_CLASS: Record<string, string> = {
-  staff: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  staff: "bg-teal-500/10 text-teal-700",
   self_service: "bg-muted text-muted-foreground",
-  system: "bg-purple-500/10 text-purple-700 dark:text-purple-300",
+  system: "bg-teal-500/10 text-teal-700",
 };
 
 function formatAuditDate(iso: string): string {
@@ -3398,7 +3398,7 @@ function RemindersAuditTab() {
                       <span
                         className={
                           r.old_value
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-green-600"
                             : "text-muted-foreground"
                         }
                       >
@@ -3408,7 +3408,7 @@ function RemindersAuditTab() {
                       <span
                         className={
                           r.new_value
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-green-600"
                             : "text-muted-foreground"
                         }
                       >
@@ -3477,7 +3477,7 @@ function StatBar({ label, value, total, tone = "primary" }: { label: string; val
     emerald: "bg-emerald-500",
     amber: "bg-amber-500",
     destructive: "bg-destructive",
-    sky: "bg-sky-500",
+    sky: "bg-teal-500",
   }[tone];
   return (
     <div>

@@ -417,7 +417,7 @@ function TransitionAlertsPage() {
                           <div className="font-semibold flex items-center gap-2 flex-wrap">
                             {r.label || `${SCOPE_LABEL[r.scope]} · ${STATUS_LABEL[r.status]}`}
                             {r.is_shared ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] bg-blue-500/15 text-blue-700 border border-blue-500/30 px-1.5 py-0.5 rounded-full">
+                              <span className="inline-flex items-center gap-1 text-[10px] bg-teal-500/15 text-teal-700 border border-teal-500/30 px-1.5 py-0.5 rounded-full">
                                 <Share2 className="h-3 w-3" /> مشتركة
                               </span>
                             ) : (

@@ -55,11 +55,11 @@ type Row = {
 type Scope = "upcoming" | "pending" | "today" | "past" | "all";
 
 const STATUS_META: Record<Status, { label: string; cls: string }> = {
-  new: { label: "جديد", cls: "bg-blue-500/15 text-blue-700 dark:text-blue-300" },
-  confirmed: { label: "مؤكّد", cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" },
+  new: { label: "جديد", cls: "bg-teal-500/15 text-teal-700" },
+  confirmed: { label: "مؤكّد", cls: "bg-emerald-500/15 text-emerald-700" },
   completed: { label: "مكتمل", cls: "bg-primary/15 text-primary" },
-  cancelled: { label: "ملغى", cls: "bg-rose-500/15 text-rose-700 dark:text-rose-300" },
-  no_show: { label: "لم يحضر", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
+  cancelled: { label: "ملغى", cls: "bg-rose-500/15 text-rose-700" },
+  no_show: { label: "لم يحضر", cls: "bg-amber-500/15 text-amber-700" },
 };
 
 const STATUS_FILTERS: (Status | "all")[] = [
@@ -237,7 +237,7 @@ function AppointmentsQueuePage() {
 
       <div className="mb-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
         <QueueMetric label="مواعيد اليوم" value={scopeCounts.today} tone="text-primary" />
-        <QueueMetric label="بانتظار التأكيد" value={scopeCounts.pending} tone="text-blue-600" />
+        <QueueMetric label="بانتظار التأكيد" value={scopeCounts.pending} tone="text-teal-600" />
         <QueueMetric label="القادمة" value={scopeCounts.upcoming} tone="text-emerald-600" />
         <QueueMetric label="لم يحضر" value={rows.filter((r) => r.status === "no_show").length} tone="text-amber-600" />
       </div>

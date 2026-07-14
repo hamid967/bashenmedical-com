@@ -49,10 +49,10 @@ const CHANNELS: Array<{
   hint: string;
 }> = [
   { value: "in_app", label: "داخل التطبيق", Icon: Bell, color: "bg-slate-100 text-slate-800", hint: "إشعار داخل جرس التطبيق." },
-  { value: "web_push", label: "Push", Icon: Smartphone, color: "bg-indigo-100 text-indigo-900", hint: "إشعار متصفح/جوال. حافظ على نص قصير." },
-  { value: "sms", label: "SMS", Icon: MessageSquare, color: "bg-sky-100 text-sky-900", hint: "رسالة نصية ≤ 160 حرف موصى بها." },
+  { value: "web_push", label: "Push", Icon: Smartphone, color: "bg-teal-100 text-teal-900", hint: "إشعار متصفح/جوال. حافظ على نص قصير." },
+  { value: "sms", label: "SMS", Icon: MessageSquare, color: "bg-teal-100 text-teal-900", hint: "رسالة نصية ≤ 160 حرف موصى بها." },
   { value: "whatsapp", label: "WhatsApp", Icon: MessageCircle, color: "bg-emerald-100 text-emerald-900", hint: "يدعم أسطر متعددة ورموز." },
-  { value: "email", label: "Email", Icon: Mail, color: "bg-violet-100 text-violet-900", hint: "استخدم عنوانًا واضحًا." },
+  { value: "email", label: "Email", Icon: Mail, color: "bg-teal-100 text-teal-900", hint: "استخدم عنوانًا واضحًا." },
 ];
 
 const CHANNEL_META: Record<
@@ -534,7 +534,7 @@ function PreviewCard({
     const bubble =
       channel === "whatsapp"
         ? "bg-emerald-50 border-emerald-200"
-        : "bg-sky-50 border-sky-200";
+        : "bg-teal-50 border-teal-200";
     return (
       <div className="rounded-2xl border bg-slate-50 p-4">
         <div className={`max-w-md whitespace-pre-wrap rounded-2xl border p-3 text-sm shadow-sm ${bubble}`}>

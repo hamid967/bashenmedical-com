@@ -128,7 +128,7 @@ function EmployeesTab() {
                   <td className="p-3 text-center text-muted-foreground">{e.hire_date ?? "—"}</td>
                   <td className="p-3 text-center">
                     {e.is_active
-                      ? <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:text-emerald-400">نشط</span>
+                      ? <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-semibold text-emerald-700">نشط</span>
                       : <span className="rounded-full bg-muted px-2 py-0.5 text-xs">معطّل</span>}
                   </td>
                   <td className="p-3 text-center">
@@ -370,10 +370,10 @@ function LeavesTab() {
 }
 
 function StatusPill({ status }: { status: LeaveStatus }) {
-  const cls = status === "approved" ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400"
+  const cls = status === "approved" ? "bg-emerald-500/15 text-emerald-700"
     : status === "rejected" ? "bg-destructive/15 text-destructive"
     : status === "cancelled" ? "bg-muted text-muted-foreground"
-    : "bg-amber-500/15 text-amber-700 dark:text-amber-400";
+    : "bg-amber-500/15 text-amber-700";
   return <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${cls}`}>{LEAVE_STATUS_AR[status]}</span>;
 }
 
@@ -520,7 +520,7 @@ function PayrollRunCard({ run, onFinalize, onDelete }: {
         <div className="flex items-center gap-2">
           <Wallet className="h-4 w-4 text-muted-foreground" />
           <span className="font-bold">{run.period_year}/{String(run.period_month).padStart(2, "0")}</span>
-          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${locked ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400" : "bg-amber-500/15 text-amber-700 dark:text-amber-400"}`}>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${locked ? "bg-emerald-500/15 text-emerald-700" : "bg-amber-500/15 text-amber-700"}`}>
             {locked ? "معتمد" : "مسودة"}
           </span>
         </div>

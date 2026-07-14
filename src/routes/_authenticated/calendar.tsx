@@ -39,7 +39,7 @@ const START_HOUR = 8;
 const END_HOUR = 22;
 
 const STATUS_STYLE: Record<CalendarAppointment["status"], string> = {
-  new: "bg-blue-100 text-blue-900 border-blue-300",
+  new: "bg-teal-100 text-teal-900 border-teal-300",
   confirmed: "bg-emerald-100 text-emerald-900 border-emerald-300",
   completed: "bg-slate-100 text-slate-700 border-slate-300",
   cancelled: "bg-rose-100 text-rose-700 border-rose-300 line-through opacity-70",

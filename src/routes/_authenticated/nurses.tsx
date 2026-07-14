@@ -376,9 +376,9 @@ function isoDate(d: Date) { return d.toISOString().slice(0, 10); }
 function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
 
 const SHIFT_TYPES: Array<{ v: ShiftType; label: string; range: [string, string]; cls: string }> = [
-  { v: "morning", label: "صباحية", range: ["07:00", "15:00"], cls: "bg-sky-500/15 text-sky-700 border-sky-500/30" },
+  { v: "morning", label: "صباحية", range: ["07:00", "15:00"], cls: "bg-teal-500/15 text-teal-700 border-teal-500/30" },
   { v: "evening", label: "مسائية", range: ["15:00", "23:00"], cls: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
-  { v: "night",   label: "ليلية",  range: ["23:00", "07:00"], cls: "bg-indigo-500/15 text-indigo-700 border-indigo-500/30" },
+  { v: "night",   label: "ليلية",  range: ["23:00", "07:00"], cls: "bg-teal-500/15 text-teal-700 border-teal-500/30" },
 ];
 
 function ShiftsPanel({ branchId }: { branchId: string | null }) {
@@ -624,8 +624,8 @@ const PRIORITY_META: Record<CallPriority, { label: string; cls: string }> = {
 };
 
 const STATUS_META: Record<CallStatus, { label: string; cls: string }> = {
-  pending: { label: "قيد الانتظار", cls: "bg-blue-500/15 text-blue-700" },
-  in_progress: { label: "قيد المعالجة", cls: "bg-indigo-500/15 text-indigo-700" },
+  pending: { label: "قيد الانتظار", cls: "bg-teal-500/15 text-teal-700" },
+  in_progress: { label: "قيد المعالجة", cls: "bg-teal-500/15 text-teal-700" },
   completed: { label: "مكتمل", cls: "bg-emerald-500/15 text-emerald-700" },
   cancelled: { label: "ملغى", cls: "bg-muted text-muted-foreground" },
 };
@@ -738,7 +738,7 @@ function CallsPanel({ branchId }: { branchId: string | null }) {
                   {c.status === "pending" && (
                     <button
                       onClick={() => upd.mutate({ id: c.id, status: "in_progress" })}
-                      className="rounded bg-indigo-600 px-2 py-1 text-xs text-white hover:opacity-90"
+                      className="rounded bg-teal-600 px-2 py-1 text-xs text-white hover:opacity-90"
                     >قبول</button>
                   )}
                   {c.status === "in_progress" && (

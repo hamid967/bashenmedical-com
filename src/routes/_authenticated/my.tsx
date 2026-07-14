@@ -466,7 +466,7 @@ function PrescriptionsTab({ patientId }: { patientId: string | null }) {
               <div className="flex items-center gap-2 flex-wrap">
                 <StatusChip status={r.status} label={statusLabel(r.status)} />
                 {r.refills_remaining > 0 && (
-                  <span className="rounded-full bg-blue-500/10 text-blue-700 border border-blue-500/30 px-2 py-0.5 text-[11px]">
+                  <span className="rounded-full bg-teal-500/10 text-teal-700 border border-teal-500/30 px-2 py-0.5 text-[11px]">
                     متبقّي {r.refills_remaining} صرف
                   </span>
                 )}
@@ -1121,7 +1121,7 @@ function statusColor(s: string) {
     case "ready":
       return "bg-green-500/10 text-green-700 border-green-500/30";
     case "completed":
-      return "bg-blue-500/10 text-blue-700 border-blue-500/30";
+      return "bg-teal-500/10 text-teal-700 border-teal-500/30";
     case "cancelled":
     case "refunded":
       return "bg-red-500/10 text-red-700 border-red-500/30";

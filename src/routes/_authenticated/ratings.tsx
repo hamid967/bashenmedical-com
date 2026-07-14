@@ -437,7 +437,7 @@ function KpiCard({
 }) {
   const toneMap = {
     amber: "from-amber-500/15 to-amber-500/5 text-amber-600 border-amber-500/30",
-    blue: "from-blue-500/15 to-blue-500/5 text-blue-600 border-blue-500/30",
+    blue: "from-teal-500/15 to-teal-500/5 text-teal-600 border-teal-500/30",
     red: "from-red-500/15 to-red-500/5 text-red-600 border-red-500/30",
     green: "from-emerald-500/15 to-emerald-500/5 text-emerald-600 border-emerald-500/30",
   } as const;
@@ -482,7 +482,7 @@ function RatingCard({
             {[1, 2, 3, 4, 5].map((n) => (
               <Star key={n} className={`h-4 w-4 ${n <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
             ))}
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${r.source === "public" ? "bg-blue-500/10 text-blue-700 border-blue-500/30" : "bg-purple-500/10 text-purple-700 border-purple-500/30"}`}>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${r.source === "public" ? "bg-teal-500/10 text-teal-700 border-teal-500/30" : "bg-teal-500/10 text-teal-700 border-teal-500/30"}`}>
               {r.source === "public" ? "عام" : "داخلي"}
             </span>
             {r.staff_reply && !editing && (

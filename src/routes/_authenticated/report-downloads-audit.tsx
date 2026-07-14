@@ -30,7 +30,7 @@ const ACTION_LABELS: Record<string, { label: string; cls: string; icon: typeof F
   },
   radiology_report_download: {
     label: "تنزيل تقرير أشعة",
-    cls: "bg-sky-500/15 text-sky-700 border-sky-500/30",
+    cls: "bg-teal-500/15 text-teal-700 border-teal-500/30",
     icon: Scan,
   },
 };
