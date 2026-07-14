@@ -13,7 +13,7 @@ type Role =
   | "support_agent"
   | "reception";
 
-async function assertHasRole(
+export async function assertHasRole(
   supabase: any,
   userId: string,
   role: Role = "admin",
