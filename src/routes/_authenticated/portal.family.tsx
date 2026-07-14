@@ -974,12 +974,34 @@ function DeleteDialog({
     },
     onError: () => toast.error(T.e_generic[lang]),
   });
+  const cancelMut = useMutation({
+    mutationFn: (dependent_id: string) =>
+      cancelDependentActiveAppointments({ data: { dependent_id } }),
+    onSuccess: (res) => {
+      if (res.cancelled > 0) {
+        toast.success(T.del_cancel_success[lang]);
+      } else {
+        toast.info(T.del_cancel_none[lang]);
+      }
+      if (row) {
+        qc.invalidateQueries({
+          queryKey: ["portal", "dependent-appt-count", row.id],
+        });
+        qc.invalidateQueries({
+          queryKey: ["portal", "dependent-appointments", row.id],
+        });
+      }
+    },
+    onError: () => toast.error(T.del_cancel_error[lang]),
+  });
 
   const activeCount = countQ.data?.active ?? 0;
   const totalCount = countQ.data?.total ?? 0;
   const blocked = activeCount > 0;
   const hasHistory = !blocked && totalCount > 0;
-  const canDelete = countQ.isSuccess && !blocked && !mut.isPending;
+  const busy = mut.isPending || cancelMut.isPending;
+  const canDelete = countQ.isSuccess && !blocked && !busy;
+
 
   return (
     <AlertDialog open={!!row} onOpenChange={(o) => !o && onClose()}>
