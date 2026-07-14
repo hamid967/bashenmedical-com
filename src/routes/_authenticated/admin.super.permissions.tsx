@@ -102,8 +102,16 @@ function SuperPermissionsPage() {
   const { data: catalog } = useSuspenseQuery(catalogQuery);
   const { data: matrix } = useSuspenseQuery(matrixQuery);
   const setPerm = useServerFn(setRolePermission);
+  const importFn = useServerFn(importRolePermissions);
   const [filter, setFilter] = useState("");
   const [pending, setPending] = useState<Set<string>>(new Set());
+  const [importOpen, setImportOpen] = useState(false);
+  const [importMode, setImportMode] = useState<"merge" | "replace">("merge");
+  const [importFileName, setImportFileName] = useState<string | null>(null);
+  const [importPayload, setImportPayload] = useState<Record<string, string[]> | null>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const enabledSet = useMemo(
     () => new Set(matrix.map((r) => `${r.role}::${r.permission_key}`)),
