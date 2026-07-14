@@ -113,24 +113,45 @@ function SuperPermissionsPage() {
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [detailKey, setDetailKey] = useState<string | null>(null);
-
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [roleFocus, setRoleFocus] = useState<AppRole | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "enabled" | "disabled">("all");
 
   const enabledSet = useMemo(
     () => new Set(matrix.map((r) => `${r.role}::${r.permission_key}`)),
     [matrix],
   );
 
+  const categories = useMemo(
+    () => Array.from(new Set(catalog.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "ar")),
+    [catalog],
+  );
+
+  const visibleRoles = useMemo<AppRole[]>(
+    () => (roleFocus === "all" ? ALL_ROLES : [roleFocus]),
+    [roleFocus],
+  );
+
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
-    if (!q) return catalog;
-    return catalog.filter(
-      (p) =>
-        p.key.toLowerCase().includes(q) ||
-        p.description_ar.toLowerCase().includes(q) ||
-        (p.description_en ?? "").toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q),
-    );
-  }, [catalog, filter]);
+    return catalog.filter((p) => {
+      if (categoryFilter !== "all" && p.category !== categoryFilter) return false;
+      if (q) {
+        const hit =
+          p.key.toLowerCase().includes(q) ||
+          p.description_ar.toLowerCase().includes(q) ||
+          (p.description_en ?? "").toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q);
+        if (!hit) return false;
+      }
+      if (statusFilter !== "all" && roleFocus !== "all") {
+        const on = roleFocus === "super_admin" || enabledSet.has(`${roleFocus}::${p.key}`);
+        if (statusFilter === "enabled" && !on) return false;
+        if (statusFilter === "disabled" && on) return false;
+      }
+      return true;
+    });
+  }, [catalog, filter, categoryFilter, statusFilter, roleFocus, enabledSet]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, typeof filtered>();
@@ -141,6 +162,20 @@ function SuperPermissionsPage() {
     }
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0], "ar"));
   }, [filtered]);
+
+  const activeFilterCount =
+    (filter.trim() ? 1 : 0) +
+    (categoryFilter !== "all" ? 1 : 0) +
+    (roleFocus !== "all" ? 1 : 0) +
+    (statusFilter !== "all" ? 1 : 0);
+
+  function clearAllFilters() {
+    setFilter("");
+    setCategoryFilter("all");
+    setRoleFocus("all");
+    setStatusFilter("all");
+  }
+
 
   const mut = useMutation({
     mutationFn: async (v: { role: AppRole; permission_key: string; enabled: boolean }) => {
@@ -412,14 +447,89 @@ function SuperPermissionsPage() {
         </div>
       </header>
 
-      <div className="relative max-w-md">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="ابحث بالمفتاح أو الوصف أو التصنيف…"
-          className="pr-9"
-        />
+      <div className="rounded-xl border border-border bg-card p-3 space-y-3">
+        <div className="grid gap-2 md:grid-cols-[1fr_200px_220px_180px]">
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="ابحث بالمفتاح أو الوصف أو التصنيف…"
+              className="pr-9"
+            />
+          </div>
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="الفئة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الفئات ({categories.length})</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={roleFocus} onValueChange={(v) => setRoleFocus(v as any)}>
+            <SelectTrigger>
+              <SelectValue placeholder="الدور" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الأدوار</SelectItem>
+              {ALL_ROLES.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {ROLE_LABEL[r]}{" "}
+                  <span className="font-mono text-[10px] opacity-60">({r})</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => setStatusFilter(v as any)}
+            disabled={roleFocus === "all"}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="الحالة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">الحالة: الكل</SelectItem>
+              <SelectItem value="enabled">مُفعّلة فقط</SelectItem>
+              <SelectItem value="disabled">مُعطّلة فقط</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span>
+              النتائج: <b>{filtered.length}</b> من {catalog.length}
+            </span>
+            {activeFilterCount > 0 && (
+              <Badge variant="secondary">{activeFilterCount} فلتر نشط</Badge>
+            )}
+            {roleFocus !== "all" && (
+              <Badge variant="outline">
+                عرض دور واحد: {ROLE_LABEL[roleFocus as AppRole]}
+              </Badge>
+            )}
+          </div>
+          {activeFilterCount > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={clearAllFilters}
+            >
+              مسح الفلاتر
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
@@ -429,7 +539,7 @@ function SuperPermissionsPage() {
               <th className="sticky right-0 z-20 bg-muted/40 px-3 py-2 text-right min-w-[260px]">
                 الصلاحية
               </th>
-              {ALL_ROLES.map((r) => (
+              {visibleRoles.map((r) => (
                 <th key={r} className="px-2 py-2 text-center whitespace-nowrap">
                   <div className="text-xs font-semibold">{ROLE_LABEL[r]}</div>
                   <div className="text-[10px] font-mono text-muted-foreground">{r}</div>
@@ -440,7 +550,7 @@ function SuperPermissionsPage() {
           <tbody>
             {grouped.length === 0 && (
               <tr>
-                <td colSpan={ALL_ROLES.length + 1} className="py-10 text-center text-muted-foreground">
+                <td colSpan={visibleRoles.length + 1} className="py-10 text-center text-muted-foreground">
                   لا توجد نتائج مطابقة.
                 </td>
               </tr>
@@ -448,7 +558,7 @@ function SuperPermissionsPage() {
             {grouped.flatMap(([cat, perms]) => [
               <tr key={`cat-${cat}`} className="bg-muted/20">
                 <td
-                  colSpan={ALL_ROLES.length + 1}
+                  colSpan={visibleRoles.length + 1}
                   className="px-3 py-1.5 text-right text-xs font-semibold text-muted-foreground"
                 >
                   {cat}
@@ -472,7 +582,7 @@ function SuperPermissionsPage() {
                       </span>
                     </button>
                   </td>
-                  {ALL_ROLES.map((r) => {
+                  {visibleRoles.map((r) => {
                     const cellKey = `${r}::${p.key}`;
                     const on = r === "super_admin" ? true : enabledSet.has(cellKey);
                     const locked = r === "super_admin";
