@@ -291,11 +291,18 @@ const SORT_OPTIONS: Array<{ key: string; label: string; icon: any }> = [
 
 function PortalRefundsPage() {
   const { data } = useSuspenseQuery(refundsQuery);
-  const { status, sort } = Route.useSearch();
+  const { status, sort, receipt } = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
   const [openNew, setOpenNew] = useState(false);
   const [prefillPaymentId, setPrefillPaymentId] = useState<string | null>(null);
   const [detailsId, setDetailsId] = useState<string | null>(null);
+
+  const receiptRefund = useMemo(
+    () => (receipt ? data.refunds.find((r) => r.id === receipt && isFinalized(r.status)) ?? null : null),
+    [data.refunds, receipt],
+  );
+  const closeReceipt = () =>
+    navigate({ search: (prev: any) => ({ ...prev, receipt: undefined }), replace: true });
 
   const safeStatus = STATUS_TABS.some((t) => t.key === status) ? status : "all";
   const safeSort = SORT_OPTIONS.some((s) => s.key === sort) ? sort : "updated_desc";
