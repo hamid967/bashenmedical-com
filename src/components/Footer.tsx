@@ -49,7 +49,7 @@ export function Footer() {
 
         {/* Services */}
         <div>
-          <h4 className="text-sm font-semibold mb-3">{isAr ? "خدماتنا" : "Services"}</h4>
+          <JazanSectionLabel className="mb-3">{isAr ? "خدماتنا" : "Services"}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/specialties" className="hover:text-primary">{t("nav_specialties")}</Link></li>
             <li><Link to="/doctors" className="hover:text-primary">{t("nav_doctors")}</Link></li>
@@ -64,7 +64,7 @@ export function Footer() {
 
         {/* Patient portal */}
         <div>
-          <h4 className="text-sm font-semibold mb-3">{isAr ? "بوابة المريض" : "Patient Portal"}</h4>
+          <JazanSectionLabel className="mb-3">{isAr ? "بوابة المريض" : "Patient Portal"}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li><Link to="/book" className="hover:text-primary">{t("nav_book")}</Link></li>
             <li><Link to="/lookup" className="hover:text-primary">{t("nav_lookup")}</Link></li>
@@ -79,7 +79,7 @@ export function Footer() {
 
         {/* Contact */}
         <div>
-          <h4 className="text-sm font-semibold mb-3">{t("footer_contact")}</h4>
+          <JazanSectionLabel className="mb-3">{t("footer_contact")}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
             <li className="flex items-center gap-2">
               <Siren className="h-4 w-4 text-destructive" />
