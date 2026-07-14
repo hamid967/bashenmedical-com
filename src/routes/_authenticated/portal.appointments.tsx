@@ -446,7 +446,7 @@ function mapItemType() {
 }
 
 function AppointmentCard({
-  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, onCheckIn, pending,
+  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, onCheckIn, onTimeline, pending,
 }: {
   a: ApptRow;
   scope: Scope;
@@ -455,6 +455,7 @@ function AppointmentCard({
   onCancel: () => void;
   onFollowUp: () => void;
   onCheckIn: () => void;
+  onTimeline: () => void;
   pending: boolean;
 }) {
   const meta = statusMeta(a.status);
