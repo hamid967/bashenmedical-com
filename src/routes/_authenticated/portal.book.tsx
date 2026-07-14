@@ -220,6 +220,9 @@ function BookPage() {
       patientName: string;
       patientPhone: string;
       reason?: string;
+      nationalId?: string | null;
+      gender?: "male" | "female" | null;
+      dependentId?: string | null;
     }) =>
       bookSlot({
         data: {
@@ -227,7 +230,12 @@ function BookPage() {
           patientName: payload.patientName,
           patientPhone: payload.patientPhone,
           reason: payload.reason,
-          patientId: profile?.id ?? undefined,
+          nationalId: payload.nationalId ?? null,
+          gender: payload.gender ?? null,
+          notes: payload.dependentId ? `dependent:${payload.dependentId}` : null,
+          // Only link to the guardian's own patient record when NOT booking
+          // for a dependent — the dependent may not have a patient record yet.
+          patientId: payload.dependentId ? undefined : profile?.id ?? undefined,
         },
       }),
     onSuccess: (res) => {
@@ -256,6 +264,9 @@ function BookPage() {
       patientName: patientName.trim(),
       patientPhone: patientPhone.trim(),
       reason: reason.trim() || undefined,
+      nationalId: patientNationalId.trim() || null,
+      gender: patientGender || null,
+      dependentId: dependent?.id ?? null,
     });
   }
 
