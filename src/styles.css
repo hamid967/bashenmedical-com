@@ -103,6 +103,28 @@
   --jazan-terracotta: #B85C3C; /* Jazan terracotta */
   --jazan-sand: #E6D4B7;       /* sand */
   --jazan-gold: #C7A46B;       /* muted gold */
+  /* Unified Jazan hairline tokens — keep every gold border/ring on the
+     same brightness so cards, badges and frames read as one system. */
+  --jazan-hairline: color-mix(in oklab, var(--jazan-gold) 35%, transparent);
+  --jazan-hairline-strong: color-mix(in oklab, var(--jazan-gold) 55%, transparent);
+  --jazan-hairline-soft: color-mix(in oklab, var(--jazan-gold) 22%, transparent);
+}
+
+/* Consistent gold hairline utilities. Use on cards, frames, badges. */
+@utility jazan-hairline {
+  box-shadow: inset 0 0 0 1px var(--jazan-hairline);
+  transition: box-shadow 200ms ease;
+}
+@utility jazan-hairline-hover {
+  &:hover {
+    box-shadow: inset 0 0 0 1px var(--jazan-hairline-strong);
+  }
+}
+@utility jazan-border {
+  border: 1px solid var(--jazan-hairline);
+}
+@utility jazan-border-strong {
+  border: 1px solid var(--jazan-hairline-strong);
 }
 
 
