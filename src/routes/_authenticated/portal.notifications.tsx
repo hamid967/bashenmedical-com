@@ -237,6 +237,11 @@ function NotificationsPage() {
           </div>
         </header>
 
+        {/* Web Push subscription management + /sw-push.js diagnostics */}
+        <div className="mb-6">
+          <PushSubscriptionCard />
+        </div>
+
         {/* Tabs */}
         <div
           role="tablist"
