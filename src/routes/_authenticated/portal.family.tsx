@@ -1206,17 +1206,30 @@ function DeleteDialog({
         <AlertDialogContent
           dir={lang === "ar" ? "rtl" : "ltr"}
           aria-busy={cancelMut.isPending}
+          aria-labelledby="dep-cancel-title"
+          aria-describedby="dep-cancel-desc"
           onEscapeKeyDown={(e) => {
             if (cancelMut.isPending) e.preventDefault();
           }}
+          onOpenAutoFocus={(e) => {
+            e.preventDefault();
+            const el = document.querySelector<HTMLButtonElement>(
+              '[data-dep-cancel-back="true"]',
+            );
+            el?.focus();
+          }}
         >
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+            <AlertDialogTitle
+              id="dep-cancel-title"
+              className="flex items-center gap-2 text-red-700 dark:text-red-400"
+            >
               <AlertTriangle className="h-5 w-5" aria-hidden />
               {T.del_cancel_confirm_title[lang]}
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
-              <div className="space-y-3 text-sm">
+              <div id="dep-cancel-desc" className="space-y-3 text-sm">
+
                 <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/60 p-3 flex items-start gap-2">
                   <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
                   <div className="text-red-800 dark:text-red-200 font-medium">
