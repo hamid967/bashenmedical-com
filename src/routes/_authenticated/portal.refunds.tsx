@@ -94,6 +94,7 @@ function PortalRefundsPage() {
   const { data } = useSuspenseQuery(refundsQuery);
   const [openNew, setOpenNew] = useState(false);
   const [prefillPaymentId, setPrefillPaymentId] = useState<string | null>(null);
+  const [detailsId, setDetailsId] = useState<string | null>(null);
 
   const kpis = useMemo(() => {
     const list = data.refunds;
@@ -102,6 +103,11 @@ function PortalRefundsPage() {
     const refundedTotal = processed.reduce((s, r) => s + Number(r.amount ?? 0), 0);
     return { count: list.length, pending, refunded: refundedTotal };
   }, [data.refunds]);
+
+  const selected = useMemo(
+    () => data.refunds.find((r) => r.id === detailsId) ?? null,
+    [data.refunds, detailsId],
+  );
 
   return (
     <div className="portal-magazine min-h-full">
@@ -140,7 +146,7 @@ function PortalRefundsPage() {
         ) : (
           <ul className="space-y-3">
             {data.refunds.map((r) => (
-              <RefundRow key={r.id} r={r} />
+              <RefundRow key={r.id} r={r} onOpen={() => setDetailsId(r.id)} />
             ))}
           </ul>
         )}
@@ -151,6 +157,9 @@ function PortalRefundsPage() {
           onClose={() => setOpenNew(false)}
           prefillPaymentId={prefillPaymentId}
         />
+      )}
+      {selected && (
+        <RefundDetailsDrawer r={selected} onClose={() => setDetailsId(null)} />
       )}
     </div>
   );
