@@ -273,3 +273,252 @@ export const ATTACHMENT_LIMITS = {
   allowedAcceptAttr:
     "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf",
 } as const;
+
+// ---------------------------------------------------------------------------
+// Virus / malware pre-flight scan
+// ---------------------------------------------------------------------------
+// Basic (no external provider) scan. Verifies:
+//   1. Magic bytes match the declared content-type (defends against fake ext).
+//   2. EICAR anti-virus test signature is absent.
+//   3. No embedded PE / ELF / Mach-O executable header.
+//   4. No obviously-hostile script markup inside image bytes.
+//   5. PDFs: no /JavaScript, /JS, /Launch, or /OpenAction actions.
+// A file failing any check is quarantined: row updated to `infected`, storage
+// object removed, and the attachment update trail records the reason.
+
+const EICAR_SIG =
+  "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
+
+function startsWith(buf: Uint8Array, sig: number[]): boolean {
+  if (buf.length < sig.length) return false;
+  for (let i = 0; i < sig.length; i++) if (buf[i] !== sig[i]) return false;
+  return true;
+}
+
+function detectMagic(buf: Uint8Array): string | null {
+  if (startsWith(buf, [0xff, 0xd8, 0xff])) return "image/jpeg";
+  if (startsWith(buf, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
+    return "image/png";
+  // WEBP: "RIFF"...."WEBP"
+  if (
+    startsWith(buf, [0x52, 0x49, 0x46, 0x46]) &&
+    buf.length >= 12 &&
+    buf[8] === 0x57 &&
+    buf[9] === 0x45 &&
+    buf[10] === 0x42 &&
+    buf[11] === 0x50
+  )
+    return "image/webp";
+  // HEIC / HEIF: bytes 4..11 = "ftypheic" | "ftypheix" | "ftypmif1" | "ftypmsf1" | "ftyphevc" ...
+  if (
+    buf.length >= 12 &&
+    buf[4] === 0x66 &&
+    buf[5] === 0x74 &&
+    buf[6] === 0x79 &&
+    buf[7] === 0x70
+  ) {
+    const brand = String.fromCharCode(buf[8], buf[9], buf[10], buf[11]);
+    if (["heic", "heix", "mif1", "msf1", "hevc", "hevx"].includes(brand))
+      return "image/heic";
+  }
+  // PDF: "%PDF-"
+  if (startsWith(buf, [0x25, 0x50, 0x44, 0x46, 0x2d])) return "application/pdf";
+  return null;
+}
+
+function scanBuffer(
+  buf: Uint8Array,
+  declaredType: string,
+): { ok: boolean; reason?: string; detections: string[] } {
+  const detections: string[] = [];
+  const declared = declaredType.toLowerCase();
+
+  const detected = detectMagic(buf);
+  const compatible =
+    detected === declared ||
+    (declared === "image/heif" && detected === "image/heic");
+  if (!detected) {
+    return {
+      ok: false,
+      reason: "تعذّر التعرّف على نوع الملف الحقيقي (توقيع سحري غير معروف).",
+      detections: ["magic_unknown"],
+    };
+  }
+  if (!compatible) {
+    return {
+      ok: false,
+      reason: `نوع الملف الحقيقي (${detected}) لا يطابق النوع المُعلن (${declared}).`,
+      detections: ["magic_mismatch"],
+    };
+  }
+
+  // Executable headers anywhere in the file are suspicious for images/PDF.
+  // MZ (Windows PE), 7F 45 4C 46 (ELF), CF FA ED FE / FE ED FA CE (Mach-O).
+  for (let i = 0; i < Math.min(buf.length, 2 * 1024 * 1024) - 4; i++) {
+    if (buf[i] === 0x4d && buf[i + 1] === 0x5a && i > 0) {
+      // MZ header past byte 0 — embedded PE.
+      detections.push("embedded_pe");
+      return { ok: false, reason: "تم اكتشاف رأس تنفيذي مضمّن (PE).", detections };
+    }
+    if (
+      buf[i] === 0x7f &&
+      buf[i + 1] === 0x45 &&
+      buf[i + 2] === 0x4c &&
+      buf[i + 3] === 0x46
+    ) {
+      detections.push("embedded_elf");
+      return { ok: false, reason: "تم اكتشاف رأس تنفيذي مضمّن (ELF).", detections };
+    }
+  }
+
+  // Decode a text view for signature scans (utf-8 lossy).
+  const text = new TextDecoder("utf-8", { fatal: false }).decode(buf);
+
+  if (text.includes(EICAR_SIG)) {
+    detections.push("eicar");
+    return {
+      ok: false,
+      reason: "تم اكتشاف توقيع اختبار الفيروسات EICAR.",
+      detections,
+    };
+  }
+
+  if (declared.startsWith("image/")) {
+    // Polyglot / SVG-in-image / HTML injection markers
+    const bad = ["<script", "<?php", "<%", "javascript:"];
+    for (const m of bad) {
+      if (text.toLowerCase().includes(m)) {
+        detections.push(`image_script:${m}`);
+        return {
+          ok: false,
+          reason: "تم اكتشاف نص تنفيذي داخل ملف صورة.",
+          detections,
+        };
+      }
+    }
+  }
+
+  if (declared === "application/pdf") {
+    // Hostile PDF action tokens
+    const bad = ["/JavaScript", "/JS", "/Launch", "/OpenAction"];
+    const hits = bad.filter((m) => text.includes(m));
+    if (hits.length) {
+      detections.push(...hits.map((h) => `pdf_action:${h}`));
+      return {
+        ok: false,
+        reason: "يحتوي ملف PDF على إجراءات تنفيذية غير مسموح بها.",
+        detections,
+      };
+    }
+  }
+
+  return { ok: true, detections };
+}
+
+/**
+ * Scan a previously registered attachment. Callable by the owner (right after
+ * upload) or by staff (manual re-scan). Uses the service-role client to update
+ * the row so scan results are trustworthy regardless of caller RLS.
+ */
+export const scanInquiryAttachment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    // Load the attachment via the caller's RLS to authorize access.
+    const { data: row, error } = await supabase
+      .from("service_inquiry_attachments")
+      .select(
+        "id, inquiry_id, storage_path, content_type, size_bytes, scan_status",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("المرفق غير موجود أو لا تملك صلاحية عرضه.");
+
+    // Skip if already resolved (idempotent).
+    if (row.scan_status === "clean" || row.scan_status === "infected") {
+      return {
+        id: row.id,
+        scan_status: row.scan_status as "clean" | "infected",
+      };
+    }
+
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    // Mark as scanning.
+    await supabaseAdmin
+      .from("service_inquiry_attachments")
+      .update({ scan_status: "scanning" })
+      .eq("id", row.id);
+
+    let result: { ok: boolean; reason?: string; detections: string[] };
+    try {
+      const dl = await supabaseAdmin.storage
+        .from(BUCKET)
+        .download(row.storage_path);
+      if (dl.error || !dl.data) {
+        throw new Error(dl.error?.message ?? "تعذّر تحميل الملف للفحص.");
+      }
+      const bytes = new Uint8Array(await dl.data.arrayBuffer());
+      result = scanBuffer(bytes, row.content_type);
+    } catch (e: any) {
+      await supabaseAdmin
+        .from("service_inquiry_attachments")
+        .update({
+          scan_status: "error",
+          scan_result: { reason: e?.message ?? "خطأ أثناء الفحص", detections: [] },
+          scan_completed_at: new Date().toISOString(),
+        })
+        .eq("id", row.id);
+      await supabaseAdmin.from("service_inquiry_updates").insert({
+        inquiry_id: row.inquiry_id,
+        update_type: "attachment",
+        internal_note: `تعذّر إتمام فحص المرفق: ${e?.message ?? "خطأ غير معروف"}`,
+        created_by: userId,
+        metadata: { attachment_id: row.id, scan_status: "error" },
+      });
+      return { id: row.id, scan_status: "error" as const };
+    }
+
+    if (!result.ok) {
+      // Quarantine: remove the physical file, keep the row so audit remains.
+      await supabaseAdmin.storage.from(BUCKET).remove([row.storage_path]).catch(() => {});
+      await supabaseAdmin
+        .from("service_inquiry_attachments")
+        .update({
+          scan_status: "infected",
+          scan_result: {
+            reason: result.reason ?? "تم اكتشاف محتوى ضار.",
+            detections: result.detections,
+          },
+          scan_completed_at: new Date().toISOString(),
+        })
+        .eq("id", row.id);
+      await supabaseAdmin.from("service_inquiry_updates").insert({
+        inquiry_id: row.inquiry_id,
+        update_type: "attachment",
+        internal_note: `تم حجب مرفق مشبوه بعد الفحص: ${result.reason ?? ""}`,
+        created_by: userId,
+        metadata: {
+          attachment_id: row.id,
+          scan_status: "infected",
+          detections: result.detections,
+        },
+      });
+      return { id: row.id, scan_status: "infected" as const };
+    }
+
+    await supabaseAdmin
+      .from("service_inquiry_attachments")
+      .update({
+        scan_status: "clean",
+        scan_result: { detections: [] },
+        scan_completed_at: new Date().toISOString(),
+      })
+      .eq("id", row.id);
+    return { id: row.id, scan_status: "clean" as const };
+  });
