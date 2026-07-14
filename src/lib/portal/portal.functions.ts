@@ -169,6 +169,56 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
     }
 
 
+    // Outstanding invoices (unpaid / partially paid) for the linked patient
+    let outstandingInvoices: Array<{
+      id: string;
+      invoice_number: string | null;
+      total: number;
+      status: string;
+      issued_at: string;
+    }> = [];
+    let outstandingTotal = 0;
+    if (patientId) {
+      const invRes = await supabase
+        .from("invoices")
+        .select("id, invoice_number, total, status, issued_at")
+        .eq("patient_id", patientId)
+        .in("status", ["unpaid", "partially_paid", "pending"])
+        .order("issued_at", { ascending: false })
+        .limit(5);
+      outstandingInvoices = (invRes.data ?? []) as typeof outstandingInvoices;
+      outstandingTotal = outstandingInvoices.reduce(
+        (sum, i) => sum + Number(i.total ?? 0),
+        0,
+      );
+    }
+
+    // Pending insurance approvals
+    let pendingInsurance: Array<{
+      id: string;
+      service_description: string;
+      status: string;
+      submitted_at: string | null;
+    }> = [];
+    if (patientId) {
+      const insRes = await supabase
+        .from("insurance_approvals")
+        .select("id, service_description, status, submitted_at")
+        .eq("patient_id", patientId)
+        .in("status", ["submitted", "under_review", "additional_info_required", "draft"])
+        .order("submitted_at", { ascending: false, nullsFirst: false })
+        .limit(5);
+      pendingInsurance = (insRes.data ?? []) as typeof pendingInsurance;
+    }
+
+    // Family members (dependents) — quick strip
+    const familyRes = await supabase
+      .from("dependents")
+      .select("id, full_name, relationship, date_of_birth")
+      .eq("guardian_user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(6);
+
     return {
       profile: profileRes.data,
       patient: patientRes.data,
@@ -182,5 +232,10 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
       unreadCount,
       recentLabs: labs,
       activeMedsCount,
+      outstandingInvoices,
+      outstandingTotal,
+      pendingInsurance,
+      pendingInsuranceCount: pendingInsurance.length,
+      family: familyRes.data ?? [],
     };
   });

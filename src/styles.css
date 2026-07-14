@@ -686,3 +686,67 @@ html.reduce-motion .pulse-soft {
     pointer-events: none;
   }
 }
+
+/* =====================================================================
+   Portal Magazine — Cloud White palette + editorial layout tokens
+   Scoped to `.portal-magazine`; overrides parent .portal-root chrome
+   so PortalShell's blue gradient card system doesn't leak into the
+   overview page.
+   ===================================================================== */
+.portal-magazine {
+  --mag-bg: #fafbfc;
+  --mag-surface: #ffffff;
+  --mag-subtle: #f4f6f9;
+  --mag-line: #e5eaf1;
+  --mag-line-strong: #d5dde8;
+  --mag-ink: #0f172a;
+  --mag-ink-2: #334155;
+  --mag-ink-3: #64748b;
+  --mag-muted: #94a3b8;
+  --mag-accent: #3b82f6;
+  --mag-accent-ink: #1d4ed8;
+  --mag-accent-soft: #eff6ff;
+  --mag-success: #059669;
+  --mag-warning: #d97706;
+  --mag-danger: #dc2626;
+  --mag-radius: 20px;
+  --mag-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 30px -18px rgba(15, 23, 42, 0.15);
+  --mag-shadow-lift: 0 2px 4px rgba(15, 23, 42, 0.05), 0 24px 60px -30px rgba(15, 23, 42, 0.22);
+  font-family: "Figtree", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  color: var(--mag-ink);
+  background: var(--mag-bg);
+}
+.portal-magazine :is(h1, h2, h3, h4) {
+  font-family: "Outfit", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+[dir="rtl"] .portal-magazine :is(h1, h2, h3, h4) {
+  font-family: "Cairo", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+@utility mag-card {
+  background: var(--mag-surface);
+  border: 1px solid var(--mag-line);
+  border-radius: var(--mag-radius);
+  box-shadow: var(--mag-shadow);
+  transition: box-shadow 200ms ease, transform 200ms ease, border-color 200ms ease;
+}
+@utility mag-card-hover {
+  &:hover {
+    box-shadow: var(--mag-shadow-lift);
+    transform: translateY(-2px);
+    border-color: var(--mag-line-strong);
+  }
+}
+@utility mag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 1.5rem;
+  padding: 0 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
