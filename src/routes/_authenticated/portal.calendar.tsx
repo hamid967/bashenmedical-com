@@ -478,3 +478,207 @@ function RescheduleDialog({
     </div>
   );
 }
+
+/* ========================= Patient Calendar View ========================= */
+
+function PatientCalendarPage() {
+  const today = useMemo(() => new Date(), []);
+  const [cursor, setCursor] = useState<{ y: number; m: number }>({
+    y: today.getFullYear(), m: today.getMonth(),
+  });
+  const [selectedDate, setSelectedDate] = useState<string>(iso(today));
+
+  const monthStart = new Date(cursor.y, cursor.m, 1);
+  const monthEnd = new Date(cursor.y, cursor.m + 1, 0);
+  const gridStart = new Date(monthStart); gridStart.setDate(gridStart.getDate() - gridStart.getDay());
+  const gridEnd = new Date(monthEnd); gridEnd.setDate(gridEnd.getDate() + (6 - gridEnd.getDay()));
+
+  const fromDate = iso(gridStart);
+  const toDate = iso(gridEnd);
+
+  const q = useQuery({
+    queryKey: ["portal", "patient-calendar", fromDate, toDate],
+    queryFn: () =>
+      listMyAppointments({ data: { scope: "all", fromDate, toDate, limit: 100 } }),
+    staleTime: 30_000,
+  });
+
+  const byDate = useMemo(() => {
+    const map = new Map<string, { total: number; confirmed: number; cancelled: number }>();
+    for (let d = new Date(gridStart); d <= gridEnd; d.setDate(d.getDate() + 1)) {
+      map.set(iso(d), { total: 0, confirmed: 0, cancelled: 0 });
+    }
+    (q.data?.items ?? []).forEach((a) => {
+      const b = map.get(a.appointment_date);
+      if (!b) return;
+      b.total++;
+      if (a.status === "confirmed") b.confirmed++;
+      if (a.status === "cancelled") b.cancelled++;
+    });
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q.data, fromDate, toDate]);
+
+  const dayAppts = (q.data?.items ?? []).filter((a) => a.appointment_date === selectedDate);
+
+  const gotoMonth = (delta: number) =>
+    setCursor((c) => {
+      const nd = new Date(c.y, c.m + delta, 1);
+      return { y: nd.getFullYear(), m: nd.getMonth() };
+    });
+
+  return (
+    <div dir="rtl" className="space-y-6">
+      <header className="flex flex-wrap items-center gap-3">
+        <div className="h-11 w-11 rounded-2xl grid place-items-center bg-[color:var(--portal-gradient-soft)] text-[color:var(--portal-primary)]">
+          <CalendarDays className="h-5 w-5" />
+        </div>
+        <div className="flex-1 min-w-[220px]">
+          <h1 className="text-xl font-bold text-[color:var(--portal-ink)]">تقويم مواعيدي</h1>
+          <p className="text-sm text-[color:var(--portal-ink-2)]">نظرة شهرية على مواعيدك مع تنقّل سريع لأي يوم.</p>
+        </div>
+        <Link
+          to="/portal/appointments"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-white border border-[color:var(--portal-border)] text-sm font-semibold hover:bg-slate-50"
+        >
+          <CalendarClock className="h-4 w-4" /> قائمة المواعيد
+        </Link>
+        <Link
+          to="/portal/book"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
+          style={{ background: "var(--portal-gradient)" }}
+        >
+          <CalendarPlus className="h-4 w-4" /> حجز جديد
+        </Link>
+      </header>
+
+      <div className="glass-card p-4 sm:p-5">
+        <div className="flex items-center justify-between mb-4">
+          <button className="portal-btn portal-btn-ghost" onClick={() => gotoMonth(-1)} aria-label="الشهر السابق">
+            <ChevronRight className="h-4 w-4" />
+          </button>
+          <div className="text-center">
+            <div className="text-lg font-bold">{MONTHS[cursor.m]} {cursor.y}</div>
+            <button
+              className="text-xs text-[color:var(--portal-primary)] hover:underline"
+              onClick={() => { const t = new Date(); setCursor({ y: t.getFullYear(), m: t.getMonth() }); setSelectedDate(iso(t)); }}
+            >
+              اليوم
+            </button>
+          </div>
+          <button className="portal-btn portal-btn-ghost" onClick={() => gotoMonth(1)} aria-label="الشهر التالي">
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        </div>
+
+        {q.isLoading ? (
+          <div className="h-64 grid place-items-center text-[color:var(--portal-ink-2)]">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-7 gap-1 mb-2">
+              {WEEKDAYS.map((w) => (
+                <div key={w} className="text-center text-xs font-semibold text-[color:var(--portal-ink-2)] py-1">{w}</div>
+              ))}
+            </div>
+            <div className="grid grid-cols-7 gap-1">
+              {(() => {
+                const cells: React.ReactNode[] = [];
+                for (let d = new Date(gridStart); d <= gridEnd; d.setDate(d.getDate() + 1)) {
+                  const dateStr = iso(d);
+                  const inMonth = d.getMonth() === cursor.m;
+                  const isToday = dateStr === iso(today);
+                  const isSelected = dateStr === selectedDate;
+                  const b = byDate.get(dateStr);
+                  cells.push(
+                    <button
+                      key={dateStr}
+                      onClick={() => setSelectedDate(dateStr)}
+                      className={[
+                        "aspect-square min-h-[60px] rounded-lg border p-1.5 text-right transition flex flex-col",
+                        inMonth ? "bg-white" : "bg-transparent opacity-50",
+                        isSelected ? "ring-2 ring-[color:var(--portal-primary)] border-[color:var(--portal-primary)]" : "border-slate-200 hover:border-slate-300",
+                        isToday && !isSelected ? "border-[color:var(--portal-primary)]" : "",
+                      ].join(" ")}
+                    >
+                      <div className="flex items-center justify-between text-xs">
+                        <span className={isToday ? "font-bold text-[color:var(--portal-primary)]" : ""}>{d.getDate()}</span>
+                      </div>
+                      <div className="mt-auto flex flex-wrap gap-0.5 items-end justify-start">
+                        {b && b.confirmed > 0 && (
+                          <span className="text-[10px] px-1 rounded bg-emerald-100 text-emerald-700 font-semibold">
+                            {b.confirmed} مؤكّد
+                          </span>
+                        )}
+                        {b && b.total - b.confirmed - b.cancelled > 0 && (
+                          <span className="text-[10px] px-1 rounded bg-sky-100 text-sky-700">
+                            {b.total - b.confirmed - b.cancelled} جديد
+                          </span>
+                        )}
+                        {b && b.cancelled > 0 && (
+                          <span className="text-[10px] px-1 rounded bg-red-100 text-red-700">
+                            {b.cancelled} ملغى
+                          </span>
+                        )}
+                      </div>
+                    </button>,
+                  );
+                }
+                return cells;
+              })()}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-3 text-xs text-[color:var(--portal-ink-2)]">
+              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-emerald-500" /> مؤكّد</span>
+              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-sky-500" /> جديد</span>
+              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-red-500" /> ملغى</span>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Day details */}
+      <div className="glass-card p-4 sm:p-5">
+        <h2 className="text-base font-bold mb-4">
+          مواعيد {new Date(`${selectedDate}T00:00:00`).toLocaleDateString("ar-SA-u-nu-latn", {
+            weekday: "long", day: "numeric", month: "long", year: "numeric",
+          })}
+        </h2>
+        {dayAppts.length === 0 ? (
+          <p className="text-sm text-[color:var(--portal-ink-2)]">
+            لا توجد مواعيد في هذا اليوم.{" "}
+            <Link to="/portal/book" className="text-[color:var(--portal-primary)] hover:underline">احجز موعدًا ←</Link>
+          </p>
+        ) : (
+          <ul className="space-y-2">
+            {dayAppts.map((a) => (
+              <li key={a.id} className="p-3 rounded-lg border border-slate-200 bg-white">
+                <div className="flex items-start gap-3">
+                  <div className="text-sm font-bold text-[color:var(--portal-primary)] tabular-nums min-w-[48px]">
+                    {hhmm(a.appointment_time)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold flex items-center gap-2">
+                      <Stethoscope className="h-4 w-4 text-slate-400" />
+                      {a.doctor?.name_ar ?? "طبيب"}
+                    </div>
+                    <div className="text-xs text-[color:var(--portal-ink-2)] mt-0.5 flex flex-wrap gap-x-3 gap-y-1">
+                      {a.branch && (<span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {a.branch.name_ar}</span>)}
+                      {a.specialty && (<span>{a.specialty.name_ar}</span>)}
+                    </div>
+                    {a.reason && (
+                      <div className="text-xs text-[color:var(--portal-ink-2)] mt-1 line-clamp-2">
+                        <StickyNote className="h-3 w-3 inline-block mr-1" />{a.reason}
+                      </div>
+                    )}
+                  </div>
+                  <StatusBadge status={a.status} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
