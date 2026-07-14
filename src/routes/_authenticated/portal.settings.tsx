@@ -99,7 +99,7 @@ function SettingsPage() {
 
   // Test-send per channel (mock delivery to demo data). Push uses the real
   // browser Notification API when a subscription is active.
-  type TestResult = { ok: boolean; msg: string; at: number };
+  // browser Notification API when a subscription is active.
   const [testing, setTesting] = useState<keyof Prefs | null>(null);
   const [results, setResults] = useState<Partial<Record<keyof Prefs, TestResult>>>({});
   const [userEmail, setUserEmail] = useState<string>("");
