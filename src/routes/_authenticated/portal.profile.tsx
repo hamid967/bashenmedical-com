@@ -2,7 +2,7 @@
  * /portal/profile — Editable patient profile.
  * Reads via getMyProfile and writes via updateMyProfile.
  */
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter, useBlocker } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
