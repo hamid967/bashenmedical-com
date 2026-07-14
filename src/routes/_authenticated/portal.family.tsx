@@ -184,6 +184,23 @@ const T = {
     ar: "سيتم إلغاء جميع المواعيد النشطة لهذا الفرد وتحرير حجوزاتها. هل تريد المتابعة؟",
     en: "All active appointments for this member will be cancelled and their slots freed. Continue?",
   },
+  del_cancel_confirm_title: {
+    ar: "تأكيد إلغاء المواعيد النشطة",
+    en: "Confirm cancelling active appointments",
+  },
+  del_cancel_confirm_warning: {
+    ar: "لا يمكن التراجع عن هذا الإجراء. سيتم إشعار العيادة وتحرير الحجوزات.",
+    en: "This action cannot be undone. The clinic will be notified and slots freed.",
+  },
+  del_cancel_confirm_ok: {
+    ar: "نعم، ألغِ المواعيد",
+    en: "Yes, cancel appointments",
+  },
+  del_cancel_confirm_keep: {
+    ar: "تراجع",
+    en: "Go back",
+  },
+
   del_cancel_success: {
     ar: "تم إلغاء المواعيد النشطة. يمكنك الآن حذف الفرد.",
     en: "Active appointments cancelled. You can now delete the member.",
@@ -958,6 +975,8 @@ function DeleteDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
   const countQ = useQuery({
     queryKey: ["portal", "dependent-appt-count", row?.id],
     queryFn: () =>
@@ -991,9 +1010,14 @@ function DeleteDialog({
           queryKey: ["portal", "dependent-appointments", row.id],
         });
       }
+      setConfirmCancel(false);
     },
-    onError: () => toast.error(T.del_cancel_error[lang]),
+    onError: () => {
+      toast.error(T.del_cancel_error[lang]);
+      setConfirmCancel(false);
+    },
   });
+
 
   const activeCount = countQ.data?.active ?? 0;
   const totalCount = countQ.data?.total ?? 0;
@@ -1067,10 +1091,9 @@ function DeleteDialog({
                     disabled={busy}
                     onClick={() => {
                       if (!row || busy) return;
-                      if (window.confirm(T.del_cancel_confirm[lang])) {
-                        cancelMut.mutate(row.id);
-                      }
+                      setConfirmCancel(true);
                     }}
+
                     className="inline-flex items-center gap-2 rounded-md border border-red-300 dark:border-red-800 bg-white/70 dark:bg-red-950/40 px-3 h-9 text-xs font-semibold text-red-800 dark:text-red-100 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {cancelMut.isPending ? (
@@ -1127,9 +1150,76 @@ function DeleteDialog({
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
+
+      {/* Second confirmation: cancelling active appointments */}
+      <AlertDialog
+        open={confirmCancel}
+        onOpenChange={(o) => {
+          if (!o && !cancelMut.isPending) setConfirmCancel(false);
+        }}
+      >
+        <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+              <AlertTriangle className="h-5 w-5" aria-hidden />
+              {T.del_cancel_confirm_title[lang]}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/60 p-3 flex items-start gap-2">
+                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
+                  <div className="text-red-800 dark:text-red-200 font-medium">
+                    {T.del_cancel_confirm_warning[lang]}
+                  </div>
+                </div>
+                <div className="text-foreground">{T.del_cancel_confirm[lang]}</div>
+                <div className="rounded-lg border border-border bg-muted/40 p-3 flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">
+                    {T.del_active_label[lang]}
+                  </span>
+                  <span className="font-semibold tabular-nums text-red-600 dark:text-red-400">
+                    {activeCount}
+                  </span>
+                </div>
+                <div className="text-foreground">
+                  <span className="text-muted-foreground">{T.member_label[lang]} </span>
+                  <span className="font-semibold">{row?.full_name}</span>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={cancelMut.isPending}
+              className="font-semibold border-2"
+              autoFocus
+            >
+              {T.del_cancel_confirm_keep[lang]}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={cancelMut.isPending || !row}
+              onClick={(e) => {
+                e.preventDefault();
+                if (row && !cancelMut.isPending) cancelMut.mutate(row.id);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {cancelMut.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+                  {T.del_cancelling[lang]}
+                </>
+              ) : (
+                T.del_cancel_confirm_ok[lang]
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AlertDialog>
   );
 }
+
 
 
 /* ---------------- error boundary ---------------- */
