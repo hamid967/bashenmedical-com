@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0f766e" />
+    <title>لا يوجد اتصال — Offline · Baeshen Medical</title>
+    <link rel="icon" href="/favicon-32.png" type="image/png" />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        font-family:
+          "Cairo",
+          "Inter",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        color: #0f172a;
+        background:
+          radial-gradient(1200px 600px at 90% -10%, #ccfbf1 0%, transparent 60%),
+          radial-gradient(900px 500px at -10% 110%, #cffafe 0%, transparent 55%),
+          #f8fafc;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+      }
+      .card {
+        max-width: 520px;
+        width: 100%;
+        background: #ffffff;
+        border: 1px solid rgba(15, 118, 110, 0.12);
+        border-radius: 24px;
+        box-shadow:
+          0 20px 40px -20px rgba(15, 118, 110, 0.25),
+          0 8px 16px -8px rgba(15, 23, 42, 0.08);
+        padding: 2.5rem 2rem;
+        text-align: center;
+      }
+      .icon {
+        width: 88px;
+        height: 88px;
+        margin: 0 auto 1.25rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #0f766e, #14b8a6);
+        display: grid;
+        place-items: center;
+        box-shadow: 0 12px 24px -8px rgba(15, 118, 110, 0.5);
+      }
+      .icon svg {
+        width: 44px;
+        height: 44px;
+        color: #fff;
+      }
+      h1 {
+        font-size: 1.5rem;
+        margin: 0 0 0.5rem;
+        color: #0f766e;
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        font-size: 0.95rem;
+        margin: 0 0 1.25rem;
+        color: #64748b;
+        font-weight: 500;
+      }
+      p {
+        margin: 0 0 1.75rem;
+        color: #475569;
+        line-height: 1.7;
+        font-size: 0.95rem;
+      }
+      .actions {
+        display: flex;
+        gap: 0.75rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      button,
+      a.btn {
+        appearance: none;
+        border: 0;
+        cursor: pointer;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease,
+          background 0.15s ease;
+        font-family: inherit;
+      }
+      .btn-primary {
+        background: #0f766e;
+        color: #fff;
+        box-shadow: 0 8px 20px -8px rgba(15, 118, 110, 0.6);
+      }
+      .btn-primary:hover {
+        background: #115e59;
+        transform: translateY(-1px);
+      }
+      .btn-secondary {
+        background: #f1f5f9;
+        color: #0f172a;
+        border: 1px solid #e2e8f0;
+      }
+      .btn-secondary:hover {
+        background: #e2e8f0;
+      }
+      .status {
+        margin-top: 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: #64748b;
+        padding: 0.5rem 0.875rem;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+      }
+      .status .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: #ef4444;
+        box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15);
+      }
+      .status.online .dot {
+        background: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+      }
+      .divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+        margin: 1.5rem 0;
+      }
+      .en {
+        direction: ltr;
+        text-align: left;
+      }
+      .en h2,
+      .en p {
+        text-align: left;
+      }
+      @media (prefers-color-scheme: dark) {
+        html,
+        body {
+          color: #f1f5f9;
+          background:
+            radial-gradient(1200px 600px at 90% -10%, rgba(15, 118, 110, 0.25) 0%, transparent 60%),
+            radial-gradient(900px 500px at -10% 110%, rgba(14, 116, 144, 0.2) 0%, transparent 55%),
+            #020617;
+        }
+        .card {
+          background: #0f172a;
+          border-color: rgba(20, 184, 166, 0.2);
+        }
+        h1 {
+          color: #5eead4;
+        }
+        h2,
+        p {
+          color: #cbd5e1;
+        }
+        .btn-secondary {
+          background: #1e293b;
+          color: #f1f5f9;
+          border-color: #334155;
+        }
+        .btn-secondary:hover {
+          background: #334155;
+        }
+        .status {
+          background: #1e293b;
+          border-color: #334155;
+          color: #cbd5e1;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card" role="main">
+      <div class="icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 1l22 22" />
+          <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+          <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+          <path d="M10.71 5.05A16 16 0 0 1 22.58 9" />
+          <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+          <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+          <line x1="12" y1="20" x2="12.01" y2="20" />
+        </svg>
+      </div>
+
+      <h1>لا يوجد اتصال بالإنترنت</h1>
+      <h2>لا يمكن الوصول إلى الصفحة حاليًا. تحقق من اتصالك ثم أعد المحاولة.</h2>
+
+      <div class="actions">
+        <button class="btn-primary" onclick="window.location.reload()">إعادة المحاولة</button>
+        <a class="btn btn-secondary" href="/">الصفحة الرئيسية</a>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="en">
+        <h1 style="text-align: left">You're offline</h1>
+        <h2>We couldn't load this page. Please check your connection and try again.</h2>
+      </div>
+
+      <div id="status" class="status" role="status" aria-live="polite">
+        <span class="dot"></span>
+        <span id="status-text">غير متصل — Offline</span>
+      </div>
+    </main>
+
+    <script>
+      (function () {
+        var status = document.getElementById("status");
+        var text = document.getElementById("status-text");
+        function update() {
+          if (navigator.onLine) {
+            status.classList.add("online");
+            text.textContent = "تم استعادة الاتصال — Back online";
+            // Give the SW a moment, then reload to the page they wanted.
+            setTimeout(function () {
+              window.location.reload();
+            }, 900);
+          } else {
+            status.classList.remove("online");
+            text.textContent = "غير متصل — Offline";
+          }
+        }
+        window.addEventListener("online", update);
+        window.addEventListener("offline", update);
+        update();
+      })();
+    </script>
+  </body>
+</html>
