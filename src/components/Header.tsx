@@ -20,7 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
-import { JazanPattern } from "@/components/jazan/JazanPattern";
+import { JazanPattern, JazanIconFrame, JazanSectionLabel } from "@/components/jazan";
 
 const bmcLogo = bmcLogoAsset.url;
 
@@ -86,7 +86,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border/60">
       {/* Top bar */}
-      <div className="hidden md:block bg-[color:var(--primary)] text-primary-foreground text-xs">
+      <div className="hidden md:block bg-[color:var(--primary)] text-primary-foreground text-xs relative">
+        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 30%, var(--jazan-terracotta,#B85C3C) 50%, var(--jazan-gold,#C7A46B) 70%, transparent)", opacity: 0.6 }} />
         <div className="container-app flex h-9 items-center justify-between gap-4">
           <div className="flex items-center gap-4 opacity-95">
             <span className="inline-flex items-center gap-1">
@@ -122,15 +123,17 @@ export function Header() {
       {/* Main bar */}
       <div className="container-app flex h-16 items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 group shrink-0">
-          <img
-            src={bmcLogo}
-            alt={isAr ? SITE.nameAr : SITE.nameEn}
-            width={44}
-            height={44}
-            className="h-11 w-11 object-contain"
-            loading="eager"
-            decoding="async"
-          />
+          <JazanIconFrame size={44} className="shrink-0">
+            <img
+              src={bmcLogo}
+              alt={isAr ? SITE.nameAr : SITE.nameEn}
+              width={36}
+              height={36}
+              className="h-9 w-9 object-contain"
+              loading="eager"
+              decoding="async"
+            />
+          </JazanIconFrame>
           <div className="leading-tight">
             <div className="text-sm font-bold text-foreground">
               {isAr ? SITE.nameAr : SITE.nameEn}
@@ -158,7 +161,8 @@ export function Header() {
                   <ChevronDown className="h-3.5 w-3.5" />
                 </Link>
                 {openMenu === n.to && (
-                  <div className="absolute top-full start-0 mt-1 w-72 rounded-xl border border-border bg-popover shadow-lg p-2 grid gap-1">
+                  <div className="absolute top-full start-0 mt-1 w-72 rounded-xl border border-[var(--jazan-gold,#C7A46B)]/40 bg-popover shadow-lg p-3 grid gap-1 ring-1 ring-[var(--jazan-teal,#075E63)]/10">
+                    <JazanSectionLabel className="px-2 pb-1">{n.label}</JazanSectionLabel>
                     {n.children.map((c) => (
                       <Link
                         key={c.to}
