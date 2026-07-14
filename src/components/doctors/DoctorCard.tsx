@@ -4,6 +4,7 @@ import {
   Award, Calendar, Languages, MapPin, Star, Stethoscope,
 } from "lucide-react";
 import { LANG_LABELS, type DoctorRow } from "./types";
+import { DemoBadge } from "@/components/DemoBadge";
 
 export function DoctorCard({ d, lang, nextSlotIso }: { d: DoctorRow; lang: "ar" | "en"; nextSlotIso?: string }) {
   const name = lang === "ar" ? d.name_ar : d.name_en;
@@ -53,18 +54,19 @@ export function DoctorCard({ d, lang, nextSlotIso }: { d: DoctorRow; lang: "ar" 
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="font-bold text-lg leading-tight truncate">
+          <h3 className="font-bold text-lg leading-tight truncate flex items-center gap-2">
             {d.slug ? (
               <Link
                 to="/doctors/$slug"
                 params={{ slug: d.slug }}
-                className="hover:text-primary transition-colors"
+                className="hover:text-primary transition-colors truncate"
               >
                 {name}
               </Link>
             ) : (
-              name
+              <span className="truncate">{name}</span>
             )}
+            <DemoBadge show={/\(DEMO\)/i.test(name)} />
           </h3>
           {title && (
             <div className="text-xs text-muted-foreground mt-0.5 truncate">{title}</div>
