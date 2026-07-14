@@ -163,9 +163,9 @@ function PortalRefundsPage() {
   );
 
   const setStatus = (key: string) =>
-    navigate({ search: (prev) => ({ ...prev, status: key }), replace: true });
+    navigate({ search: (prev: any) => ({ ...prev, status: key }), replace: true });
   const setSort = (key: string) =>
-    navigate({ search: (prev) => ({ ...prev, sort: key }), replace: true });
+    navigate({ search: (prev: any) => ({ ...prev, sort: key }), replace: true });
 
   return (
     <div className="portal-magazine min-h-full">
