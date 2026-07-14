@@ -6,8 +6,8 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@ta
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle, ArrowLeft, Bell, Globe, Loader2, Mail, MessageSquare, Moon,
-  RefreshCw, Save, Settings as SettingsIcon, ShieldCheck, Smartphone, Sun,
+  AlertTriangle, ArrowLeft, Bell, CheckCircle2, Globe, Loader2, Mail, MessageSquare, Moon,
+  RefreshCw, Save, Send, Settings as SettingsIcon, ShieldCheck, Smartphone, Sun, XCircle,
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
