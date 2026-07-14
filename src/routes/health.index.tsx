@@ -105,7 +105,7 @@ function HealthIndex() {
 
   return (
     <div>
-      <section className="hero-gradient text-white py-14">
+      <section className="hero-gradient-deep text-white py-14">
         <div className="container-app">
           <div className="flex items-center gap-3">
             <BookOpen className="h-8 w-8" />

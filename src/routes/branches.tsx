@@ -91,22 +91,28 @@ function BranchesPage() {
               ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
               : null;
           return (
-            <article key={b.id} className="rounded-2xl border border-border bg-card overflow-hidden flex flex-col">
-              <div className="aspect-[16/8] bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
+            <article key={b.id} className="bento-card overflow-hidden flex flex-col p-0">
+              <div
+                className="aspect-[16/8] overflow-hidden relative"
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--brand-mist) 0%, var(--brand-sky) 60%, color-mix(in oklab, var(--brand-gold) 25%, white) 100%)",
+                }}
+              >
                 {b.hero_image_url ? (
                   <img src={b.hero_image_url} alt={b.name_ar} className="h-full w-full object-cover" loading="lazy" />
                 ) : (
                   <div className="h-full w-full grid place-items-center">
-                    <Building2 className="h-14 w-14 text-primary/60" />
+                    <Building2 className="h-14 w-14 text-[color:var(--brand-deep)]/70" />
                   </div>
                 )}
               </div>
 
               <div className="p-5 flex-1 flex flex-col">
                 <div className="flex items-start justify-between gap-2">
-                  <h2 className="text-lg font-bold">{b.name_ar}</h2>
+                  <h2 className="text-lg font-bold text-[color:var(--brand-deep)]">{b.name_ar}</h2>
                   {b.city_ar && (
-                    <span className="text-[11px] rounded-full bg-primary/10 text-primary px-2 py-0.5 font-semibold">
+                    <span className="text-[11px] rounded-full bg-[color:var(--brand-mist)] text-[color:var(--brand-deep)] border border-[color:var(--brand-gold-soft)] px-2 py-0.5 font-semibold">
                       {b.city_ar}
                     </span>
                   )}

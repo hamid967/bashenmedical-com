@@ -129,18 +129,27 @@ function ServicesPortal() {
   return (
     <div className="min-h-screen">
       {/* Hero */}
-      <section className="relative bg-primary text-primary-foreground">
-        <div className="container-app py-14 md:py-20">
+      <section className="relative hero-gradient-deep overflow-hidden">
+        <div
+          className="absolute inset-0 opacity-20 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, var(--brand-gold) 0, transparent 45%), radial-gradient(circle at 80% 80%, var(--brand-soft) 0, transparent 45%)",
+          }}
+          aria-hidden
+        />
+        <div className="container-app relative py-14 md:py-20">
           <div className="max-w-3xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color:var(--brand-gold-soft)] bg-white/15 px-3.5 py-1 text-xs font-semibold text-white">
+              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--brand-gold)" }} aria-hidden />
               {lang === "ar" ? "بوابة الخدمات الإلكترونية" : "E-Services Portal"}
             </div>
-            <h1 className="text-4xl md:text-5xl leading-tight">
+            <h1 className="text-4xl md:text-5xl leading-tight text-white">
               {lang === "ar"
                 ? "جميع خدماتك الطبية في مكان واحد"
                 : "All your medical services, in one place"}
             </h1>
-            <p className="mt-3 text-white/80 max-w-2xl">
+            <p className="mt-3 text-white/85 max-w-2xl leading-8">
               {lang === "ar"
                 ? "احجز، تابع تقاريرك، اطلب دواءك، وتواصل معنا بسهولة."
                 : "Book, track reports, order medicines and reach us easily."}

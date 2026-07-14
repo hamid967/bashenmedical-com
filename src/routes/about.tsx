@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import { ShieldCheck, MapPin, Users, Award } from "lucide-react";
+import { PageHero } from "@/components/PageShell";
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
 const PAGE_URL = `${SITE_URL}/about`;
@@ -88,27 +89,30 @@ function AboutPage() {
 
   return (
     <div>
-      <section className="hero-gradient text-white py-16">
-        <div className="container-app">
-          <h1 className="text-4xl md:text-5xl font-extrabold">{t("about_title")}</h1>
-          <p className="mt-3 max-w-2xl text-white/90">
-            {(lang === "ar" ? heroSub?.body_ar : heroSub?.body_en) ??
-              (lang === "ar"
-                ? "منشأة صحية خاصة معتمدة من هيئة CBAHI."
-                : "A CBAHI-accredited private healthcare facility.")}
-          </p>
-        </div>
-      </section>
+      <PageHero
+        eyebrow={lang === "ar" ? "من نحن" : "About us"}
+        title={t("about_title")}
+        subtitle={
+          (lang === "ar" ? heroSub?.body_ar : heroSub?.body_en) ??
+          (lang === "ar"
+            ? "منشأة صحية خاصة معتمدة من هيئة CBAHI في صبيا، جازان."
+            : "A CBAHI-accredited private healthcare facility in Sabya, Jazan.")
+        }
+      />
 
-      <section className="container-app py-16 grid gap-10 md:grid-cols-2 items-start">
-        <div className="space-y-6 text-sm leading-7 text-foreground/90">
+      <section className="container-app py-14 md:py-16 grid gap-10 md:grid-cols-2 items-start">
+        <div className="space-y-6 text-[15px] leading-8 text-foreground/90">
           {paragraphs.map((p) => {
             const title = lang === "ar" ? p.title_ar : p.title_en;
             const body = lang === "ar" ? p.body_ar : p.body_en;
             if (!body) return null;
             return (
               <div key={p.id}>
-                {title && <h2 className="text-base font-semibold mb-2">{title}</h2>}
+                {title && (
+                  <h2 className="text-lg font-bold mb-2 text-[color:var(--brand-deep)]">
+                    {title}
+                  </h2>
+                )}
                 <p>{body}</p>
               </div>
             );
@@ -122,8 +126,8 @@ function AboutPage() {
             { icon: Award, l: lang === "ar" ? "جودة عالية" : "Quality-first" },
             { icon: MapPin, l: lang === "ar" ? SITE.addressAr : SITE.addressEn },
           ].map((f) => (
-            <div key={f.l} className="rounded-2xl border border-border bg-card p-5">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary grid place-items-center">
+            <div key={f.l} className="bento-card p-5">
+              <div className="h-11 w-11 rounded-xl bg-[color:var(--brand-mist)] text-[color:var(--brand-deep)] grid place-items-center ring-1 ring-[color:var(--brand-gold-soft)]">
                 <f.icon className="h-5 w-5" />
               </div>
               <div className="mt-3 font-semibold text-sm">{f.l}</div>
