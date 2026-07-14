@@ -3,7 +3,22 @@ import { getRequestHeader, getRequestIP } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const ROLES = ["super_admin", "admin", "doctor", "reception", "pharmacy"] as const;
+const ROLES = [
+  "super_admin",
+  "admin",
+  "center_admin",
+  "branch_manager",
+  "doctor",
+  "reception",
+  "pharmacy",
+  "reports_officer",
+  "billing_officer",
+  "insurance_officer",
+  "support_agent",
+  "content_manager",
+  "auditor",
+  "patient",
+] as const;
 export type AppRole = (typeof ROLES)[number];
 
 function humanize(err: any, fallback = "تعذّر تنفيذ الطلب.") {
