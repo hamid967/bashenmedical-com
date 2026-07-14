@@ -327,7 +327,6 @@ function useQueryDetail(id: string) {
 }
 
 // Non-suspense variant since drawer opens after page loads
-import { useQuery } from "@tanstack/react-query";
 function useSuspenseQueryOrFallback(id: string) {
   return useQuery(invoiceDetailQuery(id));
 }
