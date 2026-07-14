@@ -56,6 +56,23 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             autoComplete="tel"
           />
         </Field>
+        <Field label={t("patient.emailOptional")} error={show("email")}>
+          <input
+            value={value.email}
+            onChange={(e) => { onChange({ email: e.target.value.slice(0, 255) }); mark("email"); }}
+            onBlur={() => mark("email")}
+            aria-invalid={!!show("email")}
+            className={`input ${show("email") ? "input-error" : ""}`}
+            placeholder="name@example.com"
+            dir="ltr"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+          />
+          <div className="text-[11px] text-muted-foreground mt-1">
+            {t("patient.emailHint")}
+          </div>
+        </Field>
         <Field label={t("patient.nationalIdOptional")} error={show("nationalId")}>
           <input
             value={value.nationalId}

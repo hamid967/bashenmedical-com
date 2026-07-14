@@ -45,6 +45,16 @@ const bookingCreateSchema = z.object({
     .min(PHONE_MIN, "رقم الهاتف قصير جدًا")
     .max(PHONE_MAX, "رقم الهاتف طويل جدًا")
     .regex(PHONE_RE, "رقم الهاتف يحتوي على أحرف غير مسموحة"),
+  patient_email: z
+    .string()
+    .trim()
+    .max(255, "البريد الإلكتروني طويل جدًا")
+    .refine(
+      (v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
+      "بريد إلكتروني غير صالح",
+    )
+    .optional()
+    .nullable(),
   national_id: z.string().trim().max(NID_MAX, "رقم الهوية طويل جدًا").optional().nullable(),
   gender: z.enum(["male", "female"], { message: "الجنس غير صالح" }).optional(),
   specialty_id: z.string().uuid("قيمة غير صالحة").optional().nullable(),
@@ -249,9 +259,11 @@ export const Route = createFileRoute("/api/public/book/create")({
         // we cannot use .select() here. If two requests race past the
         // fast-path check above, the partial UNIQUE INDEX rejects the
         // second insert with SQLSTATE 23505 which we surface as 409.
+        const cleanEmail = (parsed.data.patient_email ?? "").trim().toLowerCase() || null;
         const { error } = await supa.from("appointments").insert({
           patient_name: parsed.data.patient_name,
           patient_phone: parsed.data.patient_phone,
+          patient_email: cleanEmail,
           national_id: parsed.data.national_id ?? null,
           gender: parsed.data.gender,
           specialty_id: parsed.data.specialty_id ?? null,

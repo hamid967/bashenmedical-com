@@ -430,6 +430,7 @@ function BookPage() {
     const res = await submitBooking({
       patient_name: p.name.trim(),
       patient_phone: p.phone.trim(),
+      patient_email: p.email.trim().toLowerCase() || null,
       appointment_date: state.date!,
       appointment_time: state.time!,
       reason: p.reason.trim() || undefined,
@@ -446,7 +447,7 @@ function BookPage() {
       if (slotHold.holdId) void releaseHold(slotHold.holdId);
       try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
       toast.success(t("page.created"));
-      setResult({ reference: res.reference, phone: p.phone.trim() });
+      setResult({ reference: res.reference, phone: p.phone.trim(), email: p.email.trim().toLowerCase() || null });
       goto(9);
     } else {
       setErrorMsg(res.message);
