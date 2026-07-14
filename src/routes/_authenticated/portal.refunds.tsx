@@ -139,12 +139,45 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const showHero = has("amount_hero");
   const showNote = has("footer_note");
 
+  const fontBase = `${window.location.origin}/fonts`;
+  const fontFaceCss = `
+    /* Self-hosted, same-origin Arabic fonts — embedded into the exported PDF by the browser */
+    @font-face {
+      font-family: 'Noto Naskh Arabic'; font-style: normal; font-weight: 400; font-display: block;
+      src: url('${fontBase}/NotoNaskhArabic-400-arabic.woff2') format('woff2');
+      unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E;
+    }
+    @font-face {
+      font-family: 'Noto Naskh Arabic'; font-style: normal; font-weight: 400; font-display: block;
+      src: url('${fontBase}/NotoNaskhArabic-400-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Noto Naskh Arabic'; font-style: normal; font-weight: 700; font-display: block;
+      src: url('${fontBase}/NotoNaskhArabic-700-arabic.woff2') format('woff2');
+      unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E;
+    }
+    @font-face {
+      font-family: 'Noto Naskh Arabic'; font-style: normal; font-weight: 700; font-display: block;
+      src: url('${fontBase}/NotoNaskhArabic-700-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: 'Noto Kufi Arabic'; font-style: normal; font-weight: 700; font-display: block;
+      src: url('${fontBase}/NotoKufiArabic-700-arabic.woff2') format('woff2');
+      unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E;
+    }
+    @font-face {
+      font-family: 'Noto Kufi Arabic'; font-style: normal; font-weight: 700; font-display: block;
+      src: url('${fontBase}/NotoKufiArabic-700-latin.woff2') format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+  `;
+
   const html = `<!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"/>
 <title>إيصال استرداد ${r.receipt_reference ?? r.invoice_number ?? r.id.slice(0, 8)}</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap">
+<style>${fontFaceCss}</style>
 <style>
   @page { size: A4; margin: 16mm 14mm; }
   html, body { direction: rtl; }
