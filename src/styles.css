@@ -750,3 +750,56 @@ html.reduce-motion .pulse-soft {
   font-weight: 600;
   letter-spacing: 0.01em;
 }
+
+/* =====================================================================
+   Admin Console — Cloud White palette + Outfit/Figtree typography
+   Scoped to `.admin-console` (layout root)
+   ===================================================================== */
+.admin-console {
+  --ac-bg: #f6f8fb;
+  --ac-surface: #ffffff;
+  --ac-subtle: #f1f4f9;
+  --ac-line: #e5eaf1;
+  --ac-line-strong: #d3dbe6;
+  --ac-ink: #0f172a;
+  --ac-ink-2: #334155;
+  --ac-ink-3: #64748b;
+  --ac-muted: #94a3b8;
+  --ac-accent: #2563eb;
+  --ac-accent-ink: #1d4ed8;
+  --ac-accent-soft: #eff4ff;
+  --ac-success: #059669;
+  --ac-warning: #d97706;
+  --ac-danger: #dc2626;
+  --ac-radius: 14px;
+  --ac-shadow: 0 1px 2px rgba(15,23,42,.04), 0 6px 24px -18px rgba(15,23,42,.16);
+  font-family: "Figtree", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  color: var(--ac-ink);
+  background: var(--ac-bg);
+}
+.admin-console :is(h1, h2, h3, h4) {
+  font-family: "Outfit", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+[dir="rtl"] .admin-console :is(h1, h2, h3, h4) {
+  font-family: "Cairo", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: 0;
+}
+
+@utility ac-card {
+  background: var(--ac-surface);
+  border: 1px solid var(--ac-line);
+  border-radius: var(--ac-radius);
+  box-shadow: var(--ac-shadow);
+}
+@utility ac-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .375rem;
+  height: 1.5rem;
+  padding: 0 .625rem;
+  border-radius: 9999px;
+  font-size: .6875rem;
+  font-weight: 600;
+  letter-spacing: .01em;
+}
