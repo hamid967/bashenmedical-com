@@ -725,7 +725,7 @@ function DoctorDetail() {
 
   return (
     <div>
-      <section className="hero-gradient text-white py-14">
+      <section className="hero-gradient-deep text-white py-14">
         <div className="container-app">
           <nav className="text-xs text-white/80 mb-4">
             <Link to="/" className="hover:underline">الرئيسية</Link>

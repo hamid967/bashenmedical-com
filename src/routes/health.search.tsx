@@ -169,7 +169,7 @@ function HealthSearch() {
 
   return (
     <div>
-      <section className="hero-gradient text-white py-12">
+      <section className="hero-gradient-deep text-white py-12">
         <div className="container-app">
           <nav className="text-white/80 text-sm mb-3" aria-label="breadcrumb">
             <Link to="/" className="hover:underline">الرئيسية</Link>
