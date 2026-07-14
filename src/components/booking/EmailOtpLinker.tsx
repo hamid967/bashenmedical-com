@@ -259,7 +259,7 @@ export function EmailOtpLinker({
                   type="button"
                   className="text-primary hover:underline disabled:opacity-40 disabled:no-underline"
                   onClick={sendCode}
-                  disabled={cooldown > 0 || phase === "sending" || phase === "linking"}
+                  disabled={cooldown > 0 || phase === "verifying" || phase === "linking"}
                 >
                   {cooldown > 0
                     ? isAr
