@@ -25,17 +25,19 @@ export const Route = createFileRoute("/_authenticated/admin")({
     if (search && typeof search.tab === "string" && location.pathname === "/admin") {
       throw redirect({ to: "/admin/classic", search: search as never });
     }
-    // Server-side role gate — verify actual roles before rendering the shell
+    // Server-side role gate — verify actual roles before rendering the shell.
+    // Any signed-in user without staff roles is a patient/portal user, so send
+    // them straight to /portal instead of the public homepage.
     let rolesData: { roles?: string[] } | null = null;
     try {
       rolesData = await context.queryClient.ensureQueryData(rolesQuery);
     } catch {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/portal" });
     }
     const roles = (rolesData?.roles ?? []) as AdminRole[];
     const allowed = roles.some((r) => CONSOLE_ROLES.includes(r));
     if (!allowed) {
-      throw redirect({ to: "/" });
+      throw redirect({ to: "/portal" });
     }
   },
   loader: async ({ context }) => {
