@@ -118,26 +118,39 @@ function defaultReceiptSelection(r: RefundRow): Set<ReceiptFieldKey> {
   );
 }
 
+function toArabicIndic(s: string): string {
+  return s.replace(/[0-9]/g, (d) => String.fromCharCode(0x0660 + Number(d)));
+}
+// U+2068 FIRST STRONG ISOLATE + U+2069 POP DIRECTIONAL ISOLATE
+// Prevents Bidi reordering when tokens (reference/amount) sit next to Arabic text.
+function isolate(s: string): string {
+  return `\u2068${s}\u2069`;
+}
+
 function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const meta = statusMeta(r.status);
   const has = (k: ReceiptFieldKey) => selected.has(k);
   const rows: Array<[string, string]> = [];
-  if (has("reference") && r.receipt_reference) rows.push(["الرقم المرجعي", r.receipt_reference]);
+  if (has("reference") && r.receipt_reference) rows.push(["الرقم المرجعي", toArabicIndic(r.receipt_reference)]);
   if (has("request_id")) rows.push(["معرّف الطلب", r.id]);
-  if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"]);
+  if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? toArabicIndic(`#${r.invoice_number}`) : "—"]);
   if (has("status")) rows.push(["حالة الطلب", meta.label]);
-  if (has("refund_amount")) rows.push(["المبلغ المُسترد", fmtSAR(r.amount, r.currency)]);
-  if (has("original_amount")) rows.push(["قيمة الدفعة الأصلية", fmtSAR(r.payment_amount, r.currency)]);
+  if (has("refund_amount")) rows.push(["المبلغ المُسترد", toArabicIndic(fmtSAR(r.amount, r.currency))]);
+  if (has("original_amount")) rows.push(["قيمة الدفعة الأصلية", toArabicIndic(fmtSAR(r.payment_amount, r.currency))]);
   if (has("payment_method")) rows.push(["وسيلة الدفع", r.payment_method ?? "—"]);
-  if (has("payment_paid_at")) rows.push(["تاريخ الدفعة", fmtDate(r.payment_paid_at)]);
-  if (has("created_at")) rows.push(["تاريخ الطلب", fmtDateTime(r.created_at)]);
-  if (has("updated_at")) rows.push(["آخر تحديث", fmtDateTime(r.updated_at)]);
-  if (has("processed_at") && r.processed_at) rows.push(["تاريخ المعالجة", fmtDateTime(r.processed_at)]);
+  if (has("payment_paid_at")) rows.push(["تاريخ الدفعة", toArabicIndic(fmtDate(r.payment_paid_at))]);
+  if (has("created_at")) rows.push(["تاريخ الطلب", toArabicIndic(fmtDateTime(r.created_at))]);
+  if (has("updated_at")) rows.push(["آخر تحديث", toArabicIndic(fmtDateTime(r.updated_at))]);
+  if (has("processed_at") && r.processed_at) rows.push(["تاريخ المعالجة", toArabicIndic(fmtDateTime(r.processed_at))]);
   if (has("reason")) rows.push(["سبب الطلب", r.reason || "—"]);
   if (has("decision_reason")) rows.push(["قرار المحاسبة", r.decision_reason || "—"]);
 
   const showHero = has("amount_hero");
   const showNote = has("footer_note");
+  const refDisplay = r.receipt_reference ? toArabicIndic(r.receipt_reference) : null;
+  const nowDisplay = toArabicIndic(fmtDateTime(new Date().toISOString()));
+  const amountDisplay = toArabicIndic(fmtSAR(r.amount, r.currency));
+  const originalAmountDisplay = toArabicIndic(fmtSAR(r.payment_amount, r.currency));
 
   const fontBase = `${window.location.origin}/fonts`;
   const fontFaceCss = `
