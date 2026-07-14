@@ -140,6 +140,19 @@ function InsurancePage() {
         {/* Policy card */}
         <section className="glass-card p-5 sm:p-6">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)] mb-4">وثيقة التأمين المسجّلة</h2>
+          {(mut.isError || removeMut.isError) && (
+            <div className="mb-4">
+              <MutationErrorBanner
+                message={
+                  mut.isError
+                    ? (mut.error instanceof Error ? mut.error.message : "تعذّر حفظ بيانات التأمين")
+                    : (removeMut.error instanceof Error ? removeMut.error.message : "تعذّر إزالة بيانات التأمين")
+                }
+                onRetry={() => (mut.isError ? mut.mutate() : removeMut.mutate())}
+                retrying={mut.isPending || removeMut.isPending}
+              />
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block">
               <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">جهة التأمين</span>
