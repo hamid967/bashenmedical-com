@@ -7,6 +7,11 @@ import { getBookingOptions } from "@/lib/portal/booking.functions";
 import { listAvailableSlots, bookSlot } from "@/lib/slots.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { getDependent } from "@/lib/portal/dependents.functions";
+import {
+  verifyMyInsurance,
+  listMyInsuranceVerifications,
+} from "@/lib/portal/insurance.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -270,30 +275,44 @@ function BookPage() {
     mutationFn: async () => {
       if (!doctorId) throw new Error("اختر الطبيب أولًا");
       if (!providerId) throw new Error("اختر جهة التأمين");
-      const res = await fetch("/api/public/insurance/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      return await verifyMyInsurance({
+        data: {
           doctor_id: doctorId,
           provider_id: providerId,
           policy_number: policyNumber.trim() || null,
-        }),
+        },
       });
-      const json = await res.json();
-      if (!res.ok || !json.ok) throw new Error(json.message ?? "تعذّر التحقق حاليًا");
-      return json as NonNullable<typeof verify>;
     },
-    onSuccess: (r) => setVerify(r),
+    onSuccess: (r) => {
+      setVerify(r);
+      qc.invalidateQueries({ queryKey: ["portal", "insurance-verify-history"] });
+    },
     onError: (err: any) => {
       setVerify(null);
       toast.error(err?.message ?? "تعذّر التحقق من الأهلية");
     },
   });
 
+  const historyQ = useQuery({
+    queryKey: ["portal", "insurance-verify-history", doctorId, providerId],
+    queryFn: () =>
+      listMyInsuranceVerifications({
+        data: {
+          doctor_id: doctorId || null,
+          provider_id: providerId || null,
+          limit: 10,
+        },
+      }),
+    enabled: Boolean(doctorId),
+    staleTime: 30_000,
+  });
+
   // Reset verification when the doctor or provider changes.
   useEffect(() => {
     setVerify(null);
   }, [doctorId, providerId]);
+
+
 
   const selectedDoctor = options.doctors.find((d) => d.id === doctorId);
   const selectedBranch = options.branches.find((b) => b.id === branchId);
@@ -755,6 +774,100 @@ function BookPage() {
               </div>
             )}
           </div>
+
+          {/* Verification history */}
+          {doctorId && (historyQ.data?.length ?? 0) > 0 && (
+            <details className="mt-3 rounded-2xl border border-[color:var(--portal-border)] bg-white p-3 group">
+              <summary className="cursor-pointer text-sm font-semibold flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  <BadgeCheck className="h-4 w-4 text-[color:var(--portal-primary)]" />
+                  سجل عمليات التحقق السابقة
+                  <span className="text-[11px] font-normal text-[color:var(--portal-ink-2)]">
+                    ({historyQ.data!.length})
+                  </span>
+                </span>
+                <span className="text-[11px] font-normal text-[color:var(--portal-ink-2)] group-open:hidden">
+                  عرض
+                </span>
+              </summary>
+              <ul className="mt-3 space-y-2">
+                {historyQ.data!.map((h) => {
+                  const dt = new Date(h.created_at);
+                  const dateLabel = dt.toLocaleString("ar-SA-u-ca-gregory", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  return (
+                    <li
+                      key={h.id}
+                      className="rounded-xl border border-[color:var(--portal-border)] bg-slate-50/60 p-3 text-xs space-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="font-semibold">
+                          {h.provider_name_ar ?? "جهة تأمين"}
+                          {h.policy_hint ? (
+                            <span className="text-[color:var(--portal-ink-2)] font-normal">
+                              {" "}
+                              — <span dir="ltr">{h.policy_hint}</span>
+                            </span>
+                          ) : null}
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                            h.eligible
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {h.eligible ? (
+                            <>
+                              <ShieldCheck className="h-3 w-3" /> مؤهل
+                            </>
+                          ) : (
+                            <>
+                              <ShieldAlert className="h-3 w-3" /> يحتاج مراجعة
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      <div className="text-[color:var(--portal-ink-2)]" dir="ltr">
+                        {dateLabel}
+                      </div>
+                      {h.message && (
+                        <div className="text-[color:var(--portal-ink-2)]">{h.message}</div>
+                      )}
+                      {(h.estimated_cost !== null || h.patient_share !== null) && (
+                        <div className="flex items-center gap-3 flex-wrap pt-1">
+                          {h.estimated_cost !== null && (
+                            <span>
+                              الاستشارة:{" "}
+                              <span className="font-mono">{h.estimated_cost} ر.س</span>
+                            </span>
+                          )}
+                          {h.coverage_percent !== null && (
+                            <span>
+                              التغطية: <span className="font-mono">{h.coverage_percent}%</span>
+                            </span>
+                          )}
+                          {h.patient_share !== null && (
+                            <span className="font-semibold">
+                              حصة المريض:{" "}
+                              <span className="font-mono">{h.patient_share} ر.س</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
+          )}
+
+
 
 
 
