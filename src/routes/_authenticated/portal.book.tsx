@@ -266,9 +266,40 @@ function BookPage() {
     onError: (err: any) => toast.error(err?.message ?? "تعذّر حفظ الحجز"),
   });
 
+  const verifyMut = useMutation({
+    mutationFn: async () => {
+      if (!doctorId) throw new Error("اختر الطبيب أولًا");
+      if (!providerId) throw new Error("اختر جهة التأمين");
+      const res = await fetch("/api/public/insurance/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          doctor_id: doctorId,
+          provider_id: providerId,
+          policy_number: policyNumber.trim() || null,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.message ?? "تعذّر التحقق حاليًا");
+      return json as NonNullable<typeof verify>;
+    },
+    onSuccess: (r) => setVerify(r),
+    onError: (err: any) => {
+      setVerify(null);
+      toast.error(err?.message ?? "تعذّر التحقق من الأهلية");
+    },
+  });
+
+  // Reset verification when the doctor or provider changes.
+  useEffect(() => {
+    setVerify(null);
+  }, [doctorId, providerId]);
+
   const selectedDoctor = options.doctors.find((d) => d.id === doctorId);
   const selectedBranch = options.branches.find((b) => b.id === branchId);
   const selectedSpecialty = options.specialties.find((s) => s.id === specialtyId);
+  const selectedProvider = options.providers?.find((p: any) => p.id === providerId);
+
 
   function handleConfirm() {
     if (!doctorId || !dateStr || !slot || !slotId) return;
