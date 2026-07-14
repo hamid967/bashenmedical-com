@@ -3757,9 +3757,11 @@ export type Database = {
           amount: number
           approved_by: string | null
           created_at: string
+          decision_reason: string | null
           id: string
           is_mock: boolean
           payment_id: string
+          processed_at: string | null
           reason: string | null
           requested_by: string | null
           status: string
@@ -3769,9 +3771,11 @@ export type Database = {
           amount: number
           approved_by?: string | null
           created_at?: string
+          decision_reason?: string | null
           id?: string
           is_mock?: boolean
           payment_id: string
+          processed_at?: string | null
           reason?: string | null
           requested_by?: string | null
           status?: string
@@ -3781,9 +3785,11 @@ export type Database = {
           amount?: number
           approved_by?: string | null
           created_at?: string
+          decision_reason?: string | null
           id?: string
           is_mock?: boolean
           payment_id?: string
+          processed_at?: string | null
           reason?: string | null
           requested_by?: string | null
           status?: string
