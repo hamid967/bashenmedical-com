@@ -112,6 +112,8 @@ function SuperPermissionsPage() {
   const [importError, setImportError] = useState<string | null>(null);
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [detailKey, setDetailKey] = useState<string | null>(null);
+
 
   const enabledSet = useMemo(
     () => new Set(matrix.map((r) => `${r.role}::${r.permission_key}`)),
