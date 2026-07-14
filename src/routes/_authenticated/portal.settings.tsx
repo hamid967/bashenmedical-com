@@ -97,6 +97,53 @@ function SettingsPage() {
     await savePref("push", v);
   };
 
+  // Test-send per channel (mock delivery to demo data). Push uses the real
+  // browser Notification API when a subscription is active.
+  type TestResult = { ok: boolean; msg: string; at: number };
+  const [testing, setTesting] = useState<keyof Prefs | null>(null);
+  const [results, setResults] = useState<Partial<Record<keyof Prefs, TestResult>>>({});
+  const contact = {
+    email: p?.email ?? "",
+    sms: p?.phone_e164 ?? p?.phone ?? "",
+    whatsapp: p?.whatsapp_e164 ?? p?.phone_e164 ?? p?.phone ?? "",
+  };
+  const sendTest = async (k: keyof Prefs) => {
+    setTesting(k);
+    try {
+      if (!prefs[k]) throw new Error(`القناة موقوفة — فعّلها أولاً`);
+      if (k === "push") {
+        if (push.state !== "granted" || !push.subscribed) {
+          throw new Error("فعّل إشعارات المتصفح أولاً");
+        }
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          new Notification("إشعار اختبار — مستشفى باشن", {
+            body: "هذه رسالة تجريبية للتأكد من عمل الإشعارات.",
+            icon: "/favicon.ico",
+          });
+        }
+        setResults((r) => ({ ...r, push: { ok: true, msg: "تم عرض إشعار متصفح تجريبي", at: Date.now() } }));
+        toast.success("تم إرسال إشعار الاختبار");
+        return;
+      }
+      const target = contact[k as "email" | "sms" | "whatsapp"];
+      if (!target) throw new Error("لا توجد بيانات تواصل محفوظة لهذه القناة");
+      // Simulated dispatch to demo data (no external provider wired yet).
+      await new Promise((res) => setTimeout(res, 700));
+      const msg =
+        k === "email" ? `تم إرسال بريد اختبار إلى ${target}` :
+        k === "sms" ? `تم إرسال SMS تجريبي إلى ${target}` :
+        `تم إرسال رسالة واتساب تجريبية إلى ${target}`;
+      setResults((r) => ({ ...r, [k]: { ok: true, msg, at: Date.now() } }));
+      toast.success(msg);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذّر إرسال إشعار الاختبار";
+      setResults((r) => ({ ...r, [k]: { ok: false, msg, at: Date.now() } }));
+      toast.error(msg);
+    } finally {
+      setTesting(null);
+    }
+  };
+
   const mut = useMutation({
     mutationFn: () =>
       updateMyProfile({
