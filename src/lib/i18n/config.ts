@@ -37,7 +37,7 @@ if (!i18n.isInitialized) {
     // instead of raw keys (fixes hydration mismatch e.g. "page.title" vs "احجز موعدك").
     initImmediate: false,
     react: { useSuspense: false },
-  });
+  } as Parameters<typeof chain.init>[0]);
 }
 
 export default i18n;
