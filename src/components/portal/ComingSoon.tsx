@@ -15,7 +15,7 @@ export function ComingSoon({
 }) {
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="portal-card p-8 md:p-12 text-center relative overflow-hidden ring-1 ring-[var(--jazan-gold,#C7A46B)]/25">
+      <div className="portal-card p-8 md:p-12 text-center relative overflow-hidden jazan-hairline">
         <JazanPattern
           variant="subtle"
           className="absolute inset-x-0 top-0 h-4 opacity-60 pointer-events-none"
