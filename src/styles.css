@@ -454,28 +454,31 @@ html.reduce-motion *::after {
    Palette: Neon Teal #00D9C0, Electric Cyan, Neon Purple #7B61FF
    ============================================================ */
 :root {
-  --neon-teal: #00d9c0;
-  --neon-teal-soft: color-mix(in oklab, #00d9c0 55%, transparent);
-  --neon-purple: #7b61ff;
-  --electric-cyan: #22e8ff;
-  --fut-bg-1: #05060a;
-  --fut-bg-2: #0a1a2f;
-  --fut-ink: #eaf6ff;
-  --fut-ink-muted: rgba(234, 246, 255, 0.7);
-  --fut-ink-dim: rgba(234, 246, 255, 0.45);
-  --fut-border: rgba(255, 255, 255, 0.08);
-  --fut-border-strong: rgba(0, 217, 192, 0.35);
-  --fut-glow-teal: 0 0 24px -4px rgba(0, 217, 192, 0.55), 0 0 60px -18px rgba(0, 217, 192, 0.35);
-  --fut-glow-purple: 0 0 24px -4px rgba(123, 97, 255, 0.55), 0 0 60px -18px rgba(123, 97, 255, 0.35);
-  --fut-shadow-glass: 0 12px 44px -14px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-  --fut-gradient-hero: linear-gradient(135deg, #05060a 0%, #08122a 55%, #0a1a2f 100%);
-  --fut-gradient-neon: linear-gradient(135deg, #00d9c0 0%, #22e8ff 50%, #7b61ff 100%);
+  /* Legacy "futuristic" opt-in layer — retuned to the Warm Light Teal
+     palette so pages using .futuristic render on the new light system
+     without a per-file rewrite. */
+  --neon-teal: #0B8585;
+  --neon-teal-soft: color-mix(in oklab, #0B8585 55%, transparent);
+  --neon-purple: #C7A46B;
+  --electric-cyan: #2AA6A0;
+  --fut-bg-1: #FCFDFB;
+  --fut-bg-2: #ECF8F5;
+  --fut-ink: #173B42;
+  --fut-ink-muted: #3A555B;
+  --fut-ink-dim: #64777C;
+  --fut-border: #DCEAE8;
+  --fut-border-strong: #C7DAD6;
+  --fut-glow-teal: 0 6px 22px -10px rgba(11, 133, 133, 0.28), 0 0 0 1px rgba(11, 133, 133, 0.10);
+  --fut-glow-purple: 0 6px 22px -10px rgba(199, 164, 107, 0.30), 0 0 0 1px rgba(199, 164, 107, 0.14);
+  --fut-shadow-glass: 0 8px 30px -18px rgba(7, 94, 99, 0.20), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --fut-gradient-hero: linear-gradient(160deg, #FCFDFB 0%, #ECF8F5 55%, #EEF7FB 100%);
+  --fut-gradient-neon: linear-gradient(135deg, #075E63 0%, #0B8585 55%, #2AA6A0 100%);
   --fut-gradient-aurora:
-    radial-gradient(1200px 700px at 15% -10%, rgba(0, 217, 192, 0.18), transparent 55%),
-    radial-gradient(900px 600px at 110% 5%, rgba(123, 97, 255, 0.22), transparent 55%),
-    radial-gradient(700px 500px at 60% 110%, rgba(34, 232, 255, 0.14), transparent 55%);
-  --font-fut-display: "Tajawal", "IBM Plex Sans Arabic", "Cairo", sans-serif;
-  --font-fut-body: "IBM Plex Sans Arabic", "Tajawal", "Cairo", sans-serif;
+    radial-gradient(1200px 700px at 15% -10%, rgba(11, 133, 133, 0.10), transparent 55%),
+    radial-gradient(900px 600px at 110% 5%, rgba(199, 164, 107, 0.08), transparent 55%),
+    radial-gradient(700px 500px at 60% 110%, rgba(11, 133, 133, 0.06), transparent 55%);
+  --font-fut-display: "Cairo", "Tajawal", "IBM Plex Sans Arabic", sans-serif;
+  --font-fut-body: "Cairo", "IBM Plex Sans Arabic", "Tajawal", sans-serif;
 }
 
 .futuristic {
@@ -489,9 +492,16 @@ html.reduce-motion *::after {
 .futuristic h1, .futuristic h2, .futuristic h3, .futuristic h4 {
   font-family: var(--font-fut-display);
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  color: var(--fut-ink);
 }
-.futuristic ::selection { background: rgba(0, 217, 192, 0.35); color: #fff; }
+.futuristic ::selection { background: rgba(11, 133, 133, 0.22); color: var(--fut-ink); }
+
+/* Neutralize legacy dark-glass utilities inside .futuristic so their
+   translucent white/dark rules read as solid light surfaces. */
+.futuristic [class*="bg-white/"] { background-color: rgba(255, 255, 255, 0.85) !important; }
+.futuristic [class*="hover:bg-white/"]:hover { background-color: #FFFFFF !important; }
+
 
 /* Slow-moving aurora mesh background — for hero sections. */
 @keyframes fut-aurora-drift {
