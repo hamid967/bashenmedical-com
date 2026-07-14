@@ -135,10 +135,21 @@
 @utility hero-gradient {
   background: linear-gradient(
     135deg,
-    var(--navy-deep) 0%,
-    var(--navy) 55%,
-    var(--navy-soft) 100%
+    var(--brand-mint) 0%,
+    var(--brand-sky) 55%,
+    #FFFFFF 100%
   );
+}
+
+/* Deep teal hero variant — for CTA bands and dark-on-light contrast sections. */
+@utility hero-gradient-deep {
+  background: linear-gradient(
+    135deg,
+    var(--brand-deep) 0%,
+    var(--brand) 55%,
+    var(--brand-soft) 100%
+  );
+  color: #FCFDFB;
 }
 
 @utility bento-card {
@@ -148,10 +159,11 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
   &:hover {
     transform: translateY(-2px);
-    border-color: color-mix(in oklab, var(--color-primary) 35%, transparent);
-    box-shadow: 0 12px 40px -18px color-mix(in oklab, var(--navy-deep) 55%, transparent);
+    border-color: color-mix(in oklab, var(--brand) 35%, transparent);
+    box-shadow: 0 12px 40px -18px color-mix(in oklab, var(--brand-deep) 30%, transparent);
   }
 }
+
 
 /* Flat card panel — no hover lift. Use for form panels, detail sections. */
 @utility card-panel {
