@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -17,16 +17,32 @@ import {
   AlertTriangle,
   Loader2,
   Inbox,
+  Info,
+  Calendar,
+  MapPin,
+  User as UserIcon,
+  History as HistoryIcon,
 } from "lucide-react";
 import {
   listMyMedicalReports,
   getMyMedicalReportFileUrl,
+  getMyMedicalReportDetail,
+  getMyMedicalReportVersionFileUrl,
   type MyMedicalReport,
+  type MyMedicalReportDetail,
   type ReportType,
 } from "@/lib/portal/reports.functions";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { DemoBadge } from "@/components/DemoBadge";
 
 const reportsQuery = queryOptions({
