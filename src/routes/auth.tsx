@@ -86,7 +86,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/auth" });
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [channel, setChannel] = useState<"email" | "phone">("email");
+  const [channel, setChannel] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -94,7 +94,9 @@ function AuthPage() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<null | "google" | "apple">(null);
-  // Phone/OTP state
+  // OTP state — supports both email (default) and SMS
+  const [otpChannel, setOtpChannel] = useState<"email" | "sms">("email");
+  const [otpEmail, setOtpEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpStep, setOtpStep] = useState<"enter" | "verify">("enter");
@@ -219,29 +221,53 @@ function AuthPage() {
 
   async function handleSendOtp(e?: React.FormEvent) {
     e?.preventDefault();
-    const e164 = normalizeSaPhone(phone);
-    if (!e164) {
-      toast.error("رقم الجوال غير صحيح. أدخل رقمًا سعوديًا (مثال: 05XXXXXXXX)");
-      return;
-    }
     setOtpLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        phone: e164,
-        options: { channel: "sms" },
-      });
-      if (error) {
-        safeLog({ action: "login_failed", metadata: { via: "phone", error: error.message } });
-        throw error;
+      if (otpChannel === "email") {
+        const value = otpEmail.trim();
+        if (!value || !value.includes("@")) {
+          toast.error("أدخل بريدًا إلكترونيًا صحيحًا");
+          setOtpLoading(false);
+          return;
+        }
+        const { error } = await supabase.auth.signInWithOtp({
+          email: value,
+          options: {
+            shouldCreateUser: true,
+            emailRedirectTo: window.location.origin + "/auth",
+          },
+        });
+        if (error) {
+          safeLog({ action: "login_failed", email: value, metadata: { via: "email_otp", error: error.message } });
+          throw error;
+        }
+        setOtpStep("verify");
+        setOtpCooldown(45);
+        toast.success("أُرسل رمز التحقق إلى بريدك الإلكتروني");
+      } else {
+        const e164 = normalizeSaPhone(phone);
+        if (!e164) {
+          toast.error("رقم الجوال غير صحيح. أدخل رقمًا سعوديًا (مثال: 05XXXXXXXX)");
+          setOtpLoading(false);
+          return;
+        }
+        const { error } = await supabase.auth.signInWithOtp({
+          phone: e164,
+          options: { channel: "sms" },
+        });
+        if (error) {
+          safeLog({ action: "login_failed", metadata: { via: "phone", error: error.message } });
+          throw error;
+        }
+        setOtpStep("verify");
+        setOtpCooldown(45);
+        toast.success("أُرسل رمز التحقق إلى جوالك");
       }
-      setOtpStep("verify");
-      setOtpCooldown(45);
-      toast.success("أُرسل رمز التحقق إلى جوالك");
     } catch (err: any) {
       const msg = err?.message ?? "تعذر إرسال الرمز";
       toast.error(
-        /provider|sms|not.*configured|unsupported/i.test(msg)
-          ? "خدمة الرسائل غير مفعّلة. اتصل بمسؤول النظام لتفعيل مزود SMS."
+        /provider|sms|not.*configured|unsupported/i.test(msg) && otpChannel === "sms"
+          ? "خدمة الرسائل غير مفعّلة حاليًا. استخدم البريد الإلكتروني بدلًا من الجوال."
           : msg,
       );
     } finally {
@@ -251,34 +277,51 @@ function AuthPage() {
 
   async function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
-    const e164 = normalizeSaPhone(phone);
-    if (!e164) return;
     if (otp.trim().length < 4) {
       toast.error("أدخل رمز التحقق كاملًا");
       return;
     }
     setOtpLoading(true);
     try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        phone: e164,
-        token: otp.trim(),
-        type: "sms",
-      });
+      let result;
+      if (otpChannel === "email") {
+        result = await supabase.auth.verifyOtp({
+          email: otpEmail.trim(),
+          token: otp.trim(),
+          type: "email",
+        });
+      } else {
+        const e164 = normalizeSaPhone(phone);
+        if (!e164) return;
+        result = await supabase.auth.verifyOtp({
+          phone: e164,
+          token: otp.trim(),
+          type: "sms",
+        });
+      }
+      const { data, error } = result;
       if (error) {
-        safeLog({ action: "login_failed", metadata: { via: "phone", error: error.message } });
+        safeLog({ action: "login_failed", metadata: { via: otpChannel === "email" ? "email_otp" : "phone", error: error.message } });
         throw error;
       }
-      safeLog({ action: "login_success", user_id: data.user?.id ?? null, metadata: { via: "phone" } });
-      // Best-effort: keep the phone in profiles so admin views find them.
-      if (data.user?.id) {
-        supabase
-          .from("profiles")
-          .update({ phone: e164 })
-          .eq("id", data.user.id)
-          .then(() => {}, () => {});
+      safeLog({
+        action: "login_success",
+        user_id: data.user?.id ?? null,
+        email: otpChannel === "email" ? otpEmail.trim() : null,
+        metadata: { via: otpChannel === "email" ? "email_otp" : "phone" },
+      });
+      // Best-effort: persist phone into profiles when SMS OTP is used.
+      if (otpChannel === "sms" && data.user?.id) {
+        const e164 = normalizeSaPhone(phone);
+        if (e164) {
+          supabase
+            .from("profiles")
+            .update({ phone: e164 })
+            .eq("id", data.user.id)
+            .then(() => {}, () => {});
+        }
       }
       toast.success("تم تسجيل الدخول بنجاح");
-      // onAuthStateChange handles navigation.
     } catch (err: any) {
       toast.error(err?.message ?? "رمز غير صحيح أو منتهي الصلاحية");
     } finally {
@@ -427,7 +470,7 @@ function AuthPage() {
           <div className="relative flex items-center mb-5">
             <div className="flex-grow border-t border-white/10" />
             <span className="mx-4 text-[10px] text-white/40 uppercase tracking-[0.2em]">
-              {channel === "email" ? "أو عبر البريد" : "أو عبر الجوال"}
+              {channel === "email" ? "أو عبر البريد وكلمة المرور" : "أو عبر رمز تحقق (OTP)"}
             </span>
             <div className="flex-grow border-t border-white/10" />
           </div>
@@ -443,23 +486,24 @@ function AuthPage() {
                   : "text-white/50 hover:text-white"
               }`}
             >
-              <Mail className="h-3.5 w-3.5" /> البريد
+              <Lock className="h-3.5 w-3.5" /> بريد + كلمة مرور
             </button>
             <button
               type="button"
               onClick={() => {
-                setChannel("phone");
+                setChannel("otp");
                 setOtpStep("enter");
               }}
               className={`h-9 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition ${
-                channel === "phone"
+                channel === "otp"
                   ? "bg-[#1FAEFF] text-white shadow-[0_4px_15px_rgba(31,174,255,0.35)]"
                   : "text-white/50 hover:text-white"
               }`}
             >
-              <Phone className="h-3.5 w-3.5" /> الجوال + OTP
+              <KeyRound className="h-3.5 w-3.5" /> رمز OTP
             </button>
           </div>
+
 
           {channel === "email" ? (
             <form onSubmit={handleSubmit} className="relative space-y-4">
@@ -551,30 +595,83 @@ function AuthPage() {
             </form>
           ) : otpStep === "enter" ? (
             <form onSubmit={handleSendOtp} className="relative space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
-                  رقم الجوال
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
-                    <Phone className="h-4 w-4" />
-                  </span>
-                  <input
-                    type="tel"
-                    required
-                    inputMode="tel"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="05XXXXXXXX"
-                    dir="ltr"
-                    className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
-                  />
-                </div>
-                <p className="mt-1.5 text-[11px] text-white/40 px-1">
-                  سنرسل رمز تحقق (OTP) صالحًا لدقائق قليلة.
-                </p>
+              {/* Sub-channel: email (default) or SMS */}
+              <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.03] border border-white/10 p-1">
+                <button
+                  type="button"
+                  onClick={() => setOtpChannel("email")}
+                  className={`h-8 rounded-md text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition ${
+                    otpChannel === "email"
+                      ? "bg-[#1FAEFF]/90 text-white"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  <Mail className="h-3 w-3" /> عبر البريد
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOtpChannel("sms")}
+                  className={`h-8 rounded-md text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition ${
+                    otpChannel === "sms"
+                      ? "bg-[#1FAEFF]/90 text-white"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  <Phone className="h-3 w-3" /> عبر الجوال (SMS)
+                </button>
               </div>
+
+              {otpChannel === "email" ? (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                    البريد الإلكتروني
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
+                      <Mail className="h-4 w-4" />
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      inputMode="email"
+                      autoComplete="email"
+                      value={otpEmail}
+                      onChange={(e) => setOtpEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      dir="ltr"
+                      className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-white/40 px-1">
+                    سنرسل رمز تحقق مكوّن من 6 أرقام إلى بريدك، صالحًا لدقائق قليلة.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                    رقم الجوال
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
+                      <Phone className="h-4 w-4" />
+                    </span>
+                    <input
+                      type="tel"
+                      required
+                      inputMode="tel"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="05XXXXXXXX"
+                      dir="ltr"
+                      className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-amber-300/80 px-1">
+                    خدمة SMS قد لا تكون مفعّلة بعد — يمكنك استخدام البريد بدلًا منها.
+                  </p>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -589,13 +686,14 @@ function AuthPage() {
                 إرسال رمز التحقق
               </button>
             </form>
+
           ) : (
             <form onSubmit={handleVerifyOtp} className="relative space-y-4">
               <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white/70 flex items-center justify-between">
                 <span>
                   الرمز أُرسل إلى{" "}
                   <span dir="ltr" className="font-semibold text-white">
-                    {normalizeSaPhone(phone) ?? phone}
+                    {otpChannel === "email" ? otpEmail : (normalizeSaPhone(phone) ?? phone)}
                   </span>
                 </span>
                 <button
