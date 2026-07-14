@@ -30,3 +30,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Portal visual regression: only baselines are committed
+tests/e2e/visual/actual/
+tests/e2e/visual/diffs/
