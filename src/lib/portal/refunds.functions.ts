@@ -169,3 +169,72 @@ export const cancelMyRefund = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/* ---------- logRefundReceiptDownload ---------- */
+
+export const logRefundReceiptDownload = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) =>
+    z
+      .object({
+        refund_id: z.string().uuid(),
+        status: z.string().max(40),
+        fields: z.array(z.string().max(60)).max(30),
+        field_count: z.number().int().min(0).max(100),
+      })
+      .parse(input),
+  )
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+
+    // Verify the refund belongs to the caller before logging (RLS on refunds enforces this too)
+    const { data: refund, error: refundErr } = await supabase
+      .from("refunds")
+      .select("id, requested_by, payment_id, amount, status")
+      .eq("id", data.refund_id)
+      .maybeSingle();
+    if (refundErr) throw new Error(refundErr.message);
+    if (!refund || refund.requested_by !== userId) {
+      throw new Error("Not authorized to log this refund receipt.");
+    }
+
+    const req = (globalThis as any).Request
+      ? undefined
+      : undefined;
+    // Best-effort user agent / IP capture
+    let userAgent: string | null = null;
+    let ipAddress: string | null = null;
+    try {
+      const { getRequest } = await import("@tanstack/react-start/server");
+      const httpReq = getRequest();
+      userAgent = httpReq.headers.get("user-agent");
+      ipAddress =
+        httpReq.headers.get("cf-connecting-ip") ??
+        httpReq.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+        httpReq.headers.get("x-real-ip") ??
+        null;
+    } catch {
+      /* ignore */
+    }
+
+    const { error: logErr } = await supabase.from("audit_logs").insert({
+      actor_id: userId,
+      actor_role: "patient",
+      action: "download",
+      entity_type: "refund_receipt",
+      entity_id: data.refund_id,
+      user_agent: userAgent,
+      ip_address: ipAddress,
+      metadata: {
+        refund_status: data.status,
+        included_fields: data.fields,
+        field_count: data.field_count,
+        payment_id: refund.payment_id,
+        refund_amount: refund.amount,
+        downloaded_at: new Date().toISOString(),
+      },
+    });
+    if (logErr) throw new Error(logErr.message);
+
+    return { ok: true };
+  });

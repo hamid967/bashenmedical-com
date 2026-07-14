@@ -9,6 +9,7 @@ import {
   listMyRefunds,
   requestRefund,
   cancelMyRefund,
+  logRefundReceiptDownload,
 } from "@/lib/portal/refunds.functions";
 import { listMyPayments } from "@/lib/portal/invoices.functions";
 import {
@@ -776,6 +777,7 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
   const meta = statusMeta(r.status);
   const available = useMemo(() => RECEIPT_FIELDS.filter((f) => f.isAvailable(r)), [r]);
   const [selected, setSelected] = useState<Set<ReceiptFieldKey>>(() => defaultReceiptSelection(r));
+  const logDownload = useServerFn(logRefundReceiptDownload);
 
   const toggle = (k: ReceiptFieldKey) =>
     setSelected((prev) => {
@@ -802,7 +804,19 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
       toast.error("اختر حقلًا واحدًا على الأقل.");
       return;
     }
+    const fields = Array.from(selected);
     openRefundReceipt(r, selected);
+    // Fire-and-forget audit log — never block the download on logging errors
+    logDownload({
+      data: {
+        refund_id: r.id,
+        status: r.status,
+        fields,
+        field_count: fields.length,
+      },
+    }).catch(() => {
+      /* silent: audit logging failure shouldn't disrupt the user */
+    });
     onClose();
   };
 
