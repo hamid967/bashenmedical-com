@@ -958,6 +958,8 @@ function DeleteDialog({
   onClose: () => void;
 }) {
   const qc = useQueryClient();
+  const [confirmCancel, setConfirmCancel] = useState(false);
+
   const countQ = useQuery({
     queryKey: ["portal", "dependent-appt-count", row?.id],
     queryFn: () =>
