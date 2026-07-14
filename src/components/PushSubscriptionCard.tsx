@@ -301,6 +301,34 @@ export function PushSubscriptionCard() {
   }, []);
 
   const sendServerTest = useCallback(async () => {
+    // Parse & validate the optional data JSON before any network call.
+    let dataObj: Record<string, unknown> | undefined;
+    const raw = payload.dataJson.trim();
+    if (raw.length > 0) {
+      if (raw.length > 4000) {
+        setDataError("الحمولة أكبر من 4000 حرف");
+        toast.error("حمولة data كبيرة جدًا");
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+          setDataError("يجب أن تكون data كائنًا JSON ({ ... })");
+          toast.error("data يجب أن تكون كائن JSON");
+          return;
+        }
+        dataObj = parsed as Record<string, unknown>;
+        setDataError(null);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "JSON غير صالح";
+        setDataError(msg);
+        toast.error("JSON غير صالح", { description: msg });
+        return;
+      }
+    } else {
+      setDataError(null);
+    }
+
     setServerSending(true);
     try {
       const res = await sendServer({
@@ -309,6 +337,7 @@ export function PushSubscriptionCard() {
           body: payload.body.trim() || undefined,
           url: payload.url.trim() || undefined,
           requireInteraction: payload.requireInteraction,
+          data: dataObj,
         },
       });
       if (res.ok) {
@@ -332,6 +361,7 @@ export function PushSubscriptionCard() {
       setServerSending(false);
     }
   }, [sendServer, payload]);
+
 
 
 
