@@ -604,6 +604,7 @@ function NewRefundDrawer({
 }) {
   const qc = useQueryClient();
   const { data: paysRes, isLoading } = useQuery(paymentsQuery);
+  const { data: refundsRes } = useQuery(refundsQuery);
   const requestFn = useServerFn(requestRefund);
 
   // Only refundable, non-mock payments
@@ -625,6 +626,39 @@ function NewRefundDrawer({
     [refundable, paymentId],
   );
 
+  // Deductions breakdown for the selected payment
+  const breakdown = useMemo(() => {
+    if (!selected) return null;
+    const gross = Number(selected.amount ?? 0);
+    const rows = (refundsRes?.refunds ?? []).filter((r) => r.payment_id === selected.id);
+    const sumBy = (statuses: string[]) =>
+      rows
+        .filter((r) => statuses.includes(r.status))
+        .reduce((s, r) => s + Number(r.amount ?? 0), 0);
+    const processed = sumBy(["processed"]);
+    const inFlight = sumBy(["pending", "approved"]);
+    const deducted = processed + inFlight;
+    const available = Math.max(0, gross - deducted);
+    const pendingCount = rows.filter((r) => r.status === "pending").length;
+    const approvedCount = rows.filter((r) => r.status === "approved").length;
+    const processedCount = rows.filter((r) => r.status === "processed").length;
+    return {
+      gross,
+      processed,
+      inFlight,
+      available,
+      pendingCount,
+      approvedCount,
+      processedCount,
+      hasHistory: rows.length > 0,
+    };
+  }, [selected, refundsRes?.refunds]);
+
+  const amountNum = amount ? Number(amount) : NaN;
+  const exceedsMax =
+    !!breakdown && !Number.isNaN(amountNum) && amountNum > breakdown.available + 0.01;
+  const noAvailable = !!breakdown && breakdown.available <= 0;
+
   const mutation = useMutation({
     mutationFn: () =>
       requestFn({
@@ -642,7 +676,12 @@ function NewRefundDrawer({
     onError: (e: any) => toast.error(e?.message ?? "تعذّر إرسال الطلب"),
   });
 
-  const canSubmit = !!paymentId && reason.trim().length >= 3 && !mutation.isPending;
+  const canSubmit =
+    !!paymentId &&
+    reason.trim().length >= 3 &&
+    !mutation.isPending &&
+    !exceedsMax &&
+    !noAvailable;
 
   return (
     <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
@@ -705,6 +744,73 @@ function NewRefundDrawer({
                 </div>
               </div>
 
+              {selected && breakdown && (
+                <section className="mag-card p-4 space-y-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-sm font-semibold">تفصيل المبلغ</div>
+                    <div className="text-[11px] text-[color:var(--mag-ink-3)]">
+                      {selected.currency ?? "SAR"}
+                    </div>
+                  </div>
+                  <dl className="text-xs space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <dt className="text-[color:var(--mag-ink-3)]">قيمة الدفعة الأصلية</dt>
+                      <dd className="font-semibold">{fmtSAR(breakdown.gross, selected.currency)}</dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-[color:var(--mag-ink-3)]">
+                        مُسترد سابقًا
+                        {breakdown.processedCount > 0 && (
+                          <span className="ms-1 text-[10px]">({breakdown.processedCount})</span>
+                        )}
+                      </dt>
+                      <dd className="font-semibold text-emerald-700">
+                        − {fmtSAR(breakdown.processed, selected.currency)}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <dt className="text-[color:var(--mag-ink-3)]">
+                        طلبات جارية
+                        {(breakdown.pendingCount + breakdown.approvedCount) > 0 && (
+                          <span className="ms-1 text-[10px]">
+                            (قيد المراجعة: {breakdown.pendingCount} · معتمدة: {breakdown.approvedCount})
+                          </span>
+                        )}
+                      </dt>
+                      <dd className="font-semibold text-amber-700">
+                        − {fmtSAR(breakdown.inFlight, selected.currency)}
+                      </dd>
+                    </div>
+                  </dl>
+                  <div className="pt-3 border-t border-[color:var(--mag-line)] flex items-end justify-between gap-3">
+                    <div>
+                      <div className="text-[11px] text-[color:var(--mag-ink-3)]">المتاح للاسترداد الآن</div>
+                      <div className={[
+                        "text-xl font-bold",
+                        breakdown.available > 0 ? "text-[color:var(--mag-ink-1)]" : "text-[color:var(--mag-danger)]",
+                      ].join(" ")}>
+                        {fmtSAR(breakdown.available, selected.currency)}
+                      </div>
+                    </div>
+                    {breakdown.available > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => setAmount(breakdown.available.toFixed(2))}
+                        className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-soft)]"
+                      >
+                        استرداد الكامل المتاح
+                      </button>
+                    )}
+                  </div>
+                  {noAvailable && (
+                    <div className="text-xs rounded-lg p-2.5 bg-red-50 text-[color:var(--mag-danger)] flex items-start gap-2">
+                      <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                      <span>لا يوجد مبلغ متاح للاسترداد على هذه الدفعة (تمت تغطية كامل المبلغ بطلبات سابقة أو جارية).</span>
+                    </div>
+                  )}
+                </section>
+              )}
+
               <div>
                 <label className="text-sm font-semibold block mb-2">
                   المبلغ المطلوب استرداده
@@ -717,12 +823,24 @@ function NewRefundDrawer({
                   inputMode="decimal"
                   step="0.01"
                   min={0}
-                  max={selected ? Number(selected.amount) : undefined}
+                  max={breakdown ? breakdown.available : undefined}
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder={selected ? String(Number(selected.amount).toFixed(2)) : "—"}
-                  className="w-full h-11 px-3 rounded-xl border border-[color:var(--mag-line)] bg-white text-sm outline-none focus:border-[color:var(--mag-accent)]"
+                  disabled={noAvailable}
+                  placeholder={breakdown ? breakdown.available.toFixed(2) : "—"}
+                  className={[
+                    "w-full h-11 px-3 rounded-xl border bg-white text-sm outline-none",
+                    exceedsMax
+                      ? "border-[color:var(--mag-danger)] focus:border-[color:var(--mag-danger)]"
+                      : "border-[color:var(--mag-line)] focus:border-[color:var(--mag-accent)]",
+                    noAvailable ? "opacity-60 cursor-not-allowed" : "",
+                  ].join(" ")}
                 />
+                {exceedsMax && breakdown && (
+                  <div className="mt-1.5 text-[11px] text-[color:var(--mag-danger)]">
+                    يتجاوز المبلغ الحد الأقصى المتاح ({fmtSAR(breakdown.available, selected?.currency)}).
+                  </div>
+                )}
               </div>
 
               <div>
