@@ -1173,7 +1173,13 @@ function DeleteDialog({
           if (!o && !cancelMut.isPending) setConfirmCancel(false);
         }}
       >
-        <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+        <AlertDialogContent
+          dir={lang === "ar" ? "rtl" : "ltr"}
+          aria-busy={cancelMut.isPending}
+          onEscapeKeyDown={(e) => {
+            if (cancelMut.isPending) e.preventDefault();
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
               <AlertTriangle className="h-5 w-5" aria-hidden />
@@ -1200,28 +1206,42 @@ function DeleteDialog({
                   <span className="text-muted-foreground">{T.member_label[lang]} </span>
                   <span className="font-semibold">{row?.full_name}</span>
                 </div>
+
+                {cancelMut.isPending && (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50/70 dark:bg-red-950/30 p-3 text-red-800 dark:text-red-200"
+                  >
+                    <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden />
+                    <span className="font-medium">{T.del_cancelling[lang]}</span>
+                  </div>
+                )}
               </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
               disabled={cancelMut.isPending}
-              className="font-semibold border-2"
+              aria-disabled={cancelMut.isPending}
+              className="font-semibold border-2 disabled:opacity-50 disabled:cursor-not-allowed"
               autoFocus
             >
               {T.del_cancel_confirm_keep[lang]}
             </AlertDialogCancel>
             <AlertDialogAction
               disabled={cancelMut.isPending || !row}
+              aria-disabled={cancelMut.isPending || !row}
               onClick={(e) => {
                 e.preventDefault();
-                if (row && !cancelMut.isPending) cancelMut.mutate(row.id);
+                if (!row || cancelMut.isPending) return;
+                cancelMut.mutate(row.id);
               }}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
               {cancelMut.isPending ? (
                 <>
-                  <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   {T.del_cancelling[lang]}
                 </>
               ) : (
@@ -1230,6 +1250,7 @@ function DeleteDialog({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
+
       </AlertDialog>
     </AlertDialog>
   );
