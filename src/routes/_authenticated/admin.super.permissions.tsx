@@ -582,7 +582,7 @@ function SuperPermissionsPage() {
                       </span>
                     </button>
                   </td>
-                  {ALL_ROLES.map((r) => {
+                  {visibleRoles.map((r) => {
                     const cellKey = `${r}::${p.key}`;
                     const on = r === "super_admin" ? true : enabledSet.has(cellKey);
                     const locked = r === "super_admin";
