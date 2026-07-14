@@ -20,6 +20,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -111,6 +112,7 @@ async function fetchAvailability(date: string, doctorId: string | null, specialt
 function BookPage() {
   const searchParams = Route.useSearch();
   const { lang } = useI18n();
+  const { t } = useTranslation("booking");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -379,7 +381,7 @@ function BookPage() {
     setErrorMsg(null);
     setSuggestion(null);
     if (!patientValidation.ok) {
-      setErrorMsg(lang === "ar" ? "يرجى تصحيح بيانات المريض قبل التأكيد" : "Please fix patient info before confirming");
+      setErrorMsg(t("page.fixPatient"));
       goto(7);
       return;
     }
@@ -391,9 +393,7 @@ function BookPage() {
       const fresh = await fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId);
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
-        setErrorMsg(lang === "ar"
-          ? "هذا الموعد لم يعد متاحًا. اختر وقتًا آخر."
-          : "This slot is no longer available. Please pick another time.");
+        setErrorMsg(t("page.slotTaken"));
         // Refresh the availability query so StepTime shows the updated state.
         queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
         const prevTime = state.time;
@@ -425,7 +425,7 @@ function BookPage() {
     setSubmitting(false);
     if (res.ok) {
       try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
-      toast.success(lang === "ar" ? "تم إنشاء الحجز بنجاح" : "Booking created");
+      toast.success(t("page.created"));
       setResult({ reference: res.reference, phone: p.phone.trim() });
       goto(9);
     } else {
@@ -436,10 +436,7 @@ function BookPage() {
   function handleReset() {
     // Guard against accidental taps that would drop the reference/QR forever.
     if (typeof window !== "undefined" && result?.reference) {
-      const msg = lang === "ar"
-        ? "سيتم مسح تفاصيل الحجز الحالي من الشاشة. تأكد أنك احتفظت برقم الحجز. هل تريد المتابعة؟"
-        : "The current booking details will be cleared from this screen. Make sure you saved the reference. Continue?";
-      if (!window.confirm(msg)) return;
+      if (!window.confirm(t("page.resetConfirm"))) return;
     }
     setResult(null);
     setErrorMsg(null);
