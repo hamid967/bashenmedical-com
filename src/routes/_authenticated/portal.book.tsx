@@ -46,7 +46,6 @@ import {
 import { ar as arLocale } from "date-fns/locale";
 import { format } from "date-fns";
 import { SA_PHONE_RE, SA_NID_RE } from "@/lib/booking-limits";
-import { format } from "date-fns";
 
 const optionsQuery = queryOptions({
   queryKey: ["portal", "booking", "options"],
