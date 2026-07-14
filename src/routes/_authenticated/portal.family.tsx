@@ -1,0 +1,706 @@
+import { createFileRoute, Link, useNavigate, useRouter } from "@tanstack/react-router";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  listDependents,
+  createDependent,
+  updateDependent,
+  deleteDependent,
+  type Dependent,
+} from "@/lib/portal/dependents.functions";
+import { getMyProfile } from "@/lib/portal/portal.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  UsersRound,
+  UserPlus,
+  Pencil,
+  Trash2,
+  CalendarPlus,
+  Loader2,
+  AlertTriangle,
+  RefreshCw,
+  BadgeCheck,
+  ShieldAlert,
+} from "lucide-react";
+
+const dependentsQuery = queryOptions({
+  queryKey: ["portal", "dependents"],
+  queryFn: () => listDependents(),
+  staleTime: 30_000,
+});
+const profileQuery = queryOptions({
+  queryKey: ["portal", "my-profile"],
+  queryFn: () => getMyProfile(),
+  staleTime: 60_000,
+});
+
+export const Route = createFileRoute("/_authenticated/portal/family")({
+  loader: async ({ context }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(dependentsQuery),
+      context.queryClient.ensureQueryData(profileQuery),
+    ]);
+  },
+  head: () => ({
+    meta: [
+      { title: "أفراد العائلة | بوابة المريض" },
+      {
+        name: "description",
+        content:
+          "إدارة أفراد العائلة والمعالين وحجز مواعيدهم من خلال بوابة المريض.",
+      },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  component: FamilyPage,
+  errorComponent: FamilyError,
+  notFoundComponent: () => null,
+});
+
+/* ---------------- i18n ---------------- */
+
+type Lang = "ar" | "en";
+const T = {
+  title:            { ar: "أفراد العائلة", en: "Family Members" },
+  subtitle: {
+    ar: "أضف أفراد عائلتك لإدارة سجلاتهم وحجز مواعيدهم من حسابك.",
+    en: "Add family members to manage their records and book appointments from your account.",
+  },
+  add:              { ar: "إضافة فرد جديد", en: "Add Member" },
+  empty_title:      { ar: "لم تُضف أي أفراد بعد", en: "No members added yet" },
+  empty_body: {
+    ar: "ابدأ بإضافة طفلك أو زوجك/زوجتك أو أحد والديك لإدارة سجلاتهم وحجز المواعيد نيابةً عنهم.",
+    en: "Start by adding a child, spouse, or parent to manage their records and book on their behalf.",
+  },
+  edit:             { ar: "تعديل", en: "Edit" },
+  delete:           { ar: "حذف", en: "Delete" },
+  book_for:         { ar: "احجز موعدًا لهذا الفرد", en: "Book an appointment" },
+  verified:         { ar: "موثّق", en: "Verified" },
+  pending:          { ar: "قيد التوثيق", en: "Pending verification" },
+  // form
+  form_add_title:   { ar: "إضافة فرد إلى العائلة", en: "Add family member" },
+  form_edit_title:  { ar: "تعديل بيانات فرد", en: "Edit family member" },
+  form_desc: {
+    ar: "املأ البيانات المطلوبة. تُطبَّق قواعد تحقق مطابقة لنظام الهوية والجوال السعودي.",
+    en: "Fill in the required fields. Saudi ID and mobile validation are applied.",
+  },
+  f_name:           { ar: "الاسم الرباعي",     en: "Full name" },
+  f_relationship:   { ar: "صلة القرابة",       en: "Relationship" },
+  f_gender:         { ar: "الجنس",             en: "Gender" },
+  f_dob:            { ar: "تاريخ الميلاد",     en: "Date of birth" },
+  f_nid:            { ar: "رقم الهوية",         en: "National ID" },
+  f_phone:          { ar: "رقم الجوال",        en: "Mobile number" },
+  optional:         { ar: "اختياري",           en: "optional" },
+  save:             { ar: "حفظ",              en: "Save" },
+  cancel:           { ar: "إلغاء",            en: "Cancel" },
+  saving:           { ar: "جارٍ الحفظ…",      en: "Saving…" },
+  // relationships
+  r_child:          { ar: "ابن/ابنة",         en: "Child" },
+  r_spouse:         { ar: "زوج/زوجة",         en: "Spouse" },
+  r_parent:         { ar: "والد/والدة",       en: "Parent" },
+  r_sibling:        { ar: "أخ/أخت",           en: "Sibling" },
+  r_other:          { ar: "أخرى",             en: "Other" },
+  g_male:           { ar: "ذكر", en: "Male" },
+  g_female:         { ar: "أنثى", en: "Female" },
+  choose:           { ar: "اختر…", en: "Choose…" },
+  // delete confirm
+  del_title:        { ar: "حذف فرد من العائلة؟", en: "Delete family member?" },
+  del_body: {
+    ar: "لن يتم حذف السجلات الطبية المرتبطة بهذا الفرد إن وُجدت. يمكنك إعادة إضافته لاحقًا.",
+    en: "Existing linked medical records won't be deleted. You can add them again later.",
+  },
+  del_ok:           { ar: "تأكيد الحذف", en: "Delete" },
+  // errors
+  e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
+  e_name_too_long:  { ar: "الاسم طويل جدًا.", en: "Name is too long." },
+  e_nid:            { ar: "رقم الهوية يجب أن يتكوّن من 10 أرقام.", en: "National ID must be 10 digits." },
+  e_phone:          { ar: "رقم الجوال غير صالح (مثال: 05XXXXXXXX).", en: "Invalid mobile number (e.g. 05XXXXXXXX)." },
+  e_date:           { ar: "التاريخ غير صالح.", en: "Invalid date." },
+  e_relationship:   { ar: "اختر صلة القرابة.", en: "Choose a relationship." },
+  e_generic:        { ar: "تعذّر حفظ البيانات.", en: "Could not save." },
+} as const;
+
+function t(k: keyof typeof T, lang: Lang) {
+  return T[k][lang];
+}
+
+const RELATIONSHIP_LABELS: Record<Dependent["relationship"], keyof typeof T> = {
+  child: "r_child",
+  spouse: "r_spouse",
+  parent: "r_parent",
+  sibling: "r_sibling",
+  other: "r_other",
+};
+
+/* ---------------- page ---------------- */
+
+function FamilyPage() {
+  const { data: profile } = useSuspenseQuery(profileQuery);
+  const { data: rows } = useSuspenseQuery(dependentsQuery);
+  const lang: Lang = (profile?.preferred_language as Lang) ?? "ar";
+
+  const [dialog, setDialog] = useState<{ mode: "add" } | { mode: "edit"; row: Dependent } | null>(
+    null,
+  );
+  const [toDelete, setToDelete] = useState<Dependent | null>(null);
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
+  return (
+    <div className="space-y-6 pb-24 md:pb-6" dir={dir}>
+      <header className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+            <UsersRound className="h-6 w-6 text-[color:var(--portal-primary)]" />
+            {t("title", lang)}
+          </h1>
+          <p className="text-sm text-[color:var(--portal-ink-2)] mt-1 max-w-xl">
+            {t("subtitle", lang)}
+          </p>
+        </div>
+        <Button
+          onClick={() => setDialog({ mode: "add" })}
+          className="rounded-full text-white font-semibold px-5"
+          style={{ background: "var(--portal-gradient)" }}
+        >
+          <UserPlus className="h-4 w-4 ms-2" />
+          {t("add", lang)}
+        </Button>
+      </header>
+
+      {rows.length === 0 ? (
+        <div className="glass-card p-10 text-center">
+          <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-primary)] mb-4">
+            <UsersRound className="h-7 w-7" />
+          </div>
+          <h2 className="text-lg font-bold">{t("empty_title", lang)}</h2>
+          <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 max-w-md mx-auto">
+            {t("empty_body", lang)}
+          </p>
+          <Button
+            onClick={() => setDialog({ mode: "add" })}
+            className="mt-5 rounded-full text-white font-semibold px-5"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <UserPlus className="h-4 w-4 ms-2" />
+            {t("add", lang)}
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map((r) => (
+            <DependentCard
+              key={r.id}
+              row={r}
+              lang={lang}
+              onEdit={() => setDialog({ mode: "edit", row: r })}
+              onDelete={() => setToDelete(r)}
+            />
+          ))}
+        </div>
+      )}
+
+      {dialog && (
+        <DependentDialog
+          lang={lang}
+          mode={dialog.mode}
+          initial={dialog.mode === "edit" ? dialog.row : null}
+          onClose={() => setDialog(null)}
+        />
+      )}
+
+      <DeleteDialog
+        lang={lang}
+        row={toDelete}
+        onClose={() => setToDelete(null)}
+      />
+    </div>
+  );
+}
+
+/* ---------------- card ---------------- */
+
+function DependentCard({
+  row,
+  lang,
+  onEdit,
+  onDelete,
+}: {
+  row: Dependent;
+  lang: Lang;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const initials = row.full_name
+    .split(" ")
+    .slice(0, 2)
+    .map((s) => s[0])
+    .join("");
+  const rel = t(RELATIONSHIP_LABELS[row.relationship], lang);
+  return (
+    <div className="glass-card p-4 flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <div
+          className="h-12 w-12 rounded-full grid place-items-center text-white font-bold shrink-0"
+          style={{ background: "var(--portal-gradient)" }}
+        >
+          <span>{initials || "?"}</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="font-semibold truncate">{row.full_name}</div>
+          <div className="text-xs text-[color:var(--portal-ink-2)] truncate">{rel}</div>
+        </div>
+        <span
+          className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 h-6 whitespace-nowrap ${
+            row.verified
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-amber-50 text-amber-700"
+          }`}
+        >
+          {row.verified ? (
+            <>
+              <BadgeCheck className="h-3 w-3" />
+              {t("verified", lang)}
+            </>
+          ) : (
+            <>
+              <ShieldAlert className="h-3 w-3" />
+              {t("pending", lang)}
+            </>
+          )}
+        </span>
+      </div>
+
+      <dl className="text-xs grid gap-1.5 text-[color:var(--portal-ink-2)]">
+        {row.date_of_birth && (
+          <div className="flex justify-between gap-2">
+            <dt>{t("f_dob", lang)}</dt>
+            <dd className="font-mono" dir="ltr">{row.date_of_birth}</dd>
+          </div>
+        )}
+        {row.national_id && (
+          <div className="flex justify-between gap-2">
+            <dt>{t("f_nid", lang)}</dt>
+            <dd className="font-mono" dir="ltr">{row.national_id}</dd>
+          </div>
+        )}
+        {row.phone && (
+          <div className="flex justify-between gap-2">
+            <dt>{t("f_phone", lang)}</dt>
+            <dd className="font-mono" dir="ltr">{row.phone}</dd>
+          </div>
+        )}
+      </dl>
+
+      <div className="flex items-center justify-between gap-2 pt-1 mt-auto">
+        <Link
+          to="/portal/book"
+          search={{ forDependent: row.id }}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-white"
+          style={{ background: "var(--portal-gradient)" }}
+        >
+          <CalendarPlus className="h-3.5 w-3.5" />
+          {t("book_for", lang)}
+        </Link>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onEdit}
+            className="h-8 w-8 rounded-full grid place-items-center hover:bg-slate-100 text-[color:var(--portal-ink-2)]"
+            aria-label={t("edit", lang)}
+            title={t("edit", lang)}
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button
+            onClick={onDelete}
+            className="h-8 w-8 rounded-full grid place-items-center hover:bg-red-50 text-red-600"
+            aria-label={t("delete", lang)}
+            title={t("delete", lang)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- form dialog ---------------- */
+
+type FormState = {
+  full_name: string;
+  relationship: Dependent["relationship"] | "";
+  gender: "" | "male" | "female";
+  date_of_birth: string;
+  national_id: string;
+  phone: string;
+};
+
+const EMPTY: FormState = {
+  full_name: "",
+  relationship: "",
+  gender: "",
+  date_of_birth: "",
+  national_id: "",
+  phone: "",
+};
+
+const ERROR_KEY: Record<string, keyof typeof T> = {
+  name_too_short: "e_name_too_short",
+  name_too_long: "e_name_too_long",
+  national_id_invalid: "e_nid",
+  phone_invalid: "e_phone",
+  date_invalid: "e_date",
+};
+
+function DependentDialog({
+  lang,
+  mode,
+  initial,
+  onClose,
+}: {
+  lang: Lang;
+  mode: "add" | "edit";
+  initial: Dependent | null;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const [form, setForm] = useState<FormState>(
+    initial
+      ? {
+          full_name: initial.full_name,
+          relationship: initial.relationship,
+          gender: (initial.gender as FormState["gender"]) ?? "",
+          date_of_birth: initial.date_of_birth ?? "",
+          national_id: initial.national_id ?? "",
+          phone: initial.phone ?? "",
+        }
+      : EMPTY,
+  );
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+
+  const mut = useMutation({
+    mutationFn: async (payload: FormState) => {
+      const data = {
+        full_name: payload.full_name.trim(),
+        relationship: payload.relationship as Dependent["relationship"],
+        gender: payload.gender || null,
+        date_of_birth: payload.date_of_birth || null,
+        national_id: payload.national_id.trim() || null,
+        phone: payload.phone.trim() || null,
+      };
+      if (mode === "edit" && initial) {
+        return updateDependent({ data: { id: initial.id, ...data } });
+      }
+      return createDependent({ data });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
+      toast.success(mode === "edit" ? T.f_name[lang] + " ✓" : T.form_add_title[lang]);
+      onClose();
+    },
+    onError: (err: unknown) => {
+      const msg = err instanceof Error ? err.message : String(err);
+      // Map validator errors from Zod payload
+      const found = Object.keys(ERROR_KEY).find((k) => msg.includes(k));
+      if (found) {
+        // best-effort field mapping
+        const field: keyof FormState =
+          found === "national_id_invalid" ? "national_id"
+          : found === "phone_invalid" ? "phone"
+          : found === "date_invalid" ? "date_of_birth"
+          : "full_name";
+        setErrors((e) => ({ ...e, [field]: T[ERROR_KEY[found]][lang] }));
+      } else {
+        toast.error(T.e_generic[lang]);
+      }
+    },
+  });
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const nextErrors: Partial<Record<keyof FormState, string>> = {};
+    if (form.full_name.trim().length < 2) nextErrors.full_name = T.e_name_too_short[lang];
+    if (!form.relationship) nextErrors.relationship = T.e_relationship[lang];
+    if (form.national_id && !/^\d{10}$/.test(form.national_id.trim()))
+      nextErrors.national_id = T.e_nid[lang];
+    if (form.phone && !/^(?:\+?966|0)?5\d{8}$/.test(form.phone.trim()))
+      nextErrors.phone = T.e_phone[lang];
+    if (form.date_of_birth && !/^\d{4}-\d{2}-\d{2}$/.test(form.date_of_birth))
+      nextErrors.date_of_birth = T.e_date[lang];
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+    mut.mutate(form);
+  }
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="sm:max-w-lg" dir={lang === "ar" ? "rtl" : "ltr"}>
+        <DialogHeader>
+          <DialogTitle>
+            {mode === "edit" ? t("form_edit_title", lang) : t("form_add_title", lang)}
+          </DialogTitle>
+          <DialogDescription>{t("form_desc", lang)}</DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={submit} className="grid gap-4">
+          <Field label={t("f_name", lang)} error={errors.full_name}>
+            <Input
+              value={form.full_name}
+              onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+              autoFocus
+              required
+              maxLength={120}
+            />
+          </Field>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("f_relationship", lang)} error={errors.relationship}>
+              <Select
+                value={form.relationship || undefined}
+                onValueChange={(v) =>
+                  setForm({ ...form, relationship: v as Dependent["relationship"] })
+                }
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder={t("choose", lang)} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="child">{t("r_child", lang)}</SelectItem>
+                  <SelectItem value="spouse">{t("r_spouse", lang)}</SelectItem>
+                  <SelectItem value="parent">{t("r_parent", lang)}</SelectItem>
+                  <SelectItem value="sibling">{t("r_sibling", lang)}</SelectItem>
+                  <SelectItem value="other">{t("r_other", lang)}</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field
+              label={`${t("f_gender", lang)} — ${t("optional", lang)}`}
+              error={undefined}
+            >
+              <Select
+                value={form.gender || undefined}
+                onValueChange={(v) =>
+                  setForm({ ...form, gender: v as FormState["gender"] })
+                }
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder={t("choose", lang)} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="male">{t("g_male", lang)}</SelectItem>
+                  <SelectItem value="female">{t("g_female", lang)}</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field
+              label={`${t("f_dob", lang)} — ${t("optional", lang)}`}
+              error={errors.date_of_birth}
+            >
+              <Input
+                type="date"
+                value={form.date_of_birth}
+                onChange={(e) => setForm({ ...form, date_of_birth: e.target.value })}
+                max={new Date().toISOString().slice(0, 10)}
+              />
+            </Field>
+            <Field
+              label={`${t("f_nid", lang)} — ${t("optional", lang)}`}
+              error={errors.national_id}
+            >
+              <Input
+                value={form.national_id}
+                onChange={(e) => setForm({ ...form, national_id: e.target.value })}
+                inputMode="numeric"
+                maxLength={10}
+                dir="ltr"
+                placeholder="1XXXXXXXXX"
+              />
+            </Field>
+          </div>
+
+          <Field
+            label={`${t("f_phone", lang)} — ${t("optional", lang)}`}
+            error={errors.phone}
+          >
+            <Input
+              value={form.phone}
+              onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              inputMode="tel"
+              maxLength={14}
+              dir="ltr"
+              placeholder="05XXXXXXXX"
+            />
+          </Field>
+
+          <DialogFooter className="gap-2">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={onClose}
+              disabled={mut.isPending}
+            >
+              {t("cancel", lang)}
+            </Button>
+            <Button
+              type="submit"
+              disabled={mut.isPending}
+              className="rounded-full text-white font-semibold px-6"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              {mut.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+                  {t("saving", lang)}
+                </>
+              ) : (
+                t("save", lang)
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function Field({
+  label,
+  error,
+  children,
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="grid gap-1.5">
+      <Label className="text-xs">{label}</Label>
+      {children}
+      {error && <p className="text-xs text-red-600">{error}</p>}
+    </div>
+  );
+}
+
+/* ---------------- delete dialog ---------------- */
+
+function DeleteDialog({
+  lang,
+  row,
+  onClose,
+}: {
+  lang: Lang;
+  row: Dependent | null;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const mut = useMutation({
+    mutationFn: (id: string) => deleteDependent({ data: { id } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
+      toast.success(T.del_ok[lang]);
+      onClose();
+    },
+    onError: () => toast.error(T.e_generic[lang]),
+  });
+  return (
+    <AlertDialog open={!!row} onOpenChange={(o) => !o && onClose()}>
+      <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{T.del_title[lang]}</AlertDialogTitle>
+          <AlertDialogDescription>
+            <span className="font-semibold text-foreground">{row?.full_name}</span>
+            <br />
+            {T.del_body[lang]}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={mut.isPending}>
+            {T.cancel[lang]}
+          </AlertDialogCancel>
+          <AlertDialogAction
+            disabled={mut.isPending}
+            onClick={(e) => {
+              e.preventDefault();
+              if (row) mut.mutate(row.id);
+            }}
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
+            {mut.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+                {T.saving[lang]}
+              </>
+            ) : (
+              T.del_ok[lang]
+            )}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+/* ---------------- error boundary ---------------- */
+
+function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  return (
+    <div className="glass-card max-w-md mx-auto p-8 text-center">
+      <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
+        <AlertTriangle className="h-7 w-7" />
+      </div>
+      <h3 className="text-lg font-bold">تعذّر تحميل الصفحة</h3>
+      <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 break-words">
+        {error.message || "خطأ غير متوقع."}
+      </p>
+      <button
+        onClick={() => {
+          router.invalidate();
+          reset();
+        }}
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        style={{ background: "var(--portal-gradient)" }}
+      >
+        <RefreshCw className="h-4 w-4" />
+        إعادة المحاولة
+      </button>
+    </div>
+  );
+}
