@@ -353,31 +353,32 @@ html.reduce-motion *::after {
    Dark navy shell + glassmorphism + cyan/blue gradients
    ============================================================ */
 :root {
-  --cc-bg-1: #0b1220;
-  --cc-bg-2: #0f1a2e;
-  --cc-surface: rgba(255, 255, 255, 0.04);
-  --cc-surface-strong: rgba(255, 255, 255, 0.07);
-  --cc-border: rgba(255, 255, 255, 0.08);
-  --cc-border-strong: rgba(255, 255, 255, 0.14);
-  --cc-fg: #e6edf7;
-  --cc-fg-muted: rgba(230, 237, 247, 0.62);
-  --cc-fg-dim: rgba(230, 237, 247, 0.42);
-  --cc-primary: #0f6cbd;
-  --cc-cyan: #1cc8ee;
-  --cc-success: #22c55e;
-  --cc-warning: #f59e0b;
-  --cc-danger: #ef4444;
-  --cc-gradient-primary: linear-gradient(135deg, #0f6cbd 0%, #1cc8ee 100%);
-  --cc-gradient-panel: linear-gradient(180deg, rgba(28, 200, 238, 0.08), rgba(15, 108, 189, 0.02));
-  --cc-gradient-emergency: linear-gradient(135deg, rgba(239, 68, 68, 0.18), rgba(245, 158, 11, 0.06));
-  --cc-shadow-glass: 0 10px 40px -12px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
-  --cc-shadow-elevated: 0 24px 60px -20px rgba(15, 108, 189, 0.4);
+  /* Command Center — retuned to the light teal palette. */
+  --cc-bg-1: #FCFDFB;
+  --cc-bg-2: #F1F6F5;
+  --cc-surface: rgba(255, 255, 255, 0.85);
+  --cc-surface-strong: rgba(255, 255, 255, 0.95);
+  --cc-border: #DCEAE8;
+  --cc-border-strong: #C7DAD6;
+  --cc-fg: #173B42;
+  --cc-fg-muted: #3A555B;
+  --cc-fg-dim: #64777C;
+  --cc-primary: #075E63;
+  --cc-cyan: #0B8585;
+  --cc-success: #16A34A;
+  --cc-warning: #D97706;
+  --cc-danger: #C0392B;
+  --cc-gradient-primary: linear-gradient(135deg, #075E63 0%, #0B8585 100%);
+  --cc-gradient-panel: linear-gradient(180deg, rgba(11, 133, 133, 0.06), rgba(7, 94, 99, 0.02));
+  --cc-gradient-emergency: linear-gradient(135deg, rgba(192, 57, 43, 0.10), rgba(217, 119, 6, 0.05));
+  --cc-shadow-glass: 0 6px 24px -14px rgba(7, 94, 99, 0.20), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  --cc-shadow-elevated: 0 24px 60px -20px rgba(7, 94, 99, 0.28);
 }
 
 .cc-shell {
   background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(28, 200, 238, 0.12), transparent 60%),
-    radial-gradient(900px 500px at 110% 10%, rgba(15, 108, 189, 0.14), transparent 55%),
+    radial-gradient(1200px 600px at 15% -10%, rgba(11, 133, 133, 0.10), transparent 60%),
+    radial-gradient(900px 500px at 110% 10%, rgba(199, 164, 107, 0.08), transparent 55%),
     linear-gradient(180deg, var(--cc-bg-1) 0%, var(--cc-bg-2) 100%);
   color: var(--cc-fg);
   min-height: 100vh;
@@ -386,17 +387,27 @@ html.reduce-motion *::after {
 .cc-glass {
   background: var(--cc-surface);
   border: 1px solid var(--cc-border);
-  backdrop-filter: blur(18px) saturate(140%);
-  border-radius: 1.5rem;
+  backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 1.25rem;
   box-shadow: var(--cc-shadow-glass);
 }
 .cc-glass-strong {
   background: var(--cc-surface-strong);
   border: 1px solid var(--cc-border-strong);
-  backdrop-filter: blur(18px) saturate(140%);
-  border-radius: 1.5rem;
+  backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 1.25rem;
   box-shadow: var(--cc-shadow-glass);
 }
+
+/* Neutralize legacy white-on-dark inline utilities used inside the admin
+   shell so they read correctly on the new light surface. */
+.cc-shell [class*="bg-white/"] { background-color: rgba(11, 133, 133, 0.05) !important; }
+.cc-shell [class*="hover:bg-white/"]:hover { background-color: rgba(11, 133, 133, 0.08) !important; }
+.cc-shell .text-white { color: var(--cc-fg) !important; }
+.cc-shell .hover\:text-white:hover { color: var(--cc-primary) !important; }
+.cc-shell .border-white\/10,
+.cc-shell .border-white\/20 { border-color: var(--cc-border) !important; }
+
 
 .cc-gradient-text {
   background: var(--cc-gradient-primary);
