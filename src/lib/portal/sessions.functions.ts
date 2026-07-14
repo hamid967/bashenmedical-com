@@ -103,7 +103,7 @@ const RevokeSchema = z.object({ sessionId: z.string().uuid() });
 
 export const revokeMySession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => RevokeSchema.parse(input))
+  .validator((input: unknown) => RevokeSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { userId } = context;
 

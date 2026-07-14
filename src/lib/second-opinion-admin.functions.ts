@@ -18,7 +18,7 @@ async function assertAdmin(ctx: { supabase: any; userId: string }) {
 
 export const listSecondOpinionRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { status?: SecondOpinionStatus | "all" } | undefined) =>
+  .validator((input: { status?: SecondOpinionStatus | "all" } | undefined) =>
     z
       .object({ status: z.enum([...STATUSES, "all"]).optional() })
       .optional()
@@ -38,7 +38,7 @@ export const listSecondOpinionRequests = createServerFn({ method: "GET" })
 
 export const updateSecondOpinionRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { id: string; status?: SecondOpinionStatus; admin_notes?: string | null }) =>
+  .validator((input: { id: string; status?: SecondOpinionStatus; admin_notes?: string | null }) =>
     z
       .object({
         id: z.string().uuid(),
@@ -63,7 +63,7 @@ export const updateSecondOpinionRequest = createServerFn({ method: "POST" })
 
 export const getSecondOpinionAttachmentUrls = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { paths: string[] }) =>
+  .validator((input: { paths: string[] }) =>
     z.object({ paths: z.array(z.string()).max(50) }).parse(input),
   )
   .handler(async ({ data, context }) => {

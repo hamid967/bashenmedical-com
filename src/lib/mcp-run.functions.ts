@@ -19,7 +19,7 @@ export type RunToolResult = {
  */
 export const runMcpTool = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { toolName: string; args: Record<string, unknown> }) => input)
+  .validator((input: { toolName: string; args: Record<string, unknown> }) => input)
   .handler(async ({ data, context }): Promise<RunToolResult> => {
     const tool = (mcp as unknown as { tools: Array<{ name: string; handler: Function }> }).tools.find(
       (t) => t.name === data.toolName,

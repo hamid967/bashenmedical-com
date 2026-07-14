@@ -47,7 +47,7 @@ export type MyOrderDetails = {
 
 export const getMyOrderDetails = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         kind: z.enum([

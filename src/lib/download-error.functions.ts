@@ -29,7 +29,7 @@ export type DownloadErrorReport = z.infer<typeof DownloadErrorPayload>;
 
 export const logDownloadError = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => DownloadErrorPayload.parse(input))
+  .validator((input: unknown) => DownloadErrorPayload.parse(input))
   .handler(async ({ data, context }) => {
     // Structured single-line JSON so log search + parsing stays simple.
     // Namespaced with a stable prefix so it's easy to grep in worker logs.

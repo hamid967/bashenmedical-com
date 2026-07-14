@@ -31,7 +31,7 @@ const ACTIONS = [
 ] as const;
 
 export const logAuthEvent = createServerFn({ method: "POST" })
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         action: z.enum(ACTIONS),

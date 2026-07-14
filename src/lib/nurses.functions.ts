@@ -60,7 +60,7 @@ export type NurseCall = {
 // ---------- Nurses ----------
 export const listNurses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { branchId?: string | null } | undefined) => d ?? {})
+  .validator((d: { branchId?: string | null } | undefined) => d ?? {})
   .handler(async ({ data, context }) => {
     let q = context.supabase.from("nurses" as never).select("*").order("full_name");
     if (data.branchId) q = q.eq("branch_id", data.branchId);
@@ -83,7 +83,7 @@ const NurseInput = z.object({
 
 export const upsertNurse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => NurseInput.parse(d))
+  .validator((d: unknown) => NurseInput.parse(d))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     if (id) {
@@ -102,7 +102,7 @@ export const upsertNurse = createServerFn({ method: "POST" })
 
 export const deleteNurse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("nurses" as never).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -118,7 +118,7 @@ const ShiftRangeInput = z.object({
 
 export const listShifts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ShiftRangeInput.parse(d))
+  .validator((d: unknown) => ShiftRangeInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("nurse_shifts" as never)
@@ -146,7 +146,7 @@ const ShiftInput = z.object({
 
 export const upsertShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ShiftInput.parse(d))
+  .validator((d: unknown) => ShiftInput.parse(d))
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     if (id) {
@@ -169,7 +169,7 @@ export const upsertShift = createServerFn({ method: "POST" })
 
 export const deleteShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("nurse_shifts" as never).delete().eq("id", data.id);
     if (error) throw new Error(error.message);
@@ -186,7 +186,7 @@ const CallListInput = z
 
 export const listCalls = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => CallListInput.parse(d))
+  .validator((d: unknown) => CallListInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("nurse_calls" as never)
@@ -212,7 +212,7 @@ const CreateCallInput = z.object({
 
 export const createCall = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => CreateCallInput.parse(d))
+  .validator((d: unknown) => CreateCallInput.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("nurse_calls" as never)
@@ -231,7 +231,7 @@ const UpdateCallInput = z.object({
 
 export const updateCallStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpdateCallInput.parse(d))
+  .validator((d: unknown) => UpdateCallInput.parse(d))
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = { status: data.status };
     if (data.assigned_nurse_id !== undefined) patch.assigned_nurse_id = data.assigned_nurse_id;

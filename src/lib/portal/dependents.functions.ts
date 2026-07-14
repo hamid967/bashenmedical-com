@@ -79,7 +79,7 @@ export const listDependents = createServerFn({ method: "GET" })
 
 export const getDependent = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -98,7 +98,7 @@ export const getDependent = createServerFn({ method: "GET" })
 
 export const createDependent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => BaseSchema.parse(raw))
+  .validator((raw: unknown) => BaseSchema.parse(raw))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
@@ -122,7 +122,7 @@ export const createDependent = createServerFn({ method: "POST" })
 
 export const updateDependent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     BaseSchema.extend({ id: z.string().uuid() }).parse(raw),
   )
   .handler(async ({ context, data }) => {
@@ -150,7 +150,7 @@ export const updateDependent = createServerFn({ method: "POST" })
 
 export const deleteDependent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
+  .validator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { error } = await supabase
@@ -178,7 +178,7 @@ export type DependentAppointment = {
 
 export const listDependentAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z
       .object({
         dependent_id: z.string().uuid(),
@@ -247,7 +247,7 @@ export const listDependentAppointments = createServerFn({ method: "POST" })
  */
 export const countDependentAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({ dependent_id: z.string().uuid() }).parse(raw),
   )
   .handler(
@@ -307,7 +307,7 @@ export const countDependentAppointments = createServerFn({ method: "POST" })
  */
 export const cancelDependentActiveAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((raw: unknown) =>
+  .validator((raw: unknown) =>
     z.object({ dependent_id: z.string().uuid() }).parse(raw),
   )
   .handler(async ({ context, data }): Promise<{ cancelled: number }> => {

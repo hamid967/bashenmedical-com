@@ -73,7 +73,7 @@ const FileInput = z.object({ id: z.string().uuid() });
 
 export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileInput.parse(i))
+  .validator((i: unknown) => FileInput.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -152,7 +152,7 @@ export type MyMedicalReportDetail = MyMedicalReport & {
 
 export const getMyMedicalReportDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileInput.parse(i))
+  .validator((i: unknown) => FileInput.parse(i))
   .handler(async ({ context, data }): Promise<MyMedicalReportDetail> => {
     const { supabase, userId } = context;
 
@@ -215,7 +215,7 @@ const VersionInput = z.object({
 
 export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => VersionInput.parse(i))
+  .validator((i: unknown) => VersionInput.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -311,7 +311,7 @@ const DownloadsInput = z.object({
 
 export const listMyReportDownloads = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => DownloadsInput.parse(i ?? {}))
+  .validator((i: unknown) => DownloadsInput.parse(i ?? {}))
   .handler(async ({ context, data }): Promise<MyReportDownloadEntry[]> => {
     const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

@@ -81,7 +81,7 @@ const UpdateSchema = z.object({
 
 export const updateMessagingConfig = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpdateSchema.parse(d))
+  .validator((d: unknown) => UpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
     ensureAdmin(await getRoles(context.supabase, context.userId));
     const { error } = await context.supabase

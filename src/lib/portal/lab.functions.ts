@@ -59,7 +59,7 @@ const FileSchema = z.object({ path: z.string().min(1).max(1024) });
 
 export const getLabFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => FileSchema.parse(i))
+  .validator((i: unknown) => FileSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patientRes = await supabase
@@ -105,7 +105,7 @@ const ShareSchema = z.object({
 
 export const shareLabWithDoctor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ShareSchema.parse(i))
+  .validator((i: unknown) => ShareSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
 

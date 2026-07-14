@@ -68,7 +68,7 @@ const claimSchema = z.object({
 
 export const claimMyInquiry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => claimSchema.parse(input))
+  .validator((input: unknown) => claimSchema.parse(input))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const { data: rows, error } = await supabase.rpc("claim_service_inquiry", {

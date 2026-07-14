@@ -73,7 +73,7 @@ export type PatientRow = {
 
 export const listPatientsAdvanced = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => ListInput.parse(d))
+  .validator((d) => ListInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -157,7 +157,7 @@ const UpdateStatusInput = z.object({
 
 export const updatePatientStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => UpdateStatusInput.parse(d))
+  .validator((d) => UpdateStatusInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -204,7 +204,7 @@ const BulkStatusInput = z.object({
 
 export const bulkUpdatePatientStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => BulkStatusInput.parse(d))
+  .validator((d) => BulkStatusInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -241,7 +241,7 @@ const UpdateTagsInput = z.object({
 
 export const updatePatientTags = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => UpdateTagsInput.parse(d))
+  .validator((d) => UpdateTagsInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -284,7 +284,7 @@ const SoftDeleteInput = z.object({
 
 export const softDeletePatient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => SoftDeleteInput.parse(d))
+  .validator((d) => SoftDeleteInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -327,7 +327,7 @@ export const softDeletePatient = createServerFn({ method: "POST" })
 
 export const restorePatient = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => SoftDeleteInput.parse(d))
+  .validator((d) => SoftDeleteInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;

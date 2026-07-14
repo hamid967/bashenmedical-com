@@ -45,7 +45,7 @@ const STATUS_LABEL_AR: Record<string, string> = {
 
 export const getPatientsAiSummary = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => Input.parse(d))
+  .validator((d) => Input.parse(d))
   .handler(async ({ data, context }): Promise<AiSummary> => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("مفتاح الذكاء الاصطناعي غير مهيأ.");

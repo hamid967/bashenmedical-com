@@ -24,7 +24,7 @@ function humanize(err: any) {
 
 export const listReportDownloadAudit = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => filterSchema.parse(d ?? {}))
+  .validator((d: unknown) => filterSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const { data: rls } = await supabase

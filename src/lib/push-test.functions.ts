@@ -42,7 +42,7 @@ type DeliveryResult = {
 
 export const sendTestPushToMe = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => TestPushInput.parse(d ?? {}))
+  .validator((d: unknown) => TestPushInput.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const privateKey = process.env.VAPID_PRIVATE_KEY;
     const publicKey = process.env.VAPID_PUBLIC_KEY;

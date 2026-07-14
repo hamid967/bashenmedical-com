@@ -15,7 +15,7 @@ const SaveInput = z.object({
 
 export const savePushSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => SaveInput.parse(d))
+  .validator((d: unknown) => SaveInput.parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("push_subscriptions").upsert(
       {
@@ -37,7 +37,7 @@ const DeleteInput = z.object({ endpoint: z.string().url().max(2000) });
 
 export const deletePushSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => DeleteInput.parse(d))
+  .validator((d: unknown) => DeleteInput.parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("push_subscriptions")

@@ -46,7 +46,7 @@ const UpdateProfileSchema = z.object({
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => UpdateProfileSchema.parse(input))
+  .validator((input: unknown) => UpdateProfileSchema.parse(input))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { data: updated, error } = await supabase

@@ -73,7 +73,7 @@ export const listUsersWithRoles = createServerFn({ method: "GET" })
 
 export const assignRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         user_id: z.string().uuid(),
@@ -97,7 +97,7 @@ export const assignRole = createServerFn({ method: "POST" })
 
 export const revokeRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -148,7 +148,7 @@ export const listRolePermissionsMatrix = createServerFn({ method: "GET" })
 
 export const setRolePermission = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         role: z.enum(ROLES),
@@ -184,7 +184,7 @@ export type RolePermissionAuditRow = {
 
 export const listRolePermissionAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         limit: z.number().int().min(1).max(500).default(100),
@@ -242,7 +242,7 @@ const importSchema = z.object({
 
 export const importRolePermissions = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => importSchema.parse(d))
+  .validator((d: unknown) => importSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { supabase } = context;
     const myRoles = await getRoles(supabase, context.userId);
@@ -367,7 +367,7 @@ const auditFilterSchema = z.object({
 
 export const listAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => auditFilterSchema.parse(d ?? {}))
+  .validator((d: unknown) => auditFilterSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const roles = await getRoles(supabase, userId);
@@ -491,7 +491,7 @@ function extractTargets(row: any): {
 
 export const listRbacAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => rbacAuditFilterSchema.parse(d ?? {}))
+  .validator((d: unknown) => rbacAuditFilterSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const roles = await getRoles(supabase, userId);

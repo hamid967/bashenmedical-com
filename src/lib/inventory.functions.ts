@@ -114,7 +114,7 @@ const LowStockInput = z.object({
 
 export const listLowStockAlerts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => LowStockInput.parse(d))
+  .validator((d: unknown) => LowStockInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase.from("inventory_items" as never)
       .select("id,name_ar,branch_id,quantity,min_stock,unit")
@@ -156,7 +156,7 @@ const PRListInput = z.object({
 
 export const listPurchaseRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PRListInput.parse(d))
+  .validator((d: unknown) => PRListInput.parse(d))
   .handler(async ({ data, context }) => {
     let q = context.supabase.from("purchase_requests" as never)
       .select("*")
@@ -215,7 +215,7 @@ const PRCreateInput = z.object({
 
 export const createPurchaseRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PRCreateInput.parse(d))
+  .validator((d: unknown) => PRCreateInput.parse(d))
   .handler(async ({ data, context }) => {
     const request_no = `PR-${Date.now().toString(36).toUpperCase()}`;
     const { data: pr, error } = await context.supabase.from("purchase_requests" as never)
@@ -254,7 +254,7 @@ const PRUpdateStatusInput = z.object({
 
 export const updatePurchaseRequestStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => PRUpdateStatusInput.parse(d))
+  .validator((d: unknown) => PRUpdateStatusInput.parse(d))
   .handler(async ({ data, context }) => {
     const patch: Record<string, unknown> = {
       status: data.status,
@@ -297,7 +297,7 @@ export const updatePurchaseRequestStatus = createServerFn({ method: "POST" })
 
 export const deletePurchaseRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("purchase_requests" as never)
       .delete().eq("id", data.id);

@@ -191,7 +191,7 @@ const PlanInput = z.object({
 
 export const generateMedicationReminders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => PlanInput.parse(i ?? {}))
+  .validator((i: unknown) => PlanInput.parse(i ?? {}))
   .handler(async ({ context, data }): Promise<ReminderPlan> => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("مفتاح الذكاء الاصطناعي غير مهيأ.");
@@ -411,7 +411,7 @@ const ConfirmInput = z.object({ id: z.string().uuid(), taken: z.boolean().defaul
 
 export const confirmMedicationReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => ConfirmInput.parse(i))
+  .validator((i: unknown) => ConfirmInput.parse(i))
   .handler(async ({ context, data }): Promise<{ ok: true; taken_at: string | null }> => {
     const { supabase, userId } = context;
     const takenAt = data.taken ? new Date().toISOString() : null;
@@ -542,7 +542,7 @@ const PrefsInput = z.object({
 
 export const saveReminderPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((i: unknown) => PrefsInput.parse(i))
+  .validator((i: unknown) => PrefsInput.parse(i))
   .handler(async ({ context, data }): Promise<ReminderPreferences> => {
     const { supabase, userId } = context;
     const { data: row, error } = await supabase

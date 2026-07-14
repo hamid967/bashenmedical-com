@@ -46,7 +46,7 @@ export type AppointmentReportRow = {
 
 export const getAppointmentsReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => RangeInput.parse(d))
+  .validator((d) => RangeInput.parse(d))
   .handler(async ({ data, context }): Promise<AppointmentReportRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -103,7 +103,7 @@ export type DoctorOccupancyRow = {
 
 export const getDoctorOccupancyReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => OccupancyInput.parse(d))
+  .validator((d) => OccupancyInput.parse(d))
   .handler(async ({ data, context }): Promise<DoctorOccupancyRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -139,7 +139,7 @@ export type PharmacyOrderRow = {
 
 export const getPharmacyOrdersReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => RangeInput.parse(d))
+  .validator((d) => RangeInput.parse(d))
   .handler(async ({ data, context }): Promise<PharmacyOrderRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -188,7 +188,7 @@ export type PatientReportRow = {
 
 export const getPatientsReport = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => PatientsInput.parse(d))
+  .validator((d) => PatientsInput.parse(d))
   .handler(async ({ data, context }): Promise<PatientReportRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;

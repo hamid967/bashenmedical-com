@@ -9,7 +9,7 @@ import { z } from "zod";
  */
 export const getAttachmentSignedUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { path: string; expiresIn?: number }) =>
+  .validator((d: { path: string; expiresIn?: number }) =>
     z
       .object({
         path: z.string().min(1).max(500),
@@ -33,7 +33,7 @@ export const getAttachmentSignedUrl = createServerFn({ method: "POST" })
  */
 export const generateMrn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: { branchId: string }) =>
+  .validator((d: { branchId: string }) =>
     z.object({ branchId: z.string().uuid() }).parse(d),
   )
   .handler(async ({ data, context }) => {

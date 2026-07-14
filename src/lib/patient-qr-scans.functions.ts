@@ -14,7 +14,7 @@ const LogInput = z.object({
 
 export const logPatientQrScan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => LogInput.parse(d))
+  .validator((d) => LogInput.parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -38,7 +38,7 @@ export type PatientQrScanRow = {
 
 export const listPatientQrScans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ patientId: z.string().uuid(), limit: z.number().int().min(1).max(200).default(50) }).parse(d))
+  .validator((d) => z.object({ patientId: z.string().uuid(), limit: z.number().int().min(1).max(200).default(50) }).parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -69,7 +69,7 @@ export const listPatientQrScans = createServerFn({ method: "POST" })
 
 export const getPatientQrScanCount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ patientId: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ patientId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;

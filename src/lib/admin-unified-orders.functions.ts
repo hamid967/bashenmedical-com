@@ -49,7 +49,7 @@ const KINDS: readonly OrderTableKind[] = [
 
 export const listAllUnifiedOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         kinds: z
