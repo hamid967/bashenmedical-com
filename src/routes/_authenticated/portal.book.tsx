@@ -104,7 +104,16 @@ function toYMD(d: Date) {
 function BookPage() {
   const { data: options } = useSuspenseQuery(optionsQuery);
   const { data: profile } = useSuspenseQuery(profileQuery);
+  const { forDependent } = Route.useSearch();
   const qc = useQueryClient();
+
+  const dependentQ = useQuery({
+    queryKey: ["portal", "dependent", forDependent],
+    queryFn: () => getDependent({ data: { id: forDependent! } }),
+    enabled: !!forDependent,
+    staleTime: 60_000,
+  });
+  const dependent = dependentQ.data ?? null;
 
   const [branchId, setBranchId] = useState<string>(profile?.default_branch_id ?? "");
   const [specialtyId, setSpecialtyId] = useState<string>("");
@@ -115,11 +124,23 @@ function BookPage() {
   const [reason, setReason] = useState("");
   const [patientName, setPatientName] = useState(profile?.full_name ?? "");
   const [patientPhone, setPatientPhone] = useState(profile?.phone ?? "");
+  const [patientNationalId, setPatientNationalId] = useState<string>("");
+  const [patientGender, setPatientGender] = useState<"" | "male" | "female">("");
   const [confirmed, setConfirmed] = useState<null | {
     id: string;
     date: string;
     time: string;
   }>(null);
+
+  // When a dependent is selected via query param, prefill the patient fields
+  // with their info (and keep them in sync if the dependent switches).
+  useEffect(() => {
+    if (!dependent) return;
+    setPatientName(dependent.full_name);
+    setPatientPhone(dependent.phone ?? profile?.phone ?? "");
+    setPatientNationalId(dependent.national_id ?? "");
+    setPatientGender((dependent.gender as "" | "male" | "female") ?? "");
+  }, [dependent, profile?.phone]);
 
   const doctors = useMemo(() => {
     return options.doctors.filter((d) => {
