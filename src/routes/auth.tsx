@@ -470,7 +470,7 @@ function AuthPage() {
           <div className="relative flex items-center mb-5">
             <div className="flex-grow border-t border-white/10" />
             <span className="mx-4 text-[10px] text-white/40 uppercase tracking-[0.2em]">
-              {channel === "email" ? "أو عبر البريد" : "أو عبر الجوال"}
+              {channel === "email" ? "أو عبر البريد وكلمة المرور" : "أو عبر رمز تحقق (OTP)"}
             </span>
             <div className="flex-grow border-t border-white/10" />
           </div>
@@ -486,23 +486,24 @@ function AuthPage() {
                   : "text-white/50 hover:text-white"
               }`}
             >
-              <Mail className="h-3.5 w-3.5" /> البريد
+              <Lock className="h-3.5 w-3.5" /> بريد + كلمة مرور
             </button>
             <button
               type="button"
               onClick={() => {
-                setChannel("phone");
+                setChannel("otp");
                 setOtpStep("enter");
               }}
               className={`h-9 rounded-lg text-xs font-semibold inline-flex items-center justify-center gap-1.5 transition ${
-                channel === "phone"
+                channel === "otp"
                   ? "bg-[#1FAEFF] text-white shadow-[0_4px_15px_rgba(31,174,255,0.35)]"
                   : "text-white/50 hover:text-white"
               }`}
             >
-              <Phone className="h-3.5 w-3.5" /> الجوال + OTP
+              <KeyRound className="h-3.5 w-3.5" /> رمز OTP
             </button>
           </div>
+
 
           {channel === "email" ? (
             <form onSubmit={handleSubmit} className="relative space-y-4">
