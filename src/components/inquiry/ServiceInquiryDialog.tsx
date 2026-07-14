@@ -236,11 +236,26 @@ export function ServiceInquiryDialog({
       const body = (await res.json().catch(() => ({}))) as {
         ok?: boolean;
         request_number?: string;
+        link_token?: string;
         message?: string;
       };
       if (!res.ok || !body.ok || !body.request_number) {
         toast.error(body.message ?? "تعذّر إرسال الطلب. حاول مرة أخرى.", { id: toastId });
         return;
+      }
+
+      // Persist the one-time link token so the portal can auto-claim
+      // this inquiry once the patient signs in.
+      if (body.link_token) {
+        try {
+          const KEY = "bmc:pending_inquiry_links";
+          const prev = JSON.parse(localStorage.getItem(KEY) ?? "[]") as Array<{ request_number: string; link_token: string }>;
+          const next = [
+            { request_number: body.request_number, link_token: body.link_token },
+            ...prev.filter((r) => r.request_number !== body.request_number),
+          ].slice(0, 20);
+          localStorage.setItem(KEY, JSON.stringify(next));
+        } catch { /* ignore */ }
       }
 
       const svc = services.find((s) => s.id === form.service_id);
