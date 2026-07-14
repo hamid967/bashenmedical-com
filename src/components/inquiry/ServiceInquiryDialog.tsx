@@ -606,13 +606,13 @@ function ConfirmationView({
         </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">
           <a
-            href={`/auth?intent=link_inquiry&ref=${encodeURIComponent(c.request_number)}&tab=signup`}
+            href={`/auth?redirect=${encodeURIComponent(`/portal/inquiries?ref=${c.request_number}`)}`}
             className="inline-flex items-center justify-center rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             أنشئ حسابك لمتابعة الطلب
           </a>
           <a
-            href={`/auth?intent=link_inquiry&ref=${encodeURIComponent(c.request_number)}&tab=signin`}
+            href={`/auth?redirect=${encodeURIComponent(`/portal/inquiries?ref=${c.request_number}`)}`}
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-3 py-2 text-sm font-semibold hover:bg-muted"
           >
             لدي حساب بالفعل
