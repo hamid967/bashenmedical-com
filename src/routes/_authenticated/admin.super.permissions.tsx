@@ -550,7 +550,7 @@ function SuperPermissionsPage() {
           <tbody>
             {grouped.length === 0 && (
               <tr>
-                <td colSpan={ALL_ROLES.length + 1} className="py-10 text-center text-muted-foreground">
+                <td colSpan={visibleRoles.length + 1} className="py-10 text-center text-muted-foreground">
                   لا توجد نتائج مطابقة.
                 </td>
               </tr>
