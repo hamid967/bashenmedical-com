@@ -1,17 +1,19 @@
 import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
-// Doctors hero — matches Baeshen Medical Company reference design
-import heroAvif from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&format=avif&as=srcset";
-import heroWebp from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&format=webp&as=srcset";
-import heroJpg from "@/assets/baeshen-hero-doctors.jpg?w=1600&format=jpg";
-import heroMobileAvif from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&format=avif&as=srcset";
-import heroMobileWebp from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&format=webp&as=srcset";
-import heroMobileJpg from "@/assets/baeshen-hero-doctors.jpg?w=800&format=jpg";
+// Doctors hero — responsive srcset with per-format quality tuning for smaller payloads.
+// AVIF ~48q / WebP ~68q / JPEG ~72q keep visual fidelity while dropping bytes 40–60%.
+import heroAvif from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&quality=48&format=avif&as=srcset";
+import heroWebp from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&quality=68&format=webp&as=srcset";
+import heroJpg from "@/assets/baeshen-hero-doctors.jpg?w=1280&quality=72&format=jpg";
+import heroMobileAvif from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&quality=50&format=avif&as=srcset";
+import heroMobileWebp from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&quality=70&format=webp&as=srcset";
+import heroMobileJpg from "@/assets/baeshen-hero-doctors.jpg?w=800&quality=72&format=jpg";
 import { CalendarCheck, Phone } from "lucide-react";
 import { MedicalMotifs } from "./MedicalMotifs";
 
-const DESKTOP_SIZES = "100vw";
-const MOBILE_SIZES = "100vw";
+// Viewport-aware sizes hint so the browser picks the smallest source that fits.
+const DESKTOP_SIZES = "(min-width: 1600px) 1600px, (min-width: 1280px) 1280px, 100vw";
+const MOBILE_SIZES = "(min-width: 640px) 800px, 100vw";
 const MOBILE_MEDIA = "(max-width: 767px)";
 
 export function HeroComplex() {
