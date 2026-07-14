@@ -355,6 +355,11 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     line-height: 1.9; text-align: justify; text-justify: inter-word;
     page-break-inside: avoid; break-inside: avoid;
   }
+  /* Tighter widow/orphan and split rules to avoid content being cut across pages. */
+  .hd, .amount, .note, .grid tr {
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .grid { orphans: 3; widows: 3; }
 
   @media print {
     body { background: #fff; }
@@ -363,6 +368,8 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     .sheet-wrap { transform: none !important; }
     .sheet { width: auto; min-height: 0; padding: 0; box-shadow: none; border-radius: 0; }
     .rtl-badge { display: none; }
+    /* Inline .ft is hidden in print — per-page footer is drawn by @page @bottom-* margin boxes. */
+    .ft { display: none !important; }
     a { color: inherit; text-decoration: none; }
   }
   @media (max-width: 820px) {
