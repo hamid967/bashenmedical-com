@@ -153,7 +153,12 @@ const T = {
     ar: "لن يتم حذف السجلات الطبية المرتبطة بهذا الفرد إن وُجدت. يمكنك إعادة إضافته لاحقًا.",
     en: "Existing linked medical records won't be deleted. You can add them again later.",
   },
-  del_ok:           { ar: "تأكيد الحذف", en: "Delete" },
+  del_warning: {
+    ar: "هذا الإجراء لا يمكن التراجع عنه. سيتم إزالة الفرد من قائمة عائلتك فورًا.",
+    en: "This action cannot be undone. The member will be removed from your family list immediately.",
+  },
+  del_ok:           { ar: "نعم، احذف", en: "Yes, delete" },
+  del_keep:         { ar: "لا، احتفظ به", en: "No, keep it" },
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
   e_name_too_long:  { ar: "الاسم طويل جدًا.", en: "Name is too long." },
