@@ -299,15 +299,15 @@ export const requestFollowUp = createServerFn({ method: "POST" })
       scope.patientId
         ? supabase
             .from("patients")
-            .select("full_name_ar, phone_e164, email")
+            .select("full_name_ar, phone, email")
             .eq("id", scope.patientId)
             .maybeSingle()
-        : Promise.resolve({ data: null }),
+        : Promise.resolve({ data: null as { full_name_ar: string; phone: string; email: string | null } | null }),
     ]);
 
     const patient_name =
       patient?.full_name_ar || profile?.full_name || "مريض";
-    const patient_phone = patient?.phone_e164 || profile?.phone || appt.patient_phone;
+    const patient_phone = patient?.phone || profile?.phone || appt.patient_phone;
 
     const insertRes = await supabase
       .from("appointments")
