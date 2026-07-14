@@ -604,6 +604,7 @@ function NewRefundDrawer({
 }) {
   const qc = useQueryClient();
   const { data: paysRes, isLoading } = useQuery(paymentsQuery);
+  const { data: refundsRes } = useQuery(refundsQuery);
   const requestFn = useServerFn(requestRefund);
 
   // Only refundable, non-mock payments
@@ -625,6 +626,39 @@ function NewRefundDrawer({
     [refundable, paymentId],
   );
 
+  // Deductions breakdown for the selected payment
+  const breakdown = useMemo(() => {
+    if (!selected) return null;
+    const gross = Number(selected.amount ?? 0);
+    const rows = (refundsRes?.refunds ?? []).filter((r) => r.payment_id === selected.id);
+    const sumBy = (statuses: string[]) =>
+      rows
+        .filter((r) => statuses.includes(r.status))
+        .reduce((s, r) => s + Number(r.amount ?? 0), 0);
+    const processed = sumBy(["processed"]);
+    const inFlight = sumBy(["pending", "approved"]);
+    const deducted = processed + inFlight;
+    const available = Math.max(0, gross - deducted);
+    const pendingCount = rows.filter((r) => r.status === "pending").length;
+    const approvedCount = rows.filter((r) => r.status === "approved").length;
+    const processedCount = rows.filter((r) => r.status === "processed").length;
+    return {
+      gross,
+      processed,
+      inFlight,
+      available,
+      pendingCount,
+      approvedCount,
+      processedCount,
+      hasHistory: rows.length > 0,
+    };
+  }, [selected, refundsRes?.refunds]);
+
+  const amountNum = amount ? Number(amount) : NaN;
+  const exceedsMax =
+    !!breakdown && !Number.isNaN(amountNum) && amountNum > breakdown.available + 0.01;
+  const noAvailable = !!breakdown && breakdown.available <= 0;
+
   const mutation = useMutation({
     mutationFn: () =>
       requestFn({
@@ -642,7 +676,12 @@ function NewRefundDrawer({
     onError: (e: any) => toast.error(e?.message ?? "تعذّر إرسال الطلب"),
   });
 
-  const canSubmit = !!paymentId && reason.trim().length >= 3 && !mutation.isPending;
+  const canSubmit =
+    !!paymentId &&
+    reason.trim().length >= 3 &&
+    !mutation.isPending &&
+    !exceedsMax &&
+    !noAvailable;
 
   return (
     <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
