@@ -473,6 +473,80 @@ function SuperPermissionsPage() {
         ملاحظة: <b>super_admin</b> يمتلك كامل الصلاحيات ولا يمكن تعديله. تعديل صلاحيات
         <b> admin</b> يتطلب أن تكون super_admin. تُسجَّل جميع التغييرات في سجل التدقيق.
       </p>
+
+      <Dialog open={importOpen} onOpenChange={setImportOpen}>
+        <DialogContent dir="rtl" className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>استيراد مصفوفة الصلاحيات من CSV</DialogTitle>
+            <DialogDescription>
+              اختر ملف CSV بنفس صيغة التصدير (أعمدة: <code>permission_key</code> ثم أعمدة الأدوار
+              بقيم 1/0). لن يتم تعديل دور <b>super_admin</b>. يتطلب تعديل دور <b>admin</b> صلاحية
+              super_admin.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">وضع التطبيق</label>
+              <Select value={importMode} onValueChange={(v) => setImportMode(v as any)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="merge">
+                    دمج — إضافة الصلاحيات المفعّلة فقط (لا يُلغى شيء)
+                  </SelectItem>
+                  <SelectItem value="replace">
+                    استبدال — مطابقة كاملة (يُلغى ما ليس في الملف)
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">ملف CSV</label>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleFilePicked(f);
+                }}
+                className="block w-full text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border file:border-border file:bg-muted file:text-foreground"
+              />
+              {importFileName && (
+                <p className="text-xs text-muted-foreground">
+                  الملف: <span className="font-mono">{importFileName}</span>
+                </p>
+              )}
+              {importError && (
+                <p className="text-xs text-destructive">{importError}</p>
+              )}
+              {importPayload && (
+                <div className="rounded-md border border-border bg-muted/30 p-2 text-xs">
+                  معاينة: {Object.keys(importPayload).length} دور،{" "}
+                  {Object.values(importPayload).reduce((a, b) => a + b.length, 0)} صلاحية مُفعّلة.
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setImportOpen(false)} disabled={importing}>
+              إلغاء
+            </Button>
+            <Button
+              onClick={handleConfirmImport}
+              disabled={!importPayload || importing}
+              className="gap-1.5"
+            >
+              {importing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              تطبيق الاستيراد
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
