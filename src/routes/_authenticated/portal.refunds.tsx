@@ -455,6 +455,9 @@ function PortalRefundsPage() {
       {selected && (
         <RefundDetailsDrawer r={selected} onClose={() => setDetailsId(null)} />
       )}
+      {receiptRefund && (
+        <ReceiptCustomizerModal r={receiptRefund} onClose={closeReceipt} />
+      )}
     </div>
   );
 }
