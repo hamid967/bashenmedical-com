@@ -16,7 +16,17 @@ import {
 } from "@/lib/portal/appointments.functions";
 
 type Scope = "upcoming" | "past";
-type ApptStatus = "new" | "confirmed" | "completed" | "cancelled" | "no_show";
+type ApptStatus =
+  | "new"
+  | "confirmed"
+  | "completed"
+  | "cancelled"
+  | "no_show"
+  | "held"
+  | "pending_verification"
+  | "pending_payment"
+  | "checked_in"
+  | "in_progress";
 
 const appointmentsQuery = (scope: Scope) =>
   queryOptions({
@@ -54,6 +64,11 @@ function statusMeta(s: ApptStatus) {
     completed: { label: "مكتمل", cls: "bg-slate-100 text-slate-700 border-slate-200" },
     cancelled: { label: "ملغى", cls: "bg-red-50 text-red-700 border-red-200" },
     no_show: { label: "لم يحضر", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+    held: { label: "محجوز مؤقتًا", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+    pending_verification: { label: "بانتظار التحقق", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    pending_payment: { label: "بانتظار الدفع", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+    checked_in: { label: "تم الحضور", cls: "bg-cyan-50 text-cyan-700 border-cyan-200" },
+    in_progress: { label: "قيد الكشف", cls: "bg-violet-50 text-violet-700 border-violet-200" },
   };
   return m[s] ?? { label: s, cls: "bg-slate-100 text-slate-700 border-slate-200" };
 }
@@ -127,7 +142,10 @@ function MyAppointmentsPage() {
   };
 
   const counts = useMemo(() => {
-    const c = { new: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0 } as Record<ApptStatus, number>;
+    const c: Record<ApptStatus, number> = {
+      new: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0,
+      held: 0, pending_verification: 0, pending_payment: 0, checked_in: 0, in_progress: 0,
+    };
     items.forEach((a) => { c[a.status as ApptStatus] = (c[a.status as ApptStatus] ?? 0) + 1; });
     return c;
   }, [items]);
