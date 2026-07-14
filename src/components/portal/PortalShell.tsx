@@ -26,6 +26,7 @@ import {
   Inbox,
 } from "lucide-react";
 import { useState } from "react";
+import { JazanPattern } from "@/components/jazan";
 
 type NavItem = { to: string; icon: typeof LayoutDashboard; label_ar: string; label_en: string };
 
@@ -89,7 +90,8 @@ export function PortalShell({
     <div dir={dir} className="portal-root portal-gradient-bg font-sans">
       <div className="min-h-dvh grid lg:grid-cols-[280px_1fr]">
         {/* Sidebar (desktop) */}
-        <aside className="hidden lg:flex flex-col border-e border-[color:var(--portal-border)] bg-white/80 backdrop-blur-xl sticky top-0 h-dvh">
+        <aside className="hidden lg:flex flex-col border-e border-[color:var(--portal-border)] bg-white/80 backdrop-blur-xl sticky top-0 h-dvh relative overflow-hidden">
+          <JazanPattern variant="subtle" orientation="vertical" className="absolute inset-y-0 end-0 w-6 opacity-40 pointer-events-none" />
           <SidebarBrand isAr={isAr} />
           <SidebarNav
             isAr={isAr}
@@ -102,7 +104,8 @@ export function PortalShell({
         {/* Main column */}
         <div className="flex flex-col min-w-0">
           {/* Topbar */}
-          <header className="sticky top-0 z-20 h-16 flex items-center gap-3 px-4 md:px-6 border-b border-[color:var(--portal-border)] bg-white/70 backdrop-blur-xl">
+          <header className="sticky top-0 z-20 h-16 flex items-center gap-3 px-4 md:px-6 border-b border-[color:var(--portal-border)] bg-white/70 backdrop-blur-xl relative">
+            <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 40%, var(--jazan-terracotta,#B85C3C) 60%, transparent)", opacity: 0.35 }} />
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden inline-grid place-items-center h-10 w-10 rounded-full hover:bg-[color:var(--portal-gradient-soft)]"
