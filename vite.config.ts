@@ -46,5 +46,45 @@ export default defineConfig({
   // Nitro emits a Netlify Functions bundle for SSR + server functions.
   // NITRO_PRESET=netlify in the CI env also wins if set.
   nitro: { preset: "netlify" },
-  plugins: [disableTanstackDevtoolsInjectSource(), imagetools(), mcpPlugin()],
+  plugins: [
+    disableTanstackDevtoolsInjectSource(),
+    imagetools(),
+    mcpPlugin(),
+    VitePWA({
+      strategies: "generateSW",
+      registerType: "autoUpdate",
+      injectRegister: null,
+      manifest: false, // we ship /site.webmanifest manually
+      filename: "sw.js",
+      devOptions: { enabled: false },
+      workbox: {
+        clientsClaim: true,
+        skipWaiting: true,
+        cleanupOutdatedCaches: true,
+        navigateFallback: "/",
+        navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/sw-push\.js$/, /^\/sw\.js$/],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,avif,woff2}"],
+        runtimeCaching: [
+          {
+            urlPattern: ({ request, sameOrigin }) => sameOrigin && request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "html-navigations",
+              networkTimeoutSeconds: 4,
+              expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 },
+            },
+          },
+          {
+            urlPattern: ({ url, sameOrigin }) =>
+              sameOrigin && /\.(?:js|css|woff2|png|jpg|jpeg|webp|avif|svg|ico)$/i.test(url.pathname),
+            handler: "CacheFirst",
+            options: {
+              cacheName: "static-assets",
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
+            },
+          },
+        ],
+      },
+    }),
+  ],
 });
