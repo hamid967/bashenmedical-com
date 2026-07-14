@@ -539,7 +539,7 @@ function SuperPermissionsPage() {
               <th className="sticky right-0 z-20 bg-muted/40 px-3 py-2 text-right min-w-[260px]">
                 الصلاحية
               </th>
-              {ALL_ROLES.map((r) => (
+              {visibleRoles.map((r) => (
                 <th key={r} className="px-2 py-2 text-center whitespace-nowrap">
                   <div className="text-xs font-semibold">{ROLE_LABEL[r]}</div>
                   <div className="text-[10px] font-mono text-muted-foreground">{r}</div>
