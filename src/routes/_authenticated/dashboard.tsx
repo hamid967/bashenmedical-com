@@ -436,10 +436,10 @@ function KpiCard({
 }) {
   const toneClass: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
-    success: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    info: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-    warning: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    danger: "bg-red-500/10 text-red-600 dark:text-red-400",
+    success: "bg-emerald-500/10 text-emerald-600",
+    info: "bg-teal-500/10 text-teal-700",
+    warning: "bg-amber-500/10 text-amber-700",
+    danger: "bg-red-500/10 text-red-600",
   };
   return (
     <div className="rounded-xl border border-border bg-card p-4 transition hover:shadow-sm">
