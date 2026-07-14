@@ -159,6 +159,20 @@ const T = {
   },
   del_ok:           { ar: "نعم، احذف", en: "Yes, delete" },
   del_keep:         { ar: "لا، احتفظ به", en: "No, keep it" },
+  del_counting:     { ar: "جارٍ التحقق من المواعيد المرتبطة…", en: "Checking linked appointments…" },
+  del_count_error:  { ar: "تعذّر التحقق من المواعيد المرتبطة.", en: "Could not check linked appointments." },
+  del_total_label:  { ar: "إجمالي المواعيد المرتبطة", en: "Total linked appointments" },
+  del_active_label: { ar: "مواعيد نشطة (قادمة/قيد التأكيد)", en: "Active appointments (upcoming/pending)" },
+  del_blocked_title:{ ar: "لا يمكن الحذف حاليًا", en: "Deletion currently blocked" },
+  del_blocked_body: {
+    ar: "يوجد لدى هذا الفرد مواعيد نشطة. الرجاء إلغاؤها أو إتمامها أولًا قبل حذفه.",
+    en: "This member has active appointments. Please cancel or complete them before deleting.",
+  },
+  del_history_note: {
+    ar: "توجد مواعيد سابقة لهذا الفرد. سيتم الاحتفاظ بسجلها ولن تُحذف.",
+    en: "This member has past appointments. Their history will be kept and not deleted.",
+  },
+
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
   e_name_too_long:  { ar: "الاسم طويل جدًا.", en: "Name is too long." },
