@@ -1008,8 +1008,13 @@ function NewRefundDrawer({
           amount: amount ? Number(amount) : undefined,
         },
       }),
-    onSuccess: () => {
-      toast.success("تم إرسال طلب الاسترداد. سيتم مراجعته من قبل قسم المحاسبة.");
+    onSuccess: (res: any) => {
+      const ref = res?.receipt_reference;
+      toast.success(
+        ref
+          ? `تم إرسال طلب الاسترداد. رقمك المرجعي: ${ref}`
+          : "تم إرسال طلب الاسترداد. سيتم مراجعته من قبل قسم المحاسبة.",
+      );
       qc.invalidateQueries({ queryKey: ["portal", "refunds"] });
       onClose();
     },
