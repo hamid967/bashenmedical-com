@@ -1054,14 +1054,40 @@ function DeleteDialog({
               )}
 
               {blocked && (
-                <div className="rounded-lg border border-red-300 bg-red-100/70 dark:bg-red-950/50 dark:border-red-800 p-3 flex items-start gap-2">
-                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 dark:text-red-300 shrink-0" aria-hidden />
-                  <div className="text-red-900 dark:text-red-100">
-                    <div className="font-semibold">{T.del_blocked_title[lang]}</div>
-                    <div className="mt-0.5">{T.del_blocked_body[lang]}</div>
+                <div className="rounded-lg border border-red-300 bg-red-100/70 dark:bg-red-950/50 dark:border-red-800 p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 dark:text-red-300 shrink-0" aria-hidden />
+                    <div className="text-red-900 dark:text-red-100">
+                      <div className="font-semibold">{T.del_blocked_title[lang]}</div>
+                      <div className="mt-0.5">{T.del_blocked_body[lang]}</div>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      if (!row || busy) return;
+                      if (window.confirm(T.del_cancel_confirm[lang])) {
+                        cancelMut.mutate(row.id);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-md border border-red-300 dark:border-red-800 bg-white/70 dark:bg-red-950/40 px-3 h-9 text-xs font-semibold text-red-800 dark:text-red-100 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {cancelMut.isPending ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        {T.del_cancelling[lang]}
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-3.5 w-3.5" />
+                        {T.del_cancel_active[lang]} ({activeCount})
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
+
               {hasHistory && (
                 <div className="text-xs text-muted-foreground">
                   {T.del_history_note[lang]}
