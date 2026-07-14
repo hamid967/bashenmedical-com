@@ -363,28 +363,32 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
         <div class="hd">
           <div style="min-width:0;flex:1">
             <div class="brand">إيصال طلب استرداد</div>
-            ${r.receipt_reference ? `<div class="sub">المرجع: <span class="ref">${r.receipt_reference}</span></div>` : ""}
-            <div class="sub">مستخرج بتاريخ <span class="num">${fmtDateTime(new Date().toISOString())}</span></div>
+            ${refDisplay ? `<div class="sub">المرجع: <span class="ref">${isolate(refDisplay)}</span></div>` : ""}
+            <div class="sub">مستخرج بتاريخ <span class="num">${isolate(nowDisplay)}</span></div>
           </div>
           <span class="badge">${meta.label}</span>
         </div>
         ${showHero ? `<div class="amount">
           <div>
             <div class="lbl">المبلغ المُسترد</div>
-            <div class="val num">${fmtSAR(r.amount, r.currency)}</div>
+            <div class="val num">${isolate(amountDisplay)}</div>
           </div>
           <div class="side">
             <div class="lbl">من دفعة أصلية</div>
-            <div class="val-sm num">${fmtSAR(r.payment_amount, r.currency)}</div>
+            <div class="val-sm num">${isolate(originalAmountDisplay)}</div>
           </div>
         </div>` : ""}
         ${rows.length ? `<table class="grid">
           ${rows.map(([k, v]) => {
             const safe = String(v).replace(/</g, "&lt;");
-            const isNumeric = /^[\d\s.,+\-/:%#SARر\.س]+$/.test(safe.trim()) && safe.trim().length > 0;
-            const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(safe.trim());
+            const trimmed = safe.trim();
+            // Detect tokens that must render as an atomic Arabic-Indic block:
+            // - references beginning with RF- or UUID-like
+            // - purely numeric / date / currency strings (Arabic-Indic or Western digits)
+            const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(trimmed);
+            const isNumeric = /^[\d\u0660-\u0669\s.,+\-/:%#SARر\.س]+$/.test(trimmed) && trimmed.length > 0;
             const cls = looksRef ? "ref" : isNumeric ? "num" : "";
-            const inner = cls ? `<span class="${cls}">${safe}</span>` : safe;
+            const inner = cls ? `<span class="${cls}">${isolate(safe)}</span>` : safe;
             return `<tr><td class="k">${k}</td><td class="v">${inner}</td></tr>`;
           }).join("")}
         </table>` : ""}
