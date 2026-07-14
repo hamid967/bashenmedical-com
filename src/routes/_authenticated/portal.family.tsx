@@ -1150,9 +1150,76 @@ function DeleteDialog({
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
+
+      {/* Second confirmation: cancelling active appointments */}
+      <AlertDialog
+        open={confirmCancel}
+        onOpenChange={(o) => {
+          if (!o && !cancelMut.isPending) setConfirmCancel(false);
+        }}
+      >
+        <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+              <AlertTriangle className="h-5 w-5" aria-hidden />
+              {T.del_cancel_confirm_title[lang]}
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3 text-sm">
+                <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/60 p-3 flex items-start gap-2">
+                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
+                  <div className="text-red-800 dark:text-red-200 font-medium">
+                    {T.del_cancel_confirm_warning[lang]}
+                  </div>
+                </div>
+                <div className="text-foreground">{T.del_cancel_confirm[lang]}</div>
+                <div className="rounded-lg border border-border bg-muted/40 p-3 flex items-center justify-between gap-3">
+                  <span className="text-muted-foreground">
+                    {T.del_active_label[lang]}
+                  </span>
+                  <span className="font-semibold tabular-nums text-red-600 dark:text-red-400">
+                    {activeCount}
+                  </span>
+                </div>
+                <div className="text-foreground">
+                  <span className="text-muted-foreground">{T.member_label[lang]} </span>
+                  <span className="font-semibold">{row?.full_name}</span>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={cancelMut.isPending}
+              className="font-semibold border-2"
+              autoFocus
+            >
+              {T.del_cancel_confirm_keep[lang]}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              disabled={cancelMut.isPending || !row}
+              onClick={(e) => {
+                e.preventDefault();
+                if (row && !cancelMut.isPending) cancelMut.mutate(row.id);
+              }}
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {cancelMut.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+                  {T.del_cancelling[lang]}
+                </>
+              ) : (
+                T.del_cancel_confirm_ok[lang]
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AlertDialog>
   );
 }
+
 
 
 /* ---------------- error boundary ---------------- */
