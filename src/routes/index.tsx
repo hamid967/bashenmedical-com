@@ -26,7 +26,7 @@ import {
   DoctorsSkeleton,
   SectionError,
 } from "@/components/home/HomeSkeletons";
-import ogHomeAsset from "@/assets/og-home.jpg.asset.json";
+import ogHomeAsset from "@/assets/og-home-bmc.jpg.asset.json";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE =
