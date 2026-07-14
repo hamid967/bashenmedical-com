@@ -581,8 +581,8 @@ function statusVisual(status: string): {
   if (s === "completed") return { cls: "bg-emerald-50 text-emerald-700", Icon: CheckCircle2 };
   if (s === "cancelled" || s === "canceled" || s === "no_show")
     return { cls: "bg-red-50 text-red-700", Icon: XCircle };
-  if (s === "confirmed") return { cls: "bg-sky-50 text-sky-700", Icon: CheckCircle2 };
-  if (s === "in_progress") return { cls: "bg-indigo-50 text-indigo-700", Icon: Clock3 };
+  if (s === "confirmed") return { cls: "bg-teal-50 text-teal-700", Icon: CheckCircle2 };
+  if (s === "in_progress") return { cls: "bg-teal-50 text-teal-700", Icon: Clock3 };
   return { cls: "bg-amber-50 text-amber-700", Icon: Clock3 };
 }
 

@@ -49,7 +49,7 @@ const fmtDate = (d: string) =>
 
 function statusMeta(s: ApptStatus) {
   const m: Record<ApptStatus, { label: string; cls: string }> = {
-    new: { label: "جديد", cls: "bg-sky-50 text-sky-700 border-sky-200" },
+    new: { label: "جديد", cls: "bg-teal-50 text-teal-700 border-teal-200" },
     confirmed: { label: "مؤكّد", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
     completed: { label: "مكتمل", cls: "bg-slate-100 text-slate-700 border-slate-200" },
     cancelled: { label: "ملغى", cls: "bg-red-50 text-red-700 border-red-200" },
@@ -294,7 +294,7 @@ function StatCard({
   label, value, tone,
 }: { label: string; value: number; tone: "sky" | "emerald" | "slate" | "red" | "amber" }) {
   const map = {
-    sky: "from-sky-50 to-sky-100/60 text-sky-700",
+    sky: "from-teal-50 to-teal-100/60 text-teal-700",
     emerald: "from-emerald-50 to-emerald-100/60 text-emerald-700",
     slate: "from-slate-50 to-slate-100/60 text-slate-700",
     red: "from-red-50 to-red-100/60 text-red-700",
