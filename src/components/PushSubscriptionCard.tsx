@@ -27,6 +27,10 @@ import {
   XCircle,
   RefreshCw,
   Activity,
+  Settings,
+  ExternalLink,
+  Info,
+  RotateCcw,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { sendTestPushToMe } from "@/lib/push-test.functions";
