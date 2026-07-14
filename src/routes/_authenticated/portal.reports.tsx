@@ -312,11 +312,65 @@ function ReportsPage() {
             );
           })}
         </div>
+
+        {/* Advanced filters */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 items-center">
+          <div>
+            <label className="text-[11px] text-muted-foreground block mb-1">من تاريخ</label>
+            <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground block mb-1">إلى تاريخ</label>
+            <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground block mb-1">المرفق</label>
+            <select
+              value={attachment}
+              onChange={(e) => setAttachment(e.target.value as AttachmentFilter)}
+              className="w-full h-9 rounded-md border bg-background px-2 text-sm"
+            >
+              <option value="all">الكل</option>
+              <option value="has_file">به ملف</option>
+              <option value="no_file">بدون ملف</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-[11px] text-muted-foreground block mb-1">المصدر</label>
+            <select
+              value={demo}
+              onChange={(e) => setDemo(e.target.value as DemoFilter)}
+              className="w-full h-9 rounded-md border bg-background px-2 text-sm"
+            >
+              <option value="all">الكل</option>
+              <option value="real">حقيقية فقط</option>
+              <option value="demo">تجريبية فقط</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Results summary */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <Badge variant="secondary" className="text-xs">
+            عرض <span className="mx-1 font-bold">{filtered.length}</span> من {reports.length} تقرير
+          </Badge>
+          {activeFilterCount > 0 && (
+            <>
+              <Badge variant="outline">{activeFilterCount} فلتر نشط</Badge>
+              <Button variant="ghost" size="sm" onClick={resetFilters} className="h-7 px-2 text-xs">
+                مسح الفلاتر
+              </Button>
+              <span className="text-muted-foreground">
+                يتم حفظ فلاترك تلقائيًا لهذا الجهاز.
+              </span>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Results */}
       {filtered.length === 0 ? (
-        <EmptyState hasReports={reports.length > 0} onReset={() => { setType("all"); setQ(""); }} />
+        <EmptyState hasReports={reports.length > 0} onReset={resetFilters} />
       ) : (
         <ul className="grid gap-3 md:grid-cols-2">
           {filtered.map((r) => {
