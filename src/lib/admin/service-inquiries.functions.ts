@@ -27,11 +27,6 @@ async function assertHasRole(
   return true;
 }
 
-async function ensureStaff(supabase: any, userId: string) {
-  await assertHasRole(supabase, userId, "admin");
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: any) => r.role as Role);
-}
 
 const STATUSES = [
   "new",
