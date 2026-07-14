@@ -28,6 +28,9 @@ import {
 } from "@/components/home/HomeSkeletons";
 import ogHomeAsset from "@/assets/og-home-bmc.jpg.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
+import { JazanSectionLabel } from "@/components/jazan/JazanSectionLabel";
+import { JazanDivider } from "@/components/jazan/JazanDivider";
+import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE =
