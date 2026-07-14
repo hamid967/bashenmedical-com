@@ -191,17 +191,22 @@ export const listInquiryAttachments = createServerFn({ method: "GET" })
 
     const { data: rows, error } = await supabase
       .from("service_inquiry_attachments")
-      .select("id, storage_path, file_name, content_type, size_bytes, uploaded_by, created_at")
+      .select(
+        "id, storage_path, file_name, content_type, size_bytes, uploaded_by, created_at, scan_status, scan_result, scan_completed_at",
+      )
       .eq("inquiry_id", data.inquiry_id)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
 
-    const paths = (rows ?? []).map((r: any) => r.storage_path);
-    let urlByPath = new Map<string, string>();
-    if (paths.length) {
+    // Only issue signed URLs for files that passed the scan.
+    const cleanPaths = (rows ?? [])
+      .filter((r: any) => r.scan_status === "clean")
+      .map((r: any) => r.storage_path);
+    const urlByPath = new Map<string, string>();
+    if (cleanPaths.length) {
       const { data: signed } = await supabase.storage
         .from(BUCKET)
-        .createSignedUrls(paths, SIGNED_URL_TTL_SECONDS);
+        .createSignedUrls(cleanPaths, SIGNED_URL_TTL_SECONDS);
       for (const s of signed ?? []) {
         if (s.path && s.signedUrl) urlByPath.set(s.path, s.signedUrl);
       }
@@ -213,6 +218,17 @@ export const listInquiryAttachments = createServerFn({ method: "GET" })
       size_bytes: r.size_bytes,
       created_at: r.created_at,
       uploaded_by: r.uploaded_by,
+      scan_status: r.scan_status as
+        | "pending"
+        | "scanning"
+        | "clean"
+        | "infected"
+        | "error",
+      scan_result: (r.scan_result ?? null) as {
+        reason?: string;
+        detections?: string[];
+      } | null,
+      scan_completed_at: r.scan_completed_at as string | null,
       download_url: urlByPath.get(r.storage_path) ?? null,
       expires_in: SIGNED_URL_TTL_SECONDS,
     }));
