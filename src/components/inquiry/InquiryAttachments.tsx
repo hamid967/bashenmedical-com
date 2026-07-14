@@ -2,12 +2,23 @@ import { useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Paperclip, Trash2, Upload, FileText, ImageIcon } from "lucide-react";
+import {
+  Loader2,
+  Paperclip,
+  Trash2,
+  Upload,
+  FileText,
+  ImageIcon,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldQuestion,
+} from "lucide-react";
 import {
   requestInquiryUploadUrl,
   registerInquiryAttachment,
   listInquiryAttachments,
   deleteInquiryAttachment,
+  scanInquiryAttachment,
   ATTACHMENT_LIMITS,
 } from "@/lib/inquiry/attachments.functions";
 
