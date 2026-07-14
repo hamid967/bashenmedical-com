@@ -153,7 +153,12 @@ const T = {
     ar: "لن يتم حذف السجلات الطبية المرتبطة بهذا الفرد إن وُجدت. يمكنك إعادة إضافته لاحقًا.",
     en: "Existing linked medical records won't be deleted. You can add them again later.",
   },
-  del_ok:           { ar: "تأكيد الحذف", en: "Delete" },
+  del_warning: {
+    ar: "هذا الإجراء لا يمكن التراجع عنه. سيتم إزالة الفرد من قائمة عائلتك فورًا.",
+    en: "This action cannot be undone. The member will be removed from your family list immediately.",
+  },
+  del_ok:           { ar: "نعم، احذف", en: "Yes, delete" },
+  del_keep:         { ar: "لا، احتفظ به", en: "No, keep it" },
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
   e_name_too_long:  { ar: "الاسم طويل جدًا.", en: "Name is too long." },
@@ -915,16 +920,33 @@ function DeleteDialog({
     <AlertDialog open={!!row} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
         <AlertDialogHeader>
-          <AlertDialogTitle>{T.del_title[lang]}</AlertDialogTitle>
-          <AlertDialogDescription>
-            <span className="font-semibold text-foreground">{row?.full_name}</span>
-            <br />
-            {T.del_body[lang]}
+          <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
+            <AlertTriangle className="h-5 w-5" aria-hidden />
+            {T.del_title[lang]}
+          </AlertDialogTitle>
+          <AlertDialogDescription asChild>
+            <div className="space-y-3 text-sm">
+              <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/60 p-3 flex items-start gap-2">
+                <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
+                <div className="text-red-800 dark:text-red-200 font-medium">
+                  {T.del_warning[lang]}
+                </div>
+              </div>
+              <div className="text-foreground">
+                <span className="text-muted-foreground">{lang === "ar" ? "الفرد:" : "Member:"} </span>
+                <span className="font-semibold">{row?.full_name}</span>
+              </div>
+              <div className="text-muted-foreground">{T.del_body[lang]}</div>
+            </div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={mut.isPending}>
-            {T.cancel[lang]}
+          <AlertDialogCancel
+            disabled={mut.isPending}
+            className="font-semibold border-2"
+            autoFocus
+          >
+            {T.del_keep[lang]}
           </AlertDialogCancel>
           <AlertDialogAction
             disabled={mut.isPending}
@@ -932,7 +954,7 @@ function DeleteDialog({
               e.preventDefault();
               if (row) mut.mutate(row.id);
             }}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white font-semibold"
           >
             {mut.isPending ? (
               <>
