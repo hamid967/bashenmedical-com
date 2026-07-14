@@ -19,7 +19,7 @@ const IntroOverlay = lazy(() =>
   import("@/components/IntroOverlay").then((m) => ({ default: m.IntroOverlay })),
 );
 import { ChatbotBubble } from "@/components/ChatbotBubble";
-import { WhatsAppFab } from "@/components/WhatsAppFab";
+import { FloatingWhatsAppButton } from "@/components/inquiry/FloatingWhatsAppButton";
 import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
 
 function NotFoundComponent() {
