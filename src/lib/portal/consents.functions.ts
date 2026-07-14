@@ -231,18 +231,8 @@ export type ConsentView = {
 
 /* --------------------------- helpers ---------------------------------- */
 
-async function resolvePatientId(
-  supabase: {
-    from: (t: "patients") => {
-      select: (c: string) => {
-        eq: (col: string, val: string) => {
-          maybeSingle: () => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
-        };
-      };
-    };
-  },
-  userId: string,
-): Promise<string> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function resolvePatientId(supabase: any, userId: string): Promise<string> {
   const { data, error } = await supabase
     .from("patients")
     .select("id")
@@ -254,7 +244,7 @@ async function resolvePatientId(
       "لم يتم ربط حسابك بملف مريض بعد. يُرجى إكمال ملفك الشخصي أو التواصل مع الاستقبال.",
     );
   }
-  return data.id;
+  return data.id as string;
 }
 
 /* --------------------------- server fns ------------------------------- */
