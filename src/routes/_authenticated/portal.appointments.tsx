@@ -85,6 +85,14 @@ function MyAppointmentsPage() {
   const [reschedFor, setReschedFor] = useState<null | { id: string; date: string; time: string; doctor?: string | null }>(null);
   const [cancelFor, setCancelFor] = useState<null | { id: string; doctor?: string | null; date: string; time: string }>(null);
   const [followFor, setFollowFor] = useState<null | { id: string; doctor?: string | null }>(null);
+  const [checkInResult, setCheckInResult] = useState<null | {
+    queue_number: number | null;
+    checked_in_at: string;
+    status: string;
+    already: boolean;
+    doctor?: string | null;
+    branch?: string | null;
+  }>(null);
 
   const q = useSuspenseQuery(appointmentsQuery(scope));
   const qc = useQueryClient();
