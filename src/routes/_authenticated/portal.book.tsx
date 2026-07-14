@@ -642,6 +642,122 @@ function BookPage() {
             <SummaryRow icon={<Clock className="h-4 w-4" />} label="الوقت" value={slot} />
           </div>
 
+          {/* Appointment cost & insurance eligibility */}
+          <div className="mt-5 rounded-2xl border border-[color:var(--portal-border)] bg-white p-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+              <h3 className="text-sm font-bold flex items-center gap-2">
+                <BadgeCheck className="h-4 w-4 text-[color:var(--portal-primary)]" />
+                تكلفة الموعد والتحقق من الأهلية
+              </h3>
+              <span className="text-xs text-[color:var(--portal-ink-2)]">اختياري — يساعدك في تقدير حصتك</span>
+            </div>
+
+            <div className="grid gap-3 md:grid-cols-2">
+              <div>
+                <Label className="text-xs mb-1 block">جهة التأمين</Label>
+                <Select value={providerId || undefined} onValueChange={(v) => setProviderId(v)}>
+                  <SelectTrigger className="bg-white">
+                    <SelectValue placeholder="اختر جهة التأمين" />
+                  </SelectTrigger>
+                  <SelectContent className="pointer-events-auto">
+                    {(options.providers ?? []).map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.name_ar}
+                        {typeof p.coverage_percent === "number" ? ` — تغطية ${p.coverage_percent}%` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs mb-1 block">رقم البوليصة (اختياري)</Label>
+                <Input
+                  value={policyNumber}
+                  onChange={(e) => setPolicyNumber(e.target.value)}
+                  placeholder="POL-123456"
+                  dir="ltr"
+                  className="bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => verifyMut.mutate()}
+                disabled={!providerId || verifyMut.isPending}
+                className="rounded-full"
+              >
+                {verifyMut.isPending ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 ml-1.5 animate-spin" /> جارٍ التحقق…
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="h-3.5 w-3.5 ml-1.5" />
+                    تحقّق من الأهلية
+                  </>
+                )}
+              </Button>
+              {selectedProvider && !verify && (
+                <span className="text-xs text-[color:var(--portal-ink-2)]">
+                  تغطية افتراضية: {selectedProvider.coverage_percent}%
+                </span>
+              )}
+            </div>
+
+            {verify && (
+              <div
+                className={`mt-3 rounded-xl border p-3 text-sm ${
+                  verify.eligible
+                    ? "border-emerald-500/40 bg-emerald-500/5 text-emerald-800"
+                    : "border-amber-500/40 bg-amber-500/5 text-amber-800"
+                }`}
+              >
+                <div className="font-semibold mb-1 flex items-center gap-2">
+                  {verify.eligible ? (
+                    <>
+                      <ShieldCheck className="h-4 w-4" /> التأمين مؤهل
+                    </>
+                  ) : (
+                    <>
+                      <ShieldAlert className="h-4 w-4" /> يحتاج مراجعة
+                    </>
+                  )}
+                </div>
+                <div className="text-xs opacity-90 mb-2">{verify.message}</div>
+                {verify.estimated_cost !== null && (
+                  <div className="grid grid-cols-2 gap-1 text-xs">
+                    <span className="opacity-80">قيمة الاستشارة:</span>
+                    <span className="font-mono text-left">{verify.estimated_cost} ر.س</span>
+                    {verify.coverage_percent !== null && (
+                      <>
+                        <span className="opacity-80">التغطية:</span>
+                        <span className="font-mono text-left">{verify.coverage_percent}%</span>
+                      </>
+                    )}
+                    {verify.covered_amount !== null && (
+                      <>
+                        <span className="opacity-80">المُغطّى:</span>
+                        <span className="font-mono text-left">{verify.covered_amount} ر.س</span>
+                      </>
+                    )}
+                    {verify.patient_share !== null && (
+                      <>
+                        <span className="opacity-80 font-semibold">حصة المريض:</span>
+                        <span className="font-mono text-left font-semibold">{verify.patient_share} ر.س</span>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+
+
           <div className="mt-5 flex items-center justify-between flex-wrap gap-3">
             <Badge variant="outline" className="text-xs">
               الحجز مبدئي — يخضع لتأكيد الاستقبال
