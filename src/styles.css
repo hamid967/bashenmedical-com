@@ -91,6 +91,21 @@
   --ring: #0B8585;
 }
 
+/* ============================================================
+   JAZAN HERITAGE — palette tokens (original, not the official emblem)
+   Used by JazanPattern, JazanDivider, JazanSectionLabel, JazanIconFrame,
+   AnnouncementBar, and other heritage-styled surfaces.
+   ============================================================ */
+:root {
+  --jazan-teal: #075E63;       /* deep medical teal */
+  --jazan-palm: #24745E;       /* palm green */
+  --jazan-ivory: #FCF9F2;      /* warm ivory */
+  --jazan-terracotta: #B85C3C; /* Jazan terracotta */
+  --jazan-sand: #E6D4B7;       /* sand */
+  --jazan-gold: #C7A46B;       /* muted gold */
+}
+
+
 
 @layer base {
   * {
