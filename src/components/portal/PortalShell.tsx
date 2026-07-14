@@ -47,6 +47,7 @@ const NAV: NavItem[] = [
   { to: "/portal/payments", icon: CreditCard, label_ar: "المدفوعات", label_en: "Payments" },
   { to: "/portal/refunds", icon: RotateCcw, label_ar: "طلبات الاسترداد", label_en: "Refunds" },
   { to: "/portal/notifications", icon: Bell, label_ar: "الإشعارات", label_en: "Notifications" },
+  { to: "/portal/reminder-preferences", icon: Bell, label_ar: "تفضيلات التنبيهات", label_en: "Reminder Preferences" },
   { to: "/portal/orders", icon: Inbox, label_ar: "طلباتي", label_en: "My Orders" },
   { to: "/portal/inquiries", icon: MessageSquareWarning, label_ar: "استفساراتي", label_en: "My Inquiries" },
   { to: "/portal/complaints", icon: MessageSquareWarning, label_ar: "الشكاوى والمقترحات", label_en: "Complaints" },
