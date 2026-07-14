@@ -1043,8 +1043,38 @@ function DeleteDialog({
 
 
   return (
-    <AlertDialog open={!!row} onOpenChange={(o) => !o && onClose()}>
-      <AlertDialogContent dir={lang === "ar" ? "rtl" : "ltr"}>
+    <AlertDialog
+      open={!!row}
+      onOpenChange={(o) => {
+        if (o) return;
+        if (busy) return; // don't close while a mutation is running
+        onClose();
+      }}
+    >
+      <AlertDialogContent
+        dir={lang === "ar" ? "rtl" : "ltr"}
+        aria-busy={busy}
+        aria-labelledby="dep-del-title"
+        aria-describedby="dep-del-desc"
+        onEscapeKeyDown={(e) => {
+          if (busy) e.preventDefault();
+        }}
+        onPointerDownOutside={(e) => {
+          if (busy) e.preventDefault();
+        }}
+        onInteractOutside={(e) => {
+          if (busy) e.preventDefault();
+        }}
+        onOpenAutoFocus={(e) => {
+          // Move initial focus to the safe (Cancel/keep) button
+          e.preventDefault();
+          const el = document.querySelector<HTMLButtonElement>(
+            '[data-dep-del-cancel="true"]',
+          );
+          el?.focus();
+        }}
+      >
+
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-2 text-red-700 dark:text-red-400">
             <AlertTriangle className="h-5 w-5" aria-hidden />
