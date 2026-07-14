@@ -169,6 +169,59 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
     }
 
 
+    // Outstanding invoices (unpaid / partially paid) for the linked patient
+    let outstandingInvoices: Array<{
+      id: string;
+      invoice_number: string | null;
+      total_amount: number | null;
+      paid_amount: number | null;
+      due_date: string | null;
+      status: string | null;
+    }> = [];
+    let outstandingTotal = 0;
+    if (patientId) {
+      const invRes = await supabase
+        .from("invoices")
+        .select("id, invoice_number, total_amount, paid_amount, due_date, status")
+        .eq("patient_id", patientId)
+        .in("status", ["unpaid", "partially_paid", "pending"])
+        .order("due_date", { ascending: true, nullsFirst: false })
+        .limit(5);
+      outstandingInvoices = (invRes.data ?? []) as typeof outstandingInvoices;
+      outstandingTotal = outstandingInvoices.reduce((sum, i) => {
+        const total = Number(i.total_amount ?? 0);
+        const paid = Number(i.paid_amount ?? 0);
+        return sum + Math.max(0, total - paid);
+      }, 0);
+    }
+
+    // Pending insurance approvals
+    let pendingInsurance: Array<{
+      id: string;
+      service: string | null;
+      provider_name: string | null;
+      status: string | null;
+      submitted_at: string | null;
+    }> = [];
+    if (patientId) {
+      const insRes = await supabase
+        .from("insurance_approvals")
+        .select("id, service, provider_name, status, submitted_at")
+        .eq("patient_id", patientId)
+        .in("status", ["submitted", "under_review", "additional_info_required", "draft"])
+        .order("submitted_at", { ascending: false, nullsFirst: false })
+        .limit: 5 as never; // placeholder fixed below
+      pendingInsurance = (insRes.data ?? []) as typeof pendingInsurance;
+    }
+
+    // Family members (dependents) — quick strip
+    const familyRes = await supabase
+      .from("dependents")
+      .select("id, full_name_ar, full_name_en, relationship, date_of_birth")
+      .eq("guardian_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(6);
+
     return {
       profile: profileRes.data,
       patient: patientRes.data,
@@ -182,5 +235,10 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
       unreadCount,
       recentLabs: labs,
       activeMedsCount,
+      outstandingInvoices,
+      outstandingTotal,
+      pendingInsurance,
+      pendingInsuranceCount: pendingInsurance.length,
+      family: familyRes.data ?? [],
     };
   });
