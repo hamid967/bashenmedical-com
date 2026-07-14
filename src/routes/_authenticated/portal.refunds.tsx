@@ -38,6 +38,7 @@ function isFinalized(status: string) {
 }
 
 type ReceiptFieldKey =
+  | "reference"
   | "request_id"
   | "invoice"
   | "status"
