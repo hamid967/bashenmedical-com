@@ -4199,7 +4199,9 @@ export type Database = {
           id: string
           insurance_provider_id: string | null
           internal_status: Database["public"]["Enums"]["service_inquiry_internal_status"]
+          link_token: string | null
           linked_appointment_id: string | null
+          linked_at: string | null
           mobile_e164: string
           mobile_number: string
           national_id: string | null
@@ -4230,7 +4232,9 @@ export type Database = {
           id?: string
           insurance_provider_id?: string | null
           internal_status?: Database["public"]["Enums"]["service_inquiry_internal_status"]
+          link_token?: string | null
           linked_appointment_id?: string | null
+          linked_at?: string | null
           mobile_e164: string
           mobile_number: string
           national_id?: string | null
@@ -4261,7 +4265,9 @@ export type Database = {
           id?: string
           insurance_provider_id?: string | null
           internal_status?: Database["public"]["Enums"]["service_inquiry_internal_status"]
+          link_token?: string | null
           linked_appointment_id?: string | null
+          linked_at?: string | null
           mobile_e164?: string
           mobile_number?: string
           national_id?: string | null
@@ -4613,6 +4619,13 @@ export type Database = {
       cancel_order_by_ref: {
         Args: { _kind: string; _phone: string; _reason?: string; _ref: string }
         Returns: Json
+      }
+      claim_service_inquiry: {
+        Args: { _link_token: string; _request_number: string }
+        Returns: {
+          id: string
+          request_number: string
+        }[]
       }
       dashboard_appointments_daily: {
         Args: { _branch_id?: string; _days?: number }
