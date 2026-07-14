@@ -3,6 +3,7 @@ import { Instagram, MapPin, Phone, Mail, Clock, ShieldCheck, Award, Siren } from
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
+import { JazanDivider, JazanPattern } from "@/components/jazan";
 
 const bmcLogo = bmcLogoAsset.url;
 
@@ -11,7 +12,9 @@ export function Footer() {
   const isAr = lang === "ar";
 
   return (
-    <footer className="mt-16 bg-gradient-to-b from-muted/40 to-muted/70 border-t border-border">
+    <footer className="mt-16 bg-gradient-to-b from-muted/40 to-muted/70 border-t border-border relative">
+      <JazanPattern variant="subtle" className="absolute inset-x-0 top-0 h-3 opacity-70 pointer-events-none" />
+      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B), var(--jazan-terracotta,#B85C3C), var(--jazan-gold,#C7A46B), transparent)", opacity: 0.45 }} />
       <div className="container-app py-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div>
@@ -111,6 +114,10 @@ export function Footer() {
             </a>
           </div>
         </div>
+      </div>
+
+      <div className="container-app">
+        <JazanDivider variant="subtle" className="my-0" />
       </div>
 
       <div className="border-t border-border">
