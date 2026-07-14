@@ -449,9 +449,7 @@ function HomePage() {
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
-              <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-                {isAr ? "التخصصات" : "Specialties"}
-              </div>
+              <JazanSectionLabel>{isAr ? "التخصصات" : "Specialties"}</JazanSectionLabel>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
                 {t("specialties_title")}
               </h2>
