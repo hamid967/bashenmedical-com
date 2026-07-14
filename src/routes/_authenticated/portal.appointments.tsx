@@ -16,7 +16,17 @@ import {
 } from "@/lib/portal/appointments.functions";
 
 type Scope = "upcoming" | "past";
-type ApptStatus = "new" | "confirmed" | "completed" | "cancelled" | "no_show";
+type ApptStatus =
+  | "new"
+  | "confirmed"
+  | "completed"
+  | "cancelled"
+  | "no_show"
+  | "held"
+  | "pending_verification"
+  | "pending_payment"
+  | "checked_in"
+  | "in_progress";
 
 const appointmentsQuery = (scope: Scope) =>
   queryOptions({
