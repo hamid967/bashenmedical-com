@@ -79,6 +79,7 @@ import { Route as AuthenticatedOrdersUnifiedRouteImport } from './routes/_authen
 import { Route as AuthenticatedNursesRouteImport } from './routes/_authenticated/nurses'
 import { Route as AuthenticatedNotificationsQueueRouteImport } from './routes/_authenticated/notifications-queue'
 import { Route as AuthenticatedMyRouteImport } from './routes/_authenticated/my'
+import { Route as AuthenticatedMessagingSettingsRouteImport } from './routes/_authenticated/messaging-settings'
 import { Route as AuthenticatedMessageTemplatesRouteImport } from './routes/_authenticated/message-templates'
 import { Route as AuthenticatedMcpStatusRouteImport } from './routes/_authenticated/mcp-status'
 import { Route as AuthenticatedInventoryManagementRouteImport } from './routes/_authenticated/inventory-management'
@@ -502,6 +503,12 @@ const AuthenticatedMyRoute = AuthenticatedMyRouteImport.update({
   path: '/my',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMessagingSettingsRoute =
+  AuthenticatedMessagingSettingsRouteImport.update({
+    id: '/messaging-settings',
+    path: '/messaging-settings',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMessageTemplatesRoute =
   AuthenticatedMessageTemplatesRouteImport.update({
     id: '/message-templates',
@@ -921,6 +928,7 @@ export interface FileRoutesByFullPath {
   '/inventory-management': typeof AuthenticatedInventoryManagementRoute
   '/mcp-status': typeof AuthenticatedMcpStatusRoute
   '/message-templates': typeof AuthenticatedMessageTemplatesRoute
+  '/messaging-settings': typeof AuthenticatedMessagingSettingsRoute
   '/my': typeof AuthenticatedMyRoute
   '/notifications-queue': typeof AuthenticatedNotificationsQueueRoute
   '/nurses': typeof AuthenticatedNursesRoute
@@ -1054,6 +1062,7 @@ export interface FileRoutesByTo {
   '/inventory-management': typeof AuthenticatedInventoryManagementRoute
   '/mcp-status': typeof AuthenticatedMcpStatusRoute
   '/message-templates': typeof AuthenticatedMessageTemplatesRoute
+  '/messaging-settings': typeof AuthenticatedMessagingSettingsRoute
   '/my': typeof AuthenticatedMyRoute
   '/notifications-queue': typeof AuthenticatedNotificationsQueueRoute
   '/nurses': typeof AuthenticatedNursesRoute
@@ -1189,6 +1198,7 @@ export interface FileRoutesById {
   '/_authenticated/inventory-management': typeof AuthenticatedInventoryManagementRoute
   '/_authenticated/mcp-status': typeof AuthenticatedMcpStatusRoute
   '/_authenticated/message-templates': typeof AuthenticatedMessageTemplatesRoute
+  '/_authenticated/messaging-settings': typeof AuthenticatedMessagingSettingsRoute
   '/_authenticated/my': typeof AuthenticatedMyRoute
   '/_authenticated/notifications-queue': typeof AuthenticatedNotificationsQueueRoute
   '/_authenticated/nurses': typeof AuthenticatedNursesRoute
@@ -1325,6 +1335,7 @@ export interface FileRouteTypes {
     | '/inventory-management'
     | '/mcp-status'
     | '/message-templates'
+    | '/messaging-settings'
     | '/my'
     | '/notifications-queue'
     | '/nurses'
@@ -1458,6 +1469,7 @@ export interface FileRouteTypes {
     | '/inventory-management'
     | '/mcp-status'
     | '/message-templates'
+    | '/messaging-settings'
     | '/my'
     | '/notifications-queue'
     | '/nurses'
@@ -1592,6 +1604,7 @@ export interface FileRouteTypes {
     | '/_authenticated/inventory-management'
     | '/_authenticated/mcp-status'
     | '/_authenticated/message-templates'
+    | '/_authenticated/messaging-settings'
     | '/_authenticated/my'
     | '/_authenticated/notifications-queue'
     | '/_authenticated/nurses'
@@ -2228,6 +2241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMyRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messaging-settings': {
+      id: '/_authenticated/messaging-settings'
+      path: '/messaging-settings'
+      fullPath: '/messaging-settings'
+      preLoaderRoute: typeof AuthenticatedMessagingSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/message-templates': {
       id: '/_authenticated/message-templates'
       path: '/message-templates'
@@ -2818,6 +2838,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedInventoryManagementRoute: typeof AuthenticatedInventoryManagementRoute
   AuthenticatedMcpStatusRoute: typeof AuthenticatedMcpStatusRoute
   AuthenticatedMessageTemplatesRoute: typeof AuthenticatedMessageTemplatesRoute
+  AuthenticatedMessagingSettingsRoute: typeof AuthenticatedMessagingSettingsRoute
   AuthenticatedMyRoute: typeof AuthenticatedMyRoute
   AuthenticatedNotificationsQueueRoute: typeof AuthenticatedNotificationsQueueRoute
   AuthenticatedNursesRoute: typeof AuthenticatedNursesRoute
@@ -2861,6 +2882,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedInventoryManagementRoute: AuthenticatedInventoryManagementRoute,
   AuthenticatedMcpStatusRoute: AuthenticatedMcpStatusRoute,
   AuthenticatedMessageTemplatesRoute: AuthenticatedMessageTemplatesRoute,
+  AuthenticatedMessagingSettingsRoute: AuthenticatedMessagingSettingsRoute,
   AuthenticatedMyRoute: AuthenticatedMyRoute,
   AuthenticatedNotificationsQueueRoute: AuthenticatedNotificationsQueueRoute,
   AuthenticatedNursesRoute: AuthenticatedNursesRoute,
