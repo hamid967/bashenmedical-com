@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import QRCode from "qrcode";
-import { AlertCircle, Bell, Calendar as CalIcon, CalendarPlus, CheckCircle2, ClipboardList, Download, MessageCircle, QrCode } from "lucide-react";
+import { AlertCircle, Bell, Calendar as CalIcon, CalendarPlus, CheckCircle2, ClipboardList, Clock, Download, MessageCircle, QrCode } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/site";
