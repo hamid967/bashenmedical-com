@@ -210,7 +210,7 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
         .eq("patient_id", patientId)
         .in("status", ["submitted", "under_review", "additional_info_required", "draft"])
         .order("submitted_at", { ascending: false, nullsFirst: false })
-        .limit: 5 as never; // placeholder fixed below
+        .limit(5);
       pendingInsurance = (insRes.data ?? []) as typeof pendingInsurance;
     }
 
