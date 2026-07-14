@@ -15,9 +15,11 @@ import {
   deleteDependent,
   listDependentAppointments,
   countDependentAppointments,
+  cancelDependentActiveAppointments,
   type Dependent,
   type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
+
 
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui/button";
@@ -174,6 +176,28 @@ const T = {
     ar: "توجد مواعيد سابقة لهذا الفرد. سيتم الاحتفاظ بسجلها ولن تُحذف.",
     en: "This member has past appointments. Their history will be kept and not deleted.",
   },
+  del_cancel_active: {
+    ar: "إلغاء المواعيد النشطة",
+    en: "Cancel active appointments",
+  },
+  del_cancel_confirm: {
+    ar: "سيتم إلغاء جميع المواعيد النشطة لهذا الفرد وتحرير حجوزاتها. هل تريد المتابعة؟",
+    en: "All active appointments for this member will be cancelled and their slots freed. Continue?",
+  },
+  del_cancel_success: {
+    ar: "تم إلغاء المواعيد النشطة. يمكنك الآن حذف الفرد.",
+    en: "Active appointments cancelled. You can now delete the member.",
+  },
+  del_cancel_none: {
+    ar: "لا توجد مواعيد نشطة لإلغائها.",
+    en: "No active appointments to cancel.",
+  },
+  del_cancel_error: {
+    ar: "تعذّر إلغاء المواعيد النشطة.",
+    en: "Could not cancel active appointments.",
+  },
+  del_cancelling: { ar: "جارٍ الإلغاء…", en: "Cancelling…" },
+
 
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
@@ -950,12 +974,34 @@ function DeleteDialog({
     },
     onError: () => toast.error(T.e_generic[lang]),
   });
+  const cancelMut = useMutation({
+    mutationFn: (dependent_id: string) =>
+      cancelDependentActiveAppointments({ data: { dependent_id } }),
+    onSuccess: (res) => {
+      if (res.cancelled > 0) {
+        toast.success(T.del_cancel_success[lang]);
+      } else {
+        toast.info(T.del_cancel_none[lang]);
+      }
+      if (row) {
+        qc.invalidateQueries({
+          queryKey: ["portal", "dependent-appt-count", row.id],
+        });
+        qc.invalidateQueries({
+          queryKey: ["portal", "dependent-appointments", row.id],
+        });
+      }
+    },
+    onError: () => toast.error(T.del_cancel_error[lang]),
+  });
 
   const activeCount = countQ.data?.active ?? 0;
   const totalCount = countQ.data?.total ?? 0;
   const blocked = activeCount > 0;
   const hasHistory = !blocked && totalCount > 0;
-  const canDelete = countQ.isSuccess && !blocked && !mut.isPending;
+  const busy = mut.isPending || cancelMut.isPending;
+  const canDelete = countQ.isSuccess && !blocked && !busy;
+
 
   return (
     <AlertDialog open={!!row} onOpenChange={(o) => !o && onClose()}>
@@ -1008,14 +1054,40 @@ function DeleteDialog({
               )}
 
               {blocked && (
-                <div className="rounded-lg border border-red-300 bg-red-100/70 dark:bg-red-950/50 dark:border-red-800 p-3 flex items-start gap-2">
-                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 dark:text-red-300 shrink-0" aria-hidden />
-                  <div className="text-red-900 dark:text-red-100">
-                    <div className="font-semibold">{T.del_blocked_title[lang]}</div>
-                    <div className="mt-0.5">{T.del_blocked_body[lang]}</div>
+                <div className="rounded-lg border border-red-300 bg-red-100/70 dark:bg-red-950/50 dark:border-red-800 p-3 space-y-2">
+                  <div className="flex items-start gap-2">
+                    <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 dark:text-red-300 shrink-0" aria-hidden />
+                    <div className="text-red-900 dark:text-red-100">
+                      <div className="font-semibold">{T.del_blocked_title[lang]}</div>
+                      <div className="mt-0.5">{T.del_blocked_body[lang]}</div>
+                    </div>
                   </div>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      if (!row || busy) return;
+                      if (window.confirm(T.del_cancel_confirm[lang])) {
+                        cancelMut.mutate(row.id);
+                      }
+                    }}
+                    className="inline-flex items-center gap-2 rounded-md border border-red-300 dark:border-red-800 bg-white/70 dark:bg-red-950/40 px-3 h-9 text-xs font-semibold text-red-800 dark:text-red-100 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {cancelMut.isPending ? (
+                      <>
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        {T.del_cancelling[lang]}
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="h-3.5 w-3.5" />
+                        {T.del_cancel_active[lang]} ({activeCount})
+                      </>
+                    )}
+                  </button>
                 </div>
               )}
+
               {hasHistory && (
                 <div className="text-xs text-muted-foreground">
                   {T.del_history_note[lang]}
@@ -1028,7 +1100,8 @@ function DeleteDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            disabled={mut.isPending}
+            disabled={busy}
+
             className="font-semibold border-2"
             autoFocus
           >

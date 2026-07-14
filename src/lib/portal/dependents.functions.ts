@@ -296,4 +296,63 @@ export const countDependentAppointments = createServerFn({ method: "POST" })
     },
   );
 
+/* -------------------- cancelDependentActiveAppointments -------------------- */
+
+/**
+ * Cancels every active (new/confirmed) appointment attached to the
+ * dependent and frees any linked availability slot. Used by the delete
+ * dialog so guardians can unblock deletion in one action.
+ */
+export const cancelDependentActiveAppointments = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw: unknown) =>
+    z.object({ dependent_id: z.string().uuid() }).parse(raw),
+  )
+  .handler(async ({ context, data }): Promise<{ cancelled: number }> => {
+    const { supabase, userId } = context;
+
+    const { data: dep, error: depErr } = await supabase
+      .from("dependents")
+      .select("id, patient_id")
+      .eq("id", data.dependent_id)
+      .eq("guardian_user_id", userId)
+      .maybeSingle();
+    if (depErr) throw new Error(depErr.message);
+    if (!dep) throw new Error("Not found");
+
+    const { supabaseAdmin } = await import(
+      "@/integrations/supabase/client.server"
+    );
+
+    const marker = `dependent:${dep.id}`;
+    let selectQ = supabaseAdmin
+      .from("appointments")
+      .select("id")
+      .in("status", ["new", "confirmed"]);
+    selectQ = dep.patient_id
+      ? selectQ.or(`notes.ilike.${marker}%,patient_id.eq.${dep.patient_id}`)
+      : selectQ.ilike("notes", `${marker}%`);
+
+    const { data: rows, error: selErr } = await selectQ;
+    if (selErr) throw new Error(selErr.message);
+    const ids = (rows ?? []).map((r) => r.id);
+    if (ids.length === 0) return { cancelled: 0 };
+
+    const nowIso = new Date().toISOString();
+    const { error: updErr } = await supabaseAdmin
+      .from("appointments")
+      .update({ status: "cancelled", cancelled_at: nowIso })
+      .in("id", ids);
+    if (updErr) throw new Error(updErr.message);
+
+    // Free any linked availability slots so the doctor's schedule reopens.
+    await supabaseAdmin
+      .from("availability_slots")
+      .update({ status: "available", appointment_id: null })
+      .in("appointment_id", ids);
+
+    return { cancelled: ids.length };
+  });
+
+
 
