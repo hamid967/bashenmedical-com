@@ -745,11 +745,11 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             </button>
             {isFinalized(r.status) && (
               <button
-                onClick={() => openRefundReceipt(r)}
+                onClick={() => setReceiptOpen(true)}
                 className="flex-1 h-11 rounded-full text-sm font-semibold border border-[color:var(--mag-line)] bg-white text-[color:var(--mag-ink-1)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center justify-center gap-2"
               >
                 <Download className="h-4 w-4" />
-                تنزيل الإيصال (PDF)
+                تخصيص وتنزيل الإيصال (PDF)
               </button>
             )}
             {canCancel && (
