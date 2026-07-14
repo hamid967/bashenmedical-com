@@ -116,6 +116,10 @@ export function Footer() {
         </div>
       </div>
 
+      <div className="container-app">
+        <JazanDivider variant="subtle" className="my-0" />
+      </div>
+
       <div className="border-t border-border">
         <div className="container-app py-4 text-xs text-muted-foreground flex flex-wrap items-center justify-between gap-2">
           <span>
