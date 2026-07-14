@@ -25,9 +25,42 @@ import {
   ShieldAlert,
   ShieldCheck,
   XCircle,
+  RefreshCw,
+  Activity,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { sendTestPushToMe } from "@/lib/push-test.functions";
+
+type SwWorkerInfo = { state: string; scriptURL: string } | null;
+type SwDiag = {
+  supported: boolean;
+  registered: boolean;
+  scope: string | null;
+  updateViaCache: string | null;
+  scriptURL: string | null;
+  active: SwWorkerInfo;
+  waiting: SwWorkerInfo;
+  installing: SwWorkerInfo;
+  controller: SwWorkerInfo;
+  lastUpdated: number | null;
+  lastEvent: string | null;
+  error: string | null;
+};
+
+const initialSwDiag: SwDiag = {
+  supported: false,
+  registered: false,
+  scope: null,
+  updateViaCache: null,
+  scriptURL: null,
+  active: null,
+  waiting: null,
+  installing: null,
+  controller: null,
+  lastUpdated: null,
+  lastEvent: null,
+  error: null,
+};
 
 type SubDetails = {
   endpoint: string;
@@ -56,7 +89,124 @@ export function PushSubscriptionCard() {
     url: "/portal/notifications",
     requireInteraction: false,
   });
+  const [swDiag, setSwDiag] = useState<SwDiag>(initialSwDiag);
+  const [swRefreshing, setSwRefreshing] = useState(false);
   const sendServer = useServerFn(sendTestPushToMe);
+
+  const inspectWorker = useCallback((w: ServiceWorker | null): SwWorkerInfo => {
+    if (!w) return null;
+    return { state: w.state, scriptURL: w.scriptURL };
+  }, []);
+
+  const readSwState = useCallback(
+    async (eventLabel?: string) => {
+      if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+        setSwDiag((prev) => ({ ...initialSwDiag, lastEvent: prev.lastEvent }));
+        return;
+      }
+      try {
+        const reg = await navigator.serviceWorker.getRegistration("/sw-push.js");
+        if (!reg) {
+          setSwDiag({
+            ...initialSwDiag,
+            supported: true,
+            lastEvent: eventLabel ?? null,
+            lastUpdated: Date.now(),
+          });
+          return;
+        }
+        const script =
+          reg.active?.scriptURL ||
+          reg.waiting?.scriptURL ||
+          reg.installing?.scriptURL ||
+          null;
+        setSwDiag({
+          supported: true,
+          registered: true,
+          scope: reg.scope,
+          updateViaCache: reg.updateViaCache ?? null,
+          scriptURL: script,
+          active: inspectWorker(reg.active),
+          waiting: inspectWorker(reg.waiting),
+          installing: inspectWorker(reg.installing),
+          controller: inspectWorker(navigator.serviceWorker.controller),
+          lastUpdated: Date.now(),
+          lastEvent: eventLabel ?? null,
+          error: null,
+        });
+      } catch (e) {
+        setSwDiag((prev) => ({
+          ...prev,
+          supported: true,
+          error: e instanceof Error ? e.message : "خطأ غير معروف",
+          lastUpdated: Date.now(),
+          lastEvent: eventLabel ?? prev.lastEvent,
+        }));
+      }
+    },
+    [inspectWorker],
+  );
+
+  // Subscribe to SW lifecycle changes to keep the diagnostic panel live.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    let cancelled = false;
+    let cleanupFns: Array<() => void> = [];
+
+    void (async () => {
+      await readSwState("initial");
+      const reg = await navigator.serviceWorker.getRegistration("/sw-push.js");
+      if (cancelled || !reg) return;
+
+      const attach = (w: ServiceWorker | null, label: string) => {
+        if (!w) return;
+        const handler = () => void readSwState(`${label}:${w.state}`);
+        w.addEventListener("statechange", handler);
+        cleanupFns.push(() => w.removeEventListener("statechange", handler));
+      };
+      attach(reg.installing, "installing");
+      attach(reg.waiting, "waiting");
+      attach(reg.active, "active");
+
+      const onUpdate = () => {
+        void readSwState("updatefound");
+        attach(reg.installing, "installing");
+      };
+      reg.addEventListener("updatefound", onUpdate);
+      cleanupFns.push(() => reg.removeEventListener("updatefound", onUpdate));
+
+      const onController = () => void readSwState("controllerchange");
+      navigator.serviceWorker.addEventListener("controllerchange", onController);
+      cleanupFns.push(() =>
+        navigator.serviceWorker.removeEventListener("controllerchange", onController),
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+      cleanupFns.forEach((fn) => fn());
+    };
+  }, [readSwState, push.subscribed]);
+
+  const forceSwUpdate = useCallback(async () => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    setSwRefreshing(true);
+    try {
+      const reg = await navigator.serviceWorker.getRegistration("/sw-push.js");
+      if (!reg) {
+        toast.error("لا يوجد Service Worker مسجّل");
+        return;
+      }
+      await reg.update();
+      await readSwState("manual-update");
+      toast.success("تم فحص التحديثات");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّر التحديث");
+    } finally {
+      setSwRefreshing(false);
+    }
+  }, [readSwState]);
+
 
   // Refresh subscription details whenever the subscribed state changes.
   useEffect(() => {
@@ -222,6 +372,11 @@ export function PushSubscriptionCard() {
         </div>
       )}
 
+      {/* Service Worker diagnostic panel */}
+      <SwDiagnosticPanel diag={swDiag} onRefresh={forceSwUpdate} refreshing={swRefreshing} />
+
+
+
       {/* Actions */}
       <div className="flex flex-wrap gap-2">
         {!push.subscribed ? (
@@ -371,3 +526,187 @@ function DetailRow({ label, value, onCopy }: { label: string; value: string; onC
     </div>
   );
 }
+
+function formatTime(ts: number | null): string {
+  if (!ts) return "—";
+  try {
+    return new Date(ts).toLocaleTimeString("ar-EG", { hour12: false });
+  } catch {
+    return new Date(ts).toISOString().slice(11, 19);
+  }
+}
+
+function stateTone(state: string | undefined): string {
+  switch (state) {
+    case "activated":
+      return "text-emerald-600 dark:text-emerald-400";
+    case "installing":
+    case "installed":
+    case "activating":
+      return "text-amber-600 dark:text-amber-400";
+    case "redundant":
+      return "text-rose-600 dark:text-rose-400";
+    default:
+      return "text-muted-foreground";
+  }
+}
+
+function SwWorkerRow({ label, worker }: { label: string; worker: SwWorkerInfo }) {
+  return (
+    <div className="flex items-center gap-2 text-[11px]">
+      <span className="w-20 shrink-0 font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </span>
+      {worker ? (
+        <>
+          <span className={`font-mono font-semibold ${stateTone(worker.state)}`}>
+            {worker.state}
+          </span>
+          <code
+            className="flex-1 truncate rounded bg-muted px-2 py-0.5 font-mono text-[10px] text-muted-foreground"
+            dir="ltr"
+            title={worker.scriptURL}
+          >
+            {worker.scriptURL.replace(/^https?:\/\/[^/]+/, "")}
+          </code>
+        </>
+      ) : (
+        <span className="text-muted-foreground">—</span>
+      )}
+    </div>
+  );
+}
+
+function SwDiagnosticPanel({
+  diag,
+  onRefresh,
+  refreshing,
+}: {
+  diag: SwDiag;
+  onRefresh: () => void | Promise<void>;
+  refreshing: boolean;
+}) {
+  const registered = diag.registered;
+  const headerTone = !diag.supported
+    ? "bg-slate-50 dark:bg-slate-900"
+    : diag.error
+      ? "bg-rose-50/60 dark:bg-rose-950/30"
+      : registered
+        ? "bg-emerald-50/50 dark:bg-emerald-950/20"
+        : "bg-amber-50/60 dark:bg-amber-950/30";
+
+  return (
+    <div className={`mb-4 rounded-xl border p-3 ${headerTone}`}>
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <Activity className="size-4 text-muted-foreground" />
+          <h3 className="text-sm font-semibold text-foreground">
+            تشخيص الـ Service Worker
+          </h3>
+          <span
+            className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+              !diag.supported
+                ? "bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                : registered
+                  ? "bg-emerald-600 text-white"
+                  : "bg-amber-500 text-white"
+            }`}
+          >
+            {!diag.supported ? "غير مدعوم" : registered ? "مسجّل" : "غير مسجّل"}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => void onRefresh()}
+          disabled={refreshing || !diag.supported}
+          className="inline-flex items-center gap-1 rounded-md border border-input bg-background px-2 py-1 text-[11px] font-medium text-muted-foreground transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          title="فحص التحديثات وإعادة قراءة الحالة"
+        >
+          {refreshing ? (
+            <Loader2 className="size-3 animate-spin" />
+          ) : (
+            <RefreshCw className="size-3" />
+          )}
+          تحديث
+        </button>
+      </div>
+
+      {!diag.supported && (
+        <p className="text-xs text-muted-foreground">
+          لا يدعم هذا المتصفح Service Workers.
+        </p>
+      )}
+
+      {diag.supported && !registered && !diag.error && (
+        <p className="text-xs text-muted-foreground">
+          الملف <code className="rounded bg-background px-1">/sw-push.js</code> غير
+          مسجّل بعد. اضغط «تفعيل الإشعارات» لتسجيله.
+        </p>
+      )}
+
+      {diag.error && (
+        <p className="text-xs text-rose-600 dark:text-rose-400">خطأ: {diag.error}</p>
+      )}
+
+      {registered && (
+        <div className="space-y-2">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="rounded-md bg-background/60 p-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                scriptURL
+              </div>
+              <code
+                className="mt-0.5 block truncate font-mono text-[11px] text-foreground"
+                dir="ltr"
+                title={diag.scriptURL ?? ""}
+              >
+                {diag.scriptURL ?? "—"}
+              </code>
+            </div>
+            <div className="rounded-md bg-background/60 p-2">
+              <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Scope
+              </div>
+              <code
+                className="mt-0.5 block truncate font-mono text-[11px] text-foreground"
+                dir="ltr"
+                title={diag.scope ?? ""}
+              >
+                {diag.scope ?? "—"}
+              </code>
+            </div>
+          </div>
+
+          <div className="space-y-1 rounded-md bg-background/60 p-2">
+            <SwWorkerRow label="Active" worker={diag.active} />
+            <SwWorkerRow label="Waiting" worker={diag.waiting} />
+            <SwWorkerRow label="Installing" worker={diag.installing} />
+            <SwWorkerRow label="Controller" worker={diag.controller} />
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-muted-foreground">
+            <span>
+              updateViaCache:{" "}
+              <code className="rounded bg-background px-1 font-mono">
+                {diag.updateViaCache ?? "—"}
+              </code>
+            </span>
+            <span>
+              آخر حدث:{" "}
+              <code className="rounded bg-background px-1 font-mono">
+                {diag.lastEvent ?? "—"}
+              </code>
+            </span>
+            <span>
+              آخر تحديث:{" "}
+              <code className="rounded bg-background px-1 font-mono">
+                {formatTime(diag.lastUpdated)}
+              </code>
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
