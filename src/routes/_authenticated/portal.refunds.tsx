@@ -559,6 +559,9 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
           إلغاء الطلب
         </button>
       )}
+      {receiptOpen && (
+        <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />
+      )}
     </li>
   );
 }
