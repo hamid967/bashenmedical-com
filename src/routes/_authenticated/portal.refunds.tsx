@@ -431,7 +431,12 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
           }).join("")}
         </table>` : ""}
         ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
-        <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
+        <div class="ft">
+          Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا
+          <div style="margin-top:6px;font-size:10px;color:#cbd5e1">
+            سيظهر في كل صفحة عند الطباعة: «صفحة X / Y» على اليسار مع المرجع على اليمين.
+          </div>
+        </div>
       </article>
     </div>
   </div>
