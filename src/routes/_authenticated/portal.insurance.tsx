@@ -320,6 +320,9 @@ function InsurancePage() {
 const inputCls =
   "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30";
 
+function FieldError({ msg }: { msg: string }) {
+  return <p role="alert" className="mt-1 text-[11px] font-semibold text-red-600">{msg}</p>;
+}
 function Metric({ label, value, tone }: { label: string; value: string; tone?: "warn" }) {
   return (
     <div className={`rounded-lg border px-2 py-1.5 ${tone === "warn" ? "bg-amber-50 border-amber-100 text-amber-800" : "bg-slate-50 border-slate-200 text-[color:var(--portal-ink)]"}`}>
