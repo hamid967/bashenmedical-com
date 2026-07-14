@@ -193,8 +193,19 @@ const T = {
   // language
   lang_toggle_to_en: { ar: "English", en: "English" },
   lang_toggle_to_ar: { ar: "العربية", en: "العربية" },
+  lang_switch_aria:  { ar: "التبديل إلى العربية", en: "Switch to English" },
   lang_saved:        { ar: "تم حفظ لغة الحساب.", en: "Account language saved." },
   lang_error:        { ar: "تعذّر حفظ اللغة.", en: "Could not save language." },
+  // page-level
+  page_error_title:   { ar: "تعذّر تحميل الصفحة", en: "Could not load the page" },
+  page_error_generic: { ar: "خطأ غير متوقع.", en: "Unexpected error." },
+  page_error_retry:   { ar: "إعادة المحاولة", en: "Retry" },
+  member_label:       { ar: "الفرد:", en: "Member:" },
+  // save toasts
+  saved_created:      { ar: "تم إضافة الفرد بنجاح.", en: "Family member added." },
+  saved_updated:      { ar: "تم تحديث بيانات الفرد.", en: "Family member updated." },
+  // list join separator (locale-appropriate punctuation)
+  list_separator:     { ar: "، ", en: ", " },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
