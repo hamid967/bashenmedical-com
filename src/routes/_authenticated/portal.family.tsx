@@ -986,14 +986,22 @@ function DeleteDialog({
 
 function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
+  const qc = useQueryClient();
+  const cached = qc.getQueryData(profileQuery.queryKey) as
+    | { preferred_language?: string | null }
+    | undefined;
+  const docLang =
+    typeof document !== "undefined" ? document.documentElement.lang : "ar";
+  const lang: Lang = ((cached?.preferred_language as Lang | undefined) ??
+    (docLang === "en" ? "en" : "ar")) as Lang;
   return (
-    <div className="glass-card max-w-md mx-auto p-8 text-center">
+    <div className="glass-card max-w-md mx-auto p-8 text-center" dir={lang === "ar" ? "rtl" : "ltr"}>
       <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
         <AlertTriangle className="h-7 w-7" />
       </div>
-      <h3 className="text-lg font-bold">تعذّر تحميل الصفحة</h3>
+      <h3 className="text-lg font-bold">{T.page_error_title[lang]}</h3>
       <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 break-words">
-        {error.message || "خطأ غير متوقع."}
+        {error.message || T.page_error_generic[lang]}
       </p>
       <button
         onClick={() => {
@@ -1004,7 +1012,7 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" />
-        إعادة المحاولة
+        {T.page_error_retry[lang]}
       </button>
     </div>
   );
