@@ -1,13 +1,12 @@
 /**
- * سجل التغييرات على الموعد — يعرض للمريض تاريخ التعديلات
- * (تأكيد/إلغاء/تعديل ملاحظات + من قام بها + السبب).
- *
- * يستخدم RPC `list_appointment_audit_by_ref` التي تتحقق من رقم الحجز + الجوال
- * قبل إرجاع البيانات (SECURITY DEFINER).
+ * Appointment audit history — shows the patient the change log for a booking.
+ * Uses RPC `list_appointment_audit_by_ref` (SECURITY DEFINER) which validates
+ * reference + phone before returning rows.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { History, User, Bot, UserCog, ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
 
 type Row = {
@@ -18,14 +17,6 @@ type Row = {
   new_notes: string | null;
   reason: string | null;
   actor_kind: string;
-};
-
-const STATUS_AR: Record<string, string> = {
-  new: "جديد",
-  confirmed: "مؤكّد",
-  cancelled: "ملغى",
-  completed: "مكتمل",
-  no_show: "لم يحضر",
 };
 
 function fmt(iso: string, lang: "ar" | "en") {
@@ -40,22 +31,25 @@ function fmt(iso: string, lang: "ar" | "en") {
 }
 
 function ActorBadge({ kind }: { kind: string }) {
-  const map: Record<string, { label: string; icon: React.ReactNode; cls: string }> = {
-    staff: { label: "موظف الاستقبال", icon: <UserCog className="h-3 w-3" />, cls: "bg-primary/10 text-primary" },
-    self_service: { label: "المراجع", icon: <User className="h-3 w-3" />, cls: "bg-emerald-500/10 text-emerald-700" },
-    system: { label: "النظام", icon: <Bot className="h-3 w-3" />, cls: "bg-muted text-muted-foreground" },
+  const { t } = useTranslation("booking");
+  const map: Record<string, { icon: React.ReactNode; cls: string }> = {
+    staff: { icon: <UserCog className="h-3 w-3" />, cls: "bg-primary/10 text-primary" },
+    self_service: { icon: <User className="h-3 w-3" />, cls: "bg-emerald-500/10 text-emerald-700" },
+    system: { icon: <Bot className="h-3 w-3" />, cls: "bg-muted text-muted-foreground" },
   };
   const m = map[kind] ?? map.system;
+  const label = t(`audit.actor.${kind in map ? kind : "system"}`);
   return (
     <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${m.cls}`}>
       {m.icon}
-      {m.label}
+      {label}
     </span>
   );
 }
 
 export function AppointmentAuditHistory({ refId, phone }: { refId: string; phone: string }) {
   const { lang } = useI18n();
+  const { t } = useTranslation("booking");
 
   const { data, isLoading } = useQuery({
     queryKey: ["appt-audit", refId, phone],
@@ -80,11 +74,13 @@ export function AppointmentAuditHistory({ refId, phone }: { refId: string; phone
   }
   if (!data || data.length === 0) return null;
 
+  const statusLabel = (s: string) => t(`audit.statusValues.${s}`, { defaultValue: s });
+
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <div className="mb-4 flex items-center gap-2">
         <History className="h-5 w-5 text-primary" />
-        <h3 className="font-bold">{lang === "ar" ? "سجل التغييرات على الحجز" : "Booking change history"}</h3>
+        <h3 className="font-bold">{t("audit.title")}</h3>
       </div>
       <ol className="relative space-y-4 border-s-2 border-border ps-5">
         {data.map((r, i) => {
@@ -99,26 +95,24 @@ export function AppointmentAuditHistory({ refId, phone }: { refId: string; phone
               </div>
               {statusChanged && (
                 <div className="mt-1 text-sm font-medium flex items-center gap-2 flex-wrap">
-                  <span className="text-muted-foreground">{lang === "ar" ? "الحالة:" : "Status:"}</span>
+                  <span className="text-muted-foreground">{t("audit.status")}</span>
                   {r.old_status && (
-                    <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{STATUS_AR[r.old_status] ?? r.old_status}</span>
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-xs">{statusLabel(r.old_status)}</span>
                   )}
                   <ArrowRight className="h-3.5 w-3.5 text-muted-foreground" />
                   {r.new_status && (
                     <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-semibold">
-                      {STATUS_AR[r.new_status] ?? r.new_status}
+                      {statusLabel(r.new_status)}
                     </span>
                   )}
                 </div>
               )}
               {notesChanged && (
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {lang === "ar" ? "تحديث الملاحظات" : "Notes updated"}
-                </div>
+                <div className="mt-1 text-sm text-muted-foreground">{t("audit.notesUpdated")}</div>
               )}
               {r.reason && (
                 <div className="mt-1 rounded-md bg-muted/50 px-3 py-1.5 text-xs">
-                  <span className="font-semibold">{lang === "ar" ? "السبب: " : "Reason: "}</span>
+                  <span className="font-semibold">{t("audit.reason")}</span>
                   {r.reason}
                 </div>
               )}

@@ -1,31 +1,31 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 import { Field } from "./Field";
 import { NAME_MAX, PHONE_MAX, REASON_MAX, type PatientErrors, type State } from "./types";
 
 export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "en"; value: State["patient"]; errors: PatientErrors; onChange: (p: Partial<State["patient"]>) => void }) {
+  const { t } = useTranslation("booking");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
-  const mark = (k: string) => setTouched((t) => (t[k] ? t : { ...t, [k]: true }));
-  // Inline validation: show the error as soon as the user starts typing in a
-  // field (touch on first change), instead of waiting for blur.
+  const mark = (k: string) => setTouched((tt) => (tt[k] ? tt : { ...tt, [k]: true }));
   const show = (k: keyof PatientErrors) => (touched[k] ? errors[k] : undefined);
   const allValid = Object.keys(errors).length === 0;
 
   return (
-    <StepShell lang={lang} title={lang === "ar" ? "بياناتك" : "Your details"}>
+    <StepShell lang={lang} title={t("patient.title")}>
       <div className="grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto">
-        <Field label={lang === "ar" ? "الاسم الرباعي" : "Full name"} required error={show("name")}>
+        <Field label={t("patient.fullName")} required error={show("name")}>
           <input
             value={value.name}
             onChange={(e) => { onChange({ name: e.target.value.slice(0, NAME_MAX) }); mark("name"); }}
             onBlur={() => mark("name")}
             aria-invalid={!!show("name")}
             className={`input ${show("name") ? "input-error" : ""}`}
-            placeholder={lang === "ar" ? "الاسم كما في الهوية" : "Full name"}
+            placeholder={t("patient.fullNamePlaceholder")}
             autoComplete="name"
           />
         </Field>
-        <Field label={lang === "ar" ? "رقم الجوال" : "Mobile"} required error={show("phone")}>
+        <Field label={t("patient.mobile")} required error={show("phone")}>
           <input
             value={value.phone}
             onChange={(e) => { onChange({ phone: e.target.value.slice(0, PHONE_MAX) }); mark("phone"); }}
@@ -38,7 +38,7 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             autoComplete="tel"
           />
         </Field>
-        <Field label={lang === "ar" ? "رقم الهوية / الإقامة (اختياري)" : "National ID (optional)"} error={show("nationalId")}>
+        <Field label={t("patient.nationalIdOptional")} error={show("nationalId")}>
           <input
             value={value.nationalId}
             onChange={(e) => { onChange({ nationalId: e.target.value.replace(/\D/g, "").slice(0, 10) }); mark("nationalId"); }}
@@ -51,7 +51,7 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             maxLength={10}
           />
         </Field>
-        <Field label={lang === "ar" ? "الجنس" : "Gender"} required error={touched.gender ? errors.gender : undefined}>
+        <Field label={t("patient.gender")} required error={touched.gender ? errors.gender : undefined}>
           <div className="grid grid-cols-2 gap-2">
             {(["male", "female"] as const).map((g) => (
               <button key={g} type="button"
@@ -60,39 +60,39 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
                   value.gender === g ? "border-primary bg-primary/5 text-primary" : "border-border bg-card hover:border-primary/50"
                 }`}
               >
-                {g === "male" ? (lang === "ar" ? "ذكر" : "Male") : (lang === "ar" ? "أنثى" : "Female")}
+                {t(`patient.${g}`)}
               </button>
             ))}
           </div>
         </Field>
         <div className="sm:col-span-2">
-          <Field label={lang === "ar" ? "سبب الزيارة (اختياري)" : "Reason (optional)"} error={show("reason")}>
+          <Field label={t("patient.reasonOptional")} error={show("reason")}>
             <textarea
               value={value.reason}
               onChange={(e) => onChange({ reason: e.target.value.slice(0, REASON_MAX) })}
               onBlur={() => mark("reason")}
               aria-invalid={!!show("reason")}
               className={`input min-h-[80px] ${show("reason") ? "input-error" : ""}`}
-              placeholder={lang === "ar" ? "وصف مختصر…" : "Short description…"}
+              placeholder={t("patient.reasonPlaceholder")}
             />
             <div className="text-[11px] text-muted-foreground mt-1 text-end">{value.reason.length}/{REASON_MAX}</div>
           </Field>
         </div>
         <div className="sm:col-span-2 rounded-xl bg-muted/50 p-4 space-y-2">
-          <div className="font-semibold text-sm">{lang === "ar" ? "التذكيرات" : "Reminders"}</div>
+          <div className="font-semibold text-sm">{t("patient.reminders")}</div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={value.reminder24h} onChange={(e) => onChange({ reminder24h: e.target.checked })} className="accent-primary"/>
-            {lang === "ar" ? "قبل 24 ساعة" : "24 hours before"}
+            {t("patient.before24h")}
           </label>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" checked={value.reminder2h} onChange={(e) => onChange({ reminder2h: e.target.checked })} className="accent-primary"/>
-            {lang === "ar" ? "قبل ساعتين" : "2 hours before"}
+            {t("patient.before2h")}
           </label>
         </div>
 
         {!allValid && Object.values(touched).some(Boolean) && (
           <div className="sm:col-span-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-            {lang === "ar" ? "يوجد بيانات ناقصة أو غير صحيحة. أكمل الحقول المطلوبة للمتابعة." : "Some fields are missing or invalid. Complete required fields to continue."}
+            {t("patient.hasErrors")}
           </div>
         )}
       </div>

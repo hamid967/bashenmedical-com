@@ -20,6 +20,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
@@ -111,6 +112,7 @@ async function fetchAvailability(date: string, doctorId: string | null, specialt
 function BookPage() {
   const searchParams = Route.useSearch();
   const { lang } = useI18n();
+  const { t } = useTranslation("booking");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -379,7 +381,7 @@ function BookPage() {
     setErrorMsg(null);
     setSuggestion(null);
     if (!patientValidation.ok) {
-      setErrorMsg(lang === "ar" ? "يرجى تصحيح بيانات المريض قبل التأكيد" : "Please fix patient info before confirming");
+      setErrorMsg(t("page.fixPatient"));
       goto(7);
       return;
     }
@@ -391,9 +393,7 @@ function BookPage() {
       const fresh = await fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId);
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
-        setErrorMsg(lang === "ar"
-          ? "هذا الموعد لم يعد متاحًا. اختر وقتًا آخر."
-          : "This slot is no longer available. Please pick another time.");
+        setErrorMsg(t("page.slotTaken"));
         // Refresh the availability query so StepTime shows the updated state.
         queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
         const prevTime = state.time;
@@ -425,7 +425,7 @@ function BookPage() {
     setSubmitting(false);
     if (res.ok) {
       try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
-      toast.success(lang === "ar" ? "تم إنشاء الحجز بنجاح" : "Booking created");
+      toast.success(t("page.created"));
       setResult({ reference: res.reference, phone: p.phone.trim() });
       goto(9);
     } else {
@@ -436,10 +436,7 @@ function BookPage() {
   function handleReset() {
     // Guard against accidental taps that would drop the reference/QR forever.
     if (typeof window !== "undefined" && result?.reference) {
-      const msg = lang === "ar"
-        ? "سيتم مسح تفاصيل الحجز الحالي من الشاشة. تأكد أنك احتفظت برقم الحجز. هل تريد المتابعة؟"
-        : "The current booking details will be cleared from this screen. Make sure you saved the reference. Continue?";
-      if (!window.confirm(msg)) return;
+      if (!window.confirm(t("page.resetConfirm"))) return;
     }
     setResult(null);
     setErrorMsg(null);
@@ -453,9 +450,10 @@ function BookPage() {
     navigate({ to: "/book", search: { step: 1 } });
   }
 
-  const STEPS = lang === "ar"
-    ? ["نوع الخدمة", "الفرع", "التخصص", "الطبيب", "التاريخ", "الوقت", "بياناتك", "المراجعة", "التأكيد"]
-    : ["Service", "Branch", "Specialty", "Doctor", "Date", "Time", "Your info", "Review", "Confirmed"];
+  const STEPS = [
+    t("steps.service"), t("steps.branch"), t("steps.specialty"), t("steps.doctor"),
+    t("steps.date"), t("steps.time"), t("steps.yourInfo"), t("steps.review"), t("steps.confirmed"),
+  ];
 
   // Displayed step for the indicator/progress bar — never allowed to exceed
   // the highest step whose prerequisites are met. Prevents a transient flash
@@ -470,14 +468,8 @@ function BookPage() {
     <div className="min-h-screen bg-muted/30">
       <div className="container-app py-8 md:py-12 max-w-5xl">
         <header className="mb-6 md:mb-8 text-center">
-          <h1 className="text-2xl md:text-4xl font-bold">
-            {lang === "ar" ? "احجز موعدك" : "Book an appointment"}
-          </h1>
-          <p className="mt-2 text-sm md:text-base text-muted-foreground">
-            {lang === "ar"
-              ? "اتبع الخطوات لإتمام حجز موعدك — يمكنك الرجوع في أي وقت."
-              : "Follow the steps to complete your booking — you can go back anytime."}
-          </p>
+          <h1 className="text-2xl md:text-4xl font-bold">{t("page.title")}</h1>
+          <p className="mt-2 text-sm md:text-base text-muted-foreground">{t("page.subtitle")}</p>
         </header>
 
         <Stepper steps={STEPS} current={displayedStep} onJump={(i) => {
@@ -494,9 +486,7 @@ function BookPage() {
               />
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground text-center">
-              {lang === "ar"
-                ? `الخطوة ${displayedStep} من 8`
-                : `Step ${displayedStep} of 8`}
+              {t("page.stepOf", { current: displayedStep, total: 8 })}
             </div>
           </div>
         )}
@@ -513,26 +503,22 @@ function BookPage() {
                 {(findingAlt || suggestion) && (
                   <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 md:p-4 text-sm">
                     {findingAlt && !suggestion && (
-                      <span className="text-muted-foreground">
-                        {lang === "ar" ? "جارٍ البحث عن طبيب بديل بأقرب موعد…" : "Looking for an alternative doctor…"}
-                      </span>
+                      <span className="text-muted-foreground">{t("page.lookingAlt")}</span>
                     )}
                     {suggestion && (
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
                         <div>
                           <div className="font-medium">
-                            {lang === "ar" ? "طبيب بديل متاح:" : "Alternative doctor available:"} {suggestion.doctorName}
+                            {t("page.altAvailable")} {suggestion.doctorName}
                           </div>
                           <div className="text-muted-foreground">
-                            {lang === "ar" ? "أقرب موعد" : "Earliest slot"}: {suggestion.time}
+                            {t("page.earliestSlot")}: {suggestion.time}
                           </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={acceptSuggestion}>
-                            {lang === "ar" ? "احجز مع البديل" : "Book alternative"}
-                          </Button>
+                          <Button size="sm" onClick={acceptSuggestion}>{t("page.bookAlt")}</Button>
                           <Button size="sm" variant="ghost" onClick={() => setSuggestion(null)}>
-                            {lang === "ar" ? "تجاهل" : "Dismiss"}
+                            {t("page.dismiss")}
                           </Button>
                         </div>
                       </div>
@@ -578,7 +564,7 @@ function BookPage() {
               onClick={() => goto(state.step - 1)}
               className="gap-1"
             >
-              {lang === "ar" ? <><ChevronRight className="h-4 w-4"/>السابق</> : <><ChevronLeft className="h-4 w-4"/>Back</>}
+              {lang === "ar" ? <><ChevronRight className="h-4 w-4"/>{t("page.back")}</> : <><ChevronLeft className="h-4 w-4"/>{t("page.back")}</>}
             </Button>
 
             {state.step < 8 && (
@@ -587,16 +573,16 @@ function BookPage() {
                 onClick={() => goto(state.step + 1)}
                 className="gap-1"
               >
-                {lang === "ar" ? <>التالي<ChevronLeft className="h-4 w-4"/></> : <>Next<ChevronRight className="h-4 w-4"/></>}
+                {lang === "ar" ? <>{t("page.next")}<ChevronLeft className="h-4 w-4"/></> : <>{t("page.next")}<ChevronRight className="h-4 w-4"/></>}
               </Button>
             )}
           </div>
         )}
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          {lang === "ar" ? "لديك حجز مسبق؟" : "Already booked?"}{" "}
+          {t("page.alreadyBooked")}{" "}
           <Link to="/track" search={{ ref: undefined, phone4: undefined }} className="text-primary hover:underline">
-            {lang === "ar" ? "تتبع حجزك" : "Track your booking"}
+            {t("page.trackBooking")}
           </Link>
         </p>
       </div>

@@ -1,9 +1,11 @@
 import { Building2, MapPin } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 
 export function StepBranch({ lang, branches, value, onPick }: { lang: "ar" | "en"; branches: any[]; value: string | null; onPick: (v: string) => void }) {
+  const { t } = useTranslation("booking");
   return (
-    <StepShell lang={lang} title={lang === "ar" ? "اختر الفرع" : "Choose branch"}>
+    <StepShell lang={lang} title={t("branch.title")}>
       <div className="grid gap-3 sm:grid-cols-2">
         {branches.map((b) => {
           const active = value === b.id;

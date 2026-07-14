@@ -4,14 +4,16 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 import arCommon from "@/locales/ar/common.json";
 import enCommon from "@/locales/en/common.json";
+import arBooking from "@/locales/ar/booking.json";
+import enBooking from "@/locales/en/booking.json";
 
 export const SUPPORTED_LANGS = ["ar", "en"] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 export const DEFAULT_LANG: Lang = "ar";
 
 export const resources = {
-  ar: { common: arCommon },
-  en: { common: enCommon },
+  ar: { common: arCommon, booking: arBooking },
+  en: { common: enCommon, booking: enBooking },
 } as const;
 
 if (!i18n.isInitialized) {
@@ -23,7 +25,7 @@ if (!i18n.isInitialized) {
     fallbackLng: DEFAULT_LANG,
     supportedLngs: SUPPORTED_LANGS as unknown as string[],
     defaultNS: "common",
-    ns: ["common"],
+    ns: ["common", "booking"],
     interpolation: { escapeValue: false },
     detection: {
       order: ["localStorage", "htmlTag", "navigator"],

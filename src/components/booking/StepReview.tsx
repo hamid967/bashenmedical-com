@@ -1,4 +1,5 @@
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SubmitErrorBanner } from "@/components/SubmitErrorBanner";
 import { StepShell } from "./StepShell";
@@ -11,20 +12,21 @@ export function StepReview({
   errorMsg: string | null; submitting: boolean; onSubmit: () => void;
   patientValid: boolean; onEditPatient: () => void;
 }) {
+  const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
   const spec   = specialties.find((s) => s.id === state.specialtyId);
   const doc    = doctors.find((d: any) => d.id === state.doctorId);
   const rows = [
-    { label: lang === "ar" ? "الفرع" : "Branch", value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—" },
-    { label: lang === "ar" ? "التخصص" : "Specialty", value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—" },
-    { label: lang === "ar" ? "الطبيب" : "Doctor", value: doc ? (lang === "ar" ? doc.name_ar : doc.name_en) : "—" },
-    { label: lang === "ar" ? "التاريخ" : "Date", value: formatArDate(state.date, lang) },
-    { label: lang === "ar" ? "الوقت" : "Time", value: state.time ?? "—" },
-    { label: lang === "ar" ? "الاسم" : "Name", value: state.patient.name },
-    { label: lang === "ar" ? "الجوال" : "Phone", value: state.patient.phone },
+    { label: t("review.branch"), value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—" },
+    { label: t("review.specialty"), value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—" },
+    { label: t("review.doctor"), value: doc ? (lang === "ar" ? doc.name_ar : doc.name_en) : "—" },
+    { label: t("review.date"), value: formatArDate(state.date, lang) },
+    { label: t("review.time"), value: state.time ?? "—" },
+    { label: t("review.name"), value: state.patient.name },
+    { label: t("review.phone"), value: state.patient.phone },
   ];
   return (
-    <StepShell lang={lang} title={lang === "ar" ? "مراجعة الحجز" : "Review your booking"}>
+    <StepShell lang={lang} title={t("review.title")}>
       <div className="max-w-xl mx-auto">
         <dl className="rounded-xl border border-border divide-y divide-border overflow-hidden">
           {rows.map((r) => (
@@ -37,9 +39,9 @@ export function StepReview({
 
         {!patientValid && (
           <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
-            <span>{lang === "ar" ? "بيانات المريض غير مكتملة أو غير صحيحة." : "Patient info is incomplete or invalid."}</span>
+            <span>{t("review.incomplete")}</span>
             <Button variant="outline" size="sm" onClick={onEditPatient}>
-              {lang === "ar" ? "تعديل" : "Edit"}
+              {t("review.edit")}
             </Button>
           </div>
         )}
@@ -52,14 +54,10 @@ export function StepReview({
           className="w-full mt-6 gap-2 h-12 text-base"
         >
           {submitting
-            ? <><Loader2 className="h-4 w-4 animate-spin"/> {lang === "ar" ? "جارٍ الحجز…" : "Booking…"}</>
-            : <><CheckCircle2 className="h-5 w-5"/> {lang === "ar" ? "تأكيد الحجز" : "Confirm booking"}</>}
+            ? <><Loader2 className="h-4 w-4 animate-spin"/> {t("review.submitting")}</>
+            : <><CheckCircle2 className="h-5 w-5"/> {t("review.confirm")}</>}
         </Button>
-        <p className="mt-3 text-center text-xs text-muted-foreground">
-          {lang === "ar"
-            ? "بالضغط على التأكيد، فأنت توافق على شروط الاستخدام."
-            : "By confirming, you agree to our terms of use."}
-        </p>
+        <p className="mt-3 text-center text-xs text-muted-foreground">{t("review.terms")}</p>
       </div>
     </StepShell>
   );

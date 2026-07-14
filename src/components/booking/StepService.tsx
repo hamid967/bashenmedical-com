@@ -1,19 +1,23 @@
 import { Stethoscope, Activity, Scan, TestTube } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 import type { ServiceType } from "./types";
 
 export function StepService({ lang, value, onPick }: { lang: "ar" | "en"; value: ServiceType | null; onPick: (v: ServiceType) => void }) {
-  const items: { id: ServiceType; ar: string; en: string; icon: any; desc_ar: string; desc_en: string; disabled?: boolean }[] = [
-    { id: "clinic",    ar: "عيادات تخصصية", en: "Specialty Clinics", icon: Stethoscope, desc_ar: "احجز مع طبيب متخصص", desc_en: "Book with a specialist" },
-    { id: "followup",  ar: "متابعة",         en: "Follow-up",        icon: Activity,    desc_ar: "متابعة مع نفس الطبيب", desc_en: "Follow-up visit" },
-    { id: "radiology", ar: "الأشعة",         en: "Radiology",        icon: Scan,        desc_ar: "قريبًا",              desc_en: "Coming soon", disabled: true },
-    { id: "lab",       ar: "المختبر",        en: "Laboratory",       icon: TestTube,    desc_ar: "قريبًا",              desc_en: "Coming soon", disabled: true },
+  const { t } = useTranslation("booking");
+  const items: { id: ServiceType; icon: any; disabled?: boolean }[] = [
+    { id: "clinic",    icon: Stethoscope },
+    { id: "followup",  icon: Activity },
+    { id: "radiology", icon: Scan,     disabled: true },
+    { id: "lab",       icon: TestTube, disabled: true },
   ];
   return (
-    <StepShell lang={lang} title={lang === "ar" ? "اختر نوع الخدمة" : "Choose service type"}>
+    <StepShell lang={lang} title={t("service.title")}>
       <div className="grid gap-3 sm:grid-cols-2">
         {items.map((it) => {
           const active = value === it.id;
+          const label = t(`service.${it.id}`);
+          const desc = it.disabled ? t("service.comingSoon") : t(`service.${it.id}_desc`);
           return (
             <button
               key={it.id}
@@ -30,8 +34,8 @@ export function StepService({ lang, value, onPick }: { lang: "ar" | "en"; value:
                   <it.icon className="h-5 w-5"/>
                 </div>
                 <div>
-                  <div className="font-semibold">{lang === "ar" ? it.ar : it.en}</div>
-                  <div className="text-xs text-muted-foreground">{lang === "ar" ? it.desc_ar : it.desc_en}</div>
+                  <div className="font-semibold">{label}</div>
+                  <div className="text-xs text-muted-foreground">{desc}</div>
                 </div>
               </div>
             </button>
