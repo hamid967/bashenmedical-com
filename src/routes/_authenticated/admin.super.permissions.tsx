@@ -447,14 +447,89 @@ function SuperPermissionsPage() {
         </div>
       </header>
 
-      <div className="relative max-w-md">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
-          placeholder="ابحث بالمفتاح أو الوصف أو التصنيف…"
-          className="pr-9"
-        />
+      <div className="rounded-xl border border-border bg-card p-3 space-y-3">
+        <div className="grid gap-2 md:grid-cols-[1fr_200px_220px_180px]">
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="ابحث بالمفتاح أو الوصف أو التصنيف…"
+              className="pr-9"
+            />
+          </div>
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="الفئة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الفئات ({categories.length})</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={roleFocus} onValueChange={(v) => setRoleFocus(v as any)}>
+            <SelectTrigger>
+              <SelectValue placeholder="الدور" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الأدوار</SelectItem>
+              {ALL_ROLES.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {ROLE_LABEL[r]}{" "}
+                  <span className="font-mono text-[10px] opacity-60">({r})</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => setStatusFilter(v as any)}
+            disabled={roleFocus === "all"}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="الحالة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">الحالة: الكل</SelectItem>
+              <SelectItem value="enabled">مُفعّلة فقط</SelectItem>
+              <SelectItem value="disabled">مُعطّلة فقط</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span>
+              النتائج: <b>{filtered.length}</b> من {catalog.length}
+            </span>
+            {activeFilterCount > 0 && (
+              <Badge variant="secondary">{activeFilterCount} فلتر نشط</Badge>
+            )}
+            {roleFocus !== "all" && (
+              <Badge variant="outline">
+                عرض دور واحد: {ROLE_LABEL[roleFocus as AppRole]}
+              </Badge>
+            )}
+          </div>
+          {activeFilterCount > 0 && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 text-xs"
+              onClick={clearAllFilters}
+            >
+              مسح الفلاتر
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="rounded-xl border border-border bg-card overflow-x-auto">
