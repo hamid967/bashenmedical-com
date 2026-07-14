@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -10,7 +10,7 @@ import {
   type AppRole,
 } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { Loader2, Search, ShieldCheck } from "lucide-react";
+import { History, Loader2, Search, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
