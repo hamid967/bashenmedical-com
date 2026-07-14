@@ -66,8 +66,19 @@ export default defineConfig({
         clientsClaim: false,
         skipWaiting: false,
         cleanupOutdatedCaches: true,
-        navigateFallback: "/",
-        navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/sw-push\.js$/, /^\/sw\.js$/],
+        // Fallback served by workbox's built-in NavigationRoute for any nav
+        // that isn't handled by the runtime NetworkFirst below (belt & braces).
+        navigateFallback: "/offline.html",
+        navigateFallbackDenylist: [
+          /^\/~oauth/,
+          /^\/api\//,
+          /^\/sw-push\.js$/,
+          /^\/sw\.js$/,
+          /^\/offline\.html$/,
+        ],
+        // Explicitly precache offline.html so it's always available even if
+        // globPatterns changes; it must be in cache for the fallback to work.
+        additionalManifestEntries: [{ url: "/offline.html", revision: null }],
         globPatterns: ["**/*.{js,css,html,ico,png,svg,webp,avif,woff2}"],
         runtimeCaching: [
           {
@@ -77,6 +88,20 @@ export default defineConfig({
               cacheName: "html-navigations",
               networkTimeoutSeconds: 4,
               expiration: { maxEntries: 30, maxAgeSeconds: 60 * 60 * 24 },
+              // When both the network AND the runtime cache fail (e.g. user
+              // is offline and this URL was never visited), serve the
+              // precached offline shell so we never show the browser's
+              // default "no internet" chrome page.
+              plugins: [
+                {
+                  handlerDidError: async () => {
+                    const cache = await caches.match("/offline.html", {
+                      ignoreSearch: true,
+                    });
+                    return cache || Response.error();
+                  },
+                },
+              ],
             },
           },
           {
