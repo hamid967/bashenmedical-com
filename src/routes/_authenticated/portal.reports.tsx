@@ -109,6 +109,7 @@ function ReportsPage() {
   const [type, setType] = useState<ReportType | "all">("all");
   const [q, setQ] = useState("");
   const [downloading, setDownloading] = useState<string | null>(null);
+  const [detailId, setDetailId] = useState<string | null>(null);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { all: reports.length };
