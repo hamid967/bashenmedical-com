@@ -285,13 +285,8 @@ export const countDependentAppointments = createServerFn({ method: "POST" })
       const totalRes = await buildQuery();
       if (totalRes.error) throw new Error(totalRes.error.message);
 
-      const activeRes = await buildQuery().in("status", [
-        "pending",
-        "scheduled",
-        "confirmed",
-        "checked_in",
-        "in_progress",
-      ]);
+      const activeRes = await buildQuery().in("status", ["new", "confirmed"]);
+
       if (activeRes.error) throw new Error(activeRes.error.message);
 
       return {
