@@ -21,6 +21,7 @@ import {
   Building2,
   Package,
   FileBarChart,
+  Gauge,
 } from "lucide-react";
 
 export type AdminRole = "admin" | "reception" | "doctor" | "nurse" | "hr" | "pharmacy";
@@ -80,6 +81,8 @@ const NAV: NavGroup[] = [
     title: "الحوكمة",
     items: [
       { to: "/rbac", label: "الأدوار والصلاحيات", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/super/monitoring", label: "صحة النظام (Super)", icon: Gauge, roles: ["admin"] },
+      { to: "/admin/super/permissions", label: "مصفوفة الصلاحيات (Super)", icon: ShieldCheck, roles: ["admin"] },
       { to: "/audit-log", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
       { to: "/clinic-settings", label: "إعدادات المجمع", icon: Settings, roles: ["admin"] },
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Settings, roles: ["admin"] },
