@@ -4,6 +4,7 @@ import {
   Award, Calendar, Languages, MapPin, Star, Stethoscope,
 } from "lucide-react";
 import { LANG_LABELS, type DoctorRow } from "./types";
+import { DemoBadge } from "@/components/DemoBadge";
 
 export function DoctorCard({ d, lang, nextSlotIso }: { d: DoctorRow; lang: "ar" | "en"; nextSlotIso?: string }) {
   const name = lang === "ar" ? d.name_ar : d.name_en;
