@@ -114,6 +114,13 @@ function ProfilePage() {
         </header>
 
         <form onSubmit={submit} className="glass-card p-5 sm:p-6 space-y-6">
+          {mut.isError && (
+            <MutationErrorBanner
+              message={mut.error instanceof Error ? mut.error.message : "تعذّر حفظ التعديلات"}
+              onRetry={() => mut.variables && mut.mutate(mut.variables)}
+              retrying={mut.isPending}
+            />
+          )}
           <Section title="البيانات الأساسية">
             <Field label="الاسم الكامل" required>
               <input value={form.full_name} onChange={(e) => set("full_name", e.target.value)} maxLength={120}
