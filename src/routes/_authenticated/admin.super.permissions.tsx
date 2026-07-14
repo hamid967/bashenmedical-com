@@ -181,6 +181,152 @@ function SuperPermissionsPage() {
 
   const enabledCount = matrix.length;
 
+  function csvEscape(s: string) {
+    if (s == null) return "";
+    const needs = /[",\n\r]/.test(s);
+    const v = String(s).replace(/"/g, '""');
+    return needs ? `"${v}"` : v;
+  }
+
+  function handleExportCsv() {
+    const header = [
+      "permission_key",
+      "category",
+      "description_ar",
+      "description_en",
+      ...ALL_ROLES,
+    ];
+    const lines = [header.map(csvEscape).join(",")];
+    const sorted = [...catalog].sort((a, b) =>
+      a.category.localeCompare(b.category, "ar") || a.key.localeCompare(b.key),
+    );
+    for (const p of sorted) {
+      const row = [
+        p.key,
+        p.category,
+        p.description_ar ?? "",
+        p.description_en ?? "",
+        ...ALL_ROLES.map((r) =>
+          r === "super_admin" ? "1" : enabledSet.has(`${r}::${p.key}`) ? "1" : "0",
+        ),
+      ];
+      lines.push(row.map((v) => csvEscape(String(v))).join(","));
+    }
+    const csv = "\uFEFF" + lines.join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
+    a.href = url;
+    a.download = `rbac-permissions-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast.success("تم تصدير المصفوفة");
+  }
+
+  function parseCsv(text: string): string[][] {
+    const rows: string[][] = [];
+    let cur: string[] = [];
+    let val = "";
+    let inQ = false;
+    const t = text.replace(/^\uFEFF/, "");
+    for (let i = 0; i < t.length; i++) {
+      const c = t[i];
+      if (inQ) {
+        if (c === '"') {
+          if (t[i + 1] === '"') {
+            val += '"';
+            i++;
+          } else inQ = false;
+        } else val += c;
+      } else {
+        if (c === '"') inQ = true;
+        else if (c === ",") {
+          cur.push(val);
+          val = "";
+        } else if (c === "\n" || c === "\r") {
+          if (c === "\r" && t[i + 1] === "\n") i++;
+          cur.push(val);
+          rows.push(cur);
+          cur = [];
+          val = "";
+        } else val += c;
+      }
+    }
+    if (val.length || cur.length) {
+      cur.push(val);
+      rows.push(cur);
+    }
+    return rows.filter((r) => r.length && r.some((c) => c.trim() !== ""));
+  }
+
+  async function handleFilePicked(file: File) {
+    setImportError(null);
+    setImportFileName(file.name);
+    try {
+      const text = await file.text();
+      const rows = parseCsv(text);
+      if (rows.length < 2) throw new Error("الملف فارغ.");
+      const header = rows[0].map((h) => h.trim());
+      const keyIdx = header.indexOf("permission_key");
+      if (keyIdx < 0) throw new Error("عمود permission_key مفقود.");
+      const roleCols: { role: AppRole; idx: number }[] = [];
+      for (let i = 0; i < header.length; i++) {
+        if (ALL_ROLES.includes(header[i] as AppRole)) {
+          roleCols.push({ role: header[i] as AppRole, idx: i });
+        }
+      }
+      if (roleCols.length === 0) throw new Error("لا توجد أعمدة أدوار في الملف.");
+      const payload: Record<string, string[]> = {};
+      for (const { role } of roleCols) payload[role] = [];
+      for (let r = 1; r < rows.length; r++) {
+        const row = rows[r];
+        const key = (row[keyIdx] ?? "").trim();
+        if (!key) continue;
+        for (const { role, idx } of roleCols) {
+          const v = (row[idx] ?? "").trim().toLowerCase();
+          if (v === "1" || v === "true" || v === "yes" || v === "y" || v === "x") {
+            payload[role].push(key);
+          }
+        }
+      }
+      setImportPayload(payload);
+    } catch (err: any) {
+      setImportPayload(null);
+      setImportError(err?.message ?? "تعذّر قراءة الملف.");
+    }
+  }
+
+  async function handleConfirmImport() {
+    if (!importPayload) return;
+    setImporting(true);
+    try {
+      const res: any = await importFn({
+        data: {
+          mode: importMode,
+          payload: { version: 1, roles: importPayload },
+        },
+      });
+      const parts = [`أُضيف: ${res.added ?? 0}`, `أُلغي: ${res.removed ?? 0}`];
+      if (res.skipped_unknown?.length) parts.push(`تُخطّي غير معروف: ${res.skipped_unknown.length}`);
+      if (res.skipped_roles?.length) parts.push(`تُخطّي أدوار: ${res.skipped_roles.length}`);
+      if (res.errors?.length) parts.push(`أخطاء: ${res.errors.length}`);
+      toast.success("تم الاستيراد — " + parts.join("، "));
+      setImportOpen(false);
+      setImportPayload(null);
+      setImportFileName(null);
+      if (fileRef.current) fileRef.current.value = "";
+      qc.invalidateQueries({ queryKey: ["rbac", "role-permissions-matrix"] });
+    } catch (err: any) {
+      toast.error(err?.message ?? "تعذّر الاستيراد");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+
   return (
     <div className="container-app py-8 space-y-6" dir="rtl">
       <header className="flex flex-wrap items-start justify-between gap-4">
