@@ -558,7 +558,7 @@ function SuperPermissionsPage() {
             {grouped.flatMap(([cat, perms]) => [
               <tr key={`cat-${cat}`} className="bg-muted/20">
                 <td
-                  colSpan={ALL_ROLES.length + 1}
+                  colSpan={visibleRoles.length + 1}
                   className="px-3 py-1.5 text-right text-xs font-semibold text-muted-foreground"
                 >
                   {cat}
