@@ -246,8 +246,8 @@ export const verifyMyInsurance = createServerFn({ method: "POST" })
         deductible: null,
         plan_label: null,
       };
-      await logAttempt(supabase, userId, data, policy, result);
-      return { ok: true, ...result };
+      const id = await logAttempt(supabase, userId, data, policy, result);
+      return { ok: true, id, ...result };
     }
 
     const { data: est, error } = await supabase.rpc("estimate_appointment_cost", {
@@ -280,9 +280,10 @@ export const verifyMyInsurance = createServerFn({ method: "POST" })
       { policy, doctor_id: data.doctor_id, provider_id: data.provider_id },
     );
 
-    await logAttempt(supabase, userId, data, policy, result);
-    return { ok: true, ...result };
+    const id = await logAttempt(supabase, userId, data, policy, result);
+    return { ok: true, id, ...result };
   });
+
 
 async function logAttempt(
   supabase: any,
