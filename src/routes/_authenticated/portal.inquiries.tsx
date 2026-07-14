@@ -36,6 +36,7 @@ import {
   CircleDot,
   XCircle,
 } from "lucide-react";
+import { InquiryAttachments } from "@/components/inquiry/InquiryAttachments";
 
 const LS_KEY = "bmc:pending_inquiry_links";
 
