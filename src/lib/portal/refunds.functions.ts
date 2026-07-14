@@ -121,13 +121,15 @@ export const requestRefund = createServerFn({ method: "POST" })
       throw new Error(`المبلغ يتجاوز الحد الأقصى المسموح (${maxRefundable.toFixed(2)})`);
     }
 
-    // Ensure patient can't refund a mock payment through this real flow
+    // Block mock/demo payments — real refunds require real payments
     const { data: mockCheck } = await supabase
       .from("payments")
       .select("is_mock")
       .eq("id", pay.id)
       .maybeSingle();
-    const isMockPayment = !!mockCheck?.is_mock;
+    if (mockCheck?.is_mock) {
+      throw new Error("لا يمكن طلب استرداد على دفعة تجريبية. يرجى التواصل مع المحاسبة.");
+    }
 
     // RLS: pending, requested_by = self, is_mock = false, patient owns the payment
     const { data: row, error: insErr } = await supabase
@@ -138,7 +140,7 @@ export const requestRefund = createServerFn({ method: "POST" })
         reason: data.reason,
         status: "pending",
         requested_by: userId,
-        is_mock: isMockPayment, // trace mock/demo requests but still allow only if RLS admits
+        is_mock: false,
       })
       .select("id")
       .single();
