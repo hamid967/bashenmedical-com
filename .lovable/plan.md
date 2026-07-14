@@ -1,79 +1,85 @@
-# خطة تطوير شاملة — البوابات ونظام الحجز
+# خطة بناء نظام الحجز الذكي + لوحة المريض (Baeshen)
 
-النظام الحالي كبير جداً (بوابة مريض بـ ~30 صفحة، لوحة إدارة بـ ~35 صفحة، تدفق حجز موجود، لا توجد بوابة طبيب مستقلة). تنفيذ كل شيء دفعة واحدة غير ممكن، والخطة أدناه مقسمة إلى **6 مراحل** يمكن اعتماد كل مرحلة على حدة.
+المواصفات ضخمة (30 قسم). بدلاً من إعادة كتابة كل شيء دفعة واحدة (ما يكسر ما يعمل حالياً)، سأنفّذها على **7 دفعات مركّزة** — كل دفعة تُسلَّم كاملة (DB + خادم + واجهة + اختبار) قبل الانتقال للتي بعدها. تحتاج تأكيدك على النقاط في نهاية الخطة قبل البدء.
 
 ---
 
-## المرحلة 0 — تنظيف عاجل (نصف يوم)
+## ما يوجد الآن (بعد الفحص)
 
-معالجة الأخطاء المعلقة قبل أي تطوير جديد:
-- إصلاح Hydration mismatch على `/doctors` و `/auth`.
-- نقل `/app` و `/my-orders` إلى تحت `_authenticated/` أو إضافة حارس مصادقة.
-- إعادة تشغيل الفحص الآلي RLS للتأكد من صفر أخطاء 500/401 على الصفحات العامة.
+- `/book` — معالج 9 خطوات يعمل (types.ts, StepService..StepSuccess, submitBooking, idempotency-key). مبني على `appointments` + `availability` + `availability_slots`.
+- `/patient/*` بوابة موجودة (30+ صفحة) عبر `_authenticated/`.
+- `/reservations/*`, `/my-orders`, `/track`, `/lookup` — سطوح متعددة للحجز (تكرار).
+- جداول: `appointments`, `availability`, `availability_slots`, `appointment_waitlist`, `appointment_audit`, `dependents`, `patients`, `doctors`, `branches`, `specialties`, `insurance_providers`, `insurance_approvals`, `payments`, `notifications`.
+- **مفقود جوهرياً:** `slot_holds` (تعليق مؤقت للموعد)، حالة "held/pending_*"، OTP هاتف، ربط ضيف→حساب، تدفّق دفع فعلي، تدفق إعادة جدولة/إلغاء موحّد من البوابة، إعدادات Super Admin (كلها مبعثرة).
 
-## المرحلة 1 — تجديد تصميم بوابة المريض (يوم-يومين)
+---
 
-الهدف: توحيد الشكل البصري لصفحات `portal.*` الثلاثين.
-- إنشاء `<PortalShell>` موحد: sidebar قابلة للطي (shadcn) + header + breadcrumbs + بحث سريع.
-- توحيد بطاقات القوائم (مواعيد، وصفات، تقارير، فواتير) بمكون `<PortalCard>` واحد بحالات: loading / empty / error / data.
-- نظام ألوان طبي هادئ + دعم كامل RTL + وضع داكن اختياري.
-- استبدال أي `text-white / bg-black / bg-[#...]` بـ tokens دلالية في `src/styles.css`.
+## الدفعات (تُنفَّذ بالترتيب)
 
-## المرحلة 2 — تطوير نظام حجز المواعيد (يومان-3)
+### الدفعة 1 — أساس البيانات (يوم واحد)
+- Migration: `slot_holds` (patient_ref, doctor_id, date, time, expires_at, idempotency_key).
+- توسيع `appointments.status` لتشمل: `held, pending_verification, pending_payment, checked_in, in_progress, no_show`.
+- `appointment_status_history` (منفصل عن audit، مرتبط بـ status transition).
+- RPC واحد `book_appointment_atomic(...)` بمعاملة SERIALIZABLE: يتحقق من عدم التعارض ويحجز في استعلام واحد. يستبدل الفحص المزدوج الحالي في `create.ts`.
+- Indexes: `(doctor_id, appointment_date, appointment_time)` UNIQUE partial على الحالات النشطة.
+- RLS + GRANTs لكل جدول جديد.
 
-تحسين تدفق `/book` الحالي بدلاً من إعادة كتابته:
-- **معالج مرئي متعدد الخطوات**: تخصص → طبيب → فرع → تاريخ → وقت → بيانات → تأكيد، مع stepper واضح وإمكانية الرجوع.
-- **شبكة أوقات متاحة**: عرض المواعيد الفارغة فقط من `availability_slots` مع تحديث حي عند الاختيار.
-- **قائمة انتظار ذكية** عبر `appointment_waitlist` إذا لا تتوفر مواعيد.
-- **تأكيد فوري بـ QR + SMS/Email** (استخدام `enqueue_appointment_confirmation` الموجود).
-- **إعادة الجدولة/الإلغاء بنقرة** من بوابة المريض مع سياسة زمنية.
-- التحقق من التأمين مسبقاً عبر `insurance_verifications`.
+### الدفعة 2 — محرّك الحجز الجديد (`/book`)
+- إعادة استخدام معالج الـ 9 خطوات القائم مع:
+  - تعليق الفتحة (5 دقائق) عند الوصول لخطوة الوقت + عدّاد مرئي.
+  - إعادة التحقق قبل الإرسال.
+  - رسالة "تم الحجز للتو" + اقتراحات ذكية (أقرب وقت/طبيب آخر/فرع آخر/قائمة انتظار).
+- إضافة نقطة دخول "أقرب موعد متاح" (استعلام واحد يرجّع أول فتحة عبر كل الأطباء المطابقين).
+- إضافة "حجز لأحد أفراد الأسرة" (dependents) في الخطوة 1 للمسجّلين.
 
-## المرحلة 3 — بوابة الطبيب (يومان)
+### الدفعة 3 — OTP هاتف + ربط ضيف→حساب
+- تكامل SMS عبر connector (Twilio/Unifonic). طلب secret واحد.
+- جدول `otp_codes` (hash فقط، expire 5 دقائق، rate-limit 3 محاولات).
+- تعديل الخطوة 6: OTP إلزامي للجدد، اختياري للمسجّلين.
+- بعد التأكيد، دعوة "أنشئ حسابك" — الربط عبر مطابقة الهاتف + OTP جديد فقط (لا عبر booking reference).
 
-مسار جديد `_authenticated/doctor/*` بصلاحية `has_role('doctor')`:
-- **لوحة اليوم**: قائمة مواعيد اليوم، حالة كل مريض، أزرار "بدأ / انتهى / لم يحضر".
-- **ملف المريض السريع**: تاريخ مرضي، حساسيات، أدوية، آخر زيارات (قراءة فقط أو تحرير حسب الدور).
-- **كتابة الوصفة والتقرير**: نموذج مع templates جاهزة، توقيع رقمي، حفظ في `prescriptions` و `medical_reports`.
-- **إدارة الإجازات والجدول**: قراءة/طلب من `doctor_leaves` و `availability_slots`.
+### الدفعة 4 — لوحة المريض المعاد تصميمها (`/patient`)
+- بطاقات: الموعد التالي، تقارير جديدة، وصفات، فواتير، موافقات تأمين، إجراءات مطلوبة.
+- تبويبات مواعيدي: قادمة/معلّقة/سابقة/ملغاة.
+- تدفّق موحّد لإعادة جدولة + إلغاء (يستخدم `slot_holds`).
+- Bottom nav للجوال (5 عناصر)، sidebar للـ desktop.
+- Check-in رقمي (QR + نافذة زمنية).
 
-## المرحلة 4 — تطوير لوحة الإدارة/الاستقبال (يومان)
+### الدفعة 5 — قائمة الانتظار + الإشعارات
+- توسيع `appointment_waitlist` الموجود + تشغيله فعلياً: عند تحرّر فتحة → notify → hold تلقائي 10 دقائق → confirmation بضغطة.
+- مركز إشعارات موحّد (in-app + SMS + email + WhatsApp) مع تفضيلات القناة.
 
-- **Command Center محسّن**: KPIs حية (مواعيد اليوم، دخل، شكاوى مفتوحة، طوابير).
-- **جدول مواعيد يومي بسحب-وإفلات** لإعادة الجدولة.
-- **check-in سريع** بمسح QR للمريض.
-- **إدارة الوصفات المعلقة والصيدلية**.
-- **تقارير قابلة للتصدير** (CSV/PDF).
+### الدفعة 6 — التقارير + الفواتير + التأمين
+- توحيد `medical_reports`/`lab_reports`/`radiology_reports` في عرض واحد مع signed URLs (Storage) بدل روابط عامة.
+- ربط `payments` بمزوّد سعودي (بوابة موجودة أو Paddle). لا محاكاة نجاح.
+- عرض `insurance_approvals` مع الحالات الكاملة والوثائق المطلوبة.
 
-## المرحلة 5 — الأداء والاستعلامات (يوم)
-
-- تحويل استعلامات portal الثقيلة إلى `queryOptions` + `ensureQueryData` مع مفاتيح `[table, filters]` واضحة.
-- prefetch للبيانات غير الحرجة بدون await.
-- فهارس DB على أعمدة الفلترة المتكررة (`appointments.patient_id + status`, `slots.doctor_id + date`).
-- تقليل استدعاءات Supabase عبر RPCs مجمعة بدل عدة SELECT.
-- lazy load للـ admin bundles الكبيرة.
+### الدفعة 7 — Admin/Reception Console + Super Admin Settings
+- Command Center: جدول اليوم، timeline، مواعيد الطوارئ، تحويلات.
+- `system_settings` — نقل كل الثوابت (slot hold duration, cancellation window…) لواجهة إدارة.
+- سجل تدقيق لكل تغيير حسّاس.
 
 ---
 
 ## تفاصيل تقنية
 
-- كل الصفحات تحت `_authenticated/` (المصادقة تعمل بالفعل عبر gate).
-- الحجز يستخدم `createServerFn` + `requireSupabaseAuth` للعمليات، و RPC عامة `book_appointment_v2` للحجز غير المسجّل.
-- كل جدول جديد أو تعديل RLS يمر عبر migration منفصل.
-- الأدوار الحالية: `admin`, `super_admin`, `reception`, `doctor`, `nurse`, `pharmacy` (موجودة في `app_role`).
-- استخدام TanStack Query + Suspense في كل الصفحات الجديدة.
-- لا استخدام `Date.now()` أو `crypto.randomUUID()` في render (وضعها في `useEffect`).
+- كل الجداول الجديدة: RLS + GRANT + `service_role` (وفق قواعد Cloud).
+- Server-only logic عبر `createServerFn` أو `/api/public/*` (الأخير للـ webhooks/OTP فقط بعد signature verification).
+- التوقيت: كل مقارنة "اليوم" تمرّ عبر `riyadhTodayIso()` الموجود.
+- Realtime: `useRealtimeInvalidation` الحالي يوسَّع ليشمل `slot_holds`.
+- i18n: كل نص جديد عبر `src/locales/{ar,en}/*.json`.
+- لا حذف لصفحات موجودة قبل التأكد من عدم كسر تدفّقات؛ التوحيد تدريجي (`/reservations/*` تبقى redirect إلى `/book` في الدفعة 2).
+
+## ما لن أفعله
+
+- لن أستبدل `client.ts`, `auth-middleware.ts`, `types.ts` (auto-gen).
+- لن أنشئ Edge Functions لمنطق داخلي (كل شيء `createServerFn`).
+- لن أُدخل بوابة دفع أو مزوّد SMS دون طلب مفاتيحه صراحة.
 
 ---
 
-## قرار مطلوب منك
+## أحتاج تأكيدك على:
 
-يرجى اختيار **مرحلة واحدة** لنبدأ بها الآن:
-- المرحلة 0 (تنظيف عاجل — سريع)
-- المرحلة 1 (تصميم بوابة المريض)
-- المرحلة 2 (نظام حجز محسّن)
-- المرحلة 3 (بوابة الطبيب الجديدة)
-- المرحلة 4 (لوحة إدارة محسّنة)
-- المرحلة 5 (أداء واستعلامات)
-
-أو اقترح ترتيباً مختلفاً / ادمج مرحلتين.
+1. **مزوّد SMS للـ OTP**: هل لديك Twilio/Unifonic/آخر؟ (سأطلب المفاتيح في الدفعة 3.)
+2. **بوابة الدفع**: هل نفعّل Lovable Stripe المدمج (بدون حساب) أم لديك بوابة سعودية محدّدة (Moyasar/HyperPay)؟
+3. **البدء بالدفعة 1** (أساس البيانات + RPC ذرّي) الآن؟ أم تفضّل ترتيباً مختلفاً؟
