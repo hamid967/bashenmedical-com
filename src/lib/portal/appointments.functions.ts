@@ -330,3 +330,87 @@ export const requestFollowUp = createServerFn({ method: "POST" })
     if (insertRes.error) throw new Error(insertRes.error.message);
     return { ok: true, id: insertRes.data.id as string };
   });
+
+/* ------------------------------ self check-in ---------------------------- */
+/**
+ * Digital self check-in from the patient portal.
+ * Allowed within a window: 60 min before → 30 min after appointment time.
+ * Returns queue number and status.
+ */
+export const performSelfCheckIn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { appt, scope } = await loadOwnedAppointment(supabase, userId, data.id);
+
+    if (appt.status === "cancelled" || appt.status === "completed" || appt.status === "no_show") {
+      throw new Error("لا يمكن تسجيل الحضور لهذا الموعد.");
+    }
+
+    // Riyadh time (UTC+3) window
+    const [y, mo, d] = String(appt.appointment_date).split("-").map(Number);
+    const [hh, mm] = String(appt.appointment_time).slice(0, 5).split(":").map(Number);
+    const apptUTC = Date.UTC(y, mo - 1, d, hh - 3, mm);
+    const now = Date.now();
+    const diffMin = (now - apptUTC) / 60000;
+    if (diffMin < -60) throw new Error("تسجيل الحضور متاح قبل الموعد بـ 60 دقيقة.");
+    if (diffMin > 30) throw new Error("انتهت نافذة تسجيل الحضور. يرجى مراجعة الاستقبال.");
+
+    // Idempotent: return existing check-in if present
+    const existing = await supabase
+      .from("patient_check_ins")
+      .select("id, queue_number, status, checked_in_at")
+      .eq("appointment_id", data.id)
+      .maybeSingle();
+    if (existing.error && existing.error.code !== "PGRST116") {
+      throw new Error(existing.error.message);
+    }
+    if (existing.data) {
+      return {
+        ok: true,
+        already: true as const,
+        queue_number: existing.data.queue_number as number | null,
+        status: existing.data.status as string,
+        checked_in_at: existing.data.checked_in_at as string,
+      };
+    }
+
+    // Compute next queue number for the doctor/branch today
+    const { data: existingToday } = await supabase
+      .from("patient_check_ins")
+      .select("queue_number, appointment_id, appointments!inner(appointment_date, doctor_id, branch_id)")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .eq("appointments.appointment_date" as any, appt.appointment_date)
+      .eq("appointments.doctor_id" as any, appt.doctor_id ?? "")
+      .order("queue_number", { ascending: false })
+      .limit(1);
+    const nextQueue =
+      Array.isArray(existingToday) && existingToday[0]?.queue_number
+        ? Number(existingToday[0].queue_number) + 1
+        : 1;
+
+    const ins = await supabase
+      .from("patient_check_ins")
+      .insert({
+        appointment_id: data.id,
+        patient_id: scope.patientId,
+        queue_number: nextQueue,
+        status: "waiting",
+      })
+      .select("id, queue_number, status, checked_in_at")
+      .single();
+    if (ins.error) throw new Error(ins.error.message);
+
+    // Move appointment to checked_in
+    await supabase.from("appointments").update({ status: "checked_in" }).eq("id", data.id);
+
+    return {
+      ok: true,
+      already: false as const,
+      queue_number: ins.data.queue_number as number | null,
+      status: ins.data.status as string,
+      checked_in_at: ins.data.checked_in_at as string,
+    };
+  });
+
