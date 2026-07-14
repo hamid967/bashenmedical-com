@@ -846,6 +846,108 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_records: {
+        Row: {
+          channel: string
+          consent_type: Database["public"]["Enums"]["consent_type"]
+          created_at: string
+          document_hash: string | null
+          document_url: string | null
+          expires_at: string | null
+          granted_at: string
+          granted_by: string | null
+          guardian_name: string | null
+          guardian_national_id: string | null
+          guardian_relationship: string | null
+          id: string
+          ip_address: unknown
+          language: string
+          linked_appointment_id: string | null
+          notes: string | null
+          patient_id: string
+          scope: Json
+          signature_data: string | null
+          status: Database["public"]["Enums"]["consent_status"]
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          version: string
+          withdrawal_reason: string | null
+          withdrawn_at: string | null
+        }
+        Insert: {
+          channel?: string
+          consent_type: Database["public"]["Enums"]["consent_type"]
+          created_at?: string
+          document_hash?: string | null
+          document_url?: string | null
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          guardian_name?: string | null
+          guardian_national_id?: string | null
+          guardian_relationship?: string | null
+          id?: string
+          ip_address?: unknown
+          language?: string
+          linked_appointment_id?: string | null
+          notes?: string | null
+          patient_id: string
+          scope?: Json
+          signature_data?: string | null
+          status?: Database["public"]["Enums"]["consent_status"]
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          version?: string
+          withdrawal_reason?: string | null
+          withdrawn_at?: string | null
+        }
+        Update: {
+          channel?: string
+          consent_type?: Database["public"]["Enums"]["consent_type"]
+          created_at?: string
+          document_hash?: string | null
+          document_url?: string | null
+          expires_at?: string | null
+          granted_at?: string
+          granted_by?: string | null
+          guardian_name?: string | null
+          guardian_national_id?: string | null
+          guardian_relationship?: string | null
+          id?: string
+          ip_address?: unknown
+          language?: string
+          linked_appointment_id?: string | null
+          notes?: string | null
+          patient_id?: string
+          scope?: Json
+          signature_data?: string | null
+          status?: Database["public"]["Enums"]["consent_status"]
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          version?: string
+          withdrawal_reason?: string | null
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_records_linked_appointment_id_fkey"
+            columns: ["linked_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "consent_records_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       corporate_requests: {
         Row: {
           admin_notes: string | null
@@ -4425,6 +4527,13 @@ export type Database = {
           stars_5: number
         }[]
       }
+      has_active_consent: {
+        Args: {
+          _consent_type: Database["public"]["Enums"]["consent_type"]
+          _patient_id: string
+        }
+        Returns: boolean
+      }
       has_branch_access: {
         Args: { _branch_id: string; _user_id: string }
         Returns: boolean
@@ -4954,6 +5063,21 @@ export type Database = {
         | "prescription"
         | "insurance"
         | "other"
+      consent_status: "granted" | "withdrawn" | "expired" | "superseded"
+      consent_type:
+        | "terms_of_service"
+        | "privacy_policy"
+        | "data_processing"
+        | "marketing_communications"
+        | "medical_treatment"
+        | "anesthesia"
+        | "surgical_procedure"
+        | "telemedicine"
+        | "share_medical_records"
+        | "insurance_data_sharing"
+        | "research_participation"
+        | "photography_recording"
+        | "minor_guardian_consent"
       delivery_type: "pickup" | "delivery"
       gender_type: "male" | "female" | "other"
       medical_history_category: "chronic" | "past" | "family" | "surgical_note"
@@ -5132,6 +5256,22 @@ export const Constants = {
         "prescription",
         "insurance",
         "other",
+      ],
+      consent_status: ["granted", "withdrawn", "expired", "superseded"],
+      consent_type: [
+        "terms_of_service",
+        "privacy_policy",
+        "data_processing",
+        "marketing_communications",
+        "medical_treatment",
+        "anesthesia",
+        "surgical_procedure",
+        "telemedicine",
+        "share_medical_records",
+        "insurance_data_sharing",
+        "research_participation",
+        "photography_recording",
+        "minor_guardian_consent",
       ],
       delivery_type: ["pickup", "delivery"],
       gender_type: ["male", "female", "other"],
