@@ -177,6 +177,13 @@ const T = {
   st_pending:       { ar: "بانتظار المعالجة", en: "Pending" },
   st_in_progress:   { ar: "جارٍ", en: "In progress" },
   st_unknown:       { ar: "غير معروف", en: "Unknown" },
+  // completeness
+  incomplete_title: { ar: "بيانات ناقصة قبل الحجز", en: "Missing details before booking" },
+  incomplete_body: {
+    ar: "لإتمام الحجز نيابةً عن هذا الفرد، الرجاء استكمال الحقول التالية:",
+    en: "To book on behalf of this member, please complete the following fields:",
+  },
+  complete_now:     { ar: "استكمل البيانات", en: "Complete details" },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
@@ -190,6 +197,17 @@ const RELATIONSHIP_LABELS: Record<Dependent["relationship"], keyof typeof T> = {
   sibling: "r_sibling",
   other: "r_other",
 };
+
+/**
+ * Returns the labels of required-but-missing fields on a dependent for
+ * booking. National ID + mobile are the payer/registration prerequisites.
+ */
+export function dependentMissingForBooking(row: Dependent): Array<keyof typeof T> {
+  const missing: Array<keyof typeof T> = [];
+  if (!row.national_id || !/^\d{10}$/.test(row.national_id)) missing.push("f_nid");
+  if (!row.phone || !/^(?:\+?966|0)?5\d{8}$/.test(row.phone)) missing.push("f_phone");
+  return missing;
+}
 
 /* ---------------- page ---------------- */
 
@@ -295,6 +313,8 @@ function DependentCard({
     .map((s) => s[0])
     .join("");
   const rel = t(RELATIONSHIP_LABELS[row.relationship], lang);
+  const missing = dependentMissingForBooking(row);
+  const canBook = missing.length === 0;
   return (
     <div className="glass-card p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
@@ -350,16 +370,54 @@ function DependentCard({
         )}
       </dl>
 
-      <div className="flex items-center justify-between gap-2 pt-1 mt-auto">
-        <Link
-          to="/portal/book"
-          search={{ forDependent: row.id }}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-white"
-          style={{ background: "var(--portal-gradient)" }}
+      {!canBook && (
+        <div
+          className="rounded-xl border border-amber-300/60 bg-amber-50/70 p-2.5 text-[11px] text-amber-800"
+          role="status"
         >
-          <CalendarPlus className="h-3.5 w-3.5" />
-          {t("book_for", lang)}
-        </Link>
+          <div className="flex items-start gap-1.5">
+            <ShieldAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <div className="font-semibold">{t("incomplete_title", lang)}</div>
+              <div className="opacity-90 mt-0.5">{t("incomplete_body", lang)}</div>
+              <ul className="mt-1 list-disc pr-4 space-y-0.5">
+                {missing.map((k) => (
+                  <li key={k}>{t(k, lang)}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-2 pt-1 mt-auto">
+        {canBook ? (
+          <Link
+            to="/portal/book"
+            search={{ forDependent: row.id }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-white"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <CalendarPlus className="h-3.5 w-3.5" />
+            {t("book_for", lang)}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              toast.warning(t("incomplete_title", lang), {
+                description: `${t("incomplete_body", lang)} ${missing
+                  .map((k) => t(k, lang))
+                  .join("، ")}`,
+              });
+              onEdit();
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 border border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100"
+          >
+            <ShieldAlert className="h-3.5 w-3.5" />
+            {t("complete_now", lang)}
+          </button>
+        )}
         <div className="flex items-center gap-1">
           <button
             onClick={onEdit}
@@ -381,6 +439,7 @@ function DependentCard({
       </div>
 
       <DependentAppointmentsSection dependentId={row.id} lang={lang} />
+
     </div>
   );
 }
