@@ -412,7 +412,7 @@ function mapItemType() {
 }
 
 function AppointmentCard({
-  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, pending,
+  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, onCheckIn, pending,
 }: {
   a: ApptRow;
   scope: Scope;
@@ -420,12 +420,24 @@ function AppointmentCard({
   onReschedule: () => void;
   onCancel: () => void;
   onFollowUp: () => void;
+  onCheckIn: () => void;
   pending: boolean;
 }) {
   const meta = statusMeta(a.status);
   const canConfirm = scope === "upcoming" && a.status === "new";
   const canModify = scope === "upcoming" && (a.status === "new" || a.status === "confirmed");
   const canFollow = scope === "past" && (a.status === "completed" || a.status === "no_show");
+  // Check-in window: 60 min before → 30 min after appointment time (Riyadh)
+  const canCheckIn = (() => {
+    if (scope !== "upcoming") return false;
+    if (!(a.status === "new" || a.status === "confirmed")) return false;
+    const [y, mo, d] = a.appointment_date.split("-").map(Number);
+    const [hh, mm] = String(a.appointment_time).slice(0, 5).split(":").map(Number);
+    const apptUTC = Date.UTC(y, mo - 1, d, hh - 3, mm);
+    const diffMin = (Date.now() - apptUTC) / 60000;
+    return diffMin >= -60 && diffMin <= 30;
+  })();
+  const alreadyCheckedIn = a.status === "checked_in" || a.status === "in_progress";
   const mapsUrl =
     a.branch?.lat != null && a.branch?.lng != null
       ? `https://www.google.com/maps/search/?api=1&query=${a.branch.lat},${a.branch.lng}`
