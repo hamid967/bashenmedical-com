@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import QRCode from "qrcode";
-import { AlertCircle, Bell, Calendar as CalIcon, CalendarPlus, CheckCircle2, ClipboardList, Download, MessageCircle, QrCode } from "lucide-react";
+import { AlertCircle, Bell, Calendar as CalIcon, CalendarPlus, CheckCircle2, ClipboardList, Clock, Download, MessageCircle, QrCode } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/site";
@@ -177,6 +177,13 @@ export function StepSuccess({
       </div>
       <h2 className="text-2xl md:text-3xl font-bold">{t("success.title")}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{t("success.subtitle")}</p>
+
+      <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/60 px-4 py-1.5 text-xs font-semibold text-amber-800 dark:text-amber-200">
+        <Clock className="h-3.5 w-3.5" />
+        <span>{t("success.statusLabel")}:</span>
+        <span className="font-bold">{t("success.pendingReview")}</span>
+      </div>
+      <p className="mt-2 text-xs text-muted-foreground">{t("success.statusHint")}</p>
 
       {reference && (
         <div className="mt-6 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-4">

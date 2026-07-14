@@ -178,6 +178,8 @@
     "amSuffix": "AM",
     "pmSuffix": "PM",
     "pendingReview": "Pending review",
+    "statusLabel": "Current status",
+    "statusHint": "Our reception team will contact you to confirm the appointment during working hours. You can track the status or manage the booking below.",
     "eventTitleSuffix": " — Appointment with {{doctor}}",
     "eventTitleGeneric": " — Appointment",
     "riyadhShort": "Riyadh time",
