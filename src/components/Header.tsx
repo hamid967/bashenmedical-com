@@ -190,8 +190,9 @@ export function Header() {
           <ThemeToggle />
           <Link
             to="/book"
-            className="inline-flex items-center rounded-md bg-gradient-to-r from-primary to-accent px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm hover:opacity-95"
+            className="inline-flex items-center gap-1.5 rounded-md bg-[var(--jazan-teal,#075E63)] px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-[var(--jazan-gold,#C7A46B)]/60 hover:bg-[var(--jazan-palm,#24745E)] transition"
           >
+            <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rotate-45 bg-[var(--jazan-gold,#C7A46B)]" />
             {t("cta_book")}
           </Link>
           {signedIn ? (
