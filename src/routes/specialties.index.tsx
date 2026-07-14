@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { Stethoscope, Users } from "lucide-react";
 import { buildLocalBusinessSchema, buildBreadcrumbs } from "@/lib/localBusinessSchema";
 import { specialtyDoctorCountsQuery } from "@/lib/accreditations";
+import { PageHero } from "@/components/PageShell";
 
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
