@@ -65,6 +65,17 @@ function fmtDate(iso: string | null) {
     return iso.slice(0, 10);
   }
 }
+function fmtDateTime(iso: string | null) {
+  if (!iso) return "—";
+  try {
+    return new Intl.DateTimeFormat("ar-SA", {
+      year: "numeric", month: "short", day: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    }).format(new Date(iso));
+  } catch {
+    return iso.slice(0, 16).replace("T", " ");
+  }
+}
 type Status = "pending" | "approved" | "processed" | "rejected" | "canceled";
 const STATUS_META: Record<Status, { label: string; cls: string; icon: any }> = {
   pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-700", icon: Clock },
