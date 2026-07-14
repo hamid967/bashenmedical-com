@@ -176,6 +176,28 @@ const T = {
     ar: "توجد مواعيد سابقة لهذا الفرد. سيتم الاحتفاظ بسجلها ولن تُحذف.",
     en: "This member has past appointments. Their history will be kept and not deleted.",
   },
+  del_cancel_active: {
+    ar: "إلغاء المواعيد النشطة",
+    en: "Cancel active appointments",
+  },
+  del_cancel_confirm: {
+    ar: "سيتم إلغاء جميع المواعيد النشطة لهذا الفرد وتحرير حجوزاتها. هل تريد المتابعة؟",
+    en: "All active appointments for this member will be cancelled and their slots freed. Continue?",
+  },
+  del_cancel_success: {
+    ar: "تم إلغاء المواعيد النشطة. يمكنك الآن حذف الفرد.",
+    en: "Active appointments cancelled. You can now delete the member.",
+  },
+  del_cancel_none: {
+    ar: "لا توجد مواعيد نشطة لإلغائها.",
+    en: "No active appointments to cancel.",
+  },
+  del_cancel_error: {
+    ar: "تعذّر إلغاء المواعيد النشطة.",
+    en: "Could not cancel active appointments.",
+  },
+  del_cancelling: { ar: "جارٍ الإلغاء…", en: "Cancelling…" },
+
 
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
