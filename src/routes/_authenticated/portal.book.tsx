@@ -144,6 +144,7 @@ function BookPage() {
   const [providerId, setProviderId] = useState<string>("");
   const [policyNumber, setPolicyNumber] = useState<string>("");
   const [verify, setVerify] = useState<null | {
+    id: string | null;
     ok: boolean;
     eligible: boolean;
     reason: string;
