@@ -692,6 +692,39 @@ html.reduce-motion .skeleton-neon::after {
   background: linear-gradient(110deg, transparent 40%, rgba(0, 217, 192, 0.08) 50%, transparent 60%);
 }
 
+/* --- Jazan skeleton — warm ivory shimmer with gold hairline ------------- */
+@keyframes jazan-skeleton-pulse {
+  0%, 100% { background-color: var(--jazan-ivory, #FCF9F2); }
+  50%      { background-color: color-mix(in oklab, var(--jazan-sand, #E6D4B7) 35%, var(--jazan-ivory, #FCF9F2)); }
+}
+@utility skeleton-jazan {
+  position: relative;
+  overflow: hidden;
+  background: var(--jazan-ivory, #FCF9F2);
+  border: 1px solid var(--jazan-hairline);
+  border-radius: 0.75rem;
+  animation: jazan-skeleton-pulse 2.4s ease-in-out infinite;
+}
+.skeleton-jazan::after {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    110deg,
+    transparent 20%,
+    color-mix(in oklab, var(--jazan-gold, #C7A46B) 30%, transparent) 50%,
+    transparent 80%
+  );
+  transform: translateX(-100%);
+  animation: fut-shine 1.6s ease-in-out infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-jazan { animation: none !important; }
+  .skeleton-jazan::after { animation: none !important; transform: none; background: none; }
+}
+html.reduce-motion .skeleton-jazan { animation: none !important; }
+html.reduce-motion .skeleton-jazan::after { animation: none !important; transform: none; background: none; }
+
 /* Pulse dot — availability / live indicator. */
 @keyframes fut-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(0, 217, 192, 0.55); }
