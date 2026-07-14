@@ -119,6 +119,7 @@ import { Route as AuthenticatedPortalDoctorsRouteImport } from './routes/_authen
 import { Route as AuthenticatedPortalComplaintsRouteImport } from './routes/_authenticated/portal.complaints'
 import { Route as AuthenticatedPortalCalendarRouteImport } from './routes/_authenticated/portal.calendar'
 import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authenticated/portal.book'
+import { Route as AuthenticatedPortalAppointmentsRouteImport } from './routes/_authenticated/portal.appointments'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -728,6 +729,12 @@ const AuthenticatedPortalBookRoute = AuthenticatedPortalBookRouteImport.update({
   path: '/book',
   getParentRoute: () => AuthenticatedPortalRoute,
 } as any)
+const AuthenticatedPortalAppointmentsRoute =
+  AuthenticatedPortalAppointmentsRouteImport.update({
+    id: '/appointments',
+    path: '/appointments',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedPatientsPatientIdRoute =
   AuthenticatedPatientsPatientIdRouteImport.update({
     id: '/patients/$patientId',
@@ -912,6 +919,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
+  '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/book': typeof AuthenticatedPortalBookRoute
   '/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
@@ -1038,6 +1046,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
+  '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/book': typeof AuthenticatedPortalBookRoute
   '/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
@@ -1167,6 +1176,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
+  '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/_authenticated/portal/book': typeof AuthenticatedPortalBookRoute
   '/_authenticated/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/_authenticated/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
@@ -1296,6 +1306,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/patients/$patientId'
+    | '/portal/appointments'
     | '/portal/book'
     | '/portal/calendar'
     | '/portal/complaints'
@@ -1422,6 +1433,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/patients/$patientId'
+    | '/portal/appointments'
     | '/portal/book'
     | '/portal/calendar'
     | '/portal/complaints'
@@ -1550,6 +1562,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/patients/$patientId'
+    | '/_authenticated/portal/appointments'
     | '/_authenticated/portal/book'
     | '/_authenticated/portal/calendar'
     | '/_authenticated/portal/complaints'
@@ -2418,6 +2431,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalBookRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/appointments': {
+      id: '/_authenticated/portal/appointments'
+      path: '/appointments'
+      fullPath: '/portal/appointments'
+      preLoaderRoute: typeof AuthenticatedPortalAppointmentsRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/_authenticated/patients/$patientId': {
       id: '/_authenticated/patients/$patientId'
       path: '/patients/$patientId'
@@ -2605,6 +2625,7 @@ const AuthenticatedPortalReportsRouteWithChildren =
   )
 
 interface AuthenticatedPortalRouteChildren {
+  AuthenticatedPortalAppointmentsRoute: typeof AuthenticatedPortalAppointmentsRoute
   AuthenticatedPortalBookRoute: typeof AuthenticatedPortalBookRoute
   AuthenticatedPortalCalendarRoute: typeof AuthenticatedPortalCalendarRoute
   AuthenticatedPortalComplaintsRoute: typeof AuthenticatedPortalComplaintsRoute
@@ -2627,6 +2648,7 @@ interface AuthenticatedPortalRouteChildren {
 }
 
 const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
+  AuthenticatedPortalAppointmentsRoute: AuthenticatedPortalAppointmentsRoute,
   AuthenticatedPortalBookRoute: AuthenticatedPortalBookRoute,
   AuthenticatedPortalCalendarRoute: AuthenticatedPortalCalendarRoute,
   AuthenticatedPortalComplaintsRoute: AuthenticatedPortalComplaintsRoute,
