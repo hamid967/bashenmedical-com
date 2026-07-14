@@ -81,6 +81,72 @@ function arrayBufferToBase64Url(buf: ArrayBuffer | null): string | null {
   return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
+type PayloadPreset = {
+  id: string;
+  label: string;
+  description: string;
+  title: string;
+  body: string;
+  url: string;
+  requireInteraction: boolean;
+  dataJson: string;
+};
+
+const PAYLOAD_PRESETS: PayloadPreset[] = [
+  {
+    id: "test",
+    label: "اختبار عام",
+    description: "حمولة تجريبية بسيطة للتحقق من وصول الإشعار.",
+    title: "إشعار تجريبي — Test push",
+    body: "هذا اختبار حقيقي عبر web-push من الخادم.",
+    url: "/portal/notifications",
+    requireInteraction: false,
+    dataJson: '{\n  "kind": "test",\n  "source": "portal"\n}',
+  },
+  {
+    id: "appointment-reminder",
+    label: "تذكير موعد",
+    description: "تذكير موعد قادم يوجّه إلى صفحة الحجوزات.",
+    title: "تذكير بموعدك القادم",
+    body: "لديك موعد خلال ساعة. اضغط لعرض التفاصيل.",
+    url: "/portal/appointments",
+    requireInteraction: true,
+    dataJson:
+      '{\n  "kind": "appointment_reminder",\n  "appointmentId": 12345,\n  "leadMinutes": 60\n}',
+  },
+  {
+    id: "lab-ready",
+    label: "نتائج مختبر جاهزة",
+    description: "إشعار بجاهزية نتائج المختبر مع رابط التقارير.",
+    title: "نتائج المختبر جاهزة",
+    body: "تم اعتماد نتائج فحوصاتك الأخيرة. اطّلع عليها الآن.",
+    url: "/portal/lab",
+    requireInteraction: false,
+    dataJson: '{\n  "kind": "lab_result",\n  "reportId": "L-2026-0001"\n}',
+  },
+  {
+    id: "prescription-ready",
+    label: "وصفة جاهزة للاستلام",
+    description: "تنبيه صيدلية بأن الوصفة جاهزة للاستلام.",
+    title: "وصفتك جاهزة في الصيدلية",
+    body: "يمكنك استلام أدويتك من صيدلية الفرع خلال ساعات العمل.",
+    url: "/portal/prescriptions",
+    requireInteraction: false,
+    dataJson: '{\n  "kind": "prescription_ready",\n  "prescriptionId": "RX-8890"\n}',
+  },
+  {
+    id: "invoice-due",
+    label: "فاتورة مستحقة",
+    description: "تذكير بفاتورة غير مدفوعة يوجّه إلى صفحة الفواتير.",
+    title: "لديك فاتورة مستحقة الدفع",
+    body: "يرجى تسوية الفاتورة لتجنّب تأجيل الخدمات.",
+    url: "/portal/invoices",
+    requireInteraction: true,
+    dataJson:
+      '{\n  "kind": "invoice_due",\n  "invoiceId": "INV-2026-0042",\n  "amount": 350\n}',
+  },
+]
+
 export function PushSubscriptionCard() {
   const push = usePushNotifications(true);
   const [details, setDetails] = useState<SubDetails | null>(null);
@@ -522,7 +588,43 @@ export function PushSubscriptionCard() {
       {/* Custom payload editor for the server-side push test */}
       {showPayload && (
         <div className="mt-4 space-y-3 rounded-xl border bg-muted/20 p-4">
+          {/* Preset picker — replaces title/body/url/data with a template */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted-foreground">
+                قوالب جاهزة — Presets
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                تستبدل الحقول أدناه
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {PAYLOAD_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  title={preset.description}
+                  onClick={() => {
+                    setPayload({
+                      title: preset.title,
+                      body: preset.body,
+                      url: preset.url,
+                      requireInteraction: preset.requireInteraction,
+                      dataJson: preset.dataJson,
+                    });
+                    setDataError(null);
+                    toast.success(`تم تطبيق القالب: ${preset.label}`);
+                  }}
+                  className="rounded-full border border-input bg-background px-3 py-1 text-[11px] font-medium text-foreground transition hover:border-primary hover:bg-primary/10 hover:text-primary"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
+
             <label className="space-y-1 text-xs">
               <span className="font-semibold text-muted-foreground">العنوان — Title</span>
               <input
