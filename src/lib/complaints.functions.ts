@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import type { Database } from "@/integrations/supabase/types";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { SIGNED_URL_TTL_SECONDS } from "@/lib/download-error";
 
 /**
  * Complaints & suggestions system.
@@ -210,7 +211,7 @@ export const getMyComplaintAttachmentUrls = createServerFn({ method: "POST" })
       items.map(async (a) => {
         const { data: s } = await context.supabase.storage
           .from("complaint-attachments")
-          .createSignedUrl(a.path, 60 * 10);
+          .createSignedUrl(a.path, SIGNED_URL_TTL_SECONDS);
         return { ...a, url: s?.signedUrl ?? null };
       }),
     );

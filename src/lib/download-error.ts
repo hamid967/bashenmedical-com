@@ -15,28 +15,50 @@ export const DOWNLOAD_ERROR_MESSAGES = {
   downloadStarted: "تم بدء تنزيل الملف بنجاح",
 } as const;
 
+export const DOWNLOAD_ERROR_MESSAGES_EN = {
+  generic: "Could not generate download link",
+  notFound: "File is not available right now — please contact the reception",
+  expired: "Download link has expired",
+  invalidUrl: "Download link is invalid or expired",
+  unexpected: "An unexpected error occurred during download",
+  downloadStarted: "File download has started",
+} as const;
+
+export type DownloadLang = "ar" | "en";
+
+function messagesFor(lang: DownloadLang) {
+  return lang === "en" ? DOWNLOAD_ERROR_MESSAGES_EN : DOWNLOAD_ERROR_MESSAGES;
+}
+
 /**
  * Signed URL lifetime in seconds. Kept as a shared constant so the button
- * hint ("صالح لمدة N دقائق") always matches the value passed to
+ * hint always matches the value passed to
  * `supabase.storage.from(bucket).createSignedUrl(path, SIGNED_URL_TTL_SECONDS)`.
+ * Used uniformly across patient reports, radiology, lab, invoices and attachments.
  */
 export const SIGNED_URL_TTL_SECONDS = 300;
 
 /**
- * Format the signed-URL lifetime as a short Arabic phrase for the UI hint.
- * Rounds up to whole minutes when >= 60s; falls back to seconds otherwise.
+ * Format the signed-URL lifetime as a short bilingual phrase for the UI hint.
  */
-export function formatSignedUrlValidity(ttlSeconds: number = SIGNED_URL_TTL_SECONDS): string {
+export function formatSignedUrlValidity(
+  ttlSeconds: number = SIGNED_URL_TTL_SECONDS,
+  lang: DownloadLang = "ar",
+): string {
   if (!Number.isFinite(ttlSeconds) || ttlSeconds <= 0) return "";
-  if (ttlSeconds < 60) return `صالح لمدة ${ttlSeconds} ثانية`;
+  if (ttlSeconds < 60) {
+    return lang === "en"
+      ? `Valid for ${ttlSeconds} seconds`
+      : `صالح لمدة ${ttlSeconds} ثانية`;
+  }
   const minutes = Math.round(ttlSeconds / 60);
-  return `صالح لمدة ${minutes} دقيقة`;
+  return lang === "en"
+    ? `Valid for ${minutes} minute${minutes === 1 ? "" : "s"}`
+    : `صالح لمدة ${minutes} دقيقة`;
 }
 
 /**
- * Format remaining seconds as "MM:SS" for the live countdown shown under the
- * download button after a signed URL is generated. Clamps to 00:00 for
- * non-positive / non-finite inputs so the UI never flashes negatives.
+ * Format remaining seconds as "MM:SS" for the live countdown.
  */
 export function formatCountdown(secondsRemaining: number): string {
   if (!Number.isFinite(secondsRemaining) || secondsRemaining <= 0) return "00:00";
@@ -47,17 +69,28 @@ export function formatCountdown(secondsRemaining: number): string {
 }
 
 /**
- * Map a raw signed-URL error message to a user-friendly Arabic message.
- * - 404 / "not found" → notFound
- * - "expired" / "انتهت" → expired
- * - other non-empty messages → passed through verbatim (surface backend text)
- * - empty / null / undefined → generic
+ * Bilingual countdown label: "متبقّي MM:SS" / "MM:SS remaining".
  */
-export function getFriendlyDownloadError(rawMessage: string | null | undefined): string {
+export function formatCountdownLabel(
+  secondsRemaining: number,
+  lang: DownloadLang = "ar",
+): string {
+  const mmss = formatCountdown(secondsRemaining);
+  return lang === "en" ? `${mmss} remaining` : `متبقّي ${mmss}`;
+}
+
+/**
+ * Map a raw signed-URL error to a friendly localized message.
+ */
+export function getFriendlyDownloadError(
+  rawMessage: string | null | undefined,
+  lang: DownloadLang = "ar",
+): string {
   const msg = (rawMessage ?? "").trim();
-  if (!msg) return DOWNLOAD_ERROR_MESSAGES.generic;
-  if (/not.?found|404/i.test(msg)) return DOWNLOAD_ERROR_MESSAGES.notFound;
-  if (/expired|انتهت/i.test(msg)) return DOWNLOAD_ERROR_MESSAGES.expired;
+  const table = messagesFor(lang);
+  if (!msg) return table.generic;
+  if (/not.?found|404/i.test(msg)) return table.notFound;
+  if (/expired|انتهت|jwt|signature/i.test(msg)) return table.expired;
   return msg;
 }
 

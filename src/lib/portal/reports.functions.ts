@@ -4,6 +4,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { SIGNED_URL_TTL_SECONDS } from "@/lib/download-error";
 import { z } from "zod";
 
 export const REPORT_TYPES = [
@@ -114,11 +115,11 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
       const downloadName = buildDownloadName(r.title_ar, r.report_type, r.file_path);
       const { data: signed, error } = await supabaseAdmin.storage
         .from("medical-reports")
-        .createSignedUrl(r.file_path, 60, { download: downloadName });
+        .createSignedUrl(r.file_path, SIGNED_URL_TTL_SECONDS, { download: downloadName });
       if (error) throw new Error(error.message);
 
       await logAttempt("success");
-      return { url: signed.signedUrl, expiresIn: 60 };
+      return { url: signed.signedUrl, expiresIn: SIGNED_URL_TTL_SECONDS };
     } catch (err: any) {
       await logAttempt("failure", err?.message ?? "unknown");
       throw err;
@@ -278,11 +279,11 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
 
       const { data: signed, error: sErr } = await supabaseAdmin.storage
         .from("medical-reports")
-        .createSignedUrl(v.file_path, 60, { download: downloadName });
+        .createSignedUrl(v.file_path, SIGNED_URL_TTL_SECONDS, { download: downloadName });
       if (sErr) throw new Error(sErr.message);
 
       await logAttempt("success");
-      return { url: signed.signedUrl, expiresIn: 60 };
+      return { url: signed.signedUrl, expiresIn: SIGNED_URL_TTL_SECONDS };
     } catch (err: any) {
       await logAttempt("failure", err?.message ?? "unknown");
       throw err;

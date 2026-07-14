@@ -99,5 +99,14 @@
   "status_cancelled": "ملغى",
   "status_no_show": "لم يحضر",
   "upcoming": "القادمة",
-  "past": "السابقة"
+  "past": "السابقة",
+  "download_generic_error": "تعذّر إنشاء رابط التنزيل",
+  "download_not_found": "الملف غير متاح حاليًا، الرجاء التواصل مع الاستقبال",
+  "download_expired": "انتهت صلاحية رابط التنزيل",
+  "download_invalid_url": "رابط التنزيل غير صالح أو انتهت صلاحيته",
+  "download_unexpected": "حدث خطأ غير متوقع أثناء التنزيل",
+  "download_started": "تم بدء تنزيل الملف بنجاح",
+  "download_retry": "إعادة المحاولة",
+  "download_no_file": "لا يوجد ملف مرفق",
+  "download_remaining": "متبقّي"
 }

@@ -99,5 +99,14 @@
   "status_cancelled": "Cancelled",
   "status_no_show": "No-show",
   "upcoming": "Upcoming",
-  "past": "Past"
+  "past": "Past",
+  "download_generic_error": "Could not generate download link",
+  "download_not_found": "File is not available right now — please contact the reception",
+  "download_expired": "Download link has expired",
+  "download_invalid_url": "Download link is invalid or expired",
+  "download_unexpected": "An unexpected error occurred during download",
+  "download_started": "File download has started",
+  "download_retry": "Retry",
+  "download_no_file": "No file attached",
+  "download_remaining": "remaining"
 }
