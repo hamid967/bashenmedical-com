@@ -125,11 +125,18 @@ function MyAppointmentsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
   const checkInMut = useMutation({
-    mutationFn: (id: string) => performSelfCheckIn({ data: { id } }),
+    mutationFn: (v: { id: string; doctor?: string | null; branch?: string | null }) =>
+      performSelfCheckIn({ data: { id: v.id } }).then((r) => ({ ...r, doctor: v.doctor, branch: v.branch })),
     onSuccess: (r) => {
       invalidate();
-      const num = r.queue_number ? ` — رقمك في الدور: ${r.queue_number}` : "";
-      toast.success((r.already ? "أنت مسجّل بالفعل" : "تم تسجيل حضورك") + num);
+      setCheckInResult({
+        queue_number: r.queue_number,
+        checked_in_at: r.checked_in_at,
+        status: r.status,
+        already: r.already,
+        doctor: r.doctor,
+        branch: r.branch,
+      });
     },
     onError: (e: Error) => toast.error(e.message),
   });
