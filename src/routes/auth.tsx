@@ -86,7 +86,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const { redirect } = useSearch({ from: "/auth" });
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [channel, setChannel] = useState<"email" | "phone">("email");
+  const [channel, setChannel] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
@@ -94,7 +94,9 @@ function AuthPage() {
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [oauthLoading, setOauthLoading] = useState<null | "google" | "apple">(null);
-  // Phone/OTP state
+  // OTP state — supports both email (default) and SMS
+  const [otpChannel, setOtpChannel] = useState<"email" | "sms">("email");
+  const [otpEmail, setOtpEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpStep, setOtpStep] = useState<"enter" | "verify">("enter");
