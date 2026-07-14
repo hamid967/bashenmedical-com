@@ -457,10 +457,20 @@ function SuperPermissionsPage() {
               ...perms.map((p) => (
                 <tr key={p.key} className="border-t border-border hover:bg-muted/10">
                   <td className="sticky right-0 z-10 bg-card px-3 py-2 text-right">
-                    <div className="font-medium">{p.description_ar}</div>
-                    <div className="mt-0.5 font-mono text-[10px] text-muted-foreground">
-                      {p.key}
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setDetailKey(p.key)}
+                      className="group inline-flex items-start gap-1.5 text-right hover:text-primary transition"
+                      title="عرض تفاصيل الصلاحية"
+                    >
+                      <Info className="mt-0.5 h-3.5 w-3.5 opacity-50 group-hover:opacity-100" />
+                      <span>
+                        <span className="block font-medium">{p.description_ar}</span>
+                        <span className="mt-0.5 block font-mono text-[10px] text-muted-foreground">
+                          {p.key}
+                        </span>
+                      </span>
+                    </button>
                   </td>
                   {ALL_ROLES.map((r) => {
                     const cellKey = `${r}::${p.key}`;
