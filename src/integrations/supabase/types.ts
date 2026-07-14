@@ -4332,6 +4332,9 @@ export type Database = {
           file_name: string
           id: string
           inquiry_id: string
+          scan_completed_at: string | null
+          scan_result: Json | null
+          scan_status: string
           size_bytes: number
           storage_path: string
           uploaded_by: string | null
@@ -4342,6 +4345,9 @@ export type Database = {
           file_name: string
           id?: string
           inquiry_id: string
+          scan_completed_at?: string | null
+          scan_result?: Json | null
+          scan_status?: string
           size_bytes: number
           storage_path: string
           uploaded_by?: string | null
@@ -4352,6 +4358,9 @@ export type Database = {
           file_name?: string
           id?: string
           inquiry_id?: string
+          scan_completed_at?: string | null
+          scan_result?: Json | null
+          scan_status?: string
           size_bytes?: number
           storage_path?: string
           uploaded_by?: string | null
