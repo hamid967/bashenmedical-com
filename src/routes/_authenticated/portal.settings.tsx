@@ -253,16 +253,6 @@ function SettingsPage() {
               })}
             </div>
           </div>
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              {dark ? <Moon className="h-4 w-4 text-[color:var(--portal-ink-2)]" /> : <Sun className="h-4 w-4 text-[color:var(--portal-ink-2)]" />}
-              <div>
-                <div className="text-sm font-semibold text-[color:var(--portal-ink)]">الوضع الداكن</div>
-                <div className="text-xs text-[color:var(--portal-ink-2)]">راحة أفضل للعين ليلاً</div>
-              </div>
-            </div>
-            <Switch value={dark} onChange={(v) => { setDark(v); setDirty(true); }} />
-          </div>
         </section>
 
         <section className="glass-card p-5 sm:p-6 mt-6">
