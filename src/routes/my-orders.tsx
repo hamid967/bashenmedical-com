@@ -27,6 +27,7 @@ export const Route = createFileRoute("/my-orders")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "طلباتي | مجمع باعشن الطبي" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "تتبع جميع طلباتك (مواعيد، صيدلية، رأي طبي ثاني، رعاية منزلية) برقم جوالك." },
       { property: "og:title", content: "طلباتي — مجمع باعشن الطبي" },
     ],

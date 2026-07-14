@@ -40,6 +40,7 @@ export const Route = createFileRoute("/booking-confirmation")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "تأكيد الحجز | مجمع باعشن الطبي" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "ملخص الحجز ورقم الحجز في مجمع باعشن الطبي." },
       { property: "og:title", content: "تأكيد الحجز — مجمع باعشن الطبي" },
       { property: "og:description", content: "استعرض تفاصيل موعدك ورقم الحجز." },
