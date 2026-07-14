@@ -20,12 +20,15 @@ Disallow: /verify
 # Internal APIs and server routes
 Disallow: /api/
 Disallow: /_/
+Disallow: /mcp
 
 # Utility pages (no SEO value)
 Disallow: /track
 Disallow: /rate
 Disallow: /not-found
 Disallow: /404
+Disallow: /booking-confirmation
+Disallow: /my-orders
 
 # Prevent indexing of query-string duplicates
 Disallow: /*?*utm_
