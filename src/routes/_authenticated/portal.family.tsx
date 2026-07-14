@@ -370,16 +370,54 @@ function DependentCard({
         )}
       </dl>
 
-      <div className="flex items-center justify-between gap-2 pt-1 mt-auto">
-        <Link
-          to="/portal/book"
-          search={{ forDependent: row.id }}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-white"
-          style={{ background: "var(--portal-gradient)" }}
+      {!canBook && (
+        <div
+          className="rounded-xl border border-amber-300/60 bg-amber-50/70 p-2.5 text-[11px] text-amber-800"
+          role="status"
         >
-          <CalendarPlus className="h-3.5 w-3.5" />
-          {t("book_for", lang)}
-        </Link>
+          <div className="flex items-start gap-1.5">
+            <ShieldAlert className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <div className="font-semibold">{t("incomplete_title", lang)}</div>
+              <div className="opacity-90 mt-0.5">{t("incomplete_body", lang)}</div>
+              <ul className="mt-1 list-disc pr-4 space-y-0.5">
+                {missing.map((k) => (
+                  <li key={k}>{t(k, lang)}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="flex items-center justify-between gap-2 pt-1 mt-auto">
+        {canBook ? (
+          <Link
+            to="/portal/book"
+            search={{ forDependent: row.id }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-white"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <CalendarPlus className="h-3.5 w-3.5" />
+            {t("book_for", lang)}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              toast.warning(t("incomplete_title", lang), {
+                description: `${t("incomplete_body", lang)} ${missing
+                  .map((k) => t(k, lang))
+                  .join("، ")}`,
+              });
+              onEdit();
+            }}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 border border-amber-400 bg-amber-50 text-amber-800 hover:bg-amber-100"
+          >
+            <ShieldAlert className="h-3.5 w-3.5" />
+            {t("complete_now", lang)}
+          </button>
+        )}
         <div className="flex items-center gap-1">
           <button
             onClick={onEdit}
@@ -401,6 +439,7 @@ function DependentCard({
       </div>
 
       <DependentAppointmentsSection dependentId={row.id} lang={lang} />
+
     </div>
   );
 }
