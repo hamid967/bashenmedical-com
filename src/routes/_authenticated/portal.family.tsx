@@ -3,6 +3,7 @@ import {
   queryOptions,
   useSuspenseQuery,
   useMutation,
+  useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import { useState } from "react";
@@ -12,7 +13,9 @@ import {
   createDependent,
   updateDependent,
   deleteDependent,
+  listDependentAppointments,
   type Dependent,
+  type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui/button";
