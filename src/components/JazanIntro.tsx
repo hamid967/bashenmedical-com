@@ -179,7 +179,7 @@ export function JazanIntro() {
           </div>
         </div>
       ) : (
-        <CinematicStage phase={phase} text={text} />
+        <CinematicStage phase={phase} text={text} logoSrc={logoSrc} />
       )}
     </div>
   );
@@ -188,9 +188,11 @@ export function JazanIntro() {
 function CinematicStage({
   phase,
   text,
+  logoSrc,
 }: {
   phase: 0 | 1 | 2 | 3 | 4;
   text: { tagline: string; brand: string };
+  logoSrc: string;
 }) {
   return (
     <div className="absolute inset-0 grid place-items-center px-6 overflow-hidden">
