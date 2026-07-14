@@ -31,6 +31,7 @@ import {
   type PatientNotification,
 } from "@/lib/portal/notifications.functions";
 import { supabase } from "@/integrations/supabase/client";
+import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
 
 /* ----------------------------- query --------------------------------- */
 
@@ -235,6 +236,11 @@ function NotificationsPage() {
             </button>
           </div>
         </header>
+
+        {/* Web Push subscription management + /sw-push.js diagnostics */}
+        <div className="mb-6">
+          <PushSubscriptionCard />
+        </div>
 
         {/* Tabs */}
         <div
