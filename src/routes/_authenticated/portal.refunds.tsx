@@ -765,6 +765,126 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
           </div>
         )}
       </div>
+      {receiptOpen && (
+        <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />
+      )}
+    </div>
+  );
+}
+
+function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => void }) {
+  const meta = statusMeta(r.status);
+  const available = useMemo(() => RECEIPT_FIELDS.filter((f) => f.isAvailable(r)), [r]);
+  const [selected, setSelected] = useState<Set<ReceiptFieldKey>>(() => defaultReceiptSelection(r));
+
+  const toggle = (k: ReceiptFieldKey) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k); else next.add(k);
+      return next;
+    });
+  const setAll = (on: boolean) =>
+    setSelected(on ? new Set(available.map((f) => f.key)) : new Set());
+  const resetDefaults = () => setSelected(defaultReceiptSelection(r));
+
+  const grouped = useMemo(() => {
+    const map = new Map<ReceiptField["group"], ReceiptField[]>();
+    for (const f of available) {
+      const arr = map.get(f.group) ?? [];
+      arr.push(f);
+      map.set(f.group, arr);
+    }
+    return Array.from(map.entries());
+  }, [available]);
+
+  const generate = () => {
+    if (selected.size === 0) {
+      toast.error("اختر حقلًا واحدًا على الأقل.");
+      return;
+    }
+    openRefundReceipt(r, selected);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-slate-900/50" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
+        <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
+          <div>
+            <div className="font-bold text-sm">تخصيص حقول الإيصال</div>
+            <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
+              حسب الحالة: <span className="font-semibold">{meta.label}</span>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="px-5 pt-3 pb-2 flex flex-wrap items-center gap-2 border-b border-[color:var(--mag-line)]">
+          <button onClick={() => setAll(true)}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+            تحديد الكل
+          </button>
+          <button onClick={() => setAll(false)}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+            إلغاء التحديد
+          </button>
+          <button onClick={resetDefaults}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+            الافتراضي حسب الحالة
+          </button>
+          <span className="ms-auto text-[11px] text-[color:var(--mag-ink-3)]">
+            {selected.size} / {available.length} حقلاً
+          </span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {grouped.map(([group, fields]) => (
+            <div key={group}>
+              <div className="text-[11px] uppercase tracking-wider font-bold text-[color:var(--mag-ink-3)] mb-2">
+                {GROUP_LABELS[group]}
+              </div>
+              <div className="space-y-1.5">
+                {fields.map((f) => {
+                  const on = selected.has(f.key);
+                  return (
+                    <label key={f.key}
+                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[color:var(--mag-subtle)] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => toggle(f.key)}
+                        className="h-4 w-4 accent-[color:var(--mag-accent)]"
+                      />
+                      <span className="text-sm text-[color:var(--mag-ink-1)] font-medium">{f.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {!r.decision_reason && (r.status === "processed" || r.status === "rejected" || r.status === "canceled") && (
+            <div className="text-[11px] text-[color:var(--mag-ink-3)] p-2.5 rounded-lg bg-[color:var(--mag-subtle)]">
+              لا يوجد قرار محاسبي مسجّل لهذا الطلب، لذا لا يظهر خيار «قرار المحاسبة».
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
+          <button onClick={onClose}
+            className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold">
+            إلغاء
+          </button>
+          <button onClick={generate}
+            disabled={selected.size === 0}
+            className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2">
+            <Download className="h-4 w-4" />
+            توليد الإيصال
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
