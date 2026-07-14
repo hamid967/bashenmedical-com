@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS uq_patient_check_ins_appointment ON public.patient_check_ins (appointment_id);
