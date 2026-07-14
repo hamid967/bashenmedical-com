@@ -229,7 +229,7 @@ export const logRefundReceiptDownload = createServerFn({ method: "POST" })
         refund_status: data.status,
         included_fields: data.fields,
         field_count: data.field_count,
-        invoice_id: refund.invoice_id,
+        payment_id: refund.payment_id,
         refund_amount: refund.amount,
         downloaded_at: new Date().toISOString(),
       },
