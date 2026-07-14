@@ -104,6 +104,9 @@ async function fetchAvailability(date: string, doctorId: string | null, specialt
   if (doctorId) p.set("doctor_id", doctorId);
   else if (specialtyId) p.set("specialty_id", specialtyId);
   if (branchId) p.set("branch_id", branchId);
+  // Tag the request with our booking session so our own active holds
+  // don't appear as busy in the response we render.
+  if (typeof window !== "undefined") p.set("session", getBookingSessionId());
   const res = await fetch(`/api/public/book/availability?${p.toString()}`);
   if (!res.ok) return { ok: false, times: [], booked: [] };
   return (await res.json()) as AvailResp;
