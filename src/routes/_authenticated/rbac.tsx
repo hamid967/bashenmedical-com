@@ -36,18 +36,36 @@ export const Route = createFileRoute("/_authenticated/rbac")({
 const ROLE_LABELS: Record<AppRole, string> = {
   super_admin: "مسؤول أعلى",
   admin: "مسؤول",
+  center_admin: "مسؤول المجمع",
+  branch_manager: "مدير فرع",
   doctor: "طبيب",
   reception: "استقبال",
   pharmacy: "صيدلية",
+  reports_officer: "مسؤول التقارير",
+  billing_officer: "مسؤول الفوترة",
+  insurance_officer: "مسؤول التأمين",
+  support_agent: "دعم فني",
+  content_manager: "مدير المحتوى",
+  auditor: "مدقق",
+  patient: "مريض",
 };
 const ROLES: AppRole[] = ["super_admin", "admin", "doctor", "reception", "pharmacy"];
 
 const ROLE_DESCRIPTIONS: Record<AppRole, string> = {
   super_admin: "أعلى صلاحية، يتحكم بكل الإعدادات ولا يمكن حذفه بالكامل.",
   admin: "مسؤول تشغيل المجمع؛ يدير المستخدمين والصلاحيات والتقارير.",
+  center_admin: "مسؤول عام على مستوى المجمع الطبي.",
+  branch_manager: "مدير فرع؛ يشرف على عمليات الفرع اليومية.",
   doctor: "الطبيب المعالج؛ يطّلع على المرضى ويكتب البيانات السريرية.",
   reception: "موظف الاستقبال؛ يدير المواعيد وملفات المرضى.",
   pharmacy: "الصيدلي؛ يدير المخزون والوصفات الطبية.",
+  reports_officer: "مسؤول التقارير الطبية؛ يرفع ويراجع التقارير.",
+  billing_officer: "مسؤول الفوترة والمدفوعات.",
+  insurance_officer: "مسؤول التأمين والموافقات.",
+  support_agent: "الدعم الفني والاستفسارات.",
+  content_manager: "مدير محتوى الموقع والمقالات الصحية.",
+  auditor: "مدقق؛ اطلاع فقط على سجلات التدقيق.",
+  patient: "المريض؛ صلاحيات البوابة الشخصية فقط.",
 };
 
 type Tab = "users" | "roles" | "permissions";
