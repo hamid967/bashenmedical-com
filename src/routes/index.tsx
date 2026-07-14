@@ -27,6 +27,7 @@ import {
   SectionError,
 } from "@/components/home/HomeSkeletons";
 import ogHomeAsset from "@/assets/og-home-bmc.jpg.asset.json";
+import { JazanPattern } from "@/components/jazan/JazanPattern";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE =
@@ -206,12 +207,103 @@ function HomePage() {
   return (
     <div className="futuristic" dir={isAr ? "rtl" : "ltr"}>
       {/* ===== HERO ===== */}
-      <section className="aurora-bg grid-overlay relative">
+      <section className="aurora-bg grid-overlay relative overflow-hidden">
+        {/* Jazan heritage decorative layer — mountain terraces, coastal reflection, palm fronds */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          {/* soft warm ivory glow from bottom */}
+          <div
+            className="absolute inset-x-0 bottom-0 h-2/3"
+            style={{
+              background:
+                "linear-gradient(to top, rgba(252,249,242,0.55), transparent 60%), radial-gradient(60% 50% at 50% 100%, rgba(199,164,107,0.10), transparent 70%)",
+            }}
+          />
+          {/* mountain terraces — layered ridges, RTL-flipped for balance */}
+          <svg
+            viewBox="0 0 1440 320"
+            preserveAspectRatio="none"
+            className="absolute inset-x-0 bottom-0 h-56 md:h-72 w-full"
+          >
+            <defs>
+              <linearGradient id="jazan-hero-mtn-1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#075E63" stopOpacity="0" />
+                <stop offset="100%" stopColor="#075E63" stopOpacity="0.18" />
+              </linearGradient>
+              <linearGradient id="jazan-hero-mtn-2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#24745E" stopOpacity="0" />
+                <stop offset="100%" stopColor="#24745E" stopOpacity="0.22" />
+              </linearGradient>
+              <linearGradient id="jazan-hero-mtn-3" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#B85C3C" stopOpacity="0" />
+                <stop offset="100%" stopColor="#B85C3C" stopOpacity="0.18" />
+              </linearGradient>
+            </defs>
+            {/* far ridge */}
+            <path
+              d="M0,240 L120,180 L260,220 L420,150 L600,210 L780,140 L960,200 L1140,160 L1320,220 L1440,180 L1440,320 L0,320 Z"
+              fill="url(#jazan-hero-mtn-1)"
+            />
+            {/* mid ridge with terrace steps */}
+            <path
+              d="M0,280 L160,220 L180,240 L340,190 L360,210 L520,170 L540,190 L720,220 L900,180 L920,200 L1100,170 L1120,190 L1300,220 L1440,200 L1440,320 L0,320 Z"
+              fill="url(#jazan-hero-mtn-2)"
+            />
+            {/* front ridge — warmer terracotta hint */}
+            <path
+              d="M0,300 L200,260 L400,285 L620,250 L820,290 L1040,255 L1240,290 L1440,265 L1440,320 L0,320 Z"
+              fill="url(#jazan-hero-mtn-3)"
+            />
+            {/* coastal reflection line */}
+            <line
+              x1="0"
+              y1="308"
+              x2="1440"
+              y2="308"
+              stroke="#0B8585"
+              strokeOpacity="0.35"
+              strokeWidth="1"
+              strokeDasharray="3 6"
+            />
+          </svg>
+          {/* palm frond, corner */}
+          <svg
+            viewBox="0 0 120 200"
+            className="absolute -bottom-4 start-2 md:start-8 h-40 md:h-56 w-auto opacity-40"
+            aria-hidden="true"
+          >
+            <g stroke="#24745E" strokeWidth="1.2" fill="none" strokeLinecap="round">
+              <path d="M60 195 L60 40" />
+              {Array.from({ length: 8 }).map((_, i) => {
+                const y = 40 + i * 18;
+                const len = 34 - i * 2;
+                return (
+                  <g key={i}>
+                    <path d={`M60 ${y} Q ${60 - len / 2} ${y - 8} ${60 - len} ${y - 4}`} />
+                    <path d={`M60 ${y} Q ${60 + len / 2} ${y - 8} ${60 + len} ${y - 4}`} />
+                  </g>
+                );
+              })}
+              <circle cx="60" cy="34" r="4" fill="#C7A46B" opacity="0.7" stroke="none" />
+            </g>
+          </svg>
+          {/* faint Jazan diamond motif in top-end corner */}
+          <div className="absolute top-6 end-6 h-16 w-40 opacity-30">
+            <JazanPattern variant="standard" />
+          </div>
+        </div>
+
         <div className="container-app relative py-20 md:py-28">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--fut-border-strong)] bg-white/[0.03] px-4 py-1.5 text-[11px] tracking-[0.35em] uppercase text-[color:var(--fut-ink-muted)]">
-              <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-teal)] pulse-neon" />
-              {isAr ? "طب المستقبل · مجمع باعشن" : "Future of Care · Baeshen"}
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/80 px-4 py-1.5 text-[11px] tracking-[0.3em] uppercase text-[var(--jazan-teal)] shadow-sm">
+              <span
+                aria-hidden="true"
+                className="inline-block h-2 w-2 rotate-45 bg-[var(--jazan-terracotta)]"
+              />
+              {isAr ? "من قلب جازان · مجمع باعشن الطبي" : "From the heart of Jazan · Baeshen Medical"}
+              <span
+                aria-hidden="true"
+                className="inline-block h-2 w-2 rotate-45 bg-[var(--jazan-gold)]"
+              />
             </div>
             <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-[1.1]">
               <span className="block text-[color:var(--fut-ink)]">
@@ -226,6 +318,12 @@ function HomePage() {
                 ? "احجز مع استشاريين معتمدين، تابع تقاريرك، واطلب دواءك من صيدلياتنا — كلها من مكان واحد."
                 : "Book certified consultants, track reports, and order medication — all in one place."}
             </p>
+            {/* Jazan supporting phrase */}
+            <p className="mt-3 text-sm md:text-base font-medium text-[var(--jazan-terracotta)]">
+              {isAr
+                ? "خبرة طبية حديثة بروح جازان الأصيلة"
+                : "Modern medical expertise with the authentic spirit of Jazan"}
+            </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link to="/book" className="btn-magnetic pulse-soft">
@@ -234,7 +332,7 @@ function HomePage() {
               </Link>
               <Link
                 to="/doctors"
-                className="neon-glow-purple inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[color:var(--fut-ink)] backdrop-blur-md"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/70 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] backdrop-blur-md hover:bg-[var(--jazan-ivory)] transition"
               >
                 <Search className="h-4 w-4" />
                 {isAr ? "تصفّح الأطباء" : "Browse doctors"}
@@ -245,7 +343,11 @@ function HomePage() {
           {/* Stats strip */}
           <StaggerReveal className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3">
             {STATS.map((s) => (
-              <RevealItem key={s.k} className="glass-fut p-5 text-center">
+              <RevealItem key={s.k} className="glass-fut p-5 text-center relative overflow-hidden">
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-1 start-1/2 -translate-x-1/2 h-1 w-8 rounded-b bg-[var(--jazan-gold)]/70"
+                />
                 <div className="text-3xl md:text-4xl font-black text-neon">{s.k}</div>
                 <div className="mt-1 text-xs tracking-widest uppercase text-[color:var(--fut-ink-muted)]">
                   {isAr ? s.ar : s.en}
@@ -255,6 +357,7 @@ function HomePage() {
           </StaggerReveal>
         </div>
       </section>
+
 
       {/* ===== QUICK BOOKING ===== */}
       <section className="relative py-16 md:py-20">
