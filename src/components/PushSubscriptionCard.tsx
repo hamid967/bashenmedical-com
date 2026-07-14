@@ -27,6 +27,10 @@ import {
   XCircle,
   RefreshCw,
   Activity,
+  Settings,
+  ExternalLink,
+  Info,
+  RotateCcw,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { sendTestPushToMe } from "@/lib/push-test.functions";
@@ -206,6 +210,30 @@ export function PushSubscriptionCard() {
       setSwRefreshing(false);
     }
   }, [readSwState]);
+
+  const [retryingPermission, setRetryingPermission] = useState(false);
+  const retryPermission = useCallback(async () => {
+    if (typeof window === "undefined") return;
+    setRetryingPermission(true);
+    try {
+      const current = typeof Notification !== "undefined" ? Notification.permission : "default";
+      if (current === "granted") {
+        await push.subscribe();
+        toast.success("تم منح الإذن — جاري إنشاء الاشتراك");
+      } else if (current === "denied") {
+        toast.error("الإذن ما زال مرفوضًا", {
+          description: "افتح إعدادات الموقع في المتصفح واسمح بالإشعارات، ثم أعد المحاولة.",
+        });
+      } else {
+        await push.subscribe();
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّرت إعادة المحاولة");
+    } finally {
+      setRetryingPermission(false);
+    }
+  }, [push]);
+
 
 
   // Refresh subscription details whenever the subscribed state changes.
@@ -487,9 +515,7 @@ export function PushSubscriptionCard() {
 
 
       {push.state === "denied" && (
-        <p className="mt-3 text-xs text-muted-foreground">
-          تم رفض الإذن سابقًا. افتح إعدادات الموقع في المتصفح واسمح بالإشعارات ثم أعد المحاولة.
-        </p>
+        <PermissionDeniedGuide onRetry={retryPermission} retrying={retryingPermission} />
       )}
     </div>
   );
@@ -710,3 +736,189 @@ function SwDiagnosticPanel({
   );
 }
 
+
+type BrowserGuide = {
+  name: string;
+  steps: string[];
+  settingsUrl?: string;
+  settingsLabel?: string;
+};
+
+function detectBrowserGuide(): BrowserGuide {
+  if (typeof navigator === "undefined") {
+    return { name: "المتصفح", steps: ["افتح إعدادات الموقع واسمح بالإشعارات."] };
+  }
+  const ua = navigator.userAgent;
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const isIOS = /iPad|iPhone|iPod/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const isEdge = /Edg\//.test(ua);
+  const isFirefox = /Firefox\//.test(ua);
+  const isSafari = /Safari\//.test(ua) && !/Chrome|Chromium|Edg\//.test(ua);
+  const isChromium = /Chrome|Chromium/.test(ua) && !isEdge;
+
+  if (isIOS) {
+    return {
+      name: "iOS Safari",
+      steps: [
+        "افتح تطبيق الإعدادات على الجهاز.",
+        "انتقل إلى Safari ← إعدادات المواقع ← الإشعارات.",
+        "ابحث عن نطاق هذا الموقع واختر «السماح».",
+        "ارجع إلى Safari وأعد تحميل الصفحة، ثم اضغط «إعادة المحاولة».",
+      ],
+    };
+  }
+  if (isAndroid && isChromium) {
+    return {
+      name: "Chrome على Android",
+      steps: [
+        "اضغط على أيقونة القفل بجانب عنوان الموقع.",
+        "افتح «أذونات» أو «إعدادات الموقع».",
+        "غيّر «الإشعارات» إلى «السماح».",
+        "ارجع إلى الصفحة واضغط «إعادة المحاولة».",
+      ],
+      settingsUrl: `chrome://settings/content/siteDetails?site=${origin}`,
+      settingsLabel: "chrome://settings",
+    };
+  }
+  if (isSafari) {
+    return {
+      name: "Safari (macOS)",
+      steps: [
+        "افتح Safari ← الإعدادات (⌘,) ← المواقع ← الإشعارات.",
+        "ابحث عن هذا الموقع وغيّر الحالة إلى «السماح».",
+        "أعد تحميل الصفحة ثم اضغط «إعادة المحاولة».",
+      ],
+    };
+  }
+  if (isFirefox) {
+    return {
+      name: "Firefox",
+      steps: [
+        "اضغط على أيقونة القفل بجانب العنوان.",
+        "افتح «مزيد من المعلومات» ← «الأذونات».",
+        "احذف قيمة «إرسال الإشعارات» أو اجعلها «السماح».",
+        "أعد تحميل الصفحة واضغط «إعادة المحاولة».",
+      ],
+      settingsUrl: "about:preferences#privacy",
+      settingsLabel: "about:preferences",
+    };
+  }
+  if (isEdge) {
+    return {
+      name: "Microsoft Edge",
+      steps: [
+        "اضغط على أيقونة القفل بجانب العنوان.",
+        "افتح «أذونات لهذا الموقع».",
+        "غيّر «الإشعارات» إلى «السماح».",
+        "أعد تحميل الصفحة واضغط «إعادة المحاولة».",
+      ],
+      settingsUrl: `edge://settings/content/siteDetails?site=${origin}`,
+      settingsLabel: "edge://settings",
+    };
+  }
+  return {
+    name: "Chrome / متصفح مبني على Chromium",
+    steps: [
+      "اضغط على أيقونة القفل بجانب العنوان.",
+      "افتح «إعدادات الموقع».",
+      "غيّر «الإشعارات» من «حظر» إلى «السماح».",
+      "أعد تحميل الصفحة واضغط «إعادة المحاولة».",
+    ],
+    settingsUrl: `chrome://settings/content/siteDetails?site=${origin}`,
+    settingsLabel: "chrome://settings",
+  };
+}
+
+function PermissionDeniedGuide({
+  onRetry,
+  retrying,
+}: {
+  onRetry: () => void | Promise<void>;
+  retrying: boolean;
+}) {
+  const [guide, setGuide] = useState<BrowserGuide | null>(null);
+  useEffect(() => {
+    setGuide(detectBrowserGuide());
+  }, []);
+
+  if (!guide) return null;
+
+  return (
+    <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50/60 p-4 dark:border-rose-900 dark:bg-rose-950/30">
+      <div className="mb-3 flex items-start gap-2">
+        <div className="grid size-8 shrink-0 place-items-center rounded-lg bg-rose-100 text-rose-700 dark:bg-rose-900 dark:text-rose-300">
+          <ShieldAlert className="size-4" />
+        </div>
+        <div className="flex-1">
+          <h4 className="text-sm font-semibold text-rose-900 dark:text-rose-200">
+            تم رفض إذن الإشعارات
+          </h4>
+          <p className="mt-0.5 text-xs text-rose-800/80 dark:text-rose-300/80">
+            المتصفح المكتشف: <span className="font-semibold">{guide.name}</span>. اتبع
+            الخطوات التالية ثم اضغط «إعادة المحاولة». المتصفحات لا تسمح لصفحة الويب
+            بإعادة طلب الإذن تلقائيًا بعد الرفض.
+          </p>
+        </div>
+      </div>
+
+      <ol className="mb-3 space-y-1.5 pl-1 text-xs text-rose-900/90 dark:text-rose-100/90">
+        {guide.steps.map((step, i) => (
+          <li key={i} className="flex gap-2">
+            <span className="grid size-5 shrink-0 place-items-center rounded-full bg-rose-200 font-mono text-[10px] font-bold text-rose-800 dark:bg-rose-900 dark:text-rose-200">
+              {i + 1}
+            </span>
+            <span className="pt-0.5">{step}</span>
+          </li>
+        ))}
+      </ol>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={() => void onRetry()}
+          disabled={retrying}
+          className="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {retrying ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <RotateCcw className="size-3.5" />
+          )}
+          إعادة المحاولة
+        </button>
+
+        <button
+          type="button"
+          onClick={() => window.location.reload()}
+          className="inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-800 transition hover:bg-rose-50 dark:border-rose-800 dark:bg-transparent dark:text-rose-200 dark:hover:bg-rose-950/50"
+        >
+          <RefreshCw className="size-3.5" />
+          إعادة تحميل الصفحة
+        </button>
+
+        {guide.settingsUrl && (
+          <a
+            href={guide.settingsUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-800 transition hover:bg-rose-50 dark:border-rose-800 dark:bg-transparent dark:text-rose-200 dark:hover:bg-rose-950/50"
+            title="قد لا يفتح تلقائيًا — انسخه في شريط العنوان إن لزم"
+          >
+            <Settings className="size-3.5" />
+            {guide.settingsLabel ?? "الإعدادات"}
+            <ExternalLink className="size-3" />
+          </a>
+        )}
+      </div>
+
+      <p className="mt-3 flex items-start gap-1.5 text-[11px] text-rose-800/70 dark:text-rose-300/70">
+        <Info className="mt-0.5 size-3 shrink-0" />
+        <span>
+          بعد تغيير الإعدادات، قد يتطلب المتصفح إعادة تحميل الصفحة لتفعيل الحالة
+          الجديدة قبل الاشتراك.
+        </span>
+      </p>
+    </div>
+  );
+}
