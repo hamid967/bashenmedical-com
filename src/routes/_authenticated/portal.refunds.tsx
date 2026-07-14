@@ -209,12 +209,22 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   h1, .brand, .badge, .amount .val, .grid td.k, .grid td.v {
     font-family: "Noto Kufi Arabic", "Noto Naskh Arabic", "SF Arabic", "Segoe UI", Tahoma, sans-serif;
   }
+  /* Numeric tokens: Arabic-Indic digits rendered from Noto Naskh Arabic,
+     isolated as an atomic unit so they cannot flip inside Arabic sentences. */
   .num, .mono, .ref {
-    font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
-    direction: ltr;
+    font-family: "Noto Naskh Arabic", "SF Arabic", "Geeza Pro", "Segoe UI", Tahoma, sans-serif;
+    direction: rtl;
     unicode-bidi: isolate;
     white-space: nowrap;
     letter-spacing: 0;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "kern" 1;
+  }
+  .ref {
+    background: #f8fafc;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-weight: 700;
   }
 
   /* ---- Preview shell (screen only) ---- */
