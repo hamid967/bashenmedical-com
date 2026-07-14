@@ -92,7 +92,9 @@ export function PushSubscriptionCard() {
     body: "هذا اختبار حقيقي عبر web-push من الخادم.",
     url: "/portal/notifications",
     requireInteraction: false,
+    dataJson: '{\n  "kind": "test",\n  "source": "portal"\n}',
   });
+  const [dataError, setDataError] = useState<string | null>(null);
   const [swDiag, setSwDiag] = useState<SwDiag>(initialSwDiag);
   const [swRefreshing, setSwRefreshing] = useState(false);
   const sendServer = useServerFn(sendTestPushToMe);
