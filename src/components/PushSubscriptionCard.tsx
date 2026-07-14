@@ -25,9 +25,42 @@ import {
   ShieldAlert,
   ShieldCheck,
   XCircle,
+  RefreshCw,
+  Activity,
 } from "lucide-react";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
 import { sendTestPushToMe } from "@/lib/push-test.functions";
+
+type SwWorkerInfo = { state: string; scriptURL: string } | null;
+type SwDiag = {
+  supported: boolean;
+  registered: boolean;
+  scope: string | null;
+  updateViaCache: string | null;
+  scriptURL: string | null;
+  active: SwWorkerInfo;
+  waiting: SwWorkerInfo;
+  installing: SwWorkerInfo;
+  controller: SwWorkerInfo;
+  lastUpdated: number | null;
+  lastEvent: string | null;
+  error: string | null;
+};
+
+const initialSwDiag: SwDiag = {
+  supported: false,
+  registered: false,
+  scope: null,
+  updateViaCache: null,
+  scriptURL: null,
+  active: null,
+  waiting: null,
+  installing: null,
+  controller: null,
+  lastUpdated: null,
+  lastEvent: null,
+  error: null,
+};
 
 type SubDetails = {
   endpoint: string;
