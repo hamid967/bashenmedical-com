@@ -161,6 +161,22 @@ const T = {
   e_date:           { ar: "التاريخ غير صالح.", en: "Invalid date." },
   e_relationship:   { ar: "اختر صلة القرابة.", en: "Choose a relationship." },
   e_generic:        { ar: "تعذّر حفظ البيانات.", en: "Could not save." },
+  // history
+  history_toggle:   { ar: "سجل المواعيد", en: "Appointments history" },
+  history_show:     { ar: "عرض", en: "Show" },
+  history_hide:     { ar: "إخفاء", en: "Hide" },
+  history_empty:    { ar: "لا توجد مواعيد مسجلة لهذا الفرد بعد.", en: "No appointments recorded yet." },
+  history_loading:  { ar: "جارٍ التحميل…", en: "Loading…" },
+  history_error:    { ar: "تعذّر تحميل السجل.", en: "Could not load history." },
+  history_retry:    { ar: "إعادة", en: "Retry" },
+  st_scheduled:     { ar: "مجدول", en: "Scheduled" },
+  st_confirmed:     { ar: "مؤكد", en: "Confirmed" },
+  st_completed:     { ar: "منتهي", en: "Completed" },
+  st_cancelled:     { ar: "ملغى", en: "Cancelled" },
+  st_no_show:       { ar: "لم يحضر", en: "No-show" },
+  st_pending:       { ar: "بانتظار المعالجة", en: "Pending" },
+  st_in_progress:   { ar: "جارٍ", en: "In progress" },
+  st_unknown:       { ar: "غير معروف", en: "Unknown" },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
