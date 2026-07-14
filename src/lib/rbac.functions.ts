@@ -167,6 +167,40 @@ export const setRolePermission = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+export type RolePermissionAuditRow = {
+  id: string;
+  created_at: string;
+  action: "role_permission_granted" | "role_permission_revoked";
+  actor_id: string | null;
+  actor_name: string | null;
+  actor_email: string | null;
+  role_key: AppRole | null;
+  permission_key: string | null;
+  permission_label_ar: string | null;
+  permission_label_en: string | null;
+  previous_enabled: boolean | null;
+  new_enabled: boolean | null;
+};
+
+export const listRolePermissionAudit = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z
+      .object({
+        limit: z.number().int().min(1).max(500).default(100),
+        offset: z.number().int().min(0).default(0),
+      })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: rows, error } = await context.supabase.rpc(
+      "list_role_permission_audit" as any,
+      { _limit: data.limit, _offset: data.offset } as any,
+    );
+    if (error) throw new Error(humanize(error));
+    return (rows ?? []) as RolePermissionAuditRow[];
+  });
+
 /* ---------------- Export / Import role-permission settings ---------------- */
 
 export const exportRolePermissions = createServerFn({ method: "GET" })
