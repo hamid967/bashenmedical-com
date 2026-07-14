@@ -45,6 +45,8 @@ import {
 
 import { ar as arLocale } from "date-fns/locale";
 import { format } from "date-fns";
+import { SA_PHONE_RE, SA_NID_RE } from "@/lib/booking-limits";
+import { format } from "date-fns";
 
 const optionsQuery = queryOptions({
   queryKey: ["portal", "booking", "options"],
@@ -419,10 +421,11 @@ function BookPage() {
   }
 
   // Guard: booking for a dependent whose required data is incomplete.
+  // نستخدم نفس منطق التحقق الموحّد المستخدم في /book و APIs العامة.
   const dependentMissing: string[] = dependent
     ? [
-        ...(!dependent.national_id || !/^\d{10}$/.test(dependent.national_id) ? ["رقم الهوية"] : []),
-        ...(!dependent.phone || !/^(?:\+?966|0)?5\d{8}$/.test(dependent.phone) ? ["رقم الجوال"] : []),
+        ...(!dependent.national_id || !SA_NID_RE.test(dependent.national_id) ? ["رقم الهوية"] : []),
+        ...(!dependent.phone || !SA_PHONE_RE.test(dependent.phone) ? ["رقم الجوال"] : []),
       ]
     : [];
   if (dependent && dependentMissing.length > 0) {
