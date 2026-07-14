@@ -384,6 +384,9 @@ function MyAppointmentsPage() {
           onClose={() => setCheckInResult(null)}
         />
       )}
+      {timelineFor && (
+        <TimelineDialog target={timelineFor} onClose={() => setTimelineFor(null)} />
+      )}
     </div>
   );
 }
