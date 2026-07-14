@@ -57,6 +57,13 @@ import {
   RefreshCw,
   BadgeCheck,
   ShieldAlert,
+  ClipboardList,
+  CalendarClock,
+  MapPin,
+  Stethoscope,
+  CheckCircle2,
+  XCircle,
+  Clock3,
 } from "lucide-react";
 
 const dependentsQuery = queryOptions({
