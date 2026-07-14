@@ -353,8 +353,41 @@ export const cancelDependentActiveAppointments = createServerFn({ method: "POST"
       .update({ status: "available", appointment_id: null })
       .in("appointment_id", ids);
 
+    // Audit trail: who cancelled, when, and how many appointments were cancelled.
+    let ip: string | null = null;
+    let ua: string | null = null;
+    try {
+      ip =
+        getRequestHeader("x-forwarded-for")?.split(",")[0]?.trim() ??
+        getRequestHeader("cf-connecting-ip") ??
+        null;
+      ua = getRequestHeader("user-agent") ?? null;
+    } catch {
+      /* headers unavailable outside request scope */
+    }
+
+    await supabaseAdmin.from("audit_logs").insert({
+      actor_id: userId,
+      actor_role: "guardian",
+      action: "dependent_appointments_cancelled",
+      entity_type: "dependent",
+      entity_id: dep.id,
+      before_data: { active_appointment_ids: ids, active_count: ids.length },
+      after_data: { status: "cancelled", cancelled_at: nowIso },
+      ip_address: ip,
+      user_agent: ua,
+      metadata: {
+        dependent_id: dep.id,
+        cancelled_count: ids.length,
+        appointment_ids: ids,
+        cancelled_at: nowIso,
+        source: "portal.family.delete_dialog",
+      },
+    });
+
     return { cancelled: ids.length };
   });
+
 
 
 
