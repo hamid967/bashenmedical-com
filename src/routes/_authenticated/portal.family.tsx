@@ -998,7 +998,12 @@ function DeleteDialog({
       cancelDependentActiveAppointments({ data: { dependent_id } }),
     onSuccess: (res) => {
       if (res.cancelled > 0) {
-        toast.success(T.del_cancel_success[lang]);
+        toast.success(T.del_cancel_success[lang], {
+          description:
+            lang === "ar"
+              ? `تم إلغاء ${res.cancelled} موعدًا نشطًا وتحرير حجوزاتها.`
+              : `Cancelled ${res.cancelled} active appointment${res.cancelled === 1 ? "" : "s"} and freed their slots.`,
+        });
       } else {
         toast.info(T.del_cancel_none[lang]);
       }
@@ -1012,10 +1017,20 @@ function DeleteDialog({
       }
       setConfirmCancel(false);
     },
-    onError: () => {
-      toast.error(T.del_cancel_error[lang]);
+    onError: (err: unknown) => {
+      const detail =
+        err instanceof Error && err.message
+          ? err.message
+          : lang === "ar"
+            ? "خطأ غير متوقع أثناء الاتصال بالخادم."
+            : "Unexpected server error.";
+      toast.error(T.del_cancel_error[lang], {
+        description: detail,
+        duration: 8000,
+      });
       setConfirmCancel(false);
     },
+
   });
 
 
