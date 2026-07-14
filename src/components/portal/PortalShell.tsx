@@ -58,6 +58,14 @@ const NAV: NavItem[] = [
   { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
 ];
 
+const BOTTOM_NAV: NavItem[] = [
+  { to: "/portal", icon: LayoutDashboard, label_ar: "الرئيسية", label_en: "Home" },
+  { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "Visits" },
+  { to: "/portal/book", icon: CalendarPlus, label_ar: "احجز", label_en: "Book" },
+  { to: "/portal/records", icon: FileText, label_ar: "سجلي", label_en: "Records" },
+  { to: "/portal/profile", icon: User, label_ar: "حسابي", label_en: "Me" },
+];
+
 export function PortalShell({
   children,
   lang = "ar",
