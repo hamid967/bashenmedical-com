@@ -142,7 +142,10 @@ function MyAppointmentsPage() {
   };
 
   const counts = useMemo(() => {
-    const c = { new: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0 } as Record<ApptStatus, number>;
+    const c: Record<ApptStatus, number> = {
+      new: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0,
+      held: 0, pending_verification: 0, pending_payment: 0, checked_in: 0, in_progress: 0,
+    };
     items.forEach((a) => { c[a.status as ApptStatus] = (c[a.status as ApptStatus] ?? 0) + 1; });
     return c;
   }, [items]);
