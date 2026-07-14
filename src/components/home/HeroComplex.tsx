@@ -2,12 +2,12 @@ import { Link } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
 // Doctors hero — responsive srcset with per-format quality tuning for smaller payloads.
 // AVIF ~48q / WebP ~68q / JPEG ~72q keep visual fidelity while dropping bytes 40–60%.
-import heroAvif from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&format=avif&quality=48&as=srcset";
-import heroWebp from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&format=webp&quality=68&as=srcset";
-import heroJpg from "@/assets/baeshen-hero-doctors.jpg?w=1280&format=jpg&quality=72";
-import heroMobileAvif from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&format=avif&quality=50&as=srcset";
-import heroMobileWebp from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&format=webp&quality=70&as=srcset";
-import heroMobileJpg from "@/assets/baeshen-hero-doctors.jpg?w=800&format=jpg&quality=72";
+import heroAvif from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&quality=48&format=avif&as=srcset";
+import heroWebp from "@/assets/baeshen-hero-doctors.jpg?w=960;1280;1600;1920&quality=68&format=webp&as=srcset";
+import heroJpg from "@/assets/baeshen-hero-doctors.jpg?w=1280&quality=72&format=jpg";
+import heroMobileAvif from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&quality=50&format=avif&as=srcset";
+import heroMobileWebp from "@/assets/baeshen-hero-doctors.jpg?w=480;640;800;960&quality=70&format=webp&as=srcset";
+import heroMobileJpg from "@/assets/baeshen-hero-doctors.jpg?w=800&quality=72&format=jpg";
 import { CalendarCheck, Phone } from "lucide-react";
 import { MedicalMotifs } from "./MedicalMotifs";
 
