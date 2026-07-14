@@ -1,12 +1,226 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { ComingSoon } from "@/components/portal/ComingSoon";
+/**
+ * /portal/settings — Notification, language, and appearance preferences.
+ */
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import {
+  AlertTriangle, ArrowLeft, Bell, Globe, Loader2, Mail, MessageSquare, Moon,
+  RefreshCw, Save, Settings as SettingsIcon, ShieldCheck, Smartphone, Sun,
+} from "lucide-react";
+import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
+import { supabase } from "@/integrations/supabase/client";
+
+const profileQuery = queryOptions({
+  queryKey: ["portal", "my-profile-full"],
+  queryFn: () => getMyProfile(),
+  staleTime: 30_000,
+});
 
 export const Route = createFileRoute("/_authenticated/portal/settings")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(profileQuery),
   head: () => ({
     meta: [
       { title: "الإعدادات | بوابة المريض" },
+      { name: "description", content: "قنوات الإشعارات، اللغة، ووضع العرض." },
       { name: "robots", content: "noindex" },
     ],
   }),
-  component: () => <ComingSoon title_ar="الإعدادات" title_en="Settings" />,
+  component: SettingsPage,
+  errorComponent: ErrorState,
+  pendingComponent: Skeleton,
 });
+
+type Prefs = { email: boolean; sms: boolean; whatsapp: boolean; push: boolean };
+
+function SettingsPage() {
+  const q = useSuspenseQuery(profileQuery);
+  const qc = useQueryClient();
+  const p = q.data;
+  const initial: Prefs = {
+    email: (p?.notification_prefs as Prefs)?.email ?? true,
+    sms: (p?.notification_prefs as Prefs)?.sms ?? true,
+    whatsapp: (p?.notification_prefs as Prefs)?.whatsapp ?? true,
+    push: (p?.notification_prefs as Prefs)?.push ?? false,
+  };
+  const [prefs, setPrefs] = useState<Prefs>(initial);
+  const [lang, setLang] = useState<"ar" | "en">((p?.preferred_language as "ar" | "en") ?? "ar");
+  const [dark, setDark] = useState<boolean>(!!p?.dark_mode);
+  const [dirty, setDirty] = useState(false);
+  useEffect(() => setDirty(false), [p?.id]);
+
+  const setP = <K extends keyof Prefs>(k: K, v: boolean) => {
+    setPrefs((s) => ({ ...s, [k]: v }));
+    setDirty(true);
+  };
+
+  const mut = useMutation({
+    mutationFn: () =>
+      updateMyProfile({
+        data: {
+          preferred_language: lang,
+          dark_mode: dark,
+          notification_prefs: prefs,
+        },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["portal", "my-profile-full"] });
+      qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
+      toast.success("تم حفظ الإعدادات");
+      setDirty(false);
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
+  });
+
+  const [signingOut, setSigningOut] = useState(false);
+  const router = useRouter();
+  const signOut = async () => {
+    setSigningOut(true);
+    await supabase.auth.signOut();
+    qc.clear();
+    router.navigate({ to: "/auth" });
+  };
+
+  return (
+    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
+      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
+        <header className="mb-6 flex items-center gap-3">
+          <div className="h-11 w-11 rounded-2xl grid place-items-center text-white" style={{ background: "var(--portal-gradient)" }}>
+            <SettingsIcon className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">الإعدادات</h1>
+            <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">قنوات التنبيه، اللغة، ومظهر البوابة</p>
+          </div>
+        </header>
+
+        <section className="glass-card p-5 sm:p-6 space-y-4">
+          <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
+          <Toggle icon={<Mail className="h-4 w-4" />} label="البريد الإلكتروني" desc="تذكيرات المواعيد وتحديثات التقارير"
+            value={prefs.email} onChange={(v) => setP("email", v)} />
+          <Toggle icon={<MessageSquare className="h-4 w-4" />} label="الرسائل النصية (SMS)" desc="تنبيهات فورية على جوالك"
+            value={prefs.sms} onChange={(v) => setP("sms", v)} />
+          <Toggle icon={<Smartphone className="h-4 w-4" />} label="واتساب" desc="رسائل تأكيد وتذكير عبر واتساب"
+            value={prefs.whatsapp} onChange={(v) => setP("whatsapp", v)} />
+          <Toggle icon={<Bell className="h-4 w-4" />} label="إشعارات المتصفح (Push)" desc="تنبيه لحظي داخل المتصفح"
+            value={prefs.push} onChange={(v) => setP("push", v)} />
+        </section>
+
+        <section className="glass-card p-5 sm:p-6 mt-6 space-y-4">
+          <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">التخصيص</h2>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <Globe className="h-4 w-4 text-[color:var(--portal-ink-2)]" />
+              <div>
+                <div className="text-sm font-semibold text-[color:var(--portal-ink)]">لغة البوابة</div>
+                <div className="text-xs text-[color:var(--portal-ink-2)]">تُطبَّق على الواجهات والإشعارات</div>
+              </div>
+            </div>
+            <div className="inline-flex rounded-full border border-[color:var(--portal-border)] bg-white p-1">
+              {(["ar", "en"] as const).map((k) => {
+                const active = lang === k;
+                return (
+                  <button key={k} type="button" onClick={() => { setLang(k); setDirty(true); }}
+                    className={`px-3 h-7 rounded-full text-xs font-semibold ${active ? "text-white" : "text-[color:var(--portal-ink-2)]"}`}
+                    style={active ? { background: "var(--portal-gradient)" } : undefined}>
+                    {k === "ar" ? "العربية" : "English"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              {dark ? <Moon className="h-4 w-4 text-[color:var(--portal-ink-2)]" /> : <Sun className="h-4 w-4 text-[color:var(--portal-ink-2)]" />}
+              <div>
+                <div className="text-sm font-semibold text-[color:var(--portal-ink)]">الوضع الداكن</div>
+                <div className="text-xs text-[color:var(--portal-ink-2)]">راحة أفضل للعين ليلاً</div>
+              </div>
+            </div>
+            <Switch value={dark} onChange={(v) => { setDark(v); setDirty(true); }} />
+          </div>
+        </section>
+
+        <section className="glass-card p-5 sm:p-6 mt-6">
+          <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)] mb-3">الخصوصية والأمان</h2>
+          <div className="space-y-2 text-sm">
+            <Link to="/portal/consents" className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 hover:bg-slate-50">
+              <span className="flex items-center gap-2 text-[color:var(--portal-ink)]"><ShieldCheck className="h-4 w-4" />الموافقات وسياسات الخصوصية</span>
+              <ArrowLeft className="h-4 w-4 text-[color:var(--portal-ink-2)] -rotate-180" />
+            </Link>
+          </div>
+        </section>
+
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2">
+          <button type="button" onClick={signOut} disabled={signingOut}
+            className="h-10 px-4 rounded-full border border-red-200 bg-white text-sm text-red-700 hover:bg-red-50 inline-flex items-center gap-2 disabled:opacity-60">
+            {signingOut ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            تسجيل الخروج
+          </button>
+          <button type="button" onClick={() => mut.mutate()} disabled={!dirty || mut.isPending}
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-semibold text-white disabled:opacity-60"
+            style={{ background: "var(--portal-gradient)" }}>
+            {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            حفظ التعديلات
+          </button>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function Toggle({ icon, label, desc, value, onChange }: { icon: React.ReactNode; label: string; desc: string; value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3">
+      <div className="flex items-start gap-3">
+        <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
+        <div>
+          <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
+          <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
+        </div>
+      </div>
+      <Switch value={value} onChange={onChange} />
+    </div>
+  );
+}
+function Switch({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={value} onClick={() => onChange(!value)}
+      className={`h-6 w-11 rounded-full transition relative ${value ? "bg-emerald-500" : "bg-slate-300"}`}>
+      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${value ? "right-0.5" : "right-[calc(100%-1.375rem)]"}`} />
+    </button>
+  );
+}
+
+function Skeleton() {
+  return (
+    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
+      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+        <div className="h-11 w-56 rounded-2xl bg-slate-200/60 animate-pulse mb-6" />
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="glass-card p-6 mb-4 space-y-3">
+            {[0, 1, 2, 3].map((j) => (
+              <div key={j} className="h-12 rounded-xl bg-slate-200/60 animate-pulse" />
+            ))}
+          </div>
+        ))}
+      </main>
+    </div>
+  );
+}
+function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
+  const router = useRouter();
+  return (
+    <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6" dir="rtl">
+      <div className="glass-card max-w-md w-full p-8 text-center">
+        <AlertTriangle className="mx-auto h-10 w-10 text-red-500 mb-2" />
+        <h2 className="text-lg font-bold">تعذّر تحميل الإعدادات</h2>
+        <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">{error.message}</p>
+        <button onClick={() => { router.invalidate(); reset(); }} className="mt-4 h-10 px-4 rounded-full text-white text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
+          <RefreshCw className="inline h-4 w-4 ms-1" />حاول مجددًا
+        </button>
+      </div>
+    </div>
+  );
+}
