@@ -31,6 +31,10 @@ import {
   Sparkles,
   Loader2,
   Link2,
+  CheckCircle2,
+  Circle,
+  CircleDot,
+  XCircle,
 } from "lucide-react";
 
 const LS_KEY = "bmc:pending_inquiry_links";
