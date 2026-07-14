@@ -92,7 +92,7 @@ const adminSearchSchema = z.object({
   logTo: fallback(z.string(), "").default(""),
 });
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/_authenticated/admin/classic")({
   head: () => ({
     meta: [{ title: "لوحة التحكم | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
