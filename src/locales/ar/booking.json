@@ -178,6 +178,8 @@
     "amSuffix": "صباحًا",
     "pmSuffix": "مساءً",
     "pendingReview": "قيد المراجعة",
+    "statusLabel": "الحالة الحالية",
+    "statusHint": "سيتواصل معك فريق الاستقبال لتأكيد الموعد خلال ساعات العمل. يمكنك متابعة الحالة أو تعديل الحجز من الخيارات أدناه.",
     "eventTitleSuffix": " — موعد مع {{doctor}}",
     "eventTitleGeneric": " — موعد",
     "riyadhShort": "بتوقيت الرياض",
