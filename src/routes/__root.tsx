@@ -158,7 +158,7 @@ function RootComponent() {
           <Footer />
           <Toaster position="top-center" richColors closeButton />
           <ChatbotBubble />
-          <WhatsAppFab />
+          <FloatingWhatsAppButton />
           <PwaUpdatePrompt />
         </div>
       </I18nProvider>
