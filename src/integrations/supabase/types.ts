@@ -229,6 +229,7 @@ export type Database = {
           insurance_policy_number: string | null
           insurance_provider_id: string | null
           insurance_status: string
+          is_demo: boolean
           national_id: string | null
           notes: string | null
           patient_email: string | null
@@ -261,6 +262,7 @@ export type Database = {
           insurance_policy_number?: string | null
           insurance_provider_id?: string | null
           insurance_status?: string
+          is_demo?: boolean
           national_id?: string | null
           notes?: string | null
           patient_email?: string | null
@@ -293,6 +295,7 @@ export type Database = {
           insurance_policy_number?: string | null
           insurance_provider_id?: string | null
           insurance_status?: string
+          is_demo?: boolean
           national_id?: string | null
           notes?: string | null
           patient_email?: string | null
@@ -390,6 +393,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          actor_role: string | null
+          after_data: Json | null
+          before_data: Json | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          actor_role?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          after_data?: Json | null
+          before_data?: Json | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          user_agent?: string | null
+        }
+        Relationships: []
       }
       availability: {
         Row: {
@@ -843,6 +891,59 @@ export type Database = {
         }
         Relationships: []
       }
+      dependents: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          gender: string | null
+          guardian_user_id: string
+          id: string
+          national_id: string | null
+          patient_id: string | null
+          phone: string | null
+          relationship: string
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          full_name: string
+          gender?: string | null
+          guardian_user_id: string
+          id?: string
+          national_id?: string | null
+          patient_id?: string | null
+          phone?: string | null
+          relationship: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          full_name?: string
+          gender?: string | null
+          guardian_user_id?: string
+          id?: string
+          national_id?: string | null
+          patient_id?: string | null
+          phone?: string | null
+          relationship?: string
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dependents_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       doctor_branches: {
         Row: {
           branch_id: string
@@ -949,6 +1050,7 @@ export type Database = {
           gender: string | null
           id: string
           is_active: boolean
+          is_demo: boolean
           languages: string[] | null
           name_ar: string
           name_en: string
@@ -978,6 +1080,7 @@ export type Database = {
           gender?: string | null
           id?: string
           is_active?: boolean
+          is_demo?: boolean
           languages?: string[] | null
           name_ar: string
           name_en: string
@@ -1007,6 +1110,7 @@ export type Database = {
           gender?: string | null
           id?: string
           is_active?: boolean
+          is_demo?: boolean
           languages?: string[] | null
           name_ar?: string
           name_en?: string
@@ -1374,6 +1478,91 @@ export type Database = {
           },
         ]
       }
+      insurance_approvals: {
+        Row: {
+          appointment_id: string | null
+          approved_amount: number | null
+          attachments: Json | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          insurance_provider_id: string | null
+          is_mock: boolean
+          missing_documents: string[] | null
+          notes: string | null
+          patient_id: string
+          patient_share: number | null
+          request_number: string | null
+          reviewed_at: string | null
+          service_description: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          approved_amount?: number | null
+          attachments?: Json | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          insurance_provider_id?: string | null
+          is_mock?: boolean
+          missing_documents?: string[] | null
+          notes?: string | null
+          patient_id: string
+          patient_share?: number | null
+          request_number?: string | null
+          reviewed_at?: string | null
+          service_description: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          approved_amount?: number | null
+          attachments?: Json | null
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          insurance_provider_id?: string | null
+          is_mock?: boolean
+          missing_documents?: string[] | null
+          notes?: string | null
+          patient_id?: string
+          patient_share?: number | null
+          request_number?: string | null
+          reviewed_at?: string | null
+          service_description?: string
+          status?: string
+          submitted_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_approvals_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_approvals_insurance_provider_id_fkey"
+            columns: ["insurance_provider_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_approvals_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_providers: {
         Row: {
           active: boolean
@@ -1410,6 +1599,45 @@ export type Database = {
           notes_ar?: string | null
           sort_order?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      integration_logs: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          id: string
+          integration_key: string
+          is_mock: boolean
+          operation: string
+          request_data: Json | null
+          response_data: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          integration_key: string
+          is_mock?: boolean
+          operation: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          id?: string
+          integration_key?: string
+          is_mock?: boolean
+          operation?: string
+          request_data?: Json | null
+          response_data?: Json | null
+          status?: string
         }
         Relationships: []
       }
@@ -1536,6 +1764,7 @@ export type Database = {
           currency: string
           id: string
           invoice_number: string | null
+          is_demo: boolean
           issued_at: string
           notes: string | null
           paid_at: string | null
@@ -1551,6 +1780,7 @@ export type Database = {
           currency?: string
           id?: string
           invoice_number?: string | null
+          is_demo?: boolean
           issued_at?: string
           notes?: string | null
           paid_at?: string | null
@@ -1566,6 +1796,7 @@ export type Database = {
           currency?: string
           id?: string
           invoice_number?: string | null
+          is_demo?: boolean
           issued_at?: string
           notes?: string | null
           paid_at?: string | null
@@ -1597,6 +1828,7 @@ export type Database = {
           created_at: string
           file_path: string | null
           id: string
+          is_demo: boolean
           ordered_by: string | null
           patient_id: string
           released_at: string | null
@@ -1611,6 +1843,7 @@ export type Database = {
           created_at?: string
           file_path?: string | null
           id?: string
+          is_demo?: boolean
           ordered_by?: string | null
           patient_id: string
           released_at?: string | null
@@ -1625,6 +1858,7 @@ export type Database = {
           created_at?: string
           file_path?: string | null
           id?: string
+          is_demo?: boolean
           ordered_by?: string | null
           patient_id?: string
           released_at?: string | null
@@ -1740,6 +1974,88 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      medical_reports: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          created_by: string | null
+          doctor_id: string | null
+          file_path: string | null
+          id: string
+          is_demo: boolean
+          patient_id: string
+          published_at: string | null
+          report_type: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          status: string
+          summary: string | null
+          title_ar: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_id?: string | null
+          file_path?: string | null
+          id?: string
+          is_demo?: boolean
+          patient_id: string
+          published_at?: string | null
+          report_type: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          status?: string
+          summary?: string | null
+          title_ar: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_id?: string | null
+          file_path?: string | null
+          id?: string
+          is_demo?: boolean
+          patient_id?: string
+          published_at?: string | null
+          report_type?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          status?: string
+          summary?: string | null
+          title_ar?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_reports_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_reports_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_reports_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       medicine_orders: {
         Row: {
@@ -2190,6 +2506,57 @@ export type Database = {
             columns: ["visit_id"]
             isOneToOne: false
             referencedRelation: "patient_visits"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_check_ins: {
+        Row: {
+          appointment_id: string
+          checked_in_at: string
+          created_at: string
+          id: string
+          notes: string | null
+          patient_id: string | null
+          queue_number: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          checked_in_at?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          queue_number?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          checked_in_at?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          patient_id?: string | null
+          queue_number?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_check_ins_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_check_ins_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
         ]
@@ -2668,6 +3035,7 @@ export type Database = {
           gender: Database["public"]["Enums"]["gender_type"] | null
           id: string
           is_active: boolean
+          is_demo: boolean
           marital_status: string | null
           mrn: string
           national_id: string | null
@@ -2699,6 +3067,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           is_active?: boolean
+          is_demo?: boolean
           marital_status?: string | null
           mrn: string
           national_id?: string | null
@@ -2730,6 +3099,7 @@ export type Database = {
           gender?: Database["public"]["Enums"]["gender_type"] | null
           id?: string
           is_active?: boolean
+          is_demo?: boolean
           marital_status?: string | null
           mrn?: string
           national_id?: string | null
@@ -2751,6 +3121,62 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          gateway: string | null
+          gateway_ref: string | null
+          id: string
+          invoice_id: string
+          is_mock: boolean
+          metadata: Json | null
+          method: string
+          paid_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          gateway?: string | null
+          gateway_ref?: string | null
+          id?: string
+          invoice_id: string
+          is_mock?: boolean
+          metadata?: Json | null
+          method: string
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          gateway?: string | null
+          gateway_ref?: string | null
+          id?: string
+          invoice_id?: string
+          is_mock?: boolean
+          metadata?: Json | null
+          method?: string
+          paid_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
             referencedColumns: ["id"]
           },
         ]
@@ -2883,6 +3309,7 @@ export type Database = {
           end_date: string | null
           id: string
           instructions: string | null
+          is_demo: boolean
           item_id: string | null
           medication: string
           notes: string | null
@@ -2906,6 +3333,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           instructions?: string | null
+          is_demo?: boolean
           item_id?: string | null
           medication: string
           notes?: string | null
@@ -2929,6 +3357,7 @@ export type Database = {
           end_date?: string | null
           id?: string
           instructions?: string | null
+          is_demo?: boolean
           item_id?: string | null
           medication?: string
           notes?: string | null
@@ -3191,6 +3620,7 @@ export type Database = {
           file_path: string | null
           findings: string | null
           id: string
+          is_demo: boolean
           modality: string
           ordered_by: string | null
           patient_id: string
@@ -3205,6 +3635,7 @@ export type Database = {
           file_path?: string | null
           findings?: string | null
           id?: string
+          is_demo?: boolean
           modality: string
           ordered_by?: string | null
           patient_id: string
@@ -3219,6 +3650,7 @@ export type Database = {
           file_path?: string | null
           findings?: string | null
           id?: string
+          is_demo?: boolean
           modality?: string
           ordered_by?: string | null
           patient_id?: string
@@ -3240,6 +3672,53 @@ export type Database = {
             columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      refunds: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          created_at: string
+          id: string
+          is_mock: boolean
+          payment_id: string
+          reason: string | null
+          requested_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          is_mock?: boolean
+          payment_id: string
+          reason?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          created_at?: string
+          id?: string
+          is_mock?: boolean
+          payment_id?: string
+          reason?: string | null
+          requested_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
             referencedColumns: ["id"]
           },
         ]
@@ -3323,6 +3802,44 @@ export type Database = {
           wake_hour?: number
         }
         Relationships: []
+      }
+      report_versions: {
+        Row: {
+          changed_at: string
+          changed_by: string | null
+          file_path: string | null
+          id: string
+          report_id: string
+          summary: string | null
+          version_number: number
+        }
+        Insert: {
+          changed_at?: string
+          changed_by?: string | null
+          file_path?: string | null
+          id?: string
+          report_id: string
+          summary?: string | null
+          version_number: number
+        }
+        Update: {
+          changed_at?: string
+          changed_by?: string | null
+          file_path?: string | null
+          id?: string
+          report_id?: string
+          summary?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "report_versions_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "medical_reports"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {
@@ -3535,6 +4052,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_settings: {
+        Row: {
+          description: string | null
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          description?: string | null
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value: Json
+        }
+        Update: {
+          description?: string | null
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
       }
       transition_alert_rules: {
         Row: {
@@ -4270,7 +4811,21 @@ export type Database = {
     }
     Enums: {
       allergy_severity: "mild" | "moderate" | "severe" | "life_threatening"
-      app_role: "admin" | "reception" | "pharmacy" | "super_admin" | "doctor"
+      app_role:
+        | "admin"
+        | "reception"
+        | "pharmacy"
+        | "super_admin"
+        | "doctor"
+        | "patient"
+        | "center_admin"
+        | "branch_manager"
+        | "reports_officer"
+        | "billing_officer"
+        | "insurance_officer"
+        | "support_agent"
+        | "content_manager"
+        | "auditor"
       appointment_status:
         | "new"
         | "confirmed"
@@ -4432,7 +4987,22 @@ export const Constants = {
   public: {
     Enums: {
       allergy_severity: ["mild", "moderate", "severe", "life_threatening"],
-      app_role: ["admin", "reception", "pharmacy", "super_admin", "doctor"],
+      app_role: [
+        "admin",
+        "reception",
+        "pharmacy",
+        "super_admin",
+        "doctor",
+        "patient",
+        "center_admin",
+        "branch_manager",
+        "reports_officer",
+        "billing_officer",
+        "insurance_officer",
+        "support_agent",
+        "content_manager",
+        "auditor",
+      ],
       appointment_status: [
         "new",
         "confirmed",
