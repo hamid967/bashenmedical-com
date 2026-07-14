@@ -457,6 +457,16 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
         التفاصيل
         <ChevronLeft className="h-3.5 w-3.5" />
       </button>
+      {isFinalized(r.status) && (
+        <button
+          onClick={() => openRefundReceipt(r)}
+          className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
+          title="تنزيل إيصال PDF"
+        >
+          <Download className="h-3.5 w-3.5" />
+          الإيصال
+        </button>
+      )}
       {canCancel && (
         <button
           onClick={() => mutation.mutate()}
