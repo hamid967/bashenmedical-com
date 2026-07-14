@@ -342,6 +342,22 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python tests/e2e/portal_complaints_flow.py
 
+      - name: Run admin redirect (no admin role) E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+        run: python tests/e2e/admin_redirect_when_not_admin.py
+
+      - name: Run admin opens for admin user E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: python tests/e2e/admin_opens_for_admin_user.py
+
+
+
 
       - name: Stop preview server
         if: always() && steps.verify_secrets.outputs.has_secrets == 'true'
