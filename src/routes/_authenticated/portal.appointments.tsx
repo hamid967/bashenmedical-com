@@ -365,6 +365,12 @@ function MyAppointmentsPage() {
           }
         />
       )}
+      {checkInResult && (
+        <CheckInSuccessDialog
+          result={checkInResult}
+          onClose={() => setCheckInResult(null)}
+        />
+      )}
     </div>
   );
 }
