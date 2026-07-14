@@ -91,7 +91,7 @@ function DoctorCard({ d }: { d: MyDoctor }) {
           <h3 className="font-bold text-[color:var(--portal-ink)] leading-tight">{d.name_ar}</h3>
           {d.title_ar && <p className="mt-0.5 text-xs text-[color:var(--portal-ink-2)]">{d.title_ar}</p>}
           {d.specialty_ar && (
-            <p className="mt-1 inline-flex items-center h-5 px-1.5 rounded-md bg-sky-50 text-sky-700 border border-sky-100 text-[10px] font-semibold">
+            <p className="mt-1 inline-flex items-center h-5 px-1.5 rounded-md bg-teal-50 text-teal-700 border border-teal-100 text-[10px] font-semibold">
               {d.specialty_ar}
             </p>
           )}

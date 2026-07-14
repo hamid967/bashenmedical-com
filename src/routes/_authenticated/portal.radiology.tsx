@@ -77,12 +77,12 @@ function RadiologyError({ error, reset }: { error: Error; reset: () => void }) {
 
 const MODALITY_STYLES: Record<string, { bg: string; ring: string; icon: string; label: string }> = {
   xray:  { bg: "from-slate-50 to-slate-100/50",   ring: "ring-slate-200",   icon: "text-slate-700",   label: "أشعة سينية" },
-  ct:    { bg: "from-sky-50 to-sky-100/50",       ring: "ring-sky-200",     icon: "text-sky-600",     label: "أشعة مقطعية CT" },
-  mri:   { bg: "from-violet-50 to-violet-100/50", ring: "ring-violet-200",  icon: "text-violet-600",  label: "رنين مغناطيسي MRI" },
+  ct:    { bg: "from-teal-50 to-teal-100/50",       ring: "ring-teal-200",     icon: "text-teal-600",     label: "أشعة مقطعية CT" },
+  mri:   { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200",  icon: "text-teal-600",  label: "رنين مغناطيسي MRI" },
   us:    { bg: "from-teal-50 to-teal-100/50",     ring: "ring-teal-200",    icon: "text-teal-600",    label: "موجات فوق صوتية" },
   mammo: { bg: "from-pink-50 to-pink-100/50",     ring: "ring-pink-200",    icon: "text-pink-600",    label: "ماموغرام" },
   pet:   { bg: "from-amber-50 to-amber-100/50",   ring: "ring-amber-200",   icon: "text-amber-600",   label: "PET" },
-  other: { bg: "from-indigo-50 to-indigo-100/50", ring: "ring-indigo-200",  icon: "text-indigo-600",  label: "أخرى" },
+  other: { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200",  icon: "text-teal-600",  label: "أخرى" },
 };
 
 function modalityKey(r: RadiologyReport): keyof typeof MODALITY_STYLES {

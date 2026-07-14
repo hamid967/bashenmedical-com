@@ -92,14 +92,14 @@ const FILTERS: { key: FilterKey; label: string; icon: React.ComponentType<{ clas
 ];
 
 const KIND_STYLES: Record<TimelineKind, { bg: string; text: string; label: string }> = {
-  visit: { bg: "bg-sky-50", text: "text-sky-600", label: "زيارة" },
-  diagnosis: { bg: "bg-indigo-50", text: "text-indigo-600", label: "تشخيص" },
+  visit: { bg: "bg-teal-50", text: "text-teal-600", label: "زيارة" },
+  diagnosis: { bg: "bg-teal-50", text: "text-teal-600", label: "تشخيص" },
   surgery: { bg: "bg-rose-50", text: "text-rose-600", label: "عملية" },
   immunization: { bg: "bg-emerald-50", text: "text-emerald-600", label: "تطعيم" },
   medication: { bg: "bg-amber-50", text: "text-amber-600", label: "دواء" },
   allergy: { bg: "bg-red-50", text: "text-red-600", label: "حساسية" },
-  lab: { bg: "bg-violet-50", text: "text-violet-600", label: "مختبر" },
-  radiology: { bg: "bg-cyan-50", text: "text-cyan-600", label: "أشعة" },
+  lab: { bg: "bg-teal-50", text: "text-teal-600", label: "مختبر" },
+  radiology: { bg: "bg-teal-50", text: "text-teal-600", label: "أشعة" },
   prescription: { bg: "bg-teal-50", text: "text-teal-600", label: "وصفة" },
   attachment: { bg: "bg-slate-100", text: "text-slate-600", label: "مرفق" },
 };

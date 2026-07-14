@@ -74,12 +74,12 @@ const TYPE_META: Record<
   { label: string; Icon: typeof FileText; tint: string; bg: string }
 > = {
   lab: { label: "المختبر", Icon: FlaskConical, tint: "text-emerald-700", bg: "bg-emerald-50" },
-  radiology: { label: "الأشعة", Icon: ScanLine, tint: "text-indigo-700", bg: "bg-indigo-50" },
+  radiology: { label: "الأشعة", Icon: ScanLine, tint: "text-teal-700", bg: "bg-teal-50" },
   visit_summary: {
     label: "ملخص زيارة",
     Icon: Stethoscope,
-    tint: "text-sky-700",
-    bg: "bg-sky-50",
+    tint: "text-teal-700",
+    bg: "bg-teal-50",
   },
   discharge: {
     label: "خروج/إخلاء",

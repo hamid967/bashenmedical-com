@@ -145,7 +145,7 @@ function Kpi({ icon: Icon, label, value, tone }: {
   const toneCls: Record<typeof tone, string> = {
     primary: "bg-primary/10 text-primary",
     emerald: "bg-emerald-100 text-emerald-700",
-    sky: "bg-sky-100 text-sky-700",
+    sky: "bg-teal-100 text-teal-700",
     amber: "bg-amber-100 text-amber-700",
   };
   return (
@@ -438,7 +438,7 @@ function TimeSlotsSection() {
               <ul className="flex flex-wrap gap-2">
                 {list.map((s) => {
                   const tone =
-                    s.status === "booked" ? "bg-blue-100 text-blue-700"
+                    s.status === "booked" ? "bg-teal-100 text-teal-700"
                     : s.status === "blocked" ? "bg-amber-100 text-amber-700"
                     : "bg-emerald-100 text-emerald-700";
                   return (
@@ -610,7 +610,7 @@ function UpcomingAppointmentsSection() {
               </div>
               <div className="mt-1 flex items-center gap-2 text-xs">
                 <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 ${
-                  a.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : "bg-blue-100 text-blue-700"
+                  a.status === "confirmed" ? "bg-emerald-100 text-emerald-700" : "bg-teal-100 text-teal-700"
                 }`}>
                   {a.status === "confirmed" ? <CheckCircle2 className="h-3 w-3" /> : <Clock className="h-3 w-3" />}
                   {a.status === "confirmed" ? "مؤكّد" : "جديد"}

@@ -269,7 +269,7 @@ function InsurancePage() {
             </button>
           </div>
 
-          <div className="mt-4 rounded-xl border border-sky-100 bg-sky-50 text-sky-900 p-3 text-xs leading-relaxed flex gap-2">
+          <div className="mt-4 rounded-xl border border-teal-100 bg-teal-50 text-teal-900 p-3 text-xs leading-relaxed flex gap-2">
             <ShieldAlert className="h-4 w-4 shrink-0 mt-0.5" />
             <div>يتم التحقق من أهلية التأمين تلقائيًا عند حجز موعد. تحقق من قائمة الأهلية أدناه أو <Link to="/portal/book" className="underline font-semibold">احجز موعدًا جديدًا</Link> للتحقق قبل الزيارة.</div>
           </div>

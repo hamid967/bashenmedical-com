@@ -250,7 +250,7 @@ function DoctorCalendarPage() {
                           </span>
                         )}
                         {b && b.available > 0 && (
-                          <span className="text-[10px] px-1 rounded bg-sky-100 text-sky-700">
+                          <span className="text-[10px] px-1 rounded bg-teal-100 text-teal-700">
                             {b.available} متاح
                           </span>
                         )}
@@ -268,7 +268,7 @@ function DoctorCalendarPage() {
             </div>
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-[color:var(--portal-ink-2)]">
               <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-emerald-500" /> موعد مؤكّد</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-sky-500" /> فترة متاحة</span>
+              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-teal-500" /> فترة متاحة</span>
               <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-slate-400" /> محجوب</span>
               <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-amber-500" /> إجازة</span>
             </div>
@@ -402,7 +402,7 @@ function DoctorCalendarPage() {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { t: string; c: string }> = {
-    new: { t: "جديد", c: "bg-blue-100 text-blue-700" },
+    new: { t: "جديد", c: "bg-teal-100 text-teal-700" },
     confirmed: { t: "مؤكّد", c: "bg-emerald-100 text-emerald-700" },
     completed: { t: "مكتمل", c: "bg-slate-200 text-slate-700" },
     cancelled: { t: "ملغى", c: "bg-red-100 text-red-700" },
@@ -414,7 +414,7 @@ function StatusBadge({ status }: { status: string }) {
 
 function SlotBadge({ status }: { status: string }) {
   const map: Record<string, { t: string; c: string }> = {
-    available: { t: "متاح", c: "bg-sky-100 text-sky-700" },
+    available: { t: "متاح", c: "bg-teal-100 text-teal-700" },
     booked: { t: "محجوز", c: "bg-emerald-100 text-emerald-700" },
     blocked: { t: "محجوب", c: "bg-slate-200 text-slate-700" },
   };
@@ -612,7 +612,7 @@ function PatientCalendarPage() {
                           </span>
                         )}
                         {b && b.total - b.confirmed - b.cancelled > 0 && (
-                          <span className="text-[10px] px-1 rounded bg-sky-100 text-sky-700">
+                          <span className="text-[10px] px-1 rounded bg-teal-100 text-teal-700">
                             {b.total - b.confirmed - b.cancelled} جديد
                           </span>
                         )}
@@ -630,7 +630,7 @@ function PatientCalendarPage() {
             </div>
             <div className="mt-3 flex flex-wrap gap-3 text-xs text-[color:var(--portal-ink-2)]">
               <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-emerald-500" /> مؤكّد</span>
-              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-sky-500" /> جديد</span>
+              <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-teal-500" /> جديد</span>
               <span className="inline-flex items-center gap-1"><span className="h-2.5 w-2.5 rounded bg-red-500" /> ملغى</span>
             </div>
           </>

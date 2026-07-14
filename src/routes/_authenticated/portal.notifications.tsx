@@ -62,10 +62,10 @@ type Filter = "all" | "unread";
 function iconForKind(kind: string) {
   const k = kind.toLowerCase();
   if (k.startsWith("reminder_") || k.includes("appointment"))
-    return { Icon: CalendarDays, cls: "bg-sky-50 text-sky-600 border-sky-100" };
+    return { Icon: CalendarDays, cls: "bg-teal-50 text-teal-600 border-teal-100" };
   if (k.includes("report") || k.includes("record"))
-    return { Icon: FileText, cls: "bg-indigo-50 text-indigo-600 border-indigo-100" };
-  if (k.includes("lab")) return { Icon: FlaskConical, cls: "bg-violet-50 text-violet-600 border-violet-100" };
+    return { Icon: FileText, cls: "bg-teal-50 text-teal-600 border-teal-100" };
+  if (k.includes("lab")) return { Icon: FlaskConical, cls: "bg-teal-50 text-teal-600 border-teal-100" };
   if (k.includes("prescription") || k.includes("pharmacy"))
     return { Icon: Pill, cls: "bg-emerald-50 text-emerald-600 border-emerald-100" };
   if (k.includes("invoice") || k.includes("payment") || k.includes("refund"))

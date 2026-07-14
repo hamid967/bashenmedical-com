@@ -912,7 +912,7 @@ function LabStatusChip({ status, lang }: { status: string | null; lang: Lang }) 
   const s = (status ?? "normal").toLowerCase();
   const map: Record<string, { l_ar: string; l_en: string; cls: string }> = {
     normal: { l_ar: "طبيعي", l_en: "Normal", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
-    low: { l_ar: "منخفض", l_en: "Low", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    low: { l_ar: "منخفض", l_en: "Low", cls: "bg-teal-50 text-teal-700 border-teal-200" },
     high: { l_ar: "مرتفع", l_en: "High", cls: "bg-amber-50 text-amber-700 border-amber-200" },
     critical: { l_ar: "حرج", l_en: "Critical", cls: "bg-rose-50 text-rose-700 border-rose-200" },
   };
@@ -945,11 +945,11 @@ function InvoiceStatusChip({
 
 function InsuranceStatusChip({ status, lang }: { status: string; lang: Lang }) {
   const map: Record<string, { l_ar: string; l_en: string; cls: string }> = {
-    submitted: { l_ar: "مُقدّم", l_en: "Submitted", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    submitted: { l_ar: "مُقدّم", l_en: "Submitted", cls: "bg-teal-50 text-teal-700 border-teal-200" },
     under_review: {
       l_ar: "قيد المراجعة",
       l_en: "Under review",
-      cls: "bg-indigo-50 text-indigo-700 border-indigo-200",
+      cls: "bg-teal-50 text-teal-700 border-teal-200",
     },
     additional_info_required: {
       l_ar: "بحاجة معلومات",
