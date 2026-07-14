@@ -118,6 +118,7 @@ import { Route as AuthenticatedPortalInvoicesRouteImport } from './routes/_authe
 import { Route as AuthenticatedPortalInsuranceRouteImport } from './routes/_authenticated/portal.insurance'
 import { Route as AuthenticatedPortalFamilyRouteImport } from './routes/_authenticated/portal.family'
 import { Route as AuthenticatedPortalDoctorsRouteImport } from './routes/_authenticated/portal.doctors'
+import { Route as AuthenticatedPortalConsentsRouteImport } from './routes/_authenticated/portal.consents'
 import { Route as AuthenticatedPortalComplaintsRouteImport } from './routes/_authenticated/portal.complaints'
 import { Route as AuthenticatedPortalCalendarRouteImport } from './routes/_authenticated/portal.calendar'
 import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authenticated/portal.book'
@@ -726,6 +727,12 @@ const AuthenticatedPortalDoctorsRoute =
     path: '/doctors',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
+const AuthenticatedPortalConsentsRoute =
+  AuthenticatedPortalConsentsRouteImport.update({
+    id: '/consents',
+    path: '/consents',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedPortalComplaintsRoute =
   AuthenticatedPortalComplaintsRouteImport.update({
     id: '/complaints',
@@ -944,6 +951,7 @@ export interface FileRoutesByFullPath {
   '/portal/book': typeof AuthenticatedPortalBookRoute
   '/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
+  '/portal/consents': typeof AuthenticatedPortalConsentsRoute
   '/portal/doctors': typeof AuthenticatedPortalDoctorsRoute
   '/portal/family': typeof AuthenticatedPortalFamilyRoute
   '/portal/insurance': typeof AuthenticatedPortalInsuranceRoute
@@ -1073,6 +1081,7 @@ export interface FileRoutesByTo {
   '/portal/book': typeof AuthenticatedPortalBookRoute
   '/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
+  '/portal/consents': typeof AuthenticatedPortalConsentsRoute
   '/portal/doctors': typeof AuthenticatedPortalDoctorsRoute
   '/portal/family': typeof AuthenticatedPortalFamilyRoute
   '/portal/insurance': typeof AuthenticatedPortalInsuranceRoute
@@ -1206,6 +1215,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/book': typeof AuthenticatedPortalBookRoute
   '/_authenticated/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/_authenticated/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
+  '/_authenticated/portal/consents': typeof AuthenticatedPortalConsentsRoute
   '/_authenticated/portal/doctors': typeof AuthenticatedPortalDoctorsRoute
   '/_authenticated/portal/family': typeof AuthenticatedPortalFamilyRoute
   '/_authenticated/portal/insurance': typeof AuthenticatedPortalInsuranceRoute
@@ -1339,6 +1349,7 @@ export interface FileRouteTypes {
     | '/portal/book'
     | '/portal/calendar'
     | '/portal/complaints'
+    | '/portal/consents'
     | '/portal/doctors'
     | '/portal/family'
     | '/portal/insurance'
@@ -1468,6 +1479,7 @@ export interface FileRouteTypes {
     | '/portal/book'
     | '/portal/calendar'
     | '/portal/complaints'
+    | '/portal/consents'
     | '/portal/doctors'
     | '/portal/family'
     | '/portal/insurance'
@@ -1600,6 +1612,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/book'
     | '/_authenticated/portal/calendar'
     | '/_authenticated/portal/complaints'
+    | '/_authenticated/portal/consents'
     | '/_authenticated/portal/doctors'
     | '/_authenticated/portal/family'
     | '/_authenticated/portal/insurance'
@@ -2460,6 +2473,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalDoctorsRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/consents': {
+      id: '/_authenticated/portal/consents'
+      path: '/consents'
+      fullPath: '/portal/consents'
+      preLoaderRoute: typeof AuthenticatedPortalConsentsRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/_authenticated/portal/complaints': {
       id: '/_authenticated/portal/complaints'
       path: '/complaints'
@@ -2690,6 +2710,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalBookRoute: typeof AuthenticatedPortalBookRoute
   AuthenticatedPortalCalendarRoute: typeof AuthenticatedPortalCalendarRoute
   AuthenticatedPortalComplaintsRoute: typeof AuthenticatedPortalComplaintsRoute
+  AuthenticatedPortalConsentsRoute: typeof AuthenticatedPortalConsentsRoute
   AuthenticatedPortalDoctorsRoute: typeof AuthenticatedPortalDoctorsRoute
   AuthenticatedPortalFamilyRoute: typeof AuthenticatedPortalFamilyRoute
   AuthenticatedPortalInsuranceRoute: typeof AuthenticatedPortalInsuranceRoute
@@ -2714,6 +2735,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalBookRoute: AuthenticatedPortalBookRoute,
   AuthenticatedPortalCalendarRoute: AuthenticatedPortalCalendarRoute,
   AuthenticatedPortalComplaintsRoute: AuthenticatedPortalComplaintsRoute,
+  AuthenticatedPortalConsentsRoute: AuthenticatedPortalConsentsRoute,
   AuthenticatedPortalDoctorsRoute: AuthenticatedPortalDoctorsRoute,
   AuthenticatedPortalFamilyRoute: AuthenticatedPortalFamilyRoute,
   AuthenticatedPortalInsuranceRoute: AuthenticatedPortalInsuranceRoute,
