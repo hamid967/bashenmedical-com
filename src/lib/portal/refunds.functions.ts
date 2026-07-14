@@ -40,7 +40,7 @@ export const listMyRefunds = createServerFn({ method: "GET" })
 
     const { data: rows, error } = await supabase
       .from("refunds")
-      .select("id, payment_id, amount, reason, status, requested_by, approved_by, is_mock, decision_reason, processed_at, created_at, updated_at")
+      .select("id, payment_id, amount, reason, status, requested_by, approved_by, is_mock, decision_reason, processed_at, created_at, updated_at, receipt_reference")
       .in("payment_id", payIds)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
@@ -64,6 +64,7 @@ export const listMyRefunds = createServerFn({ method: "GET" })
           created_at: r.created_at as string,
           updated_at: r.updated_at as string,
           has_decision_maker: !!r.approved_by,
+          receipt_reference: (r.receipt_reference ?? null) as string | null,
           payment_amount: Number(pay?.amount ?? 0),
           payment_method: (pay?.method ?? null) as string | null,
           payment_paid_at: (pay?.paid_at ?? null) as string | null,
