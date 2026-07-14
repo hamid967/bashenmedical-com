@@ -177,6 +177,13 @@ const T = {
   st_pending:       { ar: "بانتظار المعالجة", en: "Pending" },
   st_in_progress:   { ar: "جارٍ", en: "In progress" },
   st_unknown:       { ar: "غير معروف", en: "Unknown" },
+  // completeness
+  incomplete_title: { ar: "بيانات ناقصة قبل الحجز", en: "Missing details before booking" },
+  incomplete_body: {
+    ar: "لإتمام الحجز نيابةً عن هذا الفرد، الرجاء استكمال الحقول التالية:",
+    en: "To book on behalf of this member, please complete the following fields:",
+  },
+  complete_now:     { ar: "استكمل البيانات", en: "Complete details" },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
