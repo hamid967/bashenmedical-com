@@ -36,6 +36,7 @@ import {
   CircleDot,
   XCircle,
 } from "lucide-react";
+import { InquiryAttachments } from "@/components/inquiry/InquiryAttachments";
 
 const LS_KEY = "bmc:pending_inquiry_links";
 
@@ -333,6 +334,19 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
       <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
         <Badge tone="primary">{STATUS_LABEL[i.internal_status] ?? i.internal_status}</Badge>
         <Badge tone="muted">واتساب: {HANDOFF_LABEL[i.whatsapp_handoff_status] ?? i.whatsapp_handoff_status}</Badge>
+      </div>
+
+      <div className="mt-4 pt-3 border-t border-border">
+        <InquiryAttachments
+          inquiryId={i.id}
+          compact
+          disabled={i.internal_status === "cancelled" || i.internal_status === "completed"}
+          disabledReason={
+            i.internal_status === "cancelled" || i.internal_status === "completed"
+              ? "الطلب مغلق — لا يمكن إضافة مرفقات."
+              : undefined
+          }
+        />
       </div>
 
       <div className="mt-3 text-[10px] text-muted-foreground">أُرسل في {created}</div>

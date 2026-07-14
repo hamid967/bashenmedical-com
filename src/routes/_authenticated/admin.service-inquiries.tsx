@@ -27,6 +27,7 @@ import {
   notifyInquiryPatient,
   closeInquiry,
 } from "@/lib/admin/service-inquiries.functions";
+import { InquiryAttachments } from "@/components/inquiry/InquiryAttachments";
 
 export const Route = createFileRoute("/_authenticated/admin/service-inquiries")({
   head: () => ({
@@ -650,6 +651,10 @@ function InquiryDrawer({
                   الطلب مغلق — الإجراءات معطّلة.
                 </span>
               )}
+            </section>
+
+            <section className="space-y-2">
+              <InquiryAttachments inquiryId={id} />
             </section>
 
             {/* Audit timeline */}
