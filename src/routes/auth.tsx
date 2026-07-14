@@ -595,30 +595,83 @@ function AuthPage() {
             </form>
           ) : otpStep === "enter" ? (
             <form onSubmit={handleSendOtp} className="relative space-y-4">
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
-                  رقم الجوال
-                </label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
-                    <Phone className="h-4 w-4" />
-                  </span>
-                  <input
-                    type="tel"
-                    required
-                    inputMode="tel"
-                    autoComplete="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="05XXXXXXXX"
-                    dir="ltr"
-                    className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
-                  />
-                </div>
-                <p className="mt-1.5 text-[11px] text-white/40 px-1">
-                  سنرسل رمز تحقق (OTP) صالحًا لدقائق قليلة.
-                </p>
+              {/* Sub-channel: email (default) or SMS */}
+              <div className="grid grid-cols-2 gap-1 rounded-lg bg-white/[0.03] border border-white/10 p-1">
+                <button
+                  type="button"
+                  onClick={() => setOtpChannel("email")}
+                  className={`h-8 rounded-md text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition ${
+                    otpChannel === "email"
+                      ? "bg-[#1FAEFF]/90 text-white"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  <Mail className="h-3 w-3" /> عبر البريد
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOtpChannel("sms")}
+                  className={`h-8 rounded-md text-[11px] font-semibold inline-flex items-center justify-center gap-1.5 transition ${
+                    otpChannel === "sms"
+                      ? "bg-[#1FAEFF]/90 text-white"
+                      : "text-white/50 hover:text-white"
+                  }`}
+                >
+                  <Phone className="h-3 w-3" /> عبر الجوال (SMS)
+                </button>
               </div>
+
+              {otpChannel === "email" ? (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                    البريد الإلكتروني
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
+                      <Mail className="h-4 w-4" />
+                    </span>
+                    <input
+                      type="email"
+                      required
+                      inputMode="email"
+                      autoComplete="email"
+                      value={otpEmail}
+                      onChange={(e) => setOtpEmail(e.target.value)}
+                      placeholder="name@example.com"
+                      dir="ltr"
+                      className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-white/40 px-1">
+                    سنرسل رمز تحقق مكوّن من 6 أرقام إلى بريدك، صالحًا لدقائق قليلة.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                    رقم الجوال
+                  </label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
+                      <Phone className="h-4 w-4" />
+                    </span>
+                    <input
+                      type="tel"
+                      required
+                      inputMode="tel"
+                      autoComplete="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="05XXXXXXXX"
+                      dir="ltr"
+                      className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
+                    />
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-amber-300/80 px-1">
+                    خدمة SMS قد لا تكون مفعّلة بعد — يمكنك استخدام البريد بدلًا منها.
+                  </p>
+                </div>
+              )}
 
               <button
                 type="submit"
@@ -633,6 +686,7 @@ function AuthPage() {
                 إرسال رمز التحقق
               </button>
             </form>
+
           ) : (
             <form onSubmit={handleVerifyOtp} className="relative space-y-4">
               <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white/70 flex items-center justify-between">
