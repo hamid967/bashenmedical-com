@@ -72,7 +72,12 @@ export const Route = createFileRoute("/faq")({
 
 function FAQPage() {
   const { t, lang } = useI18n();
-  const { data: faqs } = useQuery({ queryKey: ["faqs"], queryFn: fetchFaqs });
+  const initialFaqs = Route.useLoaderData() as Faq[] | undefined;
+  const { data: faqs } = useQuery({
+    queryKey: ["faqs"],
+    queryFn: fetchFaqs,
+    initialData: initialFaqs,
+  });
 
   return (
     <div className="container-app py-12 max-w-3xl">
