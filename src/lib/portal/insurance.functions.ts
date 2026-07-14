@@ -291,27 +291,68 @@ async function logAttempt(
   data: z.infer<typeof VerifySchema>,
   policy: string,
   r: MockResult,
-) {
+): Promise<string | null> {
   const messageForLog = r.notes.length
     ? `${r.message} — ${r.notes.join(" · ")}`
     : r.message;
-  const { error } = await supabase.from("insurance_verifications").insert({
-    user_id: userId,
-    doctor_id: data.doctor_id,
-    provider_id: data.provider_id,
-    appointment_id: data.appointment_id ?? null,
-    policy_hint: maskPolicy(policy || null),
-    eligible: r.eligible,
-    reason: r.reason,
-    message: messageForLog,
-    consultation_fee: r.consultation_fee,
-    coverage_percent: r.coverage_percent,
-    covered_amount: r.covered_amount,
-    estimated_cost: r.estimated_cost,
-    patient_share: r.patient_share,
-  });
-  if (error) console.warn("[verifyMyInsurance] log failed:", error.message);
+  const { data: inserted, error } = await supabase
+    .from("insurance_verifications")
+    .insert({
+      user_id: userId,
+      doctor_id: data.doctor_id,
+      provider_id: data.provider_id,
+      appointment_id: data.appointment_id ?? null,
+      policy_hint: maskPolicy(policy || null),
+      eligible: r.eligible,
+      reason: r.reason,
+      message: messageForLog,
+      consultation_fee: r.consultation_fee,
+      coverage_percent: r.coverage_percent,
+      covered_amount: r.covered_amount,
+      estimated_cost: r.estimated_cost,
+      patient_share: r.patient_share,
+    })
+    .select("id")
+    .single();
+  if (error) {
+    console.warn("[verifyMyInsurance] log failed:", error.message);
+    return null;
+  }
+  return inserted?.id ?? null;
 }
+
+/* --------------------- attachVerificationToAppointment -------------------- */
+
+const AttachSchema = z.object({
+  verification_id: z.string().uuid(),
+  appointment_id: z.string().uuid(),
+});
+
+export const attachVerificationToAppointment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((i: unknown) => AttachSchema.parse(i))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    // Confirm the appointment belongs to this user (patient_id → patients.user_id)
+    const { data: appt, error: apptErr } = await supabase
+      .from("appointments")
+      .select("id, patient_id, patients:patient_id(user_id)")
+      .eq("id", data.appointment_id)
+      .maybeSingle();
+    if (apptErr) throw new Error(apptErr.message);
+    const ownerId = (appt as any)?.patients?.user_id ?? null;
+    if (!appt || (ownerId && ownerId !== userId)) {
+      throw new Error("لا يمكن ربط هذا التحقق بالموعد.");
+    }
+    const { error } = await supabase
+      .from("insurance_verifications")
+      .update({ appointment_id: data.appointment_id })
+      .eq("id", data.verification_id)
+      .eq("user_id", userId);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 
 /* --------------------------- listMyVerifications -------------------------- */
