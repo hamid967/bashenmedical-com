@@ -5,8 +5,8 @@ import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { z } from "zod";
 import { logAuthEvent } from "@/lib/auth-log.functions";
-import {
 import { bmcOgImageMeta } from "@/lib/og-meta";
+import {
   Mail,
   Lock,
   User as UserIcon,
