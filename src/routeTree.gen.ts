@@ -128,6 +128,7 @@ import { Route as AuthenticatedPortalCalendarRouteImport } from './routes/_authe
 import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authenticated/portal.book'
 import { Route as AuthenticatedPortalAppointmentsRouteImport } from './routes/_authenticated/portal.appointments'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
+import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -793,6 +794,12 @@ const AuthenticatedPatientsPatientIdRoute =
     path: '/patients/$patientId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminServiceInquiriesRoute =
+  AuthenticatedAdminServiceInquiriesRouteImport.update({
+    id: '/service-inquiries',
+    path: '/service-inquiries',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminServiceCatalogRoute =
   AuthenticatedAdminServiceCatalogRouteImport.update({
     id: '/service-catalog',
@@ -997,6 +1004,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
+  '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/book': typeof AuthenticatedPortalBookRoute
@@ -1134,6 +1142,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
+  '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/book': typeof AuthenticatedPortalBookRoute
@@ -1275,6 +1284,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
+  '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/_authenticated/portal/book': typeof AuthenticatedPortalBookRoute
@@ -1416,6 +1426,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/service-catalog'
+    | '/admin/service-inquiries'
     | '/patients/$patientId'
     | '/portal/appointments'
     | '/portal/book'
@@ -1553,6 +1564,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/service-catalog'
+    | '/admin/service-inquiries'
     | '/patients/$patientId'
     | '/portal/appointments'
     | '/portal/book'
@@ -1693,6 +1705,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/service-catalog'
+    | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/portal/appointments'
     | '/_authenticated/portal/book'
@@ -2636,6 +2649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatientsPatientIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/service-inquiries': {
+      id: '/_authenticated/admin/service-inquiries'
+      path: '/service-inquiries'
+      fullPath: '/admin/service-inquiries'
+      preLoaderRoute: typeof AuthenticatedAdminServiceInquiriesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/service-catalog': {
       id: '/_authenticated/admin/service-catalog'
       path: '/service-catalog'
@@ -2790,6 +2810,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
+  AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
 }
@@ -2797,6 +2818,8 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
+  AuthenticatedAdminServiceInquiriesRoute:
+    AuthenticatedAdminServiceInquiriesRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminSuperPermissionsRoute:
     AuthenticatedAdminSuperPermissionsRouteWithChildren,
