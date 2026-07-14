@@ -526,6 +526,11 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
           </div>
         )}
         <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+          {r.receipt_reference && (
+            <span className="font-mono font-semibold text-[color:var(--mag-ink-2)] bg-[color:var(--mag-subtle)] px-1.5 py-0.5 rounded">
+              {r.receipt_reference}
+            </span>
+          )}
           <span>طُلب في {fmtDate(r.created_at)}</span>
           <span>· آخر تحديث: {fmtDateTime(lastUpdate)}</span>
         </div>
