@@ -100,6 +100,7 @@ import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } fr
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
 import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authenticated/patients.index'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedPortalSettingsRouteImport } from './routes/_authenticated/portal.settings'
 import { Route as AuthenticatedPortalScheduleRouteImport } from './routes/_authenticated/portal.schedule'
@@ -618,6 +619,11 @@ const AuthenticatedPatientsIndexRoute =
     path: '/patients/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const MediaStoriesSlugRoute = MediaStoriesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -947,6 +953,7 @@ export interface FileRoutesByFullPath {
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -999,7 +1006,6 @@ export interface FileRoutesByTo {
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appointments-queue': typeof AuthenticatedAppointmentsQueueRoute
   '/audit-export': typeof AuthenticatedAuditExportRoute
   '/audit-log': typeof AuthenticatedAuditLogRoute
@@ -1075,6 +1081,7 @@ export interface FileRoutesByTo {
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1206,6 +1213,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1337,6 +1345,7 @@ export interface FileRouteTypes {
     | '/portal/schedule'
     | '/portal/settings'
     | '/media/stories/$slug'
+    | '/admin/'
     | '/patients/'
     | '/portal/'
     | '/admin/super/permissions'
@@ -1389,7 +1398,6 @@ export interface FileRouteTypes {
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
-    | '/admin'
     | '/appointments-queue'
     | '/audit-export'
     | '/audit-log'
@@ -1465,6 +1473,7 @@ export interface FileRouteTypes {
     | '/portal/schedule'
     | '/portal/settings'
     | '/media/stories/$slug'
+    | '/admin'
     | '/patients'
     | '/portal'
     | '/admin/super/permissions'
@@ -1595,6 +1604,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/schedule'
     | '/_authenticated/portal/settings'
     | '/media/stories/$slug'
+    | '/_authenticated/admin/'
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/super/permissions'
@@ -2311,6 +2321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatientsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/media/stories/$slug': {
       id: '/media/stories/$slug'
       path: '/$slug'
@@ -2590,11 +2607,13 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminSuperPermissionsRoute:
     AuthenticatedAdminSuperPermissionsRouteWithChildren,
 }
