@@ -248,18 +248,88 @@ export function PushSubscriptionCard() {
           onClick={() => void sendLocalTest()}
           disabled={testing || push.state !== "granted" || !push.subscribed}
           className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-          title={
-            push.state !== "granted"
-              ? "يتطلّب منح الإذن"
-              : !push.subscribed
-                ? "يتطلّب اشتراكًا نشطًا"
-                : undefined
-          }
+          title="إشعار محلي عبر showNotification()"
         >
           {testing ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
-          إرسال إشعار تجريبي
+          إشعار محلي
+        </button>
+
+        <button
+          onClick={() => void sendServerTest()}
+          disabled={serverSending || !push.subscribed}
+          className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          title="Web Push حقيقي من الخادم عبر VAPID → مزوّد المتصفح"
+        >
+          {serverSending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          إرسال من الخادم
+        </button>
+
+        <button
+          onClick={() => setShowPayload((v) => !v)}
+          className="inline-flex items-center gap-2 rounded-lg border border-dashed border-input bg-background px-3 py-2 text-xs font-medium text-muted-foreground transition hover:bg-muted"
+          type="button"
+        >
+          {showPayload ? "إخفاء الحمولة" : "تخصيص الحمولة"}
         </button>
       </div>
+
+      {/* Custom payload editor for the server-side push test */}
+      {showPayload && (
+        <div className="mt-4 space-y-3 rounded-xl border bg-muted/20 p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="space-y-1 text-xs">
+              <span className="font-semibold text-muted-foreground">العنوان — Title</span>
+              <input
+                type="text"
+                value={payload.title}
+                maxLength={120}
+                onChange={(e) => setPayload((p) => ({ ...p, title: e.target.value }))}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-semibold text-muted-foreground">
+                رابط الوجهة — URL (يبدأ بـ /)
+              </span>
+              <input
+                type="text"
+                value={payload.url}
+                maxLength={500}
+                dir="ltr"
+                onChange={(e) => setPayload((p) => ({ ...p, url: e.target.value }))}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 font-mono text-xs"
+              />
+            </label>
+          </div>
+          <label className="block space-y-1 text-xs">
+            <span className="font-semibold text-muted-foreground">النص — Body</span>
+            <textarea
+              value={payload.body}
+              maxLength={400}
+              rows={2}
+              onChange={(e) => setPayload((p) => ({ ...p, body: e.target.value }))}
+              className="w-full resize-none rounded-md border border-input bg-background px-3 py-2 text-sm"
+            />
+          </label>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={payload.requireInteraction}
+              onChange={(e) =>
+                setPayload((p) => ({ ...p, requireInteraction: e.target.checked }))
+              }
+              className="rounded border-input"
+            />
+            <span>يتطلّب تفاعل المستخدم للإخفاء (requireInteraction)</span>
+          </label>
+          <p className="text-[11px] leading-relaxed text-muted-foreground">
+            هذه الحمولة تُرسَل عبر VAPID إلى مزوّد المتصفح (FCM/APNs/Mozilla)، ويلتقطها{" "}
+            <code className="rounded bg-background px-1">push</code> event في{" "}
+            <code className="rounded bg-background px-1">/sw-push.js</code>.
+          </p>
+        </div>
+      )}
+
 
       {push.state === "denied" && (
         <p className="mt-3 text-xs text-muted-foreground">
