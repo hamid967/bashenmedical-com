@@ -99,6 +99,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "مجمع باعشن الطبي  Baeshen Medical" },
       { name: "twitter:description", content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية." },
+      { name: "theme-color", content: "#0f766e" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+      { name: "apple-mobile-web-app-title", content: "Baeshen Medical" },
+      { name: "mobile-web-app-capable", content: "yes" },
       // og:image / twitter:image are set per-leaf (root would override every child).
     ],
     links: [
