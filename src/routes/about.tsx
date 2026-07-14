@@ -70,7 +70,7 @@ type AboutSection = {
 };
 
 function AboutPage() {
-  const { t, lang } = useI18n();
+  const { lang } = useI18n();
   const { data: sections } = useQuery({
     queryKey: ["about_sections"],
     queryFn: async (): Promise<AboutSection[]> => {
