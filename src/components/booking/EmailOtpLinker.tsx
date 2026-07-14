@@ -181,7 +181,13 @@ export function EmailOtpLinker({
   }
 
   // If no email captured during booking and no session, hide (nothing to link).
-  if (!email && !sessionEmail && phase !== "code_sent" && phase !== "sending") {
+  if (
+    !email &&
+    !sessionEmail &&
+    phase !== "code_sent" &&
+    phase !== "verifying" &&
+    phase !== "linking"
+  ) {
     return null;
   }
 

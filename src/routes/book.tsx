@@ -218,11 +218,12 @@ function BookPage() {
   // Without this, reload would drop `result` (React-only) and step=9 would
   // render an empty card even though state.step=9 persisted.
   const RESULT_KEY = "booking:result";
-  const [result, setResult] = useState<{ reference: string | null; phone: string } | null>(() => {
+  type BookingResult = { reference: string | null; phone: string; email?: string | null };
+  const [result, setResult] = useState<BookingResult | null>(() => {
     if (typeof window === "undefined") return null;
     try {
       const raw = sessionStorage.getItem(RESULT_KEY);
-      return raw ? (JSON.parse(raw) as { reference: string | null; phone: string }) : null;
+      return raw ? (JSON.parse(raw) as BookingResult) : null;
     } catch { return null; }
   });
   useEffect(() => {
