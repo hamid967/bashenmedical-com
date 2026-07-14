@@ -9,6 +9,7 @@ import {
   listMyRefunds,
   requestRefund,
   cancelMyRefund,
+  logRefundReceiptDownload,
 } from "@/lib/portal/refunds.functions";
 import { listMyPayments } from "@/lib/portal/invoices.functions";
 import {
