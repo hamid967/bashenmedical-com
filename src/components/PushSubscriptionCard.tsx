@@ -120,6 +120,41 @@ export function PushSubscriptionCard() {
     }
   }, []);
 
+  const sendServerTest = useCallback(async () => {
+    setServerSending(true);
+    try {
+      const res = await sendServer({
+        data: {
+          title: payload.title.trim() || undefined,
+          body: payload.body.trim() || undefined,
+          url: payload.url.trim() || undefined,
+          requireInteraction: payload.requireInteraction,
+        },
+      });
+      if (res.ok) {
+        toast.success(res.message, {
+          description:
+            res.removed > 0
+              ? `تم حذف ${res.removed} اشتراك منتهي.`
+              : "افحص إشعار النظام لديك خلال ثوانٍ.",
+        });
+      } else {
+        const first = res.results?.[0];
+        toast.error(res.message, {
+          description: first?.error
+            ? `${first.statusCode ?? "?"} — ${first.error.slice(0, 140)}`
+            : undefined,
+        });
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّر الإرسال من الخادم");
+    } finally {
+      setServerSending(false);
+    }
+  }, [sendServer, payload]);
+
+
+
   // Status pill config
   const statusPill = (() => {
     if (push.state === "unsupported")
