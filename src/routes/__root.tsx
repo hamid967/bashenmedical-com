@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { I18nProvider } from "@/lib/i18n";
 import { Header } from "@/components/Header";
+import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "sonner";
 const IntroOverlay = lazy(() =>
@@ -151,6 +152,7 @@ function RootComponent() {
           <IntroOverlay theme="dark" />
         </Suspense>
         <div className="min-h-screen flex flex-col">
+          <AnnouncementBar />
           <Header />
           <main className="flex-1">
             <Outlet />
