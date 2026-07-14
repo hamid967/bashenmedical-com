@@ -334,6 +334,31 @@ function BookPage() {
         </Link>
       </header>
 
+      {dependent && (
+        <div
+          className="rounded-2xl border border-[color:var(--portal-primary)]/25 bg-[color:var(--portal-primary)]/5 p-4 flex items-center justify-between gap-3 flex-wrap"
+          role="status"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <UserRound className="h-5 w-5 text-[color:var(--portal-primary)] shrink-0" />
+            <div className="min-w-0">
+              <div className="text-xs text-[color:var(--portal-ink-2)]">
+                هذا الحجز نيابةً عن أحد أفراد العائلة
+              </div>
+              <div className="font-semibold truncate">{dependent.full_name}</div>
+            </div>
+          </div>
+          <Link
+            to="/portal/book"
+            search={{}}
+            className="text-xs font-semibold text-[color:var(--portal-primary)] hover:underline"
+          >
+            إلغاء الربط
+          </Link>
+        </div>
+      )}
+
+
       {/* Filters */}
       <section className="glass-card p-4 md:p-6">
         <div className="grid gap-4 md:grid-cols-2">
