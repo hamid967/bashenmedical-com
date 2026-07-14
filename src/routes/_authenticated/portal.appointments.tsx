@@ -116,6 +116,15 @@ function MyAppointmentsPage() {
     onSuccess: () => { invalidate(); toast.success("تم إنشاء طلب المتابعة"); setFollowFor(null); },
     onError: (e: Error) => toast.error(e.message),
   });
+  const checkInMut = useMutation({
+    mutationFn: (id: string) => performSelfCheckIn({ data: { id } }),
+    onSuccess: (r) => {
+      invalidate();
+      const num = r.queue_number ? ` — رقمك في الدور: ${r.queue_number}` : "";
+      toast.success((r.already ? "أنت مسجّل بالفعل" : "تم تسجيل حضورك") + num);
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const items = q.data.items;
   const filtered = useMemo(() => {
