@@ -1,36 +1,29 @@
 /**
- * OrderTimeline — Timeline موحّدة لجميع أنواع الطلبات
- * (موعد / صيدلية / رأي طبي ثاني / رعاية منزلية).
- *
- * منطق المراحل:
- *  - لكل نوع طلب سلسلة خطوات مرتبة، وكل خطوة تحمل مجموعة statuses تُعتبر عندها "مبلوغة".
- *  - نُحدّد أعلى خطوة بلغتها الحالة الحالية = current.
- *  - إذا كانت الحالة ضمن `terminalStates` للنوع → جميع الخطوات done.
- *  - إذا كانت الحالة ضمن `cancelledStates` → عرض مسار مختصر (استلام → إلغاء).
- *  - إذا كانت الحالة ضمن `abortedStates` (مثل no_show للموعد) → المسار الطبيعي مع
- *    وسم المرحلة الأخيرة كـ cancelled بدلاً من done.
+ * OrderTimeline — Unified timeline for all order kinds
+ * (appointment / pharmacy / second_opinion / home_care).
  */
+import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
 
 export type OrderKind = "appointment" | "pharmacy" | "second_opinion" | "home_care";
 type StepState = "done" | "current" | "pending" | "cancelled";
 type Step = { key: string; label: string; date: string | null; state: StepState };
 
-type FlowStep = { key: string; ar: string; en: string; reachedAt: string[] };
+type FlowStep = { key: string; reachedAt: string[] };
 type Flow = {
   steps: FlowStep[];
-  terminalStates: string[]; // مسار مكتمل بنجاح — كل الخطوات done
-  cancelledStates: string[]; // مسار ملغى — استلام + إلغاء فقط
-  abortedStates?: string[]; // انتهى دون اكتمال (مثل no_show) — آخر خطوة cancelled
+  terminalStates: string[];
+  cancelledStates: string[];
+  abortedStates?: string[];
 };
 
 const FLOWS: Record<OrderKind, Flow> = {
   appointment: {
     steps: [
-      { key: "received",  ar: "تم استلام الحجز", en: "Booking received", reachedAt: ["new", "confirmed", "completed", "no_show"] },
-      { key: "confirmed", ar: "تأكيد الموعد",    en: "Confirmed",        reachedAt: ["confirmed", "completed", "no_show"] },
-      { key: "visit",     ar: "موعد الزيارة",     en: "Visit",            reachedAt: ["completed", "no_show"] },
-      { key: "completed", ar: "اكتمال الزيارة",   en: "Completed",        reachedAt: ["completed"] },
+      { key: "received",  reachedAt: ["new", "confirmed", "completed", "no_show"] },
+      { key: "confirmed", reachedAt: ["confirmed", "completed", "no_show"] },
+      { key: "visit",     reachedAt: ["completed", "no_show"] },
+      { key: "completed", reachedAt: ["completed"] },
     ],
     terminalStates: ["completed"],
     cancelledStates: ["cancelled", "canceled"],
@@ -38,30 +31,30 @@ const FLOWS: Record<OrderKind, Flow> = {
   },
   pharmacy: {
     steps: [
-      { key: "received",   ar: "تم استلام الطلب", en: "Order received", reachedAt: ["new", "processing", "ready", "delivered", "completed"] },
-      { key: "processing", ar: "قيد التجهيز",      en: "Processing",     reachedAt: ["processing", "ready", "delivered", "completed"] },
-      { key: "ready",      ar: "جاهز للتسليم",     en: "Ready",          reachedAt: ["ready", "delivered", "completed"] },
-      { key: "delivered",  ar: "تم التسليم",        en: "Delivered",      reachedAt: ["delivered", "completed"] },
+      { key: "received",   reachedAt: ["new", "processing", "ready", "delivered", "completed"] },
+      { key: "processing", reachedAt: ["processing", "ready", "delivered", "completed"] },
+      { key: "ready",      reachedAt: ["ready", "delivered", "completed"] },
+      { key: "delivered",  reachedAt: ["delivered", "completed"] },
     ],
     terminalStates: ["delivered", "completed"],
     cancelledStates: ["cancelled", "canceled", "rejected"],
   },
   second_opinion: {
     steps: [
-      { key: "received",  ar: "تم استلام الطلب",  en: "Request received", reachedAt: ["new", "in_review", "answered", "closed", "completed"] },
-      { key: "in_review", ar: "قيد المراجعة",     en: "Under review",     reachedAt: ["in_review", "answered", "closed", "completed"] },
-      { key: "answered",  ar: "تم إعداد الرأي",   en: "Opinion ready",    reachedAt: ["answered", "closed", "completed"] },
-      { key: "closed",    ar: "تم إغلاق الطلب",    en: "Closed",           reachedAt: ["closed", "completed"] },
+      { key: "received",  reachedAt: ["new", "in_review", "answered", "closed", "completed"] },
+      { key: "in_review", reachedAt: ["in_review", "answered", "closed", "completed"] },
+      { key: "answered",  reachedAt: ["answered", "closed", "completed"] },
+      { key: "closed",    reachedAt: ["closed", "completed"] },
     ],
     terminalStates: ["closed", "completed", "answered"],
     cancelledStates: ["cancelled", "canceled", "rejected"],
   },
   home_care: {
     steps: [
-      { key: "received",    ar: "تم استلام الطلب", en: "Request received", reachedAt: ["new", "confirmed", "in_progress", "completed"] },
-      { key: "confirmed",   ar: "تم التأكيد",       en: "Confirmed",        reachedAt: ["confirmed", "in_progress", "completed"] },
-      { key: "in_progress", ar: "قيد التنفيذ",      en: "In progress",      reachedAt: ["in_progress", "completed"] },
-      { key: "completed",   ar: "اكتملت الخدمة",    en: "Completed",        reachedAt: ["completed"] },
+      { key: "received",    reachedAt: ["new", "confirmed", "in_progress", "completed"] },
+      { key: "confirmed",   reachedAt: ["confirmed", "in_progress", "completed"] },
+      { key: "in_progress", reachedAt: ["in_progress", "completed"] },
+      { key: "completed",   reachedAt: ["completed"] },
     ],
     terminalStates: ["completed"],
     cancelledStates: ["cancelled", "canceled", "rejected"],
@@ -92,7 +85,7 @@ export function OrderTimeline({
   scheduledAt?: string | null;
 }) {
   const { lang } = useI18n();
-  const isAr = lang === "ar";
+  const { t } = useTranslation("booking");
   const flow = FLOWS[kind];
 
   const dateForStep = (key: string): string | null => {
@@ -102,18 +95,16 @@ export function OrderTimeline({
   };
 
   const steps: Step[] = (() => {
-    // مسار ملغى — استلام + إلغاء
     if (flow.cancelledStates.includes(status)) {
       return [
-        { key: "received",  label: isAr ? "تم استلام الطلب" : "Received", date: fmt(createdAt, lang), state: "done" },
-        { key: "cancelled", label: isAr ? "تم إلغاء الطلب" : "Cancelled", date: null, state: "cancelled" },
+        { key: "received",  label: t("timeline.received"),  date: fmt(createdAt, lang), state: "done" },
+        { key: "cancelled", label: t("timeline.cancelled"), date: null, state: "cancelled" },
       ];
     }
 
     const isTerminal = flow.terminalStates.includes(status);
     const isAborted = flow.abortedStates?.includes(status) ?? false;
 
-    // أعلى خطوة بلغتها الحالة الحالية
     let reachedIdx = 0;
     for (let i = 0; i < flow.steps.length; i++) {
       if (flow.steps[i].reachedAt.includes(status)) reachedIdx = i;
@@ -121,29 +112,20 @@ export function OrderTimeline({
 
     return flow.steps.map((s, i) => {
       let state: StepState;
-      if (isTerminal) {
-        state = "done";
-      } else if (isAborted && i === flow.steps.length - 1) {
-        state = "cancelled";
-      } else if (i < reachedIdx) {
-        state = "done";
-      } else if (i === reachedIdx) {
-        state = i === 0 ? "done" : "current";
-      } else {
-        state = "pending";
-      }
-      // الخطوة الأولى دائمًا "done" ما دام السجل موجودًا
+      if (isTerminal) state = "done";
+      else if (isAborted && i === flow.steps.length - 1) state = "cancelled";
+      else if (i < reachedIdx) state = "done";
+      else if (i === reachedIdx) state = i === 0 ? "done" : "current";
+      else state = "pending";
       if (i === 0 && state !== "cancelled") state = "done";
 
-      return { key: s.key, label: isAr ? s.ar : s.en, date: dateForStep(s.key), state };
+      return { key: s.key, label: t(`timeline.${kind}.${s.key}`), date: dateForStep(s.key), state };
     });
   })();
 
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
-      <div className="mb-4 text-sm font-semibold">
-        {isAr ? "مراحل الطلب" : "Order timeline"}
-      </div>
+      <div className="mb-4 text-sm font-semibold">{t("timeline.title")}</div>
       <ol className="relative">
         {steps.map((s, i) => {
           const isLast = i === steps.length - 1;
@@ -176,7 +158,7 @@ export function OrderTimeline({
                 {s.date && <div className="mt-0.5 text-xs text-muted-foreground">{s.date}</div>}
                 {s.state === "current" && (
                   <div className="mt-1 inline-flex items-center rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-                    {isAr ? "الحالة الحالية" : "Current"}
+                    {t("timeline.current")}
                   </div>
                 )}
               </div>

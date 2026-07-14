@@ -1,13 +1,13 @@
 import { Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 
 export function StepDoctor({ lang, doctors, value, onPick }: { lang: "ar" | "en"; doctors: any[]; value: string | null; onPick: (v: string) => void }) {
+  const { t } = useTranslation("booking");
   return (
-    <StepShell lang={lang} title={lang === "ar" ? "اختر الطبيب" : "Choose doctor"}>
+    <StepShell lang={lang} title={t("doctor.title")}>
       {doctors.length === 0 ? (
-        <p className="text-muted-foreground text-sm">
-          {lang === "ar" ? "لا يوجد أطباء متاحون بهذا التخصص/الفرع." : "No doctors available for this specialty/branch."}
-        </p>
+        <p className="text-muted-foreground text-sm">{t("doctor.empty")}</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">
           {doctors.map((d) => {

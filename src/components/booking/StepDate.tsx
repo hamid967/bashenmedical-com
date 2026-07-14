@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   Building2, Calendar as CalIcon, ChevronLeft, ChevronRight, Phone, User,
 } from "lucide-react";
@@ -15,6 +16,7 @@ export function StepDate({
   onChangeDoctor?: () => void;
   onChangeBranch?: () => void;
 }) {
+  const { t } = useTranslation("booking");
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const [monthStart, setMonthStart] = useState(() => new Date(today.getFullYear(), today.getMonth(), 1));
 
@@ -25,17 +27,12 @@ export function StepDate({
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(monthStart.getFullYear(), monthStart.getMonth(), d));
 
   const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  // Force Gregorian calendar to avoid SSR/browser hydration mismatch:
-  // browser Intl uses Umm al-Qura (Hijri) for "ar-SA" while Node/workerd
-  // falls back to Gregorian, producing e.g. "محرم ١٤٤٨ هـ" vs "يوليو ٢٠٢٦".
   const monthLabel = monthStart.toLocaleDateString(
     lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US",
     { month: "long", year: "numeric" },
   );
 
-  const weekdayNames = lang === "ar"
-    ? ["أحد", "إثن", "ثلا", "أرب", "خمي", "جمع", "سبت"]
-    : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const weekdayNames = t("date.weekdays", { returnObjects: true }) as string[];
 
   const maxDate = new Date(); maxDate.setDate(maxDate.getDate() + 60);
   const horizonEnd = new Date(); horizonEnd.setDate(horizonEnd.getDate() + 30);
@@ -93,40 +90,29 @@ export function StepDate({
   const noSlotsIn30Days = bothLoaded && datesInHorizon.length === 0
     && monthAvail?.ok !== false && nextMonthAvail?.ok !== false;
 
-  const waMsg = lang === "ar"
-    ? `مرحبًا، لم أجد مواعيد متاحة خلال 30 يومًا لهذا الطبيب/التخصص. أرجو مساعدتي بحجز أقرب موعد.`
-    : `Hi, I couldn't find any appointment within 30 days for this doctor/specialty. Please help me book the earliest available slot.`;
-  const waHref = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(waMsg)}`;
+  const waHref = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(t("date.waMessage"))}`;
   const telHref = `tel:${SITE.phone}`;
 
   if (noSlotsIn30Days) {
     return (
-      <StepShell lang={lang} title={lang === "ar" ? "اختر التاريخ" : "Choose date"}>
+      <StepShell lang={lang} title={t("date.title")}>
         <div className="max-w-lg mx-auto text-center">
           <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
             <CalIcon className="h-7 w-7" />
           </div>
-          <h3 className="text-lg font-semibold mb-2">
-            {lang === "ar"
-              ? "لا توجد مواعيد متاحة خلال 30 يومًا"
-              : "No appointments available within the next 30 days"}
-          </h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            {lang === "ar"
-              ? "جدول هذا الطبيب/التخصص ممتلئ حاليًا. يمكنك تجربة أحد الخيارات التالية:"
-              : "This doctor/specialty is fully booked for now. Try one of the options below:"}
-          </p>
+          <h3 className="text-lg font-semibold mb-2">{t("date.noneIn30")}</h3>
+          <p className="text-sm text-muted-foreground mb-6">{t("date.fullyBooked")}</p>
           <div className="grid gap-3 sm:grid-cols-2">
             {onChangeDoctor && (
               <Button variant="outline" onClick={onChangeDoctor} className="justify-start">
                 <User className="h-4 w-4 me-2" />
-                {lang === "ar" ? "اختر طبيبًا آخر" : "Pick another doctor"}
+                {t("date.pickOther")}
               </Button>
             )}
             {onChangeBranch && (
               <Button variant="outline" onClick={onChangeBranch} className="justify-start">
                 <Building2 className="h-4 w-4 me-2" />
-                {lang === "ar" ? "غيّر الفرع" : "Change branch"}
+                {t("date.changeBranch")}
               </Button>
             )}
             <a
@@ -138,14 +124,14 @@ export function StepDate({
               <svg viewBox="0 0 24 24" className="h-4 w-4 me-2" fill="currentColor" aria-hidden="true">
                 <path d="M20.52 3.48A11.94 11.94 0 0 0 12 0C5.37 0 0 5.37 0 12c0 2.12.55 4.12 1.6 5.92L0 24l6.24-1.63A11.94 11.94 0 0 0 12 24c6.63 0 12-5.37 12-12 0-3.2-1.25-6.2-3.48-8.52ZM12 22a9.94 9.94 0 0 1-5.06-1.38l-.36-.21-3.7.97.99-3.61-.24-.37A9.94 9.94 0 1 1 22 12c0 5.52-4.48 10-10 10Zm5.47-7.38c-.3-.15-1.77-.87-2.04-.97-.27-.1-.47-.15-.66.15s-.76.97-.93 1.17c-.17.2-.34.22-.63.07-.3-.15-1.26-.46-2.4-1.47-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.6.13-.13.3-.34.44-.51.15-.17.2-.29.29-.49.1-.2.05-.37-.02-.52-.07-.15-.66-1.6-.9-2.19-.24-.58-.48-.5-.66-.51h-.56c-.19 0-.5.07-.76.37-.26.3-1 1-1 2.42s1.02 2.81 1.17 3.01c.15.2 2.02 3.08 4.9 4.32.69.3 1.22.48 1.64.61.69.22 1.31.19 1.8.12.55-.08 1.77-.72 2.02-1.42.25-.7.25-1.3.17-1.42-.07-.12-.27-.19-.56-.34Z"/>
               </svg>
-              {lang === "ar" ? "تواصل عبر واتساب" : "Contact on WhatsApp"}
+              {t("date.contactWhatsApp")}
             </a>
             <a
               href={telHref}
               className="inline-flex items-center justify-start rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted transition"
             >
               <Phone className="h-4 w-4 me-2" />
-              {lang === "ar" ? `اتصل بنا · ${SITE.phoneDisplay}` : `Call us · ${SITE.phoneDisplay}`}
+              {t("date.callUs", { phone: SITE.phoneDisplay })}
             </a>
           </div>
         </div>
@@ -154,7 +140,7 @@ export function StepDate({
   }
 
   return (
-    <StepShell lang={lang} title={lang === "ar" ? "اختر التاريخ" : "Choose date"}>
+    <StepShell lang={lang} title={t("date.title")}>
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-between mb-4">
           <Button variant="outline" size="sm"
@@ -183,7 +169,7 @@ export function StepDate({
                 key={i}
                 disabled={disabled}
                 onClick={() => onPick(s)}
-                title={noAvail ? (lang === "ar" ? "الطبيب غير متاح في هذا اليوم" : "Doctor unavailable this day") : undefined}
+                title={noAvail ? t("date.unavailableTip") : undefined}
                 className={`aspect-square rounded-lg text-sm font-medium transition ${
                   active ? "bg-primary text-primary-foreground shadow"
                   : disabled ? "text-muted-foreground/40 cursor-not-allowed line-through decoration-1"
@@ -197,10 +183,10 @@ export function StepDate({
         </div>
         <p className="mt-4 text-center text-xs text-muted-foreground">
           {loadingMonth
-            ? (lang === "ar" ? "جارٍ تحميل التواريخ المتاحة…" : "Loading available dates…")
+            ? t("date.loading")
             : hasAvailData && availableDates.size === 0
-              ? (lang === "ar" ? "لا توجد أيام متاحة هذا الشهر — جرّب شهرًا آخر." : "No available days this month — try another.")
-              : (lang === "ar" ? "الأيام غير المتاحة معطّلة تلقائيًا" : "Unavailable days are disabled")}
+              ? t("date.noneThisMonth")
+              : t("date.unavailableAuto")}
         </p>
       </div>
     </StepShell>
