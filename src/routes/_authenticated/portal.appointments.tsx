@@ -64,6 +64,8 @@ function MyAppointmentsPage() {
   const [scope, setScope] = useState<Scope>("upcoming");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | ApptStatus>("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
   const [reschedFor, setReschedFor] = useState<null | { id: string; date: string; time: string; doctor?: string | null }>(null);
   const [cancelFor, setCancelFor] = useState<null | { id: string; doctor?: string | null; date: string; time: string }>(null);
   const [followFor, setFollowFor] = useState<null | { id: string; doctor?: string | null }>(null);
@@ -103,6 +105,8 @@ function MyAppointmentsPage() {
   const filtered = useMemo(() => {
     return items.filter((a) => {
       if (statusFilter !== "all" && a.status !== statusFilter) return false;
+      if (dateFrom && a.appointment_date < dateFrom) return false;
+      if (dateTo && a.appointment_date > dateTo) return false;
       if (search.trim()) {
         const s = search.trim().toLowerCase();
         const hay =
@@ -111,7 +115,16 @@ function MyAppointmentsPage() {
       }
       return true;
     });
-  }, [items, statusFilter, search]);
+  }, [items, statusFilter, search, dateFrom, dateTo]);
+
+  const hasActiveFilters =
+    !!search.trim() || statusFilter !== "all" || !!dateFrom || !!dateTo;
+  const clearFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setDateFrom("");
+    setDateTo("");
+  };
 
   const counts = useMemo(() => {
     const c = { new: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0 } as Record<ApptStatus, number>;
@@ -179,6 +192,42 @@ function MyAppointmentsPage() {
           </select>
         </label>
 
+        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-white border border-[color:var(--portal-border)] px-3 text-sm">
+          <CalendarDays className="h-4 w-4 text-slate-400" />
+          <span className="text-[11px] text-[color:var(--portal-ink-3)]">من</span>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            max={dateTo || undefined}
+            aria-label="من تاريخ"
+            className="bg-transparent outline-none text-sm tabular-nums"
+          />
+        </label>
+
+        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-white border border-[color:var(--portal-border)] px-3 text-sm">
+          <CalendarDays className="h-4 w-4 text-slate-400" />
+          <span className="text-[11px] text-[color:var(--portal-ink-3)]">إلى</span>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            min={dateFrom || undefined}
+            aria-label="إلى تاريخ"
+            className="bg-transparent outline-none text-sm tabular-nums"
+          />
+        </label>
+
+        {hasActiveFilters && (
+          <button
+            onClick={clearFilters}
+            className="inline-flex items-center gap-1.5 h-10 px-3 rounded-full bg-white border border-[color:var(--portal-border)] text-xs font-semibold text-[color:var(--portal-ink-2)] hover:bg-slate-50"
+            aria-label="مسح كل الفلاتر"
+          >
+            <XCircle className="h-3.5 w-3.5" /> مسح الفلاتر
+          </button>
+        )}
+
         <button
           onClick={() => q.refetch()}
           className="inline-grid place-items-center h-10 w-10 rounded-full bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
@@ -187,6 +236,13 @@ function MyAppointmentsPage() {
           <RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} />
         </button>
       </div>
+
+      {/* Results summary */}
+      {hasActiveFilters && (
+        <div className="text-xs text-[color:var(--portal-ink-2)] px-1 print:hidden">
+          عرض <b className="tabular-nums text-[color:var(--portal-ink)]">{filtered.length}</b> من {items.length} موعد
+        </div>
+      )}
 
       {/* Summary counts */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 print:hidden">
