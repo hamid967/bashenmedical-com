@@ -275,58 +275,59 @@ html.reduce-motion *::after {
    Only active under .portal-root so the marketing site stays untouched.
    ========================================================================== */
 .portal-root {
-  --portal-primary: #0F6CBD;
-  --portal-secondary: #34C8FF;
-  --portal-accent: #00B8D9;
-  --portal-bg: #F8FBFF;
+  --portal-primary: #075E63;
+  --portal-secondary: #0B8585;
+  --portal-accent: #C7A46B;
+  --portal-bg: #FCFDFB;
   --portal-card: #FFFFFF;
-  --portal-success: #22C55E;
-  --portal-warning: #F59E0B;
-  --portal-error: #EF4444;
-  --portal-ink: #0B2545;
-  --portal-ink-2: #43536B;
-  --portal-ink-3: #7E8DA0;
-  --portal-border: color-mix(in oklab, var(--portal-primary) 12%, #E6EEF8);
-  --portal-radius: 24px;
-  --portal-shadow-sm: 0 1px 2px rgba(15, 108, 189, 0.05), 0 4px 12px -6px rgba(15, 108, 189, 0.08);
-  --portal-shadow: 0 4px 14px -6px rgba(15, 108, 189, 0.10), 0 20px 60px -30px rgba(15, 108, 189, 0.18);
-  --portal-gradient: linear-gradient(135deg, #0F6CBD 0%, #34C8FF 100%);
-  --portal-gradient-soft: linear-gradient(135deg, rgba(15,108,189,0.08) 0%, rgba(52,200,255,0.08) 100%);
+  --portal-success: #16A34A;
+  --portal-warning: #D97706;
+  --portal-error: #C0392B;
+  --portal-ink: #173B42;
+  --portal-ink-2: #64777C;
+  --portal-ink-3: #8B9A9E;
+  --portal-border: #DCEAE8;
+  --portal-radius: 20px;
+  --portal-shadow-sm: 0 1px 2px rgba(7, 94, 99, 0.05), 0 4px 12px -6px rgba(7, 94, 99, 0.08);
+  --portal-shadow: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.18);
+  --portal-gradient: linear-gradient(135deg, #075E63 0%, #0B8585 100%);
+  --portal-gradient-soft: linear-gradient(135deg, rgba(7,94,99,0.08) 0%, rgba(11,133,133,0.08) 100%);
   background: var(--portal-bg);
   color: var(--portal-ink);
   min-height: 100vh;
 }
-.portal-root ::selection { background: rgba(15,108,189,0.18); color: var(--portal-ink); }
+.portal-root ::selection { background: rgba(11,133,133,0.20); color: var(--portal-ink); }
 
 @utility glass-card {
-  background: color-mix(in oklab, white 78%, transparent);
+  background: color-mix(in oklab, white 82%, transparent);
   backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid color-mix(in oklab, #ffffff 50%, rgba(15, 108, 189, 0.12));
-  border-radius: 24px;
-  box-shadow: 0 4px 14px -6px rgba(15, 108, 189, 0.10), 0 20px 60px -30px rgba(15, 108, 189, 0.18);
+  border: 1px solid #DCEAE8;
+  border-radius: 20px;
+  box-shadow: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.16);
 }
 
 @utility portal-card {
   background: #ffffff;
-  border: 1px solid color-mix(in oklab, #0F6CBD 10%, #E6EEF8);
-  border-radius: 24px;
-  box-shadow: 0 1px 2px rgba(15, 108, 189, 0.05), 0 4px 12px -6px rgba(15, 108, 189, 0.08);
+  border: 1px solid #DCEAE8;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px rgba(7, 94, 99, 0.04), 0 4px 12px -6px rgba(7, 94, 99, 0.06);
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
 }
 @utility portal-card-hover {
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px -6px rgba(15, 108, 189, 0.10), 0 20px 60px -30px rgba(15, 108, 189, 0.18);
-    border-color: color-mix(in oklab, #0F6CBD 22%, #E6EEF8);
+    box-shadow: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.18);
+    border-color: color-mix(in oklab, #075E63 22%, #DCEAE8);
   }
 }
 
 @utility portal-gradient-bg {
   background:
-    radial-gradient(1200px 600px at 100% -10%, rgba(52, 200, 255, 0.18), transparent 55%),
-    radial-gradient(900px 500px at -10% 110%, rgba(15, 108, 189, 0.14), transparent 55%),
-    #F8FBFF;
+    radial-gradient(1200px 600px at 100% -10%, rgba(11, 133, 133, 0.14), transparent 55%),
+    radial-gradient(900px 500px at -10% 110%, rgba(199, 164, 107, 0.10), transparent 55%),
+    #FCFDFB;
 }
+
 
 @keyframes portal-shimmer {
   0% { transform: translateX(-100%); }
