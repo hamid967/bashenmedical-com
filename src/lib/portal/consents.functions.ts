@@ -232,7 +232,15 @@ export type ConsentView = {
 /* --------------------------- helpers ---------------------------------- */
 
 async function resolvePatientId(
-  supabase: Awaited<ReturnType<typeof requireSupabaseAuth.server>>["context"]["supabase"],
+  supabase: {
+    from: (t: "patients") => {
+      select: (c: string) => {
+        eq: (col: string, val: string) => {
+          maybeSingle: () => Promise<{ data: { id: string } | null; error: { message: string } | null }>;
+        };
+      };
+    };
+  },
   userId: string,
 ): Promise<string> {
   const { data, error } = await supabase
