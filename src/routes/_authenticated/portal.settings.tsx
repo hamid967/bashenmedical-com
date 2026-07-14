@@ -96,6 +96,16 @@ function SettingsPage() {
           </div>
         </header>
 
+        {mut.isError && (
+          <div className="mb-4">
+            <MutationErrorBanner
+              message={mut.error instanceof Error ? mut.error.message : "تعذّر حفظ الإعدادات"}
+              onRetry={() => mut.mutate()}
+              retrying={mut.isPending}
+            />
+          </div>
+        )}
+
         <section className="glass-card p-5 sm:p-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
           <Toggle icon={<Mail className="h-4 w-4" />} label="البريد الإلكتروني" desc="تذكيرات المواعيد وتحديثات التقارير"
