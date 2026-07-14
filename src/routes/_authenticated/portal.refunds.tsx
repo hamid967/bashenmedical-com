@@ -38,6 +38,7 @@ function isFinalized(status: string) {
 }
 
 type ReceiptFieldKey =
+  | "reference"
   | "request_id"
   | "invoice"
   | "status"
@@ -62,7 +63,9 @@ type ReceiptField = {
 };
 
 const RECEIPT_FIELDS: ReceiptField[] = [
-  { key: "request_id", label: "معرّف الطلب", group: "identifiers",
+  { key: "reference", label: "الرقم المرجعي للإيصال", group: "identifiers",
+    isAvailable: (r) => !!r.receipt_reference, defaultOn: (r) => !!r.receipt_reference },
+  { key: "request_id", label: "معرّف الطلب (UUID)", group: "identifiers",
     isAvailable: () => true, defaultOn: () => true },
   { key: "invoice", label: "رقم الفاتورة", group: "identifiers",
     isAvailable: (r) => !!r.invoice_number, defaultOn: (r) => !!r.invoice_number },
@@ -119,6 +122,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const meta = statusMeta(r.status);
   const has = (k: ReceiptFieldKey) => selected.has(k);
   const rows: Array<[string, string]> = [];
+  if (has("reference") && r.receipt_reference) rows.push(["الرقم المرجعي", r.receipt_reference]);
   if (has("request_id")) rows.push(["معرّف الطلب", r.id]);
   if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"]);
   if (has("status")) rows.push(["حالة الطلب", meta.label]);
@@ -137,7 +141,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
 
   const html = `<!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"/>
-<title>إيصال استرداد ${r.invoice_number ?? r.id.slice(0, 8)}</title>
+<title>إيصال استرداد ${r.receipt_reference ?? r.invoice_number ?? r.id.slice(0, 8)}</title>
 <style>
   @page { size: A4; margin: 18mm; }
   * { box-sizing: border-box; }
@@ -166,6 +170,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   <div class="hd">
     <div>
       <div class="brand">إيصال طلب استرداد</div>
+      ${r.receipt_reference ? `<div class="sub" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;color:#0f172a;margin-top:2px">مرجع: ${r.receipt_reference}</div>` : ""}
       <div class="sub">مستخرج بتاريخ ${fmtDateTime(new Date().toISOString())}</div>
     </div>
     <span class="badge">${meta.label}</span>
@@ -521,6 +526,11 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
           </div>
         )}
         <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+          {r.receipt_reference && (
+            <span className="font-mono font-semibold text-[color:var(--mag-ink-2)] bg-[color:var(--mag-subtle)] px-1.5 py-0.5 rounded">
+              {r.receipt_reference}
+            </span>
+          )}
           <span>طُلب في {fmtDate(r.created_at)}</span>
           <span>· آخر تحديث: {fmtDateTime(lastUpdate)}</span>
         </div>
@@ -689,6 +699,9 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
               </div>
             </div>
             <div className="pt-2 mt-1 border-t border-[color:var(--mag-line)] text-[11px] text-[color:var(--mag-ink-3)] flex flex-wrap gap-x-4 gap-y-1">
+              {r.receipt_reference && (
+                <span>الرقم المرجعي: <span className="font-mono font-semibold text-[color:var(--mag-ink-1)]">{r.receipt_reference}</span></span>
+              )}
               <span>معرّف الطلب: <span className="font-mono">{r.id.slice(0, 8)}…</span></span>
               <span>آخر تحديث: {fmtDateTime(r.processed_at ?? r.updated_at)}</span>
             </div>
@@ -995,8 +1008,13 @@ function NewRefundDrawer({
           amount: amount ? Number(amount) : undefined,
         },
       }),
-    onSuccess: () => {
-      toast.success("تم إرسال طلب الاسترداد. سيتم مراجعته من قبل قسم المحاسبة.");
+    onSuccess: (res: any) => {
+      const ref = res?.receipt_reference;
+      toast.success(
+        ref
+          ? `تم إرسال طلب الاسترداد. رقمك المرجعي: ${ref}`
+          : "تم إرسال طلب الاسترداد. سيتم مراجعته من قبل قسم المحاسبة.",
+      );
       qc.invalidateQueries({ queryKey: ["portal", "refunds"] });
       onClose();
     },

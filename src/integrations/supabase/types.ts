@@ -3763,6 +3763,7 @@ export type Database = {
           payment_id: string
           processed_at: string | null
           reason: string | null
+          receipt_reference: string
           requested_by: string | null
           status: string
           updated_at: string
@@ -3777,6 +3778,7 @@ export type Database = {
           payment_id: string
           processed_at?: string | null
           reason?: string | null
+          receipt_reference: string
           requested_by?: string | null
           status?: string
           updated_at?: string
@@ -3791,6 +3793,7 @@ export type Database = {
           payment_id?: string
           processed_at?: string | null
           reason?: string | null
+          receipt_reference?: string
           requested_by?: string | null
           status?: string
           updated_at?: string
@@ -4384,6 +4387,7 @@ export type Database = {
         Returns: Json
       }
       generate_mrn: { Args: { _branch_id: string }; Returns: string }
+      generate_refund_receipt_reference: { Args: never; Returns: string }
       get_my_doctor_id: { Args: never; Returns: string }
       get_my_patient_id: { Args: never; Returns: string }
       get_order_by_ref: {
