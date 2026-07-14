@@ -185,6 +185,11 @@ const T = {
     en: "To book on behalf of this member, please complete the following fields:",
   },
   complete_now:     { ar: "استكمل البيانات", en: "Complete details" },
+  // language
+  lang_toggle_to_en: { ar: "English", en: "English" },
+  lang_toggle_to_ar: { ar: "العربية", en: "العربية" },
+  lang_saved:        { ar: "تم حفظ لغة الحساب.", en: "Account language saved." },
+  lang_error:        { ar: "تعذّر حفظ اللغة.", en: "Could not save language." },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
