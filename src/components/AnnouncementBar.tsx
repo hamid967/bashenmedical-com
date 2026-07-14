@@ -5,13 +5,14 @@
  */
 import { JazanPattern } from "@/components/jazan/JazanPattern";
 import { useI18n } from "@/lib/i18n";
+import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
 
 export function AnnouncementBar() {
   const { lang } = useI18n();
+  const settings = useJazanSettings();
   const isAr = lang === "ar";
-  const message = isAr
-    ? "من قلب جازان، نقدم رعاية طبية بمعايير حديثة"
-    : "From the heart of Jazan, delivering modern medical care";
+  if (!settings.announcement.enabled) return null;
+  const message = isAr ? settings.announcement.messageAr : settings.announcement.messageEn;
   return (
     <div
       dir={isAr ? "rtl" : "ltr"}

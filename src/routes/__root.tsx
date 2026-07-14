@@ -15,6 +15,7 @@ import { I18nProvider } from "@/lib/i18n";
 import { Header } from "@/components/Header";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
+import { JazanSettingsProvider } from "@/components/jazan/JazanSettingsProvider";
 import { Toaster } from "sonner";
 const JazanIntro = lazy(() =>
   import("@/components/JazanIntro").then((m) => ({ default: m.JazanIntro })),
@@ -148,21 +149,23 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
-        <Suspense fallback={null}>
-          <JazanIntro />
-        </Suspense>
-        <div className="min-h-screen flex flex-col">
-          <AnnouncementBar />
-          <Header />
-          <main className="flex-1">
-            <Outlet />
-          </main>
-          <Footer />
-          <Toaster position="top-center" richColors closeButton />
-          <ChatbotBubble />
-          <FloatingWhatsAppButton />
-          <PwaUpdatePrompt />
-        </div>
+        <JazanSettingsProvider>
+          <Suspense fallback={null}>
+            <JazanIntro />
+          </Suspense>
+          <div className="min-h-screen flex flex-col">
+            <AnnouncementBar />
+            <Header />
+            <main className="flex-1">
+              <Outlet />
+            </main>
+            <Footer />
+            <Toaster position="top-center" richColors closeButton />
+            <ChatbotBubble />
+            <FloatingWhatsAppButton />
+            <PwaUpdatePrompt />
+          </div>
+        </JazanSettingsProvider>
       </I18nProvider>
     </QueryClientProvider>
   );
