@@ -341,7 +341,7 @@ function RecordsPage() {
                                   </Badge>
                                 )}
                               </div>
-                              <h4 className="font-bold mt-1.5 break-words">{it.title}</h4>
+                              <h4 className="font-bold mt-1.5 break-words flex items-center gap-2 flex-wrap"><span>{it.title}</span><DemoBadge show={/\(DEMO\)|^DEMO-/i.test(it.title ?? "")} /></h4>
                               {it.subtitle && (
                                 <p className="text-xs text-[color:var(--portal-ink-2)] mt-0.5">
                                   {it.subtitle}
