@@ -3,6 +3,7 @@ import { CheckCircle2, Users, CalendarPlus, Phone } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { CenterBookingForm } from "@/components/CenterBookingForm";
 import { EXCELLENCE_CENTERS, getExcellenceCenterBySlug } from "@/data/excellence-centers";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/excellence/$slug")({
   loader: ({ params }) => {
@@ -12,7 +13,8 @@ export const Route = createFileRoute("/excellence/$slug")({
   },
   head: ({ loaderData }) => {
     const c = loaderData?.center;
-    if (!c) return { meta: [{ title: "مركز غير موجود — مجمع باعشن الطبي" }] };
+    if (!c) return { meta: [
+      ...bmcOgImageMeta(),{ title: "مركز غير موجود — مجمع باعشن الطبي" }] };
     const url = `https://happy-hugger-fluff.lovable.app/excellence/${c.slug}`;
     const title = `${c.name} — مراكز التميز | مجمع باعشن الطبي`;
     return {

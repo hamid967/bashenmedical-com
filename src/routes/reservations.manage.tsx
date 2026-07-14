@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useSessionProfile } from "@/hooks/use-session-profile";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const searchSchema = z.object({
   ref: fallback(z.string(), "").default(""),
@@ -24,6 +25,7 @@ export const Route = createFileRoute("/reservations/manage")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "إدارة حجزي | مجمع باعشن الطبي" },
       { name: "description", content: "تتبع حجزك أو ألغِه باستخدام رقم المرجع وآخر 4 أرقام من جوالك." },
       { name: "robots", content: "noindex" },

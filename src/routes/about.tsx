@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import { ShieldCheck, MapPin, Users, Award } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
 const PAGE_URL = `${SITE_URL}/about`;
@@ -15,6 +16,7 @@ const PAGE_DESC_AR =
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: PAGE_TITLE_AR },
       { name: "description", content: PAGE_DESC_AR },
       { property: "og:title", content: PAGE_TITLE_AR },

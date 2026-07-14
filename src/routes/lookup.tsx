@@ -10,6 +10,7 @@ import { downloadIcs, whatsappShareUrl, googleCalendarUrl, type ShareBooking } f
 import { ReminderHistoryByRefModal } from "@/components/ReminderPreferenceHistory";
 import { AppointmentAuditHistory } from "@/components/booking/AppointmentAuditHistory";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 import {
   parseOrderDetail,
   isFinalStatus,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/lookup")({
   validateSearch: lookupSearch,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تتبع حجزك | مجمع باعشن الطبي" },
       { name: "description", content: "استعرض حالة موعدك في مجمع باعشن الطبي برقم الحجز ورقم الجوال." },
       { property: "og:title", content: "تتبع حجزك — مجمع باعشن الطبي" },

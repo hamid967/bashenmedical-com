@@ -30,6 +30,7 @@ import { useFilterCounts } from "@/components/doctors/useFilterCounts";
 import { DoctorSearchBar } from "@/components/doctors/DoctorSearchBar";
 import { DoctorFilters } from "@/components/doctors/DoctorFilters";
 import { DoctorResults } from "@/components/doctors/DoctorResults";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -119,6 +120,7 @@ export const Route = createFileRoute("/doctors/")({
 
     return {
       meta: [
+      ...bmcOgImageMeta(),
         { title: PAGE_TITLE },
         { name: "description", content: PAGE_DESC },
         { property: "og:title", content: PAGE_TITLE },

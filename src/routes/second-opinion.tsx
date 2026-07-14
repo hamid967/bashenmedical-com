@@ -16,10 +16,12 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/second-opinion")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الرأي الطبي الثاني — مجمع باعشن الطبي" },
       {
         name: "description",

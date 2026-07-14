@@ -3,10 +3,12 @@ import { Plane, Hotel, Languages, FileText, ShieldCheck, HeartPulse, MapPin } fr
 import { PageHero, SectionCard } from "@/components/PageShell";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
 import { whatsappUrl } from "@/lib/site";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/international-patients")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "المرضى الدوليون — مجمع باعشن الطبي" },
       {
         name: "description",

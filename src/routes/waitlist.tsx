@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const search = z.object({
   ref: fallback(z.string().optional(), undefined),
@@ -17,6 +18,7 @@ export const Route = createFileRoute("/waitlist")({
   validateSearch: search,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "حالة قائمة الانتظار | مجمع باعشن الطبي" },
       { name: "description", content: "تحقّق من حالة تسجيلك في قائمة الانتظار للحصول على موعد شاغر." },
       { name: "robots", content: "noindex" },

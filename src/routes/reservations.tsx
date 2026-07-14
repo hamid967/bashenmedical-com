@@ -15,10 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSessionProfile } from "@/hooks/use-session-profile";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/reservations")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "احجز موعدك | مجمع باعشن الطبي" },
       {
         name: "description",

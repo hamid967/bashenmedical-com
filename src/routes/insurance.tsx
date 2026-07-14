@@ -2,10 +2,12 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ShieldCheck, PhoneCall, Search, Info } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/insurance")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "شركات التأمين المعتمدة — مجمع باعشن الطبي" },
       {
         name: "description",

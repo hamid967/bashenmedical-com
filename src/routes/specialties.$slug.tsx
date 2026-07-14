@@ -6,6 +6,7 @@ import { SITE } from "@/lib/site";
 import { buildLocalBusinessSchema, buildBreadcrumbs, CLINIC_ID, SITE_URL } from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
 import { Stethoscope, ArrowLeft, MapPin, Phone } from "lucide-react";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 type Specialty = {
   id: string;
@@ -60,7 +61,8 @@ export const Route = createFileRoute("/specialties/$slug")({
       | undefined;
     if (!ld) {
       return {
-        meta: [{ title: "غير متوفر" }, { name: "robots", content: "noindex" }],
+        meta: [
+      ...bmcOgImageMeta(),{ title: "غير متوفر" }, { name: "robots", content: "noindex" }],
       };
     }
     const { specialty, doctors, settings } = ld;

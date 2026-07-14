@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { Heart, ArrowLeft } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { listPatientStories, type PatientStory } from "@/lib/patient-stories.functions";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const storiesQuery = queryOptions({
   queryKey: ["patient-stories"],
@@ -12,6 +13,7 @@ const storiesQuery = queryOptions({
 export const Route = createFileRoute("/media/stories")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "قصص المرضى — مجمع باعشن الطبي" },
       {
         name: "description",

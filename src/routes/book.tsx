@@ -43,6 +43,7 @@ import { StepReview } from "@/components/booking/StepReview";
 import { StepSuccess } from "@/components/booking/StepSuccess";
 import { SummarySidebar } from "@/components/booking/SummarySidebar";
 import { WaitlistCTA } from "@/components/booking/WaitlistCTA";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const search = z.object({
   specialty: z.string().optional(),
@@ -57,6 +58,7 @@ export const Route = createFileRoute("/book")({
   validateSearch: search,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "احجز موعدًا | مجمع باعشن الطبي" },
       { name: "description", content: "احجز موعدك مع أطبائنا خطوة بخطوة: اختر الفرع، التخصص، الطبيب، ثم الموعد المناسب." },
       { property: "og:title", content: "احجز موعدًا — مجمع باعشن الطبي" },

@@ -5,6 +5,7 @@ import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
 import { z } from "zod";
 import { logAuthEvent } from "@/lib/auth-log.functions";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 import {
   Mail,
   Lock,
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: search,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تسجيل الدخول | مجمع باعشن الطبي" },
       {
         name: "description",

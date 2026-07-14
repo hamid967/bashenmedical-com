@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { downloadIcs, whatsappShareUrl, googleCalendarUrl, type ShareBooking } from "@/lib/booking-share";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const searchSchema = z.object({
   ref: z.string().optional(),
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/booking-confirmation")({
   validateSearch: searchSchema,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تأكيد الحجز | مجمع باعشن الطبي" },
       { name: "description", content: "ملخص الحجز ورقم الحجز في مجمع باعشن الطبي." },
       { property: "og:title", content: "تأكيد الحجز — مجمع باعشن الطبي" },

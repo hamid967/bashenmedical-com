@@ -5,10 +5,12 @@ import { friendlyInsertError } from "@/lib/insert-errors";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
 import { Upload, Check, Pill } from "lucide-react";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/pharmacy")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "طلب توصيل دواء | صيدليات باعشن" },
       {
         name: "description",

@@ -14,6 +14,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
 const PAGE_URL = `${SITE_URL}/programs`;
@@ -184,6 +185,7 @@ const PROGRAMS: Program[] = [
 export const Route = createFileRoute("/programs")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: TITLE },
       { name: "description", content: DESC },
       { property: "og:title", content: TITLE },

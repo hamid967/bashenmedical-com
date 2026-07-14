@@ -9,6 +9,7 @@ import {
 } from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const CONTACT_URL = `${SITE_URL}/contact`;
 
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/contact")({
   loader: ({ context }) => context.queryClient.ensureQueryData(clinicSettingsQuery()),
   head: ({ loaderData }) => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تواصل معنا | مجمع باعشن الطبي — صبيا، جازان" },
       {
         name: "description",

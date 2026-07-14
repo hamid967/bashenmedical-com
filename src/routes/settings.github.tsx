@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const DEFAULT_OWNER = "hamid967";
 const DEFAULT_REPO = "https-bashenmedical-com";
@@ -35,6 +36,7 @@ type Settings = z.infer<typeof schema>;
 export const Route = createFileRoute("/settings/github")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "إعدادات GitHub — Baeshen Medical" },
       { name: "description", content: "عرض وتعديل مستودع GitHub والفرع المستخدم للتزامن." },
       { name: "robots", content: "noindex" },

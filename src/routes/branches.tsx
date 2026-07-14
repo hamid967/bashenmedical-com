@@ -3,6 +3,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { MapPin, Phone, Clock, ArrowLeft, Building2, Siren } from "lucide-react";
 import { PageHero, SectionCard } from "@/components/PageShell";
 import { listPublicBranches, type PublicBranch } from "@/lib/branches.functions";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const branchesQuery = () =>
   queryOptions({
@@ -13,6 +14,7 @@ const branchesQuery = () =>
 export const Route = createFileRoute("/branches")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "مستشفياتنا وفروعنا — مجمع باعشن الطبي" },
       { name: "description", content: "تعرّف على فروع مجمع باعشن الطبي مع الصور، الخريطة، ساعات العمل وأرقام الطوارئ لكل فرع." },
       { property: "og:title", content: "مستشفياتنا وفروعنا — مجمع باعشن الطبي" },
