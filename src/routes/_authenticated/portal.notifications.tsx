@@ -64,6 +64,8 @@ type Filter = "all" | "unread";
 
 function iconForKind(kind: string) {
   const k = kind.toLowerCase();
+  if (k.includes("inquiry"))
+    return { Icon: MessageSquareWarning, cls: "bg-sky-50 text-sky-600 border-sky-100" };
   if (k.startsWith("reminder_") || k.includes("appointment"))
     return { Icon: CalendarDays, cls: "bg-teal-50 text-teal-600 border-teal-100" };
   if (k.includes("report") || k.includes("record"))
