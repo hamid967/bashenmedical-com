@@ -517,9 +517,7 @@ function HomePage() {
 
         <div className="container-app">
           <div className="mb-10 max-w-2xl">
-            <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-              {isAr ? "لماذا باعشن؟" : "Why Baeshen"}
-            </div>
+            <JazanSectionLabel>{isAr ? "لماذا باعشن؟" : "Why Baeshen"}</JazanSectionLabel>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
               {isAr ? "رعاية موثوقة · تجربة كونسيرج" : "Trusted care · concierge experience"}
             </h2>
@@ -529,16 +527,17 @@ function HomePage() {
               const Icon = f.icon;
               const c = isAr ? f.ar : f.en;
               return (
-                <RevealItem key={i} className="glass-fut neon-glow-hover p-6">
-                  <div className="grid h-12 w-12 place-items-center rounded-2xl border border-[var(--fut-border-strong)] bg-white/[0.04] text-[color:var(--neon-teal)]">
+                <RevealItem key={i} className="glass-fut neon-glow-hover p-6 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25 hover:ring-[var(--jazan-gold,#C7A46B)]/60 transition">
+                  <JazanIconFrame>
                     <Icon className="h-5 w-5" />
-                  </div>
+                  </JazanIconFrame>
                   <h3 className="mt-4 text-lg font-bold text-[color:var(--fut-ink)]">{c.t}</h3>
                   <p className="mt-2 text-sm leading-6 text-[color:var(--fut-ink-muted)]">{c.d}</p>
                 </RevealItem>
               );
             })}
           </StaggerReveal>
+          <JazanDivider variant="subtle" className="mt-16" />
         </div>
       </section>
 
@@ -547,9 +546,7 @@ function HomePage() {
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
-              <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-                {isAr ? "الفريق الطبي" : "Medical team"}
-              </div>
+              <JazanSectionLabel>{isAr ? "الفريق الطبي" : "Medical team"}</JazanSectionLabel>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
                 {t("doctors_title")}
               </h2>
