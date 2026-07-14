@@ -614,11 +614,10 @@ function HomePage() {
 
       {/* ===== VISIT / MAP ===== */}
       <section className="py-16 md:py-20">
+        <div className="container-app"><JazanDivider variant="subtle" className="mb-12" /></div>
         <div className="container-app grid items-center gap-8 md:grid-cols-2">
           <div>
-            <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-              {isAr ? "زُرنا" : "Visit us"}
-            </div>
+            <JazanSectionLabel>{isAr ? "زُرنا" : "Visit us"}</JazanSectionLabel>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
               {isAr ? "في قلب صبيا" : "In the heart of Sabya"}
             </h2>
@@ -647,7 +646,7 @@ function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="glass-fut aspect-video overflow-hidden !p-0">
+          <div className="glass-fut aspect-video overflow-hidden !p-0 ring-1 ring-[var(--jazan-gold,#C7A46B)]/30">
             <iframe
               title="map"
               className="h-full w-full opacity-90"
