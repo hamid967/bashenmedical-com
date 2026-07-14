@@ -29,8 +29,9 @@ type NavItem = { to: string; icon: typeof LayoutDashboard; label_ar: string; lab
 
 const NAV: NavItem[] = [
   { to: "/portal", icon: LayoutDashboard, label_ar: "الرئيسية", label_en: "Dashboard" },
+  { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "My Appointments" },
+  { to: "/portal/calendar", icon: CalendarClock, label_ar: "التقويم", label_en: "Calendar" },
   { to: "/portal/schedule", icon: CalendarClock, label_ar: "جدولي (طبيب)", label_en: "My Schedule (Doctor)" },
-  { to: "/portal/calendar", icon: CalendarClock, label_ar: "تقويمي (طبيب)", label_en: "My Calendar (Doctor)" },
   { to: "/portal/book", icon: CalendarPlus, label_ar: "حجز موعد", label_en: "Book Appointment" },
   { to: "/portal/doctors", icon: Users, label_ar: "أطبائي", label_en: "My Doctors" },
   { to: "/portal/family", icon: Users, label_ar: "أفراد العائلة", label_en: "Family" },
