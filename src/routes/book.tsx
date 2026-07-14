@@ -44,6 +44,9 @@ import { StepReview } from "@/components/booking/StepReview";
 import { StepSuccess } from "@/components/booking/StepSuccess";
 import { SummarySidebar } from "@/components/booking/SummarySidebar";
 import { WaitlistCTA } from "@/components/booking/WaitlistCTA";
+import { SlotHoldBanner } from "@/components/booking/SlotHoldBanner";
+import { useSlotHold } from "@/hooks/useSlotHold";
+import { releaseHold } from "@/lib/booking-hold";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const search = z.object({
@@ -281,6 +284,17 @@ function BookPage() {
 
   const patientValidation = useMemo(() => validatePatient(state.patient), [state.patient]);
 
+  // 5-minute slot hold: activates as soon as the patient reaches the time
+  // picker with a doctor+date+time. Released on unmount, on tuple change,
+  // and after a successful booking. See useSlotHold.
+  const slotHold = useSlotHold({
+    enabled: state.step >= 6 && state.step <= 8 && !!state.doctorId && !!state.date && !!state.time,
+    doctorId: state.doctorId,
+    branchId: state.branchId,
+    date: state.date,
+    time: state.time,
+  });
+
   // Warn before losing an unsent draft: any patient input on step ≥ 4 counts.
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -424,6 +438,8 @@ function BookPage() {
     });
     setSubmitting(false);
     if (res.ok) {
+      // Release our short-lived hold — the appointment row now owns the slot.
+      if (slotHold.holdId) void releaseHold(slotHold.holdId);
       try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
       toast.success(t("page.created"));
       setResult({ reference: res.reference, phone: p.phone.trim() });
@@ -493,6 +509,15 @@ function BookPage() {
 
         <div className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}>
           <div className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px]">
+            {state.step >= 6 && state.step <= 8 && state.time && (slotHold.holdId || slotHold.conflict || slotHold.expired) && (
+              <SlotHoldBanner
+                secondsLeft={slotHold.secondsLeft}
+                expired={slotHold.expired}
+                conflict={slotHold.conflict}
+                onRefresh={slotHold.refresh}
+                onChangeTime={() => { dispatch({ t: "set", p: { time: null } }); goto(6); }}
+              />
+            )}
             {state.step === 1 && <StepService lang={lang} value={state.serviceType} onPick={(v) => { dispatch({ t: "set", p: { serviceType: v } }); goto(2); }}/>}
             {state.step === 2 && <StepBranch lang={lang} branches={branches} value={state.branchId} onPick={(v) => { dispatch({ t: "set", p: { branchId: v } }); goto(3); }}/>}
             {state.step === 3 && <StepSpecialty lang={lang} specialties={specialties} value={state.specialtyId} onPick={(v) => { dispatch({ t: "set", p: { specialtyId: v, doctorId: null } }); goto(4); }}/>}

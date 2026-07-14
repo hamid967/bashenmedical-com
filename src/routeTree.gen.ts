@@ -142,6 +142,7 @@ import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/pu
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
 import { Route as ApiPublicBookMonthAvailabilityRouteImport } from './routes/api/public/book/month-availability'
+import { Route as ApiPublicBookHoldRouteImport } from './routes/api/public/book/hold'
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
 import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/book/cancel'
 import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/public/book/availability'
@@ -879,6 +880,11 @@ const ApiPublicBookMonthAvailabilityRoute =
     path: '/api/public/book/month-availability',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBookHoldRoute = ApiPublicBookHoldRouteImport.update({
+  id: '/api/public/book/hold',
+  path: '/api/public/book/hold',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicBookCreateRoute = ApiPublicBookCreateRouteImport.update({
   id: '/api/public/book/create',
   path: '/api/public/book/create',
@@ -1072,6 +1078,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
+  '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
@@ -1214,6 +1221,7 @@ export interface FileRoutesByTo {
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
+  '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
@@ -1360,6 +1368,7 @@ export interface FileRoutesById {
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
+  '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
@@ -1506,6 +1515,7 @@ export interface FileRouteTypes {
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
+    | '/api/public/book/hold'
     | '/api/public/book/month-availability'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
@@ -1648,6 +1658,7 @@ export interface FileRouteTypes {
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
+    | '/api/public/book/hold'
     | '/api/public/book/month-availability'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
@@ -1793,6 +1804,7 @@ export interface FileRouteTypes {
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
+    | '/api/public/book/hold'
     | '/api/public/book/month-availability'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
@@ -1857,6 +1869,7 @@ export interface RootRouteChildren {
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
   ApiPublicBookCancelRoute: typeof ApiPublicBookCancelRoute
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
+  ApiPublicBookHoldRoute: typeof ApiPublicBookHoldRoute
   ApiPublicBookMonthAvailabilityRoute: typeof ApiPublicBookMonthAvailabilityRoute
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
@@ -2799,6 +2812,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBookMonthAvailabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/book/hold': {
+      id: '/api/public/book/hold'
+      path: '/api/public/book/hold'
+      fullPath: '/api/public/book/hold'
+      preLoaderRoute: typeof ApiPublicBookHoldRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/create': {
       id: '/api/public/book/create'
       path: '/api/public/book/create'
@@ -3230,6 +3250,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
   ApiPublicBookCancelRoute: ApiPublicBookCancelRoute,
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,
+  ApiPublicBookHoldRoute: ApiPublicBookHoldRoute,
   ApiPublicBookMonthAvailabilityRoute: ApiPublicBookMonthAvailabilityRoute,
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
@@ -3242,13 +3263,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
