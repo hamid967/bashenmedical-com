@@ -36,22 +36,104 @@ function isFinalized(status: string) {
   return status === "processed" || status === "refunded" || status === "canceled" || status === "rejected";
 }
 
-function openRefundReceipt(r: RefundRow) {
+type ReceiptFieldKey =
+  | "request_id"
+  | "invoice"
+  | "status"
+  | "refund_amount"
+  | "original_amount"
+  | "payment_method"
+  | "payment_paid_at"
+  | "created_at"
+  | "updated_at"
+  | "processed_at"
+  | "reason"
+  | "decision_reason"
+  | "amount_hero"
+  | "footer_note";
+
+type ReceiptField = {
+  key: ReceiptFieldKey;
+  label: string;
+  group: "identifiers" | "amounts" | "dates" | "reasons" | "layout";
+  isAvailable: (r: RefundRow) => boolean;
+  defaultOn: (r: RefundRow) => boolean;
+};
+
+const RECEIPT_FIELDS: ReceiptField[] = [
+  { key: "request_id", label: "معرّف الطلب", group: "identifiers",
+    isAvailable: () => true, defaultOn: () => true },
+  { key: "invoice", label: "رقم الفاتورة", group: "identifiers",
+    isAvailable: (r) => !!r.invoice_number, defaultOn: (r) => !!r.invoice_number },
+  { key: "status", label: "حالة الطلب", group: "identifiers",
+    isAvailable: () => true, defaultOn: () => true },
+
+  { key: "amount_hero", label: "بطاقة المبلغ البارزة (أعلى الإيصال)", group: "layout",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status === "processed" || r.status === "refunded" },
+  { key: "refund_amount", label: "المبلغ المُسترد", group: "amounts",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status !== "canceled" },
+  { key: "original_amount", label: "قيمة الدفعة الأصلية", group: "amounts",
+    isAvailable: () => true, defaultOn: () => true },
+  { key: "payment_method", label: "وسيلة الدفع", group: "amounts",
+    isAvailable: (r) => !!r.payment_method, defaultOn: (r) => !!r.payment_method },
+
+  { key: "payment_paid_at", label: "تاريخ الدفعة الأصلية", group: "dates",
+    isAvailable: (r) => !!r.payment_paid_at, defaultOn: (r) => !!r.payment_paid_at },
+  { key: "created_at", label: "تاريخ تقديم الطلب", group: "dates",
+    isAvailable: () => true, defaultOn: () => true },
+  { key: "updated_at", label: "آخر تحديث", group: "dates",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status !== "processed" },
+  { key: "processed_at", label: "تاريخ المعالجة/الصرف", group: "dates",
+    isAvailable: (r) => !!r.processed_at,
+    defaultOn: (r) => !!r.processed_at && (r.status === "processed" || r.status === "refunded") },
+
+  { key: "reason", label: "سبب طلبك للاسترداد", group: "reasons",
+    isAvailable: (r) => !!r.reason, defaultOn: (r) => !!r.reason },
+  { key: "decision_reason", label: "قرار وملاحظة المحاسبة", group: "reasons",
+    isAvailable: (r) => !!r.decision_reason,
+    defaultOn: (r) => !!r.decision_reason },
+
+  { key: "footer_note", label: "الملاحظة القانونية في الأسفل", group: "layout",
+    isAvailable: () => true, defaultOn: () => true },
+];
+
+const GROUP_LABELS: Record<ReceiptField["group"], string> = {
+  identifiers: "معلومات الطلب",
+  amounts: "المبالغ ووسيلة الدفع",
+  dates: "التواريخ",
+  reasons: "السبب وقرار المحاسبة",
+  layout: "تنسيق الإيصال",
+};
+
+function defaultReceiptSelection(r: RefundRow): Set<ReceiptFieldKey> {
+  return new Set(
+    RECEIPT_FIELDS.filter((f) => f.isAvailable(r) && f.defaultOn(r)).map((f) => f.key),
+  );
+}
+
+function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const meta = statusMeta(r.status);
-  const lastAt = r.processed_at ?? r.updated_at;
-  const rows: Array<[string, string]> = [
-    ["معرّف الطلب", r.id],
-    ["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"],
-    ["حالة الطلب", meta.label],
-    ["المبلغ المُسترد", fmtSAR(r.amount, r.currency)],
-    ["قيمة الدفعة الأصلية", fmtSAR(r.payment_amount, r.currency)],
-    ["وسيلة الدفع", r.payment_method ?? "—"],
-    ["تاريخ الدفعة", fmtDate(r.payment_paid_at)],
-    ["تاريخ الطلب", fmtDateTime(r.created_at)],
-    ["آخر تحديث", fmtDateTime(lastAt)],
-    ["سبب الطلب", r.reason || "—"],
-    ["قرار المحاسبة", r.decision_reason || "—"],
-  ];
+  const has = (k: ReceiptFieldKey) => selected.has(k);
+  const rows: Array<[string, string]> = [];
+  if (has("request_id")) rows.push(["معرّف الطلب", r.id]);
+  if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? `#${r.invoice_number}` : "—"]);
+  if (has("status")) rows.push(["حالة الطلب", meta.label]);
+  if (has("refund_amount")) rows.push(["المبلغ المُسترد", fmtSAR(r.amount, r.currency)]);
+  if (has("original_amount")) rows.push(["قيمة الدفعة الأصلية", fmtSAR(r.payment_amount, r.currency)]);
+  if (has("payment_method")) rows.push(["وسيلة الدفع", r.payment_method ?? "—"]);
+  if (has("payment_paid_at")) rows.push(["تاريخ الدفعة", fmtDate(r.payment_paid_at)]);
+  if (has("created_at")) rows.push(["تاريخ الطلب", fmtDateTime(r.created_at)]);
+  if (has("updated_at")) rows.push(["آخر تحديث", fmtDateTime(r.updated_at)]);
+  if (has("processed_at") && r.processed_at) rows.push(["تاريخ المعالجة", fmtDateTime(r.processed_at)]);
+  if (has("reason")) rows.push(["سبب الطلب", r.reason || "—"]);
+  if (has("decision_reason")) rows.push(["قرار المحاسبة", r.decision_reason || "—"]);
+
+  const showHero = has("amount_hero");
+  const showNote = has("footer_note");
+
   const html = `<!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"/>
 <title>إيصال استرداد ${r.invoice_number ?? r.id.slice(0, 8)}</title>
@@ -62,7 +144,6 @@ function openRefundReceipt(r: RefundRow) {
   .hd { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:20px; }
   .brand { font-size:20px; font-weight:800; letter-spacing:-.01em; }
   .sub { font-size:11px; color:#64748b; margin-top:4px; }
-  h1 { font-size:22px; margin:0 0 4px; }
   .badge { display:inline-block; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; background:#f1f5f9; color:#0f172a; }
   .grid { width:100%; border-collapse:collapse; margin-top:16px; }
   .grid td { padding:10px 12px; border-bottom:1px solid #e2e8f0; font-size:13px; vertical-align:top; }
@@ -88,7 +169,7 @@ function openRefundReceipt(r: RefundRow) {
     </div>
     <span class="badge">${meta.label}</span>
   </div>
-  <div class="amount">
+  ${showHero ? `<div class="amount">
     <div>
       <div class="lbl">المبلغ المُسترد</div>
       <div class="val">${fmtSAR(r.amount, r.currency)}</div>
@@ -97,11 +178,11 @@ function openRefundReceipt(r: RefundRow) {
       <div class="lbl">من دفعة أصلية</div>
       <div style="font-weight:700">${fmtSAR(r.payment_amount, r.currency)}</div>
     </div>
-  </div>
-  <table class="grid">
+  </div>` : ""}
+  ${rows.length ? `<table class="grid">
     ${rows.map(([k, v]) => `<tr><td class="k">${k}</td><td class="v">${String(v).replace(/</g, "&lt;")}</td></tr>`).join("")}
-  </table>
-  <div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>
+  </table>` : ""}
+  ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
   <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
   <script>window.addEventListener('load', () => setTimeout(() => window.print(), 300));<\/script>
 </body></html>`;
@@ -405,6 +486,7 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
   const Icon = meta.icon;
   const canCancel = r.status === "pending";
   const lastUpdate = r.processed_at ?? r.updated_at;
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () => cancelFn({ data: { id: r.id } }),
@@ -459,9 +541,9 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
       </button>
       {isFinalized(r.status) && (
         <button
-          onClick={() => openRefundReceipt(r)}
+          onClick={() => setReceiptOpen(true)}
           className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
-          title="تنزيل إيصال PDF"
+          title="تخصيص وتنزيل إيصال PDF"
         >
           <Download className="h-3.5 w-3.5" />
           الإيصال
@@ -476,6 +558,9 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
           {mutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
           إلغاء الطلب
         </button>
+      )}
+      {receiptOpen && (
+        <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />
       )}
     </li>
   );
@@ -557,6 +642,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
   const meta = statusMeta(r.status);
   const steps = useMemo(() => buildTimeline(r), [r]);
   const canCancel = r.status === "pending";
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   const mutation = useMutation({
     mutationFn: () => cancelFn({ data: { id: r.id } }),
@@ -659,11 +745,11 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             </button>
             {isFinalized(r.status) && (
               <button
-                onClick={() => openRefundReceipt(r)}
+                onClick={() => setReceiptOpen(true)}
                 className="flex-1 h-11 rounded-full text-sm font-semibold border border-[color:var(--mag-line)] bg-white text-[color:var(--mag-ink-1)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center justify-center gap-2"
               >
                 <Download className="h-4 w-4" />
-                تنزيل الإيصال (PDF)
+                تخصيص وتنزيل الإيصال (PDF)
               </button>
             )}
             {canCancel && (
@@ -678,6 +764,126 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             )}
           </div>
         )}
+      </div>
+      {receiptOpen && (
+        <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />
+      )}
+    </div>
+  );
+}
+
+function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => void }) {
+  const meta = statusMeta(r.status);
+  const available = useMemo(() => RECEIPT_FIELDS.filter((f) => f.isAvailable(r)), [r]);
+  const [selected, setSelected] = useState<Set<ReceiptFieldKey>>(() => defaultReceiptSelection(r));
+
+  const toggle = (k: ReceiptFieldKey) =>
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(k)) next.delete(k); else next.add(k);
+      return next;
+    });
+  const setAll = (on: boolean) =>
+    setSelected(on ? new Set(available.map((f) => f.key)) : new Set());
+  const resetDefaults = () => setSelected(defaultReceiptSelection(r));
+
+  const grouped = useMemo(() => {
+    const map = new Map<ReceiptField["group"], ReceiptField[]>();
+    for (const f of available) {
+      const arr = map.get(f.group) ?? [];
+      arr.push(f);
+      map.set(f.group, arr);
+    }
+    return Array.from(map.entries());
+  }, [available]);
+
+  const generate = () => {
+    if (selected.size === 0) {
+      toast.error("اختر حقلًا واحدًا على الأقل.");
+      return;
+    }
+    openRefundReceipt(r, selected);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+      <div className="absolute inset-0 bg-slate-900/50" onClick={onClose} />
+      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
+        <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
+          <div>
+            <div className="font-bold text-sm">تخصيص حقول الإيصال</div>
+            <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
+              حسب الحالة: <span className="font-semibold">{meta.label}</span>
+            </div>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <div className="px-5 pt-3 pb-2 flex flex-wrap items-center gap-2 border-b border-[color:var(--mag-line)]">
+          <button onClick={() => setAll(true)}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+            تحديد الكل
+          </button>
+          <button onClick={() => setAll(false)}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+            إلغاء التحديد
+          </button>
+          <button onClick={resetDefaults}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+            الافتراضي حسب الحالة
+          </button>
+          <span className="ms-auto text-[11px] text-[color:var(--mag-ink-3)]">
+            {selected.size} / {available.length} حقلاً
+          </span>
+        </div>
+
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {grouped.map(([group, fields]) => (
+            <div key={group}>
+              <div className="text-[11px] uppercase tracking-wider font-bold text-[color:var(--mag-ink-3)] mb-2">
+                {GROUP_LABELS[group]}
+              </div>
+              <div className="space-y-1.5">
+                {fields.map((f) => {
+                  const on = selected.has(f.key);
+                  return (
+                    <label key={f.key}
+                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[color:var(--mag-subtle)] cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() => toggle(f.key)}
+                        className="h-4 w-4 accent-[color:var(--mag-accent)]"
+                      />
+                      <span className="text-sm text-[color:var(--mag-ink-1)] font-medium">{f.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+          {!r.decision_reason && (r.status === "processed" || r.status === "rejected" || r.status === "canceled") && (
+            <div className="text-[11px] text-[color:var(--mag-ink-3)] p-2.5 rounded-lg bg-[color:var(--mag-subtle)]">
+              لا يوجد قرار محاسبي مسجّل لهذا الطلب، لذا لا يظهر خيار «قرار المحاسبة».
+            </div>
+          )}
+        </div>
+
+        <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
+          <button onClick={onClose}
+            className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold">
+            إلغاء
+          </button>
+          <button onClick={generate}
+            disabled={selected.size === 0}
+            className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2">
+            <Download className="h-4 w-4" />
+            توليد الإيصال
+          </button>
+        </div>
       </div>
     </div>
   );
