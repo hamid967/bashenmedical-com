@@ -775,6 +775,100 @@ function BookPage() {
             )}
           </div>
 
+          {/* Verification history */}
+          {doctorId && (historyQ.data?.length ?? 0) > 0 && (
+            <details className="mt-3 rounded-2xl border border-[color:var(--portal-border)] bg-white p-3 group">
+              <summary className="cursor-pointer text-sm font-semibold flex items-center justify-between gap-2">
+                <span className="flex items-center gap-2">
+                  <BadgeCheck className="h-4 w-4 text-[color:var(--portal-primary)]" />
+                  سجل عمليات التحقق السابقة
+                  <span className="text-[11px] font-normal text-[color:var(--portal-ink-2)]">
+                    ({historyQ.data!.length})
+                  </span>
+                </span>
+                <span className="text-[11px] font-normal text-[color:var(--portal-ink-2)] group-open:hidden">
+                  عرض
+                </span>
+              </summary>
+              <ul className="mt-3 space-y-2">
+                {historyQ.data!.map((h) => {
+                  const dt = new Date(h.created_at);
+                  const dateLabel = dt.toLocaleString("ar-SA-u-ca-gregory", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                  return (
+                    <li
+                      key={h.id}
+                      className="rounded-xl border border-[color:var(--portal-border)] bg-slate-50/60 p-3 text-xs space-y-1"
+                    >
+                      <div className="flex items-center justify-between gap-2 flex-wrap">
+                        <span className="font-semibold">
+                          {h.provider_name_ar ?? "جهة تأمين"}
+                          {h.policy_hint ? (
+                            <span className="text-[color:var(--portal-ink-2)] font-normal">
+                              {" "}
+                              — <span dir="ltr">{h.policy_hint}</span>
+                            </span>
+                          ) : null}
+                        </span>
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                            h.eligible
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {h.eligible ? (
+                            <>
+                              <ShieldCheck className="h-3 w-3" /> مؤهل
+                            </>
+                          ) : (
+                            <>
+                              <ShieldAlert className="h-3 w-3" /> يحتاج مراجعة
+                            </>
+                          )}
+                        </span>
+                      </div>
+                      <div className="text-[color:var(--portal-ink-2)]" dir="ltr">
+                        {dateLabel}
+                      </div>
+                      {h.message && (
+                        <div className="text-[color:var(--portal-ink-2)]">{h.message}</div>
+                      )}
+                      {(h.estimated_cost !== null || h.patient_share !== null) && (
+                        <div className="flex items-center gap-3 flex-wrap pt-1">
+                          {h.estimated_cost !== null && (
+                            <span>
+                              الاستشارة:{" "}
+                              <span className="font-mono">{h.estimated_cost} ر.س</span>
+                            </span>
+                          )}
+                          {h.coverage_percent !== null && (
+                            <span>
+                              التغطية: <span className="font-mono">{h.coverage_percent}%</span>
+                            </span>
+                          )}
+                          {h.patient_share !== null && (
+                            <span className="font-semibold">
+                              حصة المريض:{" "}
+                              <span className="font-mono">{h.patient_share} ر.س</span>
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </details>
+          )}
+
+
+
 
 
           <div className="mt-5 flex items-center justify-between flex-wrap gap-3">
