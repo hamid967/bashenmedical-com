@@ -3957,10 +3957,15 @@ export type Database = {
       reminder_preferences: {
         Row: {
           appointment_lead_minutes: number
+          channel_email: boolean
+          channel_in_app: boolean
+          channel_sms: boolean
           created_at: string
           daily_repeat_days: number
+          frequency: string
           id: string
           medication_lead_minutes: number
+          quiet_hours_enabled: boolean
           sleep_hour: number
           updated_at: string
           user_id: string
@@ -3968,10 +3973,15 @@ export type Database = {
         }
         Insert: {
           appointment_lead_minutes?: number
+          channel_email?: boolean
+          channel_in_app?: boolean
+          channel_sms?: boolean
           created_at?: string
           daily_repeat_days?: number
+          frequency?: string
           id?: string
           medication_lead_minutes?: number
+          quiet_hours_enabled?: boolean
           sleep_hour?: number
           updated_at?: string
           user_id: string
@@ -3979,10 +3989,15 @@ export type Database = {
         }
         Update: {
           appointment_lead_minutes?: number
+          channel_email?: boolean
+          channel_in_app?: boolean
+          channel_sms?: boolean
           created_at?: string
           daily_repeat_days?: number
+          frequency?: string
           id?: string
           medication_lead_minutes?: number
+          quiet_hours_enabled?: boolean
           sleep_hour?: number
           updated_at?: string
           user_id?: string
