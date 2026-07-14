@@ -5,10 +5,12 @@ import { z } from "zod";
 import { Building2, CheckCircle2, Loader2, HeartHandshake, Users, BadgePercent } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/corporate")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "خدمات الشركات — اتفاقيات مجمع باعشن الطبي" },
       {
         name: "description",

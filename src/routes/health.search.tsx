@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { Calendar, Clock, ArrowLeft, BookOpen, Search, X } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { z } from "zod";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
 
@@ -71,6 +72,7 @@ export const Route = createFileRoute("/health/search")({
       "ابحث في مقالات المدونة الصحية بمجمع باعشن الطبي بصبيا، جازان. صفِّ المقالات حسب التصنيف والموسم والكلمات المفتاحية.";
     return {
       meta: [
+      ...bmcOgImageMeta(),
         { title },
         { name: "description", content: desc },
         { name: "robots", content: "noindex, follow" },

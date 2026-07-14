@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Smartphone, Bell, CalendarCheck2, FileText, Download, Apple } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تطبيق مجمع باعشن للجوال — احجز وتابع صحتك" },
       {
         name: "description",

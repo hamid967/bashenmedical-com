@@ -5,6 +5,7 @@ import { Star, Send, CheckCircle2, Building2, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const searchSchema = z.object({
   branch: z.string().uuid().optional(),
@@ -16,6 +17,7 @@ export const Route = createFileRoute("/rate")({
   validateSearch: (s) => searchSchema.parse(s),
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "قيّم تجربتك | مجمع باعشن الطبي" },
       { name: "description", content: "شاركنا رأيك في زيارتك — تقييمك يساعدنا على تحسين خدماتنا." },
       { name: "robots", content: "index, follow" },

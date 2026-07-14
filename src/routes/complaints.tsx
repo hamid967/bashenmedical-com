@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { PageHero } from "@/components/PageShell";
 import { MessageSquareWarning, ThumbsUp, Copy, Search, Loader2 } from "lucide-react";
 import { submitComplaint, trackComplaint } from "@/lib/complaints.functions";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const STATUS_AR: Record<string, string> = {
   submitted: "تم الإرسال",
@@ -25,6 +26,7 @@ const TYPE_AR: Record<string, string> = {
 export const Route = createFileRoute("/complaints")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الشكاوى والمقترحات — مجمع باعشن الطبي" },
       { name: "description", content: "شاركنا ملاحظاتك، شكاواك، ومقترحاتك لتطوير خدماتنا." },
       { property: "og:title", content: "الشكاوى والمقترحات" },

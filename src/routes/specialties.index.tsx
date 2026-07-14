@@ -6,6 +6,7 @@ import { Stethoscope, Users } from "lucide-react";
 import { buildLocalBusinessSchema, buildBreadcrumbs } from "@/lib/localBusinessSchema";
 import { specialtyDoctorCountsQuery } from "@/lib/accreditations";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
@@ -54,6 +55,7 @@ export const Route = createFileRoute("/specialties/")({
     };
     return {
       meta: [
+      ...bmcOgImageMeta(),
         { title: PAGE_TITLE_AR },
         { name: "description", content: PAGE_DESC_AR },
         { property: "og:title", content: PAGE_TITLE_AR },

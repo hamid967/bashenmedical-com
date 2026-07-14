@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { logAuthEvent } from "@/lib/auth-log.functions";
 import {
+import { bmcOgImageMeta } from "@/lib/og-meta";
   Mail,
   Lock,
   User as UserIcon,
@@ -46,6 +47,7 @@ export const Route = createFileRoute("/auth")({
   validateSearch: search,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تسجيل الدخول | مجمع باعشن الطبي" },
       {
         name: "description",

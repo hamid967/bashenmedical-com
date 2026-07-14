@@ -26,6 +26,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const search = z.object({
   phone: z.string(),
@@ -41,6 +42,7 @@ export const Route = createFileRoute("/orders/$ref")({
   },
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تفاصيل الطلب | مجمع باعشن الطبي" },
       { name: "description", content: "تفاصيل طلبك في مجمع باعشن الطبي." },
       { property: "og:title", content: "تفاصيل الطلب" },

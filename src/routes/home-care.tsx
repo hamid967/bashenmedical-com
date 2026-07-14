@@ -2,10 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { HomeIcon, Syringe, Stethoscope, Activity, Baby, Pill, MapPin, Clock, Check } from "lucide-react";
 import { PageHero, SectionCard } from "@/components/PageShell";
 import { HomeCareRequestForm } from "@/components/HomeCareRequestForm";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/home-care")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الرعاية المنزلية — مجمع باعشن الطبي" },
       {
         name: "description",

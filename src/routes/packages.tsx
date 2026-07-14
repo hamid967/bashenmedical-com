@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Check, ShieldCheck } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/packages")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الباقات الطبية والفحوصات الشاملة — مجمع باعشن الطبي" },
       { name: "description", content: "باقات فحص شامل، ما قبل الزواج، ما قبل التوظيف، صحة القلب، والسكري بأسعار تنافسية." },
       { property: "og:title", content: "الباقات الطبية والفحوصات الشاملة" },

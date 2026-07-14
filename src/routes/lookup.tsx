@@ -11,6 +11,7 @@ import { ReminderHistoryByRefModal } from "@/components/ReminderPreferenceHistor
 import { AppointmentAuditHistory } from "@/components/booking/AppointmentAuditHistory";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
 import {
+import { bmcOgImageMeta } from "@/lib/og-meta";
   parseOrderDetail,
   isFinalStatus,
   OrderParseError,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/lookup")({
   validateSearch: lookupSearch,
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تتبع حجزك | مجمع باعشن الطبي" },
       { name: "description", content: "استعرض حالة موعدك في مجمع باعشن الطبي برقم الحجز ورقم الجوال." },
       { property: "og:title", content: "تتبع حجزك — مجمع باعشن الطبي" },

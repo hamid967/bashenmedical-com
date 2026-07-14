@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Briefcase, Heart, GraduationCap, Users } from "lucide-react";
 import { PageHero, SectionCard } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/careers")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الوظائف الشاغرة — مجمع باعشن الطبي" },
       { name: "description", content: "انضم إلى فريق مجمع باعشن الطبي — فرص وظيفية للأطباء والممرضين والفنيين والإداريين في محافظة صبيا." },
       { property: "og:title", content: "الوظائف — مجمع باعشن الطبي" },

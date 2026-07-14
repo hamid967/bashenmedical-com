@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { downloadBookingConfirmationPdf } from "@/lib/booking-pdf";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 type LookupErrorKind = "validation" | "not_found" | "network" | "timeout" | "server" | "unknown";
 type LookupError = { kind: LookupErrorKind; message: string };
@@ -75,6 +76,7 @@ export const Route = createFileRoute("/track")({
   }),
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "تتبع رقم طلبك | مجمع باعشن الطبي" },
       {
         name: "description",

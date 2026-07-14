@@ -3,6 +3,7 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { Calendar, Clock, ArrowLeft, BookOpen, Search } from "lucide-react";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
 
@@ -74,6 +75,7 @@ export const Route = createFileRoute("/health/")({
     };
     return {
       meta: [
+      ...bmcOgImageMeta(),
         { title },
         { name: "description", content: desc },
         { property: "og:title", content: title },

@@ -2,10 +2,12 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Siren, Phone, MapPin, AlertTriangle, HeartPulse, Ambulance } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { SITE } from "@/lib/site";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/emergency")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الطوارئ 24/7 — مجمع باعشن الطبي" },
       { name: "description", content: "أرقام الطوارئ والاتصال العاجل بمجمع باعشن الطبي في صبيا، مع إرشادات السلامة قبل وصول الإسعاف." },
       { property: "og:title", content: "الطوارئ 24/7 — مجمع باعشن الطبي" },

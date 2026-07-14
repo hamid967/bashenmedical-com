@@ -14,10 +14,12 @@ import {
 } from "lucide-react";
 import { PageHero, SectionCard } from "@/components/PageShell";
 import { ServiceRequestForm } from "@/components/ServiceRequestForm";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/telemedicine")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الاستشارة الطبية عن بُعد — مجمع باعشن الطبي" },
       {
         name: "description",

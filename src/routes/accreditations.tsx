@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { PageHero } from "@/components/PageShell";
 import { accreditationsQuery, type Accreditation } from "@/lib/accreditations";
 import { trackEvent } from "@/lib/analytics";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const searchSchema = z.object({
   q: fallback(z.string(), "").default(""),
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/accreditations")({
   loader: ({ context }) => context.queryClient.ensureQueryData(accreditationsQuery()),
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: PAGE_TITLE },
       { name: "description", content: PAGE_DESC },
       {

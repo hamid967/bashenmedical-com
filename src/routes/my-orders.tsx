@@ -25,6 +25,7 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/my-orders")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "طلباتي | مجمع باعشن الطبي" },
       { name: "description", content: "تتبع جميع طلباتك (مواعيد، صيدلية، رأي طبي ثاني، رعاية منزلية) برقم جوالك." },
       { property: "og:title", content: "طلباتي — مجمع باعشن الطبي" },
@@ -35,6 +36,7 @@ export const Route = createFileRoute("/my-orders")({
 
 import { parseOrderSummaries, OrderParseError, type OrderSummary } from "@/lib/order-types";
 import { toast } from "sonner";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 type Order = OrderSummary;
 

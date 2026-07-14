@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHero } from "@/components/PageShell";
 import { EXCELLENCE_CENTERS } from "@/data/excellence-centers";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/excellence")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "مراكز التميز — مجمع باعشن الطبي" },
       { name: "description", content: "مراكز التميز في مجمع باعشن الطبي: القلب، العظام، العيون، النساء والولادة، طب الأسنان، الأعصاب، الجهاز الهضمي والجراحة التجميلية." },
       { property: "og:title", content: "مراكز التميز — مجمع باعشن الطبي" },

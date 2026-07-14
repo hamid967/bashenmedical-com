@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const SITE_URL = "https://happy-hugger-fluff.lovable.app";
 const PAGE_URL = `${SITE_URL}/faq`;
@@ -47,6 +48,7 @@ export const Route = createFileRoute("/faq")({
     };
     return {
       meta: [
+      ...bmcOgImageMeta(),
         { title: PAGE_TITLE_AR },
         { name: "description", content: PAGE_DESC_AR },
         { property: "og:title", content: PAGE_TITLE_AR },

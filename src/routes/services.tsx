@@ -25,10 +25,12 @@ import {
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { Input } from "@/components/ui/input";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الخدمات الإلكترونية | باعشن الطبي" },
       {
         name: "description",

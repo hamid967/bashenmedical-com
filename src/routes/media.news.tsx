@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Newspaper, Calendar } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
+import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/media/news")({
   head: () => ({
     meta: [
+      ...bmcOgImageMeta(),
       { title: "الأخبار — مجمع باعشن الطبي" },
       { name: "description", content: "آخر أخبار وفعاليات مجمع باعشن الطبي: افتتاحات، شراكات، حملات توعية، وإنجازات طبية." },
       { property: "og:title", content: "المركز الإعلامي — أخبار باعشن" },
