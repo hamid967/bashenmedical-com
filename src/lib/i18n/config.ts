@@ -17,27 +17,50 @@ export const resources = {
 } as const;
 
 if (!i18n.isInitialized) {
-  const chain = i18n.use(initReactI18next);
-  if (typeof window !== "undefined") chain.use(LanguageDetector);
-  chain.init({
+  // IMPORTANT: initialize with DEFAULT_LANG on BOTH server and client so the
+  // first client render matches the SSR HTML. If we used LanguageDetector at
+  // init, a returning visitor with `localStorage["lang"] = "en"` would render
+  // English on first paint while the server sent Arabic, causing a hydration
+  // mismatch across every page that reads translations via `useI18n()`.
+  // The detected language is applied AFTER hydration by `syncClientLanguage()`.
+  i18n.use(initReactI18next).init({
     resources,
-    lng: typeof window === "undefined" ? DEFAULT_LANG : undefined,
+    lng: DEFAULT_LANG,
     fallbackLng: DEFAULT_LANG,
     supportedLngs: SUPPORTED_LANGS as unknown as string[],
     defaultNS: "common",
     ns: ["common", "booking"],
     interpolation: { escapeValue: false },
-    detection: {
-      order: ["localStorage", "htmlTag", "navigator"],
-      lookupLocalStorage: "lang",
-      caches: ["localStorage"],
-    },
     returnNull: false,
     // Force synchronous init so t() returns real translations during SSR
     // instead of raw keys (fixes hydration mismatch e.g. "page.title" vs "احجز موعدك").
     initImmediate: false,
     react: { useSuspense: false },
-  } as Parameters<typeof chain.init>[0]);
+  } as Parameters<typeof i18n.init>[0]);
 }
+
+/**
+ * Read the visitor's preferred language from localStorage / navigator and
+ * apply it. MUST only be called after hydration (from `useEffect`), never
+ * during SSR or synchronous render.
+ */
+export function syncClientLanguage(): void {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = window.localStorage.getItem("lang");
+    const nav = window.navigator.language?.toLowerCase().split("-")[0];
+    const candidate = stored ?? nav ?? DEFAULT_LANG;
+    const next = (SUPPORTED_LANGS as readonly string[]).includes(candidate)
+      ? (candidate as Lang)
+      : DEFAULT_LANG;
+    if (i18n.language !== next) void i18n.changeLanguage(next);
+  } catch {
+    /* localStorage may be blocked; keep DEFAULT_LANG */
+  }
+}
+// Keep the LanguageDetector import referenced so tree-shaking / typecheck is
+// stable if we later re-introduce it; we intentionally don't wire it into i18n
+// init because it runs synchronously and would race hydration.
+void LanguageDetector;
 
 export default i18n;

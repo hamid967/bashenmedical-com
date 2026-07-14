@@ -1,7 +1,12 @@
 import { useEffect, type ReactNode } from "react";
 import { I18nextProvider, useTranslation } from "react-i18next";
 
-import i18n, { DEFAULT_LANG, SUPPORTED_LANGS, type Lang } from "@/lib/i18n/config";
+import i18n, {
+  DEFAULT_LANG,
+  SUPPORTED_LANGS,
+  syncClientLanguage,
+  type Lang,
+} from "@/lib/i18n/config";
 
 export type { Lang };
 export { SUPPORTED_LANGS, DEFAULT_LANG };
@@ -24,6 +29,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 function I18nHtmlSync() {
   const { i18n: inst } = useTranslation();
   const lang = normalizeLang(inst.language);
+  // Apply the visitor's stored/detected language after hydration so the first
+  // client paint matches the server (which always renders DEFAULT_LANG).
+  useEffect(() => {
+    syncClientLanguage();
+  }, []);
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.documentElement.lang = lang;
