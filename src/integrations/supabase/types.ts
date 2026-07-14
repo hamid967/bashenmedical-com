@@ -139,6 +139,47 @@ export type Database = {
           },
         ]
       }
+      appointment_status_history: {
+        Row: {
+          appointment_id: string
+          changed_by: string | null
+          created_at: string
+          from_status: Database["public"]["Enums"]["appointment_status"] | null
+          id: string
+          metadata: Json
+          reason: string | null
+          to_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Insert: {
+          appointment_id: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["appointment_status"] | null
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          to_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Update: {
+          appointment_id?: string
+          changed_by?: string | null
+          created_at?: string
+          from_status?: Database["public"]["Enums"]["appointment_status"] | null
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          to_status?: Database["public"]["Enums"]["appointment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_status_history_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       appointment_waitlist: {
         Row: {
           branch_id: string | null
@@ -4488,6 +4529,63 @@ export type Database = {
           },
         ]
       }
+      slot_holds: {
+        Row: {
+          appointment_date: string
+          appointment_time: string
+          branch_id: string | null
+          created_at: string
+          doctor_id: string
+          expires_at: string
+          held_by_user_id: string | null
+          id: string
+          idempotency_key: string | null
+          released_at: string | null
+          session_id: string
+        }
+        Insert: {
+          appointment_date: string
+          appointment_time: string
+          branch_id?: string | null
+          created_at?: string
+          doctor_id: string
+          expires_at: string
+          held_by_user_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          released_at?: string | null
+          session_id: string
+        }
+        Update: {
+          appointment_date?: string
+          appointment_time?: string
+          branch_id?: string | null
+          created_at?: string
+          doctor_id?: string
+          expires_at?: string
+          held_by_user_id?: string | null
+          id?: string
+          idempotency_key?: string | null
+          released_at?: string | null
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "slot_holds_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "slot_holds_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       specialties: {
         Row: {
           created_at: string
@@ -4714,6 +4812,32 @@ export type Database = {
           _user_id: string
         }
         Returns: undefined
+      }
+      book_appointment_atomic: {
+        Args: {
+          p_appointment_date: string
+          p_appointment_time: string
+          p_branch_id: string
+          p_doctor_id: string
+          p_gender?: string
+          p_hold_id?: string
+          p_idempotency_key?: string
+          p_initial_status?: Database["public"]["Enums"]["appointment_status"]
+          p_national_id?: string
+          p_patient_email?: string
+          p_patient_id?: string
+          p_patient_name: string
+          p_patient_phone: string
+          p_reason?: string
+          p_reminder_24h?: boolean
+          p_reminder_2h?: boolean
+          p_specialty_id: string
+        }
+        Returns: {
+          appointment_id: string
+          reference: string
+          status: Database["public"]["Enums"]["appointment_status"]
+        }[]
       }
       book_slot: {
         Args: {
@@ -5269,6 +5393,7 @@ export type Database = {
         }
         Returns: Json
       }
+      release_expired_slot_holds: { Args: never; Returns: number }
       release_slot: { Args: { p_appointment_id: string }; Returns: boolean }
       reply_to_rating: {
         Args: { _id: string; _reply: string }
