@@ -81,29 +81,40 @@ function fmt(iso: string, lang: "ar" | "en") {
 }
 
 const STORAGE_KEY = "my-orders:phone";
+const REF_KEY = "my-orders:ref";
 
 function MyOrdersPage() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
   const [phoneInput, setPhoneInput] = useState("");
+  const [refInput, setRefInput] = useState("");
   const [queryPhone, setQueryPhone] = useState<string | null>(null);
+  const [queryRef, setQueryRef] = useState<string | null>(null);
 
   // Restore last phone
   useEffect(() => {
     try {
-      const saved = sessionStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        setPhoneInput(saved);
-        setQueryPhone(saved);
+      const savedPhone = sessionStorage.getItem(STORAGE_KEY);
+      const savedRef = sessionStorage.getItem(REF_KEY);
+      if (savedPhone) {
+        setPhoneInput(savedPhone);
+        setQueryPhone(savedPhone);
+      }
+      if (savedRef) {
+        setRefInput(savedRef);
+        setQueryRef(savedRef);
       }
     } catch {}
   }, []);
 
   const { data: orders, isLoading, isFetching, error } = useQuery({
-    queryKey: ["my-orders", queryPhone],
+    queryKey: ["my-orders", queryPhone, queryRef],
     queryFn: async (): Promise<Order[]> => {
-      if (!queryPhone) return [];
-      const { data, error } = await supabase.rpc("track_orders_by_phone", { _phone: queryPhone });
+      if (!queryPhone || !queryRef) return [];
+      const { data, error } = await supabase.rpc("track_orders_by_phone", {
+        _phone: queryPhone,
+        _reference: queryRef,
+      });
       if (error) throw error;
       try {
         return parseOrderSummaries(data);
@@ -116,7 +127,7 @@ function MyOrdersPage() {
         throw e;
       }
     },
-    enabled: !!queryPhone,
+    enabled: !!queryPhone && !!queryRef,
     staleTime: 15_000,
     retry: (count, err) => !(err instanceof OrderParseError) && count < 2,
   });
@@ -124,17 +135,32 @@ function MyOrdersPage() {
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
-    const trimmed = phoneInput.trim();
-    if (trimmed.replace(/\D/g, "").length < 6) return;
-    setQueryPhone(trimmed);
-    try { sessionStorage.setItem(STORAGE_KEY, trimmed); } catch {}
+    const trimmedPhone = phoneInput.trim();
+    const trimmedRef = refInput.trim().replace(/[^0-9a-fA-F]/g, "");
+    if (trimmedPhone.replace(/\D/g, "").length < 6) return;
+    if (trimmedRef.length < 6) {
+      toast.error(isAr ? "الرجاء إدخال رمز مرجع الطلب" : "Please enter the order reference code");
+      return;
+    }
+    setQueryPhone(trimmedPhone);
+    setQueryRef(trimmedRef);
+    try {
+      sessionStorage.setItem(STORAGE_KEY, trimmedPhone);
+      sessionStorage.setItem(REF_KEY, trimmedRef);
+    } catch {}
   };
 
   const clear = () => {
     setQueryPhone(null);
+    setQueryRef(null);
     setPhoneInput("");
-    try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+    setRefInput("");
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(REF_KEY);
+    } catch {}
   };
+
 
   return (
     <div className="min-h-screen bg-muted/30">
