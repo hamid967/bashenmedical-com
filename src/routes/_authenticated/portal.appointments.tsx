@@ -96,6 +96,8 @@ function MyAppointmentsPage() {
     doctor?: string | null;
     branch?: string | null;
   }>(null);
+  const [timelineFor, setTimelineFor] = useState<null | { id: string; doctor?: string | null; date: string; time: string }>(null);
+
 
   const q = useSuspenseQuery(appointmentsQuery(scope));
   const qc = useQueryClient();
