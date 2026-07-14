@@ -176,33 +176,51 @@ function MyOrdersPage() {
             </h1>
             <p className="mt-3 text-primary-foreground/85">
               {isAr
-                ? "أدخل رقم جوالك لعرض جميع طلباتك (مواعيد، صيدلية، رأي ثاني، رعاية منزلية) في مكان واحد."
-                : "Enter your phone to view all your requests in one place."}
+                ? "أدخل رقم جوالك ورمز مرجع الطلب (الظاهر في رسالة التأكيد) لعرض تفاصيل الطلب."
+                : "Enter your phone and the order reference code from your confirmation to view details."}
             </p>
           </div>
 
-          {/* Phone form */}
-          <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-xl flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <Label htmlFor="phone" className="sr-only">{isAr ? "رقم الجوال" : "Phone"}</Label>
-              <div className="relative">
-                <Phone className="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted-foreground" />
+          {/* Phone + reference form (both required to prevent enumeration) */}
+          <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-2xl flex-col gap-3">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="phone" className="sr-only">{isAr ? "رقم الجوال" : "Phone"}</Label>
+                <div className="relative">
+                  <Phone className="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder={isAr ? "05XXXXXXXX" : "05XXXXXXXX"}
+                    value={phoneInput}
+                    onChange={(e) => setPhoneInput(e.target.value)}
+                    className="ps-9 bg-background text-foreground h-12"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="ref" className="sr-only">{isAr ? "رمز مرجع الطلب" : "Order reference"}</Label>
                 <Input
-                  id="phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder={isAr ? "05XXXXXXXX" : "05XXXXXXXX"}
-                  value={phoneInput}
-                  onChange={(e) => setPhoneInput(e.target.value)}
-                  className="ps-9 bg-background text-foreground h-12"
+                  id="ref"
+                  type="text"
+                  inputMode="text"
+                  autoComplete="off"
+                  spellCheck={false}
+                  placeholder={isAr ? "رمز المرجع (٨ خانات)" : "Reference code (8 chars)"}
+                  value={refInput}
+                  onChange={(e) => setRefInput(e.target.value)}
+                  className="bg-background text-foreground h-12 font-mono tracking-wider"
                   required
+                  maxLength={16}
                 />
               </div>
             </div>
-            <Button type="submit" variant="premium" size="xl" disabled={isFetching}>
+            <Button type="submit" variant="premium" size="xl" disabled={isFetching} className="w-full sm:w-auto sm:self-end">
               {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              {isAr ? "عرض طلباتي" : "Show my orders"}
+              {isAr ? "عرض طلبي" : "Show my order"}
             </Button>
           </form>
         </div>
@@ -215,13 +233,14 @@ function MyOrdersPage() {
           <>
             <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
               <div className="text-sm text-muted-foreground">
-                {isAr ? "الطلبات المرتبطة بـ " : "Orders for "}
+                {isAr ? "نتائج البحث برقم " : "Results for "}
                 <span className="font-semibold text-foreground" dir="ltr">{queryPhone}</span>
               </div>
               <Button variant="outline" size="sm" onClick={clear}>
-                {isAr ? "تغيير الرقم" : "Change number"}
+                {isAr ? "بحث جديد" : "New search"}
               </Button>
             </div>
+
 
             {isLoading ? (
               <div className="grid gap-3 md:grid-cols-2">
