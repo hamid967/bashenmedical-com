@@ -1,14 +1,22 @@
 {
   "name": "مجمع باعشن الطبي — Baeshen Medical Complex",
   "short_name": "Baeshen Medical",
+  "description": "بوابة مرضى مجمع باعشن الطبي — حجز المواعيد، التقارير، الفواتير والاستشارات.",
   "icons": [
-    { "src": "/android-chrome-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/android-chrome-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "/favicon-16.png", "sizes": "16x16", "type": "image/png" },
+    { "src": "/favicon-32.png", "sizes": "32x32", "type": "image/png" },
+    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "theme_color": "#0f766e",
   "background_color": "#ffffff",
   "display": "standalone",
   "start_url": "/",
+  "scope": "/",
   "dir": "rtl",
-  "lang": "ar"
+  "lang": "ar",
+  "orientation": "portrait"
 }
