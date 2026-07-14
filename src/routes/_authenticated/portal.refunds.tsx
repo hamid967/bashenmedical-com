@@ -170,6 +170,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   <div class="hd">
     <div>
       <div class="brand">إيصال طلب استرداد</div>
+      ${r.receipt_reference ? `<div class="sub" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;color:#0f172a;margin-top:2px">مرجع: ${r.receipt_reference}</div>` : ""}
       <div class="sub">مستخرج بتاريخ ${fmtDateTime(new Date().toISOString())}</div>
     </div>
     <span class="badge">${meta.label}</span>
