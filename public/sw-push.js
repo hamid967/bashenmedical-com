@@ -68,3 +68,30 @@ self.addEventListener("notificationclick", (event) => {
     })(),
   );
 });
+
+/* Browser rotates or invalidates the push subscription.
+ * We can't re-subscribe from the SW without the VAPID key handy in a portable
+ * way across restarts, so notify open clients to trigger a UI-driven resubscribe.
+ */
+self.addEventListener("pushsubscriptionchange", (event) => {
+  event.waitUntil(
+    (async () => {
+      const clientsList = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of clientsList) {
+        try {
+          client.postMessage({
+            type: "pushsubscriptionchange",
+            oldEndpoint: event.oldSubscription && event.oldSubscription.endpoint,
+            newEndpoint: event.newSubscription && event.newSubscription.endpoint,
+          });
+        } catch (_) {
+          /* ignore */
+        }
+      }
+    })(),
+  );
+});
+
