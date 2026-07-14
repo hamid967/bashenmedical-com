@@ -145,13 +145,19 @@ function BookPage() {
   const [verify, setVerify] = useState<null | {
     ok: boolean;
     eligible: boolean;
+    reason: string;
     message: string;
+    notes: string[];
     consultation_fee: number | null;
     coverage_percent: number | null;
     covered_amount: number | null;
     estimated_cost: number | null;
     patient_share: number | null;
+    copay: number | null;
+    deductible: number | null;
+    plan_label: string | null;
   }>(null);
+
 
 
   // When a dependent is selected via query param, prefill the patient fields
@@ -735,7 +741,7 @@ function BookPage() {
                     : "border-amber-500/40 bg-amber-500/5 text-amber-800"
                 }`}
               >
-                <div className="font-semibold mb-1 flex items-center gap-2">
+                <div className="font-semibold mb-1 flex items-center gap-2 flex-wrap">
                   {verify.eligible ? (
                     <>
                       <ShieldCheck className="h-4 w-4" /> التأمين مؤهل
@@ -745,8 +751,20 @@ function BookPage() {
                       <ShieldAlert className="h-4 w-4" /> يحتاج مراجعة
                     </>
                   )}
+                  {verify.plan_label && (
+                    <span className="text-[11px] font-normal rounded-full px-2 py-0.5 bg-white/60 border border-current/20">
+                      {verify.plan_label}
+                    </span>
+                  )}
                 </div>
                 <div className="text-xs opacity-90 mb-2">{verify.message}</div>
+                {verify.notes.length > 0 && (
+                  <ul className="text-[11px] opacity-90 mb-2 list-disc pr-4 space-y-0.5">
+                    {verify.notes.map((n, i) => (
+                      <li key={i}>{n}</li>
+                    ))}
+                  </ul>
+                )}
                 {verify.estimated_cost !== null && (
                   <div className="grid grid-cols-2 gap-1 text-xs">
                     <span className="opacity-80">قيمة الاستشارة:</span>
@@ -757,10 +775,22 @@ function BookPage() {
                         <span className="font-mono text-left">{verify.coverage_percent}%</span>
                       </>
                     )}
+                    {verify.deductible !== null && verify.deductible > 0 && (
+                      <>
+                        <span className="opacity-80">خصم اشتراك:</span>
+                        <span className="font-mono text-left">{verify.deductible} ر.س</span>
+                      </>
+                    )}
                     {verify.covered_amount !== null && (
                       <>
                         <span className="opacity-80">المُغطّى:</span>
                         <span className="font-mono text-left">{verify.covered_amount} ر.س</span>
+                      </>
+                    )}
+                    {verify.copay !== null && verify.copay > 0 && (
+                      <>
+                        <span className="opacity-80">رسم مشاركة:</span>
+                        <span className="font-mono text-left">{verify.copay} ر.س</span>
                       </>
                     )}
                     {verify.patient_share !== null && (
@@ -771,6 +801,7 @@ function BookPage() {
                     )}
                   </div>
                 )}
+
               </div>
             )}
           </div>
