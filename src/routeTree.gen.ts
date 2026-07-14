@@ -128,6 +128,7 @@ import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authent
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
+import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
@@ -785,6 +786,12 @@ const ApiPublicInsuranceVerifyRoute =
     path: '/api/public/insurance/verify',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicInquiriesCreateRoute =
+  ApiPublicInquiriesCreateRouteImport.update({
+    id: '/api/public/inquiries/create',
+    path: '/api/public/inquiries/create',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksSendRemindersRoute =
   ApiPublicHooksSendRemindersRouteImport.update({
     id: '/api/public/hooks/send-reminders',
@@ -982,6 +989,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
@@ -1112,6 +1120,7 @@ export interface FileRoutesByTo {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
@@ -1246,6 +1255,7 @@ export interface FileRoutesById {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
@@ -1380,6 +1390,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/inquiries/create'
     | '/api/public/insurance/verify'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
@@ -1510,6 +1521,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/inquiries/create'
     | '/api/public/insurance/verify'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
@@ -1643,6 +1655,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/inquiries/create'
     | '/api/public/insurance/verify'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
@@ -1705,6 +1718,7 @@ export interface RootRouteChildren {
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
+  ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
 }
 
@@ -2543,6 +2557,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicInsuranceVerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/inquiries/create': {
+      id: '/api/public/inquiries/create'
+      path: '/api/public/inquiries/create'
+      fullPath: '/api/public/inquiries/create'
+      preLoaderRoute: typeof ApiPublicInquiriesCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-reminders': {
       id: '/api/public/hooks/send-reminders'
       path: '/api/public/hooks/send-reminders'
@@ -2967,6 +2988,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
+  ApiPublicInquiriesCreateRoute: ApiPublicInquiriesCreateRoute,
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
 }
 export const routeTree = rootRouteImport
