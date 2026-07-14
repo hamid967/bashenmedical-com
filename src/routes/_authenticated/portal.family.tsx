@@ -64,6 +64,7 @@ import {
   CheckCircle2,
   XCircle,
   Clock3,
+  Languages,
 } from "lucide-react";
 
 const dependentsQuery = queryOptions({
