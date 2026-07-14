@@ -107,6 +107,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
       { name: "apple-mobile-web-app-title", content: "Baeshen Medical" },
       { name: "mobile-web-app-capable", content: "yes" },
+      { name: "google-site-verification", content: "KUMW5naK-6rJq8nQ6DciyVA2SgVBInRRqhY6WKbaB3U" },
       // og:image / twitter:image are set per-leaf (root would override every child).
     ],
     links: [
