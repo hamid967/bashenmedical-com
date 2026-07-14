@@ -431,7 +431,27 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
       })
       .select("id, queue_number, status, checked_in_at")
       .single();
-    if (ins.error) throw new Error(ins.error.message);
+    if (ins.error) {
+      // Race: another concurrent call already inserted the check-in row.
+      // The unique index on appointment_id guarantees only one wins.
+      if (ins.error.code === "23505") {
+        const again = await supabase
+          .from("patient_check_ins")
+          .select("queue_number, status, checked_in_at")
+          .eq("appointment_id", data.id)
+          .maybeSingle();
+        if (again.data) {
+          return {
+            ok: true,
+            already: true as const,
+            queue_number: again.data.queue_number as number | null,
+            status: again.data.status as string,
+            checked_in_at: again.data.checked_in_at as string,
+          };
+        }
+      }
+      throw new Error(ins.error.message);
+    }
 
     // Move appointment to checked_in
     await supabase.from("appointments").update({ status: "checked_in" }).eq("id", data.id);
