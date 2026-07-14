@@ -693,7 +693,7 @@ function AuthPage() {
                 <span>
                   الرمز أُرسل إلى{" "}
                   <span dir="ltr" className="font-semibold text-white">
-                    {normalizeSaPhone(phone) ?? phone}
+                    {otpChannel === "email" ? otpEmail : (normalizeSaPhone(phone) ?? phone)}
                   </span>
                 </span>
                 <button
