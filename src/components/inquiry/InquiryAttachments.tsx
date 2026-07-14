@@ -253,12 +253,15 @@ export function InquiryAttachments({
                   <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="truncate">{a.file_name}</div>
+                  <div className="truncate flex items-center gap-2">
+                    <span className="truncate">{a.file_name}</span>
+                    <ScanBadge status={a.scan_status} reason={a.scan_result?.reason} />
+                  </div>
                   <div className="text-[11px] text-muted-foreground">
                     {humanBytes(a.size_bytes)} · {new Date(a.created_at).toLocaleString("ar-SA")}
                   </div>
                 </div>
-                {a.download_url && (
+                {a.scan_status === "clean" && a.download_url ? (
                   <a
                     href={a.download_url}
                     target="_blank"
@@ -267,7 +270,9 @@ export function InquiryAttachments({
                   >
                     عرض
                   </a>
-                )}
+                ) : a.scan_status === "infected" ? (
+                  <span className="text-[11px] text-red-600">غير متاح</span>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {
