@@ -194,23 +194,62 @@ function InsurancePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <label className="block">
               <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">جهة التأمين</span>
-              <select value={providerId} onChange={(e) => { setProviderId(e.target.value); setDirty(true); }} className={inputCls}>
+              <select
+                value={providerId}
+                onChange={(e) => {
+                  setProviderId(e.target.value);
+                  setDirty(true);
+                  setErrors((x) => ({ ...x, provider: undefined, policyNo: undefined, customName: undefined }));
+                }}
+                className={`${inputCls} ${errors.provider ? "border-red-400 ring-1 ring-red-200" : ""}`}
+                aria-invalid={!!errors.provider}
+              >
                 <option value="">— بدون تأمين —</option>
                 {opts.providers.map((pr) => (
                   <option key={pr.id} value={pr.id}>{pr.name_ar}</option>
                 ))}
                 <option value="__custom__">أخرى…</option>
               </select>
+              {errors.provider && <FieldError msg={errors.provider} />}
             </label>
             <label className="block">
               <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">رقم البوليصة</span>
-              <input value={policyNo} onChange={(e) => { setPolicyNo(e.target.value); setDirty(true); }} maxLength={64}
-                dir="ltr" className={inputCls} placeholder="POL-XXXXXX" />
+              <input
+                value={policyNo}
+                onChange={(e) => {
+                  // Strip Arabic spaces and force to uppercase Latin/digits/-/ as typed.
+                  const v = e.target.value.replace(/\s+/g, "").toUpperCase();
+                  setPolicyNo(v);
+                  setDirty(true);
+                  setErrors((x) => ({ ...x, policyNo: undefined }));
+                }}
+                maxLength={64}
+                dir="ltr"
+                className={`${inputCls} ${errors.policyNo ? "border-red-400 ring-1 ring-red-200" : ""}`}
+                placeholder="POL-XXXXXX"
+                aria-invalid={!!errors.policyNo}
+                inputMode="text"
+                autoComplete="off"
+              />
+              {errors.policyNo
+                ? <FieldError msg={errors.policyNo} />
+                : <p className="mt-1 text-[10px] text-[color:var(--portal-ink-2)]">أحرف إنجليزية وأرقام وشرطات فقط، ٤-٦٤ خانة.</p>}
             </label>
             {providerId === "__custom__" && (
               <label className="block sm:col-span-2">
                 <span className="mb-1 block text-xs font-semibold text-[color:var(--portal-ink)]">اسم شركة التأمين</span>
-                <input value={customName} onChange={(e) => { setCustomName(e.target.value); setDirty(true); }} maxLength={120} className={inputCls} />
+                <input
+                  value={customName}
+                  onChange={(e) => {
+                    setCustomName(e.target.value);
+                    setDirty(true);
+                    setErrors((x) => ({ ...x, customName: undefined }));
+                  }}
+                  maxLength={120}
+                  className={`${inputCls} ${errors.customName ? "border-red-400 ring-1 ring-red-200" : ""}`}
+                  aria-invalid={!!errors.customName}
+                />
+                {errors.customName && <FieldError msg={errors.customName} />}
               </label>
             )}
           </div>
@@ -222,7 +261,7 @@ function InsurancePage() {
                 <ShieldOff className="h-4 w-4" />إزالة
               </button>
             )}
-            <button type="button" onClick={() => mut.mutate()} disabled={!dirty || mut.isPending}
+            <button type="button" onClick={onSave} disabled={!dirty || mut.isPending}
               className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white disabled:opacity-60"
               style={{ background: "var(--portal-gradient)" }}>
               {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
