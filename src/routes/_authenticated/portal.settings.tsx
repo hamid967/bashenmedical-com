@@ -152,7 +152,6 @@ function SettingsPage() {
       updateMyProfile({
         data: {
           preferred_language: lang,
-          dark_mode: dark,
           notification_prefs: prefs,
         },
       }),
