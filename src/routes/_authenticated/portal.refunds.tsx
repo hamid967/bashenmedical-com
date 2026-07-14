@@ -141,7 +141,7 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
 
   const html = `<!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"/>
-<title>إيصال استرداد ${r.invoice_number ?? r.id.slice(0, 8)}</title>
+<title>إيصال استرداد ${r.receipt_reference ?? r.invoice_number ?? r.id.slice(0, 8)}</title>
 <style>
   @page { size: A4; margin: 18mm; }
   * { box-sizing: border-box; }
