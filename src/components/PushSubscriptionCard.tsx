@@ -48,6 +48,15 @@ export function PushSubscriptionCard() {
   const push = usePushNotifications(true);
   const [details, setDetails] = useState<SubDetails | null>(null);
   const [testing, setTesting] = useState(false);
+  const [serverSending, setServerSending] = useState(false);
+  const [showPayload, setShowPayload] = useState(false);
+  const [payload, setPayload] = useState({
+    title: "إشعار تجريبي — Test push",
+    body: "هذا اختبار حقيقي عبر web-push من الخادم.",
+    url: "/portal/notifications",
+    requireInteraction: false,
+  });
+  const sendServer = useServerFn(sendTestPushToMe);
 
   // Refresh subscription details whenever the subscribed state changes.
   useEffect(() => {
