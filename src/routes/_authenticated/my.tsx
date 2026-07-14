@@ -24,15 +24,17 @@ import { ReminderHistoryForMyAppointmentModal } from "@/components/ReminderPrefe
 import {
   getFriendlyDownloadError,
   DOWNLOAD_ERROR_MESSAGES,
+  DOWNLOAD_ERROR_MESSAGES_EN,
   shouldPerformHeadCheck,
   recordDownloadSuccess,
   recordDownloadFailure,
   INITIAL_HEAD_CHECK_STATE,
   SIGNED_URL_TTL_SECONDS,
   formatSignedUrlValidity,
-  formatCountdown,
+  formatCountdownLabel,
   type HeadCheckState,
   type DownloadBucket,
+  type DownloadLang,
 } from "@/lib/download-error";
 import { logDownloadError } from "@/lib/download-error.functions";
 
@@ -834,9 +836,10 @@ function ReportRow({
 }
 
 function NoFileHint() {
+  const { lang } = useI18n();
   return (
     <span className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-border px-3 py-1.5 text-xs text-muted-foreground">
-      لا يوجد ملف مرفق
+      {lang === "en" ? "No file attached" : "لا يوجد ملف مرفق"}
     </span>
   );
 }
@@ -852,6 +855,9 @@ function DownloadFileButton({
   label: string;
   filename?: string;
 }) {
+  const { lang } = useI18n();
+  const dlLang: DownloadLang = lang === "en" ? "en" : "ar";
+  const msgs = dlLang === "en" ? DOWNLOAD_ERROR_MESSAGES_EN : DOWNLOAD_ERROR_MESSAGES;
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [signedAt, setSignedAt] = useState<number | null>(null);
@@ -879,7 +885,7 @@ function DownloadFileButton({
   const remainingSeconds =
     signedAt === null ? 0 : Math.max(0, SIGNED_URL_TTL_SECONDS - (nowTick - signedAt) / 1000);
   const countdownLabel = signedAt !== null && remainingSeconds > 0
-    ? `متبقّي ${formatCountdown(remainingSeconds)}`
+    ? formatCountdownLabel(remainingSeconds, dlLang)
     : null;
 
   async function generateAndDownload() {
@@ -895,7 +901,7 @@ function DownloadFileButton({
         .from(bucket)
         .createSignedUrl(path, SIGNED_URL_TTL_SECONDS, filename ? { download: filename } : undefined);
       if (signError || !data?.signedUrl) {
-        const friendly = getFriendlyDownloadError(signError?.message);
+        const friendly = getFriendlyDownloadError(signError?.message, dlLang);
         headCheckStateByBucket.set(bucket, recordDownloadFailure(getHeadCheckState(bucket)));
         reportDownloadError({
           bucket,
@@ -920,7 +926,7 @@ function DownloadFileButton({
         try {
           const check = await fetch(data.signedUrl, { method: "HEAD", mode: "cors" });
           if (!check.ok) {
-            const friendly = DOWNLOAD_ERROR_MESSAGES.invalidUrl;
+            const friendly = msgs.invalidUrl;
             headCheckStateByBucket.set(bucket, recordDownloadFailure(getHeadCheckState(bucket)));
             reportDownloadError({
               bucket,
@@ -964,9 +970,9 @@ function DownloadFileButton({
       attemptRef.current = 0;
       // Retain the `headCheckSkipped` flag on success paths in debug logs
       void headCheckSkipped;
-      toast.success(DOWNLOAD_ERROR_MESSAGES.downloadStarted);
+      toast.success(msgs.downloadStarted);
     } catch (unexpected) {
-      const friendly = DOWNLOAD_ERROR_MESSAGES.unexpected;
+      const friendly = msgs.unexpected;
       headCheckStateByBucket.set(bucket, recordDownloadFailure(getHeadCheckState(bucket)));
       reportDownloadError({
         bucket,
@@ -984,7 +990,8 @@ function DownloadFileButton({
     }
   }
 
-  const validityHint = formatSignedUrlValidity();
+  const validityHint = formatSignedUrlValidity(SIGNED_URL_TTL_SECONDS, dlLang);
+  const retryLabel = dlLang === "en" ? "Retry" : "إعادة المحاولة";
 
   if (error) {
     return (
@@ -997,7 +1004,7 @@ function DownloadFileButton({
           className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-          إعادة المحاولة
+          {retryLabel}
         </button>
         <span className="text-xs text-destructive">{error}</span>
         {countdownLabel ? (
