@@ -7,6 +7,11 @@ import { getBookingOptions } from "@/lib/portal/booking.functions";
 import { listAvailableSlots, bookSlot } from "@/lib/slots.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { getDependent } from "@/lib/portal/dependents.functions";
+import {
+  verifyMyInsurance,
+  listMyInsuranceVerifications,
+} from "@/lib/portal/insurance.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
