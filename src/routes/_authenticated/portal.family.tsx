@@ -1265,11 +1265,12 @@ function DeleteDialog({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel
+              data-dep-cancel-back="true"
               disabled={cancelMut.isPending}
               aria-disabled={cancelMut.isPending}
               className="font-semibold border-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              autoFocus
             >
+
               {T.del_cancel_confirm_keep[lang]}
             </AlertDialogCancel>
             <AlertDialogAction
