@@ -292,6 +292,7 @@ function MyAppointmentsPage() {
               a={a}
               scope={scope}
               onConfirm={() => confirmMut.mutate(a.id)}
+              onCheckIn={() => checkInMut.mutate(a.id)}
               onCancel={() =>
                 setCancelFor({
                   id: a.id,
@@ -311,7 +312,7 @@ function MyAppointmentsPage() {
               onFollowUp={() =>
                 setFollowFor({ id: a.id, doctor: a.doctor?.name_ar ?? null })
               }
-              pending={confirmMut.isPending || cancelMut.isPending || reschedMut.isPending}
+              pending={confirmMut.isPending || cancelMut.isPending || reschedMut.isPending || checkInMut.isPending}
             />
           ))}
         </ul>
