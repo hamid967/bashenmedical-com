@@ -10,6 +10,7 @@ import {
   AlertTriangle, ArrowLeft, Loader2, RefreshCw, Save, User as UserIcon,
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
+import { MutationErrorBanner } from "@/components/portal/MutationErrorBanner";
 
 const profileQuery = queryOptions({
   queryKey: ["portal", "my-profile-full"],
