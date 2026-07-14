@@ -145,13 +145,19 @@ function BookPage() {
   const [verify, setVerify] = useState<null | {
     ok: boolean;
     eligible: boolean;
+    reason: string;
     message: string;
+    notes: string[];
     consultation_fee: number | null;
     coverage_percent: number | null;
     covered_amount: number | null;
     estimated_cost: number | null;
     patient_share: number | null;
+    copay: number | null;
+    deductible: number | null;
+    plan_label: string | null;
   }>(null);
+
 
 
   // When a dependent is selected via query param, prefill the patient fields
