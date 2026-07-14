@@ -160,11 +160,18 @@ function ReportsPage() {
             جميع تقاريرك المنشورة في مكان واحد — صنّف حسب النوع أو ابحث بالاسم وحمّلها بأمان.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 items-center">
           <Badge variant="outline">{reports.length} تقرير</Badge>
           <Link
+            to="/portal/reports/downloads"
+            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+          >
+            <HistoryIcon className="h-3.5 w-3.5" />
+            سجل التحميلات
+          </Link>
+          <Link
             to="/portal/records"
-            className="text-xs text-primary hover:underline self-center"
+            className="text-xs text-primary hover:underline"
           >
             عرض السجل الزمني الكامل
           </Link>
