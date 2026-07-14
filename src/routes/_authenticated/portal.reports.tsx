@@ -256,7 +256,7 @@ function ReportsPage() {
                         {r.summary}
                       </p>
                     )}
-                    <div className="mt-3">
+                    <div className="mt-3 flex flex-wrap gap-2">
                       <Button
                         size="sm"
                         variant={r.file_path ? "default" : "outline"}
@@ -271,6 +271,14 @@ function ReportsPage() {
                         <span className="ms-2">
                           {r.file_path ? "تنزيل PDF" : "لا يوجد ملف"}
                         </span>
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setDetailId(r.id)}
+                      >
+                        <Info className="h-4 w-4" />
+                        <span className="ms-2">التفاصيل</span>
                       </Button>
                     </div>
                   </div>
