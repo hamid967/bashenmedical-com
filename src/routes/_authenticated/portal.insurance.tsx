@@ -83,6 +83,33 @@ function InsurancePage() {
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
+  const [errors, setErrors] = useState<{ provider?: string; policyNo?: string; customName?: string }>({});
+
+  /** Return validation errors keyed by field, empty when valid. */
+  const validate = (): typeof errors => {
+    const e: typeof errors = {};
+    const hasProvider = providerId !== "";
+    const isCustom = providerId === "__custom__";
+    const trimmedCustom = customName.trim();
+    const trimmedPolicy = policyNo.trim().toUpperCase();
+
+    if (isCustom) {
+      if (trimmedCustom.length < 2) e.customName = "اسم الشركة قصير جدًا (حد أدنى حرفان)";
+      else if (trimmedCustom.length > 120) e.customName = "اسم الشركة طويل جدًا";
+    }
+
+    if (hasProvider) {
+      if (!trimmedPolicy) e.policyNo = "رقم البوليصة مطلوب عند اختيار جهة تأمين";
+      else if (trimmedPolicy.length < 4) e.policyNo = "رقم البوليصة قصير جدًا (حد أدنى ٤ خانات)";
+      else if (trimmedPolicy.length > 64) e.policyNo = "رقم البوليصة طويل جدًا";
+      else if (!/^[A-Z0-9][A-Z0-9\-/]{2,63}$/.test(trimmedPolicy))
+        e.policyNo = "يُسمح بالأحرف الإنجليزية والأرقام والشرطات فقط (مثال: POL-123456)";
+    } else if (trimmedPolicy) {
+      e.policyNo = "اختر جهة التأمين أو احذف رقم البوليصة";
+    }
+    return e;
+  };
+
   const mut = useMutation({
     mutationFn: () => {
       const providerName =
@@ -92,7 +119,7 @@ function InsurancePage() {
       return updateMyProfile({
         data: {
           insurance_provider: (providerId ? providerName : null) as unknown as string,
-          insurance_policy_no: (policyNo.trim() || null) as unknown as string,
+          insurance_policy_no: (policyNo.trim().toUpperCase() || null) as unknown as string,
         },
       });
     },
@@ -101,9 +128,20 @@ function InsurancePage() {
       qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
       toast.success("تم حفظ بيانات التأمين");
       setDirty(false);
+      setErrors({});
     },
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
   });
+
+  const onSave = () => {
+    const eMap = validate();
+    setErrors(eMap);
+    if (Object.keys(eMap).length > 0) {
+      toast.error("تحقّق من الحقول المميّزة بالأحمر");
+      return;
+    }
+    mut.mutate();
+  };
 
   const removeMut = useMutation({
     mutationFn: () =>
