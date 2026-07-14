@@ -58,6 +58,14 @@ const NAV: NavItem[] = [
   { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
 ];
 
+const BOTTOM_NAV: NavItem[] = [
+  { to: "/portal", icon: LayoutDashboard, label_ar: "الرئيسية", label_en: "Home" },
+  { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "Visits" },
+  { to: "/portal/book", icon: CalendarPlus, label_ar: "احجز", label_en: "Book" },
+  { to: "/portal/records", icon: FileText, label_ar: "سجلي", label_en: "Records" },
+  { to: "/portal/profile", icon: User, label_ar: "حسابي", label_en: "Me" },
+];
+
 export function PortalShell({
   children,
   lang = "ar",
@@ -154,10 +162,50 @@ export function PortalShell({
             </div>
           </header>
 
-          {/* Page content */}
-          <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8">{children}</main>
+          {/* Page content — bottom padding on mobile so bottom nav doesn't cover it */}
+          <main className="flex-1 min-w-0 p-4 md:p-6 lg:p-8 pb-24 lg:pb-8">{children}</main>
         </div>
       </div>
+
+      {/* Mobile bottom nav */}
+      <nav
+        dir={dir}
+        aria-label={isAr ? "التنقّل السريع" : "Quick nav"}
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[color:var(--portal-border)] bg-white/95 backdrop-blur-xl"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <ul className="grid grid-cols-5">
+          {BOTTOM_NAV.map((item) => {
+            const active =
+              pathname === item.to ||
+              (item.to !== "/portal" && pathname.startsWith(item.to));
+            const Icon = item.icon;
+            return (
+              <li key={item.to}>
+                <Link
+                  to={item.to}
+                  className={
+                    "flex flex-col items-center justify-center gap-0.5 h-16 text-[10px] font-semibold transition-colors " +
+                    (active
+                      ? "text-[color:var(--portal-primary)]"
+                      : "text-[color:var(--portal-ink-3)] hover:text-[color:var(--portal-primary)]")
+                  }
+                >
+                  <span
+                    className={
+                      "h-8 w-8 grid place-items-center rounded-full transition " +
+                      (active ? "bg-[color:var(--portal-gradient-soft)]" : "")
+                    }
+                  >
+                    <Icon className="h-[18px] w-[18px]" />
+                  </span>
+                  <span className="truncate max-w-[64px]">{isAr ? item.label_ar : item.label_en}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
 
       {/* Mobile sidebar drawer */}
       {mobileOpen && (
@@ -186,7 +234,7 @@ export function PortalShell({
       {/* AI FAB */}
       <button
         aria-label={isAr ? "المساعد الذكي" : "AI Assistant"}
-        className="fixed bottom-5 end-5 z-30 h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_20px_60px_-15px_rgba(15,108,189,0.55)] hover:scale-105 transition-transform"
+        className="fixed bottom-24 lg:bottom-5 end-5 z-40 h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_20px_60px_-15px_rgba(15,108,189,0.55)] hover:scale-105 transition-transform"
         style={{ background: "var(--portal-gradient)" }}
       >
         <Sparkles className="h-6 w-6" />

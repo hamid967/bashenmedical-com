@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertTriangle, CalendarDays, CalendarPlus, CheckCircle2, ChevronLeft,
-  Clock, Filter, Loader2, MapPin, Phone, Printer, RefreshCw, Repeat,
+  Clock, Filter, Loader2, LogIn, MapPin, Phone, Printer, RefreshCw, Repeat,
   Search, Stethoscope, User2, XCircle,
 } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
   cancelMyAppointment,
   reschedulePatientAppointment,
   requestFollowUp,
+  performSelfCheckIn,
 } from "@/lib/portal/appointments.functions";
 
 type Scope = "upcoming" | "past";
@@ -113,6 +114,15 @@ function MyAppointmentsPage() {
     mutationFn: (v: { fromAppointmentId: string; preferredDate: string; preferredTime: string; reason?: string }) =>
       requestFollowUp({ data: v }),
     onSuccess: () => { invalidate(); toast.success("تم إنشاء طلب المتابعة"); setFollowFor(null); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+  const checkInMut = useMutation({
+    mutationFn: (id: string) => performSelfCheckIn({ data: { id } }),
+    onSuccess: (r) => {
+      invalidate();
+      const num = r.queue_number ? ` — رقمك في الدور: ${r.queue_number}` : "";
+      toast.success((r.already ? "أنت مسجّل بالفعل" : "تم تسجيل حضورك") + num);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -282,6 +292,7 @@ function MyAppointmentsPage() {
               a={a}
               scope={scope}
               onConfirm={() => confirmMut.mutate(a.id)}
+              onCheckIn={() => checkInMut.mutate(a.id)}
               onCancel={() =>
                 setCancelFor({
                   id: a.id,
@@ -301,7 +312,7 @@ function MyAppointmentsPage() {
               onFollowUp={() =>
                 setFollowFor({ id: a.id, doctor: a.doctor?.name_ar ?? null })
               }
-              pending={confirmMut.isPending || cancelMut.isPending || reschedMut.isPending}
+              pending={confirmMut.isPending || cancelMut.isPending || reschedMut.isPending || checkInMut.isPending}
             />
           ))}
         </ul>
@@ -401,7 +412,7 @@ function mapItemType() {
 }
 
 function AppointmentCard({
-  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, pending,
+  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, onCheckIn, pending,
 }: {
   a: ApptRow;
   scope: Scope;
@@ -409,12 +420,24 @@ function AppointmentCard({
   onReschedule: () => void;
   onCancel: () => void;
   onFollowUp: () => void;
+  onCheckIn: () => void;
   pending: boolean;
 }) {
   const meta = statusMeta(a.status);
   const canConfirm = scope === "upcoming" && a.status === "new";
   const canModify = scope === "upcoming" && (a.status === "new" || a.status === "confirmed");
   const canFollow = scope === "past" && (a.status === "completed" || a.status === "no_show");
+  // Check-in window: 60 min before → 30 min after appointment time (Riyadh)
+  const canCheckIn = (() => {
+    if (scope !== "upcoming") return false;
+    if (!(a.status === "new" || a.status === "confirmed")) return false;
+    const [y, mo, d] = a.appointment_date.split("-").map(Number);
+    const [hh, mm] = String(a.appointment_time).slice(0, 5).split(":").map(Number);
+    const apptUTC = Date.UTC(y, mo - 1, d, hh - 3, mm);
+    const diffMin = (Date.now() - apptUTC) / 60000;
+    return diffMin >= -60 && diffMin <= 30;
+  })();
+  const alreadyCheckedIn = a.status === "checked_in" || a.status === "in_progress";
   const mapsUrl =
     a.branch?.lat != null && a.branch?.lng != null
       ? `https://www.google.com/maps/search/?api=1&query=${a.branch.lat},${a.branch.lng}`
@@ -493,6 +516,16 @@ function AppointmentCard({
 
       {/* Actions */}
       <div className="mt-4 flex flex-wrap gap-2 print:hidden">
+        {canCheckIn && !alreadyCheckedIn && (
+          <ActionButton onClick={onCheckIn} tone="success" disabled={pending}>
+            <LogIn className="h-4 w-4" /> تسجيل الحضور
+          </ActionButton>
+        )}
+        {alreadyCheckedIn && (
+          <span className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
+            <CheckCircle2 className="h-4 w-4" /> تم تسجيل الحضور
+          </span>
+        )}
         {canConfirm && (
           <ActionButton onClick={onConfirm} tone="success" disabled={pending}>
             <CheckCircle2 className="h-4 w-4" /> تأكيد الحضور
