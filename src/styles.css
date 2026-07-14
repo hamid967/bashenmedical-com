@@ -614,13 +614,13 @@ html.reduce-motion *::after {
   100% { transform: translateX(120%); }
 }
 @keyframes fut-skeleton-pulse {
-  0%, 100% { background-color: color-mix(in oklab, #0a1a2f 60%, transparent); }
-  50%      { background-color: color-mix(in oklab, #0a1a2f 45%, transparent); }
+  0%, 100% { background-color: #F1F6F5; }
+  50%      { background-color: #E8F1EF; }
 }
 @utility skeleton-neon {
   position: relative;
   overflow: hidden;
-  background: color-mix(in oklab, #0a1a2f 60%, transparent);
+  background: #F1F6F5;
   border: 1px solid var(--fut-border);
   border-radius: 0.75rem;
   animation: fut-skeleton-pulse 2.4s ease-in-out infinite;
@@ -631,9 +631,7 @@ html.reduce-motion *::after {
   background: linear-gradient(
     110deg,
     transparent 20%,
-    rgba(0, 217, 192, 0.10) 40%,
-    rgba(140, 220, 255, 0.22) 50%,
-    rgba(0, 217, 192, 0.10) 60%,
+    rgba(255, 255, 255, 0.6) 50%,
     transparent 80%
   );
   transform: translateX(-100%);
