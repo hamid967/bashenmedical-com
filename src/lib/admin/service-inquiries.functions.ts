@@ -16,7 +16,7 @@ type Role =
 async function ensureStaff(supabase: any, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
   const roles = (data ?? []).map((r: any) => r.role as Role);
-  const ok = roles.some((r) => ["admin", "super_admin", "support_agent", "reception"].includes(r));
+  const ok = roles.some((r: Role) => ["admin", "super_admin", "support_agent", "reception"].includes(r));
   if (!ok) throw new Error("ليست لديك الصلاحية لإدارة استفسارات الخدمات.");
   return roles;
 }
