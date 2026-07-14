@@ -9,12 +9,13 @@ import { SITE } from "@/lib/site";
 import { downloadBookingConfirmationPdf } from "@/lib/booking-pdf";
 import { downloadIcs, googleCalendarUrl, type ShareBooking } from "@/lib/booking-share";
 import { formatArDate, type State } from "./types";
+import { EmailOtpLinker } from "./EmailOtpLinker";
 
 export function StepSuccess({
-  lang, state, branches, specialties, doctors, reference, phone, onNewBooking,
+  lang, state, branches, specialties, doctors, reference, phone, email, onNewBooking,
 }: {
   lang: "ar" | "en"; state: State; branches: any[]; specialties: any[]; doctors: any[];
-  reference: string | null; phone: string; onNewBooking: () => void;
+  reference: string | null; phone: string; email?: string | null; onNewBooking: () => void;
 }) {
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
@@ -488,6 +489,10 @@ export function StepSuccess({
           {t("success.newBooking")}
         </Button>
       </div>
+
+      {reference && (
+        <EmailOtpLinker email={email ?? state.patient.email ?? null} lang={lang} />
+      )}
     </div>
   );
 }
