@@ -33,6 +33,10 @@ if (!i18n.isInitialized) {
       caches: ["localStorage"],
     },
     returnNull: false,
+    // Force synchronous init so t() returns real translations during SSR
+    // instead of raw keys (fixes hydration mismatch e.g. "page.title" vs "احجز موعدك").
+    initImmediate: false,
+    react: { useSuspense: false },
   });
 }
 
