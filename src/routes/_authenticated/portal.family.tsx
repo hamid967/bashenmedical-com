@@ -379,9 +379,153 @@ function DependentCard({
           </button>
         </div>
       </div>
+
+      <DependentAppointmentsSection dependentId={row.id} lang={lang} />
     </div>
   );
 }
+
+/* ---------------- appointments history ---------------- */
+
+const STATUS_LABEL: Record<string, keyof typeof T> = {
+  scheduled: "st_scheduled",
+  confirmed: "st_confirmed",
+  completed: "st_completed",
+  cancelled: "st_cancelled",
+  canceled: "st_cancelled",
+  no_show: "st_no_show",
+  pending: "st_pending",
+  in_progress: "st_in_progress",
+};
+
+function statusVisual(status: string): {
+  cls: string;
+  Icon: typeof CheckCircle2;
+} {
+  const s = (status || "").toLowerCase();
+  if (s === "completed") return { cls: "bg-emerald-50 text-emerald-700", Icon: CheckCircle2 };
+  if (s === "cancelled" || s === "canceled" || s === "no_show")
+    return { cls: "bg-red-50 text-red-700", Icon: XCircle };
+  if (s === "confirmed") return { cls: "bg-sky-50 text-sky-700", Icon: CheckCircle2 };
+  if (s === "in_progress") return { cls: "bg-indigo-50 text-indigo-700", Icon: Clock3 };
+  return { cls: "bg-amber-50 text-amber-700", Icon: Clock3 };
+}
+
+function DependentAppointmentsSection({
+  dependentId,
+  lang,
+}: {
+  dependentId: string;
+  lang: Lang;
+}) {
+  const [open, setOpen] = useState(false);
+  const q = useQuery({
+    queryKey: ["portal", "dependent-appointments", dependentId],
+    queryFn: () =>
+      listDependentAppointments({ data: { dependent_id: dependentId, limit: 20 } }),
+    enabled: open,
+    staleTime: 30_000,
+  });
+
+  return (
+    <details
+      className="rounded-xl border border-[color:var(--portal-border)] bg-white/60 group"
+      open={open}
+      onToggle={(e) => setOpen((e.currentTarget as HTMLDetailsElement).open)}
+    >
+      <summary className="cursor-pointer list-none px-3 py-2 flex items-center justify-between gap-2 text-xs font-semibold">
+        <span className="flex items-center gap-1.5">
+          <ClipboardList className="h-3.5 w-3.5 text-[color:var(--portal-primary)]" />
+          {t("history_toggle", lang)}
+          {typeof q.data?.length === "number" && (
+            <span className="text-[10px] font-normal text-[color:var(--portal-ink-2)]">
+              ({q.data.length})
+            </span>
+          )}
+        </span>
+        <span className="text-[10px] font-normal text-[color:var(--portal-ink-2)]">
+          {open ? t("history_hide", lang) : t("history_show", lang)}
+        </span>
+      </summary>
+      <div className="px-3 pb-3">
+        {q.isLoading ? (
+          <div className="flex items-center gap-2 text-xs text-[color:var(--portal-ink-2)] py-3">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            {t("history_loading", lang)}
+          </div>
+        ) : q.isError ? (
+          <div className="flex items-center justify-between gap-2 text-xs text-red-600 py-3">
+            <span>{t("history_error", lang)}</span>
+            <button
+              onClick={() => q.refetch()}
+              className="rounded-full px-2 h-6 border border-red-200 hover:bg-red-50 text-red-700 font-semibold"
+            >
+              {t("history_retry", lang)}
+            </button>
+          </div>
+        ) : (q.data?.length ?? 0) === 0 ? (
+          <p className="text-xs text-[color:var(--portal-ink-2)] py-3 text-center">
+            {t("history_empty", lang)}
+          </p>
+        ) : (
+          <ul className="space-y-2 mt-1">
+            {q.data!.map((a) => (
+              <AppointmentRow key={a.id} row={a} lang={lang} />
+            ))}
+          </ul>
+        )}
+      </div>
+    </details>
+  );
+}
+
+function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }) {
+  const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
+  const { cls, Icon } = statusVisual(row.status);
+  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(
+    lang === "ar" ? "ar-SA-u-ca-gregory" : "en-GB",
+    { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" },
+  );
+  const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;
+
+  return (
+    <li className="rounded-lg border border-[color:var(--portal-border)] bg-white p-2.5 text-[11px] space-y-1">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <span className="inline-flex items-center gap-1 font-semibold text-[color:var(--portal-ink)]">
+          <CalendarClock className="h-3 w-3 text-[color:var(--portal-primary)]" />
+          <span dir="ltr">{dateLabel}</span>
+        </span>
+        <span
+          className={`inline-flex items-center gap-1 rounded-full px-2 h-5 font-semibold ${cls}`}
+        >
+          <Icon className="h-3 w-3" />
+          {t(statusKey, lang)}
+        </span>
+      </div>
+      <div className="flex items-center flex-wrap gap-x-3 gap-y-0.5 text-[color:var(--portal-ink-2)]">
+        {doctorName && (
+          <span className="inline-flex items-center gap-1">
+            <Stethoscope className="h-3 w-3" />
+            {doctorName}
+          </span>
+        )}
+        {row.branch_name_ar && (
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            {row.branch_name_ar}
+          </span>
+        )}
+        {row.specialty_name_ar && lang === "ar" && (
+          <span>· {row.specialty_name_ar}</span>
+        )}
+      </div>
+      {row.reason && (
+        <p className="text-[color:var(--portal-ink-2)] line-clamp-2">{row.reason}</p>
+      )}
+    </li>
+  );
+}
+
 
 /* ---------------- form dialog ---------------- */
 
