@@ -4150,6 +4150,216 @@ export type Database = {
         }
         Relationships: []
       }
+      service_catalog: {
+        Row: {
+          created_at: string
+          department_id: string | null
+          display_order: number
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department_id?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department_id?: string | null
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_inquiries: {
+        Row: {
+          assigned_to: string | null
+          branch_id: string | null
+          closed_at: string | null
+          consent_record_id: string | null
+          created_at: string
+          doctor_id: string | null
+          email: string | null
+          full_name: string
+          id: string
+          insurance_provider_id: string | null
+          internal_status: Database["public"]["Enums"]["service_inquiry_internal_status"]
+          linked_appointment_id: string | null
+          mobile_e164: string
+          mobile_number: string
+          national_id: string | null
+          notes: string | null
+          preferred_contact_method: string
+          preferred_date: string | null
+          request_number: string
+          service_id: string | null
+          service_label: string
+          source: Database["public"]["Enums"]["service_inquiry_source"]
+          specialty_id: string | null
+          submitter_ip_hash: string | null
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          whatsapp_handoff_status: Database["public"]["Enums"]["service_inquiry_whatsapp_status"]
+          whatsapp_opened_at: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          branch_id?: string | null
+          closed_at?: string | null
+          consent_record_id?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          email?: string | null
+          full_name: string
+          id?: string
+          insurance_provider_id?: string | null
+          internal_status?: Database["public"]["Enums"]["service_inquiry_internal_status"]
+          linked_appointment_id?: string | null
+          mobile_e164: string
+          mobile_number: string
+          national_id?: string | null
+          notes?: string | null
+          preferred_contact_method?: string
+          preferred_date?: string | null
+          request_number: string
+          service_id?: string | null
+          service_label: string
+          source?: Database["public"]["Enums"]["service_inquiry_source"]
+          specialty_id?: string | null
+          submitter_ip_hash?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          whatsapp_handoff_status?: Database["public"]["Enums"]["service_inquiry_whatsapp_status"]
+          whatsapp_opened_at?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          branch_id?: string | null
+          closed_at?: string | null
+          consent_record_id?: string | null
+          created_at?: string
+          doctor_id?: string | null
+          email?: string | null
+          full_name?: string
+          id?: string
+          insurance_provider_id?: string | null
+          internal_status?: Database["public"]["Enums"]["service_inquiry_internal_status"]
+          linked_appointment_id?: string | null
+          mobile_e164?: string
+          mobile_number?: string
+          national_id?: string | null
+          notes?: string | null
+          preferred_contact_method?: string
+          preferred_date?: string | null
+          request_number?: string
+          service_id?: string | null
+          service_label?: string
+          source?: Database["public"]["Enums"]["service_inquiry_source"]
+          specialty_id?: string | null
+          submitter_ip_hash?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          whatsapp_handoff_status?: Database["public"]["Enums"]["service_inquiry_whatsapp_status"]
+          whatsapp_opened_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_inquiries_consent_record_id_fkey"
+            columns: ["consent_record_id"]
+            isOneToOne: false
+            referencedRelation: "consent_records"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_inquiries_linked_appointment_id_fkey"
+            columns: ["linked_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_inquiries_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_inquiry_daily_counter: {
+        Row: {
+          counter: number
+          day_key: string
+        }
+        Insert: {
+          counter?: number
+          day_key: string
+        }
+        Update: {
+          counter?: number
+          day_key?: string
+        }
+        Relationships: []
+      }
+      service_inquiry_updates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          inquiry_id: string
+          internal_note: string | null
+          metadata: Json
+          public_message: string | null
+          update_type: Database["public"]["Enums"]["service_inquiry_update_type"]
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inquiry_id: string
+          internal_note?: string | null
+          metadata?: Json
+          public_message?: string | null
+          update_type: Database["public"]["Enums"]["service_inquiry_update_type"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          inquiry_id?: string
+          internal_note?: string | null
+          metadata?: Json
+          public_message?: string | null
+          update_type?: Database["public"]["Enums"]["service_inquiry_update_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_inquiry_updates_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "service_inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       specialties: {
         Row: {
           created_at: string
@@ -4490,6 +4700,7 @@ export type Database = {
       }
       generate_mrn: { Args: { _branch_id: string }; Returns: string }
       generate_refund_receipt_reference: { Args: never; Returns: string }
+      generate_service_inquiry_number: { Args: never; Returns: string }
       get_my_doctor_id: { Args: never; Returns: string }
       get_my_patient_id: { Args: never; Returns: string }
       get_order_by_ref: {
@@ -4549,6 +4760,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_inquiry_staff: { Args: { _user_id: string }; Returns: boolean }
       list_appointment_audit_by_ref: {
         Args: { _phone: string; _ref: string }
         Returns: {
@@ -5098,6 +5310,36 @@ export type Database = {
         | "failed"
         | "skipped"
       patient_status: "active" | "inactive" | "archived" | "deceased"
+      service_inquiry_internal_status:
+        | "new"
+        | "contacted"
+        | "awaiting_patient"
+        | "appointment_created"
+        | "completed"
+        | "cancelled"
+      service_inquiry_source:
+        | "website"
+        | "mobile_web"
+        | "patient_portal"
+        | "campaign"
+        | "direct_link"
+      service_inquiry_update_type:
+        | "created"
+        | "status_change"
+        | "assignment"
+        | "note"
+        | "public_message"
+        | "whatsapp_handoff"
+        | "info_requested"
+        | "attachment"
+        | "closed"
+        | "linked_appointment"
+      service_inquiry_whatsapp_status:
+        | "not_opened"
+        | "opened"
+        | "delivery_unverified"
+        | "delivered"
+        | "failed"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5295,6 +5537,40 @@ export const Constants = {
         "skipped",
       ],
       patient_status: ["active", "inactive", "archived", "deceased"],
+      service_inquiry_internal_status: [
+        "new",
+        "contacted",
+        "awaiting_patient",
+        "appointment_created",
+        "completed",
+        "cancelled",
+      ],
+      service_inquiry_source: [
+        "website",
+        "mobile_web",
+        "patient_portal",
+        "campaign",
+        "direct_link",
+      ],
+      service_inquiry_update_type: [
+        "created",
+        "status_change",
+        "assignment",
+        "note",
+        "public_message",
+        "whatsapp_handoff",
+        "info_requested",
+        "attachment",
+        "closed",
+        "linked_appointment",
+      ],
+      service_inquiry_whatsapp_status: [
+        "not_opened",
+        "opened",
+        "delivery_unverified",
+        "delivered",
+        "failed",
+      ],
     },
   },
 } as const
