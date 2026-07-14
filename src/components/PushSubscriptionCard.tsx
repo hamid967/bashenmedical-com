@@ -588,7 +588,43 @@ export function PushSubscriptionCard() {
       {/* Custom payload editor for the server-side push test */}
       {showPayload && (
         <div className="mt-4 space-y-3 rounded-xl border bg-muted/20 p-4">
+          {/* Preset picker — replaces title/body/url/data with a template */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-muted-foreground">
+                قوالب جاهزة — Presets
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                تستبدل الحقول أدناه
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {PAYLOAD_PRESETS.map((preset) => (
+                <button
+                  key={preset.id}
+                  type="button"
+                  title={preset.description}
+                  onClick={() => {
+                    setPayload({
+                      title: preset.title,
+                      body: preset.body,
+                      url: preset.url,
+                      requireInteraction: preset.requireInteraction,
+                      dataJson: preset.dataJson,
+                    });
+                    setDataError(null);
+                    toast.success(`تم تطبيق القالب: ${preset.label}`);
+                  }}
+                  className="rounded-full border border-input bg-background px-3 py-1 text-[11px] font-medium text-foreground transition hover:border-primary hover:bg-primary/10 hover:text-primary"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid gap-3 sm:grid-cols-2">
+
             <label className="space-y-1 text-xs">
               <span className="font-semibold text-muted-foreground">العنوان — Title</span>
               <input
