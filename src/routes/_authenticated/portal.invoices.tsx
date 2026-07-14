@@ -450,20 +450,34 @@ function InvoiceDetails({
         <div>
           <div className="text-sm font-semibold mb-2">سجل الدفعات</div>
           <ul className="space-y-2">
-            {payments.map((p) => (
-              <li key={p.id} className="mag-card p-3 flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-semibold">{fmtSAR(Number(p.amount), p.currency)}</div>
-                  <div className="text-xs text-[color:var(--mag-ink-3)]">
-                    {p.method} · {fmtDate(p.paid_at ?? p.created_at)}
-                    {p.is_mock && <span className="ms-2 text-amber-700">(محاكاة)</span>}
+            {payments.map((p) => {
+              const succeeded = ["succeeded", "paid", "completed", "partially_refunded"].includes(p.status);
+              const refundable = succeeded && !p.is_mock;
+              return (
+                <li key={p.id} className="mag-card p-3 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold">{fmtSAR(Number(p.amount), p.currency)}</div>
+                    <div className="text-xs text-[color:var(--mag-ink-3)]">
+                      {p.method} · {fmtDate(p.paid_at ?? p.created_at)}
+                      {p.is_mock && <span className="ms-2 text-amber-700">(محاكاة)</span>}
+                    </div>
                   </div>
-                </div>
-                <span className={`mag-chip ${p.status === "succeeded" || p.status === "paid" || p.status === "completed" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-                  {p.status}
-                </span>
-              </li>
-            ))}
+                  <div className="flex items-center gap-2 shrink-0">
+                    <span className={`mag-chip ${succeeded ? "bg-emerald-50 text-emerald-700" : p.status === "refunded" ? "bg-slate-100 text-slate-600" : "bg-amber-50 text-amber-700"}`}>
+                      {p.status}
+                    </span>
+                    {refundable && (
+                      <Link
+                        to="/portal/refunds"
+                        className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold hover:bg-[color:var(--mag-subtle)]"
+                      >
+                        طلب استرداد
+                      </Link>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
