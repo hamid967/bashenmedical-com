@@ -700,28 +700,29 @@ html.reduce-motion .pulse-soft {
    overview page.
    ===================================================================== */
 .portal-magazine {
-  --mag-bg: #fafbfc;
+  --mag-bg: #FCFDFB;
   --mag-surface: #ffffff;
-  --mag-subtle: #f4f6f9;
-  --mag-line: #e5eaf1;
-  --mag-line-strong: #d5dde8;
-  --mag-ink: #0f172a;
-  --mag-ink-2: #334155;
-  --mag-ink-3: #64748b;
-  --mag-muted: #94a3b8;
-  --mag-accent: #3b82f6;
-  --mag-accent-ink: #1d4ed8;
-  --mag-accent-soft: #eff6ff;
-  --mag-success: #059669;
-  --mag-warning: #d97706;
-  --mag-danger: #dc2626;
+  --mag-subtle: #F1F6F5;
+  --mag-line: #DCEAE8;
+  --mag-line-strong: #C7DAD6;
+  --mag-ink: #173B42;
+  --mag-ink-2: #3A555B;
+  --mag-ink-3: #64777C;
+  --mag-muted: #8B9A9E;
+  --mag-accent: #0B8585;
+  --mag-accent-ink: #075E63;
+  --mag-accent-soft: #ECF8F5;
+  --mag-success: #16A34A;
+  --mag-warning: #D97706;
+  --mag-danger: #C0392B;
   --mag-radius: 20px;
-  --mag-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 30px -18px rgba(15, 23, 42, 0.15);
-  --mag-shadow-lift: 0 2px 4px rgba(15, 23, 42, 0.05), 0 24px 60px -30px rgba(15, 23, 42, 0.22);
-  font-family: "Figtree", "Cairo", ui-sans-serif, system-ui, sans-serif;
+  --mag-shadow: 0 1px 2px rgba(7, 94, 99, 0.04), 0 8px 30px -18px rgba(7, 94, 99, 0.14);
+  --mag-shadow-lift: 0 2px 4px rgba(7, 94, 99, 0.05), 0 24px 60px -30px rgba(7, 94, 99, 0.20);
+  font-family: "Cairo", "Figtree", ui-sans-serif, system-ui, sans-serif;
   color: var(--mag-ink);
   background: var(--mag-bg);
 }
+
 .portal-magazine :is(h1, h2, h3, h4) {
   font-family: "Outfit", "Cairo", ui-sans-serif, system-ui, sans-serif;
   letter-spacing: -0.01em;
