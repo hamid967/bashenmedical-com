@@ -24,7 +24,7 @@ export function JazanIconFrame({ children, className, size = "md" }: Props) {
       className={cn(
         "relative inline-grid place-items-center rounded-2xl shrink-0",
         "bg-[var(--jazan-ivory,#FCF9F2)] text-[var(--jazan-teal,#075E63)]",
-        "ring-1 ring-[var(--jazan-gold,#C7A46B)]/50",
+        "jazan-hairline",
         "shadow-[0_2px_10px_-6px_rgba(7,94,99,0.25)]",
         SIZE[size],
         className,
