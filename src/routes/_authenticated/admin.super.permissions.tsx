@@ -148,21 +148,49 @@ function SuperPermissionsPage() {
     onMutate: (v) => {
       const cellKey = `${v.role}::${v.permission_key}`;
       setPending((s) => new Set(s).add(cellKey));
-      // Optimistic update
+      // Snapshot for rollback
       const prev = qc.getQueryData(matrixQuery.queryKey) as
         | Array<{ role: AppRole; permission_key: string }>
         | undefined;
+      // Optimistic update
       if (prev) {
         const next = v.enabled
           ? [...prev, { role: v.role, permission_key: v.permission_key }]
-          : prev.filter((r) => !(r.role === v.role && r.permission_key === v.permission_key));
+          : prev.filter(
+              (r) => !(r.role === v.role && r.permission_key === v.permission_key),
+            );
         qc.setQueryData(matrixQuery.queryKey, next);
       }
       return { prev, cellKey };
     },
-    onError: (err: any, _v, ctx) => {
-      if (ctx?.prev) qc.setQueryData(matrixQuery.queryKey, ctx.prev);
-      toast.error(err?.message ?? "تعذّر التحديث");
+    onError: (err: any, v, ctx) => {
+      // 1) Rollback the optimistic cache change
+      if (ctx?.prev !== undefined) {
+        qc.setQueryData(matrixQuery.queryKey, ctx.prev);
+      }
+      // 2) Build a clear, human-friendly message
+      const perm = catalog.find((p) => p.key === v.permission_key);
+      const permLabel = perm?.description_ar || v.permission_key;
+      const roleLabel = ROLE_LABEL[v.role] ?? v.role;
+      const action = v.enabled ? "تفعيل" : "تعطيل";
+      const raw = String(err?.message ?? "").trim();
+      const reason =
+        /forbidden|permission denied|42501|ليست لديك/i.test(raw)
+          ? "ليست لديك الصلاحية الكافية."
+          : /super_admin/i.test(raw)
+            ? "هذا التعديل يتطلب صلاحية المسؤول الأعلى."
+            : /network|fetch|failed to fetch|timeout/i.test(raw)
+              ? "تعذّر الاتصال بالخادم — تحقّق من الشبكة."
+              : raw || "حدث خطأ غير متوقّع.";
+      toast.error(`تعذّر ${action} «${permLabel}» للدور «${roleLabel}»`, {
+        description: reason + " — أُعيدت الحالة السابقة.",
+        action: {
+          label: "إعادة المحاولة",
+          onClick: () => mut.mutate(v),
+        },
+      });
+      // eslint-disable-next-line no-console
+      console.error("[rbac] set_role_permission failed", { input: v, error: err });
     },
     onSuccess: () => {
       toast.success("تم التحديث");
@@ -175,8 +203,10 @@ function SuperPermissionsPage() {
           return n;
         });
       }
+      // Reconcile with server truth regardless of success/failure
       qc.invalidateQueries({ queryKey: ["rbac", "role-permissions-matrix"] });
     },
+    retry: false,
   });
 
   const enabledCount = matrix.length;
