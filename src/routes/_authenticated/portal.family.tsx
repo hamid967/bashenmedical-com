@@ -184,6 +184,23 @@ const T = {
     ar: "سيتم إلغاء جميع المواعيد النشطة لهذا الفرد وتحرير حجوزاتها. هل تريد المتابعة؟",
     en: "All active appointments for this member will be cancelled and their slots freed. Continue?",
   },
+  del_cancel_confirm_title: {
+    ar: "تأكيد إلغاء المواعيد النشطة",
+    en: "Confirm cancelling active appointments",
+  },
+  del_cancel_confirm_warning: {
+    ar: "لا يمكن التراجع عن هذا الإجراء. سيتم إشعار العيادة وتحرير الحجوزات.",
+    en: "This action cannot be undone. The clinic will be notified and slots freed.",
+  },
+  del_cancel_confirm_ok: {
+    ar: "نعم، ألغِ المواعيد",
+    en: "Yes, cancel appointments",
+  },
+  del_cancel_confirm_keep: {
+    ar: "تراجع",
+    en: "Go back",
+  },
+
   del_cancel_success: {
     ar: "تم إلغاء المواعيد النشطة. يمكنك الآن حذف الفرد.",
     en: "Active appointments cancelled. You can now delete the member.",
