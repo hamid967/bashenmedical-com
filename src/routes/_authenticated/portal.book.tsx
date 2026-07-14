@@ -10,6 +10,7 @@ import { getDependent } from "@/lib/portal/dependents.functions";
 import {
   verifyMyInsurance,
   listMyInsuranceVerifications,
+  attachVerificationToAppointment,
 } from "@/lib/portal/insurance.functions";
 
 import { supabase } from "@/integrations/supabase/client";
