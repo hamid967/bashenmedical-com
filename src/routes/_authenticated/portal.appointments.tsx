@@ -516,6 +516,16 @@ function AppointmentCard({
 
       {/* Actions */}
       <div className="mt-4 flex flex-wrap gap-2 print:hidden">
+        {canCheckIn && !alreadyCheckedIn && (
+          <ActionButton onClick={onCheckIn} tone="success" disabled={pending}>
+            <LogIn className="h-4 w-4" /> تسجيل الحضور
+          </ActionButton>
+        )}
+        {alreadyCheckedIn && (
+          <span className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200">
+            <CheckCircle2 className="h-4 w-4" /> تم تسجيل الحضور
+          </span>
+        )}
         {canConfirm && (
           <ActionButton onClick={onConfirm} tone="success" disabled={pending}>
             <CheckCircle2 className="h-4 w-4" /> تأكيد الحضور
