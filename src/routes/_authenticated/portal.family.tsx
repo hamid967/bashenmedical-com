@@ -17,7 +17,7 @@ import {
   type Dependent,
   type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
-import { getMyProfile } from "@/lib/portal/portal.functions";
+import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -64,6 +64,7 @@ import {
   CheckCircle2,
   XCircle,
   Clock3,
+  Languages,
 } from "lucide-react";
 
 const dependentsQuery = queryOptions({
@@ -184,6 +185,11 @@ const T = {
     en: "To book on behalf of this member, please complete the following fields:",
   },
   complete_now:     { ar: "استكمل البيانات", en: "Complete details" },
+  // language
+  lang_toggle_to_en: { ar: "English", en: "English" },
+  lang_toggle_to_ar: { ar: "العربية", en: "العربية" },
+  lang_saved:        { ar: "تم حفظ لغة الحساب.", en: "Account language saved." },
+  lang_error:        { ar: "تعذّر حفظ اللغة.", en: "Could not save language." },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
@@ -215,12 +221,31 @@ function FamilyPage() {
   const { data: profile } = useSuspenseQuery(profileQuery);
   const { data: rows } = useSuspenseQuery(dependentsQuery);
   const lang: Lang = (profile?.preferred_language as Lang) ?? "ar";
+  const qc = useQueryClient();
 
   const [dialog, setDialog] = useState<{ mode: "add" } | { mode: "edit"; row: Dependent } | null>(
     null,
   );
   const [toDelete, setToDelete] = useState<Dependent | null>(null);
   const dir = lang === "ar" ? "rtl" : "ltr";
+
+  const langMutation = useMutation({
+    mutationFn: (next: Lang) => updateMyProfile({ data: { preferred_language: next } }),
+    onSuccess: (_data, next) => {
+      qc.setQueryData(profileQuery.queryKey, (old) =>
+        old ? { ...old, preferred_language: next } : old,
+      );
+      qc.invalidateQueries({ queryKey: ["portal"] });
+      if (typeof document !== "undefined") {
+        document.documentElement.lang = next;
+        document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
+      }
+      toast.success(T.lang_saved[next]);
+    },
+    onError: () => toast.error(t("lang_error", lang)),
+  });
+
+  const nextLang: Lang = lang === "ar" ? "en" : "ar";
 
   return (
     <div className="space-y-6 pb-24 md:pb-6" dir={dir}>
@@ -234,15 +259,33 @@ function FamilyPage() {
             {t("subtitle", lang)}
           </p>
         </div>
-        <Button
-          onClick={() => setDialog({ mode: "add" })}
-          className="rounded-full text-white font-semibold px-5"
-          style={{ background: "var(--portal-gradient)" }}
-        >
-          <UserPlus className="h-4 w-4 ms-2" />
-          {t("add", lang)}
-        </Button>
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => langMutation.mutate(nextLang)}
+            disabled={langMutation.isPending}
+            className="rounded-full font-semibold"
+            aria-label={nextLang === "en" ? "Switch to English" : "التبديل إلى العربية"}
+          >
+            {langMutation.isPending ? (
+              <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+            ) : (
+              <Languages className="h-4 w-4 ms-2" />
+            )}
+            {nextLang === "en" ? T.lang_toggle_to_en.en : T.lang_toggle_to_ar.ar}
+          </Button>
+          <Button
+            onClick={() => setDialog({ mode: "add" })}
+            className="rounded-full text-white font-semibold px-5"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <UserPlus className="h-4 w-4 ms-2" />
+            {t("add", lang)}
+          </Button>
+        </div>
       </header>
+
 
       {rows.length === 0 ? (
         <div className="glass-card p-10 text-center">
