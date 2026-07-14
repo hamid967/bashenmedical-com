@@ -28,6 +28,9 @@ import {
 } from "@/components/home/HomeSkeletons";
 import ogHomeAsset from "@/assets/og-home-bmc.jpg.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
+import { JazanSectionLabel } from "@/components/jazan/JazanSectionLabel";
+import { JazanDivider } from "@/components/jazan/JazanDivider";
+import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE =
@@ -446,9 +449,7 @@ function HomePage() {
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
-              <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-                {isAr ? "التخصصات" : "Specialties"}
-              </div>
+              <JazanSectionLabel>{isAr ? "التخصصات" : "Specialties"}</JazanSectionLabel>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
                 {t("specialties_title")}
               </h2>
@@ -488,11 +489,11 @@ function HomePage() {
                   <Link
                     to="/book"
                     search={{ specialty: s.slug }}
-                    className="glass-fut neon-glow-hover group block h-full p-5"
+                    className="glass-fut neon-glow-hover group block h-full p-5 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25 hover:ring-[var(--jazan-gold,#C7A46B)]/60 transition"
                   >
-                    <div className="grid h-11 w-11 place-items-center rounded-xl border border-[var(--fut-border)] bg-white/[0.04] text-[color:var(--neon-teal)] transition group-hover:border-[var(--neon-teal)]">
+                    <JazanIconFrame size="sm">
                       <Stethoscope className="h-5 w-5" />
-                    </div>
+                    </JazanIconFrame>
                     <div className="mt-3 text-sm font-semibold text-[color:var(--fut-ink)]">
                       {isAr ? s.name_ar : s.name_en}
                     </div>
@@ -505,6 +506,7 @@ function HomePage() {
             </StaggerReveal>
           </SkeletonSwap>
         </div>
+        <div className="container-app"><JazanDivider variant="subtle" className="mt-16" /></div>
       </section>
 
       {/* ===== ANNOUNCEMENTS ===== */}
@@ -515,9 +517,7 @@ function HomePage() {
 
         <div className="container-app">
           <div className="mb-10 max-w-2xl">
-            <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-              {isAr ? "لماذا باعشن؟" : "Why Baeshen"}
-            </div>
+            <JazanSectionLabel>{isAr ? "لماذا باعشن؟" : "Why Baeshen"}</JazanSectionLabel>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
               {isAr ? "رعاية موثوقة · تجربة كونسيرج" : "Trusted care · concierge experience"}
             </h2>
@@ -527,16 +527,17 @@ function HomePage() {
               const Icon = f.icon;
               const c = isAr ? f.ar : f.en;
               return (
-                <RevealItem key={i} className="glass-fut neon-glow-hover p-6">
-                  <div className="grid h-12 w-12 place-items-center rounded-2xl border border-[var(--fut-border-strong)] bg-white/[0.04] text-[color:var(--neon-teal)]">
+                <RevealItem key={i} className="glass-fut neon-glow-hover p-6 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25 hover:ring-[var(--jazan-gold,#C7A46B)]/60 transition">
+                  <JazanIconFrame>
                     <Icon className="h-5 w-5" />
-                  </div>
+                  </JazanIconFrame>
                   <h3 className="mt-4 text-lg font-bold text-[color:var(--fut-ink)]">{c.t}</h3>
                   <p className="mt-2 text-sm leading-6 text-[color:var(--fut-ink-muted)]">{c.d}</p>
                 </RevealItem>
               );
             })}
           </StaggerReveal>
+          <JazanDivider variant="subtle" className="mt-16" />
         </div>
       </section>
 
@@ -545,9 +546,7 @@ function HomePage() {
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
-              <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-                {isAr ? "الفريق الطبي" : "Medical team"}
-              </div>
+              <JazanSectionLabel>{isAr ? "الفريق الطبي" : "Medical team"}</JazanSectionLabel>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
                 {t("doctors_title")}
               </h2>
@@ -615,11 +614,10 @@ function HomePage() {
 
       {/* ===== VISIT / MAP ===== */}
       <section className="py-16 md:py-20">
+        <div className="container-app"><JazanDivider variant="subtle" className="mb-12" /></div>
         <div className="container-app grid items-center gap-8 md:grid-cols-2">
           <div>
-            <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-              {isAr ? "زُرنا" : "Visit us"}
-            </div>
+            <JazanSectionLabel>{isAr ? "زُرنا" : "Visit us"}</JazanSectionLabel>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
               {isAr ? "في قلب صبيا" : "In the heart of Sabya"}
             </h2>
@@ -648,7 +646,7 @@ function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="glass-fut aspect-video overflow-hidden !p-0">
+          <div className="glass-fut aspect-video overflow-hidden !p-0 ring-1 ring-[var(--jazan-gold,#C7A46B)]/30">
             <iframe
               title="map"
               className="h-full w-full opacity-90"
