@@ -102,10 +102,14 @@ function SettingsPage() {
   type TestResult = { ok: boolean; msg: string; at: number };
   const [testing, setTesting] = useState<keyof Prefs | null>(null);
   const [results, setResults] = useState<Partial<Record<keyof Prefs, TestResult>>>({});
+  const [userEmail, setUserEmail] = useState<string>("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? ""));
+  }, []);
   const contact = {
-    email: p?.email ?? "",
-    sms: p?.phone_e164 ?? p?.phone ?? "",
-    whatsapp: p?.whatsapp_e164 ?? p?.phone_e164 ?? p?.phone ?? "",
+    email: userEmail,
+    sms: p?.phone ?? "",
+    whatsapp: p?.phone ?? "",
   };
   const sendTest = async (k: keyof Prefs) => {
     setTesting(k);
