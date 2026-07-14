@@ -210,19 +210,46 @@ export function NotificationBell() {
                           {n.body}
                         </div>
                       )}
-                      <div className="flex items-center justify-between mt-1">
+                      <div className="flex items-center justify-between mt-1 gap-2">
                         <span className="text-[11px] text-muted-foreground">
                           {formatWhen(n.created_at)}
                         </span>
-                        {n.appointment_id && (
-                          <Link
-                            to="/my"
-                            onClick={() => setOpen(false)}
-                            className="text-[11px] text-primary hover:underline"
-                          >
-                            عرض
-                          </Link>
-                        )}
+                        <div className="flex items-center gap-2">
+                          {(() => {
+                            const meta = (n.metadata ?? {}) as Record<string, unknown>;
+                            const hasReceipt =
+                              (n.kind === "refund_processed" || n.kind === "refund_canceled") &&
+                              meta.has_receipt === true &&
+                              typeof meta.refund_id === "string";
+                            if (!hasReceipt) return null;
+                            const refundId = meta.refund_id as string;
+                            const ref = typeof meta.receipt_reference === "string" ? meta.receipt_reference : null;
+                            return (
+                              <Link
+                                to="/portal/refunds"
+                                search={{ receipt: refundId } as never}
+                                onClick={() => {
+                                  setOpen(false);
+                                  if (!n.read_at) onMarkOne(n.id);
+                                }}
+                                className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] font-semibold text-primary hover:bg-primary/5"
+                                title={ref ? `تنزيل الإيصال ${ref}` : "تنزيل إيصال PDF"}
+                              >
+                                <Download className="h-3 w-3" />
+                                تنزيل الإيصال (PDF)
+                              </Link>
+                            );
+                          })()}
+                          {n.appointment_id && (
+                            <Link
+                              to="/my"
+                              onClick={() => setOpen(false)}
+                              className="text-[11px] text-primary hover:underline"
+                            >
+                              عرض
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     </div>
                     {isUnread && (
