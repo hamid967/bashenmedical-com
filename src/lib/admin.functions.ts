@@ -120,7 +120,7 @@ import { reasonSchema } from "./reason";
 
 export const updateAppointmentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         id: z.string().uuid(),
@@ -211,7 +211,7 @@ export const updateAppointmentStatus = createServerFn({ method: "POST" })
 
 export const updateAppointmentNotes = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         id: z.string().uuid(),
@@ -237,7 +237,7 @@ export const updateAppointmentNotes = createServerFn({ method: "POST" })
 
 export const listAppointmentAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ appointmentId: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ appointmentId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin", "reception"]);
@@ -280,7 +280,7 @@ export const listOrders = createServerFn({ method: "GET" })
 
 export const updateOrderStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         id: z.string().uuid(),
@@ -314,7 +314,7 @@ export const listDoctorsAdmin = createServerFn({ method: "GET" })
 
 export const toggleDoctorActive = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -361,7 +361,7 @@ export const listSpecialtiesAdmin = createServerFn({ method: "GET" })
 
 export const createDoctor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => doctorInput.parse(d))
+  .validator((d) => doctorInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -377,7 +377,7 @@ export const createDoctor = createServerFn({ method: "POST" })
 
 export const updateDoctor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).and(doctorInput.partial()).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).and(doctorInput.partial()).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -391,7 +391,7 @@ export const updateDoctor = createServerFn({ method: "POST" })
 
 export const deleteDoctor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -431,7 +431,7 @@ export const listSpecialtiesFull = createServerFn({ method: "GET" })
 
 export const createSpecialty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => specialtyInput.parse(d))
+  .validator((d) => specialtyInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -446,7 +446,7 @@ export const createSpecialty = createServerFn({ method: "POST" })
 
 export const updateSpecialty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).and(specialtyInput.partial()).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).and(specialtyInput.partial()).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -461,7 +461,7 @@ export const updateSpecialty = createServerFn({ method: "POST" })
 
 export const deleteSpecialty = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -482,7 +482,7 @@ const availabilityInput = z.object({
 
 export const listAvailability = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ doctor_id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ doctor_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin", "reception"]);
@@ -498,7 +498,7 @@ export const listAvailability = createServerFn({ method: "GET" })
 
 export const createAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => availabilityInput.parse(d))
+  .validator((d) => availabilityInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -514,7 +514,7 @@ export const createAvailability = createServerFn({ method: "POST" })
 
 export const deleteAvailability = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -534,7 +534,7 @@ export const deleteAvailability = createServerFn({ method: "POST" })
  */
 export const listReminderPreferenceAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         appointmentId: z.string().uuid().optional(),
@@ -690,7 +690,7 @@ export const getReminderPreferenceStats = createServerFn({ method: "GET" })
  */
 export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         ref: z
@@ -834,7 +834,7 @@ const securityAuditFilterSchema = z.object({
 
 export const listSecurityAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((data: unknown) => securityAuditFilterSchema.parse(data ?? {}))
+  .validator((data: unknown) => securityAuditFilterSchema.parse(data ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
     const roles = await getRoles(supabase, userId);
@@ -966,7 +966,7 @@ export const listFaqsAdmin = createServerFn({ method: "GET" })
 
 export const createFaq = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => faqInput.parse(d))
+  .validator((d) => faqInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -981,7 +981,7 @@ export const createFaq = createServerFn({ method: "POST" })
 
 export const updateFaq = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).and(faqInput.partial()).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).and(faqInput.partial()).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -993,7 +993,7 @@ export const updateFaq = createServerFn({ method: "POST" })
 
 export const deleteFaq = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -1034,7 +1034,7 @@ export const listAboutSectionsAdmin = createServerFn({ method: "GET" })
 
 export const createAboutSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => aboutInput.parse(d))
+  .validator((d) => aboutInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -1049,7 +1049,7 @@ export const createAboutSection = createServerFn({ method: "POST" })
 
 export const updateAboutSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).and(aboutInput.partial()).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).and(aboutInput.partial()).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -1064,7 +1064,7 @@ export const updateAboutSection = createServerFn({ method: "POST" })
 
 export const deleteAboutSection = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -1127,7 +1127,7 @@ export const getClinicSettingsAdmin = createServerFn({ method: "GET" })
 
 export const updateClinicSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => UpdateClinicSettingsSchema.parse(d))
+  .validator((d: unknown) => UpdateClinicSettingsSchema.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -1185,7 +1185,7 @@ export const listBranchesAdmin = createServerFn({ method: "GET" })
 
 export const createBranch = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => branchInput.parse(d))
+  .validator((d) => branchInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
@@ -1222,7 +1222,7 @@ const appointmentAdminInput = z.object({
 
 export const createAppointmentAdmin = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => appointmentAdminInput.parse(d))
+  .validator((d) => appointmentAdminInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin", "reception"]);

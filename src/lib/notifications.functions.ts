@@ -48,7 +48,7 @@ const ListInput = z
 
 export const listOutboundNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListInput.parse(d))
+  .validator((d: unknown) => ListInput.parse(d))
   .handler(async ({ data, context }): Promise<OutboundNotification[]> => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -70,7 +70,7 @@ export const listOutboundNotifications = createServerFn({ method: "POST" })
 
 export const outboundNotificationStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z.object({ branchId: z.string().uuid().nullable().optional() }).default({}).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -103,7 +103,7 @@ export const outboundNotificationStats = createServerFn({ method: "POST" })
 
 export const setNotificationStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         id: z.string().uuid(),
@@ -174,7 +174,7 @@ const ListRemindersInput = z
 
 export const listReminderDeliveries = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListRemindersInput.parse(d))
+  .validator((d: unknown) => ListRemindersInput.parse(d))
   .handler(async ({ data, context }): Promise<ReminderDelivery[]> => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -247,7 +247,7 @@ export const listReminderDeliveries = createServerFn({ method: "POST" })
 
 export const retryReminderDelivery = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -274,7 +274,7 @@ export const retryReminderDelivery = createServerFn({ method: "POST" })
 
 export const retryReminderDeliveriesBulk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z.object({ ids: z.array(z.string().uuid()).min(1).max(200) }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -314,7 +314,7 @@ function csvEscape(v: unknown): string {
 
 export const exportReminderDeliveriesCsv = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListRemindersInput.parse(d))
+  .validator((d: unknown) => ListRemindersInput.parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -478,7 +478,7 @@ const DeliveryStatsInput = z
 
 export const getReminderDeliveryStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => DeliveryStatsInput.parse(d))
+  .validator((d: unknown) => DeliveryStatsInput.parse(d))
   .handler(async ({ data, context }): Promise<DeliveryStats> => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -574,7 +574,7 @@ const ListMyInput = z
 
 export const listMyNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => ListMyInput.parse(d))
+  .validator((d: unknown) => ListMyInput.parse(d))
   .handler(async ({ data, context }) => {
     const sb = context.supabase;
     const userId = context.userId;
@@ -623,7 +623,7 @@ export const countUnreadNotifications = createServerFn({ method: "GET" })
 
 export const markNotificationsRead = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d) =>
+  .validator((d) =>
     z
       .object({
         id: z.string().uuid().optional(),
