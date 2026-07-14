@@ -60,6 +60,8 @@ const profileQuery = queryOptions({
 
 const SearchSchema = z.object({
   forDependent: z.string().uuid().optional(),
+  doctorId: z.string().uuid().optional(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/portal/book")({
@@ -115,7 +117,7 @@ function toYMD(d: Date) {
 function BookPage() {
   const { data: options } = useSuspenseQuery(optionsQuery);
   const { data: profile } = useSuspenseQuery(profileQuery);
-  const { forDependent } = Route.useSearch();
+  const { forDependent, doctorId: initialDoctorId, date: initialDate } = Route.useSearch();
   const qc = useQueryClient();
 
   const dependentQ = useQuery({
@@ -126,10 +128,22 @@ function BookPage() {
   });
   const dependent = dependentQ.data ?? null;
 
-  const [branchId, setBranchId] = useState<string>(profile?.default_branch_id ?? "");
-  const [specialtyId, setSpecialtyId] = useState<string>("");
-  const [doctorId, setDoctorId] = useState<string>("");
-  const [date, setDate] = useState<Date | undefined>(undefined);
+  const initialDoctor = initialDoctorId
+    ? options.doctors.find((d) => d.id === initialDoctorId)
+    : undefined;
+
+  const [branchId, setBranchId] = useState<string>(
+    initialDoctor?.branch_id ?? profile?.default_branch_id ?? "",
+  );
+  const [specialtyId, setSpecialtyId] = useState<string>(
+    initialDoctor?.specialty_id ?? "",
+  );
+  const [doctorId, setDoctorId] = useState<string>(initialDoctor?.id ?? "");
+  const [date, setDate] = useState<Date | undefined>(() => {
+    if (!initialDate) return undefined;
+    const d = new Date(`${initialDate}T00:00:00`);
+    return isNaN(d.getTime()) ? undefined : d;
+  });
   const [slot, setSlot] = useState<string>("");
   const [slotId, setSlotId] = useState<string>("");
   const [reason, setReason] = useState("");
