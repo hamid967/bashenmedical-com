@@ -998,3 +998,121 @@ function CheckInSuccessDialog({
     </div>
   );
 }
+
+/* ------------------------------ TimelineDialog ---------------------------- */
+
+function fmtDateTime(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleString("ar-SA-u-nu-latn", {
+    year: "numeric", month: "short", day: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
+function stageLabel(status: string): string {
+  const map: Record<string, string> = {
+    new: "قيد المراجعة",
+    confirmed: "تم التأكيد",
+    checked_in: "تم تسجيل الحضور",
+    in_progress: "الكشف جارٍ",
+    completed: "اكتمل الكشف",
+    cancelled: "تم الإلغاء",
+    no_show: "لم يحضر",
+    held: "محجوز مؤقتًا",
+    pending_verification: "بانتظار التحقق",
+    pending_payment: "بانتظار الدفع",
+  };
+  return map[status] ?? status;
+}
+
+function TimelineDialog({
+  target, onClose,
+}: {
+  target: { id: string; doctor?: string | null; date: string; time: string };
+  onClose: () => void;
+}) {
+  const q = useQuery({
+    queryKey: ["portal", "appointment-timeline", target.id],
+    queryFn: () => getAppointmentTimeline({ data: { id: target.id } }),
+    staleTime: 15_000,
+  });
+
+  return (
+    <Modal onClose={onClose} title="سجل حالة الموعد">
+      <div className="text-xs text-[color:var(--portal-ink-2)] mb-3">
+        {target.doctor && <div><b>الطبيب:</b> {target.doctor}</div>}
+        <div><b>الموعد:</b> {fmtDate(target.date)} — {target.time}</div>
+      </div>
+
+      {q.isLoading && (
+        <div className="flex items-center justify-center py-8 text-[color:var(--portal-ink-3)]">
+          <Loader2 className="h-5 w-5 animate-spin" />
+        </div>
+      )}
+      {q.error && (
+        <div className="text-sm text-red-600 py-4">
+          تعذّر تحميل السجل. حاول مرة أخرى.
+        </div>
+      )}
+      {q.data && (
+        <ol className="relative border-r-2 border-[color:var(--portal-border)] pr-4 space-y-4 max-h-[60vh] overflow-y-auto">
+          {q.data.events.length === 0 && (
+            <li className="text-sm text-[color:var(--portal-ink-3)] py-3">
+              لا توجد أحداث مسجّلة بعد.
+            </li>
+          )}
+          {q.data.events.map((ev, i) => {
+            const isCurrent = i === q.data.events.length - 1;
+            const meta = statusMeta(ev.status as ApptStatus);
+            return (
+              <li key={ev.key} className="relative">
+                <span
+                  className={`absolute -right-[22px] top-1.5 grid place-items-center h-4 w-4 rounded-full border-2 ${
+                    isCurrent
+                      ? "bg-[color:var(--portal-primary)] border-[color:var(--portal-primary)]"
+                      : "bg-white border-[color:var(--portal-border)]"
+                  }`}
+                >
+                  {isCurrent && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                </span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}>
+                    {stageLabel(ev.status)}
+                  </span>
+                  {ev.queue_number != null && (
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200 font-semibold">
+                      رقم الدور: <span className="tabular-nums">{ev.queue_number}</span>
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 text-xs text-[color:var(--portal-ink-2)] tabular-nums">
+                  {fmtDateTime(ev.at)}
+                </div>
+                {ev.from && (
+                  <div className="mt-0.5 text-[11px] text-[color:var(--portal-ink-3)]">
+                    من: {stageLabel(ev.from)}
+                  </div>
+                )}
+                {ev.reason && (
+                  <div className="mt-1 text-xs text-[color:var(--portal-ink-2)] bg-slate-50 rounded p-2 border border-slate-100">
+                    {ev.reason}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      <div className="mt-5 flex justify-end">
+        <button
+          type="button"
+          onClick={onClose}
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold bg-[color:var(--portal-primary)] text-white hover:opacity-90"
+        >
+          إغلاق
+        </button>
+      </div>
+    </Modal>
+  );
+}
