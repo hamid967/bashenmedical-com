@@ -113,24 +113,45 @@ function SuperPermissionsPage() {
   const [importing, setImporting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const [detailKey, setDetailKey] = useState<string | null>(null);
-
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [roleFocus, setRoleFocus] = useState<AppRole | "all">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "enabled" | "disabled">("all");
 
   const enabledSet = useMemo(
     () => new Set(matrix.map((r) => `${r.role}::${r.permission_key}`)),
     [matrix],
   );
 
+  const categories = useMemo(
+    () => Array.from(new Set(catalog.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "ar")),
+    [catalog],
+  );
+
+  const visibleRoles = useMemo<AppRole[]>(
+    () => (roleFocus === "all" ? ALL_ROLES : [roleFocus]),
+    [roleFocus],
+  );
+
   const filtered = useMemo(() => {
     const q = filter.trim().toLowerCase();
-    if (!q) return catalog;
-    return catalog.filter(
-      (p) =>
-        p.key.toLowerCase().includes(q) ||
-        p.description_ar.toLowerCase().includes(q) ||
-        (p.description_en ?? "").toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q),
-    );
-  }, [catalog, filter]);
+    return catalog.filter((p) => {
+      if (categoryFilter !== "all" && p.category !== categoryFilter) return false;
+      if (q) {
+        const hit =
+          p.key.toLowerCase().includes(q) ||
+          p.description_ar.toLowerCase().includes(q) ||
+          (p.description_en ?? "").toLowerCase().includes(q) ||
+          p.category.toLowerCase().includes(q);
+        if (!hit) return false;
+      }
+      if (statusFilter !== "all" && roleFocus !== "all") {
+        const on = roleFocus === "super_admin" || enabledSet.has(`${roleFocus}::${p.key}`);
+        if (statusFilter === "enabled" && !on) return false;
+        if (statusFilter === "disabled" && on) return false;
+      }
+      return true;
+    });
+  }, [catalog, filter, categoryFilter, statusFilter, roleFocus, enabledSet]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, typeof filtered>();
@@ -141,6 +162,20 @@ function SuperPermissionsPage() {
     }
     return Array.from(map.entries()).sort((a, b) => a[0].localeCompare(b[0], "ar"));
   }, [filtered]);
+
+  const activeFilterCount =
+    (filter.trim() ? 1 : 0) +
+    (categoryFilter !== "all" ? 1 : 0) +
+    (roleFocus !== "all" ? 1 : 0) +
+    (statusFilter !== "all" ? 1 : 0);
+
+  function clearAllFilters() {
+    setFilter("");
+    setCategoryFilter("all");
+    setRoleFocus("all");
+    setStatusFilter("all");
+  }
+
 
   const mut = useMutation({
     mutationFn: async (v: { role: AppRole; permission_key: string; enabled: boolean }) => {
