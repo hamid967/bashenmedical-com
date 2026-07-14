@@ -489,7 +489,7 @@ function HomePage() {
                   <Link
                     to="/book"
                     search={{ specialty: s.slug }}
-                    className="glass-fut neon-glow-hover group block h-full p-5 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25 hover:ring-[var(--jazan-gold,#C7A46B)]/60 transition"
+                    className="glass-fut neon-glow-hover group block h-full p-5 jazan-hairline jazan-hairline-hover transition"
                   >
                     <JazanIconFrame size="sm">
                       <Stethoscope className="h-5 w-5" />
@@ -527,7 +527,7 @@ function HomePage() {
               const Icon = f.icon;
               const c = isAr ? f.ar : f.en;
               return (
-                <RevealItem key={i} className="glass-fut neon-glow-hover p-6 ring-1 ring-[var(--jazan-gold,#C7A46B)]/25 hover:ring-[var(--jazan-gold,#C7A46B)]/60 transition">
+                <RevealItem key={i} className="glass-fut neon-glow-hover p-6 jazan-hairline jazan-hairline-hover transition">
                   <JazanIconFrame>
                     <Icon className="h-5 w-5" />
                   </JazanIconFrame>
@@ -646,7 +646,7 @@ function HomePage() {
               </Link>
             </div>
           </div>
-          <div className="glass-fut aspect-video overflow-hidden !p-0 ring-1 ring-[var(--jazan-gold,#C7A46B)]/30">
+          <div className="glass-fut aspect-video overflow-hidden !p-0 jazan-hairline">
             <iframe
               title="map"
               className="h-full w-full opacity-90"
