@@ -43,6 +43,7 @@ const NAV: NavItem[] = [
   { to: "/portal/insurance", icon: ShieldCheck, label_ar: "التأمين", label_en: "Insurance" },
   { to: "/portal/invoices", icon: ReceiptText, label_ar: "الفواتير", label_en: "Invoices" },
   { to: "/portal/payments", icon: CreditCard, label_ar: "المدفوعات", label_en: "Payments" },
+  { to: "/portal/refunds", icon: RotateCcw, label_ar: "طلبات الاسترداد", label_en: "Refunds" },
   { to: "/portal/notifications", icon: Bell, label_ar: "الإشعارات", label_en: "Notifications" },
   { to: "/portal/complaints", icon: MessageSquareWarning, label_ar: "الشكاوى والمقترحات", label_en: "Complaints" },
   { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
