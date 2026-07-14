@@ -215,10 +215,10 @@ function HomePage() {
             </div>
             <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-[1.1]">
               <span className="block text-[color:var(--fut-ink)]">
-                {isAr ? "رعاية طبية بذكاء" : "Care meets"}
+                {isAr ? "مجمع باعشن الطبي — رعاية استشارية" : "Baeshen Medical Complex — Specialist Care"}
               </span>
               <span className="block text-neon">
-                {isAr ? "الجيل القادم" : "next-gen intelligence"}
+                {isAr ? "في صبيا، جازان" : "in Sabya, Jazan"}
               </span>
             </h1>
             <p className="mt-5 text-base md:text-lg text-[color:var(--fut-ink-muted)] leading-8">

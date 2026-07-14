@@ -128,7 +128,7 @@ function SpecialtiesPage() {
                   params={{ slug: s.slug }}
                   className="inline-flex items-center rounded-lg bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground hover:opacity-95"
                 >
-                  {lang === "ar" ? "المزيد" : "Read more"}
+                  {lang === "ar" ? "تفاصيل التخصص" : "View specialty details"}
                 </Link>
                 <Link
                   to="/book"

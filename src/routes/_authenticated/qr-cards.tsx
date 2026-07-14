@@ -334,7 +334,7 @@ function BatchCardsTab() {
           <div class="clinic">${escapeHtml(CLINIC_NAME)}</div>
           <div class="name">${escapeHtml(p.full_name_ar)}</div>
           <div class="mrn">رقم الملف: ${escapeHtml(p.mrn)}</div>
-          <img src="${dataUrl}" alt="QR" />
+          <img src="${dataUrl}" alt="Patient appointment QR code" />
           <div class="hint">امسح لفتح ملف المريض</div>
           <div class="branch">${escapeHtml(p.branch_name_ar ?? CLINIC_NAME)}</div>
         </div>`,
@@ -616,7 +616,7 @@ function CardPreview({
         <div class="clinic">${CLINIC_NAME}</div>
         <h1>${escapeHtml(title)}</h1>
         ${subtitle ? `<div class="sub">${escapeHtml(subtitle)}</div>` : ""}
-        <img src="${dataUrl}" alt="QR" />
+        <img src="${dataUrl}" alt="Patient appointment QR code" />
         <div class="hint">${escapeHtml(hint)}</div>
         <div class="footer">${escapeHtml(footer)}</div>
       </div>
@@ -643,7 +643,7 @@ function CardPreview({
         {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
         <div className="mt-5 mx-auto w-56 h-56 bg-white rounded-xl p-3 shadow-inner grid place-items-center">
           {dataUrl ? (
-            <img src={dataUrl} alt="QR" className="w-full h-full" />
+            <img src={dataUrl} alt="Patient appointment QR code" className="w-full h-full" />
           ) : (
             <p className="text-xs text-muted-foreground">جارٍ توليد الرمز…</p>
           )}
