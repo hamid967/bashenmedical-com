@@ -944,7 +944,7 @@ function DeleteDialog({
                 </div>
               </div>
               <div className="text-foreground">
-                <span className="text-muted-foreground">{lang === "ar" ? "الفرد:" : "Member:"} </span>
+                <span className="text-muted-foreground">{T.member_label[lang]} </span>
                 <span className="font-semibold">{row?.full_name}</span>
               </div>
               <div className="text-muted-foreground">{T.del_body[lang]}</div>
