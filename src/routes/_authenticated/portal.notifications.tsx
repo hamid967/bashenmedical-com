@@ -24,6 +24,8 @@ import {
   ShieldCheck,
   Sparkles,
   Stethoscope,
+  MessageSquareWarning,
+
 } from "lucide-react";
 import {
   listMyNotifications,
@@ -62,6 +64,8 @@ type Filter = "all" | "unread";
 
 function iconForKind(kind: string) {
   const k = kind.toLowerCase();
+  if (k.includes("inquiry"))
+    return { Icon: MessageSquareWarning, cls: "bg-sky-50 text-sky-600 border-sky-100" };
   if (k.startsWith("reminder_") || k.includes("appointment"))
     return { Icon: CalendarDays, cls: "bg-teal-50 text-teal-600 border-teal-100" };
   if (k.includes("report") || k.includes("record"))
@@ -111,9 +115,18 @@ function fullDate(iso: string): string {
 }
 
 /** Deep-link into other portal areas from the notification metadata. */
-function actionFor(n: PatientNotification): { to: string; label: string } | null {
+type NotificationAction =
+  | { to: "/portal/inquiries"; label: string; search?: { ref?: string } }
+  | { to: string; label: string; search?: Record<string, string> };
+
+function actionFor(n: PatientNotification): NotificationAction | null {
   const meta = (n.metadata ?? {}) as Record<string, unknown>;
   const k = n.kind.toLowerCase();
+  if (k.includes("inquiry")) {
+    const rn = meta["request_number"];
+    const ref = typeof rn === "string" && rn ? rn : undefined;
+    return { to: "/portal/inquiries", label: "عرض الاستفسار", search: ref ? { ref } : undefined };
+  }
   if (n.appointment_id || k.includes("appointment") || k.startsWith("reminder_")) {
     return { to: "/portal/appointments", label: "عرض المواعيد" };
   }
@@ -355,6 +368,7 @@ function NotificationRow({
           {action ? (
             <Link
               to={action.to}
+              search={action.search as never}
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white"
               style={{ background: "var(--portal-gradient)" }}
             >
