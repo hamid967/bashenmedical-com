@@ -142,55 +142,129 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const html = `<!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"/>
 <title>إيصال استرداد ${r.receipt_reference ?? r.invoice_number ?? r.id.slice(0, 8)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=Noto+Kufi+Arabic:wght@600;700;800&display=swap">
 <style>
-  @page { size: A4; margin: 18mm; }
-  * { box-sizing: border-box; }
-  body { font-family: -apple-system, "SF Pro Text", "Segoe UI", Tahoma, Arial, sans-serif; color: #0f172a; margin: 0; padding: 24px; }
-  .hd { display:flex; justify-content:space-between; align-items:flex-end; border-bottom:2px solid #0f172a; padding-bottom:12px; margin-bottom:20px; }
-  .brand { font-size:20px; font-weight:800; letter-spacing:-.01em; }
-  .sub { font-size:11px; color:#64748b; margin-top:4px; }
-  .badge { display:inline-block; padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; background:#f1f5f9; color:#0f172a; }
-  .grid { width:100%; border-collapse:collapse; margin-top:16px; }
-  .grid td { padding:10px 12px; border-bottom:1px solid #e2e8f0; font-size:13px; vertical-align:top; }
-  .grid td.k { width:40%; color:#64748b; font-weight:600; }
-  .grid td.v { color:#0f172a; font-weight:600; }
-  .amount { margin-top:20px; padding:16px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; display:flex; justify-content:space-between; align-items:center; }
-  .amount .lbl { font-size:12px; color:#64748b; }
-  .amount .val { font-size:26px; font-weight:800; }
-  .ft { margin-top:28px; padding-top:12px; border-top:1px solid #e2e8f0; font-size:10.5px; color:#94a3b8; text-align:center; }
-  .note { margin-top:12px; padding:10px 12px; font-size:11.5px; color:#475569; background:#f8fafc; border-radius:8px; }
-  @media print { .noprint { display:none; } body { padding:0; } }
-  .actions { text-align:center; margin-bottom:20px; }
-  .btn { display:inline-block; padding:10px 20px; background:#0f172a; color:#fff; border-radius:999px; font-weight:700; text-decoration:none; font-size:13px; border:none; cursor:pointer; }
+  @page { size: A4; margin: 16mm 14mm; }
+  html, body { direction: rtl; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body {
+    font-family: "Noto Naskh Arabic", "SF Arabic", "Geeza Pro", "Segoe UI", Tahoma, Arial, sans-serif;
+    color: #0f172a;
+    margin: 0;
+    padding: 24px;
+    line-height: 1.85;
+    font-size: 13.5px;
+    text-align: right;
+    font-feature-settings: "kern", "liga", "calt";
+    unicode-bidi: plaintext;
+  }
+  h1, .brand, .badge, .amount .val, .grid td.k, .grid td.v {
+    font-family: "Noto Kufi Arabic", "Noto Naskh Arabic", "SF Arabic", "Segoe UI", Tahoma, sans-serif;
+  }
+  .num, .mono, .ref {
+    font-family: "SFMono-Regular", ui-monospace, Menlo, Consolas, monospace;
+    direction: ltr;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+    letter-spacing: 0;
+  }
+  .hd {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 22px;
+    gap: 16px; page-break-inside: avoid; break-inside: avoid;
+  }
+  .brand { font-size: 22px; font-weight: 800; letter-spacing: 0; line-height: 1.4; }
+  .sub { font-size: 11.5px; color: #64748b; margin-top: 4px; line-height: 1.6; }
+  .badge {
+    display: inline-block; padding: 6px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; background: #f1f5f9; color: #0f172a;
+    white-space: nowrap;
+  }
+  .grid { width: 100%; border-collapse: collapse; margin-top: 16px; table-layout: fixed; }
+  .grid tr { page-break-inside: avoid; break-inside: avoid; }
+  .grid td {
+    padding: 11px 14px; border-bottom: 1px solid #e2e8f0;
+    font-size: 13px; vertical-align: top; text-align: right;
+    word-break: break-word; overflow-wrap: anywhere; hyphens: auto;
+    line-height: 1.8;
+  }
+  .grid td.k { width: 38%; color: #64748b; font-weight: 600; white-space: normal; }
+  .grid td.v { color: #0f172a; font-weight: 600; }
+  .grid td.v .ref { display: inline-block; background: #f8fafc; padding: 2px 8px; border-radius: 6px; }
+  .amount {
+    margin-top: 22px; padding: 18px 20px; background: #f8fafc;
+    border: 1px solid #e2e8f0; border-radius: 14px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 20px; page-break-inside: avoid; break-inside: avoid;
+  }
+  .amount .lbl { font-size: 12px; color: #64748b; margin-bottom: 6px; }
+  .amount .val { font-size: 26px; font-weight: 800; line-height: 1.3; white-space: nowrap; }
+  .amount .side { text-align: left; }
+  .amount .side .val-sm { font-weight: 700; font-size: 15px; white-space: nowrap; }
+  .ft {
+    margin-top: 28px; padding-top: 12px; border-top: 1px solid #e2e8f0;
+    font-size: 10.5px; color: #94a3b8; text-align: center; line-height: 1.7;
+  }
+  .note {
+    margin-top: 14px; padding: 12px 14px; font-size: 12px; color: #475569;
+    background: #f8fafc; border-right: 3px solid #cbd5e1; border-radius: 8px;
+    line-height: 1.9; text-align: justify; text-justify: inter-word;
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .actions { text-align: center; margin-bottom: 20px; }
+  .btn {
+    display: inline-block; padding: 10px 22px; background: #0f172a; color: #fff;
+    border-radius: 999px; font-weight: 700; text-decoration: none;
+    font-size: 13px; border: none; cursor: pointer;
+    font-family: "Noto Kufi Arabic", "SF Arabic", sans-serif;
+  }
+  @media print {
+    .noprint { display: none !important; }
+    body { padding: 0; }
+    a { color: inherit; text-decoration: none; }
+  }
 </style></head>
 <body>
   <div class="actions noprint">
     <button class="btn" onclick="window.print()">طباعة / حفظ PDF</button>
   </div>
   <div class="hd">
-    <div>
+    <div style="min-width:0;flex:1">
       <div class="brand">إيصال طلب استرداد</div>
-      ${r.receipt_reference ? `<div class="sub" style="font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-weight:700;color:#0f172a;margin-top:2px">مرجع: ${r.receipt_reference}</div>` : ""}
-      <div class="sub">مستخرج بتاريخ ${fmtDateTime(new Date().toISOString())}</div>
+      ${r.receipt_reference ? `<div class="sub">المرجع: <span class="ref">${r.receipt_reference}</span></div>` : ""}
+      <div class="sub">مستخرج بتاريخ <span class="num">${fmtDateTime(new Date().toISOString())}</span></div>
     </div>
     <span class="badge">${meta.label}</span>
   </div>
   ${showHero ? `<div class="amount">
     <div>
       <div class="lbl">المبلغ المُسترد</div>
-      <div class="val">${fmtSAR(r.amount, r.currency)}</div>
+      <div class="val num">${fmtSAR(r.amount, r.currency)}</div>
     </div>
-    <div style="text-align:end">
+    <div class="side">
       <div class="lbl">من دفعة أصلية</div>
-      <div style="font-weight:700">${fmtSAR(r.payment_amount, r.currency)}</div>
+      <div class="val-sm num">${fmtSAR(r.payment_amount, r.currency)}</div>
     </div>
   </div>` : ""}
   ${rows.length ? `<table class="grid">
-    ${rows.map(([k, v]) => `<tr><td class="k">${k}</td><td class="v">${String(v).replace(/</g, "&lt;")}</td></tr>`).join("")}
+    ${rows.map(([k, v]) => {
+      const safe = String(v).replace(/</g, "&lt;");
+      const isNumeric = /^[\d\s.,+\-/:%#SARر\.س]+$/.test(safe.trim()) && safe.trim().length > 0;
+      const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(safe.trim());
+      const cls = looksRef ? "ref" : isNumeric ? "num" : "";
+      const inner = cls ? `<span class="${cls}">${safe}</span>` : safe;
+      return `<tr><td class="k">${k}</td><td class="v">${inner}</td></tr>`;
+    }).join("")}
   </table>` : ""}
   ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
   <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
-  <script>window.addEventListener('load', () => setTimeout(() => window.print(), 300));<\/script>
+  <script>
+    document.fonts && document.fonts.ready
+      ? document.fonts.ready.then(() => setTimeout(() => window.print(), 250))
+      : window.addEventListener('load', () => setTimeout(() => window.print(), 400));
+  <\/script>
 </body></html>`;
   const w = window.open("", "_blank", "width=820,height=900");
   if (!w) {
