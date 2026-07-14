@@ -993,9 +993,14 @@ function DeleteDialog({
           queryKey: ["portal", "dependent-appointments", row.id],
         });
       }
+      setConfirmCancel(false);
     },
-    onError: () => toast.error(T.del_cancel_error[lang]),
+    onError: () => {
+      toast.error(T.del_cancel_error[lang]);
+      setConfirmCancel(false);
+    },
   });
+
 
   const activeCount = countQ.data?.active ?? 0;
   const totalCount = countQ.data?.total ?? 0;
