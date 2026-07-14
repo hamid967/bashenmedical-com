@@ -336,6 +336,19 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
         <Badge tone="muted">واتساب: {HANDOFF_LABEL[i.whatsapp_handoff_status] ?? i.whatsapp_handoff_status}</Badge>
       </div>
 
+      <div className="mt-4 pt-3 border-t border-border">
+        <InquiryAttachments
+          inquiryId={i.id}
+          compact
+          disabled={i.internal_status === "cancelled" || i.internal_status === "completed"}
+          disabledReason={
+            i.internal_status === "cancelled" || i.internal_status === "completed"
+              ? "الطلب مغلق — لا يمكن إضافة مرفقات."
+              : undefined
+          }
+        />
+      </div>
+
       <div className="mt-3 text-[10px] text-muted-foreground">أُرسل في {created}</div>
     </li>
   );
