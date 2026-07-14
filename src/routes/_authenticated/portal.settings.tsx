@@ -201,11 +201,14 @@ function SettingsPage() {
         <section className="glass-card p-5 sm:p-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
           <Toggle icon={<Mail className="h-4 w-4" />} label="البريد الإلكتروني" desc="تذكيرات المواعيد وتحديثات التقارير"
-            value={prefs.email} busy={savingKey === "email"} onChange={(v) => savePref("email", v)} />
+            value={prefs.email} busy={savingKey === "email"} onChange={(v) => savePref("email", v)}
+            onTest={() => sendTest("email")} testing={testing === "email"} result={results.email} />
           <Toggle icon={<MessageSquare className="h-4 w-4" />} label="الرسائل النصية (SMS)" desc="تنبيهات فورية على جوالك"
-            value={prefs.sms} busy={savingKey === "sms"} onChange={(v) => savePref("sms", v)} />
+            value={prefs.sms} busy={savingKey === "sms"} onChange={(v) => savePref("sms", v)}
+            onTest={() => sendTest("sms")} testing={testing === "sms"} result={results.sms} />
           <Toggle icon={<Smartphone className="h-4 w-4" />} label="واتساب" desc="رسائل تأكيد وتذكير عبر واتساب"
-            value={prefs.whatsapp} busy={savingKey === "whatsapp"} onChange={(v) => savePref("whatsapp", v)} />
+            value={prefs.whatsapp} busy={savingKey === "whatsapp"} onChange={(v) => savePref("whatsapp", v)}
+            onTest={() => sendTest("whatsapp")} testing={testing === "whatsapp"} result={results.whatsapp} />
           <Toggle
             icon={<Bell className="h-4 w-4" />}
             label="إشعارات المتصفح (Push)"
@@ -220,8 +223,12 @@ function SettingsPage() {
             disabled={push.state === "unsupported" || push.state === "denied"}
             busy={push.busy || savingKey === "push"}
             onChange={onPushToggle}
+            onTest={() => sendTest("push")}
+            testing={testing === "push"}
+            result={results.push}
           />
         </section>
+
 
         <section className="glass-card p-5 sm:p-6 mt-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">التخصيص</h2>
