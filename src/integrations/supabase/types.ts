@@ -4270,7 +4270,21 @@ export type Database = {
     }
     Enums: {
       allergy_severity: "mild" | "moderate" | "severe" | "life_threatening"
-      app_role: "admin" | "reception" | "pharmacy" | "super_admin" | "doctor"
+      app_role:
+        | "admin"
+        | "reception"
+        | "pharmacy"
+        | "super_admin"
+        | "doctor"
+        | "patient"
+        | "center_admin"
+        | "branch_manager"
+        | "reports_officer"
+        | "billing_officer"
+        | "insurance_officer"
+        | "support_agent"
+        | "content_manager"
+        | "auditor"
       appointment_status:
         | "new"
         | "confirmed"
@@ -4432,7 +4446,22 @@ export const Constants = {
   public: {
     Enums: {
       allergy_severity: ["mild", "moderate", "severe", "life_threatening"],
-      app_role: ["admin", "reception", "pharmacy", "super_admin", "doctor"],
+      app_role: [
+        "admin",
+        "reception",
+        "pharmacy",
+        "super_admin",
+        "doctor",
+        "patient",
+        "center_admin",
+        "branch_manager",
+        "reports_officer",
+        "billing_officer",
+        "insurance_officer",
+        "support_agent",
+        "content_manager",
+        "auditor",
+      ],
       appointment_status: [
         "new",
         "confirmed",
