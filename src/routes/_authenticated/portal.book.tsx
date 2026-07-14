@@ -2,9 +2,11 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { z } from "zod";
 import { getBookingOptions } from "@/lib/portal/booking.functions";
 import { listAvailableSlots, bookSlot } from "@/lib/slots.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
+import { getDependent } from "@/lib/portal/dependents.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
@@ -45,7 +47,12 @@ const profileQuery = queryOptions({
   staleTime: 60_000,
 });
 
+const SearchSchema = z.object({
+  forDependent: z.string().uuid().optional(),
+});
+
 export const Route = createFileRoute("/_authenticated/portal/book")({
+  validateSearch: (s) => SearchSchema.parse(s),
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(optionsQuery),
@@ -97,7 +104,16 @@ function toYMD(d: Date) {
 function BookPage() {
   const { data: options } = useSuspenseQuery(optionsQuery);
   const { data: profile } = useSuspenseQuery(profileQuery);
+  const { forDependent } = Route.useSearch();
   const qc = useQueryClient();
+
+  const dependentQ = useQuery({
+    queryKey: ["portal", "dependent", forDependent],
+    queryFn: () => getDependent({ data: { id: forDependent! } }),
+    enabled: !!forDependent,
+    staleTime: 60_000,
+  });
+  const dependent = dependentQ.data ?? null;
 
   const [branchId, setBranchId] = useState<string>(profile?.default_branch_id ?? "");
   const [specialtyId, setSpecialtyId] = useState<string>("");
@@ -108,11 +124,23 @@ function BookPage() {
   const [reason, setReason] = useState("");
   const [patientName, setPatientName] = useState(profile?.full_name ?? "");
   const [patientPhone, setPatientPhone] = useState(profile?.phone ?? "");
+  const [patientNationalId, setPatientNationalId] = useState<string>("");
+  const [patientGender, setPatientGender] = useState<"" | "male" | "female">("");
   const [confirmed, setConfirmed] = useState<null | {
     id: string;
     date: string;
     time: string;
   }>(null);
+
+  // When a dependent is selected via query param, prefill the patient fields
+  // with their info (and keep them in sync if the dependent switches).
+  useEffect(() => {
+    if (!dependent) return;
+    setPatientName(dependent.full_name);
+    setPatientPhone(dependent.phone ?? profile?.phone ?? "");
+    setPatientNationalId(dependent.national_id ?? "");
+    setPatientGender((dependent.gender as "" | "male" | "female") ?? "");
+  }, [dependent, profile?.phone]);
 
   const doctors = useMemo(() => {
     return options.doctors.filter((d) => {
@@ -192,6 +220,9 @@ function BookPage() {
       patientName: string;
       patientPhone: string;
       reason?: string;
+      nationalId?: string | null;
+      gender?: "male" | "female" | null;
+      dependentId?: string | null;
     }) =>
       bookSlot({
         data: {
@@ -199,7 +230,12 @@ function BookPage() {
           patientName: payload.patientName,
           patientPhone: payload.patientPhone,
           reason: payload.reason,
-          patientId: profile?.id ?? undefined,
+          nationalId: payload.nationalId ?? null,
+          gender: payload.gender ?? null,
+          notes: payload.dependentId ? `dependent:${payload.dependentId}` : null,
+          // Only link to the guardian's own patient record when NOT booking
+          // for a dependent — the dependent may not have a patient record yet.
+          patientId: payload.dependentId ? undefined : profile?.id ?? undefined,
         },
       }),
     onSuccess: (res) => {
@@ -228,6 +264,9 @@ function BookPage() {
       patientName: patientName.trim(),
       patientPhone: patientPhone.trim(),
       reason: reason.trim() || undefined,
+      nationalId: patientNationalId.trim() || null,
+      gender: patientGender || null,
+      dependentId: dependent?.id ?? null,
     });
   }
 
@@ -294,6 +333,31 @@ function BookPage() {
           العودة
         </Link>
       </header>
+
+      {dependent && (
+        <div
+          className="rounded-2xl border border-[color:var(--portal-primary)]/25 bg-[color:var(--portal-primary)]/5 p-4 flex items-center justify-between gap-3 flex-wrap"
+          role="status"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <UserRound className="h-5 w-5 text-[color:var(--portal-primary)] shrink-0" />
+            <div className="min-w-0">
+              <div className="text-xs text-[color:var(--portal-ink-2)]">
+                هذا الحجز نيابةً عن أحد أفراد العائلة
+              </div>
+              <div className="font-semibold truncate">{dependent.full_name}</div>
+            </div>
+          </div>
+          <Link
+            to="/portal/book"
+            search={{}}
+            className="text-xs font-semibold text-[color:var(--portal-primary)] hover:underline"
+          >
+            إلغاء الربط
+          </Link>
+        </div>
+      )}
+
 
       {/* Filters */}
       <section className="glass-card p-4 md:p-6">

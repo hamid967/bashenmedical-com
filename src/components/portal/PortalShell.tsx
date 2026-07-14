@@ -33,6 +33,7 @@ const NAV: NavItem[] = [
   { to: "/portal/calendar", icon: CalendarClock, label_ar: "تقويمي (طبيب)", label_en: "My Calendar (Doctor)" },
   { to: "/portal/book", icon: CalendarPlus, label_ar: "حجز موعد", label_en: "Book Appointment" },
   { to: "/portal/doctors", icon: Users, label_ar: "أطبائي", label_en: "My Doctors" },
+  { to: "/portal/family", icon: Users, label_ar: "أفراد العائلة", label_en: "Family" },
   { to: "/portal/records", icon: FileText, label_ar: "السجل الطبي", label_en: "Medical Records" },
   { to: "/portal/laboratory", icon: FlaskConical, label_ar: "نتائج المختبر", label_en: "Laboratory" },
   { to: "/portal/radiology", icon: ScanLine, label_ar: "الأشعة", label_en: "Radiology" },
