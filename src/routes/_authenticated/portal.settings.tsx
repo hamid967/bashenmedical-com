@@ -48,7 +48,6 @@ function SettingsPage() {
   };
   const [prefs, setPrefs] = useState<Prefs>(initial);
   const [lang, setLang] = useState<"ar" | "en">((p?.preferred_language as "ar" | "en") ?? "ar");
-  const [dark, setDark] = useState<boolean>(!!p?.dark_mode);
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
