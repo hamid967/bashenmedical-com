@@ -1074,10 +1074,9 @@ function DeleteDialog({
                     disabled={busy}
                     onClick={() => {
                       if (!row || busy) return;
-                      if (window.confirm(T.del_cancel_confirm[lang])) {
-                        cancelMut.mutate(row.id);
-                      }
+                      setConfirmCancel(true);
                     }}
+
                     className="inline-flex items-center gap-2 rounded-md border border-red-300 dark:border-red-800 bg-white/70 dark:bg-red-950/40 px-3 h-9 text-xs font-semibold text-red-800 dark:text-red-100 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {cancelMut.isPending ? (
