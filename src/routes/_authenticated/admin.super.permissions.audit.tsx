@@ -54,7 +54,7 @@ export const Route = createFileRoute("/_authenticated/admin/super/permissions/au
     ],
   }),
   component: () => (
-    <RequirePermission permission="rbac.manage">
+    <RequirePermission anyOf="rbac.manage">
       <AuditPage />
     </RequirePermission>
   ),
