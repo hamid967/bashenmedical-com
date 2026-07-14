@@ -52,9 +52,49 @@ function SettingsPage() {
   const [dirty, setDirty] = useState(false);
   useEffect(() => setDirty(false), [p?.id]);
 
-  const setP = <K extends keyof Prefs>(k: K, v: boolean) => {
-    setPrefs((s) => ({ ...s, [k]: v }));
-    setDirty(true);
+  const push = usePushNotifications(true);
+
+  // Auto-save one preference and roll back on failure.
+  const [savingKey, setSavingKey] = useState<keyof Prefs | null>(null);
+  const CHANNEL_LABEL: Record<keyof Prefs, string> = {
+    email: "البريد الإلكتروني",
+    sms: "الرسائل النصية",
+    whatsapp: "واتساب",
+    push: "إشعارات المتصفح",
+  };
+  const savePref = async (k: keyof Prefs, v: boolean) => {
+    const prev = prefs;
+    const next = { ...prev, [k]: v };
+    setPrefs(next);
+    setSavingKey(k);
+    try {
+      await updateMyProfile({ data: { notification_prefs: next } });
+      qc.invalidateQueries({ queryKey: ["portal", "my-profile-full"] });
+      qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
+      toast.success(v ? `تم تفعيل ${CHANNEL_LABEL[k]}` : `تم إيقاف ${CHANNEL_LABEL[k]}`);
+    } catch (e) {
+      setPrefs(prev);
+      toast.error(e instanceof Error ? e.message : "تعذّر حفظ التفضيل");
+    } finally {
+      setSavingKey(null);
+    }
+  };
+
+  const onPushToggle = async (v: boolean) => {
+    // Real browser activation: request permission and register/remove subscription
+    // before persisting the preference so a saved "on" always matches a live sub.
+    try {
+      if (v) {
+        await push.subscribe();
+        if (Notification.permission !== "granted") return; // subscribe already toasted
+      } else {
+        await push.unsubscribe();
+      }
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّر تحديث حالة الإشعارات");
+      return;
+    }
+    await savePref("push", v);
   };
 
   const mut = useMutation({
