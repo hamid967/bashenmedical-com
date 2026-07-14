@@ -8,7 +8,7 @@ export const getBookingOptions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase } = context;
-    const [branchesRes, specialtiesRes, doctorsRes] = await Promise.all([
+    const [branchesRes, specialtiesRes, doctorsRes, providersRes] = await Promise.all([
       supabase
         .from("branches")
         .select("id, name_ar, name_en, city_ar, city_en, slug")
@@ -26,16 +26,24 @@ export const getBookingOptions = createServerFn({ method: "GET" })
         .eq("is_active", true)
         .eq("booking_enabled", true)
         .order("sort_order", { ascending: true }),
+      supabase
+        .from("insurance_providers")
+        .select("id, name_ar, name_en, coverage_percent, coverage_tier")
+        .eq("active", true)
+        .order("sort_order", { ascending: true }),
     ]);
     if (branchesRes.error) throw new Error(branchesRes.error.message);
     if (specialtiesRes.error) throw new Error(specialtiesRes.error.message);
     if (doctorsRes.error) throw new Error(doctorsRes.error.message);
+    if (providersRes.error) throw new Error(providersRes.error.message);
     return {
       branches: branchesRes.data ?? [],
       specialties: specialtiesRes.data ?? [],
       doctors: doctorsRes.data ?? [],
+      providers: providersRes.data ?? [],
     };
   });
+
 
 /* --------------------------- getDoctorAvailability ------------------------ */
 
