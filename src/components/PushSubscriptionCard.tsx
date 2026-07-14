@@ -89,7 +89,124 @@ export function PushSubscriptionCard() {
     url: "/portal/notifications",
     requireInteraction: false,
   });
+  const [swDiag, setSwDiag] = useState<SwDiag>(initialSwDiag);
+  const [swRefreshing, setSwRefreshing] = useState(false);
   const sendServer = useServerFn(sendTestPushToMe);
+
+  const inspectWorker = useCallback((w: ServiceWorker | null): SwWorkerInfo => {
+    if (!w) return null;
+    return { state: w.state, scriptURL: w.scriptURL };
+  }, []);
+
+  const readSwState = useCallback(
+    async (eventLabel?: string) => {
+      if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
+        setSwDiag((prev) => ({ ...initialSwDiag, lastEvent: prev.lastEvent }));
+        return;
+      }
+      try {
+        const reg = await navigator.serviceWorker.getRegistration("/sw-push.js");
+        if (!reg) {
+          setSwDiag({
+            ...initialSwDiag,
+            supported: true,
+            lastEvent: eventLabel ?? null,
+            lastUpdated: Date.now(),
+          });
+          return;
+        }
+        const script =
+          reg.active?.scriptURL ||
+          reg.waiting?.scriptURL ||
+          reg.installing?.scriptURL ||
+          null;
+        setSwDiag({
+          supported: true,
+          registered: true,
+          scope: reg.scope,
+          updateViaCache: reg.updateViaCache ?? null,
+          scriptURL: script,
+          active: inspectWorker(reg.active),
+          waiting: inspectWorker(reg.waiting),
+          installing: inspectWorker(reg.installing),
+          controller: inspectWorker(navigator.serviceWorker.controller),
+          lastUpdated: Date.now(),
+          lastEvent: eventLabel ?? null,
+          error: null,
+        });
+      } catch (e) {
+        setSwDiag((prev) => ({
+          ...prev,
+          supported: true,
+          error: e instanceof Error ? e.message : "خطأ غير معروف",
+          lastUpdated: Date.now(),
+          lastEvent: eventLabel ?? prev.lastEvent,
+        }));
+      }
+    },
+    [inspectWorker],
+  );
+
+  // Subscribe to SW lifecycle changes to keep the diagnostic panel live.
+  useEffect(() => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    let cancelled = false;
+    let cleanupFns: Array<() => void> = [];
+
+    void (async () => {
+      await readSwState("initial");
+      const reg = await navigator.serviceWorker.getRegistration("/sw-push.js");
+      if (cancelled || !reg) return;
+
+      const attach = (w: ServiceWorker | null, label: string) => {
+        if (!w) return;
+        const handler = () => void readSwState(`${label}:${w.state}`);
+        w.addEventListener("statechange", handler);
+        cleanupFns.push(() => w.removeEventListener("statechange", handler));
+      };
+      attach(reg.installing, "installing");
+      attach(reg.waiting, "waiting");
+      attach(reg.active, "active");
+
+      const onUpdate = () => {
+        void readSwState("updatefound");
+        attach(reg.installing, "installing");
+      };
+      reg.addEventListener("updatefound", onUpdate);
+      cleanupFns.push(() => reg.removeEventListener("updatefound", onUpdate));
+
+      const onController = () => void readSwState("controllerchange");
+      navigator.serviceWorker.addEventListener("controllerchange", onController);
+      cleanupFns.push(() =>
+        navigator.serviceWorker.removeEventListener("controllerchange", onController),
+      );
+    })();
+
+    return () => {
+      cancelled = true;
+      cleanupFns.forEach((fn) => fn());
+    };
+  }, [readSwState, push.subscribed]);
+
+  const forceSwUpdate = useCallback(async () => {
+    if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
+    setSwRefreshing(true);
+    try {
+      const reg = await navigator.serviceWorker.getRegistration("/sw-push.js");
+      if (!reg) {
+        toast.error("لا يوجد Service Worker مسجّل");
+        return;
+      }
+      await reg.update();
+      await readSwState("manual-update");
+      toast.success("تم فحص التحديثات");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "تعذّر التحديث");
+    } finally {
+      setSwRefreshing(false);
+    }
+  }, [readSwState]);
+
 
   // Refresh subscription details whenever the subscribed state changes.
   useEffect(() => {
