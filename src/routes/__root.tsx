@@ -20,6 +20,7 @@ const IntroOverlay = lazy(() =>
 );
 import { ChatbotBubble } from "@/components/ChatbotBubble";
 import { WhatsAppFab } from "@/components/WhatsAppFab";
+import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
 
 function NotFoundComponent() {
   return (
@@ -143,9 +144,6 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  useEffect(() => {
-    void import("@/pwa-register").then((m) => m.registerAppServiceWorker());
-  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
@@ -161,8 +159,10 @@ function RootComponent() {
           <Toaster position="top-center" richColors closeButton />
           <ChatbotBubble />
           <WhatsAppFab />
+          <PwaUpdatePrompt />
         </div>
       </I18nProvider>
     </QueryClientProvider>
   );
 }
+

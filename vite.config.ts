@@ -52,14 +52,19 @@ export default defineConfig({
     mcpPlugin(),
     VitePWA({
       strategies: "generateSW",
-      registerType: "autoUpdate",
+      // "prompt" tells vite-plugin-pwa to inject a SKIP_WAITING message
+      // listener into the generated SW so our in-app update prompt can
+      // activate the waiting worker on demand.
+      registerType: "prompt",
       injectRegister: null,
       manifest: false, // we ship /site.webmanifest manually
       filename: "sw.js",
       devOptions: { enabled: false },
       workbox: {
-        clientsClaim: true,
-        skipWaiting: true,
+        // The new SW waits until the user clicks "Update" (SKIP_WAITING message).
+        // This prevents mid-session reloads and enables the in-app update prompt.
+        clientsClaim: false,
+        skipWaiting: false,
         cleanupOutdatedCaches: true,
         navigateFallback: "/",
         navigateFallbackDenylist: [/^\/~oauth/, /^\/api\//, /^\/sw-push\.js$/, /^\/sw\.js$/],
