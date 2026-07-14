@@ -268,10 +268,21 @@ function BookPage() {
           patientId: payload.dependentId ? undefined : profile?.id ?? undefined,
         },
       }),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       toast.success("تم تأكيد الحجز بنجاح");
       setConfirmed({ id: res.appointmentId, date: dateStr, time: slot });
+      // Link the last insurance eligibility check to the created appointment.
+      if (verify?.id) {
+        try {
+          await attachVerificationToAppointment({
+            data: { verification_id: verify.id, appointment_id: res.appointmentId },
+          });
+        } catch (e) {
+          console.warn("[book] attach verification failed:", (e as Error).message);
+        }
+      }
       qc.invalidateQueries({ queryKey: ["portal", "dashboard-summary"] });
+      qc.invalidateQueries({ queryKey: ["portal", "insurance-verify-history"] });
       qc.invalidateQueries({
         queryKey: ["portal", "booking", "avail-slots", doctorId, dateStr, branchId],
       });
