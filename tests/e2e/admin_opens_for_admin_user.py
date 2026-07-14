@@ -1,52 +1,88 @@
 """
 E2E: /admin يفتح مباشرة (بدون redirect) لمستخدم يملك دور admin
 
-يستعيد جلسة Supabase المُحقنة، يتأكد أن المستخدم يملك دور admin عبر
-RPC has_role، ثم يفتح /admin كـ deep link ويتحقّق:
+مصدر الجلسة (بالترتيب):
+  1) إذا وُجدت E2E_ADMIN_EMAIL + E2E_ADMIN_PASSWORD (متغيرات CI ثابتة)
+     → تسجيل دخول مباشر عبر Supabase Auth REST
+     (`/auth/v1/token?grant_type=password`) وبناء جلسة كاملة.
+     هذا هو المسار الرسمي لـ CI وتشغيل هذا الاختبار بدون skip.
+  2) وإلا: الاعتماد على الجلسة المُحقنة `LOVABLE_BROWSER_SUPABASE_*`.
+  3) إن لم يتوفّر أيّ منهما — أو كان المستخدم بلا دور admin — يُخطَّى الاختبار.
+
+ثم يفتح /admin كـ deep link ويتحقّق:
   1) الصفحة النهائية ما زالت على "/admin".
   2) عنصر AdminShell (.admin-console) ظاهر.
   3) لا رسالة "لا تملك صلاحية".
 
-إذا لم يكن المستخدم الحالي أدمن، يُخطَّى الاختبار برسالة واضحة (لأننا
-لا نستطيع منح دور admin من العميل — RLS تمنع ذلك). في بيئة CI يجب تزويد
-جلسة لمستخدم أدمن للحصول على تغطية إيجابية فعلية.
+تجهيز CI لتفعيل الاختبار كإيجابي دائم:
+  - أنشئ (أو استخدم) مستخدمًا مخصّصًا للاختبارات يملك دور admin في
+    جدول user_roles.
+  - أضِف في إعدادات CI (متغيرات بيئة الـ runner) السرّين:
+        E2E_ADMIN_EMAIL      = admin-e2e@example.com
+        E2E_ADMIN_PASSWORD   = <كلمة سر قوية>
+  - لا تُخزَّن هذه القيم داخل المستودع أو داخل .env مُلتزَم.
 
 Exit codes:
   0 = pass أو skipped
   1 = fail
 """
-import asyncio, os, sys, json, urllib.request
+import asyncio, os, sys, json, urllib.request, urllib.error
 from playwright.async_api import async_playwright
 
 BASE = os.environ.get("E2E_BASE_URL", "http://localhost:8080").rstrip("/")
 SUPA_URL = "https://rcerbsywuovcleqybumg.supabase.co"
 SUPA_KEY = "sb_publishable_jCNv8mbgtiQaIWkms_cHiA_9WUH_qEG"
+PROJECT_REF = "rcerbsywuovcleqybumg"
+DEFAULT_STORAGE_KEY = f"sb-{PROJECT_REF}-auth-token"
 
+# مصدر ثابت لـ CI
+ADMIN_EMAIL = os.environ.get("E2E_ADMIN_EMAIL", "").strip()
+ADMIN_PASSWORD = os.environ.get("E2E_ADMIN_PASSWORD", "").strip()
+
+# fallback: الجلسة المُحقنة داخل السَّندبوكس
 AUTH_STATUS = os.environ.get("LOVABLE_BROWSER_AUTH_STATUS", "")
-SESSION_JSON = os.environ.get("LOVABLE_BROWSER_SUPABASE_SESSION_JSON", "")
-STORAGE_KEY = os.environ.get("LOVABLE_BROWSER_SUPABASE_STORAGE_KEY", "")
-COOKIES_JSON = os.environ.get("LOVABLE_BROWSER_SUPABASE_COOKIES_JSON", "")
-ACCESS_TOKEN = os.environ.get("LOVABLE_BROWSER_SUPABASE_ACCESS_TOKEN", "")
+INJECTED_SESSION_JSON = os.environ.get("LOVABLE_BROWSER_SUPABASE_SESSION_JSON", "")
+INJECTED_STORAGE_KEY = os.environ.get("LOVABLE_BROWSER_SUPABASE_STORAGE_KEY", "")
+INJECTED_COOKIES_JSON = os.environ.get("LOVABLE_BROWSER_SUPABASE_COOKIES_JSON", "")
+INJECTED_ACCESS_TOKEN = os.environ.get("LOVABLE_BROWSER_SUPABASE_ACCESS_TOKEN", "")
 
 
-def user_id_from_session() -> str | None:
-    if not SESSION_JSON:
-        return None
+def password_sign_in(email: str, password: str) -> dict:
+    """يعيد كائن session بصيغة متوافقة مع Supabase JS (localStorage)."""
+    req = urllib.request.Request(
+        f"{SUPA_URL}/auth/v1/token?grant_type=password",
+        data=json.dumps({"email": email, "password": password}).encode(),
+        headers={
+            "apikey": SUPA_KEY,
+            "Content-Type": "application/json",
+        },
+        method="POST",
+    )
     try:
-        return json.loads(SESSION_JSON).get("user", {}).get("id")
-    except Exception:
-        return None
+        raw = urllib.request.urlopen(req).read()
+    except urllib.error.HTTPError as e:
+        body = e.read().decode(errors="ignore")
+        raise RuntimeError(
+            f"فشل تسجيل الدخول لـ E2E_ADMIN_EMAIL={email!r}: HTTP {e.code} — {body}"
+        ) from e
+    data = json.loads(raw)
+    return {
+        "access_token": data["access_token"],
+        "refresh_token": data["refresh_token"],
+        "expires_in": data.get("expires_in", 3600),
+        "expires_at": data.get("expires_at"),
+        "token_type": data.get("token_type", "bearer"),
+        "user": data["user"],
+    }
 
 
-def has_admin_role(uid: str) -> bool:
-    if not ACCESS_TOKEN:
-        return False
+def has_admin_role(uid: str, access_token: str) -> bool:
     req = urllib.request.Request(
         f"{SUPA_URL}/rest/v1/rpc/has_role",
         data=json.dumps({"_user_id": uid, "_role": "admin"}).encode(),
         headers={
             "apikey": SUPA_KEY,
-            "Authorization": f"Bearer {ACCESS_TOKEN}",
+            "Authorization": f"Bearer {access_token}",
             "Content-Type": "application/json",
         },
     )
@@ -57,44 +93,87 @@ def has_admin_role(uid: str) -> bool:
         return False
 
 
+def resolve_session() -> tuple[dict | None, str, str, list | None, str]:
+    """
+    → (session_dict, storage_key, access_token, cookies, source_label)
+    """
+    if ADMIN_EMAIL and ADMIN_PASSWORD:
+        session = password_sign_in(ADMIN_EMAIL, ADMIN_PASSWORD)
+        return session, DEFAULT_STORAGE_KEY, session["access_token"], None, "ci-password"
+
+    if AUTH_STATUS == "injected" and INJECTED_SESSION_JSON:
+        try:
+            session = json.loads(INJECTED_SESSION_JSON)
+        except Exception:
+            return None, "", "", None, "injected-broken"
+        cookies = None
+        if INJECTED_COOKIES_JSON:
+            try:
+                cookies = json.loads(INJECTED_COOKIES_JSON)
+            except Exception:
+                cookies = None
+        return (
+            session,
+            INJECTED_STORAGE_KEY or DEFAULT_STORAGE_KEY,
+            INJECTED_ACCESS_TOKEN or session.get("access_token", ""),
+            cookies,
+            "injected",
+        )
+
+    return None, "", "", None, "none"
+
+
 async def main() -> int:
-    if AUTH_STATUS != "injected":
-        print(f"[skip] LOVABLE_BROWSER_AUTH_STATUS={AUTH_STATUS!r} — لا توجد جلسة.")
-        return 0
-    uid = user_id_from_session()
-    if not uid:
-        print("[skip] لا يمكن قراءة user_id من الجلسة.")
-        return 0
-    if not has_admin_role(uid):
+    session, storage_key, access_token, cookies, source = resolve_session()
+    if session is None:
         print(
-            f"[skip] المستخدم {uid} لا يملك دور admin — هذا اختبار إيجابي "
-            "ويتطلب جلسة أدمن. زوّد CI بجلسة مستخدم أدمن لتفعيله."
+            "[skip] لا توجد جلسة. زوّد E2E_ADMIN_EMAIL و E2E_ADMIN_PASSWORD "
+            "في متغيرات بيئة CI لتفعيل الاختبار كإيجابي دائم."
         )
         return 0
+
+    uid = session.get("user", {}).get("id")
+    if not uid:
+        print("[skip] الجلسة لا تحوي user.id.")
+        return 0
+
+    if not has_admin_role(uid, access_token):
+        if source == "ci-password":
+            print(
+                f"[fail] المستخدم {ADMIN_EMAIL!r} لا يملك دور admin في جدول user_roles. "
+                "أضِف الدور قبل تشغيل الاختبار في CI."
+            )
+            return 1
+        print(
+            f"[skip] الجلسة المُحقنة لمستخدم {uid} بلا دور admin. "
+            "استخدم E2E_ADMIN_EMAIL/PASSWORD لجلسة أدمن ثابتة في CI."
+        )
+        return 0
+
+    print(f"[info] source={source} user_id={uid} storage_key={storage_key}")
 
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
         ctx = await browser.new_context(viewport={"width": 1280, "height": 1800})
 
-        if COOKIES_JSON:
-            cookies = json.loads(COOKIES_JSON)
+        # كوكيز @supabase/ssr — تُستخدم فقط للجلسة المُحقنة
+        if cookies:
             for c in cookies:
                 c["url"] = BASE
             await ctx.add_cookies(cookies)
 
         page = await ctx.new_page()
         await page.goto(BASE, wait_until="domcontentloaded")
-        if STORAGE_KEY and SESSION_JSON:
-            await page.evaluate(
-                f"window.localStorage.setItem({json.dumps(STORAGE_KEY)}, {json.dumps(SESSION_JSON)})"
-            )
+
+        # اكتب الجلسة في localStorage (المسار الذي يقرأه Supabase JS)
+        await page.evaluate(
+            f"window.localStorage.setItem({json.dumps(storage_key)}, {json.dumps(json.dumps(session))})"
+        )
 
         # deep link مباشر لـ /admin
         await page.goto(f"{BASE}/admin", wait_until="domcontentloaded")
-
-        # انتظار تحميل AdminShell (حتى 10s) — قد يحتاج vqن load بعد ensureQueryData
         try:
-            await page.wait_for_selector(".admin-console", timeout=10_000)
+            await page.wait_for_selector(".admin-console", timeout=15_000)
         except Exception:
             pass
 
@@ -121,7 +200,7 @@ async def main() -> int:
                 print(f"[fail] {e}")
             return 1
 
-        print(f"[ok] /admin فُتحت مباشرة على {final_path} لأدمن بدون توجيه.")
+        print(f"[ok] /admin فُتحت مباشرة على {final_path} لأدمن بدون توجيه (source={source}).")
         return 0
 
 
