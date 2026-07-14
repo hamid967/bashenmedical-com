@@ -6,8 +6,8 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@ta
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle, ArrowLeft, Bell, Globe, Loader2, Mail, MessageSquare, Moon,
-  RefreshCw, Save, Settings as SettingsIcon, ShieldCheck, Smartphone, Sun,
+  AlertTriangle, ArrowLeft, Bell, CheckCircle2, Globe, Loader2, Mail, MessageSquare, Moon,
+  RefreshCw, Save, Send, Settings as SettingsIcon, ShieldCheck, Smartphone, Sun, XCircle,
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,6 +97,57 @@ function SettingsPage() {
     await savePref("push", v);
   };
 
+  // Test-send per channel (mock delivery to demo data). Push uses the real
+  // browser Notification API when a subscription is active.
+  // browser Notification API when a subscription is active.
+  const [testing, setTesting] = useState<keyof Prefs | null>(null);
+  const [results, setResults] = useState<Partial<Record<keyof Prefs, TestResult>>>({});
+  const [userEmail, setUserEmail] = useState<string>("");
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setUserEmail(data.user?.email ?? ""));
+  }, []);
+  const contact = {
+    email: userEmail,
+    sms: p?.phone ?? "",
+    whatsapp: p?.phone ?? "",
+  };
+  const sendTest = async (k: keyof Prefs) => {
+    setTesting(k);
+    try {
+      if (!prefs[k]) throw new Error(`القناة موقوفة — فعّلها أولاً`);
+      if (k === "push") {
+        if (push.state !== "granted" || !push.subscribed) {
+          throw new Error("فعّل إشعارات المتصفح أولاً");
+        }
+        if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+          new Notification("إشعار اختبار — مستشفى باشن", {
+            body: "هذه رسالة تجريبية للتأكد من عمل الإشعارات.",
+            icon: "/favicon.ico",
+          });
+        }
+        setResults((r) => ({ ...r, push: { ok: true, msg: "تم عرض إشعار متصفح تجريبي", at: Date.now() } }));
+        toast.success("تم إرسال إشعار الاختبار");
+        return;
+      }
+      const target = contact[k as "email" | "sms" | "whatsapp"];
+      if (!target) throw new Error("لا توجد بيانات تواصل محفوظة لهذه القناة");
+      // Simulated dispatch to demo data (no external provider wired yet).
+      await new Promise((res) => setTimeout(res, 700));
+      const msg =
+        k === "email" ? `تم إرسال بريد اختبار إلى ${target}` :
+        k === "sms" ? `تم إرسال SMS تجريبي إلى ${target}` :
+        `تم إرسال رسالة واتساب تجريبية إلى ${target}`;
+      setResults((r) => ({ ...r, [k]: { ok: true, msg, at: Date.now() } }));
+      toast.success(msg);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذّر إرسال إشعار الاختبار";
+      setResults((r) => ({ ...r, [k]: { ok: false, msg, at: Date.now() } }));
+      toast.error(msg);
+    } finally {
+      setTesting(null);
+    }
+  };
+
   const mut = useMutation({
     mutationFn: () =>
       updateMyProfile({
@@ -150,11 +201,14 @@ function SettingsPage() {
         <section className="glass-card p-5 sm:p-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">قنوات الإشعارات</h2>
           <Toggle icon={<Mail className="h-4 w-4" />} label="البريد الإلكتروني" desc="تذكيرات المواعيد وتحديثات التقارير"
-            value={prefs.email} busy={savingKey === "email"} onChange={(v) => savePref("email", v)} />
+            value={prefs.email} busy={savingKey === "email"} onChange={(v) => savePref("email", v)}
+            onTest={() => sendTest("email")} testing={testing === "email"} result={results.email} />
           <Toggle icon={<MessageSquare className="h-4 w-4" />} label="الرسائل النصية (SMS)" desc="تنبيهات فورية على جوالك"
-            value={prefs.sms} busy={savingKey === "sms"} onChange={(v) => savePref("sms", v)} />
+            value={prefs.sms} busy={savingKey === "sms"} onChange={(v) => savePref("sms", v)}
+            onTest={() => sendTest("sms")} testing={testing === "sms"} result={results.sms} />
           <Toggle icon={<Smartphone className="h-4 w-4" />} label="واتساب" desc="رسائل تأكيد وتذكير عبر واتساب"
-            value={prefs.whatsapp} busy={savingKey === "whatsapp"} onChange={(v) => savePref("whatsapp", v)} />
+            value={prefs.whatsapp} busy={savingKey === "whatsapp"} onChange={(v) => savePref("whatsapp", v)}
+            onTest={() => sendTest("whatsapp")} testing={testing === "whatsapp"} result={results.whatsapp} />
           <Toggle
             icon={<Bell className="h-4 w-4" />}
             label="إشعارات المتصفح (Push)"
@@ -169,8 +223,12 @@ function SettingsPage() {
             disabled={push.state === "unsupported" || push.state === "denied"}
             busy={push.busy || savingKey === "push"}
             onChange={onPushToggle}
+            onTest={() => sendTest("push")}
+            testing={testing === "push"}
+            result={results.push}
           />
         </section>
+
 
         <section className="glass-card p-5 sm:p-6 mt-6 space-y-4">
           <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)]">التخصيص</h2>
@@ -235,8 +293,10 @@ function SettingsPage() {
   );
 }
 
+type TestResult = { ok: boolean; msg: string; at: number };
+
 function Toggle({
-  icon, label, desc, value, onChange, busy, disabled,
+  icon, label, desc, value, onChange, busy, disabled, onTest, testing, result,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -245,23 +305,53 @@ function Toggle({
   onChange: (v: boolean) => void;
   busy?: boolean;
   disabled?: boolean;
+  onTest?: () => void;
+  testing?: boolean;
+  result?: TestResult;
 }) {
   return (
-    <div className={`flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 ${disabled ? "opacity-60" : ""}`}>
-      <div className="flex items-start gap-3">
-        <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
-        <div>
-          <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
-          <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
+    <div className={`rounded-xl border border-[color:var(--portal-border)] bg-white px-4 py-3 ${disabled ? "opacity-60" : ""}`}>
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-start gap-3">
+          <div className="h-8 w-8 rounded-lg grid place-items-center bg-slate-50 text-[color:var(--portal-ink-2)]">{icon}</div>
+          <div>
+            <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
+            <div className="text-xs text-[color:var(--portal-ink-2)]">{desc}</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {onTest && (
+            <button
+              type="button"
+              onClick={onTest}
+              disabled={disabled || testing || !value}
+              title={!value ? "فعّل القناة أولاً" : "إرسال إشعار اختبار"}
+              className="inline-flex items-center gap-1 h-8 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-xs font-semibold text-[color:var(--portal-ink)] hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {testing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+              اختبار
+            </button>
+          )}
+          {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--portal-ink-2)]" />}
+          <Switch value={value} onChange={onChange} disabled={disabled || busy} />
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        {busy && <Loader2 className="h-3.5 w-3.5 animate-spin text-[color:var(--portal-ink-2)]" />}
-        <Switch value={value} onChange={onChange} disabled={disabled || busy} />
-      </div>
+      {result && (
+        <div
+          role="status"
+          className={`mt-2 flex items-start gap-2 rounded-lg px-3 py-2 text-xs ${
+            result.ok ? "bg-emerald-50 text-emerald-800 border border-emerald-100" : "bg-red-50 text-red-800 border border-red-100"
+          }`}
+        >
+          {result.ok ? <CheckCircle2 className="h-4 w-4 shrink-0" /> : <XCircle className="h-4 w-4 shrink-0" />}
+          <span className="flex-1">{result.msg}</span>
+          <span className="text-[10px] opacity-70">{new Date(result.at).toLocaleTimeString("ar-SA")}</span>
+        </div>
+      )}
     </div>
   );
 }
+
 function Switch({ value, onChange, disabled }: { value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <button type="button" role="switch" aria-checked={value} disabled={disabled} onClick={() => onChange(!value)}
