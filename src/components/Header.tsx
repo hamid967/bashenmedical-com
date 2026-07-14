@@ -123,7 +123,7 @@ export function Header() {
       {/* Main bar */}
       <div className="container-app flex h-16 items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2 group shrink-0">
-          <JazanIconFrame size={44} className="shrink-0">
+          <JazanIconFrame size="sm" className="shrink-0 h-11 w-11">
             <img
               src={bmcLogo}
               alt={isAr ? SITE.nameAr : SITE.nameEn}
