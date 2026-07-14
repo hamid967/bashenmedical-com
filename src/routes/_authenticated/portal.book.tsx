@@ -10,6 +10,7 @@ import { getDependent } from "@/lib/portal/dependents.functions";
 import {
   verifyMyInsurance,
   listMyInsuranceVerifications,
+  attachVerificationToAppointment,
 } from "@/lib/portal/insurance.functions";
 
 import { supabase } from "@/integrations/supabase/client";
@@ -143,6 +144,7 @@ function BookPage() {
   const [providerId, setProviderId] = useState<string>("");
   const [policyNumber, setPolicyNumber] = useState<string>("");
   const [verify, setVerify] = useState<null | {
+    id: string | null;
     ok: boolean;
     eligible: boolean;
     reason: string;
@@ -266,10 +268,21 @@ function BookPage() {
           patientId: payload.dependentId ? undefined : profile?.id ?? undefined,
         },
       }),
-    onSuccess: (res) => {
+    onSuccess: async (res) => {
       toast.success("تم تأكيد الحجز بنجاح");
       setConfirmed({ id: res.appointmentId, date: dateStr, time: slot });
+      // Link the last insurance eligibility check to the created appointment.
+      if (verify?.id) {
+        try {
+          await attachVerificationToAppointment({
+            data: { verification_id: verify.id, appointment_id: res.appointmentId },
+          });
+        } catch (e) {
+          console.warn("[book] attach verification failed:", (e as Error).message);
+        }
+      }
       qc.invalidateQueries({ queryKey: ["portal", "dashboard-summary"] });
+      qc.invalidateQueries({ queryKey: ["portal", "insurance-verify-history"] });
       qc.invalidateQueries({
         queryKey: ["portal", "booking", "avail-slots", doctorId, dateStr, branchId],
       });
@@ -804,7 +817,14 @@ function BookPage() {
 
               </div>
             )}
+            {verify?.id && (
+              <p className="mt-2 text-[11px] text-[color:var(--portal-ink-2)] flex items-center gap-1.5">
+                <BadgeCheck className="h-3 w-3 text-emerald-600" />
+                سيتم حفظ نتيجة التحقق وربطها بالموعد تلقائيًا عند التأكيد.
+              </p>
+            )}
           </div>
+
 
           {/* Verification history */}
           {doctorId && (historyQ.data?.length ?? 0) > 0 && (
