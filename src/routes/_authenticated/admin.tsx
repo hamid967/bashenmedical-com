@@ -19,21 +19,30 @@ const profileQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  loader: async ({ context, location }) => {
-    // Preserve back-compat: old /admin?tab=X links → /admin/classic?tab=X
+  beforeLoad: async ({ context, location }) => {
+    // Back-compat: old /admin?tab=X → /admin/classic?tab=X (before role check)
     const search = location.search as Record<string, unknown>;
     if (search && typeof search.tab === "string" && location.pathname === "/admin") {
-      throw redirect({
-        to: "/admin/classic",
-        search: search as never,
-      });
+      throw redirect({ to: "/admin/classic", search: search as never });
     }
-    await Promise.all([
-      context.queryClient.ensureQueryData(rolesQuery),
-      context.queryClient.ensureQueryData(profileQuery),
-    ]);
+    // Server-side role gate — verify actual roles before rendering the shell
+    let rolesData: { roles?: string[] } | null = null;
+    try {
+      rolesData = await context.queryClient.ensureQueryData(rolesQuery);
+    } catch {
+      throw redirect({ to: "/" });
+    }
+    const roles = (rolesData?.roles ?? []) as AdminRole[];
+    const allowed = roles.some((r) => CONSOLE_ROLES.includes(r));
+    if (!allowed) {
+      throw redirect({ to: "/" });
+    }
+  },
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(profileQuery);
     return null;
   },
+
   head: () => ({
     meta: [
       { title: "لوحة الإدارة | مجمع باعشن الطبي" },
