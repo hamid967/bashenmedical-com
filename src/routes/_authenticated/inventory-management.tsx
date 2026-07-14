@@ -150,7 +150,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone: "des
   const cls = tone === "destructive"
     ? "bg-destructive/10 text-destructive"
     : tone === "warning"
-    ? "bg-amber-500/10 text-amber-700 dark:text-amber-400"
+    ? "bg-amber-500/10 text-amber-700"
     : "bg-muted";
   return (
     <div className={`rounded-lg px-3 py-2 ${cls}`}>
@@ -194,7 +194,7 @@ function LowStockTab({ branchId }: { branchId: string | null }) {
               <td className="p-3 text-center">
                 {r.status === "out"
                   ? <span className="rounded-full bg-destructive/15 px-2 py-0.5 text-xs font-semibold text-destructive">نافد</span>
-                  : <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:text-amber-400">منخفض</span>}
+                  : <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-700">منخفض</span>}
               </td>
             </tr>
           ))}
@@ -284,13 +284,13 @@ const PRIORITY_AR: Record<PurchaseRequestPriority, string> = {
 };
 const PRIORITY_CLASS: Record<PurchaseRequestPriority, string> = {
   low: "bg-muted text-muted-foreground",
-  normal: "bg-sky-500/15 text-sky-700 dark:text-sky-400",
-  high: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
+  normal: "bg-teal-500/15 text-teal-700",
+  high: "bg-amber-500/15 text-amber-700",
   urgent: "bg-destructive/15 text-destructive",
 };
 const STATUS_CLASS: Record<PurchaseRequestStatus, string> = {
-  pending: "bg-amber-500/15 text-amber-700 dark:text-amber-400",
-  approved: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400",
+  pending: "bg-amber-500/15 text-amber-700",
+  approved: "bg-emerald-500/15 text-emerald-700",
   received: "bg-primary/15 text-primary",
   rejected: "bg-destructive/15 text-destructive",
   cancelled: "bg-muted text-muted-foreground",

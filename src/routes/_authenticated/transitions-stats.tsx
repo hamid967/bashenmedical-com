@@ -371,7 +371,7 @@ function KpiCard({ label, value, icon, tone }: { label: string; value: number | 
   const toneClass = {
     primary: "bg-primary/10 text-primary",
     success: "bg-emerald-500/10 text-emerald-600",
-    info: "bg-blue-500/10 text-blue-600",
+    info: "bg-teal-500/10 text-teal-600",
     warning: "bg-amber-500/10 text-amber-600",
   }[tone];
   return (

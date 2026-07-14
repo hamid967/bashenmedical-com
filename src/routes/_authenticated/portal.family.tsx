@@ -1073,7 +1073,7 @@ function DeleteDialog({
         <AlertDialogHeader>
           <AlertDialogTitle
             id="dep-del-title"
-            className="flex items-center gap-2 text-red-700 dark:text-red-400"
+            className="flex items-center gap-2 text-red-700"
           >
             <AlertTriangle className="h-5 w-5" aria-hidden />
             {T.del_title[lang]}
@@ -1081,9 +1081,9 @@ function DeleteDialog({
           <AlertDialogDescription asChild>
             <div id="dep-del-desc" className="space-y-3 text-sm">
 
-              <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/60 p-3 flex items-start gap-2">
-                <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
-                <div className="text-red-800 dark:text-red-200 font-medium">
+              <div className="rounded-lg border border-red-200 bg-red-50 p-3 flex items-start gap-2">
+                <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 shrink-0" aria-hidden />
+                <div className="text-red-800 font-medium">
                   {T.del_warning[lang]}
                 </div>
               </div>
@@ -1099,7 +1099,7 @@ function DeleteDialog({
                   <span>{T.del_counting[lang]}</span>
                 </div>
               ) : countQ.isError ? (
-                <div className="rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900/60 p-3 text-amber-800 dark:text-amber-200">
+                <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-amber-800">
                   {T.del_count_error[lang]}
                 </div>
               ) : (
@@ -1112,7 +1112,7 @@ function DeleteDialog({
                     <span className="text-muted-foreground">{T.del_active_label[lang]}</span>
                     <span
                       className={`font-semibold tabular-nums ${
-                        activeCount > 0 ? "text-red-600 dark:text-red-400" : ""
+                        activeCount > 0 ? "text-red-600" : ""
                       }`}
                     >
                       {activeCount}
@@ -1122,10 +1122,10 @@ function DeleteDialog({
               )}
 
               {blocked && (
-                <div className="rounded-lg border border-red-300 bg-red-100/70 dark:bg-red-950/50 dark:border-red-800 p-3 space-y-2">
+                <div className="rounded-lg border border-red-300 bg-red-100/70 p-3 space-y-2">
                   <div className="flex items-start gap-2">
-                    <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 dark:text-red-300 shrink-0" aria-hidden />
-                    <div className="text-red-900 dark:text-red-100">
+                    <ShieldAlert className="h-4 w-4 mt-0.5 text-red-700 shrink-0" aria-hidden />
+                    <div className="text-red-900">
                       <div className="font-semibold">{T.del_blocked_title[lang]}</div>
                       <div className="mt-0.5">{T.del_blocked_body[lang]}</div>
                     </div>
@@ -1138,7 +1138,7 @@ function DeleteDialog({
                       setConfirmCancel(true);
                     }}
 
-                    className="inline-flex items-center gap-2 rounded-md border border-red-300 dark:border-red-800 bg-white/70 dark:bg-red-950/40 px-3 h-9 text-xs font-semibold text-red-800 dark:text-red-100 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-md border border-red-300 bg-white/70 px-3 h-9 text-xs font-semibold text-red-800 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {cancelMut.isPending ? (
                       <>
@@ -1222,7 +1222,7 @@ function DeleteDialog({
           <AlertDialogHeader>
             <AlertDialogTitle
               id="dep-cancel-title"
-              className="flex items-center gap-2 text-red-700 dark:text-red-400"
+              className="flex items-center gap-2 text-red-700"
             >
               <AlertTriangle className="h-5 w-5" aria-hidden />
               {T.del_cancel_confirm_title[lang]}
@@ -1230,9 +1230,9 @@ function DeleteDialog({
             <AlertDialogDescription asChild>
               <div id="dep-cancel-desc" className="space-y-3 text-sm">
 
-                <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900/60 p-3 flex items-start gap-2">
-                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 dark:text-red-400 shrink-0" aria-hidden />
-                  <div className="text-red-800 dark:text-red-200 font-medium">
+                <div className="rounded-lg border border-red-200 bg-red-50 p-3 flex items-start gap-2">
+                  <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 shrink-0" aria-hidden />
+                  <div className="text-red-800 font-medium">
                     {T.del_cancel_confirm_warning[lang]}
                   </div>
                 </div>
@@ -1241,7 +1241,7 @@ function DeleteDialog({
                   <span className="text-muted-foreground">
                     {T.del_active_label[lang]}
                   </span>
-                  <span className="font-semibold tabular-nums text-red-600 dark:text-red-400">
+                  <span className="font-semibold tabular-nums text-red-600">
                     {activeCount}
                   </span>
                 </div>
@@ -1254,7 +1254,7 @@ function DeleteDialog({
                   <div
                     role="status"
                     aria-live="polite"
-                    className="flex items-center gap-2 rounded-lg border border-red-200 dark:border-red-900/60 bg-red-50/70 dark:bg-red-950/30 p-3 text-red-800 dark:text-red-200"
+                    className="flex items-center gap-2 rounded-lg border border-red-200 bg-red-50/70 p-3 text-red-800"
                   >
                     <Loader2 className="h-4 w-4 animate-spin shrink-0" aria-hidden />
                     <span className="font-medium">{T.del_cancelling[lang]}</span>

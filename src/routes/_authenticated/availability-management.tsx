@@ -42,15 +42,15 @@ export const Route = createFileRoute("/_authenticated/availability-management")(
 const STATUS_META: Record<string, { label: string; cls: string }> = {
   available: {
     label: "متاحة",
-    cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    cls: "bg-emerald-500/15 text-emerald-700",
   },
   booked: {
     label: "محجوزة",
-    cls: "bg-blue-500/15 text-blue-700 dark:text-blue-300",
+    cls: "bg-teal-500/15 text-teal-700",
   },
   blocked: {
     label: "معطّلة",
-    cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300",
+    cls: "bg-amber-500/15 text-amber-700",
   },
 };
 
@@ -294,7 +294,7 @@ function AvailabilityManagementPage() {
 
         {lastConflicts.length > 0 && (
           <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-sm">
-            <div className="mb-2 flex items-center gap-2 font-medium text-amber-800 dark:text-amber-300">
+            <div className="mb-2 flex items-center gap-2 font-medium text-amber-800">
               <AlertTriangle className="h-4 w-4" />
               تم تخطّي {lastConflicts.length} فترة بسبب التداخل مع فترات قائمة:
             </div>
@@ -314,7 +314,7 @@ function AvailabilityManagementPage() {
           </div>
         )}
         {generateM.data && generateM.data.created > 0 && lastConflicts.length === 0 && (
-          <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800 dark:text-emerald-300">
+          <div className="mt-4 flex items-center gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-800">
             <CheckCircle2 className="h-4 w-4" />
             تم إنشاء {generateM.data.created} فترة بنجاح.
           </div>
@@ -402,7 +402,7 @@ function AvailabilityManagementPage() {
                               deleteM.mutate(s.id);
                             }
                           }}
-                          className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-rose-700 hover:bg-rose-500/10 disabled:opacity-40 dark:text-rose-300"
+                          className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-xs text-rose-700 hover:bg-rose-500/10 disabled:opacity-40"
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                           حذف

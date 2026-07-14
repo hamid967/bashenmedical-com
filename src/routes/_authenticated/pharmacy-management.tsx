@@ -425,10 +425,10 @@ function PField({ label, children, className = "" }: { label: string; children: 
 
 const MOVE_TYPES: Record<MovementType, { label: string; cls: string }> = {
   in: { label: "استلام", cls: "bg-emerald-500/15 text-emerald-700" },
-  out: { label: "صرف", cls: "bg-blue-500/15 text-blue-700" },
+  out: { label: "صرف", cls: "bg-teal-500/15 text-teal-700" },
   adjust: { label: "تعديل", cls: "bg-slate-500/15 text-slate-700" },
   waste: { label: "إتلاف", cls: "bg-rose-500/15 text-rose-700" },
-  transfer: { label: "تحويل", cls: "bg-indigo-500/15 text-indigo-700" },
+  transfer: { label: "تحويل", cls: "bg-teal-500/15 text-teal-700" },
 };
 
 function MovementsPanel({ branchId }: { branchId: string | null }) {
@@ -593,7 +593,7 @@ const RX_STATUS: Record<PharmacyStatus, { label: string; cls: string }> = {
   pending: { label: "بانتظار المراجعة", cls: "bg-amber-500/15 text-amber-700 border-amber-500/30" },
   approved: { label: "معتمدة", cls: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30" },
   rejected: { label: "مرفوضة", cls: "bg-rose-500/15 text-rose-700 border-rose-500/30" },
-  needs_info: { label: "تحتاج توضيح", cls: "bg-indigo-500/15 text-indigo-700 border-indigo-500/30" },
+  needs_info: { label: "تحتاج توضيح", cls: "bg-teal-500/15 text-teal-700 border-teal-500/30" },
 };
 
 function RxPanel({ branchId }: { branchId: string | null }) {
@@ -721,7 +721,7 @@ function RxCard({
             ><Check className="h-3.5 w-3.5" /> موافقة{itemId ? " + خصم" : ""}</button>
             <button
               onClick={() => onDecide({ id: rx.id, decision: "needs_info", notes: notes || null })}
-              className="inline-flex items-center gap-1 rounded border border-indigo-500 px-3 py-1.5 text-xs text-indigo-700 hover:bg-indigo-50"
+              className="inline-flex items-center gap-1 rounded border border-teal-500 px-3 py-1.5 text-xs text-teal-700 hover:bg-teal-50"
             >طلب توضيح</button>
             <button
               onClick={() => {
