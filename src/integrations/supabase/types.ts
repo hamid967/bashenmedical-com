@@ -4325,6 +4325,47 @@ export type Database = {
           },
         ]
       }
+      service_inquiry_attachments: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          id: string
+          inquiry_id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          id?: string
+          inquiry_id: string
+          size_bytes: number
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          inquiry_id?: string
+          size_bytes?: number
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_inquiry_attachments_inquiry_id_fkey"
+            columns: ["inquiry_id"]
+            isOneToOne: false
+            referencedRelation: "service_inquiries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_inquiry_daily_counter: {
         Row: {
           counter: number
