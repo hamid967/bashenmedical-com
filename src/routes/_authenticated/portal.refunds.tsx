@@ -192,7 +192,38 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
 <title>إيصال استرداد ${r.receipt_reference ?? r.invoice_number ?? r.id.slice(0, 8)}</title>
 <style>${fontFaceCss}</style>
 <style>
-  @page { size: A4; margin: 16mm 14mm; }
+  /* A4 page with reserved bottom margin for the unified footer.
+     Chromium/Edge/Safari-TP support @page margin boxes with counter(page)/counter(pages). */
+  @page {
+    size: A4;
+    margin: 16mm 14mm 22mm;
+    @bottom-right {
+      content: "صفحة " counter(page, arabic-indic) " / " counter(pages, arabic-indic);
+      font-family: "Noto Naskh Arabic", "SF Arabic", "Segoe UI", Tahoma, sans-serif;
+      font-size: 10px; color: #64748b;
+      direction: rtl; unicode-bidi: isolate;
+      padding-top: 6mm;
+    }
+    @bottom-left {
+      content: "المرجع: ${refDisplay ?? "—"}";
+      font-family: "Noto Naskh Arabic", "SF Arabic", "Segoe UI", Tahoma, sans-serif;
+      font-size: 10px; color: #64748b;
+      direction: rtl; unicode-bidi: isolate;
+      padding-top: 6mm;
+    }
+    @bottom-center {
+      content: "Bashen Medical · بوابة المريض";
+      font-family: "Noto Kufi Arabic", "Noto Naskh Arabic", sans-serif;
+      font-size: 9.5px; color: #94a3b8;
+      padding-top: 6mm;
+    }
+    @top-right {
+      content: "إيصال طلب استرداد";
+      font-family: "Noto Kufi Arabic", "Noto Naskh Arabic", sans-serif;
+      font-size: 9.5px; color: #cbd5e1;
+      padding-bottom: 4mm;
+    }
+  }
   html, body { direction: rtl; }
   * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   body {
@@ -324,6 +355,11 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     line-height: 1.9; text-align: justify; text-justify: inter-word;
     page-break-inside: avoid; break-inside: avoid;
   }
+  /* Tighter widow/orphan and split rules to avoid content being cut across pages. */
+  .hd, .amount, .note, .grid tr {
+    page-break-inside: avoid; break-inside: avoid;
+  }
+  .grid { orphans: 3; widows: 3; }
 
   @media print {
     body { background: #fff; }
@@ -332,6 +368,8 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
     .sheet-wrap { transform: none !important; }
     .sheet { width: auto; min-height: 0; padding: 0; box-shadow: none; border-radius: 0; }
     .rtl-badge { display: none; }
+    /* Inline .ft is hidden in print — per-page footer is drawn by @page @bottom-* margin boxes. */
+    .ft { display: none !important; }
     a { color: inherit; text-decoration: none; }
   }
   @media (max-width: 820px) {
@@ -393,7 +431,12 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
           }).join("")}
         </table>` : ""}
         ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
-        <div class="ft">Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا</div>
+        <div class="ft">
+          Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا
+          <div style="margin-top:6px;font-size:10px;color:#cbd5e1">
+            سيظهر في كل صفحة عند الطباعة: «صفحة X / Y» على اليسار مع المرجع على اليمين.
+          </div>
+        </div>
       </article>
     </div>
   </div>
