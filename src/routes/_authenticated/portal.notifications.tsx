@@ -368,6 +368,7 @@ function NotificationRow({
           {action ? (
             <Link
               to={action.to}
+              search={action.search as never}
               className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white"
               style={{ background: "var(--portal-gradient)" }}
             >
