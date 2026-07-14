@@ -64,6 +64,11 @@ function statusMeta(s: ApptStatus) {
     completed: { label: "مكتمل", cls: "bg-slate-100 text-slate-700 border-slate-200" },
     cancelled: { label: "ملغى", cls: "bg-red-50 text-red-700 border-red-200" },
     no_show: { label: "لم يحضر", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+    held: { label: "محجوز مؤقتًا", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+    pending_verification: { label: "بانتظار التحقق", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    pending_payment: { label: "بانتظار الدفع", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+    checked_in: { label: "تم الحضور", cls: "bg-cyan-50 text-cyan-700 border-cyan-200" },
+    in_progress: { label: "قيد الكشف", cls: "bg-violet-50 text-violet-700 border-violet-200" },
   };
   return m[s] ?? { label: s, cls: "bg-slate-100 text-slate-700 border-slate-200" };
 }
