@@ -216,6 +216,7 @@ const paymentsQuery = queryOptions({
 const searchSchema = z.object({
   status: fallback(z.string(), "all").default("all"),
   sort: fallback(z.string(), "updated_desc").default("updated_desc"),
+  receipt: fallback(z.string().optional(), undefined).optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/portal/refunds")({
