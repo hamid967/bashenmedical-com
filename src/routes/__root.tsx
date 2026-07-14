@@ -16,8 +16,8 @@ import { Header } from "@/components/Header";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
 import { Toaster } from "sonner";
-const IntroOverlay = lazy(() =>
-  import("@/components/IntroOverlay").then((m) => ({ default: m.IntroOverlay })),
+const JazanIntro = lazy(() =>
+  import("@/components/JazanIntro").then((m) => ({ default: m.JazanIntro })),
 );
 import { ChatbotBubble } from "@/components/ChatbotBubble";
 import { FloatingWhatsAppButton } from "@/components/inquiry/FloatingWhatsAppButton";
@@ -149,7 +149,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <Suspense fallback={null}>
-          <IntroOverlay theme="dark" />
+          <JazanIntro />
         </Suspense>
         <div className="min-h-screen flex flex-col">
           <AnnouncementBar />
