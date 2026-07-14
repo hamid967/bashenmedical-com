@@ -1,75 +1,82 @@
-# نظام استفسار خدمات الواتساب — تصميم تراث جازان
 
-خطة شاملة، سأنفّذها على مراحل بعد موافقتك. لأن الطلب ضخم جدًا (widget + form + DB + admin + portal + auth linking + notifications + audit)، أقترح تقسيمه إلى **3 دفعات** بحيث تراجع كل دفعة قبل الانتقال للتالية.
+# خطة بوابة باعشن الرقمية — التنفيذ
 
----
+## القرارات المعتمدة
+- **المصادقة**: بريد + Google فقط (OTP لاحقًا).
+- **البيانات التجريبية**: نعم، موسومة `is_demo = true` عربي/إنجليزي.
+- **الدفع/الواتساب/الرسائل**: بدون تكاملات جديدة الآن — أزرار الدفع تظهر "قيد التكامل" وتُوثّق في لوحة الأدمن.
 
-## الدفعة 1 — الأساس (Widget + Form + DB + wa.me handoff)
+## المرحلة أ — لوحة المريض (Overview)
+مسار: `/app` (تحت `_authenticated/`)
 
-### قاعدة البيانات (migration واحدة)
-- `service_catalog` — الخدمات الـ16 المطلوبة (ar/en/department/order/active). Seed أولي.
-- `service_inquiries` — الحقول المذكورة + `request_number` فريد + `internal_status` (`new|contacted|awaiting_patient|appointment_created|completed|cancelled`) + `whatsapp_handoff_status` (`not_opened|opened|delivery_unverified|delivered|failed`) + `source` + FKs (nullable) لـ user/service/specialty/doctor/branch/insurance/appointment/consent.
-- `service_inquiry_updates` — سجل تغييرات ثابت (append-only trigger).
-- توليد `BMC-WA-YYYYMMDD-0001` عبر دالة SQL `SECURITY DEFINER` + عدّاد يومي (concurrency-safe عبر `INSERT ... ON CONFLICT ... RETURNING`, مثل جدول `branch_mrn_counter` الموجود).
-- RLS:
-  - anon: `INSERT` فقط عبر server function (لا SELECT).
-  - authenticated: `SELECT` صفوف حيث `user_id = auth.uid()`.
-  - admin/staff: كامل عبر `has_role`.
-- GRANTs صريحة لكل جدول.
+**ما يُبنى:**
+- بطاقة الترحيب + الملخص السريع
+- الموعد القادم (الأقرب من `listMyAppointments`) مع أزرار: تأكيد الحضور، إعادة جدولة، إلغاء، اتجاهات
+- تقارير جديدة غير مقروءة (من `medical_reports`/`lab_reports`/`radiology_reports`)
+- فواتير مستحقة (`invoices` where status in unpaid/partial)
+- حالة موافقات التأمين النشطة (`insurance_approvals`)
+- شبكة اختصارات (تقارير، وصفات، فواتير، تأمين، ملفي، دعم)
+- Skeletons + حالات فارغة + أخطاء (بأسلوب جازان)
+- Server fn واحد: `getPatientOverview` يجلب كل شيء بشكل متوازٍ
 
-### Widget (`FloatingWhatsAppButton.tsx`)
-- إعادة بناء بـ HTML/CSS: كبسولة فاتحة، حدّ ذهبي، نقش جازان (SVG صغير inline لأنماط المعينات) على اليسار في RTL / اليمين في LTR، دائرة واتساب خضراء، سهم.
-- Fixed bottom-start (يستخدم `start-4` فيتحوّل تلقائيًا). مسافة أسفل كافية حتى لا يغطي `WhatsAppFab` الحالي — سنستبدله بهذا.
-- Animation دخول خفيفة + hover scale. Responsive: نص مختصر على الموبايل.
-- زر إغلاق صغير (X) يخفيه لهذه الجلسة (`sessionStorage`).
-- `aria-label="استفسر عن خدمات مجمع باعشن عبر واتساب"`.
-- نُضيفه في `__root.tsx` بدل `WhatsAppFab`.
+## المرحلة ب — واجهات المريض التفصيلية
+مسارات جديدة تحت `_authenticated/`:
+- `/app/reports` — قائمة موحّدة (مختبر/أشعة/طبية) + فلاتر (تاريخ/نوع) + معاينة PDF عبر signed URL + تنزيل آمن
+- `/app/prescriptions` — قائمة وصفات + تفاصيل + تنزيل + تنبيه اتّباع تعليمات الطبيب
+- `/app/invoices` — فواتير + بنود + حالة دفع + "دفع" (Placeholder: قيد التكامل مع بوابة سعودية) + تنزيل إيصال
+- `/app/insurance` — موافقات نشطة/سابقة + رفع مستندات ناقصة + تتبّع الحالة
+- `/app/dependents` — إدارة التابعين (إضافة/تبديل/حذف) — تفعيل استخدامهم في wizard الحجز
+- `/app/profile` — بيانات شخصية + تفضيلات لغة + تفضيلات إشعارات + جهة اتصال طوارئ + جلسات نشطة
 
-### Dialog / Bottom sheet (`ServiceInquiryDialog.tsx`)
-- shadcn `Dialog` على الديسكتوب، `Drawer` (vaul) على الموبايل.
-- عنوان: «استفسر عن خدمات مجمع باعشن».
-- الحقول المطلوبة/الاختيارية كما في المواصفة. **لن نطلب الهوية/الإقامة افتراضيًا** (نعرضه فقط كحقل اختياري مطوي).
-- Zod validation عربية + normalize للجوال إلى `9665XXXXXXXX`.
-- موافقة الخصوصية checkbox إلزامية → نسجّل صفًا في `consent_records`.
-- المرفق: input بسيط في الدفعة 1 (رفع فعلي في الدفعة 3 مع Signed URLs).
+**Server fns**: `list*ForMe` لكل مورد، مع RLS مضبوطة (فحص وإضافة سياسات المالك حيث لزم).
 
-### تدفّق الإرسال
-1. Validate → 2. server fn `createServiceInquiry` (public, rate-limited عبر IP hash + last-submission cookie) → 3. يُنشئ الصف ويُعيد `request_number` → 4. يعرض `ConfirmationView` داخل نفس الحوار (رقم الطلب، الخدمة، التاريخ، الحالة، حالة handoff = `not_opened`).
-5. زر «فتح واتساب» → يُحدّث `whatsapp_handoff_status='opened'` (server fn) ثم يفتح `wa.me` في تبويب جديد بالرسالة المحدّدة.
-6. رقم واتساب: نقرأه من `clinic_settings.whatsapp_number` (موجود؟ سنتحقق) وإلا نعرض تحذير للأدمن. لن نستخدم أي رقم افتراضي.
+## المرحلة ج — البوابة الإدارية (Ops اليومية)
+مسارات تحت `_authenticated/admin/` (محمية بأدوار: `admin`, `receptionist`, `appointment_manager`, `branch_manager`):
 
-### حالة النجاح
-- تبقى صفحة التأكيد مفتوحة (لا redirect تلقائي).
-- زران: «أنشئ حسابك لمتابعة الطلب» → `/auth?intent=link_inquiry&ref=BMC-WA-...` و«لدي حساب بالفعل» → نفس المسار مع تبويب Sign-in.
+- `/admin` — لوحة اليوم: مواعيد اليوم/مؤكدة/معلّقة/ملغاة، معدّل عدم الحضور، إشغال العيادات، متأخّرو تسجيل الوصول
+- `/admin/appointments` — جدول شامل + فلاتر (تاريخ/فرع/تخصص/طبيب/حالة) + عمليات: إنشاء، تعديل، تأكيد، إعادة جدولة، إلغاء، no-show، check-in، إسناد طبيب، ملاحظات داخلية، سجل تعديلات
+- `/admin/schedules` — جداول الأطباء الأسبوعية + الاستثناءات + الإجازات + مدة الفتحة + منع التداخل
+- `/admin/patients` — بحث/عرض/تحديث محدود + دمج مكرّرات (workflow)
+- `/admin/reports` — رفع + مسودة/مراجعة/نشر + versions + إشعار المريض
+- `/admin/invoices` — إنشاء/تعديل + بنود + خصومات + استرداد
+- `/admin/insurance` — موافقات + مرفقات + تغيير حالة + ملاحظات
 
----
+كل عملية حسّاسة تُكتب في `audit_logs`.
 
-## الدفعة 2 — الحساب والربط والبورتال
+## المرحلة د — Super Admin ومصفوفة الصلاحيات
+مسارات تحت `_authenticated/admin/system/` (محمية بـ `has_role(_, 'super_admin')`):
+- `/admin/system/users` — إدارة المستخدمين + إسناد أدوار
+- `/admin/system/roles` — أدوار + شارة "نظام" (لا تُحذف)
+- `/admin/system/permissions` — مصفوفة (صف = دور، عمود = صلاحية، خانة اختيار)، تُكتب في `role_permissions`
+- `/admin/system/audit` — استعراض سجل التدقيق + فلاتر + تصدير
+- `/admin/system/integrations` — حالة كل تكامل (mock/live) — عرض فقط
+- `/admin/system/settings` — إعدادات النظام العامة
 
-- تعديل `/auth`: يقبل `intent=link_inquiry&ref=...` ويحفظ الـ ref في sessionStorage.
-- بعد تسجيل الدخول/OTP: server fn `linkInquiryToUser({ ref })` — يتحقق من تطابق `mobile_number` مع رقم الحساب (verified) ثم يضبط `service_inquiries.user_id`. **لا ربط بالرقم فقط دون تطابق OTP.**
-- OTP: نستخدم Supabase phone OTP الحالي (نتحقق أنه مفعّل، وإلا سنطلب تفعيله في هذه الدفعة).
-- صفحة `/portal/inquiries` — «طلباتي واستفساراتي»: قائمة + تفاصيل + محادثة (تستخدم `service_inquiry_updates` مع `public_message`) + رفع مرفقات + زر إلغاء (إذا `internal_status in ('new','contacted')`) + زر «تحويل إلى موعد» (يفتح `/book` مع prefill).
+**Helper مطلوب في قاعدة البيانات**: `has_permission(_user_id, _permission_key)` كـ SECURITY DEFINER.
 
----
+## البيانات التجريبية
+Migration إدراج (عبر أداة insert لا migrations):
+- 3 فروع، 8 تخصصات، 12 طبيبًا، جداول توفّر
+- 6 مرضى تجريبيين + مواعيد ماضية/قادمة
+- تقارير مختبر/أشعة/طبية عيّنة (بدون بيانات حقيقية)
+- 4 فواتير بحالات مختلفة، 3 موافقات تأمين، وصفات
+- كلها موسومة `is_demo = true` مع Badge "بيانات توضيحية"
 
-## الدفعة 3 — الأدمن + الأمان + الإشعارات
+## قواعد بيانات وأمان
+- تدقيق RLS لكل جدول جديد استخدامه (تقارير/فواتير/وصفات/موافقات/تابعين) — إضافة سياسات المالك أينما نقصت
+- Storage: bucket خاص للتقارير مع signed URLs قصيرة العمر
+- منع تسريب أي مفتاح خدمة، لا PII في لوحات مشتركة
 
-- `/admin/service-inquiries` — جدول مع الفلاتر المذكورة + إخفاء جزء من الجوال (`05••••1234`) + إجراءات (assign, status, internal note, request info, link/create appointment, close). كل تغيير → صف في `service_inquiry_updates` + `audit_logs`.
-- CRUD لـ `service_catalog` في `/admin/service-catalog` (add/edit/disable/reorder).
-- Rate limiting server-side: جدول `public_submission_rate` أو استخدام `security_audit_log` الموجود؛ حد أقصى 3 طلبات/جوال/ساعة و10/IP/ساعة.
-- CAPTCHA: hCaptcha invisible يُفعَّل بعد أول رفض rate-limit (سنستخدم secret مضاف عبر add_secret إذا وافقت).
-- المرفقات: bucket خاص `inquiry-attachments` (private) + Signed URLs 15 دقيقة، حد 5MB، أنواع محددة (pdf/jpg/png).
-- الإشعارات: in-app (جدول `notifications` الموجود) + SMS/WA فقط إذا كان provider مُهيّأ في `clinic_settings` — وإلا نتخطى بصمت ولا نُعلن «تم التسليم».
-- حالة handoff «delivered» لا تُضبط أبدًا من الواجهة — فقط عبر webhook مستقبلي من WhatsApp Business API (سنترك route `/api/public/hooks/wa-status` جاهز لكن معطّل بلا secret).
+## تفاصيل تقنية
+- Server fns في `src/lib/portal/*.functions.ts` و `src/lib/admin/*.functions.ts`
+- TanStack Query لكل جلب، `ensureQueryData` + `useSuspenseQuery`
+- shadcn Sidebar لبوابة الأدمن (قابلة للطيّ)
+- كل شاشة: Loading/Skeleton + Empty + Error + Retry بأسلوب جازان الحالي
+- i18n كامل عربي/إنجليزي مع RTL — لا نصوص hardcoded
 
----
+## ما سأنفّذه في هذه الجلسة
+سأبدأ بـ **المرحلة أ (Dashboard Overview)** لأنها الأساس البصري لكل ما بعدها، ثم أنتقل لواجهات المريض التفصيلية.
 
-## أسئلة قبل البدء
+المراحل ج و د ستحتاج جلسات لاحقة نظرًا لحجمها (لوحة أدمن كاملة + Super Admin + مصفوفة صلاحيات ديناميكية = ~15–20 شاشة).
 
-1. **رقم واتساب الرسمي**: هل نستخدم القيمة من `clinic_settings` (سأتحقق من العمود)، أم تريد إدخال رقم الآن؟ الحالي في `SITE.whatsapp = 966555088623` — هل هذا الرقم الرسمي المعتمد للواتساب؟
-2. **الاستبدال أو التعايش**: أستبدل `WhatsAppFab` القديم بالكامل بالويدجت الجديد، صحيح؟
-3. **OTP بالجوال**: هل هو مفعّل بالفعل في المشروع؟ (لم أرَ إعداد SMS provider). إن لم يكن، هل نبدأ بـ email OTP للربط في الدفعة 2 ثم نضيف SMS لاحقًا؟
-4. **هل تفضّل تنفيذ الدفعات الثلاث دفعة واحدة** (رد ضخم واحد، وقت أطول، مراجعة أصعب) **أم دفعة تلو الأخرى** (موصى به)؟
-
-بمجرد إجاباتك سأبدأ فورًا بالدفعة 1 (migration + widget + dialog + submit + confirmation + wa.me handoff).
+**هل أبدأ الآن بالمرحلة أ + البيانات التجريبية الأساسية؟** أو تفضّل ترتيبًا آخر؟
