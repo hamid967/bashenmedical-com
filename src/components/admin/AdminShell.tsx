@@ -82,6 +82,7 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/rbac", label: "الأدوار والصلاحيات", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام (Super)", icon: Gauge, roles: ["admin"] },
+      { to: "/admin/notification-logs", label: "سجلات الإشعارات", icon: Bell, roles: ["admin"] },
       { to: "/admin/super/permissions", label: "مصفوفة الصلاحيات (Super)", icon: ShieldCheck, roles: ["admin"] },
       { to: "/audit-log", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
       { to: "/clinic-settings", label: "إعدادات المجمع", icon: Settings, roles: ["admin"] },

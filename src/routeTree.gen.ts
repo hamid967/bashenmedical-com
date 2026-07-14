@@ -131,6 +131,7 @@ import { Route as AuthenticatedPortalAppointmentsRouteImport } from './routes/_a
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
+import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -814,6 +815,12 @@ const AuthenticatedAdminServiceCatalogRoute =
     path: '/service-catalog',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNotificationLogsRoute =
+  AuthenticatedAdminNotificationLogsRouteImport.update({
+    id: '/notification-logs',
+    path: '/notification-logs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminClassicRoute =
   AuthenticatedAdminClassicRouteImport.update({
     id: '/classic',
@@ -1017,6 +1024,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
@@ -1157,6 +1165,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
@@ -1301,6 +1310,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
@@ -1445,6 +1455,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
+    | '/admin/notification-logs'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/patients/$patientId'
@@ -1585,6 +1596,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
+    | '/admin/notification-logs'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/patients/$patientId'
@@ -1728,6 +1740,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
+    | '/_authenticated/admin/notification-logs'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/patients/$patientId'
@@ -2696,6 +2709,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServiceCatalogRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/notification-logs': {
+      id: '/_authenticated/admin/notification-logs'
+      path: '/notification-logs'
+      fullPath: '/admin/notification-logs'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/classic': {
       id: '/_authenticated/admin/classic'
       path: '/classic'
@@ -2849,6 +2869,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
+  AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -2858,6 +2879,8 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
+  AuthenticatedAdminNotificationLogsRoute:
+    AuthenticatedAdminNotificationLogsRoute,
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
