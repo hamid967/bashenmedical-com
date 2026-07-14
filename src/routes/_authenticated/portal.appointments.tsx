@@ -879,3 +879,98 @@ function ErrorState({ error }: { error: Error }) {
     </div>
   );
 }
+
+function CheckInSuccessDialog({
+  result, onClose,
+}: {
+  result: {
+    queue_number: number | null;
+    checked_in_at: string;
+    status: string;
+    already: boolean;
+    doctor?: string | null;
+    branch?: string | null;
+  };
+  onClose: () => void;
+}) {
+  const meta = statusMeta((result.status as ApptStatus) ?? "checked_in");
+  const fmtTime = new Date(result.checked_in_at).toLocaleTimeString("ar-SA-u-nu-latn", {
+    hour: "2-digit", minute: "2-digit",
+  });
+  return (
+    <div
+      dir="rtl"
+      className="fixed inset-0 z-50 bg-black/50 grid place-items-center p-4"
+      role="dialog"
+      aria-modal="true"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="h-14 w-14 rounded-full bg-emerald-100 grid place-items-center text-emerald-600 mb-3">
+            <CheckCircle2 className="h-8 w-8" />
+          </div>
+          <h2 className="text-lg font-bold text-[color:var(--portal-ink)]">
+            {result.already ? "أنت مسجّل بالفعل" : "تم تسجيل حضورك بنجاح"}
+          </h2>
+          <p className="text-sm text-[color:var(--portal-ink-2)] mt-1">
+            يُرجى الانتظار في منطقة الاستقبال حتى يتم استدعاؤك.
+          </p>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-gradient-soft)] p-4">
+          <div className="text-xs font-semibold text-[color:var(--portal-ink-3)] text-center">
+            رقمك في الدور
+          </div>
+          <div className="text-5xl font-bold tabular-nums text-[color:var(--portal-primary)] text-center leading-tight mt-1">
+            {result.queue_number ?? "—"}
+          </div>
+        </div>
+
+        <dl className="mt-4 space-y-2 text-sm">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[color:var(--portal-ink-3)] inline-flex items-center gap-1.5">
+              <Clock className="h-4 w-4" /> وقت تسجيل الحضور
+            </dt>
+            <dd className="font-semibold tabular-nums text-[color:var(--portal-ink)]">{fmtTime}</dd>
+          </div>
+          <div className="flex items-center justify-between gap-3">
+            <dt className="text-[color:var(--portal-ink-3)]">الحالة الحالية</dt>
+            <dd>
+              <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}>
+                {meta.label}
+              </span>
+            </dd>
+          </div>
+          {result.doctor && (
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-[color:var(--portal-ink-3)] inline-flex items-center gap-1.5">
+                <Stethoscope className="h-4 w-4" /> الطبيب
+              </dt>
+              <dd className="font-semibold text-[color:var(--portal-ink)] truncate">{result.doctor}</dd>
+            </div>
+          )}
+          {result.branch && (
+            <div className="flex items-center justify-between gap-3">
+              <dt className="text-[color:var(--portal-ink-3)] inline-flex items-center gap-1.5">
+                <MapPin className="h-4 w-4" /> الفرع
+              </dt>
+              <dd className="font-semibold text-[color:var(--portal-ink)] truncate">{result.branch}</dd>
+            </div>
+          )}
+        </dl>
+
+        <button
+          onClick={onClose}
+          className="mt-6 w-full inline-flex items-center justify-center gap-2 h-11 rounded-full text-white text-sm font-semibold shadow"
+          style={{ background: "var(--portal-gradient)" }}
+        >
+          <ChevronLeft className="h-4 w-4" /> العودة إلى قائمة مواعيدي
+        </button>
+      </div>
+    </div>
+  );
+}
