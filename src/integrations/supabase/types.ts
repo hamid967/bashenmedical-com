@@ -4539,6 +4539,23 @@ export type Database = {
           source: string
         }[]
       }
+      list_role_permission_audit: {
+        Args: { _limit?: number; _offset?: number }
+        Returns: {
+          action: string
+          actor_email: string
+          actor_id: string
+          actor_name: string
+          created_at: string
+          id: string
+          new_enabled: boolean
+          permission_key: string
+          permission_label_ar: string
+          permission_label_en: string
+          previous_enabled: boolean
+          role_key: string
+        }[]
+      }
       list_role_permissions_matrix: {
         Args: never
         Returns: {
