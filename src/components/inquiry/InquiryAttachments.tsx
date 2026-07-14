@@ -2,12 +2,23 @@ import { useMemo, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Paperclip, Trash2, Upload, FileText, ImageIcon } from "lucide-react";
+import {
+  Loader2,
+  Paperclip,
+  Trash2,
+  Upload,
+  FileText,
+  ImageIcon,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldQuestion,
+} from "lucide-react";
 import {
   requestInquiryUploadUrl,
   registerInquiryAttachment,
   listInquiryAttachments,
   deleteInquiryAttachment,
+  scanInquiryAttachment,
   ATTACHMENT_LIMITS,
 } from "@/lib/inquiry/attachments.functions";
 
@@ -35,6 +46,7 @@ export function InquiryAttachments({
   const signFn = useServerFn(requestInquiryUploadUrl);
   const registerFn = useServerFn(registerInquiryAttachment);
   const deleteFn = useServerFn(deleteInquiryAttachment);
+  const scanFn = useServerFn(scanInquiryAttachment);
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -44,6 +56,16 @@ export function InquiryAttachments({
     queryKey: listKey,
     queryFn: () => listFn({ data: { inquiry_id: inquiryId } }),
     staleTime: 60_000,
+    // Poll every 3s while any attachment is still being scanned.
+    refetchInterval: (query) => {
+      const rows = query.state.data as
+        | Array<{ scan_status: string }>
+        | undefined;
+      const busy = rows?.some(
+        (r) => r.scan_status === "pending" || r.scan_status === "scanning",
+      );
+      return busy ? 3000 : false;
+    },
   });
 
   const remaining = useMemo(
@@ -93,7 +115,7 @@ export function InquiryAttachments({
         if (!put.ok) {
           throw new Error(`تعذّر رفع الملف (${put.status}).`);
         }
-        await registerFn({
+        const reg = await registerFn({
           data: {
             inquiry_id: inquiryId,
             storage_path: signed.storage_path,
@@ -102,7 +124,21 @@ export function InquiryAttachments({
             size_bytes: file.size,
           },
         });
-        toast.success(`تم رفع: ${file.name}`);
+        toast.success(`تم رفع: ${file.name} — جارٍ فحص الفيروسات…`);
+        // Kick off the scan asynchronously; polling will surface the result.
+        scanFn({ data: { id: reg.id } })
+          .then((res) => {
+            if (res.scan_status === "infected") {
+              toast.error(`تم حجب ${file.name} بعد اكتشاف محتوى مشبوه.`);
+            } else if (res.scan_status === "clean") {
+              toast.success(`اجتاز ${file.name} فحص الفيروسات.`);
+            }
+            qc.invalidateQueries({ queryKey: listKey });
+          })
+          .catch((e: any) => {
+            toast.error(`تعذّر إتمام فحص ${file.name}: ${e?.message ?? ""}`);
+            qc.invalidateQueries({ queryKey: listKey });
+          });
       } catch (e: any) {
         toast.error(e?.message ?? `تعذّر رفع ${file.name}`);
       } finally {
@@ -112,6 +148,48 @@ export function InquiryAttachments({
     qc.invalidateQueries({ queryKey: listKey });
     if (inputRef.current) inputRef.current.value = "";
   }
+
+  function ScanBadge({
+    status,
+    reason,
+  }: {
+    status: "pending" | "scanning" | "clean" | "infected" | "error";
+    reason?: string | null;
+  }) {
+    if (status === "clean") {
+      return (
+        <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+          <ShieldCheck className="h-3 w-3" /> سليم
+        </span>
+      );
+    }
+    if (status === "infected") {
+      return (
+        <span
+          title={reason ?? undefined}
+          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 border border-red-200"
+        >
+          <ShieldAlert className="h-3 w-3" /> محجوب — {reason ?? "محتوى مشبوه"}
+        </span>
+      );
+    }
+    if (status === "error") {
+      return (
+        <span
+          title={reason ?? undefined}
+          className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200"
+        >
+          <ShieldQuestion className="h-3 w-3" /> تعذّر الفحص
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+        <Loader2 className="h-3 w-3 animate-spin" /> قيد الفحص
+      </span>
+    );
+  }
+
 
   return (
     <div className={compact ? "space-y-2" : "space-y-3"}>
@@ -175,12 +253,15 @@ export function InquiryAttachments({
                   <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="truncate">{a.file_name}</div>
+                  <div className="truncate flex items-center gap-2">
+                    <span className="truncate">{a.file_name}</span>
+                    <ScanBadge status={a.scan_status} reason={a.scan_result?.reason} />
+                  </div>
                   <div className="text-[11px] text-muted-foreground">
                     {humanBytes(a.size_bytes)} · {new Date(a.created_at).toLocaleString("ar-SA")}
                   </div>
                 </div>
-                {a.download_url && (
+                {a.scan_status === "clean" && a.download_url ? (
                   <a
                     href={a.download_url}
                     target="_blank"
@@ -189,7 +270,9 @@ export function InquiryAttachments({
                   >
                     عرض
                   </a>
-                )}
+                ) : a.scan_status === "infected" ? (
+                  <span className="text-[11px] text-red-600">غير متاح</span>
+                ) : null}
                 <button
                   type="button"
                   onClick={() => {
