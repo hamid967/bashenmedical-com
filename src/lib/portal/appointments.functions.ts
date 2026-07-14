@@ -512,3 +512,89 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
     };
   });
 
+/* --------------------------- appointment timeline ------------------------- */
+/**
+ * Returns the ordered status history for one appointment (owner-scoped),
+ * synthesizing a "created" entry from `appointments.created_at` and a
+ * "checked_in" entry from `patient_check_ins.checked_in_at` when present.
+ */
+export const getAppointmentTimeline = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
+
+    const [historyRes, checkInRes] = await Promise.all([
+      supabase
+        .from("appointment_status_history")
+        .select("id, from_status, to_status, reason, created_at")
+        .eq("appointment_id", data.id)
+        .order("created_at", { ascending: true }),
+      supabase
+        .from("patient_check_ins")
+        .select("queue_number, status, checked_in_at")
+        .eq("appointment_id", data.id)
+        .maybeSingle(),
+    ]);
+    if (historyRes.error) throw new Error(historyRes.error.message);
+
+    type Row = {
+      key: string;
+      status: string;
+      at: string;
+      from?: string | null;
+      reason?: string | null;
+      queue_number?: number | null;
+    };
+
+    const rows: Row[] = [];
+
+    // Synthetic "created" row (قيد المراجعة) from appointment creation.
+    const created = (appt as { created_at?: string | null }).created_at;
+    if (created) {
+      rows.push({ key: "created", status: "new", at: created });
+    }
+
+    for (const h of historyRes.data ?? []) {
+      // Skip the very first row if it duplicates the synthetic "created"
+      // entry (from_status is null and to_status is "new").
+      if (!h.from_status && h.to_status === "new" && created && h.created_at === created) {
+        continue;
+      }
+      rows.push({
+        key: h.id as string,
+        status: String(h.to_status),
+        at: h.created_at as string,
+        from: h.from_status as string | null,
+        reason: (h.reason as string | null) ?? null,
+      });
+    }
+
+    // Append check-in row if the history didn't already reflect it.
+    if (checkInRes.data?.checked_in_at) {
+      const hasCheckedIn = rows.some((r) => r.status === "checked_in");
+      if (!hasCheckedIn) {
+        rows.push({
+          key: "check_in",
+          status: "checked_in",
+          at: checkInRes.data.checked_in_at as string,
+          queue_number: (checkInRes.data.queue_number as number | null) ?? null,
+        });
+      } else {
+        // Attach queue number to the checked_in event.
+        const idx = rows.findIndex((r) => r.status === "checked_in");
+        if (idx >= 0) rows[idx].queue_number = (checkInRes.data.queue_number as number | null) ?? null;
+      }
+    }
+
+    // Sort by timestamp asc as a defensive final pass.
+    rows.sort((a, b) => new Date(a.at).getTime() - new Date(b.at).getTime());
+
+    return {
+      appointmentId: data.id,
+      currentStatus: String((appt as { status: string }).status),
+      events: rows,
+    };
+  });
+
