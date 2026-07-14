@@ -542,7 +542,7 @@ function fmtDateTime(iso: string | null) {
 type Status = "pending" | "approved" | "processed" | "rejected" | "canceled";
 const STATUS_META: Record<Status, { label: string; cls: string; icon: any }> = {
   pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-700", icon: Clock },
-  approved: { label: "معتمدة (قيد الصرف)", cls: "bg-sky-50 text-sky-700", icon: CheckCircle2 },
+  approved: { label: "معتمدة (قيد الصرف)", cls: "bg-teal-50 text-teal-700", icon: CheckCircle2 },
   processed: { label: "تمت المعالجة", cls: "bg-emerald-50 text-emerald-700", icon: CheckCircle2 },
   rejected: { label: "مرفوضة", cls: "bg-red-50 text-[color:var(--mag-danger)]", icon: XCircle },
   canceled: { label: "أُلغيت", cls: "bg-slate-100 text-slate-600", icon: Ban },

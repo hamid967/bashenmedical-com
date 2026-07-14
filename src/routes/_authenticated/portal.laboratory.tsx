@@ -138,11 +138,11 @@ function parseSummary(summary: string | null | undefined): ParsedResult[] {
 
 const CATEGORY_STYLES: Record<string, { bg: string; ring: string; icon: string; label: string }> = {
   hematology: { bg: "from-rose-50 to-rose-100/50", ring: "ring-rose-200", icon: "text-rose-600", label: "أمراض الدم" },
-  chemistry:  { bg: "from-sky-50 to-sky-100/50",  ring: "ring-sky-200",  icon: "text-sky-600",  label: "الكيمياء الحيوية" },
-  hormones:   { bg: "from-violet-50 to-violet-100/50", ring: "ring-violet-200", icon: "text-violet-600", label: "الهرمونات" },
+  chemistry:  { bg: "from-teal-50 to-teal-100/50",  ring: "ring-teal-200",  icon: "text-teal-600",  label: "الكيمياء الحيوية" },
+  hormones:   { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200", icon: "text-teal-600", label: "الهرمونات" },
   urine:      { bg: "from-amber-50 to-amber-100/50", ring: "ring-amber-200", icon: "text-amber-700", label: "تحليل البول" },
   microbiology:{bg: "from-emerald-50 to-emerald-100/50", ring: "ring-emerald-200", icon: "text-emerald-600", label: "الأحياء الدقيقة" },
-  serology:   { bg: "from-indigo-50 to-indigo-100/50", ring: "ring-indigo-200", icon: "text-indigo-600", label: "المصلية" },
+  serology:   { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200", icon: "text-teal-600", label: "المصلية" },
   lipid:      { bg: "from-orange-50 to-orange-100/50", ring: "ring-orange-200", icon: "text-orange-600", label: "الدهون" },
   other:      { bg: "from-slate-50 to-slate-100/50", ring: "ring-slate-200", icon: "text-slate-600", label: "أخرى" },
 };
@@ -424,8 +424,8 @@ function LaboratoryPage() {
       )}
 
       {/* Tip banner */}
-      <div className="rounded-2xl p-4 bg-gradient-to-r from-sky-50 to-violet-50 ring-1 ring-sky-100 flex items-start gap-3">
-        <Sparkles className="h-5 w-5 text-sky-600 mt-0.5" />
+      <div className="rounded-2xl p-4 bg-gradient-to-r from-teal-50 to-teal-50 ring-1 ring-teal-100 flex items-start gap-3">
+        <Sparkles className="h-5 w-5 text-teal-600 mt-0.5" />
         <p className="text-sm text-[color:var(--portal-ink)]">
           اضغط على أي نتيجة داخل البطاقة لعرض تطورها الزمني في رسم بياني تفاعلي.
         </p>
