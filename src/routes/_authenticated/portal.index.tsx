@@ -558,8 +558,7 @@ function PortalOverview() {
               {data.doctorsRail.slice(0, 6).map((d) => (
                 <Link
                   key={d.id}
-                  to="/doctors/$slug"
-                  params={{ slug: d.id }}
+                  to="/portal/doctors"
                   className="mag-card mag-card-hover p-3 text-center flex flex-col items-center"
                 >
                   <span
