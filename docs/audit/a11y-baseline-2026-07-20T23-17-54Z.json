@@ -1,0 +1,184 @@
+[
+  {
+    "route": "/",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/about",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/doctors",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "help": "Scrollable region must have keyboard access",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/branches",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/excellence",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/health",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/faq",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/contact",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/accreditations",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/book",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/emergency",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/auth",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/about",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/doctors",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "help": "Scrollable region must have keyboard access",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/branches",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/excellence",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/health",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/faq",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/contact",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/accreditations",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/book",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/emergency",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  },
+  {
+    "route": "/auth",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": true
+  }
+]
