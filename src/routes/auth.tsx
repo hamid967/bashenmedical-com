@@ -528,7 +528,7 @@ function AuthPage() {
               />
               <div>
                 <div className="flex justify-between items-center px-1 mb-1.5">
-                  <label className="text-xs font-semibold text-[#48C7FF]">كلمة المرور</label>
+                  <label htmlFor="auth-password" className="text-xs font-semibold text-[#48C7FF]">كلمة المرور</label>
                   {mode === "signin" && (
                     <button
                       type="button"
