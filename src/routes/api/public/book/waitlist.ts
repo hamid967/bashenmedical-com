@@ -117,7 +117,7 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data } = await supabaseAdmin
             .from("appointment_waitlist")
-            .select("id, patient_phone, status, notified_at, preferred_from, preferred_to, created_at, doctor_id")
+            .select("id, patient_phone, status, notified_at, preferred_from, preferred_to, created_at, doctor_id, offered_date, offered_time, offered_expires_at")
             .eq("reference", ref)
             .maybeSingle();
           if (!data) return json(404, { ok: false, kind: "not_found", message: "لم يتم العثور على الطلب." });
@@ -143,6 +143,9 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
             preferred_to: data.preferred_to,
             created_at: data.created_at,
             doctor_name,
+            offered_date: (data as any).offered_date ?? null,
+            offered_time: (data as any).offered_time ?? null,
+            offered_expires_at: (data as any).offered_expires_at ?? null,
           });
         } catch {
           return json(500, { ok: false, kind: "server", message: "خطأ داخلي غير متوقع." });
