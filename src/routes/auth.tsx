@@ -626,7 +626,7 @@ function AuthPage() {
 
               {otpChannel === "email" ? (
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                  <label htmlFor="otp-email" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
                     البريد الإلكتروني
                   </label>
                   <div className="relative">
