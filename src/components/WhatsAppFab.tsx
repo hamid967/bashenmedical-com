@@ -2,11 +2,10 @@
  * WhatsAppFab — floating WhatsApp contact button.
  */
 import { MessageCircle } from "lucide-react";
-
-const WHATSAPP_NUMBER = "966500000000";
+import { whatsappUrl } from "@/lib/site";
 
 export function WhatsAppFab() {
-  const href = `https://wa.me/${WHATSAPP_NUMBER}`;
+  const href = whatsappUrl();
   return (
     <a
       href={href}

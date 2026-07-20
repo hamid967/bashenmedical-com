@@ -170,36 +170,47 @@ async function sendMessagingRun(admin: any): Promise<{
   return stats;
 }
 
-async function sendPushRun(): Promise<{
+function getAdminClient() {
+  const url = process.env.SUPABASE_URL!;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  if (!url || !serviceKey) throw new Error("Supabase env missing");
+  return createClient(url, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+}
+
+async function sendPushRun(admin: any): Promise<{
   enqueue: unknown;
   sent: number;
   failed: number;
   expired: number;
   no_subscription: number;
-  messaging: Awaited<ReturnType<typeof sendMessagingRun>>;
+  push_skipped?: string;
 }> {
-  const url = process.env.SUPABASE_URL!;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  const vapidPublic = process.env.VAPID_PUBLIC_KEY!;
-  const vapidPrivate = process.env.VAPID_PRIVATE_KEY!;
+  const vapidPublic = process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivate = process.env.VAPID_PRIVATE_KEY;
   const vapidSubject = process.env.VAPID_SUBJECT || "mailto:notifications@example.com";
 
-  if (!url || !serviceKey) throw new Error("Supabase env missing");
-  if (!vapidPublic || !vapidPrivate) throw new Error("VAPID env missing");
-
-  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
-
-  const admin = createClient(url, serviceKey, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  });
-
-  // 1) Enqueue any due reminders
+  // 1) Enqueue any due reminders (independent of VAPID availability)
   const { data: enqueueResult, error: enqueueError } = await admin.rpc(
     "enqueue_appointment_reminders",
   );
   if (enqueueError) {
     console.error("enqueue_appointment_reminders failed:", enqueueError);
   }
+
+  if (!vapidPublic || !vapidPrivate) {
+    return {
+      enqueue: enqueueResult ?? null,
+      sent: 0,
+      failed: 0,
+      expired: 0,
+      no_subscription: 0,
+      push_skipped: "VAPID env missing",
+    };
+  }
+
+  webpush.setVapidDetails(vapidSubject, vapidPublic, vapidPrivate);
 
   // 2) Fetch pending web_push rows (user + staff)
   const { data: pending, error: pendErr } = await admin
@@ -232,13 +243,12 @@ async function sendPushRun(): Promise<{
       staffUsersCache.set(key, []);
       return [];
     }
-    const ids = Array.from(new Set((data ?? []).map((r) => r.user_id as string)));
+    const ids: string[] = Array.from(new Set((data ?? []).map((r: any) => r.user_id as string)));
     staffUsersCache.set(key, ids);
     return ids;
   }
 
   for (const row of rows) {
-    // Resolve target user id list
     let targetUserIds: string[] = [];
     if (row.audience === "staff") {
       const meta = (row.metadata ?? {}) as Record<string, unknown>;
@@ -313,7 +323,6 @@ async function sendPushRun(): Promise<{
         const status = e.statusCode ?? 0;
         lastError = e.message || String(err);
         if (status === 404 || status === 410) {
-          // Gone / not registered — delete subscription
           await admin.from("push_subscriptions").delete().eq("id", s.id);
           expired++;
         } else {
@@ -337,16 +346,10 @@ async function sendPushRun(): Promise<{
     else failed++;
   }
 
-  const messaging = await sendMessagingRun(admin);
-  return { enqueue: enqueueResult ?? null, sent, failed, expired, no_subscription: noSub, messaging };
+  return { enqueue: enqueueResult ?? null, sent, failed, expired, no_subscription: noSub };
 }
 
 async function handle(request: Request): Promise<Response> {
-  // Auth: require a dedicated server-only CRON_SECRET (accepted via
-  // `x-cron-secret` header or `Authorization: Bearer …`). We deliberately
-  // do NOT accept the Supabase publishable/anon key here — that value ships
-  // in every browser bundle, so anyone could otherwise trigger this endpoint
-  // and spam push notifications / exhaust VAPID quota.
   const expected = process.env.CRON_SECRET;
   const provided =
     request.headers.get("x-cron-secret") ??
@@ -367,8 +370,29 @@ async function handle(request: Request): Promise<Response> {
   }
 
   try {
-    const result = await sendPushRun();
-    return Response.json({ ok: true, ...result });
+    const admin = getAdminClient();
+    // Run push and messaging independently so WhatsApp/SMS (including
+    // `waitlist_offer` rows) are always dispatched even when VAPID is
+    // missing or the push loop errors out.
+    const [pushResult, messaging] = await Promise.all([
+      sendPushRun(admin).catch((e) => ({
+        error: e instanceof Error ? e.message : String(e),
+        sent: 0,
+        failed: 0,
+        expired: 0,
+        no_subscription: 0,
+      })),
+      sendMessagingRun(admin).catch((e) => ({
+        error: e instanceof Error ? e.message : String(e),
+        sms_sent: 0,
+        sms_failed: 0,
+        sms_skipped: 0,
+        whatsapp_sent: 0,
+        whatsapp_failed: 0,
+        whatsapp_skipped: 0,
+      })),
+    ]);
+    return Response.json({ ok: true, push: pushResult, messaging });
   } catch (e) {
     console.error("send-reminders failed:", e);
     return new Response(

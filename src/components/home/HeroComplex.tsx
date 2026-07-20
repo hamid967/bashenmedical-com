@@ -98,7 +98,7 @@ export function HeroComplex() {
               </span>
             </Link>
             <a
-              href="tel:+966920000000"
+              href="tel:+966555088623"
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 backdrop-blur-md text-white px-7 py-3.5 text-sm md:text-base font-semibold hover:bg-white/20 transition-all duration-300"
             >
               <Phone className="h-5 w-5" />
