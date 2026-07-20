@@ -147,6 +147,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => {
+    // Client-only web-vitals sampler (LCP/CLS/INP/FCP/TTFB).
+    // Fails silently if the collector endpoint isn't live yet — safe to ship.
+    import("@/lib/observability/web-vitals")
+      .then((m) => m.startWebVitals())
+      .catch(() => void 0);
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
