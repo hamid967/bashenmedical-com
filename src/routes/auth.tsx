@@ -660,6 +660,7 @@ function AuthPage() {
                       <Phone className="h-4 w-4" />
                     </span>
                     <input
+                      id="otp-phone"
                       type="tel"
                       required
                       inputMode="tel"
