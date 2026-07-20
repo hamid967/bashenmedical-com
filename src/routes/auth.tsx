@@ -722,6 +722,7 @@ function AuthPage() {
                     <KeyRound className="h-4 w-4" />
                   </span>
                   <input
+                    id="otp-code"
                     type="text"
                     required
                     inputMode="numeric"
