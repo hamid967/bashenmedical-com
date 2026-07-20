@@ -111,8 +111,15 @@ export function Footer() {
             </li>
           </ul>
           <div className="mt-4 flex items-center gap-3">
-            <a href={SITE.instagram} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-primary">
-              <Instagram className="h-5 w-5" />
+            <a
+              href={SITE.instagram}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={isAr ? "انستغرام مركز باعشن الطبي" : "Baeshen Medical Center on Instagram"}
+              className="text-muted-foreground hover:text-primary"
+            >
+              <Instagram className="h-5 w-5" aria-hidden="true" />
+              <span className="sr-only">{isAr ? "انستغرام" : "Instagram"}</span>
             </a>
           </div>
         </div>
