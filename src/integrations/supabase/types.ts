@@ -4786,6 +4786,39 @@ export type Database = {
           },
         ]
       }
+      web_vitals: {
+        Row: {
+          created_at: string
+          id: string
+          metric: string
+          metric_id: string | null
+          ts: string
+          url: string
+          user_agent: string | null
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metric: string
+          metric_id?: string | null
+          ts?: string
+          url: string
+          user_agent?: string | null
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metric?: string
+          metric_id?: string | null
+          ts?: string
+          url?: string
+          user_agent?: string | null
+          value?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
