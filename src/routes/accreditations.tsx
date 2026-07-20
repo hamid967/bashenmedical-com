@@ -272,7 +272,7 @@ function AccreditationsPage() {
                       <Icon className="h-6 w-6" />
                     </div>
                     {a.year && (
-                      <span className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                      <span className="rounded-full bg-foreground/10 px-2.5 py-0.5 text-[11px] font-semibold text-foreground">
                         {a.year}
                       </span>
                     )}
