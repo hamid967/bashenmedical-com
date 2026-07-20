@@ -138,6 +138,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
 import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './routes/api/public/inquiries/mark-whatsapp-opened'
 import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
+import { Route as ApiPublicHooksWebVitalsRouteImport } from './routes/api/public/hooks/web-vitals'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
@@ -859,6 +860,11 @@ const ApiPublicInquiriesCreateRoute =
     path: '/api/public/inquiries/create',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksWebVitalsRoute = ApiPublicHooksWebVitalsRouteImport.update({
+  id: '/api/public/hooks/web-vitals',
+  path: '/api/public/hooks/web-vitals',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSendRemindersRoute =
   ApiPublicHooksSendRemindersRouteImport.update({
     id: '/api/public/hooks/send-reminders',
@@ -1091,6 +1097,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
@@ -1235,6 +1242,7 @@ export interface FileRoutesByTo {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
@@ -1383,6 +1391,7 @@ export interface FileRoutesById {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
@@ -1531,6 +1540,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
@@ -1675,6 +1685,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
@@ -1822,6 +1833,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
@@ -1888,6 +1900,7 @@ export interface RootRouteChildren {
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
+  ApiPublicHooksWebVitalsRoute: typeof ApiPublicHooksWebVitalsRoute
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
@@ -2798,6 +2811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicInquiriesCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/web-vitals': {
+      id: '/api/public/hooks/web-vitals'
+      path: '/api/public/hooks/web-vitals'
+      fullPath: '/api/public/hooks/web-vitals'
+      preLoaderRoute: typeof ApiPublicHooksWebVitalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/send-reminders': {
       id: '/api/public/hooks/send-reminders'
       path: '/api/public/hooks/send-reminders'
@@ -3277,6 +3297,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
+  ApiPublicHooksWebVitalsRoute: ApiPublicHooksWebVitalsRoute,
   ApiPublicInquiriesCreateRoute: ApiPublicInquiriesCreateRoute,
   ApiPublicInquiriesMarkWhatsappOpenedRoute:
     ApiPublicInquiriesMarkWhatsappOpenedRoute,

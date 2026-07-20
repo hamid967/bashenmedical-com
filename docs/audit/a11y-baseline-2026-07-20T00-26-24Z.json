@@ -1,0 +1,398 @@
+[
+  {
+    "route": "/",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/about",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/doctors",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      },
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "help": "Scrollable region must have keyboard access",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/branches",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/excellence",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/health",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/faq",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/contact",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/accreditations",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 6
+      },
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/book",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-in-text-block",
+        "impact": "serious",
+        "help": "Links must be distinguishable without relying on color",
+        "nodes": 1
+      },
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/emergency",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/auth",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 2
+      },
+      {
+        "id": "label",
+        "impact": "critical",
+        "help": "Form elements must have labels",
+        "nodes": 1
+      },
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/about",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/doctors",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      },
+      {
+        "id": "scrollable-region-focusable",
+        "impact": "serious",
+        "help": "Scrollable region must have keyboard access",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/branches",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/excellence",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/health",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/faq",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/contact",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/accreditations",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 6
+      },
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/book",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-in-text-block",
+        "impact": "serious",
+        "help": "Links must be distinguishable without relying on color",
+        "nodes": 1
+      },
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/emergency",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  },
+  {
+    "route": "/auth",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 2
+      },
+      {
+        "id": "label",
+        "impact": "critical",
+        "help": "Form elements must have labels",
+        "nodes": 1
+      },
+      {
+        "id": "link-name",
+        "impact": "serious",
+        "help": "Links must have discernible text",
+        "nodes": 1
+      }
+    ],
+    "ok": true
+  }
+]
