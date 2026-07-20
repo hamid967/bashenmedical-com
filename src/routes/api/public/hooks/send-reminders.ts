@@ -243,7 +243,7 @@ async function sendPushRun(admin: any): Promise<{
       staffUsersCache.set(key, []);
       return [];
     }
-    const ids = Array.from(new Set((data ?? []).map((r: any) => r.user_id as string)));
+    const ids: string[] = Array.from(new Set((data ?? []).map((r: any) => r.user_id as string)));
     staffUsersCache.set(key, ids);
     return ids;
   }
