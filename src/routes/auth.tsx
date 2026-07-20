@@ -804,9 +804,9 @@ function AuthPage() {
         </div>
 
         {/* Bottom-corner meta */}
-        <div className="absolute bottom-6 left-6 hidden md:flex items-center gap-3 text-[10px] text-white/30 uppercase tracking-[0.2em]">
+        <div className="absolute bottom-6 left-6 hidden md:flex items-center gap-3 text-[10px] text-white/70 uppercase tracking-[0.2em]">
           <span>ISO Certified</span>
-          <span className="w-1 h-1 rounded-full bg-white/20" />
+          <span className="w-1 h-1 rounded-full bg-white/40" aria-hidden="true" />
           <span>Since 1984</span>
         </div>
       </div>
