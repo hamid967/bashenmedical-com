@@ -634,6 +634,7 @@ function AuthPage() {
                       <Mail className="h-4 w-4" />
                     </span>
                     <input
+                      id="otp-email"
                       type="email"
                       required
                       inputMode="email"
