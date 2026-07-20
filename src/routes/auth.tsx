@@ -652,7 +652,7 @@ function AuthPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                  <label htmlFor="otp-phone" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
                     رقم الجوال
                   </label>
                   <div className="relative">
