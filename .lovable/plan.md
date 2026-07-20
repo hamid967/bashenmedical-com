@@ -1,86 +1,133 @@
-# خطة بناء نظام الحجز الذكي + لوحة المريض (Baeshen)
+# Baeshen Medical Center — Elite Studio Engagement
 
-المواصفات ضخمة (30 قسم). بدلاً من إعادة كتابة كل شيء دفعة واحدة (ما يكسر ما يعمل حالياً)، سأنفّذها على **7 دفعات مركّزة** — كل دفعة تُسلَّم كاملة (DB + خادم + واجهة + اختبار) قبل الانتقال للتي بعدها. تحتاج تأكيدك على النقاط في نهاية الخطة قبل البدء.
+## 1) Current Project Assessment (audit snapshot)
+
+**Stack in place:** React 19 + TypeScript + TanStack Start/Router + Tailwind v4 + shadcn/ui + Supabase (Lovable Cloud) + TanStack Query + RHF + Zod + Playwright. Bilingual AR/EN with RTL support already wired. ~85 DB tables with RLS.
+
+**What works today**
+- Public marketing site (home, specialties, doctors, branches, centers, FAQ, contact) — SSR routes with per-route SEO metadata; `og:url` unified to bashenmedical.com; GSC verified.
+- Booking flow: multi-step wizard, slot holds with atomic guards, family/guest bookings with OTP linking, digital self-check-in with time window + idempotency, WhatsApp on check-in, appointment timeline.
+- Waitlist auto-offer on cancellation (10-min hold) + WhatsApp offer via cron.
+- Patient portal shell: appointments, dependents, notifications.
+- Admin portal: service inquiries with `has_role` guard + server-side `beforeLoad` gate; `_authenticated` layout gates all protected routes; non-staff auth users routed to `/portal`.
+- Security posture: role-based RLS on sensitive tables, `search_path` pinned on SECURITY DEFINER fns, `anon` execute revoked on internal helpers, tightened `WITH CHECK` on public request forms, `system_settings` staff-only read.
+- Unified contact number `+966 55 508 8623` sitewide; WhatsApp CTA via `whatsappUrl()` helper.
+- CI: e2e admin login flow with auto-provisioned `admin-e2e` user.
+
+**Gaps / known issues**
+- Patient dashboard still thin: no medical reports viewer, prescriptions, insurance approvals, invoices/payments surfaces wired end-to-end.
+- No true PWA (installable + offline shell + push) — only web push subscriptions table exists.
+- No cinematic intro; brand system is functional but not premium/Jazan-flavored.
+- Admin/Super Admin: many tables exist (payroll, inventory, complaints, ratings, second-opinion, corporate, home-care, nurse-calls, insurance) without full CRUD UX.
+- Doctor profile images: initials placeholder only (per memory).
+- Some public routes still rely on generated components without curated copy or medical-writer review.
+- No formal a11y audit report; no cross-browser matrix executed since the last redesign pass.
+- WhatsApp/Twilio requires live secrets to actually deliver — currently `skipped` without them.
+
+**Main problems**
+1. UX inconsistency between marketing site and patient/admin apps.
+2. Patient value: booking works, but post-visit journey (reports, Rx, insurance, billing) is incomplete.
+3. Content quality: copy, imagery, and medical accuracy need editorial pass in AR + EN.
+4. Brand ceiling: current design is clean but generic; lacks Jazan visual identity, motion, and premium finish.
+5. Admin depth: too many half-covered domains for one release.
+6. Observability & QA: no error monitoring, no perf budgets enforced, thin automated a11y.
+
+## 2) Team Structure (single accountable owner per lane)
+
+```text
+Executive/Product Director ── Project Manager
+    │
+    ├─ Squad 1  Public Site + SEO       Lead: Frontend Eng + SEO
+    ├─ Squad 2  Booking + Patient Access Lead: Full-stack + Supabase
+    ├─ Squad 3  Patient Dashboard        Lead: Frontend + Backend pair
+    ├─ Squad 4  Admin / Super Admin      Lead: Full-stack + BA
+    ├─ Squad 5  Security + DB + Integr.  Lead: Backend + Security
+    └─ Squad 6  Brand / Content / Film   Lead: Creative Director
+Cross-cutting: Healthcare BA, Medical Consultant, RTL Specialist, QA/A11y,
+DevOps, Patient Support, AI Engineer.
+```
+
+Every ticket carries: Owner · Acceptance Criteria · Deadline · Deps · Test Plan · KPI.
+
+## 3) 90-Day Roadmap
+
+**Days 1–15 — Foundation & Audit (no high-risk changes)**
+- Full a11y, perf, SEO, security, content, and DB audits → written reports.
+- Design system v2 tokens (Jazan palette, type scale, motion primitives) drafted; no code migration yet.
+- Observability baseline: error logging, web-vitals, uptime, cron heartbeats.
+- Change Manifest v1 published for approval.
+
+**Days 16–45 — Public Site + Booking polish**
+- Squad 1: redesigned home, specialties, doctors, branches, centers, journal, contact — curated AR/EN copy, medical-review sign-off, per-route SEO + JSON-LD.
+- Squad 2: booking UX overhaul (mobile-first steps, inline errors, ETA/queue visibility, insurance selector, reason-for-visit taxonomy). Preserve current DB contracts.
+- Squad 6: photography plan + shot list; brand icon set v1; motion primitives.
+- QA: Playwright coverage for booking + top 10 public journeys, AR + EN, 3 viewports, 4 browsers.
+
+**Days 46–75 — Patient Dashboard + PWA**
+- Squad 3: reports viewer (signed URLs), prescriptions, insurance approvals, invoices/payments (read-only first), family switcher, notifications center.
+- Mobile/PWA: installable manifest, offline shell for portal, web push wired to `push_subscriptions`.
+- AI: symptom-triage helper (advisory only, disclaimered) + FAQ semantic search.
+- Cinematic intro (8–12s) with skip, reduced-motion, no autoplay audio, lazy-loaded, mobile-optimized.
+
+**Days 76–90 — Admin depth + Hardening**
+- Squad 4: prioritized admin surfaces — appointments ops, waitlist board, complaints/ratings, insurance approvals workflow, reports, audit log viewer, super-admin settings.
+- Squad 5: pen-test pass, RLS re-review, rate-limits on public endpoints, backup/restore drill, DR runbook.
+- Launch readiness: perf budgets green, WCAG 2.2 AA verified, cross-browser matrix green, rollback rehearsed.
+
+## 4) Priority Backlog (top items)
+
+P0 — Change Manifest approval · a11y report · SEO fixes carry-over · error monitoring · booking mobile UX pass.
+P1 — Patient reports/Rx/insurance/invoices UI · PWA installability · Jazan design tokens · content pass for top 20 pages.
+P2 — Admin appointments ops board · waitlist board · complaints/ratings workflows · audit log viewer.
+P3 — Cinematic intro · AI triage assistant · photography shoot · super-admin analytics.
+P4 — Payroll/inventory/home-care/nurse-calls admin surfaces (staged).
+
+## 5) Security & Technical Risks
+
+- Medical data exposure via misconfigured RLS on any new table → mandatory RLS + policy review before merge.
+- Signed-URL leakage for reports → short TTL, watermarking, access log.
+- Booking race conditions on new flows → keep atomic RPCs; property-test slot holds.
+- OTP abuse → per-phone + per-IP rate limits, backoff.
+- PWA cache poisoning of stale medical UI → NetworkFirst for HTML, versioned assets only.
+- Twilio/WhatsApp cost blow-up → per-recipient/day cap + dedupe.
+- Vendor lock (Lovable Cloud/Supabase) → documented export + migration playbook.
+- Regression risk on payments/auth/medical writes → gated behind Change Manifest sign-off; no direct schema edits without migration review.
+
+## 6) Budget Allocation ($500k / month, indicative)
+
+- Engineering (FE/BE/Mobile/AI/DevOps): $230k
+- Design + Creative + Motion + Photography/Film: $110k
+- Content (AR/EN medical writing + translation + review): $45k
+- QA + A11y + Security + Pen-test: $55k
+- Product/PM/BA/Medical consultant: $40k
+- Infra, tooling, licenses, Twilio/WhatsApp, storage, CDN: $20k
+
+## 7) Change Manifest (v1 — awaiting approval)
+
+Frozen until approved: `auth.*`, `storage.*`, payments code paths, medical-document tables, any DB migration. Allowed in parallel: content, copy, imagery, non-schema UI, SEO metadata, docs, tests.
+
+Planned first-wave changes (post-approval):
+- Design tokens in `src/styles.css` (additive, no removals).
+- New route content components under `src/components/marketing/*`.
+- Portal shell enhancements under `src/routes/_authenticated/portal.*`.
+- PWA manifest + guarded SW wrapper.
+- Observability client boot in `src/routes/__root.tsx`.
+
+## 8) Affected Files & DB Objects (first wave, no migrations yet)
+
+- `src/styles.css` (tokens), `src/routes/__root.tsx` (head + observability), `src/routes/index.tsx` (hero + intro slot), marketing components, portal routes under `_authenticated/portal.*`, `public/manifest.webmanifest`, `public/sw.js` wrapper.
+- DB: read-only until manifest approved. Later waves: additive columns on `appointments`, `notifications`, new `report_access_log`; no destructive changes.
+
+## 9) Testing & Rollback Plan
+
+- Unit: Vitest for hooks, validators, RPC wrappers.
+- Integration: server-fn tests with role guards (existing pattern).
+- E2E: Playwright — booking (guest + logged-in + family), portal, admin gate, waitlist offer, check-in window.
+- A11y: axe on all top routes AR + EN; manual keyboard + screen-reader pass on booking + portal.
+- Perf: Lighthouse CI budgets (LCP ≤ 2.5s mobile, CLS ≤ 0.1, TBT ≤ 200ms).
+- Security: `supabase--linter` clean; RLS regression suite; signed-URL tests.
+- Rollback: every migration paired with a reverse migration; feature-flag risky UI; keep previous route components until new ones pass QA; one-command SW kill-switch.
 
 ---
 
-## ما يوجد الآن (بعد الفحص)
-
-- `/book` — معالج 9 خطوات يعمل (types.ts, StepService..StepSuccess, submitBooking, idempotency-key). مبني على `appointments` + `availability` + `availability_slots`.
-- `/patient/*` بوابة موجودة (30+ صفحة) عبر `_authenticated/`.
-- `/reservations/*`, `/my-orders`, `/track`, `/lookup` — سطوح متعددة للحجز (تكرار).
-- جداول: `appointments`, `availability`, `availability_slots`, `appointment_waitlist`, `appointment_audit`, `dependents`, `patients`, `doctors`, `branches`, `specialties`, `insurance_providers`, `insurance_approvals`, `payments`, `notifications`.
-- **مفقود جوهرياً:** `slot_holds` (تعليق مؤقت للموعد)، حالة "held/pending_*"، OTP هاتف، ربط ضيف→حساب، تدفّق دفع فعلي، تدفق إعادة جدولة/إلغاء موحّد من البوابة، إعدادات Super Admin (كلها مبعثرة).
-
----
-
-## الدفعات (تُنفَّذ بالترتيب)
-
-### الدفعة 1 — أساس البيانات (يوم واحد)
-- Migration: `slot_holds` (patient_ref, doctor_id, date, time, expires_at, idempotency_key).
-- توسيع `appointments.status` لتشمل: `held, pending_verification, pending_payment, checked_in, in_progress, no_show`.
-- `appointment_status_history` (منفصل عن audit، مرتبط بـ status transition).
-- RPC واحد `book_appointment_atomic(...)` بمعاملة SERIALIZABLE: يتحقق من عدم التعارض ويحجز في استعلام واحد. يستبدل الفحص المزدوج الحالي في `create.ts`.
-- Indexes: `(doctor_id, appointment_date, appointment_time)` UNIQUE partial على الحالات النشطة.
-- RLS + GRANTs لكل جدول جديد.
-
-### الدفعة 2 — محرّك الحجز الجديد (`/book`) ✅
-- ✅ تعليق الفتحة 5 دقائق مع عدّاد مرئي (SlotHoldBanner + useSlotHold + `/api/public/book/hold`).
-- ✅ إعادة تحقّق قبل الإرسال + إظهار الحجوز النشطة كمشغولة في نتائج التوفر لجلسات أخرى.
-- ✅ اقتراحات ذكية للطبيب البديل (كانت موجودة، أُعيد ربطها مع الـ hold).
-- ✅ "حجز لأحد أفراد الأسرة" (DependentPicker) للمستخدمين المسجّلين في خطوة بيانات المريض.
-- ⏳ نقطة "أقرب موعد متاح" الموحّدة (سنضيفها في الدفعة 4 مع لوحة المريض).
-
-### الدفعة 3 — OTP بريد + ربط ضيف→حساب ✅
-- ✅ حقل بريد إلكتروني اختياري في خطوة بيانات المريض (يُخزَّن على `appointments.patient_email`).
-- ✅ RPC `link_guest_appointments()` بصلاحية `authenticated`: تُنشئ/تربط سجل مريض للمستخدم وتربط كل الحجوزات المطابقة بالبريد أو الجوال.
-- ✅ `EmailOtpLinker` على شاشة النجاح: إرسال OTP بريدي عبر Supabase (`signInWithOtp` → `verifyOtp`) ثم استدعاء الـ RPC تلقائياً.
-- ✅ ربط تلقائي بلا تدخل عند فتح شاشة النجاح بجلسة قائمة.
-- ⏳ لاحقاً: OTP SMS/واتساب كخيار ثانوي عند ربط مزوّد.
-
-### الدفعة 4 — لوحة المريض المعاد تصميمها (`/patient`) ✅
-- ✅ Bottom nav للجوال (5 عناصر: الرئيسية/مواعيدي/احجز/سجلي/حسابي) في `PortalShell`، مع sidebar للـ desktop (كان موجوداً).
-- ✅ Check-in رقمي: `performSelfCheckIn` server fn تُنشئ سجل `patient_check_ins` وتُعيد رقم الدور، مع نافذة زمنية (−60 دقيقة → +30 دقيقة) وتحويل حالة الموعد إلى `checked_in`.
-- ✅ زر "تسجيل الحضور" ديناميكي على بطاقة الموعد داخل النافذة، وشارة "تم تسجيل الحضور" بعد ذلك.
-- ✅ Dashboard cards (الموعد التالي، تقارير، فواتير، تأمين) — موجودة سابقاً في `portal.index.tsx`.
-- ✅ تدفّق موحّد لإعادة جدولة + إلغاء — موجود في `portal.appointments.tsx`.
-- ⏳ تبويبات (قادمة/معلّقة/سابقة/ملغاة) موجودة عبر scope + status filter؛ إعادة تصميم كـ pill tabs مستقلة في دفعة لاحقة.
-
-### الدفعة 5 — قائمة الانتظار + الإشعارات
-- توسيع `appointment_waitlist` الموجود + تشغيله فعلياً: عند تحرّر فتحة → notify → hold تلقائي 10 دقائق → confirmation بضغطة.
-- مركز إشعارات موحّد (in-app + SMS + email + WhatsApp) مع تفضيلات القناة.
-
-### الدفعة 6 — التقارير + الفواتير + التأمين
-- توحيد `medical_reports`/`lab_reports`/`radiology_reports` في عرض واحد مع signed URLs (Storage) بدل روابط عامة.
-- ربط `payments` بمزوّد سعودي (بوابة موجودة أو Paddle). لا محاكاة نجاح.
-- عرض `insurance_approvals` مع الحالات الكاملة والوثائق المطلوبة.
-
-### الدفعة 7 — Admin/Reception Console + Super Admin Settings
-- Command Center: جدول اليوم، timeline، مواعيد الطوارئ، تحويلات.
-- `system_settings` — نقل كل الثوابت (slot hold duration, cancellation window…) لواجهة إدارة.
-- سجل تدقيق لكل تغيير حسّاس.
-
----
-
-## تفاصيل تقنية
-
-- كل الجداول الجديدة: RLS + GRANT + `service_role` (وفق قواعد Cloud).
-- Server-only logic عبر `createServerFn` أو `/api/public/*` (الأخير للـ webhooks/OTP فقط بعد signature verification).
-- التوقيت: كل مقارنة "اليوم" تمرّ عبر `riyadhTodayIso()` الموجود.
-- Realtime: `useRealtimeInvalidation` الحالي يوسَّع ليشمل `slot_holds`.
-- i18n: كل نص جديد عبر `src/locales/{ar,en}/*.json`.
-- لا حذف لصفحات موجودة قبل التأكد من عدم كسر تدفّقات؛ التوحيد تدريجي (`/reservations/*` تبقى redirect إلى `/book` في الدفعة 2).
-
-## ما لن أفعله
-
-- لن أستبدل `client.ts`, `auth-middleware.ts`, `types.ts` (auto-gen).
-- لن أنشئ Edge Functions لمنطق داخلي (كل شيء `createServerFn`).
-- لن أُدخل بوابة دفع أو مزوّد SMS دون طلب مفاتيحه صراحة.
-
----
-
-## أحتاج تأكيدك على:
-
-1. **مزوّد SMS للـ OTP**: هل لديك Twilio/Unifonic/آخر؟ (سأطلب المفاتيح في الدفعة 3.)
-2. **بوابة الدفع**: هل نفعّل Lovable Stripe المدمج (بدون حساب) أم لديك بوابة سعودية محدّدة (Moyasar/HyperPay)؟
-3. **البدء بالدفعة 1** (أساس البيانات + RPC ذرّي) الآن؟ أم تفضّل ترتيباً مختلفاً؟
+**Ask:** approve this plan and the Change Manifest so Squad 1 (Public Site + SEO) and Squad 6 (Brand/Content) can start in parallel with the audit deliverables, while high-risk lanes (auth, payments, medical data, migrations) remain frozen pending sign-off.
