@@ -118,7 +118,7 @@ function IntlPage() {
             <h3 className="font-bold mb-2">مكتب المرضى الدوليين</h3>
             <ul className="text-sm space-y-1.5 text-muted-foreground">
               <li>البريد: <span dir="ltr" className="text-foreground">intl@baeshen.med</span></li>
-              <li>واتساب: <span dir="ltr" className="text-foreground">+966 50 000 0000</span></li>
+              <li>واتساب: <span dir="ltr" className="text-foreground">+966 55 508 8623</span></li>
               <li>ساعات العمل: 8:00ص – 8:00م بتوقيت مكة المكرمة</li>
             </ul>
           </div>
