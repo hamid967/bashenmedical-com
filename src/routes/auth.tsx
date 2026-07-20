@@ -545,6 +545,9 @@ function AuthPage() {
                     <Lock className="h-4 w-4" />
                   </span>
                   <input
+                    id="auth-password"
+                    name="password"
+                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
                     type={showPass ? "text" : "password"}
                     required
                     minLength={6}
