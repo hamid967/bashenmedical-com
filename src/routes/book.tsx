@@ -612,7 +612,7 @@ function BookPage() {
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           {t("page.alreadyBooked")}{" "}
-          <Link to="/track" search={{ ref: undefined, phone4: undefined }} className="text-primary hover:underline">
+          <Link to="/track" search={{ ref: undefined, phone4: undefined }} className="text-primary underline underline-offset-2 hover:no-underline">
             {t("page.trackBooking")}
           </Link>
         </p>
