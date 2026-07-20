@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useId } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { toast } from "sonner";
@@ -528,7 +528,7 @@ function AuthPage() {
               />
               <div>
                 <div className="flex justify-between items-center px-1 mb-1.5">
-                  <label className="text-xs font-semibold text-[#48C7FF]">كلمة المرور</label>
+                  <label htmlFor="auth-password" className="text-xs font-semibold text-[#48C7FF]">كلمة المرور</label>
                   {mode === "signin" && (
                     <button
                       type="button"
@@ -545,6 +545,9 @@ function AuthPage() {
                     <Lock className="h-4 w-4" />
                   </span>
                   <input
+                    id="auth-password"
+                    name="password"
+                    autoComplete={mode === "signin" ? "current-password" : "new-password"}
                     type={showPass ? "text" : "password"}
                     required
                     minLength={6}
@@ -623,7 +626,7 @@ function AuthPage() {
 
               {otpChannel === "email" ? (
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                  <label htmlFor="otp-email" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
                     البريد الإلكتروني
                   </label>
                   <div className="relative">
@@ -631,6 +634,7 @@ function AuthPage() {
                       <Mail className="h-4 w-4" />
                     </span>
                     <input
+                      id="otp-email"
                       type="email"
                       required
                       inputMode="email"
@@ -648,7 +652,7 @@ function AuthPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                  <label htmlFor="otp-phone" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
                     رقم الجوال
                   </label>
                   <div className="relative">
@@ -656,6 +660,7 @@ function AuthPage() {
                       <Phone className="h-4 w-4" />
                     </span>
                     <input
+                      id="otp-phone"
                       type="tel"
                       required
                       inputMode="tel"
@@ -709,7 +714,7 @@ function AuthPage() {
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                <label htmlFor="otp-code" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
                   رمز التحقق
                 </label>
                 <div className="relative">
@@ -717,6 +722,7 @@ function AuthPage() {
                     <KeyRound className="h-4 w-4" />
                   </span>
                   <input
+                    id="otp-code"
                     type="text"
                     required
                     inputMode="numeric"
@@ -833,21 +839,24 @@ function Field({
   required?: boolean;
   dir?: "ltr" | "rtl";
 }) {
+  const inputId = useId();
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+      <label htmlFor={inputId} className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
         {label}
       </label>
       <div className="relative">
-        <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
+        <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40" aria-hidden="true">
           {icon}
         </span>
         <input
+          id={inputId}
           type={type}
           required={required}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           dir={dir}
+          autoComplete={type === "email" ? "email" : type === "text" ? "name" : undefined}
           className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
         />
       </div>
