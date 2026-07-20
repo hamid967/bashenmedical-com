@@ -833,21 +833,24 @@ function Field({
   required?: boolean;
   dir?: "ltr" | "rtl";
 }) {
+  const inputId = useId();
   return (
     <div>
-      <label className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+      <label htmlFor={inputId} className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
         {label}
       </label>
       <div className="relative">
-        <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40">
+        <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40" aria-hidden="true">
           {icon}
         </span>
         <input
+          id={inputId}
           type={type}
           required={required}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           dir={dir}
+          autoComplete={type === "email" ? "email" : type === "text" ? "name" : undefined}
           className="w-full h-12 rounded-xl bg-white/5 border border-white/10 ps-10 pe-3 text-sm outline-none placeholder:text-white/20 focus:border-[#1FAEFF] focus:bg-white/10 transition-all"
         />
       </div>
