@@ -188,6 +188,10 @@ export type Database = {
           id: string
           notes: string | null
           notified_at: string | null
+          offered_date: string | null
+          offered_expires_at: string | null
+          offered_hold_id: string | null
+          offered_time: string | null
           patient_name: string
           patient_phone: string
           preferred_from: string
@@ -204,6 +208,10 @@ export type Database = {
           id?: string
           notes?: string | null
           notified_at?: string | null
+          offered_date?: string | null
+          offered_expires_at?: string | null
+          offered_hold_id?: string | null
+          offered_time?: string | null
           patient_name: string
           patient_phone: string
           preferred_from: string
@@ -220,6 +228,10 @@ export type Database = {
           id?: string
           notes?: string | null
           notified_at?: string | null
+          offered_date?: string | null
+          offered_expires_at?: string | null
+          offered_hold_id?: string | null
+          offered_time?: string | null
           patient_name?: string
           patient_phone?: string
           preferred_from?: string
@@ -4873,6 +4885,14 @@ export type Database = {
           request_number: string
         }[]
       }
+      confirm_waitlist_offer: {
+        Args: { _phone4: string; _ref: string }
+        Returns: {
+          appointment_id: string
+          message: string
+          ok: boolean
+        }[]
+      }
       dashboard_appointments_daily: {
         Args: { _branch_id?: string; _days?: number }
         Returns: {
@@ -5476,6 +5496,15 @@ export type Database = {
           status: string
           title: string
         }[]
+      }
+      try_fill_waitlist_slot: {
+        Args: {
+          _branch_id: string
+          _date: string
+          _doctor_id: string
+          _time: string
+        }
+        Returns: string
       }
       update_appointment_notes: {
         Args: { _id: string; _notes: string; _reason?: string }

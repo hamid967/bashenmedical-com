@@ -139,6 +139,7 @@ import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/publi
 import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './routes/api/public/inquiries/mark-whatsapp-opened'
 import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
+import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
 import { Route as ApiPublicBookMonthAvailabilityRouteImport } from './routes/api/public/book/month-availability'
@@ -864,6 +865,12 @@ const ApiPublicHooksSendRemindersRoute =
     path: '/api/public/hooks/send-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBookWaitlistConfirmRoute =
+  ApiPublicBookWaitlistConfirmRouteImport.update({
+    id: '/api/public/book/waitlist-confirm',
+    path: '/api/public/book/waitlist-confirm',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookWaitlistRoute = ApiPublicBookWaitlistRouteImport.update({
   id: '/api/public/book/waitlist',
   path: '/api/public/book/waitlist',
@@ -1082,6 +1089,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
+  '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -1225,6 +1233,7 @@ export interface FileRoutesByTo {
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
+  '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -1372,6 +1381,7 @@ export interface FileRoutesById {
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
+  '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -1519,6 +1529,7 @@ export interface FileRouteTypes {
     | '/api/public/book/month-availability'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
+    | '/api/public/book/waitlist-confirm'
     | '/api/public/hooks/send-reminders'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
@@ -1662,6 +1673,7 @@ export interface FileRouteTypes {
     | '/api/public/book/month-availability'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
+    | '/api/public/book/waitlist-confirm'
     | '/api/public/hooks/send-reminders'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
@@ -1808,6 +1820,7 @@ export interface FileRouteTypes {
     | '/api/public/book/month-availability'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
+    | '/api/public/book/waitlist-confirm'
     | '/api/public/hooks/send-reminders'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
@@ -1873,6 +1886,7 @@ export interface RootRouteChildren {
   ApiPublicBookMonthAvailabilityRoute: typeof ApiPublicBookMonthAvailabilityRoute
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
+  ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -2791,6 +2805,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/book/waitlist-confirm': {
+      id: '/api/public/book/waitlist-confirm'
+      path: '/api/public/book/waitlist-confirm'
+      fullPath: '/api/public/book/waitlist-confirm'
+      preLoaderRoute: typeof ApiPublicBookWaitlistConfirmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/waitlist': {
       id: '/api/public/book/waitlist'
       path: '/api/public/book/waitlist'
@@ -3254,6 +3275,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookMonthAvailabilityRoute: ApiPublicBookMonthAvailabilityRoute,
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
+  ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicInquiriesCreateRoute: ApiPublicInquiriesCreateRoute,
   ApiPublicInquiriesMarkWhatsappOpenedRoute:
