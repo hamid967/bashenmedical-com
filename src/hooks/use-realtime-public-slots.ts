@@ -33,17 +33,28 @@ export function useRealtimePublicSlots(opts?: { doctorId?: string; branchId?: st
       ? `public-slots:doctor:${doctorId}`
       : "public-slots:global";
 
+    // Server-side filter when we know the doctor to reduce noise.
+    const doctorFilter = doctorId ? { filter: `doctor_id=eq.${doctorId}` } : {};
+
     const channel = supabase
       .channel(channelName)
+      // Availability windows (open/close, capacity changes).
       .on(
         "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "availability_slots",
-          // Server-side filter when we know the doctor to reduce noise
-          ...(doctorId ? { filter: `doctor_id=eq.${doctorId}` } : {}),
-        },
+        { event: "*", schema: "public", table: "availability_slots", ...doctorFilter },
+        invalidate,
+      )
+      // Live holds by other sessions — the viewer must see a slot become
+      // busy the moment someone else grabs it, and free again on release/expiry.
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "slot_holds", ...doctorFilter },
+        invalidate,
+      )
+      // Confirmed / cancelled appointments — flip slot to booked or reopen it.
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "appointments", ...doctorFilter },
         invalidate,
       )
       .subscribe();
