@@ -111,6 +111,65 @@ export const bookSlot = createServerFn({ method: "POST" })
     return { appointmentId: apptId as unknown as string };
   });
 
+/**
+ * Authenticated booking wrapper — for portal users booking either for
+ * themselves or on behalf of a verified dependent. Prevents booking for
+ * the wrong person by validating guardian ownership + verification +
+ * `booking` access scope via `can_book_for_dependent` before delegating
+ * to the atomic `book_slot` RPC. Persists `booked_for_dependent_id` on
+ * the appointment for audit.
+ */
+const bookAsGuardianSchema = bookSchema.extend({
+  dependentId: z.string().uuid().optional().nullable(),
+});
+
+export const bookSlotAsGuardian = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw: unknown) => bookAsGuardianSchema.parse(raw))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId } = context;
+
+    if (data.dependentId) {
+      const { data: allowed, error: guardErr } = await supabase.rpc(
+        "can_book_for_dependent" as any,
+        { _guardian: userId, _dependent: data.dependentId } as any,
+      );
+      if (guardErr) throw new Error("تعذّر التحقق من صلاحية الحجز نيابةً.");
+      if (allowed !== true) {
+        throw new Error(
+          "لا يمكن الحجز نيابةً عن هذا التابع: تأكّد من توثيق العلاقة ومن تفعيل صلاحية الحجز.",
+        );
+      }
+    }
+
+    // Book via the authenticated client — RPC is SECURITY DEFINER so the
+    // slot lock still runs with elevated rights.
+    const { data: apptId, error } = await supabase.rpc("book_slot", {
+      p_slot_id: data.slotId,
+      p_patient_name: data.patientName,
+      p_patient_phone: data.patientPhone,
+      p_patient_email: data.patientEmail ?? undefined,
+      p_national_id: data.nationalId ?? undefined,
+      p_gender: data.gender ?? undefined,
+      p_reason: data.reason ?? undefined,
+      p_notes: data.notes ?? undefined,
+      p_patient_id: data.patientId ?? undefined,
+    });
+    if (error) throw new Error(friendlyRpcError(error.message));
+    const appointmentId = apptId as unknown as string;
+
+    // Persist the true beneficiary + guardian link on the appointment.
+    if (data.dependentId && appointmentId) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      await supabaseAdmin
+        .from("appointments")
+        .update({ booked_for_dependent_id: data.dependentId } as any)
+        .eq("id", appointmentId);
+    }
+
+    return { appointmentId };
+  });
+
 // ---------------------------------------------------------------------------
 // Staff: release a slot (cancel/reschedule)
 // ---------------------------------------------------------------------------

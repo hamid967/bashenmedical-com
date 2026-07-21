@@ -9,6 +9,13 @@ import { getRequestHeader } from "@tanstack/react-start/server";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+export type DependentAccessScopes = {
+  booking: boolean;
+  reports: boolean;
+  prescriptions: boolean;
+  billing: boolean;
+};
+
 export type Dependent = {
   id: string;
   guardian_user_id: string;
@@ -20,9 +27,17 @@ export type Dependent = {
   gender: "male" | "female" | null;
   date_of_birth: string | null;
   verified: boolean;
+  verification_status: "pending" | "verified" | "rejected";
+  verification_method: string | null;
+  verified_at: string | null;
+  access_scopes: DependentAccessScopes;
   created_at: string;
   updated_at: string;
 };
+
+const DEPENDENT_COLS =
+  "id, guardian_user_id, patient_id, full_name, relationship, national_id, phone, gender, date_of_birth, verified, verification_status, verification_method, verified_at, access_scopes, created_at, updated_at";
+
 
 const RELATIONSHIPS = ["child", "spouse", "parent", "sibling", "other"] as const;
 
@@ -60,19 +75,41 @@ const BaseSchema = z.object({
 
 /* ------------------------------ list ------------------------------ */
 
+const DEFAULT_SCOPES: DependentAccessScopes = {
+  booking: true,
+  reports: false,
+  prescriptions: false,
+  billing: false,
+};
+
+function normalizeScopes(raw: unknown): DependentAccessScopes {
+  const o = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Record<string, unknown>;
+  return {
+    booking: o.booking !== false,
+    reports: o.reports === true,
+    prescriptions: o.prescriptions === true,
+    billing: o.billing === true,
+  };
+}
+
+function normalizeDependent(row: any): Dependent {
+  return {
+    ...row,
+    access_scopes: normalizeScopes(row?.access_scopes),
+  } as Dependent;
+}
+
 export const listDependents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("dependents")
-      .select(
-        "id, guardian_user_id, patient_id, full_name, relationship, national_id, phone, gender, date_of_birth, verified, created_at, updated_at",
-      )
+      .select(DEPENDENT_COLS)
       .eq("guardian_user_id", userId)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    return (data ?? []) as Dependent[];
+    return (data ?? []).map(normalizeDependent);
   });
 
 /* ------------------------------ getById ------------------------------ */
@@ -84,14 +121,12 @@ export const getDependent = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("dependents")
-      .select(
-        "id, guardian_user_id, patient_id, full_name, relationship, national_id, phone, gender, date_of_birth, verified, created_at, updated_at",
-      )
+      .select(DEPENDENT_COLS)
       .eq("id", data.id)
       .eq("guardian_user_id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return (row ?? null) as Dependent | null;
+    return row ? normalizeDependent(row) : null;
   });
 
 /* ------------------------------ create ------------------------------ */
@@ -112,10 +147,10 @@ export const createDependent = createServerFn({ method: "POST" })
         national_id: data.national_id ?? null,
         phone: data.phone ?? null,
       })
-      .select()
+      .select(DEPENDENT_COLS)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return row as Dependent;
+    return normalizeDependent(row);
   });
 
 /* ------------------------------ update ------------------------------ */
@@ -140,11 +175,53 @@ export const updateDependent = createServerFn({ method: "POST" })
       })
       .eq("id", id)
       .eq("guardian_user_id", userId)
-      .select()
+      .select(DEPENDENT_COLS)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    return row as Dependent;
+    return normalizeDependent(row);
   });
+
+/* -------------------- setDependentAccessScopes -------------------- */
+
+const ScopesSchema = z.object({
+  id: z.string().uuid(),
+  scopes: z.object({
+    booking: z.boolean(),
+    reports: z.boolean(),
+    prescriptions: z.boolean(),
+    billing: z.boolean(),
+  }).partial(),
+});
+
+export const setDependentAccessScopes = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw: unknown) => ScopesSchema.parse(raw))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    // Read current, merge, then write — guardian-scoped via RLS.
+    const { data: current, error: readErr } = await supabase
+      .from("dependents")
+      .select("access_scopes")
+      .eq("id", data.id)
+      .eq("guardian_user_id", userId)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!current) throw new Error("Not found");
+    const merged: DependentAccessScopes = {
+      ...normalizeScopes(current.access_scopes),
+      ...data.scopes,
+    } as DependentAccessScopes;
+    const { data: row, error } = await supabase
+      .from("dependents")
+      .update({ access_scopes: merged as any })
+      .eq("id", data.id)
+      .eq("guardian_user_id", userId)
+      .select(DEPENDENT_COLS)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return normalizeDependent(row);
+  });
+
 
 /* ------------------------------ delete ------------------------------ */
 

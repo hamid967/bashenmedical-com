@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { getBookingOptions } from "@/lib/portal/booking.functions";
-import { listAvailableSlots, bookSlot } from "@/lib/slots.functions";
+import { listAvailableSlots, bookSlot, bookSlotAsGuardian } from "@/lib/slots.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { getDependent } from "@/lib/portal/dependents.functions";
 import {
@@ -269,20 +269,33 @@ function BookPage() {
       gender?: "male" | "female" | null;
       dependentId?: string | null;
     }) =>
-      bookSlot({
-        data: {
-          slotId: payload.slotId,
-          patientName: payload.patientName,
-          patientPhone: payload.patientPhone,
-          reason: payload.reason,
-          nationalId: payload.nationalId ?? null,
-          gender: payload.gender ?? null,
-          notes: payload.dependentId ? `dependent:${payload.dependentId}` : null,
-          // Only link to the guardian's own patient record when NOT booking
-          // for a dependent — the dependent may not have a patient record yet.
-          patientId: payload.dependentId ? undefined : profile?.id ?? undefined,
-        },
-      }),
+      payload.dependentId
+        ? bookSlotAsGuardian({
+            data: {
+              slotId: payload.slotId,
+              patientName: payload.patientName,
+              patientPhone: payload.patientPhone,
+              reason: payload.reason,
+              nationalId: payload.nationalId ?? null,
+              gender: payload.gender ?? null,
+              notes: `dependent:${payload.dependentId}`,
+              patientId: undefined,
+              dependentId: payload.dependentId,
+            },
+          })
+        : bookSlot({
+            data: {
+              slotId: payload.slotId,
+              patientName: payload.patientName,
+              patientPhone: payload.patientPhone,
+              reason: payload.reason,
+              nationalId: payload.nationalId ?? null,
+              gender: payload.gender ?? null,
+              notes: null,
+              patientId: profile?.id ?? undefined,
+            },
+          }),
+
     onSuccess: async (res) => {
       toast.success("تم تأكيد الحجز بنجاح");
       setConfirmed({ id: res.appointmentId, date: dateStr, time: slot });
@@ -433,15 +446,22 @@ function BookPage() {
     );
   }
 
-  // Guard: booking for a dependent whose required data is incomplete.
-  // نستخدم نفس منطق التحقق الموحّد المستخدم في /book و APIs العامة.
+  // Guard: booking for a dependent whose required data is incomplete OR who
+  // is not verified / lacks the booking access scope. Any of these blocks
+  // the CTA and shows an explicit message so guardians cannot accidentally
+  // book for the wrong person.
+  const dependentVerified = dependent?.verification_status === "verified";
+  const dependentCanBook = dependent?.access_scopes?.booking !== false;
   const dependentMissing: string[] = dependent
     ? [
         ...(!dependent.national_id || !SA_NID_RE.test(dependent.national_id) ? ["رقم الهوية"] : []),
         ...(!dependent.phone || !SA_PHONE_RE.test(dependent.phone) ? ["رقم الجوال"] : []),
+        ...(!dependentVerified ? ["توثيق العلاقة"] : []),
+        ...(dependentVerified && !dependentCanBook ? ["تفعيل صلاحية الحجز نيابةً"] : []),
       ]
     : [];
   if (dependent && dependentMissing.length > 0) {
+
     return (
       <div className="max-w-2xl mx-auto">
         <div className="glass-card p-8 text-center">
