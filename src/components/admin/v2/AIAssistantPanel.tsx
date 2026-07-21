@@ -116,6 +116,7 @@ export function AIAssistantPanel({
       let currentModel = model;
 
       const result = await streamChatWithResume({
+        surface: "admin",
         url: "/api/admin/ai-chat",
         token,
         signal: controller.signal,
