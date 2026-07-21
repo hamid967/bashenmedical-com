@@ -3,7 +3,7 @@
  * Read-only streaming chat scoped to the signed-in patient.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Send, Sparkles, AlertTriangle, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalPageHeader, PortalCard } from "@/components/portal/ui";
@@ -21,6 +21,7 @@ import {
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
+import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
   head: () => ({
@@ -50,6 +51,21 @@ function AssistantPage() {
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [nowTick, setNowTick] = useState(0);
+  const [activeModel, setActiveModel] = useState<string | undefined>();
+  const [sessionCredits, setSessionCredits] = useState(0);
+
+  const preEstimate = useMemo(() => {
+    const historyChars = messages.reduce((n, m) => n + m.content.length, 0);
+    const inTok = estimateTokens(input) + Math.ceil(historyChars / 3.5);
+    const outTok = Math.max(64, Math.min(512, Math.round(inTok * 0.6)));
+    return { inTok, outTok, credits: estimateCredits(inTok, outTok, activeModel) };
+  }, [input, messages, activeModel]);
+
+  const lastMsg = messages[messages.length - 1];
+  const lastAssistant = lastMsg && lastMsg.role === "assistant" ? lastMsg : null;
+  const meterStreamedText = streaming && lastAssistant ? lastAssistant.content : "";
+  const meterUsage = !streaming && lastAssistant?.meta?.usage ? lastAssistant.meta.usage : null;
+  const meterModel = lastAssistant?.meta?.model ?? activeModel;
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -113,7 +129,7 @@ function AssistantPage() {
           messages: next,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (mdl) => { currentModel = mdl; updateLastMeta({ model: mdl }); },
+        onModel: (mdl) => { currentModel = mdl; setActiveModel(mdl); updateLastMeta({ model: mdl }); },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
@@ -152,10 +168,9 @@ function AssistantPage() {
         },
       });
       updateLastMeta({ endedAt: performance.now() });
-      commitSessionCredits(
-        "portal",
-        estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel),
-      );
+      const spent = estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel);
+      commitSessionCredits("portal", spent);
+      setSessionCredits((v) => v + spent);
       if (result.budgetStop) setError(result.budgetStop.message);
     } catch (e: unknown) {
       if ((e as Error).name === "AbortError") {
@@ -248,6 +263,17 @@ function AssistantPage() {
             </div>
           )}
         </div>
+
+        <AssistantCostMeter
+          streaming={streaming}
+          hasInput={input.trim().length > 0}
+          model={meterModel}
+          preEstimate={preEstimate}
+          usage={meterUsage}
+          streamedText={meterStreamedText}
+          sessionCredits={sessionCredits}
+          lang="ar"
+        />
 
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}
