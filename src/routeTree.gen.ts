@@ -136,6 +136,7 @@ import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
 import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
+import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -861,6 +862,12 @@ const AuthenticatedAdminNotificationLogsRoute =
     path: '/notification-logs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNoShowStatsRoute =
+  AuthenticatedAdminNoShowStatsRouteImport.update({
+    id: '/no-show-stats',
+    path: '/no-show-stats',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNoShowRiskRoute =
   AuthenticatedAdminNoShowRiskRouteImport.update({
     id: '/no-show-risk',
@@ -1141,6 +1148,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
+  '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -1299,6 +1307,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
+  '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -1461,6 +1470,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
+  '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -1623,6 +1633,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/no-show-risk'
+    | '/admin/no-show-stats'
     | '/admin/notification-logs'
     | '/admin/nphies-logs'
     | '/admin/reservations-usage'
@@ -1781,6 +1792,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/no-show-risk'
+    | '/admin/no-show-stats'
     | '/admin/notification-logs'
     | '/admin/nphies-logs'
     | '/admin/reservations-usage'
@@ -1942,6 +1954,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/no-show-risk'
+    | '/_authenticated/admin/no-show-stats'
     | '/_authenticated/admin/notification-logs'
     | '/_authenticated/admin/nphies-logs'
     | '/_authenticated/admin/reservations-usage'
@@ -2972,6 +2985,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificationLogsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/no-show-stats': {
+      id: '/_authenticated/admin/no-show-stats'
+      path: '/no-show-stats'
+      fullPath: '/admin/no-show-stats'
+      preLoaderRoute: typeof AuthenticatedAdminNoShowStatsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/no-show-risk': {
       id: '/_authenticated/admin/no-show-risk'
       path: '/no-show-risk'
@@ -3217,6 +3237,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
+  AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
   AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
@@ -3232,6 +3253,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminNoShowRiskRoute: AuthenticatedAdminNoShowRiskRoute,
+  AuthenticatedAdminNoShowStatsRoute: AuthenticatedAdminNoShowStatsRoute,
   AuthenticatedAdminNotificationLogsRoute:
     AuthenticatedAdminNotificationLogsRoute,
   AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
