@@ -35,6 +35,10 @@ import {
   Clock,
   XCircle,
   RefreshCw,
+  FileText,
+  AlertTriangle,
+  CreditCard,
+  CalendarClock,
 } from "lucide-react";
 import {
   getMyRecentOrders,
@@ -44,6 +48,7 @@ import {
   listMyInquiries,
   type MyInquiry,
 } from "@/lib/portal/inquiries.functions";
+import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
 import type { OrderTableKind } from "@/lib/unified-status";
 
 const KIND_LABELS_AR: Record<OrderTableKind, string> = {
