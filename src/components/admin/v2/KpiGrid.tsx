@@ -44,6 +44,14 @@ const RANGE_LABELS: Record<Range, string> = {
   "90d": "٩٠ يوم",
 };
 
+const KPI_EXPORT_COLS: Column<AdminKpi>[] = [
+  { header: "المؤشر", accessor: (k) => k.label },
+  { header: "القيمة الحالية", accessor: (k) => k.current },
+  { header: "القيمة السابقة", accessor: (k) => k.previous },
+  { header: "الفرق", accessor: (k) => k.deltaAbs },
+  { header: "النسبة %", accessor: (k) => (k.deltaPct == null ? "" : `${k.deltaPct.toFixed(1)}%`) },
+];
+
 export function KpiGrid() {
   const [range, setRange] = useState<Range>("7d");
   const fetchKpis = useServerFn(getAdminKpis);
