@@ -1049,6 +1049,63 @@ export type Database = {
         }
         Relationships: []
       }
+      custom_pages: {
+        Row: {
+          content_ar: string
+          content_en: string
+          created_at: string
+          created_by: string | null
+          id: string
+          nav_order: number
+          og_image: string | null
+          published_at: string | null
+          seo_description: string | null
+          seo_title: string | null
+          show_in_nav: boolean
+          slug: string
+          status: string
+          title_ar: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          content_ar?: string
+          content_en?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nav_order?: number
+          og_image?: string | null
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          show_in_nav?: boolean
+          slug: string
+          status?: string
+          title_ar: string
+          title_en?: string
+          updated_at?: string
+        }
+        Update: {
+          content_ar?: string
+          content_en?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          nav_order?: number
+          og_image?: string | null
+          published_at?: string | null
+          seo_description?: string | null
+          seo_title?: string | null
+          show_in_nav?: boolean
+          slug?: string
+          status?: string
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dependents: {
         Row: {
           created_at: string
@@ -4450,33 +4507,51 @@ export type Database = {
         Row: {
           created_at: string
           department_id: string | null
+          description_ar: string | null
+          description_en: string | null
           display_order: number
+          duration_min: number | null
+          icon: string | null
           id: string
+          image_url: string | null
           is_active: boolean
           name_ar: string
           name_en: string
+          price_from: number | null
           slug: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           department_id?: string | null
+          description_ar?: string | null
+          description_en?: string | null
           display_order?: number
+          duration_min?: number | null
+          icon?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           name_ar: string
           name_en: string
+          price_from?: number | null
           slug: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           department_id?: string | null
+          description_ar?: string | null
+          description_en?: string | null
           display_order?: number
+          duration_min?: number | null
+          icon?: string | null
           id?: string
+          image_url?: string | null
           is_active?: boolean
           name_ar?: string
           name_en?: string
+          price_from?: number | null
           slug?: string
           updated_at?: string
         }
