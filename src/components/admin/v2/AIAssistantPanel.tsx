@@ -145,6 +145,17 @@ export function AIAssistantPanel({
           setStreamMeta((prev) => (prev ? { ...prev, model: m } : prev));
         },
         onDelta: (_delta, acc) => setStreamed(acc),
+        budgetCheck: (acc) => {
+          const c = checkRunningBudget({
+            surface: "admin",
+            limits,
+            model: currentModel,
+            promptText,
+            outputSoFar: acc,
+          });
+          if (c.ok) return { ok: true };
+          return { ok: false, message: budgetBlockMessage(c, "ar") };
+        },
         onUsage: (u) => {
           liveUsage = {
             prompt: Number((u.prompt_tokens as number | undefined) ?? 0),
@@ -180,10 +191,13 @@ export function AIAssistantPanel({
         setUsage(liveUsage);
       }
       if (liveUsage) {
-        setSessionCredits((c) =>
-          c + estimateCredits(liveUsage!.prompt, liveUsage!.completion, currentModel),
-        );
+        const spent = estimateCredits(liveUsage.prompt, liveUsage.completion, currentModel);
+        setSessionCredits((c) => c + spent);
+        commitSessionCredits("admin", spent);
       }
+
+      if (result.budgetStop) toast.warning(result.budgetStop.message);
+
 
       const finalMeta: MessageCostMeta = {
         startedAt,
