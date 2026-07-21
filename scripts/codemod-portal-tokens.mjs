@@ -239,6 +239,9 @@ function walk(dir, out = []) {
   }
   return out;
 }
+if (IS_MAIN) runCli();
+
+function runCli() {
 const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d)))
   .filter((p) => {
     const rel = relative(ROOT, p).replaceAll("\\", "/");
