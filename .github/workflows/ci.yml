@@ -32,6 +32,14 @@ jobs:
       - name: Portal Design Tokens v2 guard (no regression from baseline)
         run: bun run lint:portal-tokens
 
+      - name: Portal — reject direct Tailwind in changed lines (pre-merge, PR only)
+        if: github.event_name == 'pull_request'
+        env:
+          LINT_BASE_REF: origin/${{ github.base_ref }}
+        run: |
+          git fetch origin "${{ github.base_ref }}" --depth=200
+          bun run lint:portal-tokens:changed
+
       - name: Verify docs examples match lint:inserts rules
         run: bash tests/lint/book-docs-examples.sh
 
