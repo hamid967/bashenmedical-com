@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { MessageCircle, X, Send, Loader2, Sparkles, Trash2, PhoneCall, Bot, Square } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -19,6 +19,7 @@ import {
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
+import { AssistantCostMeter } from "./AssistantCostMeter";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
