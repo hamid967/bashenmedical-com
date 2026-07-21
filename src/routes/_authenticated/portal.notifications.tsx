@@ -42,6 +42,9 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
+import { useHasConsent } from "@/hooks/useHasConsent";
+import { Link as RouterLink } from "@tanstack/react-router";
+import { ShieldOff } from "lucide-react";
 
 
 /* ----------------------------- query --------------------------------- */
