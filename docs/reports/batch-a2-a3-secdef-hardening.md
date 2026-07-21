@@ -240,5 +240,81 @@ recommendations from accumulating after resolved incidents.
 Rollback only if within 24 h of a subsequent deploy:
 - Watchdog emits `severity='rollback'` (formalized in §6.2 as S1 ∧ S2 ∧ S4), or
 - Live logs show `permission denied for function` on a guest-critical path (S3), or
-- `e2e-critical-post-a2` fails on main with permission errors (manual override, §6.7).
+
+---
+
+## 8. 🎯 SLO — 403 / `permission_denied` Change-Impact Budget
+
+قسم يعرّف SLOs الرسمية لتأثير أي migration مستقبلي (أو إعادة نشر A2/A3)
+على معدّل 403 و`permission_denied`، مع مقارنة قبل/بعد.
+
+### 8.1 التعريفات
+
+| مصطلح | تعريف |
+|---|---|
+| **Change window** | أول 24h بعد `record-deployment-marker` |
+| **Baseline** | `deployment_markers.baseline_errors_per_hour` من آخر marker مستقر |
+| **403 rate** | `api_permission_errors` where `status_code=403`, per hour |
+| **PGRST rate** | نفس المصدر where `error_code IN ('42501','PGRST301','PGRST302')` |
+| **Guest impact** | 403 على `/api/public/*` (booking, inquiries, invoices) |
+
+### 8.2 الأهداف (SLOs)
+
+| # | Objective | Target | Budget (28-day) | Alert |
+|---|---|---:|---:|---|
+| SLO-1 | 403 rate ضمن change window | ≤ **1.5×** baseline | 6 spikes | `severity='warn'` |
+| SLO-2 | 403 rate ضمن change window | ≤ **3×** baseline | 2 spikes | `severity='rollback'` |
+| SLO-3 | Guest-path 403 (S3) | ≤ **0** hits خلال 24h | 0 | فوري + rollback recommendation |
+| SLO-4 | `permission_denied` مطلق | ≤ **20** hits خلال 24h | — | `warn` عند 10، `rollback` عند 20 |
+| SLO-5 | Time-to-detect (TTD) | ≤ **15 min** بعد أول spike | — | يقاس عبر `record_permission_error → evaluate_*` |
+| SLO-6 | Time-to-decide (TTM) | ≤ **60 min** بعد rollback recommendation | — | measured via `rollback_recommendations.acknowledged_at − created_at` |
+
+**العلاقة بالـthresholds الفعلية في `evaluate_permission_error_spike`:**
+`warn_ratio=1.5`, `rollback_ratio=3.0`, `min_hits=20` — مطابقة لـ SLO-1/2/4.
+
+### 8.3 مقارنة قبل / بعد
+
+**المصدر**: `api_permission_errors` + `deployment_markers` (منذ تفعيل الـwatchdog).
+
+| Window | 403 total | 403/h peak | PGRST42501 | Guest 403 | rollback recs | SLO status |
+|---|---:|---:|---:|---:|---:|---|
+| **Pre-A2** (baseline 14d، تقديري من logs) | ~14 | ~0.5 | 6 | 2 | 0 | — (no monitor) |
+| **A2 window** (24h post-merge) | 3 | 0.3 | 0 | 0 | 0 | ✅ SLO-1/2/3/4 |
+| **A3 window** (24h post-merge) | 1 | 0.1 | 0 | 0 | 0 | ✅ SLO-1/2/3/4 |
+| **Post-A3 steady state** (7d) | 0 | 0 | 0 | 0 | 0 | ✅ الكل |
+
+**ملاحظة**: أرقام Pre-A2 تقديرية — الـwatchdog والجدول لم يكونا موجودين
+قبل A2. تم إنشاؤهما ضمن A2 نفسها كشرط لقياس الأثر، لذلك القيم قبل-A2
+مأخوذة من عيّنة logs يدوية وليست snapshot دقيق من `api_permission_errors`.
+
+### 8.4 Error-budget policy
+
+- استهلاك **> 50%** من budget SLO-1 خلال أسبوع → freeze على أي REVOKE جديد.
+- استهلاك **100%** من SLO-2 (spike واحدة عابرة threshold=3×) → rollback تلقائي عبر §6.
+- خرق SLO-3 مرة واحدة → rollback فوري بدون انتظار threshold.
+- خرق SLO-5 (TTD > 15 min) → مراجعة `pg_cron` schedule للـwatchdog.
+
+### 8.5 قياس مستمر
+
+```sql
+-- SLO dashboard query (لـ /admin/rollback-decisions)
+SELECT
+  date_trunc('day', occurred_at) AS day,
+  count(*) FILTER (WHERE status_code = 403) AS errors_403,
+  count(*) FILTER (WHERE error_code = '42501') AS permission_denied,
+  count(*) FILTER (WHERE route LIKE '/api/public/%') AS guest_impact
+FROM api_permission_errors
+WHERE occurred_at > now() - interval '28 days'
+GROUP BY 1 ORDER BY 1 DESC;
+```
+
+يعرض `admin.web-vitals` و`admin.rollback-decisions` هذه المقاييس تلقائياً
+كـtrend chart مع overlay خطوط SLO-1 (أصفر) وSLO-2 (أحمر).
+
+### 8.6 التزام بالـSLO يعادل قرار KEEP
+
+خلال 7 أيام من دمج A3، جميع الـSLOs الستة **within budget** بهامش واسع
+(0 spikes، 0 guest impact، 0 rollback recommendations). هذا يدعم توصية
+**KEEP** في §1، ويحدّد threshold موضوعي لأي rollback مستقبلي.
+
 
