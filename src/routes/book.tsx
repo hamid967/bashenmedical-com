@@ -492,6 +492,7 @@ function BookPage() {
     }
     setResult(null);
     setErrorMsg(null);
+    setErrorKind("unknown");
     dispatch({ t: "reset" });
     try {
       sessionStorage.removeItem(STORAGE_KEY);
