@@ -524,6 +524,36 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python tests/e2e/reservations_undo_cancel.py
 
+      - name: Ensure E2E patient user exists (auto-confirm + profile upsert, no roles)
+        id: ensure_patient
+        if: steps.verify_secrets.outputs.has_secrets == 'true' && secrets.E2E_PATIENT_EMAIL != '' && secrets.E2E_PATIENT_PASSWORD != ''
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_PATIENT_EMAIL: ${{ secrets.E2E_PATIENT_EMAIL }}
+          E2E_PATIENT_PASSWORD: ${{ secrets.E2E_PATIENT_PASSWORD }}
+        run: python scripts/ci/ensure-e2e-patient.py
+
+      - name: Run portal Visual Regression (programmatic patient session)
+        if: steps.ensure_patient.outcome == 'success'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_PATIENT_EMAIL: ${{ secrets.E2E_PATIENT_EMAIL }}
+          E2E_PATIENT_PASSWORD: ${{ secrets.E2E_PATIENT_PASSWORD }}
+        run: python tests/visual/portal_visual_regression.py
+
+      - name: Upload Visual Regression diffs on failure
+        if: failure() && steps.ensure_patient.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: portal-visual-regression-diffs-${{ github.run_id }}-${{ github.run_attempt }}
+          path: tests/visual/diffs/**
+          if-no-files-found: warn
+          retention-days: 14
+
+
+
+
 
 
 
