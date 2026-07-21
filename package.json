@@ -17,7 +17,7 @@
     "lint:portal-tokens:changed": "node scripts/lint-portal-tokens.mjs --strict-changed",
     "codemod:portal-tokens": "node scripts/codemod-portal-tokens.mjs",
     "codemod:portal-tokens:check": "node scripts/codemod-portal-tokens.mjs --check",
-    "test:codemod": "node --test tests/codemod/",
+    "test:codemod": "node --test 'tests/codemod/*.test.mjs'",
     "typecheck": "tsgo --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
