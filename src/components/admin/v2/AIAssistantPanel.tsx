@@ -391,3 +391,104 @@ function MessageBubble({
     </div>
   );
 }
+
+function CostMeter({
+  streaming,
+  model,
+  preEstimate,
+  usage,
+  streamedText,
+  sessionCredits,
+  hasInput,
+}: {
+  streaming: boolean;
+  model: string;
+  preEstimate: { inTok: number; outTok: number; credits: number };
+  usage: Usage | null;
+  streamedText: string;
+  sessionCredits: number;
+  hasInput: boolean;
+}) {
+  const liveOutTok = streaming ? estimateTokens(streamedText) : 0;
+  const liveCredits = streaming
+    ? estimateCredits(preEstimate.inTok, liveOutTok, model)
+    : 0;
+
+  let state: "idle" | "pre" | "live" | "final" = "idle";
+  if (usage) state = "final";
+  else if (streaming) state = "live";
+  else if (hasInput) state = "pre";
+
+  const label = {
+    idle: "شفافية التكلفة",
+    pre: "قبل الإرسال · تقدير",
+    live: "أثناء التوليد",
+    final: "بعد الاكتمال · فعلي",
+  }[state];
+
+  const stateColor = {
+    idle: "var(--ac-ink-3)",
+    pre: "var(--ac-ink-2)",
+    live: "var(--ac-accent-ink)",
+    final: "var(--ac-success, var(--ac-accent-ink))",
+  }[state];
+
+  return (
+    <div
+      className="px-3 py-2 border-t text-[11px] flex flex-wrap items-center gap-x-3 gap-y-1"
+      style={{ borderColor: "var(--ac-line)", background: "var(--ac-subtle)", color: "var(--ac-ink-2)" }}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-center gap-1.5 font-semibold" style={{ color: stateColor }}>
+        <Coins className="h-3.5 w-3.5" />
+        <span>{label}</span>
+      </div>
+
+      {state === "pre" && (
+        <>
+          <Metric label="مدخلات" value={`~${formatTokens(preEstimate.inTok)}`} />
+          <Metric label="مخرجات متوقعة" value={`~${formatTokens(preEstimate.outTok)}`} />
+          <Metric label="التكلفة" value={`~${formatCredits(preEstimate.credits)} ائتمان`} strong />
+        </>
+      )}
+
+      {state === "live" && (
+        <>
+          <Metric label="مدخلات" value={`~${formatTokens(preEstimate.inTok)}`} />
+          <Metric label="مخرجات" value={formatTokens(liveOutTok)} />
+          <Metric label="جارٍ" value={`~${formatCredits(liveCredits)} ائتمان`} strong />
+        </>
+      )}
+
+      {state === "final" && usage && (
+        <>
+          <Metric label="مدخلات" value={formatTokens(usage.prompt)} />
+          <Metric label="مخرجات" value={formatTokens(usage.completion)} />
+          <Metric
+            label="التكلفة"
+            value={`${formatCredits(estimateCredits(usage.prompt, usage.completion, model))} ائتمان`}
+            strong
+          />
+        </>
+      )}
+
+      {sessionCredits > 0 && (
+        <span className="ms-auto opacity-80">
+          الإجمالي: {formatCredits(sessionCredits)} ائتمان
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Metric({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="opacity-70">{label}:</span>
+      <span style={{ fontWeight: strong ? 700 : 500, color: strong ? "var(--ac-ink)" : undefined }}>
+        {value}
+      </span>
+    </span>
+  );
+}
