@@ -444,36 +444,36 @@ html.reduce-motion *::after {
   color: var(--portal-ink);
   min-height: 100vh;
 }
-.portal-root ::selection { background: rgba(11,133,133,0.20); color: var(--portal-ink); }
+.portal-root ::selection { background: color-mix(in oklab, var(--ds-brand-500) 20%, transparent); color: var(--ds-ink-900); }
 
 
 @utility glass-card {
   background: color-mix(in oklab, white 82%, transparent);
   backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid #DCEAE8;
-  border-radius: 20px;
-  box-shadow: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.16);
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-md);
 }
 
 @utility portal-card {
   background: #ffffff;
-  border: 1px solid #DCEAE8;
-  border-radius: 20px;
-  box-shadow: 0 1px 2px rgba(7, 94, 99, 0.04), 0 4px 12px -6px rgba(7, 94, 99, 0.06);
-  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+  border: 1px solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-sm);
+  transition: transform var(--ds-dur-base) var(--ds-ease-out), box-shadow var(--ds-dur-base) var(--ds-ease-out), border-color var(--ds-dur-base) var(--ds-ease-out);
 }
 @utility portal-card-hover {
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.18);
-    border-color: color-mix(in oklab, #075E63 22%, #DCEAE8);
+    box-shadow: var(--ds-shadow-md);
+    border-color: color-mix(in oklab, var(--ds-brand-700) 22%, var(--ds-border));
   }
 }
 
 @utility portal-gradient-bg {
   background:
-    radial-gradient(1200px 600px at 100% -10%, rgba(11, 133, 133, 0.14), transparent 55%),
-    radial-gradient(900px 500px at -10% 110%, rgba(199, 164, 107, 0.10), transparent 55%),
+    radial-gradient(1200px 600px at 100% -10%, color-mix(in oklab, var(--ds-brand-500) 14%, transparent), transparent 55%),
+    radial-gradient(900px 500px at -10% 110%, color-mix(in oklab, var(--ds-accent-500) 10%, transparent), transparent 55%),
     #FCFDFB;
 }
 
