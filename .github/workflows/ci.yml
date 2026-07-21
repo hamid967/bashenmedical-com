@@ -502,8 +502,9 @@ jobs:
               echo "**Artifact bundle (zip):** [download](${{ steps.upload_e2e_artifacts.outputs.artifact-url }})"
               echo ""
             fi
-            echo "<details><summary>Captured files</summary>"
+            echo "### Per-test artifacts"
             echo ""
+
             if [ -d e2e-artifacts ]; then
               base_url="${{ steps.upload_e2e_artifacts.outputs.artifact-url }}"
               # Per-test breakdown (cancel / reschedule / waitlist and any others)
