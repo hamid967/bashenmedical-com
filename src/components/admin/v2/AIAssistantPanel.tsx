@@ -19,6 +19,7 @@ import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resu
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
 import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
+import { recordUsageSample } from "@/lib/ai/token-calibration";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 type Usage = { prompt: number; completion: number; total: number };
