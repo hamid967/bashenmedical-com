@@ -175,6 +175,7 @@ import { Route as AuthenticatedOwnerPagesIdRouteImport } from './routes/_authent
 import { Route as AuthenticatedOwnerServicesIndexRouteImport } from './routes/_authenticated/owner.services.index'
 import { Route as AuthenticatedOwnerServicesIdRouteImport } from './routes/_authenticated/owner.services.$id'
 import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './routes/_authenticated/portal.reports.downloads'
+import { Route as ApiPublicAiStreamMetricsRouteImport } from './routes/api/public/ai/stream-metrics'
 import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/public/book/availability'
 import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/book/cancel'
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
@@ -1117,6 +1118,12 @@ const AuthenticatedPortalReportsDownloadsRoute =
     path: '/downloads',
     getParentRoute: () => AuthenticatedPortalReportsRoute,
   } as any)
+const ApiPublicAiStreamMetricsRoute =
+  ApiPublicAiStreamMetricsRouteImport.update({
+    id: '/api/public/ai/stream-metrics',
+    path: '/api/public/ai/stream-metrics',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookAvailabilityRoute =
   ApiPublicBookAvailabilityRouteImport.update({
     id: '/api/public/book/availability',
@@ -1430,6 +1437,7 @@ export interface FileRoutesByFullPath {
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
+  '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1620,6 +1628,7 @@ export interface FileRoutesByTo {
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
+  '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1815,6 +1824,7 @@ export interface FileRoutesById {
   '/_authenticated/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/_authenticated/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/_authenticated/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
+  '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -2010,6 +2020,7 @@ export interface FileRouteTypes {
     | '/owner/pages/$id'
     | '/owner/services/$id'
     | '/portal/reports/downloads'
+    | '/api/public/ai/stream-metrics'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2200,6 +2211,7 @@ export interface FileRouteTypes {
     | '/owner/pages/$id'
     | '/owner/services/$id'
     | '/portal/reports/downloads'
+    | '/api/public/ai/stream-metrics'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2394,6 +2406,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner/pages/$id'
     | '/_authenticated/owner/services/$id'
     | '/_authenticated/portal/reports/downloads'
+    | '/api/public/ai/stream-metrics'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2482,6 +2495,7 @@ export interface RootRouteChildren {
   ApiAiActionRoute: typeof ApiAiActionRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
+  ApiPublicAiStreamMetricsRoute: typeof ApiPublicAiStreamMetricsRoute
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
   ApiPublicBookCancelRoute: typeof ApiPublicBookCancelRoute
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
@@ -3671,6 +3685,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalReportsDownloadsRouteImport
       parentRoute: typeof AuthenticatedPortalReportsRoute
     }
+    '/api/public/ai/stream-metrics': {
+      id: '/api/public/ai/stream-metrics'
+      path: '/api/public/ai/stream-metrics'
+      fullPath: '/api/public/ai/stream-metrics'
+      preLoaderRoute: typeof ApiPublicAiStreamMetricsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/availability': {
       id: '/api/public/book/availability'
       path: '/api/public/book/availability'
@@ -4319,6 +4340,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiActionRoute: ApiAiActionRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiPortalAiChatRoute: ApiPortalAiChatRoute,
+  ApiPublicAiStreamMetricsRoute: ApiPublicAiStreamMetricsRoute,
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
   ApiPublicBookCancelRoute: ApiPublicBookCancelRoute,
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,
