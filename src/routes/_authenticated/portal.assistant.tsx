@@ -129,7 +129,7 @@ function AssistantPage() {
           messages: next,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (mdl) => { currentModel = mdl; updateLastMeta({ model: mdl }); },
+        onModel: (mdl) => { currentModel = mdl; setActiveModel(mdl); updateLastMeta({ model: mdl }); },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
