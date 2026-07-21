@@ -160,6 +160,9 @@ function AssistantPage() {
                   }
                 >
                   {parsed.clean || (streaming && !isUser ? <span className="opacity-60">…</span> : "")}
+                  {!isUser && streaming && i === messages.length - 1 && parsed.clean && (
+                    <span className="ml-1 inline-block h-3 w-1.5 -mb-0.5 bg-current opacity-70 animate-pulse align-baseline" aria-hidden />
+                  )}
                   {parsed.actions.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
                       {parsed.actions.map((a, k) => (

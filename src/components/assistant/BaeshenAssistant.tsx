@@ -277,7 +277,12 @@ export function BaeshenAssistant() {
                       )}
                     >
                       {body ? (
-                        <div className="whitespace-pre-wrap">{body}</div>
+                        <div className="whitespace-pre-wrap">
+                          {body}
+                          {m.role === "assistant" && busy && i === messages.length - 1 && (
+                            <span className="ml-1 inline-block h-3 w-1.5 -mb-0.5 bg-current opacity-70 animate-pulse align-baseline" aria-hidden />
+                          )}
+                        </div>
                       ) : (busy && i === messages.length - 1 && !actions.length) ? (
                         <span className="inline-flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
