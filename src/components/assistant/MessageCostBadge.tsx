@@ -5,7 +5,7 @@
  * All values are display-only estimates when server usage is missing.
  */
 import { useState } from "react";
-import { ArrowDownToLine, ArrowUpFromLine, ChevronDown, Clock, Coins, Cpu } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Clock, Coins, Cpu, Info, ExternalLink } from "lucide-react";
 import {
   estimateCredits,
   estimateTokens,
@@ -13,6 +13,13 @@ import {
   formatTokens,
   getRate,
 } from "@/lib/ai/pricing";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export type MessageCostMeta = {
   /** performance.now() at request start */
@@ -116,27 +123,35 @@ export function MessageCostBadge({
         {isEst ? <span className="opacity-60">{t("(تقدير)", "(est.)")}</span> : null}
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
-          aria-expanded={open}
+          onClick={() => setOpen(true)}
+          aria-haspopup="dialog"
           aria-label={t("تفاصيل التكلفة", "Cost details")}
           className="inline-flex items-center gap-0.5 rounded px-1 py-0.5 opacity-70 hover:opacity-100 hover:bg-black/5 dark:hover:bg-white/10 transition"
         >
-          <ChevronDown
-            className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
-            aria-hidden
-          />
-          <span>{open ? t("إخفاء", "hide") : t("تفاصيل", "details")}</span>
+          <Info className="h-3 w-3" aria-hidden />
+          <span>{t("تفاصيل", "details")}</span>
         </button>
       </div>
 
-      {open ? (
-        <div
-          className="mt-2 max-w-md rounded-md border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.03] p-2.5 text-[11px] leading-tight"
-          role="region"
-          aria-label={t("سجل استخدام الرسالة", "Message usage log")}
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent
+          dir={dir}
+          className="max-w-md text-[12px]"
+          aria-describedby="cost-details-desc"
         >
+          <DialogHeader>
+            <DialogTitle className="text-base">
+              {t("تفاصيل استخدام الرسالة", "Message usage details")}
+            </DialogTitle>
+            <DialogDescription id="cost-details-desc" className="text-xs">
+              {t(
+                "تفصيل الرموز (Tokens) والائتمانات (Credits) لهذه الرسالة.",
+                "Breakdown of tokens and credits for this message.",
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
           <div className="grid grid-cols-2 gap-2">
-            {/* Input column */}
             <div className="rounded border border-sky-500/20 bg-sky-500/[0.06] p-2">
               <div className="mb-1 flex items-center gap-1 font-medium text-sky-700 dark:text-sky-300">
                 <ArrowUpFromLine className="h-3 w-3" aria-hidden />
@@ -158,7 +173,6 @@ export function MessageCostBadge({
               </dl>
             </div>
 
-            {/* Output column */}
             <div className="rounded border border-emerald-500/20 bg-emerald-500/[0.06] p-2">
               <div className="mb-1 flex items-center gap-1 font-medium text-emerald-700 dark:text-emerald-300">
                 <ArrowDownToLine className="h-3 w-3" aria-hidden />
@@ -181,8 +195,7 @@ export function MessageCostBadge({
             </div>
           </div>
 
-          {/* Totals row */}
-          <div className="mt-2 grid grid-cols-3 gap-2 rounded border border-black/10 dark:border-white/10 bg-white/60 dark:bg-black/20 p-2">
+          <div className="grid grid-cols-3 gap-2 rounded border border-black/10 dark:border-white/10 bg-muted/40 p-2">
             <div>
               <div className="opacity-60">{t("الإجمالي", "Total tokens")}</div>
               <div className="font-mono">{totalTok.toLocaleString()}</div>
@@ -197,7 +210,7 @@ export function MessageCostBadge({
             </div>
           </div>
 
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2 opacity-70">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] opacity-70">
             <span>
               {t("النموذج", "Model")}: <span className="font-mono">{modelShort}</span>
             </span>
@@ -205,10 +218,38 @@ export function MessageCostBadge({
               {t("المصدر", "Source")}:{" "}
               {isEst ? t("تقدير محلي", "local estimate") : t("قياس فعلي", "server usage")}
             </span>
-            {live ? <span className="text-amber-600">{t("قيد التوليد…", "generating…")}</span> : null}
+            {live ? (
+              <span className="text-amber-600">{t("قيد التوليد…", "generating…")}</span>
+            ) : null}
           </div>
-        </div>
-      ) : null}
+
+          <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-[11px] leading-relaxed">
+            <div className="font-medium">
+              {t("طريقة الحساب", "How it's calculated")}
+            </div>
+            <pre className="rounded bg-background/60 p-2 font-mono text-[10.5px] overflow-x-auto text-left" dir="ltr">
+{`credits =
+  (input_tokens  × ${rate.inPer1M}  / 1,000,000)
++ (output_tokens × ${rate.outPer1M} / 1,000,000)`}
+            </pre>
+            <p className="opacity-80">
+              {t(
+                "الرمز (Token) قطعة من النص يفهمها النموذج. لكل نموذج سعر مختلف للمدخلات والمخرجات لكل مليون رمز. أثناء التوليد نعرض تقديرًا محليًا، ثم نستبدله بالقياس الفعلي عند وصوله.",
+                "A token is a small piece of text the model reads. Each model has separate input/output prices per 1M tokens. During streaming we show a local estimate, then replace it with the real server usage when it arrives.",
+              )}
+            </p>
+            <a
+              href="/docs/ai-cost"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-primary hover:underline"
+            >
+              {t("شرح مختصر", "Read the short guide")}
+              <ExternalLink className="h-3 w-3" aria-hidden />
+            </a>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
