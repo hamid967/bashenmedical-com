@@ -42,22 +42,76 @@ const UpdateProfileSchema = z.object({
       push: z.boolean().optional(),
     })
     .optional(),
+  /** Password re-entry required when phone / national_id changes. */
+  _password: z.string().min(1).max(200).optional(),
 });
+
+/** Phase 10 — Profile & Privacy: sensitive fields require password reauth. */
+const SENSITIVE_FIELDS = ["phone", "national_id"] as const;
 
 export const updateMyProfile = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) => UpdateProfileSchema.parse(input))
   .handler(async ({ context, data }) => {
-    const { supabase, userId } = context;
+    const { supabase, userId, claims } = context;
+    const { _password, ...updates } = data;
+
+    // Load current values to detect sensitive changes
+    const currentRes = await supabase
+      .from("profiles")
+      .select("phone, national_id")
+      .eq("id", userId)
+      .maybeSingle();
+    if (currentRes.error) throw new Error(currentRes.error.message);
+
+    const changedSensitive = SENSITIVE_FIELDS.filter((f) => {
+      if (!(f in updates)) return false;
+      const next = (updates as Record<string, unknown>)[f];
+      const prev = (currentRes.data as Record<string, unknown> | null)?.[f] ?? null;
+      const norm = (v: unknown) => (typeof v === "string" ? v.trim() : v) ?? null;
+      return norm(next) !== norm(prev);
+    });
+
+    if (changedSensitive.length > 0) {
+      const email = (claims as { email?: string })?.email;
+      if (!email) {
+        throw new Error("لا يمكن تحديث الحقول الحسّاسة دون بريد إلكتروني مرتبط بالحساب.");
+      }
+      if (!_password) {
+        throw new Error("لتحديث رقم الجوال أو الهوية يجب إعادة إدخال كلمة المرور.");
+      }
+      // Verify password using a fresh non-persisting client
+      const { createClient } = await import("@supabase/supabase-js");
+      const verifier = createClient(
+        process.env.SUPABASE_URL!,
+        process.env.SUPABASE_PUBLISHABLE_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } },
+      );
+      const check = await verifier.auth.signInWithPassword({ email, password: _password });
+      if (check.error || check.data.user?.id !== userId) {
+        throw new Error("كلمة المرور غير صحيحة.");
+      }
+      // Best-effort audit trail
+      try {
+        await supabase.from("security_audit_log").insert({
+          user_id: userId,
+          action: "sensitive_profile_change",
+          resource: "profiles",
+          metadata: { fields: changedSensitive },
+        } as never);
+      } catch { /* audit failures must not block the update */ }
+    }
+
     const { data: updated, error } = await supabase
       .from("profiles")
-      .update(data)
+      .update(updates)
       .eq("id", userId)
       .select()
       .maybeSingle();
     if (error) throw new Error(error.message);
     return updated;
   });
+
 
 /* -------------------------- getDashboardSummary -------------------------- */
 
