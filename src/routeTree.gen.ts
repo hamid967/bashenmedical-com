@@ -136,6 +136,9 @@ import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
+import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
+import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/public/reservations/cancel'
 import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
 import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './routes/api/public/inquiries/mark-whatsapp-opened'
 import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
@@ -154,6 +157,7 @@ import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
+import { Route as ApiPublicReservationsOtpVerifyRouteImport } from './routes/api/public/reservations/otp.verify'
 import { Route as ApiPublicReservationsOtpSendRouteImport } from './routes/api/public/reservations/otp.send'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
@@ -850,6 +854,24 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicReservationsRescheduleRoute =
+  ApiPublicReservationsRescheduleRouteImport.update({
+    id: '/api/public/reservations/reschedule',
+    path: '/api/public/reservations/reschedule',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicReservationsListRoute =
+  ApiPublicReservationsListRouteImport.update({
+    id: '/api/public/reservations/list',
+    path: '/api/public/reservations/list',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicReservationsCancelRoute =
+  ApiPublicReservationsCancelRouteImport.update({
+    id: '/api/public/reservations/cancel',
+    path: '/api/public/reservations/cancel',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicInsuranceVerifyRoute =
   ApiPublicInsuranceVerifyRouteImport.update({
     id: '/api/public/insurance/verify',
@@ -951,6 +973,12 @@ const AuthenticatedAdminSuperJazanVisualRoute =
     id: '/super/jazan-visual',
     path: '/super/jazan-visual',
     getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const ApiPublicReservationsOtpVerifyRoute =
+  ApiPublicReservationsOtpVerifyRouteImport.update({
+    id: '/api/public/reservations/otp/verify',
+    path: '/api/public/reservations/otp/verify',
+    getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicReservationsOtpSendRoute =
   ApiPublicReservationsOtpSendRouteImport.update({
@@ -1116,9 +1144,13 @@ export interface FileRoutesByFullPath {
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
+  '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
+  '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
+  '/api/public/reservations/otp/verify': typeof ApiPublicReservationsOtpVerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1263,9 +1295,13 @@ export interface FileRoutesByTo {
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
+  '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
+  '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
+  '/api/public/reservations/otp/verify': typeof ApiPublicReservationsOtpVerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1414,9 +1450,13 @@ export interface FileRoutesById {
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
+  '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
+  '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
+  '/api/public/reservations/otp/verify': typeof ApiPublicReservationsOtpVerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1565,9 +1605,13 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
+    | '/api/public/reservations/cancel'
+    | '/api/public/reservations/list'
+    | '/api/public/reservations/reschedule'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/otp/send'
+    | '/api/public/reservations/otp/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1712,9 +1756,13 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
+    | '/api/public/reservations/cancel'
+    | '/api/public/reservations/list'
+    | '/api/public/reservations/reschedule'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/otp/send'
+    | '/api/public/reservations/otp/verify'
   id:
     | '__root__'
     | '/'
@@ -1862,9 +1910,13 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
+    | '/api/public/reservations/cancel'
+    | '/api/public/reservations/list'
+    | '/api/public/reservations/reschedule'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
     | '/api/public/reservations/otp/send'
+    | '/api/public/reservations/otp/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1930,7 +1982,11 @@ export interface RootRouteChildren {
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
+  ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRoute
+  ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
+  ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
   ApiPublicReservationsOtpSendRoute: typeof ApiPublicReservationsOtpSendRoute
+  ApiPublicReservationsOtpVerifyRoute: typeof ApiPublicReservationsOtpVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2824,6 +2880,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reservations/reschedule': {
+      id: '/api/public/reservations/reschedule'
+      path: '/api/public/reservations/reschedule'
+      fullPath: '/api/public/reservations/reschedule'
+      preLoaderRoute: typeof ApiPublicReservationsRescheduleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/reservations/list': {
+      id: '/api/public/reservations/list'
+      path: '/api/public/reservations/list'
+      fullPath: '/api/public/reservations/list'
+      preLoaderRoute: typeof ApiPublicReservationsListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/reservations/cancel': {
+      id: '/api/public/reservations/cancel'
+      path: '/api/public/reservations/cancel'
+      fullPath: '/api/public/reservations/cancel'
+      preLoaderRoute: typeof ApiPublicReservationsCancelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/insurance/verify': {
       id: '/api/public/insurance/verify'
       path: '/api/public/insurance/verify'
@@ -2949,6 +3026,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/super/jazan-visual'
       preLoaderRoute: typeof AuthenticatedAdminSuperJazanVisualRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/api/public/reservations/otp/verify': {
+      id: '/api/public/reservations/otp/verify'
+      path: '/api/public/reservations/otp/verify'
+      fullPath: '/api/public/reservations/otp/verify'
+      preLoaderRoute: typeof ApiPublicReservationsOtpVerifyRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/reservations/otp/send': {
       id: '/api/public/reservations/otp/send'
@@ -3345,7 +3429,11 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicInquiriesMarkWhatsappOpenedRoute:
     ApiPublicInquiriesMarkWhatsappOpenedRoute,
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
+  ApiPublicReservationsCancelRoute: ApiPublicReservationsCancelRoute,
+  ApiPublicReservationsListRoute: ApiPublicReservationsListRoute,
+  ApiPublicReservationsRescheduleRoute: ApiPublicReservationsRescheduleRoute,
   ApiPublicReservationsOtpSendRoute: ApiPublicReservationsOtpSendRoute,
+  ApiPublicReservationsOtpVerifyRoute: ApiPublicReservationsOtpVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
