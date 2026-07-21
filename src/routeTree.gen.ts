@@ -138,6 +138,7 @@ import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as ApiPublicReservationsSessionFromAuthRouteImport } from './routes/api/public/reservations/session-from-auth'
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/public/reservations/cancel'
@@ -869,6 +870,12 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicReservationsSessionFromAuthRoute =
+  ApiPublicReservationsSessionFromAuthRouteImport.update({
+    id: '/api/public/reservations/session-from-auth',
+    path: '/api/public/reservations/session-from-auth',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicReservationsRescheduleRoute =
   ApiPublicReservationsRescheduleRouteImport.update({
     id: '/api/public/reservations/reschedule',
@@ -1176,6 +1183,7 @@ export interface FileRoutesByFullPath {
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
+  '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -1331,6 +1339,7 @@ export interface FileRoutesByTo {
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
+  '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -1490,6 +1499,7 @@ export interface FileRoutesById {
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
+  '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -1649,6 +1659,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
+    | '/api/public/reservations/session-from-auth'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -1804,6 +1815,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
+    | '/api/public/reservations/session-from-auth'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -1962,6 +1974,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
+    | '/api/public/reservations/session-from-auth'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -2037,6 +2050,7 @@ export interface RootRouteChildren {
   ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRouteWithChildren
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
+  ApiPublicReservationsSessionFromAuthRoute: typeof ApiPublicReservationsSessionFromAuthRoute
   ApiPublicReservationsOtpSendRoute: typeof ApiPublicReservationsOtpSendRoute
   ApiPublicReservationsOtpVerifyRoute: typeof ApiPublicReservationsOtpVerifyRoute
 }
@@ -2946,6 +2960,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reservations/session-from-auth': {
+      id: '/api/public/reservations/session-from-auth'
+      path: '/api/public/reservations/session-from-auth'
+      fullPath: '/api/public/reservations/session-from-auth'
+      preLoaderRoute: typeof ApiPublicReservationsSessionFromAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/reservations/reschedule': {
       id: '/api/public/reservations/reschedule'
       path: '/api/public/reservations/reschedule'
@@ -3532,6 +3553,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicReservationsCancelRouteWithChildren,
   ApiPublicReservationsListRoute: ApiPublicReservationsListRoute,
   ApiPublicReservationsRescheduleRoute: ApiPublicReservationsRescheduleRoute,
+  ApiPublicReservationsSessionFromAuthRoute:
+    ApiPublicReservationsSessionFromAuthRoute,
   ApiPublicReservationsOtpSendRoute: ApiPublicReservationsOtpSendRoute,
   ApiPublicReservationsOtpVerifyRoute: ApiPublicReservationsOtpVerifyRoute,
 }

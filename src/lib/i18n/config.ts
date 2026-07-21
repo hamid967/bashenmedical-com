@@ -7,6 +7,7 @@ import enCommon from "@/locales/en/common.json";
 import urCommon from "@/locales/ur/common.json";
 import arBooking from "@/locales/ar/booking.json";
 import enBooking from "@/locales/en/booking.json";
+import urBooking from "@/locales/ur/booking.json";
 
 // Primary UI languages — surfaced in the language switcher and used across
 // the app to key layout/direction. Adding a code here forces every
@@ -25,7 +26,7 @@ export const RTL_LOCALES: readonly string[] = ["ar", "ur"] as const;
 export const resources = {
   ar: { common: arCommon, booking: arBooking },
   en: { common: enCommon, booking: enBooking },
-  ur: { common: urCommon },
+  ur: { common: urCommon, booking: urBooking },
 } as const;
 
 if (!i18n.isInitialized) {
