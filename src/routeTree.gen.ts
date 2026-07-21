@@ -133,6 +133,7 @@ import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
+import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -839,6 +840,12 @@ const AuthenticatedAdminServiceCatalogRoute =
     path: '/service-catalog',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminReservationsUsageRoute =
+  AuthenticatedAdminReservationsUsageRouteImport.update({
+    id: '/reservations-usage',
+    path: '/reservations-usage',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNotificationLogsRoute =
   AuthenticatedAdminNotificationLogsRouteImport.update({
     id: '/notification-logs',
@@ -1113,6 +1120,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -1267,6 +1275,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -1425,6 +1434,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -1583,6 +1593,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/notification-logs'
+    | '/admin/reservations-usage'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/web-vitals'
@@ -1737,6 +1748,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/notification-logs'
+    | '/admin/reservations-usage'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/web-vitals'
@@ -1894,6 +1906,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/notification-logs'
+    | '/_authenticated/admin/reservations-usage'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/admin/web-vitals'
@@ -2898,6 +2911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServiceCatalogRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/reservations-usage': {
+      id: '/_authenticated/admin/reservations-usage'
+      path: '/reservations-usage'
+      fullPath: '/admin/reservations-usage'
+      preLoaderRoute: typeof AuthenticatedAdminReservationsUsageRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/notification-logs': {
       id: '/_authenticated/admin/notification-logs'
       path: '/notification-logs'
@@ -3136,6 +3156,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
+  AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminWebVitalsRoute: typeof AuthenticatedAdminWebVitalsRoute
@@ -3149,6 +3170,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminNotificationLogsRoute:
     AuthenticatedAdminNotificationLogsRoute,
+  AuthenticatedAdminReservationsUsageRoute:
+    AuthenticatedAdminReservationsUsageRoute,
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
