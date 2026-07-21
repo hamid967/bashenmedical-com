@@ -126,6 +126,23 @@ async def wait_for_response(
     )
 
 
+async def pick_by_text(page, base_selector: str, text: str, *, attempts: int = 3,
+                       timeout: int = 8_000):
+    """Find a card/button matching `base_selector` that contains `text`, then click.
+
+    Used to target deterministic E2E fixtures by their name (branch, specialty,
+    doctor) instead of trusting `.first`, which depends on database ordering.
+    Raises AssertionError if no matching element appears within retries.
+    """
+    async def _do():
+        loc = page.locator(base_selector, has_text=text)
+        await loc.first.wait_for(state="visible", timeout=timeout)
+        await loc.first.click(timeout=timeout)
+    await retry_async(_do, attempts=attempts, label=f"pick '{text}'")
+
+
+
+
 def _slugify(name: str) -> str:
     return "".join(c if c.isalnum() or c in ("-", "_") else "-" for c in name).strip("-").lower() or "e2e"
 
