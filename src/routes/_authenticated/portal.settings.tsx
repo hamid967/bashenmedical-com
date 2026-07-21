@@ -255,6 +255,10 @@ function SettingsPage() {
             <span className="flex items-center gap-2 text-[color:var(--portal-ink)]"><ShieldCheck className="h-4 w-4" />الموافقات وسياسات الخصوصية</span>
             <ArrowLeft className="h-4 w-4 text-[color:var(--portal-ink-2)] -rotate-180" />
           </Link>
+          <Link to="/portal/sessions" className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-4 py-3 hover:bg-[color:var(--portal-surface-2)]">
+            <span className="flex items-center gap-2 text-[color:var(--portal-ink)]"><MonitorSmartphone className="h-4 w-4" />الجلسات والأجهزة النشطة</span>
+            <ArrowLeft className="h-4 w-4 text-[color:var(--portal-ink-2)] -rotate-180" />
+          </Link>
         </div>
       </PortalCard>
 
