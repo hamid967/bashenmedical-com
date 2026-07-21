@@ -396,14 +396,17 @@ function BookPage() {
     dispatch({ t: "set", p: { doctorId: suggestion.doctorId, date: suggestion.date, time: suggestion.time } });
     setSuggestion(null);
     setErrorMsg(null);
+    setErrorKind("unknown");
     goto(7);
   }
 
   async function handleSubmit() {
     setErrorMsg(null);
+    setErrorKind("unknown");
     setSuggestion(null);
     if (!patientValidation.ok) {
       setErrorMsg(t("page.fixPatient"));
+      setErrorKind("validation");
       goto(7);
       return;
     }
@@ -416,6 +419,7 @@ function BookPage() {
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
         setErrorMsg(t("page.slotTaken"));
+        setErrorKind("conflict");
         // Refresh the availability query so StepTime shows the updated state.
         queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
         const prevTime = state.time;
@@ -455,6 +459,12 @@ function BookPage() {
       goto(9);
     } else {
       setErrorMsg(res.message);
+      setErrorKind(res.kind);
+      // On conflict, bounce back to step 6 so the user picks a fresh slot.
+      if (res.kind === "conflict") {
+        dispatch({ t: "set", p: { time: null } });
+        goto(6);
+      }
     }
   }
 
