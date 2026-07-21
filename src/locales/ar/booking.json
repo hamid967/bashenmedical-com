@@ -117,7 +117,9 @@
     "notEligible": "لم يتم تأكيد الأهلية",
     "fee": "رسوم الاستشارة",
     "coverage": "نسبة التغطية",
-    "patientShare": "الحصة على المريض"
+    "coveredAmount": "يغطيه التأمين",
+    "patientShare": "الحصة على المريض",
+    "costBreakdown": "تفاصيل التكلفة"
   },
   "hold": {
     "holding": "هذا الموعد محجوز لك مؤقتًا",
