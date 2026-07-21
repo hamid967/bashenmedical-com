@@ -168,10 +168,9 @@ function AssistantPage() {
         },
       });
       updateLastMeta({ endedAt: performance.now() });
-      commitSessionCredits(
-        "portal",
-        estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel),
-      );
+      const spent = estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel);
+      commitSessionCredits("portal", spent);
+      setSessionCredits((v) => v + spent);
       if (result.budgetStop) setError(result.budgetStop.message);
     } catch (e: unknown) {
       if ((e as Error).name === "AbortError") {
