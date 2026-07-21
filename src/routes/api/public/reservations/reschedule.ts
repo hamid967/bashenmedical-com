@@ -58,6 +58,18 @@ export const Route = createFileRoute("/api/public/reservations/reschedule")({
           });
         }
 
+        const rlSess = checkRateLimit(`resv-reschedule:sess:${sess.phone}`, [
+          { windowMs: 60_000, max: 4 },
+          { windowMs: 3_600_000, max: 15 },
+        ]);
+        if (!rlSess.ok) {
+          return jsonResponse(429, {
+            ok: false,
+            message: `طلبات كثيرة على هذه الجلسة. حاول بعد ${rlSess.retryAfter} ثانية.`,
+          });
+        }
+
+
         const today = riyadhTodayIso();
         if (parsed.data.date < today) {
           return jsonResponse(400, {
