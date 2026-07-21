@@ -194,15 +194,17 @@ def compare_png(actual: Path, baseline: Path) -> tuple[float, Path | None]:
 
 
 # ————————————————— التنفيذ —————————————————
-async def snapshot_and_compare(page, slug: str, path: str, ready_selector: str) -> str | None:
+async def snapshot_and_compare(page, slug: str, path: str, ready_selector: str) -> dict:
+    """يرجع dict بحالة الصفحة: status ∈ {ok, baseline, fail, error}, ratio, paths."""
     url = f"{BASE}{path}"
+    record: dict = {"slug": slug, "path": path, "url": url, "status": "ok", "ratio": 0.0}
     await page.goto(url, wait_until="domcontentloaded")
     try:
         await page.wait_for_selector(ready_selector, timeout=15_000)
     except Exception:
-        return f"{slug}: selector '{ready_selector}' لم يظهر خلال 15s ({url})"
+        record.update(status="error", error=f"selector '{ready_selector}' لم يظهر خلال 15s")
+        return record
 
-    # انتظر السكون الشبكي القصير + inject freezing CSS
     try:
         await page.wait_for_load_state("networkidle", timeout=8_000)
     except Exception:
@@ -217,18 +219,144 @@ async def snapshot_and_compare(page, slug: str, path: str, ready_selector: str) 
     if UPDATE or not baseline_path.exists():
         actual_path.replace(baseline_path)
         print(f"[baseline] wrote {baseline_path.name}")
-        return None
+        record.update(status="baseline", baseline=str(baseline_path))
+        return record
 
     ratio, diff_path = compare_png(actual_path, baseline_path)
+    record["ratio"] = ratio
+    record["baseline"] = str(baseline_path)
+    record["actual"] = str(actual_path)
+    if diff_path:
+        record["diff"] = str(diff_path)
     if ratio > PIXEL_TOLERANCE:
-        return (
-            f"{slug}: انحراف بصري {ratio:.4%} > عتبة {PIXEL_TOLERANCE:.2%} "
-            f"(baseline={baseline_path.name}, actual={actual_path.name}, diff={diff_path.name if diff_path else '—'})"
-        )
-    print(f"[ok] {slug}: انحراف {ratio:.4%} ≤ {PIXEL_TOLERANCE:.2%}")
-    # نظّف الـactual الناجح لتقليل الضوضاء
-    actual_path.unlink(missing_ok=True)
-    return None
+        record["status"] = "fail"
+        print(f"[fail] {slug}: انحراف {ratio:.4%} > {PIXEL_TOLERANCE:.2%}")
+    else:
+        print(f"[ok] {slug}: انحراف {ratio:.4%} ≤ {PIXEL_TOLERANCE:.2%}")
+        actual_path.unlink(missing_ok=True)
+    return record
+
+
+# ————————————————— توليد التقرير —————————————————
+REPORT_DIR = Path(os.environ.get("VISUAL_REPORT_DIR", "/mnt/documents/visual-regression"))
+
+
+def _b64(p: Path) -> str:
+    import base64
+    return base64.b64encode(p.read_bytes()).decode()
+
+
+def write_report(results: list[dict]) -> Path | None:
+    """يبني تقرير HTML مفصّل ويُصدر JSON مرافق. يُنشأ فقط عند وجود فروق/أخطاء/baselines جديدة."""
+    interesting = [r for r in results if r["status"] in ("fail", "error", "baseline")]
+    fails = sum(1 for r in results if r["status"] == "fail")
+    errors = sum(1 for r in results if r["status"] == "error")
+    baselines = sum(1 for r in results if r["status"] == "baseline")
+    if not interesting and not fails:
+        return None
+
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    ts = __import__("datetime").datetime.utcnow().strftime("%Y-%m-%dT%H-%M-%SZ")
+
+    # JSON summary
+    summary = {
+        "generated_at_utc": ts,
+        "base_url": BASE,
+        "tolerance": PIXEL_TOLERANCE,
+        "channel_tolerance": CHANNEL_TOLERANCE,
+        "totals": {
+            "checked": len(results),
+            "ok": sum(1 for r in results if r["status"] == "ok"),
+            "fail": fails,
+            "error": errors,
+            "baseline_written": baselines,
+        },
+        "results": [{k: v for k, v in r.items() if k not in {"baseline", "actual", "diff"} or True} for r in results],
+    }
+    (REPORT_DIR / "report.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    def _img(label: str, p: str | None) -> str:
+        if not p or not Path(p).exists():
+            return f'<div class="img missing">لا يوجد {label}</div>'
+        return f'<figure><figcaption>{label}</figcaption><img alt="{label}" src="data:image/png;base64,{_b64(Path(p))}"/></figure>'
+
+    rows = []
+    for r in results:
+        status = r["status"]
+        badge_class = {"ok": "ok", "fail": "fail", "error": "err", "baseline": "new"}[status]
+        badge_text = {"ok": "مطابق", "fail": "فرق بصري", "error": "خطأ", "baseline": "baseline جديد"}[status]
+        ratio_txt = f"{r.get('ratio', 0):.4%}" if status in ("ok", "fail") else "—"
+        details = ""
+        if status in ("fail", "baseline"):
+            details = f"""
+            <div class="triptych">
+              {_img("Baseline (القديم)", r.get("baseline"))}
+              {_img("Actual (الجديد)", r.get("actual") or r.get("baseline"))}
+              {_img("Diff (الفروقات)", r.get("diff"))}
+            </div>"""
+        elif status == "error":
+            details = f'<p class="err-msg">⚠ {r.get("error", "خطأ غير معروف")}</p>'
+        rows.append(f"""
+        <section class="row {badge_class}">
+          <header>
+            <span class="badge {badge_class}">{badge_text}</span>
+            <h2>{r["slug"]}</h2>
+            <code>{r["path"]}</code>
+            <span class="ratio">{ratio_txt}</span>
+          </header>
+          {details}
+        </section>""")
+
+    verdict_class = "fail" if fails or errors else ("new" if baselines else "ok")
+    verdict_text = (
+        f"❌ فشل: {fails} صفحة تجاوزت العتبة" if fails
+        else f"⚠ أخطاء تنفيذ في {errors} صفحة" if errors and not baselines
+        else f"🆕 كُتب {baselines} baseline جديد"
+    )
+
+    html = f"""<!doctype html>
+<html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"/>
+<title>Visual Regression Report — Portal</title>
+<style>
+  :root {{ --ok:#16A34A; --fail:#C0392B; --new:#0B8585; --err:#D97706; --ink:#173B42; --bg:#FCFDFB; --border:#DCEAE8; }}
+  body {{ font-family: -apple-system, "Segoe UI", "Tajawal", sans-serif; background: var(--bg); color: var(--ink); margin:0; padding:24px; }}
+  h1 {{ margin:0 0 4px 0; font-size:22px; }}
+  .meta {{ color:#5A6E73; font-size:13px; margin-bottom:20px; }}
+  .verdict {{ display:inline-block; padding:8px 16px; border-radius:999px; font-weight:700; margin-bottom:24px; color:#fff; }}
+  .verdict.ok {{ background:var(--ok); }} .verdict.fail {{ background:var(--fail); }}
+  .verdict.new {{ background:var(--new); }} .verdict.err {{ background:var(--err); }}
+  .row {{ background:#fff; border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px; box-shadow:0 1px 2px rgba(7,94,99,.05); }}
+  .row header {{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }}
+  .row h2 {{ margin:0; font-size:16px; }}
+  .row code {{ color:#5A6E73; font-size:13px; }}
+  .ratio {{ margin-inline-start:auto; font-variant-numeric:tabular-nums; font-weight:600; }}
+  .badge {{ padding:4px 10px; border-radius:999px; font-size:12px; font-weight:700; color:#fff; }}
+  .badge.ok {{ background:var(--ok); }} .badge.fail {{ background:var(--fail); }}
+  .badge.new {{ background:var(--new); }} .badge.err {{ background:var(--err); }}
+  .triptych {{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px; }}
+  figure {{ margin:0; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#F7FAF9; }}
+  figcaption {{ font-size:12px; font-weight:600; padding:8px 10px; background:#EEF6F5; border-bottom:1px solid var(--border); }}
+  figure img {{ display:block; width:100%; height:auto; }}
+  .img.missing {{ padding:20px; text-align:center; color:#7A8A8E; font-size:13px; }}
+  .err-msg {{ color:var(--fail); font-weight:600; margin:12px 0 0; }}
+  summary {{ cursor:pointer; }}
+</style></head><body>
+  <h1>Portal — Visual Regression Report</h1>
+  <div class="meta">
+    UTC: {ts} · Base: <code>{BASE}</code> ·
+    Tolerance: {PIXEL_TOLERANCE:.2%} · Channel: {CHANNEL_TOLERANCE}
+  </div>
+  <div class="verdict {verdict_class}">{verdict_text}</div>
+  <p class="meta">فُحصت {len(results)} صفحة — ✅ {summary["totals"]["ok"]} مطابقة، ❌ {fails} فرق، ⚠ {errors} خطأ، 🆕 {baselines} baseline جديد.</p>
+  {"".join(rows)}
+</body></html>"""
+    report_path = REPORT_DIR / "report.html"
+    report_path.write_text(html, encoding="utf-8")
+    # نسخة مؤرَّخة للأرشيف
+    (REPORT_DIR / f"report-{ts}.html").write_text(html, encoding="utf-8")
+    print(f"[report] {report_path}")
+    return report_path
 
 
 async def main() -> int:
@@ -243,6 +371,7 @@ async def main() -> int:
     print(f"[info] source={source} storage_key={storage_key} update={UPDATE}")
     print(f"[info] base={BASE} tolerance={PIXEL_TOLERANCE:.2%} channel={CHANNEL_TOLERANCE}")
 
+    results: list[dict] = []
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
         ctx = await browser.new_context(
@@ -264,27 +393,32 @@ async def main() -> int:
             f"window.localStorage.setItem({json.dumps(storage_key)}, {json.dumps(json.dumps(session))})"
         )
 
-        failures: list[str] = []
         for slug, path, ready in PAGES:
             try:
-                err = await snapshot_and_compare(page, slug, path, ready)
-                if err:
-                    failures.append(err)
+                results.append(await snapshot_and_compare(page, slug, path, ready))
             except Exception as e:  # noqa: BLE001
-                failures.append(f"{slug}: exception {type(e).__name__}: {e}")
+                results.append({"slug": slug, "path": path, "status": "error", "error": f"{type(e).__name__}: {e}"})
 
         await browser.close()
 
-    if failures:
+    report_path = write_report(results)
+    fails = [r for r in results if r["status"] == "fail"]
+    errors = [r for r in results if r["status"] == "error"]
+
+    if fails or errors:
         print("\n=== FAILURES ===")
-        for f in failures:
-            print(f"[fail] {f}")
+        for r in fails + errors:
+            print(f"[{r['status']}] {r['slug']}: {r.get('error', f'ratio={r.get('ratio', 0):.4%}')}")
+        if report_path:
+            print(f"\n📄 التقرير: {report_path}")
         print(
-            f"\nإن كان الاختلاف مقصوداً بعد ترحيل tokens، حدّث المرجع:\n"
-            f"    UPDATE_BASELINES=1 python3 {Path(__file__).relative_to(Path.cwd()) if Path(__file__).is_absolute() else __file__}"
+            "إن كان الاختلاف مقصوداً بعد ترحيل tokens، حدّث المرجع:\n"
+            "    UPDATE_BASELINES=1 python3 tests/visual/portal_visual_regression.py"
         )
         return 1
 
+    if report_path:
+        print(f"\n📄 التقرير (baselines جديدة): {report_path}")
     print("\n[ok] كل الصفحات مطابقة للـbaselines ضمن العتبة.")
     return 0
 
@@ -295,3 +429,4 @@ if __name__ == "__main__":
     except RuntimeError as e:
         print(f"[error] {e}")
         sys.exit(2)
+
