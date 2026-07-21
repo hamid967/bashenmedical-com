@@ -20,6 +20,7 @@ import {
   preflightBudget,
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
+import { recordUsageSample } from "@/lib/ai/token-calibration";
 import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
