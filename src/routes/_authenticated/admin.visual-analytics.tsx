@@ -372,7 +372,6 @@ function VisualAnalyticsPage() {
             </Card>
           </>
         )}
-      </div>
-    </AdminShell>
+    </div>
   );
 }
