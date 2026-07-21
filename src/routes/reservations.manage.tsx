@@ -347,17 +347,17 @@ function ManagePage() {
           prior_waitlist_notified: cancelResult?.waitlist_notified ?? false,
           restored_at: Date.now(),
         });
-        sonner.success("تم استرجاع الحجز.", {
+        sonner.success(t("manage.undo.toast_success"), {
           description: res.slot_rebooked
-            ? "تم إعادة تثبيت الموعد بنجاح."
-            : "أعيدت حالة الحجز — سيتواصل معك الفريق للتأكيد.",
+            ? t("manage.undo.toast_success_rebooked")
+            : t("manage.undo.toast_success_pending"),
         });
         setCancelPhase("done");
         setUndoDeadline(null);
         setUndoMsLeft(0);
         if (sessionToken) listAppts.mutate(sessionToken);
       } else {
-        sonner.error(res.message ?? "تعذّر الاسترجاع.");
+        sonner.error(res.message ?? t("manage.undo.toast_failed"));
         setUndoDeadline(null);
         setUndoMsLeft(0);
       }
