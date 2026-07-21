@@ -19,6 +19,25 @@ export const Route = createFileRoute("/insurance")({
       { property: "og:url", content: "https://bashenmedical.com/insurance" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/insurance" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "MedicalWebPage",
+          "@id": "https://bashenmedical.com/insurance",
+          name: "شركات التأمين المعتمدة — مجمع باعشن الطبي",
+          description:
+            "قائمة شركات التأمين الصحي المعتمدة لدى مجمع باعشن الطبي في صبيا، جازان.",
+          url: "https://bashenmedical.com/insurance",
+          inLanguage: "ar-SA",
+          isPartOf: { "@id": "https://bashenmedical.com/#website" },
+          publisher: { "@id": "https://bashenmedical.com/#organization" },
+          about: { "@type": "Thing", name: "التأمين الصحي" },
+          audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+        }),
+      },
+    ],
   }),
   component: InsurancePage,
 });
