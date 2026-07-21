@@ -142,7 +142,7 @@ export function PortalShell({
     <div dir={dir} className="portal-root portal-gradient-bg font-sans">
       <div className="min-h-dvh grid lg:grid-cols-[280px_1fr]">
         {/* Sidebar (desktop) */}
-        <aside className="hidden lg:flex flex-col border-e border-[color:var(--portal-border)] bg-white/80 backdrop-blur-xl sticky top-0 h-dvh relative overflow-hidden">
+        <aside className="hidden lg:flex flex-col border-e border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)]/80 backdrop-blur-xl sticky top-0 h-dvh relative overflow-hidden">
           <JazanPattern variant="subtle" orientation="vertical" className="absolute inset-y-0 end-0 w-6 opacity-40 pointer-events-none" />
           <SidebarBrand isAr={isAr} />
           <SidebarNav
@@ -156,7 +156,7 @@ export function PortalShell({
         {/* Main column */}
         <div className="flex flex-col min-w-0">
           {/* Topbar */}
-          <header className="sticky top-0 z-20 h-16 flex items-center gap-3 px-4 md:px-6 border-b border-[color:var(--portal-border)] bg-white/70 backdrop-blur-xl relative">
+          <header className="sticky top-0 z-20 h-16 flex items-center gap-3 px-4 md:px-6 border-b border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)]/70 backdrop-blur-xl relative">
             <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 40%, var(--jazan-terracotta,#B85C3C) 60%, transparent)", opacity: 0.35 }} />
             <button
               onClick={() => setMobileOpen(true)}
@@ -166,7 +166,7 @@ export function PortalShell({
               <Menu className="h-5 w-5" />
             </button>
 
-            <div className="hidden md:flex items-center gap-2 h-11 flex-1 max-w-xl rounded-full bg-white border border-[color:var(--portal-border)] px-4 shadow-sm">
+            <div className="hidden md:flex items-center gap-2 h-11 flex-1 max-w-xl rounded-full bg-[color:var(--portal-surface-1)] border border-[color:var(--portal-border)] px-4 shadow-sm">
               <Search className="h-4 w-4 text-[color:var(--portal-ink-3)]" />
               <input
                 dir={dir}
@@ -187,7 +187,7 @@ export function PortalShell({
             >
               <Bell className="h-5 w-5" />
               {unreadCount > 0 && (
-                <span className="absolute top-1 end-1 min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full bg-[color:var(--portal-error)] text-white text-[10px] font-semibold">
+                <span className="absolute top-1 end-1 min-w-[18px] h-[18px] px-1 grid place-items-center rounded-full bg-[color:var(--portal-error)] text-[color:var(--portal-on-primary)] text-[10px] font-semibold">
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </span>
               )}
@@ -215,7 +215,7 @@ export function PortalShell({
       <nav
         dir={dir}
         aria-label={isAr ? "التنقّل السريع" : "Quick nav"}
-        className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[color:var(--portal-border)] bg-white/95 backdrop-blur-xl"
+        className="lg:hidden fixed bottom-0 inset-x-0 z-30 border-t border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)]/95 backdrop-blur-xl"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <ul className="grid grid-cols-5">
@@ -261,7 +261,7 @@ export function PortalShell({
           />
           <aside
             dir={dir}
-            className="absolute top-0 bottom-0 w-[280px] bg-white shadow-2xl flex flex-col
+            className="absolute top-0 bottom-0 w-[280px] bg-[color:var(--portal-surface-1)] shadow-2xl flex flex-col
               ltr:left-0 rtl:right-0"
           >
             <SidebarBrand isAr={isAr} onClose={() => setMobileOpen(false)} />
@@ -278,7 +278,7 @@ export function PortalShell({
       {/* AI FAB */}
       <button
         aria-label={isAr ? "المساعد الذكي" : "AI Assistant"}
-        className="fixed bottom-24 lg:bottom-5 end-5 z-40 h-14 w-14 rounded-full grid place-items-center text-white shadow-[0_20px_60px_-15px_rgba(15,108,189,0.55)] hover:scale-105 transition-transform"
+        className="fixed bottom-24 lg:bottom-5 end-5 z-40 h-14 w-14 rounded-full grid place-items-center text-[color:var(--portal-on-primary)] shadow-[0_20px_60px_-15px_rgba(15,108,189,0.55)] hover:scale-105 transition-transform"
         style={{ background: "var(--portal-gradient)" }}
       >
         <Sparkles className="h-6 w-6" />
@@ -291,7 +291,7 @@ function SidebarBrand({ isAr, onClose }: { isAr: boolean; onClose?: () => void }
   return (
     <div className="h-20 px-5 flex items-center gap-3 border-b border-[color:var(--portal-border)]">
       <div
-        className="h-11 w-11 rounded-2xl grid place-items-center text-white font-bold text-lg shadow-md"
+        className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)] font-bold text-lg shadow-md"
         style={{ background: "var(--portal-gradient)" }}
       >
         ب
@@ -350,7 +350,7 @@ function SidebarNav({
                       className={
                         "flex items-center gap-3 px-3.5 h-11 rounded-2xl text-sm font-medium transition-all portal-focus-ring " +
                         (active
-                          ? "text-white shadow-[var(--portal-shadow-elevated)]"
+                          ? "text-[color:var(--portal-on-primary)] shadow-[var(--portal-shadow-elevated)]"
                           : "text-[color:var(--portal-ink-2)] hover:bg-[color:var(--portal-gradient-soft)] hover:text-[color:var(--portal-primary)]")
                       }
                       style={active ? { background: "var(--portal-gradient)" } : undefined}
@@ -396,7 +396,7 @@ function SidebarFooter({
         <button
           onClick={onSignOut}
           aria-label={isAr ? "تسجيل خروج" : "Sign out"}
-          className="h-9 w-9 grid place-items-center rounded-xl bg-white hover:bg-white/90 text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-error)]"
+          className="h-9 w-9 grid place-items-center rounded-xl bg-[color:var(--portal-surface-1)] hover:bg-[color:var(--portal-surface-1)]/90 text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-error)]"
         >
           <LogOut className="h-4 w-4" />
         </button>
@@ -420,14 +420,14 @@ function Avatar({ name, url, size = 36 }: { name: string; url?: string | null; s
         alt={name}
         width={size}
         height={size}
-        className="rounded-full object-cover ring-2 ring-white shadow-sm"
+        className="rounded-full object-cover ring-2 ring-[color:var(--portal-surface-1)] shadow-sm"
         style={{ width: size, height: size }}
       />
     );
   }
   return (
     <div
-      className="rounded-full grid place-items-center text-white font-semibold ring-2 ring-white shadow-sm"
+      className="rounded-full grid place-items-center text-[color:var(--portal-on-primary)] font-semibold ring-2 ring-[color:var(--portal-surface-1)] shadow-sm"
       style={{
         width: size,
         height: size,
