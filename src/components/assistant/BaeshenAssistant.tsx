@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/site";
 import { classifyUserMessage } from "@/lib/ai/safety";
+import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -84,56 +85,38 @@ export function BaeshenAssistant() {
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
-      const res = await fetch("/api/ai/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
-        },
+      const result = await streamChatWithResume({
+        url: "/api/ai/chat",
+        token: bearer,
         signal: controller.signal,
-        body: JSON.stringify({
+        buildBody: (resumePartial) => ({
           messages: next.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
           conversation_id: noSave ? null : conversationId.current,
           lang: isAr ? "ar" : "en",
           save_history: !noSave,
+          ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
+        onDelta: (_delta, acc) => {
+          setMessages((prev) => {
+            const copy = prev.slice();
+            copy[copy.length - 1] = { role: "assistant", content: acc };
+            return copy;
+          });
+        },
+        onRetry: (phase) => {
+          if (phase === "reconnecting") setError(t("انقطع الاتصال — جاري الاستئناف…", "Connection lost — resuming…"));
+          else if (phase === "resumed") setError(null);
+          else if (phase === "failed") setError(t("تعذّر استئناف الرد.", "Could not resume the response."));
+        },
+        mapStatusError: (s) => {
+          if (s === 503) return t("المساعد معطّل مؤقتًا.", "Assistant is temporarily disabled.");
+          if (s === 429) return t("طلبات كثيرة، حاول بعد قليل.", "Too many requests, try again shortly.");
+          if (s === 402) return t("انتهت أرصدة الذكاء الاصطناعي.", "AI credits exhausted.");
+          if (s === 401) return t("انتهت الجلسة، أعد تسجيل الدخول.", "Session expired, please sign in again.");
+          return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
+        },
       });
-      if (res.status === 503) throw new Error(t("المساعد معطّل مؤقتًا.", "Assistant is temporarily disabled."));
-      if (res.status === 429) throw new Error(t("طلبات كثيرة، حاول بعد قليل.", "Too many requests, try again shortly."));
-      if (res.status === 402) throw new Error(t("انتهت أرصدة الذكاء الاصطناعي.", "AI credits exhausted."));
-      if (!res.ok || !res.body) throw new Error(t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant."));
-
-      const reader = res.body.getReader();
-      const dec = new TextDecoder();
-      let buf = "";
-      let acc = "";
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() ?? "";
-        for (const raw of lines) {
-          const line = raw.trim();
-          if (!line.startsWith("data:")) continue;
-          const payload = line.slice(5).trim();
-          if (!payload || payload === "[DONE]") continue;
-          try {
-            const j = JSON.parse(payload);
-            const delta = j?.choices?.[0]?.delta?.content ?? "";
-            if (delta) {
-              acc += delta;
-              setMessages((prev) => {
-                const copy = prev.slice();
-                copy[copy.length - 1] = { role: "assistant", content: acc };
-                return copy;
-              });
-            }
-          } catch { /* ignore partial */ }
-        }
-      }
-      if (!acc) {
+      if (!result.text) {
         setMessages((prev) => {
           const copy = prev.slice();
           copy[copy.length - 1] = { role: "assistant", content: t("لم أستطع توليد رد الآن.", "No response was generated.") };
@@ -142,7 +125,9 @@ export function BaeshenAssistant() {
       }
     } catch (err) {
       if ((err as Error).name === "AbortError") return;
-      const msg = (err as Error).message || t("حدث خطأ.", "Something went wrong.");
+      const msg = err instanceof StreamHttpError
+        ? err.message
+        : (err as Error).message || t("حدث خطأ.", "Something went wrong.");
       setError(msg);
       setMessages((prev) => {
         const copy = prev.slice();

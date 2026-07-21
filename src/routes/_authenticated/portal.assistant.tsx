@@ -11,6 +11,7 @@ import {
   AssistantActionButton,
   parseAssistantActions,
 } from "@/components/portal/AssistantActionButton";
+import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
   head: () => ({
@@ -60,52 +61,39 @@ function AssistantPage() {
       const token = sess.session?.access_token;
       if (!token) throw new Error("يجب تسجيل الدخول");
 
-      const res = await fetch("/api/portal/ai-chat", {
-        method: "POST",
-        signal: controller.signal,
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ messages: next }),
-      });
-
-      if (res.status === 401) throw new Error("انتهت الجلسة، أعد تسجيل الدخول");
-      if (res.status === 429) throw new Error("عدد الطلبات كثير، حاول لاحقًا");
-      if (res.status === 402) throw new Error("انتهت الحصة المجانية للمساعد");
-      if (!res.ok || !res.body) throw new Error("تعذّر الاتصال بالمساعد");
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let assistantText = "";
       setMessages((m) => [...m, { role: "assistant", content: "" }]);
 
-      let buffer = "";
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-        for (const line of lines) {
-          const t = line.trim();
-          if (!t || !t.startsWith("data:")) continue;
-          const payload = t.slice(5).trim();
-          if (payload === "[DONE]") continue;
-          try {
-            const json = JSON.parse(payload);
-            const delta = json?.choices?.[0]?.delta?.content ?? "";
-            if (delta) {
-              assistantText += delta;
-              setMessages((m) => {
-                const copy = m.slice();
-                copy[copy.length - 1] = { role: "assistant", content: assistantText };
-                return copy;
-              });
-            }
-          } catch { /* ignore parse errors on partial frames */ }
-        }
-      }
+      await streamChatWithResume({
+        url: "/api/portal/ai-chat",
+        token,
+        signal: controller.signal,
+        buildBody: (resumePartial) => ({
+          messages: next,
+          ...(resumePartial ? { resume_partial: resumePartial } : {}),
+        }),
+        onDelta: (_delta, acc) => {
+          setMessages((m) => {
+            const copy = m.slice();
+            copy[copy.length - 1] = { role: "assistant", content: acc };
+            return copy;
+          });
+        },
+        onRetry: (phase) => {
+          if (phase === "reconnecting") setError("انقطع الاتصال — جاري الاستئناف…");
+          else if (phase === "resumed") setError(null);
+          else if (phase === "failed") setError("تعذّر استئناف الرد.");
+        },
+        mapStatusError: (s) => {
+          if (s === 401) return "انتهت الجلسة، أعد تسجيل الدخول";
+          if (s === 429) return "عدد الطلبات كثير، حاول لاحقًا";
+          if (s === 402) return "انتهت الحصة المجانية للمساعد";
+          return "تعذّر الاتصال بالمساعد";
+        },
+      });
     } catch (e: unknown) {
       if ((e as Error).name === "AbortError") return;
-      setError(e instanceof Error ? e.message : "خطأ غير متوقع");
+      const msg = e instanceof StreamHttpError ? e.message : e instanceof Error ? e.message : "خطأ غير متوقع";
+      setError(msg);
     } finally {
       setStreaming(false);
       abortRef.current = null;

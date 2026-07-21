@@ -139,12 +139,25 @@ export const Route = createFileRoute("/api/portal/ai-chat")({
         const apiKey = process.env.LOVABLE_API_KEY;
         if (!apiKey) return new Response("AI not configured", { status: 500 });
 
-        let body: { messages?: { role: string; content: string }[] } = {};
+        let body: { messages?: { role: string; content: string }[]; resume_partial?: string } = {};
         try { body = await request.json(); } catch { return new Response("Bad request", { status: 400 }); }
         const messages = Array.isArray(body.messages) ? body.messages.slice(-16) : [];
         if (messages.length === 0) return new Response("No messages", { status: 400 });
 
         const context = await loadPatientContext(auth.userId, auth.token);
+
+        const systemMessages: { role: string; content: string }[] = [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "system", content: context },
+        ];
+        const resumePartial = typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
+        if (resumePartial) {
+          systemMessages.push({
+            role: "system",
+            content:
+              `الرد السابق انقطع بسبب مشكلة اتصال. أكمل من حيث توقف تمامًا بدون تكرار أي كلمة أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
+          });
+        }
 
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
@@ -152,11 +165,7 @@ export const Route = createFileRoute("/api/portal/ai-chat")({
           body: JSON.stringify({
             model: "google/gemini-2.5-flash",
             stream: true,
-            messages: [
-              { role: "system", content: SYSTEM_PROMPT },
-              { role: "system", content: context },
-              ...messages,
-            ],
+            messages: [...systemMessages, ...messages],
           }),
         });
 
