@@ -203,7 +203,9 @@ export function BaeshenAssistant() {
       // Commit estimated credits for the session running total.
       const promptTok = estimateTokens(promptText);
       const outTok = estimateTokens(result.text);
-      commitSessionCredits("public", estimateCredits(promptTok, outTok, currentModel));
+      const spent = estimateCredits(promptTok, outTok, currentModel);
+      commitSessionCredits("public", spent);
+      setSessionCredits((v) => v + spent);
       if (result.budgetStop) {
         setError(result.budgetStop.message);
       }
