@@ -300,6 +300,54 @@ function ManagePage() {
     },
   });
 
+  const undoCancel = useMutation({
+    mutationFn: async (id: string) => {
+      if (!sessionToken) throw new Error("no session");
+      return apiPost<{
+        ok: boolean;
+        message?: string;
+        restored_status?: string;
+        slot_rebooked?: boolean;
+        waitlist_reverted?: boolean;
+      }>("/api/public/reservations/cancel/undo", {
+        session_token: sessionToken,
+        appointment_id: id,
+      });
+    },
+    onSuccess: (res, id) => {
+      if (res.ok) {
+        setAppointments((prev) =>
+          prev.map((a) =>
+            a.id === id ? { ...a, status: res.restored_status ?? "confirmed" } : a,
+          ),
+        );
+        sonner.success("تم استرجاع الحجز.", {
+          description: res.slot_rebooked
+            ? "تم إعادة تثبيت الموعد بنجاح."
+            : "أعيدت حالة الحجز — سيتواصل معك الفريق للتأكيد.",
+        });
+        setActiveCancelId(null);
+        setCancelResult(null);
+        setCancelPhase("reason");
+        setUndoSecondsLeft(0);
+        if (sessionToken) listAppts.mutate(sessionToken);
+      } else {
+        sonner.error(res.message ?? "تعذّر الاسترجاع.");
+        setUndoSecondsLeft(0);
+      }
+    },
+    onError: () => {
+      sonner.error("خطأ في الشبكة.");
+    },
+  });
+
+  // Countdown for undo window (30s).
+  useEffect(() => {
+    if (undoSecondsLeft <= 0) return;
+    const t = setTimeout(() => setUndoSecondsLeft((s) => s - 1), 1000);
+    return () => clearTimeout(t);
+  }, [undoSecondsLeft]);
+
   const rescheduleAppt = useMutation({
     mutationFn: async (input: { id: string; date: string; time: string }) => {
       if (!sessionToken) throw new Error("no session");
