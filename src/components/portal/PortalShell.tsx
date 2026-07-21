@@ -29,33 +29,76 @@ import { useState } from "react";
 import { JazanPattern } from "@/components/jazan";
 
 type NavItem = { to: string; icon: typeof LayoutDashboard; label_ar: string; label_en: string };
+type NavGroup = { id: string; label_ar: string; label_en: string; items: NavItem[] };
 
-const NAV: NavItem[] = [
-  { to: "/portal", icon: LayoutDashboard, label_ar: "الرئيسية", label_en: "Dashboard" },
-  { to: "/portal/dashboard", icon: LayoutDashboard, label_ar: "لوحة التحكم", label_en: "Overview" },
-  { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "My Appointments" },
-  { to: "/portal/calendar", icon: CalendarClock, label_ar: "التقويم", label_en: "Calendar" },
-  { to: "/portal/schedule", icon: CalendarClock, label_ar: "جدولي (طبيب)", label_en: "My Schedule (Doctor)" },
-  { to: "/portal/book", icon: CalendarPlus, label_ar: "حجز موعد", label_en: "Book Appointment" },
-  { to: "/portal/doctors", icon: Users, label_ar: "أطبائي", label_en: "My Doctors" },
-  { to: "/portal/family", icon: Users, label_ar: "أفراد العائلة", label_en: "Family" },
-  { to: "/portal/records", icon: FileText, label_ar: "السجل الطبي", label_en: "Medical Records" },
-  { to: "/portal/laboratory", icon: FlaskConical, label_ar: "نتائج المختبر", label_en: "Laboratory" },
-  { to: "/portal/radiology", icon: ScanLine, label_ar: "الأشعة", label_en: "Radiology" },
-  { to: "/portal/prescriptions", icon: Pill, label_ar: "الوصفات", label_en: "Prescriptions" },
-  { to: "/portal/insurance", icon: ShieldCheck, label_ar: "التأمين", label_en: "Insurance" },
-  { to: "/portal/invoices", icon: ReceiptText, label_ar: "الفواتير", label_en: "Invoices" },
-  { to: "/portal/payments", icon: CreditCard, label_ar: "المدفوعات", label_en: "Payments" },
-  { to: "/portal/refunds", icon: RotateCcw, label_ar: "طلبات الاسترداد", label_en: "Refunds" },
-  { to: "/portal/notifications", icon: Bell, label_ar: "الإشعارات", label_en: "Notifications" },
-  { to: "/portal/reminder-preferences", icon: Bell, label_ar: "تفضيلات قنوات الإشعار", label_en: "Notification Channels" },
-  { to: "/portal/orders", icon: Inbox, label_ar: "طلباتي", label_en: "My Orders" },
-  { to: "/portal/inquiries", icon: MessageSquareWarning, label_ar: "استفساراتي", label_en: "My Inquiries" },
-  { to: "/portal/complaints", icon: MessageSquareWarning, label_ar: "الشكاوى والمقترحات", label_en: "Complaints" },
-  { to: "/portal/consents", icon: ShieldCheck, label_ar: "الموافقات والخصوصية", label_en: "Consents & Privacy" },
-  { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
-  { to: "/portal/sessions", icon: ShieldCheck, label_ar: "الجلسات النشطة", label_en: "Active Sessions" },
-  { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: "home",
+    label_ar: "الرئيسية",
+    label_en: "Home",
+    items: [
+      { to: "/portal", icon: LayoutDashboard, label_ar: "الرئيسية", label_en: "Dashboard" },
+      { to: "/portal/dashboard", icon: LayoutDashboard, label_ar: "لوحة التحكم", label_en: "Overview" },
+    ],
+  },
+  {
+    id: "visits",
+    label_ar: "الحجوزات",
+    label_en: "Appointments",
+    items: [
+      { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "My Appointments" },
+      { to: "/portal/book", icon: CalendarPlus, label_ar: "حجز موعد", label_en: "Book Appointment" },
+      { to: "/portal/calendar", icon: CalendarClock, label_ar: "التقويم", label_en: "Calendar" },
+      { to: "/portal/schedule", icon: CalendarClock, label_ar: "جدولي (طبيب)", label_en: "My Schedule" },
+      { to: "/portal/family", icon: Users, label_ar: "أفراد العائلة", label_en: "Family" },
+    ],
+  },
+  {
+    id: "medical",
+    label_ar: "السجل الطبي",
+    label_en: "Medical Records",
+    items: [
+      { to: "/portal/records", icon: FileText, label_ar: "السجل الطبي", label_en: "Records" },
+      { to: "/portal/prescriptions", icon: Pill, label_ar: "الوصفات", label_en: "Prescriptions" },
+      { to: "/portal/laboratory", icon: FlaskConical, label_ar: "المختبر", label_en: "Laboratory" },
+      { to: "/portal/radiology", icon: ScanLine, label_ar: "الأشعة", label_en: "Radiology" },
+      { to: "/portal/consents", icon: ShieldCheck, label_ar: "الموافقات والخصوصية", label_en: "Consents" },
+    ],
+  },
+  {
+    id: "billing",
+    label_ar: "المدفوعات",
+    label_en: "Billing",
+    items: [
+      { to: "/portal/invoices", icon: ReceiptText, label_ar: "الفواتير", label_en: "Invoices" },
+      { to: "/portal/payments", icon: CreditCard, label_ar: "المدفوعات", label_en: "Payments" },
+      { to: "/portal/refunds", icon: RotateCcw, label_ar: "الاسترداد", label_en: "Refunds" },
+      { to: "/portal/insurance", icon: ShieldCheck, label_ar: "التأمين", label_en: "Insurance" },
+      { to: "/portal/orders", icon: Inbox, label_ar: "طلباتي", label_en: "My Orders" },
+    ],
+  },
+  {
+    id: "comms",
+    label_ar: "التواصل",
+    label_en: "Messages",
+    items: [
+      { to: "/portal/doctors", icon: Users, label_ar: "أطبائي", label_en: "My Doctors" },
+      { to: "/portal/notifications", icon: Bell, label_ar: "الإشعارات", label_en: "Notifications" },
+      { to: "/portal/inquiries", icon: MessageSquareWarning, label_ar: "استفساراتي", label_en: "Inquiries" },
+      { to: "/portal/complaints", icon: MessageSquareWarning, label_ar: "الشكاوى", label_en: "Complaints" },
+    ],
+  },
+  {
+    id: "account",
+    label_ar: "الحساب",
+    label_en: "Account",
+    items: [
+      { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
+      { to: "/portal/sessions", icon: ShieldCheck, label_ar: "الجلسات النشطة", label_en: "Sessions" },
+      { to: "/portal/reminder-preferences", icon: Bell, label_ar: "تفضيلات الإشعار", label_en: "Reminder Prefs" },
+      { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
+    ],
+  },
 ];
 
 const BOTTOM_NAV: NavItem[] = [
@@ -65,6 +108,7 @@ const BOTTOM_NAV: NavItem[] = [
   { to: "/portal/records", icon: FileText, label_ar: "سجلي", label_en: "Records" },
   { to: "/portal/profile", icon: User, label_ar: "حسابي", label_en: "Me" },
 ];
+
 
 export function PortalShell({
   children,
