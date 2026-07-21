@@ -134,6 +134,7 @@ import { Route as AuthenticatedPortalConsentsRouteImport } from './routes/_authe
 import { Route as AuthenticatedPortalComplaintsRouteImport } from './routes/_authenticated/portal.complaints'
 import { Route as AuthenticatedPortalCalendarRouteImport } from './routes/_authenticated/portal.calendar'
 import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authenticated/portal.book'
+import { Route as AuthenticatedPortalAssistantRouteImport } from './routes/_authenticated/portal.assistant'
 import { Route as AuthenticatedPortalAppointmentsRouteImport } from './routes/_authenticated/portal.appointments'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
@@ -870,6 +871,12 @@ const AuthenticatedPortalBookRoute = AuthenticatedPortalBookRouteImport.update({
   path: '/book',
   getParentRoute: () => AuthenticatedPortalRoute,
 } as any)
+const AuthenticatedPortalAssistantRoute =
+  AuthenticatedPortalAssistantRouteImport.update({
+    id: '/assistant',
+    path: '/assistant',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
 const AuthenticatedPortalAppointmentsRoute =
   AuthenticatedPortalAppointmentsRouteImport.update({
     id: '/appointments',
@@ -1325,6 +1332,7 @@ export interface FileRoutesByFullPath {
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
+  '/portal/assistant': typeof AuthenticatedPortalAssistantRoute
   '/portal/book': typeof AuthenticatedPortalBookRoute
   '/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
@@ -1506,6 +1514,7 @@ export interface FileRoutesByTo {
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
+  '/portal/assistant': typeof AuthenticatedPortalAssistantRoute
   '/portal/book': typeof AuthenticatedPortalBookRoute
   '/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
@@ -1692,6 +1701,7 @@ export interface FileRoutesById {
   '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
+  '/_authenticated/portal/assistant': typeof AuthenticatedPortalAssistantRoute
   '/_authenticated/portal/book': typeof AuthenticatedPortalBookRoute
   '/_authenticated/portal/calendar': typeof AuthenticatedPortalCalendarRoute
   '/_authenticated/portal/complaints': typeof AuthenticatedPortalComplaintsRoute
@@ -1878,6 +1888,7 @@ export interface FileRouteTypes {
     | '/owner/settings'
     | '/patients/$patientId'
     | '/portal/appointments'
+    | '/portal/assistant'
     | '/portal/book'
     | '/portal/calendar'
     | '/portal/complaints'
@@ -2059,6 +2070,7 @@ export interface FileRouteTypes {
     | '/owner/settings'
     | '/patients/$patientId'
     | '/portal/appointments'
+    | '/portal/assistant'
     | '/portal/book'
     | '/portal/calendar'
     | '/portal/complaints'
@@ -2244,6 +2256,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner/settings'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/portal/appointments'
+    | '/_authenticated/portal/assistant'
     | '/_authenticated/portal/book'
     | '/_authenticated/portal/calendar'
     | '/_authenticated/portal/complaints'
@@ -3268,6 +3281,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalBookRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/assistant': {
+      id: '/_authenticated/portal/assistant'
+      path: '/assistant'
+      fullPath: '/portal/assistant'
+      preLoaderRoute: typeof AuthenticatedPortalAssistantRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/_authenticated/portal/appointments': {
       id: '/_authenticated/portal/appointments'
       path: '/appointments'
@@ -3820,6 +3840,7 @@ const AuthenticatedPortalReportsRouteWithChildren =
 
 interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalAppointmentsRoute: typeof AuthenticatedPortalAppointmentsRoute
+  AuthenticatedPortalAssistantRoute: typeof AuthenticatedPortalAssistantRoute
   AuthenticatedPortalBookRoute: typeof AuthenticatedPortalBookRoute
   AuthenticatedPortalCalendarRoute: typeof AuthenticatedPortalCalendarRoute
   AuthenticatedPortalComplaintsRoute: typeof AuthenticatedPortalComplaintsRoute
@@ -3849,6 +3870,7 @@ interface AuthenticatedPortalRouteChildren {
 
 const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalAppointmentsRoute: AuthenticatedPortalAppointmentsRoute,
+  AuthenticatedPortalAssistantRoute: AuthenticatedPortalAssistantRoute,
   AuthenticatedPortalBookRoute: AuthenticatedPortalBookRoute,
   AuthenticatedPortalCalendarRoute: AuthenticatedPortalCalendarRoute,
   AuthenticatedPortalComplaintsRoute: AuthenticatedPortalComplaintsRoute,
