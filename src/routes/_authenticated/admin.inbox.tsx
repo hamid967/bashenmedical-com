@@ -96,7 +96,7 @@ function UnifiedInboxPage() {
   );
 
   const setSearch = (patch: Partial<z.infer<typeof SearchSchema>>) =>
-    navigate({ search: (prev) => ({ ...prev, ...patch }) });
+    navigate({ search: (prev: z.infer<typeof SearchSchema>) => ({ ...prev, ...patch }) });
 
   return (
     <AdminShell>
