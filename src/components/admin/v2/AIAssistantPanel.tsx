@@ -179,6 +179,8 @@ export function AIAssistantPanel({
   function clearChat() {
     setMessages([]);
     setStreamed("");
+    setUsage(null);
+    setSessionCredits(0);
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
 
