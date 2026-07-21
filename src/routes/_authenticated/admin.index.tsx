@@ -319,10 +319,9 @@ function ShortcutTile({ link }: { link: QuickLink }) {
         minHeight: "110px",
       }}
     >
-      <Icon
-        className="h-6 w-6 transition-transform group-hover:scale-110"
-        style={{ color: OCEAN.glow }}
-      />
+      <span style={{ color: OCEAN.glow, display: "inline-flex" }}>
+        <Icon className="h-6 w-6 transition-transform group-hover:scale-110" />
+      </span>
       <span className="text-sm font-bold">{link.label}</span>
     </Link>
   );
