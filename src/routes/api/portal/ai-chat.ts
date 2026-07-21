@@ -89,7 +89,7 @@ async function loadPatientContext(
       sb.from("profiles").select("full_name, preferred_language").eq("id", userId).maybeSingle(),
       sb.from("patients").select("id").eq("profile_id", userId).maybeSingle(),
       sb.from("appointments")
-        .select("appointment_date, appointment_time, status")
+        .select("id, appointment_date, appointment_time, status")
         .gte("appointment_date", today)
         .in("status", ["new", "confirmed"])
         .order("appointment_date").order("appointment_time").limit(3),
