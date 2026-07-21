@@ -106,6 +106,18 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           const cancelledAt = new Date(appt.cancelled_at).getTime();
           const ageSec = (Date.now() - cancelledAt) / 1000;
           if (ageSec > UNDO_WINDOW_SECONDS) {
+            try {
+              const { logReservationEvent } = await import(
+                "@/lib/reservation-events.server"
+              );
+              await logReservationEvent({
+                event_type: "cancel_undo_failed",
+                phone: sess.phone,
+                appointment_id: appt.id,
+                meta: { reason: "expired" },
+                ip,
+              });
+            } catch { /* telemetry best-effort */ }
             return jsonResponse(410, {
               ok: false,
               message: "انتهت مهلة التراجع (30 ثانية).",
