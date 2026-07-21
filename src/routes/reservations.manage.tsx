@@ -121,7 +121,11 @@ function ManagePage() {
     waitlist_notified: boolean;
     cancelled_at: number;
   } | null>(null);
-  const [undoSecondsLeft, setUndoSecondsLeft] = useState<number>(0);
+  const UNDO_WINDOW_MS = 30_000;
+  const [undoDeadline, setUndoDeadline] = useState<number | null>(null);
+  const [undoMsLeft, setUndoMsLeft] = useState<number>(0);
+  const undoExpired = undoDeadline !== null && undoMsLeft <= 0;
+  const undoSecondsLeft = Math.max(0, Math.ceil(undoMsLeft / 1000));
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
