@@ -9,6 +9,14 @@ import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/site";
 import { classifyUserMessage } from "@/lib/ai/safety";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
+import {
+  budgetBlockMessage,
+  checkRunningBudget,
+  commitSessionCredits,
+  getDefaultLimits,
+  preflightBudget,
+} from "@/lib/ai/budget";
+import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 
@@ -91,6 +99,15 @@ export function BaeshenAssistant() {
     const promptText = historyForPrompt
       .map((m) => `${m.role}: ${m.content}`)
       .join("\n");
+
+    // Pre-flight budget check — block obviously oversized prompts before we spend anything.
+    const limits = getDefaultLimits("public");
+    const pre = preflightBudget({ surface: "public", limits, promptText });
+    if (!pre.ok) {
+      setError(budgetBlockMessage(pre, isAr ? "ar" : "en"));
+      return;
+    }
+
     const initialMeta: MessageCostMeta = { startedAt, promptText };
     const next2: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "", meta: initialMeta }];
     setMessages(next2);
