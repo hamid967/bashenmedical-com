@@ -155,7 +155,7 @@ function AiOverviewPage() {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <KpiCard icon={<MessagesSquare className="h-4 w-4" />} label="المحادثات" value={d.conversations_24h} />
         <KpiCard icon={<Activity className="h-4 w-4" />} label="الرسائل" value={d.messages_24h} />
         <KpiCard
@@ -164,6 +164,96 @@ function AiOverviewPage() {
           value={d.safety_incidents_24h.reduce((s, r) => s + r.count, 0)}
           tone={d.safety_incidents_24h.some((i) => i.severity === "critical" || i.severity === "high") ? "danger" : "default"}
         />
+        <KpiCard icon={<Timer className="h-4 w-4" />} label="متوسط زمن الاستجابة" value={`${d.avg_response_ms} ms`} sub={`p95: ${d.p95_response_ms} ms`} />
+        <KpiCard icon={<DollarSign className="h-4 w-4" />} label="تكلفة المحادثات (24س)" value={`$${d.total_cost_usd.toFixed(4)}`} />
+        <KpiCard
+          icon={<PhoneForwarded className="h-4 w-4" />}
+          label="نسبة التحويل للبشر"
+          value={
+            d.handoff_by_scope.length
+              ? `${((d.handoff_by_scope.reduce((s, r) => s + r.handoffs, 0) /
+                  Math.max(1, d.handoff_by_scope.reduce((s, r) => s + r.conversations, 0))) * 100).toFixed(1)}%`
+              : "0%"
+          }
+        />
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><Wrench className="h-4 w-4" /> نجاح الأدوات وزمنها (24 ساعة)</CardTitle></CardHeader>
+          <CardContent>
+            {d.tool_stats.length === 0 ? (
+              <p className="text-sm text-muted-foreground">لا استدعاءات أدوات في آخر 24 ساعة.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-muted-foreground">
+                    <tr>
+                      <th className="p-2 text-start">الأداة</th>
+                      <th className="p-2 text-end">الإجمالي</th>
+                      <th className="p-2 text-end">نجاح</th>
+                      <th className="p-2 text-end">متوسط ms</th>
+                      <th className="p-2 text-end">p95 ms</th>
+                      <th className="p-2 text-end">التكلفة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.tool_stats.map((t) => (
+                      <tr key={t.tool} className="border-t">
+                        <td className="p-2 font-mono text-xs">{t.tool}</td>
+                        <td className="p-2 text-end">{t.total}</td>
+                        <td className="p-2 text-end">
+                          <Badge variant={t.success_rate >= 0.9 ? "default" : t.success_rate >= 0.7 ? "secondary" : "destructive"}>
+                            {(t.success_rate * 100).toFixed(0)}%
+                          </Badge>
+                        </td>
+                        <td className="p-2 text-end">{t.avg_latency_ms}</td>
+                        <td className="p-2 text-end">{t.p95_latency_ms}</td>
+                        <td className="p-2 text-end">${t.cost_usd.toFixed(4)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader><CardTitle className="text-sm flex items-center gap-2"><PhoneForwarded className="h-4 w-4" /> التحويل للبشر حسب نوع المستخدم</CardTitle></CardHeader>
+          <CardContent>
+            {d.handoff_by_scope.length === 0 ? (
+              <p className="text-sm text-muted-foreground">لا محادثات في آخر 24 ساعة.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-xs text-muted-foreground">
+                    <tr>
+                      <th className="p-2 text-start">النوع</th>
+                      <th className="p-2 text-end">محادثات</th>
+                      <th className="p-2 text-end">تحويلات</th>
+                      <th className="p-2 text-end">النسبة</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {d.handoff_by_scope.map((r) => (
+                      <tr key={r.scope} className="border-t">
+                        <td className="p-2 font-mono text-xs">{r.scope}</td>
+                        <td className="p-2 text-end">{r.conversations}</td>
+                        <td className="p-2 text-end">{r.handoffs}</td>
+                        <td className="p-2 text-end">
+                          <Badge variant={r.rate >= 0.2 ? "destructive" : r.rate >= 0.05 ? "secondary" : "default"}>
+                            {(r.rate * 100).toFixed(1)}%
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
