@@ -264,6 +264,17 @@ function AssistantPage() {
           )}
         </div>
 
+        <AssistantCostMeter
+          streaming={streaming}
+          hasInput={input.trim().length > 0}
+          model={meterModel}
+          preEstimate={preEstimate}
+          usage={meterUsage}
+          streamedText={meterStreamedText}
+          sessionCredits={sessionCredits}
+          lang="ar"
+        />
+
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}
           className="border-t border-[color:var(--portal-border)] p-3 sm:p-4 flex items-end gap-2 bg-[color:var(--portal-surface)]"
