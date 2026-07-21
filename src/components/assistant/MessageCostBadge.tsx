@@ -82,6 +82,9 @@ export function MessageCostBadge({
     ? meta.elapsedMs
     : Math.max(0, (now ?? performance.now()) - meta.startedAt);
 
+  const t = (ar: string, en: string) => (lang === "ar" ? ar : en);
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
   const inEst = estimateTokensCalibrated(meta.promptText ?? "", { model: meta.model, kind: "input" });
   const outEst = estimateTokensCalibrated(meta.outputText ?? "", { model: meta.model, kind: "output" });
   const inTok = meta.usage?.prompt ?? inEst.tokens;
@@ -92,8 +95,6 @@ export function MessageCostBadge({
   const outCredits = (outTok * rate.outPer1M) / 1_000_000;
   const credits = estimateCredits(inTok, outTok, meta.model);
   const hasServerUsage = !!meta.usage;
-  // Drop the "(est.)" hedge either when server usage arrived or when the
-  // local estimator is calibrated with enough samples to be trusted.
   const calibratedEnough =
     (meta.promptText ? isHighConfidence(inEst) : true) &&
     (meta.outputText ? isHighConfidence(outEst) : true);
@@ -106,9 +107,6 @@ export function MessageCostBadge({
 
   const modelShort =
     (meta.model ?? "").split("/").pop() || (lang === "ar" ? "افتراضي" : "default");
-
-  const t = (ar: string, en: string) => (lang === "ar" ? ar : en);
-  const dir = lang === "ar" ? "rtl" : "ltr";
 
   return (
     <div className="mt-1.5" dir={dir}>
