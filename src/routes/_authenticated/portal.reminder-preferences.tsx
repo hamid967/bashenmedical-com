@@ -62,6 +62,18 @@ function PrefsPage() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
   });
 
+  const [testing, setTesting] = useState<TestChannel | null>(null);
+  const testMut = useMutation({
+    mutationFn: (channel: TestChannel) => sendTestNotification({ data: { channel } }),
+    onMutate: (channel) => setTesting(channel),
+    onSettled: () => setTesting(null),
+    onSuccess: (res) => {
+      toast.success(res.note, { description: res.preview, duration: 6000 });
+      qc.invalidateQueries({ queryKey: ["portal", "notifications"] });
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر إرسال الاختبار"),
+  });
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const anyChannel =
