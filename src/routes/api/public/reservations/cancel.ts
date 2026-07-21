@@ -55,6 +55,20 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
           });
         }
 
+        // Per-session limit — stops a single verified phone from bursting
+        // even if their IP rotates.
+        const rlSess = checkRateLimit(`resv-cancel:sess:${sess.phone}`, [
+          { windowMs: 60_000, max: 5 },
+          { windowMs: 3_600_000, max: 30 },
+        ]);
+        if (!rlSess.ok) {
+          return jsonResponse(429, {
+            ok: false,
+            message: `طلبات كثيرة على هذه الجلسة. حاول بعد ${rlSess.retryAfter} ثانية.`,
+          });
+        }
+
+
         try {
           const { supabaseAdmin } = await import(
             "@/integrations/supabase/client.server"
