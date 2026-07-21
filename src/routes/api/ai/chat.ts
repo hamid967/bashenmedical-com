@@ -124,6 +124,7 @@ interface ChatBody {
   conversation_id?: string;
   lang?: "ar" | "en";
   save_history?: boolean;
+  resume_partial?: string;
 }
 
 export const Route = createFileRoute("/api/ai/chat")({
@@ -203,6 +204,15 @@ export const Route = createFileRoute("/api/ai/chat")({
           role: "system",
           content: `النطاق الحالي: ${scope}. اللغة: ${lang}. لا تُنفّذ أي إجراء تعديلي؛ اقترح فقط.`,
         });
+
+        const resumePartial = typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
+        if (resumePartial) {
+          systemMessages.push({
+            role: "system",
+            content:
+              `الرد السابق انقطع بسبب مشكلة اتصال. أكمل الرد من حيث توقف تمامًا بدون تكرار أي كلمة أو تحية أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
+          });
+        }
 
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",

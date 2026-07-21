@@ -8,6 +8,7 @@ import {
   formatCredits,
   formatTokens,
 } from "@/lib/ai/pricing";
+import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 
 type Msg = { role: "user" | "assistant"; content: string };
 type Usage = { prompt: number; completion: number; total: number };
@@ -29,6 +30,7 @@ export function AIAssistantPanel({
   const [streamed, setStreamed] = useState("");
   const [model, setModel] = useState<string>("google/gemini-2.5-flash");
   const [usage, setUsage] = useState<Usage | null>(null);
+  const [resumeNotice, setResumeNotice] = useState<string | null>(null);
   const [sessionCredits, setSessionCredits] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -85,6 +87,7 @@ export function AIAssistantPanel({
     setStreamed("");
     setStreaming(true);
     setUsage(null);
+    setResumeNotice(null);
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -94,61 +97,48 @@ export function AIAssistantPanel({
       const token = sess.session?.access_token;
       if (!token) throw new Error("انتهت الجلسة، أعد تسجيل الدخول.");
 
-      const res = await fetch("/api/admin/ai-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ messages: next }),
+      let liveUsage: Usage | null = null;
+      let currentModel = model;
+
+      const result = await streamChatWithResume({
+        url: "/api/admin/ai-chat",
+        token,
         signal: controller.signal,
+        buildBody: (resumePartial) => ({
+          messages: next,
+          ...(resumePartial ? { resume_partial: resumePartial } : {}),
+        }),
+        onModel: (m) => {
+          currentModel = m;
+          setModel(m);
+        },
+        onDelta: (_delta, acc) => setStreamed(acc),
+        onUsage: (u) => {
+          liveUsage = {
+            prompt: Number((u.prompt_tokens as number | undefined) ?? 0),
+            completion: Number((u.completion_tokens as number | undefined) ?? 0),
+            total: Number(
+              (u.total_tokens as number | undefined) ??
+                ((u.prompt_tokens as number | undefined) ?? 0) +
+                  ((u.completion_tokens as number | undefined) ?? 0),
+            ),
+          };
+          setUsage(liveUsage);
+        },
+        onRetry: (phase, attempt) => {
+          if (phase === "reconnecting") setResumeNotice(`انقطع الاتصال — استئناف (${attempt})…`);
+          else if (phase === "resumed") setResumeNotice(null);
+          else if (phase === "failed") setResumeNotice("تعذّر استئناف الرد.");
+        },
+        mapStatusError: (s) => {
+          if (s === 429) return "تم تجاوز الحد. حاول لاحقاً.";
+          if (s === 402) return "انتهت أرصدة الذكاء الاصطناعي.";
+          if (s === 401) return "غير مصرح بالوصول.";
+          return "تعذّر الاتصال بالمساعد.";
+        },
       });
 
-      if (res.status === 429) throw new Error("تم تجاوز الحد. حاول لاحقاً.");
-      if (res.status === 402) throw new Error("انتهت أرصدة الذكاء الاصطناعي.");
-      if (res.status === 401) throw new Error("غير مصرح بالوصول.");
-      if (!res.ok || !res.body) throw new Error("تعذّر الاتصال بالمساعد.");
-
-      const modelHeader = res.headers.get("X-Model");
-      if (modelHeader) setModel(modelHeader);
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "";
-      let acc = "";
-      let liveUsage: Usage | null = null;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-        const lines = buf.split("\n");
-        buf = lines.pop() ?? "";
-        for (const line of lines) {
-          const t = line.trim();
-          if (!t.startsWith("data:")) continue;
-          const payload = t.slice(5).trim();
-          if (payload === "[DONE]") continue;
-          try {
-            const j = JSON.parse(payload);
-            const delta = j?.choices?.[0]?.delta?.content;
-            if (typeof delta === "string" && delta) {
-              acc += delta;
-              setStreamed(acc);
-            }
-            // The gateway emits a final chunk with usage when stream_options.include_usage=true
-            if (j?.usage) {
-              liveUsage = {
-                prompt: Number(j.usage.prompt_tokens ?? 0),
-                completion: Number(j.usage.completion_tokens ?? 0),
-                total: Number(
-                  j.usage.total_tokens ??
-                    (j.usage.prompt_tokens ?? 0) + (j.usage.completion_tokens ?? 0),
-                ),
-              };
-              setUsage(liveUsage);
-            }
-          } catch { /* ignore partial chunks */ }
-        }
-      }
-
+      const acc = result.text;
       // Fallback: estimate output tokens from streamed text if gateway omitted usage
       if (!liveUsage && acc) {
         const promptTok = estimateTokens(next.map((m) => m.content).join("\n"));
@@ -158,7 +148,7 @@ export function AIAssistantPanel({
       }
       if (liveUsage) {
         setSessionCredits((c) =>
-          c + estimateCredits(liveUsage!.prompt, liveUsage!.completion, modelHeader ?? model),
+          c + estimateCredits(liveUsage!.prompt, liveUsage!.completion, currentModel),
         );
       }
 
@@ -168,10 +158,12 @@ export function AIAssistantPanel({
       if ((e as Error).name === "AbortError") {
         setStreamed("");
       } else {
-        toast.error((e as Error).message || "خطأ غير متوقع");
+        const msg = e instanceof StreamHttpError ? e.message : (e as Error).message || "خطأ غير متوقع";
+        toast.error(msg);
       }
     } finally {
       setStreaming(false);
+      setResumeNotice(null);
       abortRef.current = null;
     }
   }
