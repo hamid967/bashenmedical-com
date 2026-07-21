@@ -87,8 +87,8 @@ export function BaeshenAssistant() {
     setShowEmergency(cls.kind === "emergency");
 
     const startedAt = performance.now();
-    const promptText = next
-      .slice(0, -1)
+    const historyForPrompt: Msg[] = [...messages, { role: "user", content: trimmed }];
+    const promptText = historyForPrompt
       .map((m) => `${m.role}: ${m.content}`)
       .join("\n");
     const initialMeta: MessageCostMeta = { startedAt, promptText };
