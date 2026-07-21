@@ -428,6 +428,19 @@ jobs:
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
         run: python tests/e2e/admin_opens_for_admin_user.py
 
+      - name: Run portal cancel appointment E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: python tests/e2e/portal_cancel_appointment.py
+
+
+
 
 
 
