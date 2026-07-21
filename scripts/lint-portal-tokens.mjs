@@ -18,10 +18,16 @@
  */
 import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
+import { execSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const BASELINE_PATH = join(ROOT, "scripts", "portal-tokens-baseline.json");
 const UPDATE_BASELINE = process.argv.includes("--update-baseline");
+const STRICT_CHANGED = process.argv.includes("--strict-changed");
+const BASE_REF =
+  process.env.LINT_BASE_REF ||
+  process.env.GITHUB_BASE_REF ||
+  "origin/main";
 
 
 // المسارات المُراقَبة
