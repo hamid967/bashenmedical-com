@@ -1,6 +1,7 @@
 import { createLazyFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { AdminShell, type AdminRole } from "@/components/admin/AdminShell";
+import { AdminShellV2 } from "@/components/admin/v2/AdminShellV2";
+import type { AdminRole } from "@/components/admin/AdminShell";
 import { AlertTriangle, RefreshCw, ShieldAlert, Home } from "lucide-react";
 import { rolesQuery, profileQuery, ADMIN_CONSOLE_ROLES } from "./admin";
 
@@ -43,9 +44,9 @@ function AdminLayout() {
   }
 
   return (
-    <AdminShell roles={roles} userName={profile?.full_name ?? null}>
+    <AdminShellV2 roles={roles} userName={profile?.full_name ?? null}>
       <Outlet />
-    </AdminShell>
+    </AdminShellV2>
   );
 }
 
