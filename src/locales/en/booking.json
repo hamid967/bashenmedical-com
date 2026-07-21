@@ -284,6 +284,31 @@
     "ratingLabel": "Rated {{rating}} out of 5 from {{count}} reviews",
     "bookingDisabled": "Booking disabled",
     "charsCount": "{{count}} of {{max}} characters"
+  },
+  "patientExtra": {
+    "savedNote": "Saved details will be filled in — you can edit any field before confirming."
+  },
+  "otp": {
+    "linkedTitle": "Booking linked to your account",
+    "signedInAs": "Signed in as {{email}}",
+    "linkedCount": "— {{count}} booking(s) attached.",
+    "openPortal": "Open patient portal",
+    "cardTitle": "Save this booking to a permanent account",
+    "cardDesc": "Verify your email to create an account and manage your appointments, reports, and invoices in one place.",
+    "emailPlaceholder": "you@example.com",
+    "sendCode": "Send code",
+    "sent": "Code sent to your email",
+    "codeSentTo": "Enter the 6-digit code sent to {{email}}",
+    "verifyLink": "Verify & link",
+    "resendIn": "Resend in {{seconds}}s",
+    "resend": "Resend code",
+    "changeEmail": "Change email",
+    "invalidEmail": "Invalid email",
+    "codeMustBe6": "Code must be 6 digits",
+    "invalidCode": "Invalid code",
+    "linkFailed": "Could not link bookings",
+    "linkedToast": "Account created and {{count}} booking(s) linked"
   }
 }
+
 
