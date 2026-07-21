@@ -817,6 +817,10 @@ jobs:
       - name: Run SECURITY DEFINER privilege audit (blocking)
         run: |
           python tests/security/test_secdef_privileges.py | tee secdef-report.txt
+      - name: Run role access matrix (authenticated allowed / anon denied)
+        run: |
+          cd tests/security && python test_role_access_matrix.py | tee ../../role-matrix-report.txt
+
       - name: Sticky PR comment on failure
         if: failure() && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2
