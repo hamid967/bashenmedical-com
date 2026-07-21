@@ -26,17 +26,20 @@ const STATIC_KEYS = [
 ] as const;
 
 describe("manage.undo.* i18n", () => {
-  it("declares {{seconds}} placeholder in AR + EN sources", () => {
+  it("declares {{seconds}} placeholder in AR + EN + UR sources", () => {
     for (const key of INTERPOLATED_KEYS) {
       expect((arCommon as Record<string, string>)[key]).toContain("{{seconds}}");
       expect((enCommon as Record<string, string>)[key]).toContain("{{seconds}}");
+      expect((urCommon as Record<string, string>)[key]).toContain("{{seconds}}");
     }
   });
 
-  it("has parity — every AR key exists in EN and vice versa", () => {
-    const arKeys = Object.keys(arCommon).filter((k) => k.startsWith("manage.undo."));
-    const enKeys = Object.keys(enCommon).filter((k) => k.startsWith("manage.undo."));
-    expect(arKeys.sort()).toEqual(enKeys.sort());
+  it("has parity — every AR key exists in EN and UR (and vice versa)", () => {
+    const arKeys = Object.keys(arCommon).filter((k) => k.startsWith("manage.undo.")).sort();
+    const enKeys = Object.keys(enCommon).filter((k) => k.startsWith("manage.undo.")).sort();
+    const urKeys = Object.keys(urCommon).filter((k) => k.startsWith("manage.undo.")).sort();
+    expect(enKeys).toEqual(arKeys);
+    expect(urKeys).toEqual(arKeys);
   });
 
   it("interpolates {{seconds}} in Arabic via t()", async () => {
@@ -59,8 +62,8 @@ describe("manage.undo.* i18n", () => {
     expect(aria).toBe("Undo cancellation, 1 seconds remaining");
   });
 
-  it("resolves static undo keys to non-empty, non-raw values in both languages", async () => {
-    for (const lang of ["ar", "en"] as const) {
+  it("resolves static undo keys to non-empty, non-raw values in AR/EN/UR", async () => {
+    for (const lang of ["ar", "en", "ur"] as const) {
       await i18n.changeLanguage(lang);
       for (const key of STATIC_KEYS) {
         const val = i18n.t(key, { ns: "common" });
@@ -68,6 +71,19 @@ describe("manage.undo.* i18n", () => {
         expect(val).not.toBe(key);
       }
     }
+  });
+
+  it("interpolates {{seconds}} in Urdu via t() using ur/common.json", async () => {
+    await i18n.changeLanguage("ur");
+    const out = i18n.t("manage.undo.button_active", { seconds: 22, ns: "common" });
+    expect(out).toContain("22");
+    expect(out).not.toContain("{{seconds}}");
+    // Uses the Urdu source, not the AR fallback.
+    expect(out).toBe(urCommon["manage.undo.button_active"].replace("{{seconds}}", "22"));
+
+    const aria = i18n.t("manage.undo.aria_active", { seconds: 9, ns: "common" });
+    expect(aria).toContain("9");
+    expect(aria).toBe(urCommon["manage.undo.aria_active"].replace("{{seconds}}", "9"));
   });
 
   it("uses the source file text verbatim when no params are passed", async () => {
