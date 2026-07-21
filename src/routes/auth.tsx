@@ -79,7 +79,7 @@ async function resolveDefaultDestination(userId: string): Promise<string> {
   } catch {
     /* ignore */
   }
-  return "/portal";
+  return "/portal/dashboard";
 }
 
 function AuthPage() {
@@ -145,7 +145,7 @@ function AuthPage() {
       }
       return;
     }
-    const target = userId ? await resolveDefaultDestination(userId) : "/portal";
+    const target = userId ? await resolveDefaultDestination(userId) : "/portal/dashboard";
     navigate({ to: target });
   }
 
@@ -165,7 +165,7 @@ function AuthPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const target = safeRedirectTarget() ?? "/portal";
+        const target = safeRedirectTarget() ?? "/portal/dashboard";
         const { data: signup, error } = await supabase.auth.signUp({
           email,
           password,
