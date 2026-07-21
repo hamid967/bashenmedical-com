@@ -509,6 +509,52 @@ function DependentCard({
         )}
       </dl>
 
+      <fieldset
+        className="rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]/60 p-2.5 text-[11px]"
+        disabled={scopesMut.isPending}
+      >
+        <legend className="px-1 text-[10px] font-semibold text-[color:var(--portal-ink-2)]">
+          {lang === "ar" ? "صلاحيات الوصول" : "Access scopes"}
+        </legend>
+        <div className="grid grid-cols-2 gap-1.5">
+          {(
+            [
+              ["booking", lang === "ar" ? "الحجز" : "Booking"],
+              ["reports", lang === "ar" ? "التقارير" : "Reports"],
+              ["prescriptions", lang === "ar" ? "الوصفات" : "Prescriptions"],
+              ["billing", lang === "ar" ? "الفواتير" : "Billing"],
+            ] as const
+          ).map(([key, label]) => {
+            const active = row.access_scopes?.[key] === true;
+            return (
+              <label
+                key={key}
+                className="flex items-center gap-1.5 cursor-pointer select-none rounded-lg px-2 py-1 hover:bg-slate-50"
+              >
+                <input
+                  type="checkbox"
+                  className="accent-[color:var(--portal-primary)]"
+                  checked={active}
+                  onChange={(e) =>
+                    scopesMut.mutate({ [key]: e.currentTarget.checked } as Partial<DependentAccessScopes>)
+                  }
+                />
+                <span>{label}</span>
+              </label>
+            );
+          })}
+        </div>
+        {!verified && (
+          <div className="mt-1.5 text-[10px] text-amber-700">
+            {lang === "ar"
+              ? "الصلاحيات لن تُفعَّل قبل توثيق العلاقة."
+              : "Scopes take effect only after the relationship is verified."}
+          </div>
+        )}
+      </fieldset>
+
+
+
       {!canBook && (
         <div
           className="rounded-xl border border-amber-300/60 bg-amber-50/70 p-2.5 text-[11px] text-amber-800"
