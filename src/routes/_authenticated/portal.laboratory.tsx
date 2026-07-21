@@ -86,7 +86,7 @@ function LabsError({ error, reset }: { error: Error; reset: () => void }) {
       </p>
       <button
         onClick={() => { router.invalidate(); reset(); }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" /> إعادة المحاولة
@@ -399,7 +399,7 @@ function LaboratoryPage() {
                         setDownloadingId(null);
                       }
                     }}
-                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold bg-white/80 hover:bg-white text-[color:var(--portal-ink)] disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold bg-white/80 hover:bg-[color:var(--portal-surface)] text-[color:var(--portal-ink)] disabled:opacity-50"
                   >
                     {downloadingId === r.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -410,7 +410,7 @@ function LaboratoryPage() {
                   </button>
                   <button
                     onClick={() => setShareOpen(r)}
-                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold text-white"
+                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold text-[color:var(--portal-on-primary)]"
                     style={{ background: "var(--portal-gradient)" }}
                   >
                     <Share2 className="h-4 w-4" />
@@ -512,7 +512,7 @@ function ResultRow({ p }: { p: ParsedResult }) {
     p.flag === "normal" ? "bg-emerald-500" : p.flag === "low" ? "bg-amber-500" : "bg-rose-500";
 
   return (
-    <div className="rounded-xl bg-white/70 hover:bg-white transition-colors px-3 py-2 ring-1 ring-white/60">
+    <div className="rounded-xl bg-white/70 hover:bg-[color:var(--portal-surface)] transition-colors px-3 py-2 ring-1 ring-white/60">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-sm font-medium truncate">{p.name}</span>
         <span className={`text-sm font-bold tabular-nums inline-flex items-center gap-1 ${flagColor}`}>
@@ -583,7 +583,7 @@ function ShareDialog({ report, onClose }: { report: LabReport | null; onClose: (
               <select
                 value={doctorId}
                 onChange={(e) => setDoctorId(e.target.value)}
-                className="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:ring-2 focus:ring-[color:var(--portal-accent)]"
+                className="mt-1 w-full h-11 rounded-xl border border-slate-200 bg-[color:var(--portal-surface)] px-3 text-sm outline-none focus:ring-2 focus:ring-[color:var(--portal-accent)]"
               >
                 <option value="">اختر الطبيب…</option>
                 {(doctors.data?.doctors ?? []).map((d) => (
@@ -603,7 +603,7 @@ function ShareDialog({ report, onClose }: { report: LabReport | null; onClose: (
                 rows={3}
                 maxLength={500}
                 placeholder="مثال: أرغب بمراجعة النتائج قبل الموعد القادم."
-                className="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--portal-accent)]"
+                className="mt-1 w-full rounded-xl border border-slate-200 bg-[color:var(--portal-surface)] px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[color:var(--portal-accent)]"
               />
             </div>
           </div>
@@ -625,7 +625,7 @@ function ShareDialog({ report, onClose }: { report: LabReport | null; onClose: (
                 note: note.trim() || undefined,
               })
             }
-            className="h-10 rounded-full px-5 text-sm font-semibold text-white inline-flex items-center gap-2 disabled:opacity-50"
+            className="h-10 rounded-full px-5 text-sm font-semibold text-[color:var(--portal-on-primary)] inline-flex items-center gap-2 disabled:opacity-50"
             style={{ background: "var(--portal-gradient)" }}
           >
             {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}

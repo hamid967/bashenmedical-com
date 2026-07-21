@@ -189,7 +189,7 @@ function SessionsPage() {
         <button
           type="button"
           onClick={() => qc.invalidateQueries({ queryKey: ["portal", "sessions"] })}
-          className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--portal-border)] bg-white px-3 h-9 text-xs font-medium hover:bg-muted"
+          className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-3 h-9 text-xs font-medium hover:bg-muted"
         >
           <RefreshCw className="h-3.5 w-3.5" />
           تحديث
@@ -202,7 +202,7 @@ function SessionsPage() {
           type="button"
           disabled={otherCount === 0 || signingOutScope !== null}
           onClick={() => setConfirm({ kind: "others" })}
-          className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 text-white px-4 h-10 text-sm font-semibold hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-1.5 rounded-full bg-amber-600 text-[color:var(--portal-on-primary)] px-4 h-10 text-sm font-semibold hover:bg-amber-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {signingOutScope === "others" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -215,7 +215,7 @@ function SessionsPage() {
           type="button"
           disabled={signingOutScope !== null}
           onClick={() => setConfirm({ kind: "global" })}
-          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white text-red-600 px-4 h-10 text-sm font-semibold hover:bg-red-50 disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-[color:var(--portal-surface)] text-red-600 px-4 h-10 text-sm font-semibold hover:bg-red-50 disabled:opacity-50"
         >
           {signingOutScope === "global" ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -336,7 +336,7 @@ function SessionCard({
             type="button"
             onClick={onRevoke}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white text-red-600 px-3 h-9 text-xs font-semibold hover:bg-red-50 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-[color:var(--portal-surface)] text-red-600 px-3 h-9 text-xs font-semibold hover:bg-red-50 disabled:opacity-50"
           >
             {busy ? (
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -387,7 +387,7 @@ function ConfirmDialog({
       aria-modal="true"
       dir="rtl"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      <div className="w-full max-w-md rounded-2xl bg-[color:var(--portal-surface)] p-6 shadow-2xl">
         <div className="flex items-start gap-3">
           <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-50 text-amber-600 shrink-0">
             <AlertTriangle className="h-5 w-5" />
@@ -402,7 +402,7 @@ function ConfirmDialog({
             type="button"
             onClick={onCancel}
             disabled={busy}
-            className="inline-flex items-center rounded-full border border-input bg-white px-4 h-10 text-sm font-medium hover:bg-muted disabled:opacity-50"
+            className="inline-flex items-center rounded-full border border-input bg-[color:var(--portal-surface)] px-4 h-10 text-sm font-medium hover:bg-muted disabled:opacity-50"
           >
             إلغاء
           </button>
@@ -410,7 +410,7 @@ function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             disabled={busy}
-            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 text-white px-4 h-10 text-sm font-semibold hover:bg-red-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full bg-red-600 text-[color:var(--portal-on-primary)] px-4 h-10 text-sm font-semibold hover:bg-red-700 disabled:opacity-50"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             {copy.confirm}

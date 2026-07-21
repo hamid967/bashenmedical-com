@@ -644,7 +644,7 @@ function PortalRefundsPage() {
           </div>
           <button
             onClick={() => { setPrefillPaymentId(null); setOpenNew(true); }}
-            className="inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
+            className="inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
           >
             <Plus className="h-4 w-4" />
             طلب استرداد جديد
@@ -692,7 +692,7 @@ function PortalRefundsPage() {
               <select
                 value={safeSort}
                 onChange={(e) => setSort(e.target.value)}
-                className="h-9 ps-3 pe-8 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] outline-none focus:border-[color:var(--mag-accent)]"
+                className="h-9 ps-3 pe-8 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--mag-ink-2)] outline-none focus:border-[color:var(--mag-accent)]"
                 aria-label="ترتيب النتائج"
               >
                 {SORT_OPTIONS.map((o) => (
@@ -834,7 +834,7 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
       <span className={`mag-chip ${meta.cls}`}>{meta.label}</span>
       <button
         onClick={onOpen}
-        className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
+        className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
       >
         <FileText className="h-3.5 w-3.5" />
         التفاصيل
@@ -843,7 +843,7 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
       {isFinalized(r.status) && (
         <button
           onClick={() => setReceiptOpen(true)}
-          className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
+          className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--mag-ink-2)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center gap-1"
           title="تخصيص وتنزيل إيصال PDF"
         >
           <Download className="h-3.5 w-3.5" />
@@ -854,7 +854,7 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
         <button
           onClick={() => mutation.mutate()}
           disabled={mutation.isPending}
-          className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-danger)] hover:bg-red-50 disabled:opacity-60 inline-flex items-center gap-1"
+          className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--mag-danger)] hover:bg-red-50 disabled:opacity-60 inline-flex items-center gap-1"
         >
           {mutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
           إلغاء الطلب
@@ -958,7 +958,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
   return (
     <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
-      <div className="relative ms-auto h-full w-full max-w-lg bg-white shadow-xl flex flex-col">
+      <div className="relative ms-auto h-full w-full max-w-lg bg-[color:var(--portal-surface)] shadow-xl flex flex-col">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div className="font-bold">تفاصيل طلب الاسترداد</div>
           <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
@@ -1043,14 +1043,14 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
           <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
             <button
               onClick={onClose}
-              className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold"
+              className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm font-semibold"
             >
               إغلاق
             </button>
             {isFinalized(r.status) && (
               <button
                 onClick={() => setReceiptOpen(true)}
-                className="flex-1 h-11 rounded-full text-sm font-semibold border border-[color:var(--mag-line)] bg-white text-[color:var(--mag-ink-1)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center justify-center gap-2"
+                className="flex-1 h-11 rounded-full text-sm font-semibold border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-[color:var(--mag-ink-1)] hover:bg-[color:var(--mag-subtle)] inline-flex items-center justify-center gap-2"
               >
                 <Download className="h-4 w-4" />
                 تخصيص وتنزيل الإيصال (PDF)
@@ -1060,7 +1060,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
               <button
                 onClick={() => mutation.mutate()}
                 disabled={mutation.isPending}
-                className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
+                className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
               >
                 {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
                 إلغاء طلب الاسترداد
@@ -1126,7 +1126,7 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-slate-900/50" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
+      <div className="relative w-full max-w-md bg-[color:var(--portal-surface)] rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div>
             <div className="font-bold text-sm">تخصيص حقول الإيصال</div>
@@ -1191,12 +1191,12 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
 
         <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
           <button onClick={onClose}
-            className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold">
+            className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm font-semibold">
             إلغاء
           </button>
           <button onClick={generate}
             disabled={selected.size === 0}
-            className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2">
+            className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2">
             <Download className="h-4 w-4" />
             توليد الإيصال
           </button>
@@ -1215,7 +1215,7 @@ function EmptyState({ onNew }: { onNew: () => void }) {
       <p className="text-[color:var(--mag-ink-2)]">لا توجد طلبات استرداد.</p>
       <button
         onClick={onNew}
-        className="mt-4 inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
+        className="mt-4 inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
       >
         <Plus className="h-4 w-4" /> إنشاء طلب
       </button>
@@ -1321,7 +1321,7 @@ function NewRefundDrawer({
   return (
     <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
-      <div className="relative ms-auto h-full w-full max-w-lg bg-white shadow-xl flex flex-col">
+      <div className="relative ms-auto h-full w-full max-w-lg bg-[color:var(--portal-surface)] shadow-xl flex flex-col">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div className="font-bold">طلب استرداد جديد</div>
           <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
@@ -1431,7 +1431,7 @@ function NewRefundDrawer({
                       <button
                         type="button"
                         onClick={() => setAmount(breakdown.available.toFixed(2))}
-                        className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold text-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-soft)]"
+                        className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-soft)]"
                       >
                         استرداد الكامل المتاح
                       </button>
@@ -1485,7 +1485,7 @@ function NewRefundDrawer({
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="اذكر سبب طلب الاسترداد (لن يقل عن 3 أحرف)"
-                  className="w-full min-h-[100px] p-3 rounded-xl border border-[color:var(--mag-line)] bg-white text-sm outline-none focus:border-[color:var(--mag-accent)] resize-y"
+                  className="w-full min-h-[100px] p-3 rounded-xl border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm outline-none focus:border-[color:var(--mag-accent)] resize-y"
                 />
               </div>
 
@@ -1501,14 +1501,14 @@ function NewRefundDrawer({
           <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
             <button
               onClick={onClose}
-              className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold"
+              className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm font-semibold"
             >
               إلغاء
             </button>
             <button
               onClick={() => mutation.mutate()}
               disabled={!canSubmit}
-              className="flex-1 h-11 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2"
+              className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2"
             >
               {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
               إرسال طلب الاسترداد

@@ -355,7 +355,7 @@ function FamilyPage() {
             </Button>
             <Button
               onClick={() => setDialog({ mode: "add" })}
-              className="rounded-full text-white font-semibold px-5"
+              className="rounded-full text-[color:var(--portal-on-primary)] font-semibold px-5"
               style={{ background: "var(--portal-gradient)" }}
             >
               <UserPlus className="h-4 w-4 ms-2" />
@@ -374,7 +374,7 @@ function FamilyPage() {
           action={
             <Button
               onClick={() => setDialog({ mode: "add" })}
-              className="rounded-full text-white font-semibold px-5"
+              className="rounded-full text-[color:var(--portal-on-primary)] font-semibold px-5"
               style={{ background: "var(--portal-gradient)" }}
             >
               <UserPlus className="h-4 w-4 ms-2" />
@@ -439,7 +439,7 @@ function DependentCard({
     <div className="glass-card p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
         <div
-          className="h-12 w-12 rounded-full grid place-items-center text-white font-bold shrink-0"
+          className="h-12 w-12 rounded-full grid place-items-center text-[color:var(--portal-on-primary)] font-bold shrink-0"
           style={{ background: "var(--portal-gradient)" }}
         >
           <span>{initials || "?"}</span>
@@ -515,7 +515,7 @@ function DependentCard({
           <Link
             to="/portal/book"
             search={{ forDependent: row.id }}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-white"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3 h-8 text-[color:var(--portal-on-primary)]"
             style={{ background: "var(--portal-gradient)" }}
           >
             <CalendarPlus className="h-3.5 w-3.5" />
@@ -668,7 +668,7 @@ function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }
   const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;
 
   return (
-    <li className="rounded-lg border border-[color:var(--portal-border)] bg-white p-2.5 text-[11px] space-y-1">
+    <li className="rounded-lg border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-2.5 text-[11px] space-y-1">
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <span className="inline-flex items-center gap-1 font-semibold text-[color:var(--portal-ink)]">
           <CalendarClock className="h-3 w-3 text-[color:var(--portal-primary)]" />
@@ -843,7 +843,7 @@ function DependentDialog({
                   setForm({ ...form, relationship: v as Dependent["relationship"] })
                 }
               >
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-[color:var(--portal-surface)]">
                   <SelectValue placeholder={t("choose", lang)} />
                 </SelectTrigger>
                 <SelectContent>
@@ -866,7 +866,7 @@ function DependentDialog({
                   setForm({ ...form, gender: v as FormState["gender"] })
                 }
               >
-                <SelectTrigger className="bg-white">
+                <SelectTrigger className="bg-[color:var(--portal-surface)]">
                   <SelectValue placeholder={t("choose", lang)} />
                 </SelectTrigger>
                 <SelectContent>
@@ -930,7 +930,7 @@ function DependentDialog({
             <Button
               type="submit"
               disabled={mut.isPending}
-              className="rounded-full text-white font-semibold px-6"
+              className="rounded-full text-[color:var(--portal-on-primary)] font-semibold px-6"
               style={{ background: "var(--portal-gradient)" }}
             >
               {mut.isPending ? (
@@ -1142,7 +1142,7 @@ function DeleteDialog({
                       setConfirmCancel(true);
                     }}
 
-                    className="inline-flex items-center gap-2 rounded-md border border-red-300 bg-white/70 px-3 h-9 text-xs font-semibold text-red-800 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center gap-2 rounded-md border border-red-300 bg-white/70 px-3 h-9 text-xs font-semibold text-red-800 hover:bg-[color:var(--portal-surface)] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {cancelMut.isPending ? (
                       <>
@@ -1186,7 +1186,7 @@ function DeleteDialog({
               if (!canDelete) return;
               if (row) mut.mutate(row.id);
             }}
-            className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-red-600 hover:bg-red-700 text-[color:var(--portal-on-primary)] font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {mut.isPending ? (
               <>
@@ -1285,7 +1285,7 @@ function DeleteDialog({
                 if (!row || cancelMut.isPending) return;
                 cancelMut.mutate(row.id);
               }}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
+              className="bg-red-600 hover:bg-red-700 text-[color:var(--portal-on-primary)] font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
             >
               {cancelMut.isPending ? (
                 <>
@@ -1332,7 +1332,7 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
           router.invalidate();
           reset();
         }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" />
