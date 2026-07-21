@@ -27,10 +27,9 @@ export function StepDate({
   for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(monthStart.getFullYear(), monthStart.getMonth(), d));
 
   const iso = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  const monthLabel = monthStart.toLocaleDateString(
-    lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US",
-    { month: "long", year: "numeric" },
-  );
+  const locale = lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US";
+  const monthLabel = monthStart.toLocaleDateString(locale, { month: "long", year: "numeric" });
+  const fullDate = (d: Date) => d.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   const weekdayNames = t("date.weekdays", { returnObjects: true }) as string[];
 
@@ -97,7 +96,7 @@ export function StepDate({
     return (
       <StepShell lang={lang} title={t("date.title")}>
         <div className="max-w-lg mx-auto text-center">
-          <div className="mx-auto mb-4 h-14 w-14 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
+          <div aria-hidden="true" className="mx-auto mb-4 h-14 w-14 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
             <CalIcon className="h-7 w-7" />
           </div>
           <h3 className="text-lg font-semibold mb-2">{t("date.noneIn30")}</h3>
@@ -105,13 +104,13 @@ export function StepDate({
           <div className="grid gap-3 sm:grid-cols-2">
             {onChangeDoctor && (
               <Button variant="outline" onClick={onChangeDoctor} className="justify-start">
-                <User className="h-4 w-4 me-2" />
+                <User className="h-4 w-4 me-2" aria-hidden="true" />
                 {t("date.pickOther")}
               </Button>
             )}
             {onChangeBranch && (
               <Button variant="outline" onClick={onChangeBranch} className="justify-start">
-                <Building2 className="h-4 w-4 me-2" />
+                <Building2 className="h-4 w-4 me-2" aria-hidden="true" />
                 {t("date.changeBranch")}
               </Button>
             )}
@@ -130,7 +129,7 @@ export function StepDate({
               href={telHref}
               className="inline-flex items-center justify-start rounded-md border border-border bg-card px-4 py-2 text-sm font-medium hover:bg-muted transition"
             >
-              <Phone className="h-4 w-4 me-2" />
+              <Phone className="h-4 w-4 me-2" aria-hidden="true" />
               {t("date.callUs", { phone: SITE.phoneDisplay })}
             </a>
           </div>
@@ -139,49 +138,63 @@ export function StepDate({
     );
   }
 
+  const atFirstMonth = monthStart <= new Date(today.getFullYear(), today.getMonth(), 1);
+
   return (
     <StepShell lang={lang} title={t("date.title")}>
       <div className="max-w-md mx-auto">
         <div className="flex items-center justify-between mb-4">
           <Button variant="outline" size="sm"
             onClick={() => setMonthStart(new Date(monthStart.getFullYear(), monthStart.getMonth() - 1, 1))}
-            disabled={monthStart <= new Date(today.getFullYear(), today.getMonth(), 1)}
-          ><ChevronRight className="h-4 w-4"/></Button>
-          <div className="font-semibold">{monthLabel}</div>
+            disabled={atFirstMonth}
+            aria-label={t("a11y.prevMonth", "الشهر السابق")}
+          ><ChevronRight className="h-4 w-4" aria-hidden="true"/></Button>
+          <div className="font-semibold" aria-live="polite">{monthLabel}</div>
           <Button variant="outline" size="sm"
             onClick={() => setMonthStart(new Date(monthStart.getFullYear(), monthStart.getMonth() + 1, 1))}
-          ><ChevronLeft className="h-4 w-4"/></Button>
+            aria-label={t("a11y.nextMonth", "الشهر التالي")}
+          ><ChevronLeft className="h-4 w-4" aria-hidden="true"/></Button>
         </div>
-        <div className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-1">
-          {weekdayNames.map((w) => <div key={w}>{w}</div>)}
+        <div role="grid" aria-label={`${t("date.title")} — ${monthLabel}`}>
+          <div role="row" className="grid grid-cols-7 gap-1 text-center text-xs text-muted-foreground mb-1">
+            {weekdayNames.map((w) => <div role="columnheader" key={w}>{w}</div>)}
+          </div>
+          <div role="row" className="grid grid-cols-7 gap-1">
+            {cells.map((d, i) => {
+              if (!d) return <div role="gridcell" key={i} aria-hidden="true"/>;
+              const isPast = d < today;
+              const isTooFar = d > maxDate;
+              const s = iso(d);
+              const noAvail = hasAvailData && !availableDates.has(s);
+              const disabled = isPast || isTooFar || noAvail;
+              const active = value === s;
+              const status = disabled
+                ? (isPast ? t("a11y.datePast", "تاريخ سابق")
+                  : isTooFar ? t("a11y.dateTooFar", "خارج نطاق الحجز")
+                  : t("a11y.dateUnavailable", "غير متاح"))
+                : t("a11y.dateAvailable", "متاح");
+              return (
+                <div role="gridcell" key={i} aria-selected={active} className="contents">
+                  <button
+                    type="button"
+                    disabled={disabled}
+                    onClick={() => onPick(s)}
+                    aria-label={`${fullDate(d)} — ${status}`}
+                    aria-pressed={active}
+                    className={`aspect-square rounded-lg text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
+                      active ? "bg-primary text-primary-foreground shadow"
+                      : disabled ? "text-muted-foreground/40 cursor-not-allowed line-through decoration-1"
+                      : "bg-muted hover:bg-primary/10 hover:text-primary"
+                    }`}
+                  >
+                    {d.getDate()}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="grid grid-cols-7 gap-1">
-          {cells.map((d, i) => {
-            if (!d) return <div key={i}/>;
-            const isPast = d < today;
-            const isTooFar = d > maxDate;
-            const s = iso(d);
-            const noAvail = hasAvailData && !availableDates.has(s);
-            const disabled = isPast || isTooFar || noAvail;
-            const active = value === s;
-            return (
-              <button
-                key={i}
-                disabled={disabled}
-                onClick={() => onPick(s)}
-                title={noAvail ? t("date.unavailableTip") : undefined}
-                className={`aspect-square rounded-lg text-sm font-medium transition ${
-                  active ? "bg-primary text-primary-foreground shadow"
-                  : disabled ? "text-muted-foreground/40 cursor-not-allowed line-through decoration-1"
-                  : "bg-muted hover:bg-primary/10 hover:text-primary"
-                }`}
-              >
-                {d.getDate()}
-              </button>
-            );
-          })}
-        </div>
-        <p className="mt-4 text-center text-xs text-muted-foreground">
+        <p className="mt-4 text-center text-xs text-muted-foreground" aria-live="polite">
           {loadingMonth
             ? t("date.loading")
             : hasAvailData && availableDates.size === 0

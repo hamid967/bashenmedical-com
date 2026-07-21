@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 import { Field } from "./Field";
@@ -11,6 +11,11 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
   const mark = (k: string) => setTouched((tt) => (tt[k] ? tt : { ...tt, [k]: true }));
   const show = (k: keyof PatientErrors) => (touched[k] ? errors[k] : undefined);
   const allValid = Object.keys(errors).length === 0;
+
+  const genderLegendId = useId();
+  const genderErrId = `${genderLegendId}-err`;
+  const reasonCounterId = useId();
+  const genderError = touched.gender ? errors.gender : undefined;
 
   function applyPicker(v: SelfOrDependent) {
     onChange({
@@ -37,7 +42,6 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             value={value.name}
             onChange={(e) => { onChange({ name: e.target.value.slice(0, NAME_MAX) }); mark("name"); }}
             onBlur={() => mark("name")}
-            aria-invalid={!!show("name")}
             className={`input ${show("name") ? "input-error" : ""}`}
             placeholder={t("patient.fullNamePlaceholder")}
             autoComplete="name"
@@ -48,7 +52,6 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             value={value.phone}
             onChange={(e) => { onChange({ phone: e.target.value.slice(0, PHONE_MAX) }); mark("phone"); }}
             onBlur={() => mark("phone")}
-            aria-invalid={!!show("phone")}
             className={`input ${show("phone") ? "input-error" : ""}`}
             placeholder="05XXXXXXXX"
             dir="ltr"
@@ -56,12 +59,11 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             autoComplete="tel"
           />
         </Field>
-        <Field label={t("patient.emailOptional")} error={show("email")}>
+        <Field label={t("patient.emailOptional")} error={show("email")} hint={t("patient.emailHint")}>
           <input
             value={value.email}
             onChange={(e) => { onChange({ email: e.target.value.slice(0, 255) }); mark("email"); }}
             onBlur={() => mark("email")}
-            aria-invalid={!!show("email")}
             className={`input ${show("email") ? "input-error" : ""}`}
             placeholder="name@example.com"
             dir="ltr"
@@ -69,16 +71,12 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             inputMode="email"
             autoComplete="email"
           />
-          <div className="text-[11px] text-muted-foreground mt-1">
-            {t("patient.emailHint")}
-          </div>
         </Field>
         <Field label={t("patient.nationalIdOptional")} error={show("nationalId")}>
           <input
             value={value.nationalId}
             onChange={(e) => { onChange({ nationalId: e.target.value.replace(/\D/g, "").slice(0, 10) }); mark("nationalId"); }}
             onBlur={() => mark("nationalId")}
-            aria-invalid={!!show("nationalId")}
             className={`input ${show("nationalId") ? "input-error" : ""}`}
             placeholder="1XXXXXXXXX / 2XXXXXXXXX"
             dir="ltr"
@@ -86,12 +84,26 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             maxLength={10}
           />
         </Field>
-        <Field label={t("patient.gender")} required error={touched.gender ? errors.gender : undefined}>
-          <div className="grid grid-cols-2 gap-2">
+        <fieldset className="block">
+          <legend id={genderLegendId} className="text-xs font-semibold mb-1.5">
+            {t("patient.gender")}
+            <span className="text-destructive" aria-hidden="true"> *</span>
+            <span className="sr-only"> (required)</span>
+          </legend>
+          <div
+            role="radiogroup"
+            aria-labelledby={genderLegendId}
+            aria-required="true"
+            aria-invalid={!!genderError}
+            aria-describedby={genderError ? genderErrId : undefined}
+            className="grid grid-cols-2 gap-2"
+          >
             {(["male", "female"] as const).map((g) => (
               <button key={g} type="button"
+                role="radio"
+                aria-checked={value.gender === g}
                 onClick={() => { onChange({ gender: g }); mark("gender"); }}
-                className={`rounded-lg border-2 py-2 text-sm font-medium transition ${
+                className={`rounded-lg border-2 py-2 text-sm font-medium transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                   value.gender === g ? "border-primary bg-primary/5 text-primary" : "border-border bg-card hover:border-primary/50"
                 }`}
               >
@@ -99,19 +111,30 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
               </button>
             ))}
           </div>
-        </Field>
+          {genderError && (
+            <div id={genderErrId} role="alert" className="mt-1 text-xs text-destructive">
+              {genderError}
+            </div>
+          )}
+        </fieldset>
         <div className="sm:col-span-2">
           <Field label={t("patient.reasonOptional")} error={show("reason")}>
             <textarea
               value={value.reason}
               onChange={(e) => onChange({ reason: e.target.value.slice(0, REASON_MAX) })}
               onBlur={() => mark("reason")}
-              aria-invalid={!!show("reason")}
+              aria-describedby={reasonCounterId}
               className={`input min-h-[80px] ${show("reason") ? "input-error" : ""}`}
               placeholder={t("patient.reasonPlaceholder")}
             />
-            <div className="text-[11px] text-muted-foreground mt-1 text-end">{value.reason.length}/{REASON_MAX}</div>
           </Field>
+          <div
+            id={reasonCounterId}
+            className="text-[11px] text-muted-foreground mt-1 text-end"
+            aria-live="polite"
+          >
+            {t("a11y.charsCount", "{{count}} من {{max}} حرف", { count: value.reason.length, max: REASON_MAX })}
+          </div>
         </div>
         <div className="sm:col-span-2 rounded-xl bg-muted/50 p-4 space-y-2">
           <div className="font-semibold text-sm">{t("patient.reminders")}</div>
@@ -126,7 +149,11 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
         </div>
 
         {!allValid && Object.values(touched).some(Boolean) && (
-          <div className="sm:col-span-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <div
+            className="sm:col-span-2 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+            role="alert"
+            aria-live="assertive"
+          >
             {t("patient.hasErrors")}
           </div>
         )}
