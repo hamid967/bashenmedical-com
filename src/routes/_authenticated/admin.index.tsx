@@ -284,7 +284,7 @@ function KpiCard({
         >
           {label}
         </div>
-        <Icon className="h-5 w-5" style={{ color: labelColor, opacity: 0.7 }} />
+        <span style={{ color: labelColor, opacity: 0.7, display: "inline-flex" }}><Icon className="h-5 w-5" /></span>
       </div>
       <div className="text-4xl font-bold" style={{ fontFamily: SORA }}>
         {value}
