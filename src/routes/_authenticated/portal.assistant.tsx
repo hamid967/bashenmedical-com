@@ -3,7 +3,7 @@
  * Read-only streaming chat scoped to the signed-in patient.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Send, Sparkles, AlertTriangle, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalPageHeader, PortalCard } from "@/components/portal/ui";
