@@ -463,6 +463,7 @@ function BookPage() {
     setErrorMsg(null);
     setErrorKind("unknown");
     setSuggestion(null);
+    setSameDoctorTimes([]);
     if (!patientValidation.ok) {
       setErrorMsg(t("page.fixPatient"));
       setErrorKind("validation");
@@ -477,19 +478,14 @@ function BookPage() {
       const fresh = await fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId);
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
-        setErrorMsg(t("page.slotTaken"));
+        setErrorMsg(t("page.conflictReason"));
         setErrorKind("conflict");
         // Refresh the availability query so StepTime shows the updated state.
         queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
         const prevTime = state.time;
         dispatch({ t: "set", p: { time: null } });
         goto(6);
-        // Fire-and-forget: look up an alternative doctor with the earliest slot.
-        setFindingAlt(true);
-        findAlternativeDoctor(state.date!, prevTime)
-          .then((alt) => { if (alt) setSuggestion(alt); })
-          .catch(() => {})
-          .finally(() => setFindingAlt(false));
+        void runAlternativesSearch(state.date!, prevTime);
         return;
       }
     } catch {/* network hiccup — let the real submit surface the error */}
@@ -521,12 +517,18 @@ function BookPage() {
       setResult({ reference: res.reference, phone: p.phone.trim(), email: p.email.trim().toLowerCase() || null });
       goto(9);
     } else {
-      setErrorMsg(res.message);
+      setErrorMsg(res.kind === "conflict" ? t("page.conflictReason") : res.message);
       setErrorKind(res.kind);
-      // On conflict, bounce back to step 6 so the user picks a fresh slot.
+      // On conflict (server-side race, HTTP 409), bounce back to step 6 and
+      // surface nearest alternatives (same doctor + alt doctor) so the user
+      // isn't stuck staring at a red banner.
       if (res.kind === "conflict") {
+        const prevTime = state.time;
+        // Invalidate availability so StepTime re-fetches and drops the taken slot.
+        queryClient.invalidateQueries({ queryKey: ["avail", state.date, state.doctorId, state.specialtyId, state.branchId] });
         dispatch({ t: "set", p: { time: null } });
         goto(6);
+        void runAlternativesSearch(state.date!, prevTime);
       }
     }
   }
