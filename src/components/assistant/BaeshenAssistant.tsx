@@ -341,6 +341,14 @@ export function BaeshenAssistant() {
                           isAr={isAr}
                         />
                       ))}
+                      {m.role === "assistant" && m.meta && (body || actions.length > 0) && (
+                        <MessageCostBadge
+                          meta={{ ...m.meta, outputText: body }}
+                          live={busy && i === messages.length - 1}
+                          now={nowTick}
+                          lang={isAr ? "ar" : "en"}
+                        />
+                      )}
                     </div>
                   </div>
                 );
