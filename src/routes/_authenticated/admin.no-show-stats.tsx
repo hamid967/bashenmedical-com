@@ -151,7 +151,7 @@ function NoShowStatsPage() {
     setApplied({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "" });
   }
 
-  function exportDoctorsCsv() {
+  function doctorsData(): (string | number | null)[][] {
     const header = ["الطبيب", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "مؤكد", "متوسط المخاطرة", "نسبة عدم الحضور %"];
     const rows = stats.byDoctor.map((r) => [
       r.doctor_name_ar ?? "بدون تخصيص",
@@ -159,22 +159,28 @@ function NoShowStatsPage() {
       r.avg_risk ?? "",
       r.no_show_rate,
     ]);
-    downloadCsv(`no-show_by-doctor_${applied.from}_${applied.to}.csv`, [header, ...rows]);
+    return [header, ...rows];
   }
-
-  function exportDaysCsv() {
+  function daysData(): (string | number | null)[][] {
     const header = ["التاريخ", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "نسبة عدم الحضور %"];
     const rows = stats.byDay.map((r) => [
       r.appointment_date, r.total, r.completed, r.no_show, r.cancelled, r.no_show_rate,
     ]);
-    downloadCsv(`no-show_by-day_${applied.from}_${applied.to}.csv`, [header, ...rows]);
+    return [header, ...rows];
   }
-
-  function exportReasonsCsv() {
+  function reasonsData(): (string | number | null)[][] {
     const header = ["سبب الإلغاء", "العدد"];
     const rows = stats.cancelReasons.map((r) => [r.reason, r.count]);
-    downloadCsv(`cancel-reasons_${applied.from}_${applied.to}.csv`, [header, ...rows]);
+    return [header, ...rows];
   }
+
+  const stamp = `${applied.from}_${applied.to}`;
+  const exportDoctorsCsv = () => downloadCsv(`no-show_by-doctor_${stamp}.csv`, doctorsData());
+  const exportDoctorsXlsx = () => downloadXlsx(`no-show_by-doctor_${stamp}.xlsx`, "الأطباء", doctorsData());
+  const exportDaysCsv = () => downloadCsv(`no-show_by-day_${stamp}.csv`, daysData());
+  const exportDaysXlsx = () => downloadXlsx(`no-show_by-day_${stamp}.xlsx`, "الأيام", daysData());
+  const exportReasonsCsv = () => downloadCsv(`cancel-reasons_${stamp}.csv`, reasonsData());
+  const exportReasonsXlsx = () => downloadXlsx(`cancel-reasons_${stamp}.xlsx`, "الأسباب", reasonsData());
 
   return (
     <div className="p-6 space-y-6">
