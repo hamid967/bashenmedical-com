@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getOwnerPage, createOwnerPage, updateOwnerPage } from "@/lib/owner/pages.functions";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowRight, Save } from "lucide-react";
+import { ArrowRight, Save, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
+import { MediaPicker, type PickedMedia } from "@/components/owner/MediaPicker";
 
 export const Route = createFileRoute("/_authenticated/owner/pages/$id")({
   head: () => ({ meta: [{ title: "تحرير صفحة · Site Builder" }, { name: "robots", content: "noindex,nofollow" }] }),
