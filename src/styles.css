@@ -308,12 +308,72 @@ html.reduce-motion *::after {
 }
 
 /* ==========================================================================
+   DESIGN SYSTEM v4 — Unified primitives (Wave 2)
+   Additive layer consumed by --portal-*, --admin-*, and marketing tokens.
+   Rule: new components should read from --ds-* directly. Never inline hex.
+   ========================================================================== */
+:root {
+  /* Brand */
+  --ds-brand-50: #E6F1F1;
+  --ds-brand-500: #0B8585;
+  --ds-brand-700: #075E63;
+  --ds-brand-800: #064F53;
+  --ds-accent-500: #C7A46B;
+
+  /* Status */
+  --ds-success-500: #16A34A;
+  --ds-success-50: #E7F7EE;
+  --ds-warning-500: #D97706;
+  --ds-warning-50: #FDF3E4;
+  --ds-error-500: #C0392B;
+  --ds-error-50: #FBEAE7;
+  --ds-info-500: #0B8585;
+  --ds-info-50: #E6F1F1;
+
+  /* Ink (contrast-tuned for WCAG AA on light surfaces) */
+  --ds-ink-900: #173B42;
+  --ds-ink-600: #5A6E73;
+  --ds-ink-400: #7A8A8E;
+
+  /* Borders */
+  --ds-border: #DCEAE8;
+  --ds-border-strong: #C7DAD6;
+
+  /* Radii */
+  --ds-radius-sm: 10px;
+  --ds-radius-md: 14px;
+  --ds-radius-lg: 20px;
+  --ds-radius-xl: 28px;
+  --ds-radius-2xl: 36px;
+
+  /* Shadows */
+  --ds-shadow-sm: 0 1px 2px rgba(7, 94, 99, 0.05), 0 4px 12px -6px rgba(7, 94, 99, 0.08);
+  --ds-shadow-md: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.18);
+  --ds-shadow-lg: 0 10px 30px -12px rgba(7, 94, 99, 0.22), 0 30px 80px -40px rgba(7, 94, 99, 0.28);
+  --ds-shadow-glow: 0 0 0 4px color-mix(in oklab, #0B8585 18%, transparent);
+
+  /* Motion */
+  --ds-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ds-ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ds-dur-fast: 120ms;
+  --ds-dur-base: 220ms;
+  --ds-dur-slow: 360ms;
+
+  /* Icon sizes */
+  --ds-icon-sm: 16px;
+  --ds-icon-md: 20px;
+  --ds-icon-lg: 24px;
+}
+
+/* ==========================================================================
    PATIENT PORTAL — scoped tokens + utilities (Apple/Stripe/Linear-inspired)
    Only active under .portal-root so the marketing site stays untouched.
    ========================================================================== */
 .portal-root {
   /* v2 — Design tokens for the patient portal.
-     Rule: components MUST reference these tokens; no hex/rgb inline. */
+     Rule: components MUST reference these tokens; no hex/rgb inline.
+     Note: values re-point to --ds-* primitives introduced in Wave 2. */
+
   --portal-primary: #075E63;
   --portal-primary-600: #064F53;
   --portal-primary-50: #E6F1F1;
