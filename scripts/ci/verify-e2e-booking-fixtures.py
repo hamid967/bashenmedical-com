@@ -1,145 +1,69 @@
 """
 CI preflight: يتحقق أن fixtures الحجز E2E موجودة وأن availability_slots
-تحتوي على أوقات صالحة (status='available' في المستقبل) قبل تشغيل مجموعة
-اختبارات الحجز. يُستدعى BeforeEach لمجموعة booking في .github/workflows/ci.yml.
-
-يفشل مبكراً وبرسالة واضحة إذا:
-  - أي fixture (branch/specialty/doctor) مفقود
-  - doctor_branches غير مربوط
-  - لا يوجد أي slot متاح في الأيام الـ 14 القادمة
+تحتوي على أوقات صالحة قبل تشغيل مجموعة اختبارات الحجز.
 
 Env:
   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY
 
-اختياري:
-  E2E_MIN_AVAILABLE_SLOTS  الحد الأدنى (افتراضي 3)
-  E2E_BRANCH_SLUG          افتراضي 'e2e-branch'
-  E2E_SPECIALTY_SLUG       افتراضي 'e2e-specialty'
-  E2E_DOCTOR_SLUG          افتراضي 'e2e-doctor'
+Optional:
+  E2E_MIN_AVAILABLE_SLOTS  (default 3)
+  E2E_BRANCH_SLUG          (default 'e2e-branch')
+  E2E_SPECIALTY_SLUG       (default 'e2e-specialty')
+  E2E_DOCTOR_SLUG          (default 'e2e-doctor')
 
-Exit: 0 عند الاجتياز، 1 عند الفشل.
+Exit: 0 pass, 1 fail.
 """
 from __future__ import annotations
 
-import json
 import os
 import sys
-import urllib.parse
-import urllib.request
 from datetime import date, timedelta
+from pathlib import Path
 
-REQUIRED = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"]
-_missing = [k for k in REQUIRED if not os.environ.get(k, "").strip()]
-if _missing:
-    print(f"[verify] متغيّرات مفقودة: {', '.join(_missing)}", file=sys.stderr)
-    sys.exit(1)
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _verify_common import SupaClient, get_e2e_bundle, run  # noqa: E402
 
-SUPA_URL = os.environ["SUPABASE_URL"].rstrip("/")
-SRV_KEY = os.environ["SUPABASE_SERVICE_ROLE_KEY"].strip()
+TAG = "verify-booking"
+HINT = "شغّل: python scripts/ci/ensure-e2e-booking-fixtures.py ثم أعد المحاولة."
 
 BRANCH_SLUG = os.environ.get("E2E_BRANCH_SLUG", "e2e-branch")
 SPEC_SLUG = os.environ.get("E2E_SPECIALTY_SLUG", "e2e-specialty")
 DOC_SLUG = os.environ.get("E2E_DOCTOR_SLUG", "e2e-doctor")
 MIN_SLOTS = int(os.environ.get("E2E_MIN_AVAILABLE_SLOTS", "3"))
 
-
-def rest_get(path: str, params: dict[str, str]) -> list[dict]:
-    url = f"{SUPA_URL}/rest/v1/{path}?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(
-        url,
-        method="GET",
-        headers={
-            "apikey": SRV_KEY,
-            "Authorization": f"Bearer {SRV_KEY}",
-            "Accept": "application/json",
-        },
-    )
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        return json.loads(resp.read().decode() or "[]")
-
-
-def fail(msg: str) -> None:
-    print(f"[verify][FAIL] {msg}", file=sys.stderr)
-    print(
-        "→ شغّل: python scripts/ci/ensure-e2e-booking-fixtures.py ثم أعد المحاولة.",
-        file=sys.stderr,
-    )
-    sys.exit(1)
+cli, _ = SupaClient.from_env(TAG, fail_hint=HINT)
 
 
 def main() -> None:
-    # 1) fixtures وجود
-    branches = rest_get("branches", {"select": "id,slug,name_ar,name_en", "slug": f"eq.{BRANCH_SLUG}"})
-    if not branches:
-        fail(f"الفرع '{BRANCH_SLUG}' غير موجود.")
-    branch = branches[0]
-
-    specs = rest_get("specialties", {"select": "id,slug,name_ar,name_en", "slug": f"eq.{SPEC_SLUG}"})
-    if not specs:
-        fail(f"التخصص '{SPEC_SLUG}' غير موجود.")
-    spec = specs[0]
-
-    doctors = rest_get(
-        "doctors",
-        {"select": "id,slug,name_ar,name_en,specialty_id,branch_id", "slug": f"eq.{DOC_SLUG}"},
+    branch, spec, doctor = get_e2e_bundle(
+        cli, branch_slug=BRANCH_SLUG, spec_slug=SPEC_SLUG, doctor_slug=DOC_SLUG
     )
-    if not doctors:
-        fail(f"الطبيب '{DOC_SLUG}' غير موجود.")
-    doc = doctors[0]
 
-    if doc.get("specialty_id") != spec["id"]:
-        fail(f"الطبيب غير مرتبط بالتخصص المطلوب (got {doc.get('specialty_id')}).")
-
-    # 2) doctor_branches ربط
-    links = rest_get(
-        "doctor_branches",
-        {
-            "select": "doctor_id,branch_id",
-            "doctor_id": f"eq.{doc['id']}",
-            "branch_id": f"eq.{branch['id']}",
-        },
-    )
-    if not links:
-        fail("doctor_branches: لا يوجد ربط للطبيب E2E بالفرع E2E.")
-
-    # 3) availability_slots — على الأقل MIN_SLOTS متاحة في المستقبل
     today = date.today().isoformat()
     horizon = (date.today() + timedelta(days=14)).isoformat()
-    # PostgREST: نستخدم and=() لدمج شرطي slot_date في مفتاح واحد
-    # (تكرار نفس مفتاح querystring يحتفظ بآخر قيمة فقط).
-    slots = rest_get(
-        "availability_slots",
-        {
+    slots = cli.rows(
+        cli.get("/rest/v1/availability_slots", {
             "select": "slot_date,start_time,status",
-            "doctor_id": f"eq.{doc['id']}",
+            "doctor_id": f"eq.{doctor['id']}",
             "status": "eq.available",
             "and": f"(slot_date.gte.{today},slot_date.lte.{horizon})",
             "limit": "500",
-        },
+        }),
+        "availability_slots (14d window)",
     )
     if len(slots) < MIN_SLOTS:
-        fail(
+        cli.fail(
             f"عدد الـ slots المتاحة ({len(slots)}) أقل من الحد الأدنى "
             f"({MIN_SLOTS}) للطبيب E2E خلال 14 يوم."
         )
 
-
     unique_days = {s["slot_date"] for s in slots}
-    print(
-        f"[verify] OK — branch={branch["name_ar"]!r} specialty={spec["name_ar"]!r} "
-        f"doctor={doc["name_ar"]!r} available_slots={len(slots)} days={len(unique_days)}"
+    cli.ok(
+        f"branch={branch['name_ar']!r} specialty={spec['slug']!r} "
+        f"doctor={doctor['name_ar']!r} available_slots={len(slots)} "
+        f"days={len(unique_days)}"
     )
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except urllib.error.HTTPError as e:
-        body = ""
-        try:
-            body = e.read().decode()
-        except Exception:
-            pass
-        fail(f"HTTP {e.code}: {body[:400]}")
-    except Exception as e:  # noqa: BLE001
-        fail(f"exception: {e}")
+    run(main, cli)
