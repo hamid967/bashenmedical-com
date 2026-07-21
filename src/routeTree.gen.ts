@@ -111,6 +111,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
+import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
 import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
@@ -163,6 +164,7 @@ import { Route as AuthenticatedPortalReportsRouteImport } from './routes/_authen
 import { Route as AuthenticatedPortalScheduleRouteImport } from './routes/_authenticated/portal.schedule'
 import { Route as AuthenticatedPortalSessionsRouteImport } from './routes/_authenticated/portal.sessions'
 import { Route as AuthenticatedPortalSettingsRouteImport } from './routes/_authenticated/portal.settings'
+import { Route as AuthenticatedPortalUsageRouteImport } from './routes/_authenticated/portal.usage'
 import { Route as ApiAdminAiChatRouteImport } from './routes/api/admin/ai-chat'
 import { Route as ApiAiActionRouteImport } from './routes/api/ai/action'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
@@ -745,6 +747,12 @@ const AuthenticatedAdminAiStreamingRoute =
     path: '/ai-streaming',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAiUsageRoute =
+  AuthenticatedAdminAiUsageRouteImport.update({
+    id: '/ai-usage',
+    path: '/ai-usage',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAuditLogsRoute =
   AuthenticatedAdminAuditLogsRouteImport.update({
     id: '/audit-logs',
@@ -1051,6 +1059,12 @@ const AuthenticatedPortalSettingsRoute =
   AuthenticatedPortalSettingsRouteImport.update({
     id: '/settings',
     path: '/settings',
+    getParentRoute: () => AuthenticatedPortalRoute,
+  } as any)
+const AuthenticatedPortalUsageRoute =
+  AuthenticatedPortalUsageRouteImport.update({
+    id: '/usage',
+    path: '/usage',
     getParentRoute: () => AuthenticatedPortalRoute,
   } as any)
 const ApiAdminAiChatRoute = ApiAdminAiChatRouteImport.update({
@@ -1394,6 +1408,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
+  '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1443,6 +1458,7 @@ export interface FileRoutesByFullPath {
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
+  '/portal/usage': typeof AuthenticatedPortalUsageRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
   '/api/ai/action': typeof ApiAiActionRoute
   '/api/ai/chat': typeof ApiAiChatRoute
@@ -1588,6 +1604,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
+  '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1637,6 +1654,7 @@ export interface FileRoutesByTo {
   '/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
+  '/portal/usage': typeof AuthenticatedPortalUsageRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
   '/api/ai/action': typeof ApiAiActionRoute
   '/api/ai/chat': typeof ApiAiChatRoute
@@ -1787,6 +1805,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
+  '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1836,6 +1855,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/schedule': typeof AuthenticatedPortalScheduleRoute
   '/_authenticated/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
+  '/_authenticated/portal/usage': typeof AuthenticatedPortalUsageRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
   '/api/ai/action': typeof ApiAiActionRoute
   '/api/ai/chat': typeof ApiAiChatRoute
@@ -1986,6 +2006,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/ai-streaming'
+    | '/admin/ai-usage'
     | '/admin/audit-logs'
     | '/admin/classic'
     | '/admin/design-tokens'
@@ -2035,6 +2056,7 @@ export interface FileRouteTypes {
     | '/portal/schedule'
     | '/portal/sessions'
     | '/portal/settings'
+    | '/portal/usage'
     | '/api/admin/ai-chat'
     | '/api/ai/action'
     | '/api/ai/chat'
@@ -2180,6 +2202,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/ai-streaming'
+    | '/admin/ai-usage'
     | '/admin/audit-logs'
     | '/admin/classic'
     | '/admin/design-tokens'
@@ -2229,6 +2252,7 @@ export interface FileRouteTypes {
     | '/portal/schedule'
     | '/portal/sessions'
     | '/portal/settings'
+    | '/portal/usage'
     | '/api/admin/ai-chat'
     | '/api/ai/action'
     | '/api/ai/chat'
@@ -2378,6 +2402,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/ai-streaming'
+    | '/_authenticated/admin/ai-usage'
     | '/_authenticated/admin/audit-logs'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/design-tokens'
@@ -2427,6 +2452,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/schedule'
     | '/_authenticated/portal/sessions'
     | '/_authenticated/portal/settings'
+    | '/_authenticated/portal/usage'
     | '/api/admin/ai-chat'
     | '/api/ai/action'
     | '/api/ai/chat'
@@ -3276,6 +3302,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiStreamingRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ai-usage': {
+      id: '/_authenticated/admin/ai-usage'
+      path: '/ai-usage'
+      fullPath: '/admin/ai-usage'
+      preLoaderRoute: typeof AuthenticatedAdminAiUsageRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/audit-logs': {
       id: '/_authenticated/admin/audit-logs'
       path: '/audit-logs'
@@ -3640,6 +3673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalSettingsRouteImport
       parentRoute: typeof AuthenticatedPortalRoute
     }
+    '/_authenticated/portal/usage': {
+      id: '/_authenticated/portal/usage'
+      path: '/usage'
+      fullPath: '/portal/usage'
+      preLoaderRoute: typeof AuthenticatedPortalUsageRouteImport
+      parentRoute: typeof AuthenticatedPortalRoute
+    }
     '/api/admin/ai-chat': {
       id: '/api/admin/ai-chat'
       path: '/api/admin/ai-chat'
@@ -3954,6 +3994,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
+  AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
   AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
@@ -3979,6 +4020,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
+  AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
   AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
@@ -4125,6 +4167,7 @@ interface AuthenticatedPortalRouteChildren {
   AuthenticatedPortalScheduleRoute: typeof AuthenticatedPortalScheduleRoute
   AuthenticatedPortalSessionsRoute: typeof AuthenticatedPortalSessionsRoute
   AuthenticatedPortalSettingsRoute: typeof AuthenticatedPortalSettingsRoute
+  AuthenticatedPortalUsageRoute: typeof AuthenticatedPortalUsageRoute
   AuthenticatedPortalIndexRoute: typeof AuthenticatedPortalIndexRoute
 }
 
@@ -4157,6 +4200,7 @@ const AuthenticatedPortalRouteChildren: AuthenticatedPortalRouteChildren = {
   AuthenticatedPortalScheduleRoute: AuthenticatedPortalScheduleRoute,
   AuthenticatedPortalSessionsRoute: AuthenticatedPortalSessionsRoute,
   AuthenticatedPortalSettingsRoute: AuthenticatedPortalSettingsRoute,
+  AuthenticatedPortalUsageRoute: AuthenticatedPortalUsageRoute,
   AuthenticatedPortalIndexRoute: AuthenticatedPortalIndexRoute,
 }
 
