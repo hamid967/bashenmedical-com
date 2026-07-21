@@ -1,19 +1,8 @@
 /**
  * Post-booking guest → account linking via email OTP.
- *
- * Flow:
- *  1. Guest completes booking as anon with `patient_email` stored on row.
- *  2. If no session, we render this card on the success screen.
- *  3. User taps "Send code" → `supabase.auth.signInWithOtp({ email })`.
- *  4. User enters 6-digit code → `supabase.auth.verifyOtp(...)` establishes
- *     a session for that email.
- *  5. We then call the `linkGuestAppointments` server fn which finds/creates
- *     the patient row and attaches all matching appointments.
- *
- * If the user is already signed in when this mounts we call the link fn
- * immediately (idempotent) and just show a success line.
  */
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Loader2, Mail, ShieldCheck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +18,8 @@ export function EmailOtpLinker({
   email: string | null;
   lang: "ar" | "en";
 }) {
-  const isAr = lang === "ar";
+  void lang;
+  const { t } = useTranslation("booking");
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
   const [otpEmail, setOtpEmail] = useState<string>(email?.trim().toLowerCase() ?? "");
   const [code, setCode] = useState("");
@@ -38,7 +28,6 @@ export function EmailOtpLinker({
   const [linkedCount, setLinkedCount] = useState<number>(0);
   const [cooldown, setCooldown] = useState(0);
 
-  // Detect existing session — if signed in, auto-link and short-circuit.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -55,7 +44,7 @@ export function EmailOtpLinker({
             setPhase("linked");
           } else {
             setPhase("error");
-            setErrorMsg(res.message ?? (isAr ? "تعذّر ربط الحجوزات" : "Could not link bookings"));
+            setErrorMsg(res.message ?? t("otp.linkFailed"));
           }
         } catch (e) {
           if (cancelled) return;
@@ -70,11 +59,10 @@ export function EmailOtpLinker({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Resend cooldown timer
   useEffect(() => {
     if (cooldown <= 0) return;
-    const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(timer);
   }, [cooldown]);
 
   const emailValid = useMemo(
@@ -84,7 +72,7 @@ export function EmailOtpLinker({
 
   async function sendCode() {
     if (!emailValid) {
-      setErrorMsg(isAr ? "بريد إلكتروني غير صالح" : "Invalid email");
+      setErrorMsg(t("otp.invalidEmail"));
       return;
     }
     setErrorMsg(null);
@@ -100,13 +88,13 @@ export function EmailOtpLinker({
     }
     setPhase("code_sent");
     setCooldown(45);
-    toast.success(isAr ? "أُرسل الرمز إلى بريدك" : "Code sent to your email");
+    toast.success(t("otp.sent"));
   }
 
   async function verifyCode() {
     const token = code.trim();
     if (!/^\d{6}$/.test(token)) {
-      setErrorMsg(isAr ? "الرمز يجب أن يكون 6 أرقام" : "Code must be 6 digits");
+      setErrorMsg(t("otp.codeMustBe6"));
       return;
     }
     setErrorMsg(null);
@@ -118,7 +106,7 @@ export function EmailOtpLinker({
     });
     if (error || !data.user) {
       setPhase("code_sent");
-      setErrorMsg(error?.message ?? (isAr ? "رمز غير صحيح" : "Invalid code"));
+      setErrorMsg(error?.message ?? t("otp.invalidCode"));
       return;
     }
     setSessionEmail(data.user.email ?? null);
@@ -128,14 +116,10 @@ export function EmailOtpLinker({
       if (res.ok) {
         setLinkedCount(res.linkedCount);
         setPhase("linked");
-        toast.success(
-          isAr
-            ? `تم إنشاء حسابك وربط ${res.linkedCount} حجز`
-            : `Account created and ${res.linkedCount} booking(s) linked`,
-        );
+        toast.success(t("otp.linkedToast", { count: res.linkedCount }));
       } else {
         setPhase("error");
-        setErrorMsg(res.message ?? (isAr ? "تعذّر ربط الحجوزات" : "Could not link bookings"));
+        setErrorMsg(res.message ?? t("otp.linkFailed"));
       }
     } catch (e) {
       setPhase("error");
@@ -143,7 +127,6 @@ export function EmailOtpLinker({
     }
   }
 
-  // Success state
   if (phase === "linked") {
     return (
       <div className="mt-6 rounded-xl border border-emerald-200 dark:border-emerald-900/40 bg-emerald-50/70 dark:bg-emerald-900/10 p-4 text-start">
@@ -153,16 +136,12 @@ export function EmailOtpLinker({
           </div>
           <div className="flex-1 min-w-0">
             <div className="text-sm font-semibold text-emerald-800 dark:text-emerald-200">
-              {isAr ? "تم ربط حجزك بحسابك" : "Booking linked to your account"}
+              {t("otp.linkedTitle")}
             </div>
             <p className="mt-1 text-xs text-emerald-800/80 dark:text-emerald-200/80">
-              {sessionEmail && (isAr ? `مسجّل الدخول باسم ${sessionEmail}` : `Signed in as ${sessionEmail}`)}
+              {sessionEmail && t("otp.signedInAs", { email: sessionEmail })}
               {linkedCount > 0 && (
-                <span className="ms-1">
-                  {isAr
-                    ? `— تم ربط ${linkedCount} حجز.`
-                    : `— ${linkedCount} booking(s) attached.`}
-                </span>
+                <span className="ms-1">{t("otp.linkedCount", { count: linkedCount })}</span>
               )}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
@@ -171,7 +150,7 @@ export function EmailOtpLinker({
                 className="inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-3 py-1.5 text-xs font-semibold hover:opacity-90"
               >
                 <UserIcon className="h-3.5 w-3.5" />
-                {isAr ? "افتح لوحة المريض" : "Open patient portal"}
+                {t("otp.openPortal")}
               </a>
             </div>
           </div>
@@ -180,7 +159,6 @@ export function EmailOtpLinker({
     );
   }
 
-  // If no email captured during booking and no session, hide (nothing to link).
   if (
     !email &&
     !sessionEmail &&
@@ -198,14 +176,8 @@ export function EmailOtpLinker({
           <Mail className="h-5 w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold">
-            {isAr ? "احفظ حجزك بحساب دائم" : "Save this booking to a permanent account"}
-          </div>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {isAr
-              ? "أنشئ حسابك بالتحقق من بريدك الإلكتروني لإدارة مواعيدك، تقاريرك، وفواتيرك من مكان واحد."
-              : "Verify your email to create an account and manage your appointments, reports, and invoices in one place."}
-          </p>
+          <div className="text-sm font-semibold">{t("otp.cardTitle")}</div>
+          <p className="mt-1 text-xs text-muted-foreground">{t("otp.cardDesc")}</p>
 
           {phase !== "code_sent" && phase !== "verifying" && phase !== "linking" && (
             <div className="mt-3 flex flex-col sm:flex-row gap-2">
@@ -213,14 +185,15 @@ export function EmailOtpLinker({
                 type="email"
                 value={otpEmail}
                 onChange={(e) => setOtpEmail(e.target.value)}
-                placeholder={isAr ? "بريدك الإلكتروني" : "you@example.com"}
+                placeholder={t("otp.emailPlaceholder")}
                 dir="ltr"
                 className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm"
                 autoComplete="email"
+                aria-label={t("otp.emailPlaceholder")}
               />
               <Button size="sm" onClick={sendCode} disabled={!emailValid || phase === "sending"}>
                 {phase === "sending" ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-                {isAr ? "إرسال الرمز" : "Send code"}
+                {t("otp.sendCode")}
               </Button>
             </div>
           )}
@@ -228,9 +201,7 @@ export function EmailOtpLinker({
           {(phase === "code_sent" || phase === "verifying" || phase === "linking") && (
             <div className="mt-3 space-y-2">
               <div className="text-xs text-muted-foreground">
-                {isAr
-                  ? `أدخل الرمز المرسل إلى ${otpEmail}`
-                  : `Enter the 6-digit code sent to ${otpEmail}`}
+                {t("otp.codeSentTo", { email: otpEmail })}
               </div>
               <div className="flex flex-col sm:flex-row gap-2">
                 <input
@@ -242,6 +213,7 @@ export function EmailOtpLinker({
                   dir="ltr"
                   placeholder="123456"
                   className="flex-1 rounded-md border border-border bg-background px-3 py-2 text-sm font-mono tracking-widest text-center"
+                  aria-label={t("otp.codeSentTo", { email: otpEmail })}
                 />
                 <Button
                   size="sm"
@@ -251,7 +223,7 @@ export function EmailOtpLinker({
                   {(phase === "verifying" || phase === "linking") ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : null}
-                  {isAr ? "تحقّق وربط" : "Verify & link"}
+                  {t("otp.verifyLink")}
                 </Button>
               </div>
               <div className="flex items-center justify-between text-[11px]">
@@ -262,12 +234,8 @@ export function EmailOtpLinker({
                   disabled={cooldown > 0 || phase === "verifying" || phase === "linking"}
                 >
                   {cooldown > 0
-                    ? isAr
-                      ? `إعادة الإرسال بعد ${cooldown}ث`
-                      : `Resend in ${cooldown}s`
-                    : isAr
-                      ? "إعادة إرسال الرمز"
-                      : "Resend code"}
+                    ? t("otp.resendIn", { seconds: cooldown })
+                    : t("otp.resend")}
                 </button>
                 <button
                   type="button"
@@ -278,14 +246,16 @@ export function EmailOtpLinker({
                     setErrorMsg(null);
                   }}
                 >
-                  {isAr ? "تغيير البريد" : "Change email"}
+                  {t("otp.changeEmail")}
                 </button>
               </div>
             </div>
           )}
 
           {errorMsg && (
-            <div className="mt-2 text-xs text-destructive">{errorMsg}</div>
+            <div className="mt-2 text-xs text-destructive" role="alert">
+              {errorMsg}
+            </div>
           )}
         </div>
       </div>
