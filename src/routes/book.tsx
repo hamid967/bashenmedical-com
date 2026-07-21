@@ -517,13 +517,25 @@ function BookPage() {
     ? 9
     : Math.min(state.step, maxReachableStep(state, patientValidation.ok));
 
+  const stepAnnounce = state.step === 9
+    ? STEPS[8]
+    : t("a11y.stepAnnounce", "الخطوة {{current}} من {{total}}: {{title}}", {
+        current: displayedStep, total: 8, title: STEPS[displayedStep - 1] ?? "",
+      });
+
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="container-app py-8 md:py-12 max-w-5xl">
+        {/* SR-only live region: announces each step change once so screen
+            reader users hear "Step N of 8: Title" without extra chatter. */}
+        <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
+          {stepAnnounce}
+        </div>
         <header className="mb-6 md:mb-8 text-center">
           <h1 className="text-2xl md:text-4xl font-bold">{t("page.title")}</h1>
           <p className="mt-2 text-sm md:text-base text-muted-foreground">{t("page.subtitle")}</p>
         </header>
+
 
         <Stepper steps={STEPS} current={displayedStep} onJump={(i) => {
           if (state.step === 9) return;
