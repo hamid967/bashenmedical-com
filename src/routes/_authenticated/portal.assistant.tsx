@@ -291,6 +291,18 @@ function AssistantPage() {
           lang="ar"
         />
 
+        {!streaming && input.trim() && (
+          <div className="px-3 sm:px-4 pt-2 flex justify-end bg-[color:var(--portal-surface)]">
+            <PreflightCostChip
+              input={input}
+              streaming={streaming}
+              model={currentModel}
+              historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
+              lang="ar"
+            />
+          </div>
+        )}
+
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}
           className="border-t border-[color:var(--portal-border)] p-3 sm:p-4 flex items-end gap-2 bg-[color:var(--portal-surface)]"
