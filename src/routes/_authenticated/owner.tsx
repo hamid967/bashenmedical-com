@@ -58,7 +58,7 @@ const NAV: ReadonlyArray<{
   { to: "/owner/media", label: "الوسائط", icon: ImageIcon },
   { to: "/owner/navigation", label: "القوائم", icon: MenuIcon },
   { to: "/owner/services", label: "الخدمات", icon: Stethoscope },
-  { to: "/owner/inquiries", label: "الطلبات", icon: Inbox },
+  { to: "/admin/service-inquiries", label: "الطلبات", icon: Inbox },
 ];
 
 function OwnerLayout() {
