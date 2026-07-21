@@ -4,16 +4,28 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 import arCommon from "@/locales/ar/common.json";
 import enCommon from "@/locales/en/common.json";
+import urCommon from "@/locales/ur/common.json";
 import arBooking from "@/locales/ar/booking.json";
 import enBooking from "@/locales/en/booking.json";
 
+// Primary UI languages — surfaced in the language switcher and used across
+// the app to key layout/direction. Adding a code here forces every
+// `Record<Lang, ...>` in the codebase to add a branch, so we keep this narrow
+// and register extended locales (see EXTRA_LOCALES) in i18next only.
 export const SUPPORTED_LANGS = ["ar", "en"] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 export const DEFAULT_LANG: Lang = "ar";
 
+// Extended locales registered with i18next but not part of the `Lang` union.
+// Users who call `i18n.changeLanguage("ur")` get these translations; any
+// missing key falls back to DEFAULT_LANG (ar) via i18next's fallbackLng.
+export const EXTRA_LOCALES = ["ur"] as const;
+export const RTL_LOCALES: readonly string[] = ["ar", "ur"] as const;
+
 export const resources = {
   ar: { common: arCommon, booking: arBooking },
   en: { common: enCommon, booking: enBooking },
+  ur: { common: urCommon },
 } as const;
 
 if (!i18n.isInitialized) {
@@ -27,7 +39,7 @@ if (!i18n.isInitialized) {
     resources,
     lng: DEFAULT_LANG,
     fallbackLng: DEFAULT_LANG,
-    supportedLngs: SUPPORTED_LANGS as unknown as string[],
+    supportedLngs: [...SUPPORTED_LANGS, ...EXTRA_LOCALES] as string[],
     defaultNS: "common",
     ns: ["common", "booking"],
     interpolation: { escapeValue: false },

@@ -4,12 +4,13 @@ import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n, {
   DEFAULT_LANG,
   SUPPORTED_LANGS,
+  RTL_LOCALES,
   syncClientLanguage,
   type Lang,
 } from "@/lib/i18n/config";
 
 export type { Lang };
-export { SUPPORTED_LANGS, DEFAULT_LANG };
+export { SUPPORTED_LANGS, DEFAULT_LANG, RTL_LOCALES };
 
 function normalizeLang(raw: string | undefined): Lang {
   if (!raw) return DEFAULT_LANG;
@@ -36,9 +37,12 @@ function I18nHtmlSync() {
   }, []);
   useEffect(() => {
     if (typeof document === "undefined") return;
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
-  }, [lang]);
+    const raw = inst.language ?? DEFAULT_LANG;
+    document.documentElement.lang = raw;
+    document.documentElement.dir = RTL_LOCALES.includes(raw.toLowerCase().split("-")[0])
+      ? "rtl"
+      : "ltr";
+  }, [lang, inst.language]);
   return null;
 }
 
