@@ -195,6 +195,21 @@ function AssistantPage() {
       />
 
       <PortalCard as="section" className="p-0 overflow-hidden">
+        <div className="flex items-center justify-between gap-2 border-b border-[color:var(--portal-border)] px-3 py-2 bg-[color:var(--portal-surface)]">
+          <span className="text-[11px] text-[color:var(--portal-ink-2)]">
+            {messages.length > 0
+              ? `${messages.length} ${messages.length === 1 ? "رسالة" : "رسائل"}`
+              : "لا توجد رسائل بعد"}
+          </span>
+          <SessionExportButton
+            messages={messages}
+            sessionCredits={sessionCredits}
+            preEstimateTokens={preEstimate?.inTok}
+            model={meterModel}
+            surface="بوابة المريض"
+            lang="ar"
+          />
+        </div>
         <div
           ref={scrollRef}
           className="max-h-[60vh] min-h-[280px] overflow-y-auto p-4 sm:p-6 space-y-4"
