@@ -12,6 +12,7 @@ import {
   Legend,
 } from "recharts";
 import { getAdminStats, getMyRoles, getAdminTrends } from "@/lib/admin.functions";
+import { KpiGrid } from "@/components/admin/v2/KpiGrid";
 import type { AdminRole } from "@/components/admin/AdminShell";
 import {
   CalendarCheck,
@@ -149,22 +150,9 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* KPIs */}
-      {stats && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-10">
-          <KpiCard
-            label="طلبات قيد المعالجة"
-            value={stats.ordersPending}
-            hint={`إجمالي: ${stats.ordersTotal}`}
-            icon={Package}
-            to="/orders-unified"
-            highlight={stats.ordersPending > 0}
-          />
-          <KpiCard label="أطباء نشطون" value={stats.doctorsActive} icon={Stethoscope} to="/doctors-management" />
-          <KpiCard label="بانتظار التأكيد" value={stats.appointmentsPending} icon={Clock} to="/appointments-queue" />
-          <KpiCard label="مواعيد اليوم" value={stats.appointmentsToday} icon={CalendarCheck} to="/appointments-queue" filled />
-        </div>
-      )}
+      {/* KPIs — expanded with period-over-period + sparklines + drill-down */}
+      <KpiGrid />
+
 
 
       {/* Trends section — daily/weekly stats for developers */}
