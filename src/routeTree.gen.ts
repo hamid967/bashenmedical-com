@@ -50,6 +50,7 @@ import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
 import { Route as SettingsGithubRouteImport } from './routes/settings.github'
 import { Route as ReservationsNewRouteImport } from './routes/reservations.new'
 import { Route as ReservationsManageRouteImport } from './routes/reservations.manage'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as OrdersRefRouteImport } from './routes/orders.$ref'
 import { Route as MediaStoriesRouteImport } from './routes/media.stories'
 import { Route as MediaNewsRouteImport } from './routes/media.news'
@@ -145,6 +146,8 @@ import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
+import { Route as AuthenticatedOwnerServicesIndexRouteImport } from './routes/_authenticated/owner.services.index'
+import { Route as AuthenticatedOwnerPagesIndexRouteImport } from './routes/_authenticated/owner.pages.index'
 import { Route as ApiPublicReservationsSessionFromAuthRouteImport } from './routes/api/public/reservations/session-from-auth'
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
@@ -164,6 +167,8 @@ import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/boo
 import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/book/cancel'
 import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/public/book/availability'
 import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './routes/_authenticated/portal.reports.downloads'
+import { Route as AuthenticatedOwnerServicesIdRouteImport } from './routes/_authenticated/owner.services.$id'
+import { Route as AuthenticatedOwnerPagesIdRouteImport } from './routes/_authenticated/owner.pages.$id'
 import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_authenticated/orders-unified.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
@@ -377,6 +382,11 @@ const ReservationsManageRoute = ReservationsManageRouteImport.update({
   id: '/manage',
   path: '/manage',
   getParentRoute: () => ReservationsRoute,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OrdersRefRoute = OrdersRefRouteImport.update({
   id: '/orders/$ref',
@@ -917,6 +927,18 @@ const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   path: '/.lovable/oauth/consent',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedOwnerServicesIndexRoute =
+  AuthenticatedOwnerServicesIndexRouteImport.update({
+    id: '/services/',
+    path: '/services/',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerPagesIndexRoute =
+  AuthenticatedOwnerPagesIndexRouteImport.update({
+    id: '/pages/',
+    path: '/pages/',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
 const ApiPublicReservationsSessionFromAuthRoute =
   ApiPublicReservationsSessionFromAuthRouteImport.update({
     id: '/api/public/reservations/session-from-auth',
@@ -1023,6 +1045,18 @@ const AuthenticatedPortalReportsDownloadsRoute =
     id: '/downloads',
     path: '/downloads',
     getParentRoute: () => AuthenticatedPortalReportsRoute,
+  } as any)
+const AuthenticatedOwnerServicesIdRoute =
+  AuthenticatedOwnerServicesIdRouteImport.update({
+    id: '/services/$id',
+    path: '/services/$id',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerPagesIdRoute =
+  AuthenticatedOwnerPagesIdRouteImport.update({
+    id: '/pages/$id',
+    path: '/pages/$id',
+    getParentRoute: () => AuthenticatedOwnerRoute,
   } as any)
 const AuthenticatedOrdersUnifiedKindIdRoute =
   AuthenticatedOrdersUnifiedKindIdRouteImport.update({
@@ -1164,6 +1198,7 @@ export interface FileRoutesByFullPath {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/p/$slug': typeof PSlugRoute
   '/reservations/manage': typeof ReservationsManageRoute
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
@@ -1219,6 +1254,8 @@ export interface FileRoutesByFullPath {
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
+  '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
@@ -1238,6 +1275,8 @@ export interface FileRoutesByFullPath {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
+  '/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -1326,6 +1365,7 @@ export interface FileRoutesByTo {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/p/$slug': typeof PSlugRoute
   '/reservations/manage': typeof ReservationsManageRoute
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
@@ -1381,6 +1421,8 @@ export interface FileRoutesByTo {
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
+  '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
@@ -1400,6 +1442,8 @@ export interface FileRoutesByTo {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/owner/pages': typeof AuthenticatedOwnerPagesIndexRoute
+  '/owner/services': typeof AuthenticatedOwnerServicesIndexRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -1493,6 +1537,7 @@ export interface FileRoutesById {
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
+  '/p/$slug': typeof PSlugRoute
   '/reservations/manage': typeof ReservationsManageRoute
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
@@ -1548,6 +1593,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
   '/_authenticated/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/_authenticated/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
+  '/_authenticated/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/_authenticated/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
@@ -1567,6 +1614,8 @@ export interface FileRoutesById {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/_authenticated/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
+  '/_authenticated/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -1660,6 +1709,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/p/$slug'
     | '/reservations/manage'
     | '/reservations/new'
     | '/settings/github'
@@ -1715,6 +1765,8 @@ export interface FileRouteTypes {
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
     | '/orders-unified/$kind/$id'
+    | '/owner/pages/$id'
+    | '/owner/services/$id'
     | '/portal/reports/downloads'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
@@ -1734,6 +1786,8 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/owner/pages/'
+    | '/owner/services/'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -1822,6 +1876,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/p/$slug'
     | '/reservations/manage'
     | '/reservations/new'
     | '/settings/github'
@@ -1877,6 +1932,8 @@ export interface FileRouteTypes {
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
     | '/orders-unified/$kind/$id'
+    | '/owner/pages/$id'
+    | '/owner/services/$id'
     | '/portal/reports/downloads'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
@@ -1896,6 +1953,8 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/owner/pages'
+    | '/owner/services'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -1988,6 +2047,7 @@ export interface FileRouteTypes {
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
+    | '/p/$slug'
     | '/reservations/manage'
     | '/reservations/new'
     | '/settings/github'
@@ -2043,6 +2103,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
     | '/_authenticated/orders-unified/$kind/$id'
+    | '/_authenticated/owner/pages/$id'
+    | '/_authenticated/owner/services/$id'
     | '/_authenticated/portal/reports/downloads'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
@@ -2062,6 +2124,8 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/_authenticated/owner/pages/'
+    | '/_authenticated/owner/services/'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -2113,6 +2177,7 @@ export interface RootRouteChildren {
   MediaNewsRoute: typeof MediaNewsRoute
   MediaStoriesRoute: typeof MediaStoriesRouteWithChildren
   OrdersRefRoute: typeof OrdersRefRoute
+  PSlugRoute: typeof PSlugRoute
   SettingsGithubRoute: typeof SettingsGithubRoute
   SpecialtiesSlugRoute: typeof SpecialtiesSlugRoute
   DoctorsIndexRoute: typeof DoctorsIndexRoute
@@ -2430,6 +2495,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reservations/manage'
       preLoaderRoute: typeof ReservationsManageRouteImport
       parentRoute: typeof ReservationsRoute
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/orders/$ref': {
       id: '/orders/$ref'
@@ -3096,6 +3168,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DotlovableOauthConsentRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/owner/services/': {
+      id: '/_authenticated/owner/services/'
+      path: '/services'
+      fullPath: '/owner/services/'
+      preLoaderRoute: typeof AuthenticatedOwnerServicesIndexRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/pages/': {
+      id: '/_authenticated/owner/pages/'
+      path: '/pages'
+      fullPath: '/owner/pages/'
+      preLoaderRoute: typeof AuthenticatedOwnerPagesIndexRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
     '/api/public/reservations/session-from-auth': {
       id: '/api/public/reservations/session-from-auth'
       path: '/api/public/reservations/session-from-auth'
@@ -3228,6 +3314,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/portal/reports/downloads'
       preLoaderRoute: typeof AuthenticatedPortalReportsDownloadsRouteImport
       parentRoute: typeof AuthenticatedPortalReportsRoute
+    }
+    '/_authenticated/owner/services/$id': {
+      id: '/_authenticated/owner/services/$id'
+      path: '/services/$id'
+      fullPath: '/owner/services/$id'
+      preLoaderRoute: typeof AuthenticatedOwnerServicesIdRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/pages/$id': {
+      id: '/_authenticated/owner/pages/$id'
+      path: '/pages/$id'
+      fullPath: '/owner/pages/$id'
+      preLoaderRoute: typeof AuthenticatedOwnerPagesIdRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
     }
     '/_authenticated/orders-unified/$kind/$id': {
       id: '/_authenticated/orders-unified/$kind/$id'
@@ -3373,10 +3473,18 @@ const AuthenticatedOrdersUnifiedRouteWithChildren =
 
 interface AuthenticatedOwnerRouteChildren {
   AuthenticatedOwnerIndexRoute: typeof AuthenticatedOwnerIndexRoute
+  AuthenticatedOwnerPagesIdRoute: typeof AuthenticatedOwnerPagesIdRoute
+  AuthenticatedOwnerServicesIdRoute: typeof AuthenticatedOwnerServicesIdRoute
+  AuthenticatedOwnerPagesIndexRoute: typeof AuthenticatedOwnerPagesIndexRoute
+  AuthenticatedOwnerServicesIndexRoute: typeof AuthenticatedOwnerServicesIndexRoute
 }
 
 const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
   AuthenticatedOwnerIndexRoute: AuthenticatedOwnerIndexRoute,
+  AuthenticatedOwnerPagesIdRoute: AuthenticatedOwnerPagesIdRoute,
+  AuthenticatedOwnerServicesIdRoute: AuthenticatedOwnerServicesIdRoute,
+  AuthenticatedOwnerPagesIndexRoute: AuthenticatedOwnerPagesIndexRoute,
+  AuthenticatedOwnerServicesIndexRoute: AuthenticatedOwnerServicesIndexRoute,
 }
 
 const AuthenticatedOwnerRouteWithChildren =
@@ -3687,6 +3795,7 @@ const rootRouteChildren: RootRouteChildren = {
   MediaNewsRoute: MediaNewsRoute,
   MediaStoriesRoute: MediaStoriesRouteWithChildren,
   OrdersRefRoute: OrdersRefRoute,
+  PSlugRoute: PSlugRoute,
   SettingsGithubRoute: SettingsGithubRoute,
   SpecialtiesSlugRoute: SpecialtiesSlugRoute,
   DoctorsIndexRoute: DoctorsIndexRoute,
