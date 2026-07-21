@@ -1,106 +1,92 @@
+# تطوير حساب المريض ولوحة المستخدم — خطة تنفيذية
 
-# Hamed AI Command Center — خطة التنفيذ
+بقيادة م. حامد. المبدأ: **فحص أولاً، ثم مراحل تدريجية تحافظ على ما يعمل**، لا إعادة كتابة شاملة.
 
-**الإطار التقني:** سنبقى على **TanStack Start** الحالي (بدلاً من Next.js 15 المذكور في المواصفات). السبب: الهجرة إلى Next.js تعني إعادة بناء كل شيء من الصفر (المسارات، Supabase، MCP، RBAC، اختبارات RLS/E2E، Batch A2/A3 hardening). TanStack Start يوفر نفس القدرات (persistent layouts, prefetching, SPA-like transitions, streaming SSR) بدون كسر ما بُني.
+> ملاحظة: البنية الحالية TanStack Start (وليس Next.js 15). سنبقي عليها لأنها متوافقة مع كل المتطلبات (SSR/RSC-lite, RLS, PWA, RTL). كل ما ذُكر من مزايا قابل للتنفيذ عليها بدون تغيير الإطار.
 
-## الموجات (Waves)
+---
 
-### Wave 1 — الأساس (هذا التسليم)
-**البنية الأساسية للوحة الإدارة الجديدة `/admin/*` v3:**
+## المرحلة 0 — فحص وجرد (Read-only، بدون كود)
 
-1. **App Shell جديد `AdminShellV2`:**
-   - Sidebar قابل للطي مع حفظ الحالة (localStorage)
-   - Mobile drawer (sheet)
-   - Sticky top command bar
-   - Breadcrumbs تلقائية من route tree
-   - Branch/workspace switcher (من `branches` table)
-   - Language switcher (AR/EN — يعتمد i18n الحالي)
-   - Theme switcher (Light/Dark مع Glassmorphism محدود في dark)
-   - User menu مع الأدوار
-   - Quick Actions dropdown
+المخرجات تُسلَّم كتقرير `docs/audit/patient-portal-v2-audit.md`:
 
-2. **Command Palette (`Ctrl+K` / `⌘K`):**
-   - بحث عالمي عبر: routes, patients, doctors, appointments
-   - fuzzy search محلي + server-side lookup
-   - keyboard navigation كامل
-   - permission-aware results
+1. **جرد المسارات والصفحات** تحت `src/routes/_authenticated/portal/*` + `/auth` + `/reservations*` + `/book`.
+2. **جرد الوظائف** (تعمل / متعطلة / ناقصة) لكل شاشة: مواعيد، تقارير، وصفات، فواتير، تأمين، طلبات، عائلة، إشعارات، ملف شخصي.
+3. **جرد الجداول وسياسات RLS** المرتبطة (appointments, patients, dependents, medical_reports, prescriptions, invoices, insurance_*, service_inquiries, notifications, push_subscriptions, profiles, user_roles).
+4. **ثغرات أمنية**: سياسات مفقودة/فضفاضة، GRANTs، Signed URLs في storage، تسريب بيانات في السجلات.
+5. **فجوات UX/A11y**: حالات فارغة/خطأ ناقصة، RTL/LTR، Bottom Nav، Safe Areas.
+6. **الأداء**: LCP/INP/CLS الحالية للبوابة، حجم الحزم.
 
-3. **AI Assistant Panel (هيكل + محادثة):**
-   - لوحة قابلة للفتح/الطي (drawer يمين)
-   - streaming responses عبر Lovable AI Gateway (`openai/gpt-5.6-terra`)
-   - محادثة داخل الجلسة (localStorage) — بدون تخزين DB في Wave 1
-   - Tool activity display (UI جاهز، tools تُضاف في Wave 2)
-   - Confirmation dialog قبل أي mutation
-   - permission-aware context (يمرر أدوار المستخدم)
-   - Sensitive data masking (أرقام جوال، هويات)
+بدون هذا التقرير لا نبدأ أي تعديل — هذا صريح في الأمر.
 
-4. **Design tokens v3:**
-   - Light mode: ocean (navy/teal) — يمتد من `admin.index.tsx` الحالي
-   - Dark mode: glass + navy
-   - Typography: Sora (headings) + Manrope (body) + Cairo (AR)
-   - CSS variables موحّدة `--ac-*`
+---
 
-### Wave 2 — Overview + Analytics + Tables
-- KPI cards موسعة (12 مؤشر) مع previous-period comparison
-- Analytics module مع Recharts (appointment trends, no-show, revenue, insurance)
-- `DataTableV2` reusable مع: sorting, filters, saved views, bulk actions, column visibility, responsive card mode
-- استبدال الجداول الحالية في `/admin/inbox`, `/admin/audit-logs`, `/admin/service-inquiries`
+## المراحل التنفيذية (بعد اعتماد الفحص)
 
-### Wave 3 — AI Assistant Tools + MCP
-- Typed tool registry (server-side): `search_appointments`, `search_requests`, `summarize_kpi`, `draft_message`, `navigate_to`
-- Tool execution مع confirmation و audit logging
-- Permission-aware tool filtering (RBAC)
-- Prompt-injection protection (system prompt hardening)
-- تكامل مع MCP server الحالي (`src/lib/mcp/`)
+### Phase 1 — Auth & Sessions Hardening (لا UI جديد)
+- توحيد مسارات `/auth` (تسجيل/دخول/OTP/استعادة/تحديث جوال).
+- OTP: انتهاء صلاحية، Rate Limit، عدّاد محاولات، CAPTCHA بعد فشل متكرر (server-side).
+- سجل جلسات + قائمة الأجهزة + "خروج من كل الأجهزة".
+- سجل دخول (audit).
+- **لا محاكاة OTP في الإنتاج** — flag صريح.
 
-### Wave 4 — Dashboard Builder + Activity Timeline + File Manager
-- Dashboard Builder مع dnd-kit (widgets قابلة للسحب)
-- حفظ layouts (personal + role-based) في `user_dashboard_layouts` جدول جديد
-- Activity Timeline real-time (Supabase Realtime على `audit_logs`)
-- File Manager للتقارير الطبية (private bucket + signed URLs)
+### Phase 2 — Portal Shell & Navigation
+- Sidebar (desktop) + Bottom Nav (mobile) مع Safe Areas.
+- Design Tokens v2 مُطبّقة أصلًا؛ نضيف Skeletons/Empty/Error موحدة لكل شاشة.
+- Dashboard يجيب فورًا على الأسئلة الخمسة (موعد قادم، تقرير جديد، دفعة، تأمين معلّق، طلب يحتاج إجراء).
 
-### Wave 5 — RBAC UI + Settings + System Health
-- محرر أدوار وصلاحيات كامل (بناءً على `user_roles` + `role_permissions` الموجودة)
-- Settings hub (branding, booking rules, templates, feature flags)
-- System Health page (DB, functions, AI gateway status)
+### Phase 3 — Smart Booking Integration داخل البوابة
+- إعادة استخدام `/book` wizard لكن مع سياق المريض النشط (self / dependent).
+- Slot hold + عدّاد + إعادة تحقق قبل التأكيد (موجود جزئيًا — نُكمل).
+- منع الحجز المزدوج بمعاملة atomic في DB.
 
-## القيود الفنية
-- **لن أنشئ:** Supabase Edge Functions جديدة (نستخدم `createServerFn`)
-- **لن أنشئ:** جداول جديدة إلا للـ dashboard layouts في Wave 4
-- **سأحافظ على:** كل RLS policies، Batch A2/A3 hardening، اختبارات CI الحالية
-- **أدوار الوصول:** `admin`, `super_admin` (والأدوار الفرعية للـ RBAC page في Wave 5)
+### Phase 4 — Appointments Center
+- تبويبات: قادمة/معلقة/سابقة/ملغاة.
+- الإجراءات: تأكيد، إعادة جدولة، إلغاء، Check-in، QR، ICS، تنزيل تأكيد، طلب متابعة.
+- تسجيل وصول رقمي ضمن نافذة يحددها Super Admin (setting).
 
-## Wave 1 — قائمة الملفات
+### Phase 5 — Medical Records
+- تقارير (مختبر/أشعة/ملخصات/شهادات/تحويلات) + بحث/فلاتر.
+- **Signed URLs فقط** (مدة قصيرة)، سجل وصول للمستند.
+- إشعار عند نشر تقرير جديد.
 
-**ملفات جديدة:**
-- `src/components/admin/v2/AdminShellV2.tsx` — Shell الرئيسي
-- `src/components/admin/v2/AdminSidebar.tsx` — قابل للطي
-- `src/components/admin/v2/AdminTopBar.tsx` — command bar
-- `src/components/admin/v2/CommandPalette.tsx` — Cmd+K
-- `src/components/admin/v2/AIAssistantPanel.tsx` — لوحة AI
-- `src/components/admin/v2/BranchSwitcher.tsx`
-- `src/components/admin/v2/ThemeSwitcher.tsx` — light/dark فعلي
-- `src/components/admin/v2/Breadcrumbs.tsx`
-- `src/components/admin/v2/QuickActions.tsx`
-- `src/lib/admin/ai-assistant.functions.ts` — server fn للـ AI streaming
-- `src/routes/api/admin/ai-chat.ts` — streaming route لـ AI SDK
-- `src/styles/admin-v2.css` — design tokens v3
+### Phase 6 — Prescriptions / Invoices / Insurance
+- وصفات: عرض + تنزيل آمن + طلب تجديد (إذا مسموح).
+- فواتير: عرض + دفع فعلي (بدون نجاح وهمي — الاعتماد على webhook البوابة).
+- التأمين: عضوية مقنّعة، حالة الموافقات، المستندات الناقصة.
 
-**ملفات مُحدَّثة:**
-- `src/routes/_authenticated/admin.tsx` — استخدام `AdminShellV2` بدلاً من `AdminShell`
-- `src/styles.css` — استيراد `admin-v2.css`
+### Phase 7 — Requests / Inquiries Hub
+- توحيد الطلبات من (الموقع/واتساب/الدعم/الاستقبال/البوابة) في شاشة واحدة للمريض.
+- إضافة مرفقات + رد آمن.
 
-## Definition of Done (Wave 1)
-- [ ] `/admin` يعمل بـ shell جديد كامل بدون كسر أي route فرعي
-- [ ] Cmd+K يفتح palette ويبحث في routes + top 20 patients
-- [ ] AI panel يرد بـ streaming على أسئلة عامة
-- [ ] Theme toggle يعمل ويحفظ التفضيل
-- [ ] Mobile drawer يعمل بسلاسة
-- [ ] لا كسر في اختبارات E2E الحالية للـ admin
-- [ ] RTL/LTR صحيح 100%
-- [ ] Accessibility: keyboard nav كامل، focus visible، ARIA labels
+### Phase 8 — Family (Dependents)
+- إضافة تابع، تحقق علاقة، تبديل ملف نشط ظاهر بوضوح، صلاحيات وصول.
 
-## الوقت المتوقع
-Wave 1: تسليم واحد كبير الآن. Waves 2-5: كل واحدة تسليم منفصل بعد مراجعتك للسابق.
+### Phase 9 — Notifications Center
+- داخل التطبيق + SMS/WhatsApp/Email/Push (البنية موجودة).
+- عرض حالة التسليم فقط عند تأكيد المزود.
 
-هل أبدأ بـ Wave 1؟
+### Phase 10 — Profile & Privacy
+- بيانات + تفضيلات + موافقات + جلسات/أجهزة.
+- تغيير الحساس يتطلب OTP إضافي.
+
+### Phase 11 — AI Assistant (محدود الصلاحيات)
+- Actions فقط ضمن بيانات المستخدم؛ لا تشخيص/وصف علاج؛ تأكيد قبل أي تغيير؛ audit كامل.
+
+### Phase 12 — QA شامل
+TypeScript strict، Lint، Build، Unit، RLS، Playwright E2E (السيناريوهات الـ13 المذكورة)، a11y (WCAG 2.2 AA)، RTL/LTR، متصفحات.
+
+---
+
+## Change Manifest (سيصدر بعد كل مرحلة)
+لكل مرحلة: الملفات المتأثرة + migrations + سياسات RLS + خطة اختبار + خطة تراجع (rollback SQL أو feature flag).
+
+## Rollback
+- كل migration له عكس صريح.
+- الميزات الجديدة خلف flags قابلة للإطفاء فورًا.
+- نسخة snapshot لسياسات RLS قبل كل batch.
+
+---
+
+## المطلوب من م. حامد الآن
+اعتماد **المرحلة 0 (الفحص فقط)** لأبدأ بها وأسلّم تقرير الجرد + Change Manifest المفصّل قبل أي تعديل كود.
