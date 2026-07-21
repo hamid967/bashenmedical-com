@@ -23,8 +23,11 @@ ART = Path(os.environ.get("E2E_ARTIFACTS", "e2e-artifacts")).resolve()
 SHOTS = ART / "screenshots"
 VIDEOS = ART / "videos"
 TRACES = ART / "traces"
-for d in (SHOTS, VIDEOS, TRACES):
+HARS = ART / "hars"
+for d in (SHOTS, VIDEOS, TRACES, HARS):
     d.mkdir(parents=True, exist_ok=True)
+
+HAR_PATH = HARS / "booking-flow.har"
 
 
 async def shot(page, name):
@@ -39,8 +42,11 @@ async def run():
             locale="ar-SA",
             record_video_dir=str(VIDEOS),
             record_video_size={"width": 1280, "height": 900},
+            record_har_path=str(HAR_PATH),
+            record_har_content="omit",
         )
         await context.tracing.start(screenshots=True, snapshots=True, sources=True)
+
         page = await context.new_page()
 
         console_errors = []

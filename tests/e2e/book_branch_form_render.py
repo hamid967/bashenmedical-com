@@ -1,7 +1,6 @@
 """
 BranchBookingForm render E2E — navigates to /branches, opens the first
-branch's page, and verifies the embedded BranchBookingForm renders with
-its Arabic heading ("احجز موعد ...") and step nav.
+branch's page, and verifies the embedded BranchBookingForm renders.
 
 Non-destructive: does not submit a booking.
 
@@ -11,57 +10,67 @@ Env:
 """
 import asyncio, os, re, sys, traceback
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from _helpers import make_recording_context, finalize_context, retry_async, retry_click, retry_goto
+
 from playwright.async_api import async_playwright
 
 BASE = os.environ.get("E2E_BASE_URL", "http://localhost:8080").rstrip("/")
-ART = Path(os.environ.get("E2E_ARTIFACTS", "e2e-artifacts")).resolve()
-SHOTS = ART / "screenshots" / "book-branch-form"
-SHOTS.mkdir(parents=True, exist_ok=True)
 
 
 async def run():
     async with async_playwright() as pw:
         browser = await pw.chromium.launch(headless=True)
-        context = await browser.new_context(viewport={"width": 1280, "height": 1800}, locale="ar-SA")
+        context, art = await make_recording_context(browser, name="book-branch-form", locale="ar-SA")
         page = await context.new_page()
-        try:
-            await page.goto(f"{BASE}/branches", wait_until="domcontentloaded")
-            await page.wait_for_load_state("networkidle", timeout=15000)
-            await page.wait_for_timeout(800)
-            await page.screenshot(path=str(SHOTS / "01_branches_list.png"))
+        shots = art["screenshots"]
 
-            # First anchor to a branch detail page.
+        ok = False
+        try:
+            await retry_goto(page, f"{BASE}/branches")
+            await retry_async(
+                lambda: page.wait_for_load_state("networkidle", timeout=15_000),
+                label="branches networkidle",
+            )
+            await page.wait_for_timeout(800)
+            await page.screenshot(path=str(shots / "01_branches_list.png"))
+
             branch_link = page.locator('a[href^="/branches/"]:not([href="/branches"])').first
             if await branch_link.count() == 0:
                 raise AssertionError("no branch detail link found on /branches")
-            await branch_link.click()
-            await page.wait_for_url(re.compile(r"/branches/[^/]+"))
-            await page.wait_for_load_state("networkidle", timeout=15000)
+            await retry_click(branch_link)
+            await retry_async(
+                lambda: page.wait_for_url(re.compile(r"/branches/[^/]+"), timeout=10_000),
+                label="wait branch url",
+            )
+            await retry_async(
+                lambda: page.wait_for_load_state("networkidle", timeout=15_000),
+                label="branch networkidle",
+            )
             await page.wait_for_timeout(1000)
-            await page.screenshot(path=str(SHOTS / "02_branch_page.png"))
+            await page.screenshot(path=str(shots / "02_branch_page.png"))
 
-            # Ensure the BranchBookingForm heading is present (contains "احجز موعد").
             heading = page.locator('h3', has_text=re.compile(r"احجز موعد|Book an appointment"))
-            await heading.first.wait_for(state="visible", timeout=10_000)
+            await retry_async(
+                lambda: heading.first.wait_for(state="visible", timeout=10_000),
+                label="wait form heading",
+            )
 
-            # Stepper nav should be present (aria-label "مراحل الحجز").
             nav = page.locator('nav[aria-label*="مراحل الحجز"], nav[aria-label*="Booking steps"]')
             if await nav.count() == 0:
                 raise AssertionError("BranchBookingForm stepper nav not found")
 
-            await page.screenshot(path=str(SHOTS / "03_form_visible.png"))
+            await page.screenshot(path=str(shots / "03_form_visible.png"))
             print("OK — BranchBookingForm rendered on branch detail page.")
+            ok = True
         except Exception as exc:
             print("E2E BRANCH FORM FAILURE:", exc)
             traceback.print_exc()
-            try:
-                await page.screenshot(path=str(SHOTS / "99_failure.png"))
-            except Exception:
-                pass
-            sys.exit(1)
         finally:
-            await context.close()
+            await finalize_context(context, art, page, ok=ok)
             await browser.close()
+        sys.exit(0 if ok else 1)
 
 
 asyncio.run(run())
