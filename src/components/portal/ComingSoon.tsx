@@ -29,7 +29,7 @@ export function ComingSoon({
             {title_en}
           </JazanSectionLabel>
           <div
-            className="mx-auto h-14 w-14 rounded-2xl grid place-items-center text-white portal-float ring-2 ring-[var(--jazan-gold,#C7A46B)]/40"
+            className="mx-auto h-14 w-14 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)] portal-float ring-2 ring-[var(--jazan-gold,#C7A46B)]/40"
             style={{ background: "var(--portal-gradient)" }}
           >
             <Sparkles className="h-6 w-6" />
@@ -46,7 +46,7 @@ export function ComingSoon({
           )}
           <Link
             to="/portal"
-            className="mt-6 inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
+            className="mt-6 inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
             style={{ background: "var(--portal-gradient)" }}
           >
             <ArrowLeft className="h-4 w-4" />
