@@ -31,6 +31,7 @@ import { JazanPattern } from "@/components/jazan/JazanPattern";
 import { JazanSectionLabel } from "@/components/jazan/JazanSectionLabel";
 import { JazanDivider } from "@/components/jazan/JazanDivider";
 import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
+import { DoctorAutocomplete } from "@/components/home/DoctorAutocomplete";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE = "مجمع باعشن الطبي بصبيا جازان | Baeshen Medical";
