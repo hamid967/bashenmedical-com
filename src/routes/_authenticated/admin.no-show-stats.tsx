@@ -274,6 +274,7 @@ function NoShowStatsPage() {
               مسح
             </button>
           </div>
+        </div>
         <div className="flex items-center gap-2 flex-wrap mt-3">
           <span className="text-[11px] text-muted-foreground">نطاقات سريعة:</span>
           {QUICK_RANGES.map((r) => {
