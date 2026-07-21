@@ -5523,6 +5523,7 @@ export type Database = {
           doctor_name_ar: string
           doctor_name_en: string
           id: string
+          no_show_risk: number
           notes: string
           patient_name: string
           patient_phone: string
