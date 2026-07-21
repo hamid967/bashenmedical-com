@@ -428,6 +428,14 @@ jobs:
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
         run: python tests/e2e/admin_opens_for_admin_user.py
 
+      - name: Verify E2E cancel fixtures (preflight)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+        run: python scripts/ci/verify-e2e-cancel-fixtures.py
+
       - name: Run portal cancel appointment E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
