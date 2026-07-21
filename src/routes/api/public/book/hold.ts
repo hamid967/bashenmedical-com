@@ -19,6 +19,7 @@
  * endpoint remains callable from the public /book wizard.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { getRequestIP, getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
 
 const HOLD_MINUTES = 5;
@@ -36,11 +37,75 @@ const releaseSchema = z.object({
   id: z.string().uuid().optional(),
 });
 
-function json(status: number, body: Record<string, unknown>) {
+// --- Ad-hoc in-memory rate limiter --------------------------------------
+// Workers are stateless across instances, so this is best-effort per worker;
+// still blocks the common bursty-abuse pattern from a single client.
+// Limits per key (ip + session_id):
+//   POST:   10 req / 60s   AND   30 req / 300s
+//   DELETE: 30 req / 60s
+type Bucket = number[];
+const RL_BUCKETS: Map<string, Bucket> =
+  (globalThis as unknown as { __holdRlBuckets?: Map<string, Bucket> }).__holdRlBuckets ??
+  new Map<string, Bucket>();
+(globalThis as unknown as { __holdRlBuckets?: Map<string, Bucket> }).__holdRlBuckets = RL_BUCKETS;
+
+type RLRule = { windowMs: number; max: number };
+function checkRateLimit(
+  key: string,
+  rules: RLRule[],
+): { ok: true } | { ok: false; retryAfter: number } {
+  const now = Date.now();
+  const maxWindow = Math.max(...rules.map((r) => r.windowMs));
+  const arr = (RL_BUCKETS.get(key) ?? []).filter((t) => now - t < maxWindow);
+  for (const rule of rules) {
+    const inWindow = arr.filter((t) => now - t < rule.windowMs);
+    if (inWindow.length >= rule.max) {
+      const oldest = inWindow.sort((a, b) => a - b)[0] ?? now;
+      const retryAfter = Math.max(1, Math.ceil((rule.windowMs - (now - oldest)) / 1000));
+      RL_BUCKETS.set(key, arr);
+      return { ok: false, retryAfter };
+    }
+  }
+  arr.push(now);
+  RL_BUCKETS.set(key, arr);
+  if (RL_BUCKETS.size > 5000 && Math.random() < 0.02) {
+    for (const [k, v] of RL_BUCKETS) {
+      const kept = v.filter((t) => now - t < maxWindow);
+      if (kept.length === 0) RL_BUCKETS.delete(k);
+      else RL_BUCKETS.set(k, kept);
+    }
+  }
+  return { ok: true };
+}
+
+function clientKey(sessionId?: string): string {
+  let ip = "";
+  try { ip = getRequestIP({ xForwardedFor: true }) ?? ""; } catch { /* noop */ }
+  if (!ip) {
+    try {
+      ip = (getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-real-ip") ?? "").toString();
+    } catch { /* noop */ }
+  }
+  return `${ip || "unknown"}::${sessionId || "no-session"}`;
+}
+
+function json(
+  status: number,
+  body: Record<string, unknown>,
+  extraHeaders?: Record<string, string>,
+) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: { "Content-Type": "application/json; charset=utf-8", ...(extraHeaders ?? {}) },
   });
+}
+
+function rateLimited(retryAfter: number) {
+  return json(
+    429,
+    { ok: false, kind: "rate_limited", message: "too_many_requests", retry_after: retryAfter },
+    { "Retry-After": String(retryAfter) },
+  );
 }
 
 export const Route = createFileRoute("/api/public/book/hold")({
@@ -54,6 +119,13 @@ export const Route = createFileRoute("/api/public/book/hold")({
           return json(400, { ok: false, kind: "validation", message: parsed.error.issues[0]?.message ?? "invalid" });
         }
         const { doctor_id, branch_id, appointment_date, appointment_time, session_id } = parsed.data;
+
+        const rl = checkRateLimit(`hold:post:${clientKey(session_id)}`, [
+          { windowMs: 60_000, max: 10 },
+          { windowMs: 300_000, max: 30 },
+        ]);
+        if (!rl.ok) return rateLimited(rl.retryAfter);
+
         const timeHHMMSS = appointment_time.length === 5 ? `${appointment_time}:00` : appointment_time;
         const expires_at = new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString();
 
@@ -124,6 +196,12 @@ export const Route = createFileRoute("/api/public/book/hold")({
         try { body = await request.json(); } catch { return json(400, { ok: false, message: "invalid_json" }); }
         const parsed = releaseSchema.safeParse(body);
         if (!parsed.success) return json(400, { ok: false, message: "invalid" });
+
+        const rl = checkRateLimit(`hold:del:${clientKey(parsed.data.session_id)}`, [
+          { windowMs: 60_000, max: 30 },
+        ]);
+        if (!rl.ok) return rateLimited(rl.retryAfter);
+
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           let q = supabaseAdmin
