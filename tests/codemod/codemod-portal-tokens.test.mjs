@@ -92,3 +92,44 @@ describe("codemod-portal-tokens — خصائص صلبة", () => {
     assert.match(out, /md:focus:text-\[color:var\(--portal-ink-2\)\]/);
   });
 });
+
+describe("codemod-portal-tokens — twMerge conflict handling", () => {
+  test("utilities متكررة لنفس الخاصية تُستبدل كلها بشكل مستقل داخل twMerge", () => {
+    const src = `<div className={twMerge("bg-white", "bg-slate-50", "bg-blue-600")} />`;
+    const { src: out } = run(src);
+    // كل حرفية على حدة تحوَّل — twMerge يظل يحلّ التعارض في وقت التشغيل
+    assert.match(out, /"bg-\[color:var\(--portal-surface-1\)\]"/);
+    assert.match(out, /"bg-\[color:var\(--portal-primary\)\]"/);
+    // ثلاث بدائل bg مستقلة
+    assert.equal((out.match(/bg-\[color:var/g) || []).length, 3);
+  });
+
+  test("twMerge مع variants متضاربة تحافظ على البادئة", () => {
+    const src = `<div className={twMerge("bg-red-500", "hover:bg-red-50", "focus:bg-white")} />`;
+    const { src: out } = run(src);
+    assert.match(out, /"bg-\[color:var\(--portal-error\)\]"/);
+    assert.match(out, /"hover:bg-\[color:var\(--portal-error-50\)\]"/);
+    assert.match(out, /"focus:bg-\[color:var\(--portal-surface-1\)\]"/);
+  });
+
+  test("twMerge مع short-circuit وternary لا يكسر البنية", () => {
+    const src = `<button className={twMerge("bg-white text-slate-900", on && "bg-red-500 text-white", tone === "ok" ? "bg-emerald-50" : "bg-amber-50")} />`;
+    const { src: out } = run(src);
+    assert.match(out, /on && "bg-\[color:var\(--portal-error\)\] text-\[color:var\(--portal-on-primary\)\]"/);
+    assert.match(out, /tone === "ok" \? "bg-\[color:var\(--portal-success-50\)\]" : "bg-\[color:var\(--portal-warning-50\)\]"/);
+    // البنية نفسها محفوظة (فاصلات، أقواس)
+    assert.match(out, /twMerge\([^)]*\) } \/>|twMerge\([\s\S]*?\)/);
+  });
+
+  test("twMerge لا يلمس أي شيء خارج الحرفيات (identifiers/expressions تبقى)", () => {
+    const src = `<div className={twMerge(baseClasses, computeBg(x), "bg-red-500")} />`;
+    const { src: out } = run(src);
+    assert.match(out, /twMerge\(baseClasses, computeBg\(x\), "bg-\[color:var\(--portal-error\)\]"\)/);
+  });
+
+  test("عدّاد changed يعكس كل استبدال داخل twMerge بشكل مستقل", () => {
+    const src = `<div className={twMerge("bg-white", "bg-slate-50", "text-slate-900", "border-gray-200")} />`;
+    const { changed } = run(src);
+    assert.equal(changed, 4, "كل حرفية bg/text/border تُعدّ استبدالًا منفردًا");
+  });
+});
