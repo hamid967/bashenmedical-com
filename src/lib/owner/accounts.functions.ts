@@ -41,31 +41,33 @@ async function logAudit(
 
 export const listAccounts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: { page?: number; perPage?: number; search?: string }) => ({
+  .validator((d: {
+    page?: number;
+    perPage?: number;
+    search?: string;
+    status?: "all" | "confirmed" | "unconfirmed" | "disabled";
+    role?: "all" | "none" | AppRole;
+  }) => ({
     page: Math.max(1, d?.page ?? 1),
     perPage: Math.min(200, Math.max(10, d?.perPage ?? 50)),
     search: (d?.search ?? "").trim().toLowerCase(),
+    status: d?.status ?? "all",
+    role: d?.role ?? "all",
   }))
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
+    const hasFilter = data.status !== "all" || data.role !== "all" || Boolean(data.search);
+    const fetchPerPage = hasFilter ? Math.max(data.perPage, 200) : data.perPage;
+
     const { data: page, error } = await supabaseAdmin.auth.admin.listUsers({
       page: data.page,
-      perPage: data.perPage,
+      perPage: fetchPerPage,
     });
     if (error) throw new Error(error.message);
 
-    let users = page.users;
-    if (data.search) {
-      users = users.filter(
-        (u) =>
-          u.email?.toLowerCase().includes(data.search) ||
-          u.phone?.toLowerCase().includes(data.search) ||
-          u.id.toLowerCase().includes(data.search),
-      );
-    }
-    const ids = users.map((u) => u.id);
+    const ids = page.users.map((u) => u.id);
     const [profilesRes, rolesRes] = await Promise.all([
       supabaseAdmin.from("profiles").select("id,full_name,phone").in("id", ids),
       supabaseAdmin.from("user_roles").select("user_id,role").in("user_id", ids),
@@ -81,22 +83,62 @@ export const listAccounts = createServerFn({ method: "POST" })
       rolesByUser.set(r.user_id, arr);
     });
 
-    return {
-      page: data.page,
-      perPage: data.perPage,
-      total: page.total ?? users.length,
-      users: users.map((u) => ({
+    const now = Date.now();
+    let enriched = page.users.map((u) => {
+      const prof = profiles.get(u.id);
+      const banned_until = (u as any).banned_until ?? null;
+      const disabled = Boolean(banned_until && new Date(banned_until).getTime() > now);
+      const confirmed = Boolean(u.email_confirmed_at || u.phone_confirmed_at);
+      return {
         id: u.id,
         email: u.email ?? null,
         phone: u.phone ?? null,
         created_at: u.created_at,
         last_sign_in_at: u.last_sign_in_at ?? null,
-        banned_until: (u as any).banned_until ?? null,
-        confirmed: Boolean(u.email_confirmed_at || u.phone_confirmed_at),
-        full_name: profiles.get(u.id)?.full_name ?? null,
-        profile_phone: profiles.get(u.id)?.phone ?? null,
+        banned_until,
+        disabled,
+        confirmed,
+        full_name: prof?.full_name ?? null,
+        profile_phone: prof?.phone ?? null,
         roles: rolesByUser.get(u.id) ?? [],
-      })),
+      };
+    });
+
+    if (data.search) {
+      const s = data.search;
+      enriched = enriched.filter(
+        (u) =>
+          u.email?.toLowerCase().includes(s) ||
+          u.phone?.toLowerCase().includes(s) ||
+          u.profile_phone?.toLowerCase().includes(s) ||
+          u.full_name?.toLowerCase().includes(s) ||
+          u.id.toLowerCase().includes(s),
+      );
+    }
+    if (data.status !== "all") {
+      enriched = enriched.filter((u) => {
+        if (data.status === "disabled") return u.disabled;
+        if (data.status === "confirmed") return !u.disabled && u.confirmed;
+        if (data.status === "unconfirmed") return !u.disabled && !u.confirmed;
+        return true;
+      });
+    }
+    if (data.role !== "all") {
+      enriched = enriched.filter((u) =>
+        data.role === "none" ? u.roles.length === 0 : u.roles.includes(data.role as string),
+      );
+    }
+
+    const totalFiltered = enriched.length;
+    const start = hasFilter ? (data.page - 1) * data.perPage : 0;
+    const paged = hasFilter ? enriched.slice(start, start + data.perPage) : enriched;
+
+    return {
+      page: data.page,
+      perPage: data.perPage,
+      total: page.total ?? enriched.length,
+      totalFiltered,
+      users: paged,
       roles: ROLES,
     };
   });

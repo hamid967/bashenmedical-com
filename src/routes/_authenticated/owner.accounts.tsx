@@ -26,12 +26,15 @@ export const Route = createFileRoute("/_authenticated/owner/accounts")({
 function AccountsPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState<"all" | "confirmed" | "unconfirmed" | "disabled">("all");
+  const [role, setRole] = useState<string>("all");
   const [page, setPage] = useState(1);
   const [expanded, setExpanded] = useState<string | null>(null);
 
   const q = useQuery({
-    queryKey: ["owner-accounts", page, search],
-    queryFn: () => listAccounts({ data: { page, perPage: 50, search } }),
+    queryKey: ["owner-accounts", page, search, status, role],
+    queryFn: () =>
+      listAccounts({ data: { page, perPage: 50, search, status, role: role as any } }),
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["owner-accounts"] });
@@ -68,6 +71,13 @@ function AccountsPage() {
   });
 
   const roles = q.data?.roles ?? [];
+  const hasFilter = search !== "" || status !== "all" || role !== "all";
+  const resetFilters = () => {
+    setSearch("");
+    setStatus("all");
+    setRole("all");
+    setPage(1);
+  };
 
   return (
     <div className="p-6 max-w-7xl mx-auto" dir="rtl">
@@ -78,18 +88,55 @@ function AccountsPage() {
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 flex gap-3 items-center">
-        <div className="relative flex-1">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            placeholder="بحث بالبريد أو الجوال أو المعرف…"
-            className="w-full pr-10 pl-3 py-2 border border-slate-300 rounded-lg text-sm"
-          />
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-4 space-y-3">
+        <div className="flex flex-wrap gap-3 items-center">
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              placeholder="بحث بالاسم أو البريد أو الجوال أو المعرف…"
+              className="w-full pr-10 pl-3 py-2 border border-slate-300 rounded-lg text-sm"
+            />
+          </div>
+          <select
+            value={status}
+            onChange={(e) => { setStatus(e.target.value as any); setPage(1); }}
+            className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
+            aria-label="تصفية بالحالة"
+          >
+            <option value="all">كل الحالات</option>
+            <option value="confirmed">مؤكد</option>
+            <option value="unconfirmed">غير مؤكد</option>
+            <option value="disabled">معطّل</option>
+          </select>
+          <select
+            value={role}
+            onChange={(e) => { setRole(e.target.value); setPage(1); }}
+            className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
+            aria-label="تصفية بالدور"
+          >
+            <option value="all">كل الأدوار</option>
+            <option value="none">بدون دور</option>
+            {roles.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+          {hasFilter && (
+            <button
+              onClick={resetFilters}
+              className="px-3 py-2 text-xs text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg"
+            >
+              مسح الفلاتر
+            </button>
+          )}
         </div>
         <div className="text-xs text-slate-500">
-          {q.data ? `${q.data.users.length} من ${q.data.total}` : "…"}
+          {q.data
+            ? hasFilter
+              ? `${q.data.users.length} معروض من ${q.data.totalFiltered} مطابق (إجمالي ${q.data.total})`
+              : `${q.data.users.length} من ${q.data.total}`
+            : "…"}
         </div>
       </div>
 
