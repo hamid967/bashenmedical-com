@@ -137,6 +137,40 @@ for (const file of files) {
   }
 }
 
+
+// ── وضع صارم على الأسطر المُعدَّلة فقط (pre-merge zero-tolerance) ──
+// يرفض أي انتهاك جديد أُدخل في diff مقابل BASE_REF ويشير للمصدر بدقّة سطر:عمود.
+if (STRICT_CHANGED) {
+  const changed = collectChangedLines(BASE_REF); // Map<rel, Set<lineNo>>
+  const offenders = details.filter(
+    (d) => changed.get(d.rel)?.has(d.line),
+  );
+  if (offenders.length === 0) {
+    const trackedRels = [...changed.keys()].filter((r) =>
+      files.some((f) => relative(ROOT, f).replaceAll("\\", "/") === r),
+    );
+    console.log(
+      `✓ strict-changed — لا استخدام مباشر لـ Tailwind في السطور الجديدة/المعدّلة داخل portal ` +
+        `(المرجع: ${BASE_REF}${trackedRels.length ? `, ملفات مفحوصة: ${trackedRels.length}` : ""}).`,
+    );
+    process.exit(0);
+  }
+  console.error(
+    `\n✗ رُفض الدمج: ${offenders.length} استخدام مباشر لـ Tailwind داخل portal في التغييرات الحالية ` +
+      `(المرجع: ${BASE_REF}).\n`,
+  );
+  for (const d of offenders) {
+    console.error(
+      `  ${d.rel}:${d.line}\n    match: ${d.match}\n    fix:   ${d.reason}\n    line:  ${d.text}\n`,
+    );
+  }
+  console.error(
+    `طبّق الإصلاح باستخدام var(--portal-*) / var(--ds-*) أو مكوّنات portal-primitives.\n` +
+      `للاستثناء الموثّق أضِف تعليق  // tokens-allow  على نفس السطر.`,
+  );
+  process.exit(1);
+}
+
 // وضع تحديث الـ baseline
 if (UPDATE_BASELINE) {
   writeFileSync(
