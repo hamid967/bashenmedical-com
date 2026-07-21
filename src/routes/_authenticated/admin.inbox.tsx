@@ -58,6 +58,17 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+const INBOX_EXPORT_COLS: Column<InboxItem>[] = [
+  { header: "المصدر", accessor: (r) => SOURCE_LABELS[r.source] ?? r.source },
+  { header: "القناة", accessor: (r) => CHANNEL_LABELS[r.channel] ?? r.channel },
+  { header: "المرجع", accessor: (r) => r.reference ?? "" },
+  { header: "المريض", accessor: (r) => r.patient_name },
+  { header: "الجوال", accessor: (r) => r.patient_phone ?? "" },
+  { header: "الموضوع", accessor: (r) => r.subject },
+  { header: "الحالة", accessor: (r) => r.status },
+  { header: "الوقت", accessor: (r) => new Date(r.created_at).toLocaleString("ar-SA") },
+];
+
 function UnifiedInboxPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
