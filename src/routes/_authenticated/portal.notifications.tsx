@@ -31,9 +31,18 @@ import {
   listMyNotifications,
   markMyNotificationsRead,
   type PatientNotification,
+  type DeliveryStatus,
 } from "@/lib/portal/notifications.functions";
+import {
+  Mail,
+  MessageCircle,
+  Smartphone,
+  BellRing,
+  XCircle,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
+
 
 /* ----------------------------- query --------------------------------- */
 
