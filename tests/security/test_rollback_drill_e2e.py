@@ -68,7 +68,7 @@ def run() -> int:
             fake_ref = f"e2e_rollback_{uuid.uuid4().hex[:8]}"
             cur.execute(
                 """
-                INSERT INTO deployment_markers (migration_ref, notes, baseline_per_hour)
+                INSERT INTO deployment_markers (migration_ref, notes, baseline_errors_per_hour)
                 VALUES (%s, 'e2e rollback drill', 0.5)
                 RETURNING id, migration_ref, created_at
                 """,
@@ -76,6 +76,7 @@ def run() -> int:
             )
             marker = cur.fetchone()
             log(f"marker id={marker['id']} ref={marker['migration_ref']}")
+
 
             print("→ Step 3: inject 403 spike within the 15-min window")
             now = datetime.now(timezone.utc)
