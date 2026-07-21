@@ -5,12 +5,14 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Download, Filter, TrendingDown, XCircle, CheckCircle2, Calendar } from "lucide-react";
+import { Download, Filter, TrendingDown, XCircle, CheckCircle2, Calendar, ArrowUp, ArrowDown, ArrowUpDown, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   getNoShowStats,
   listDoctorsLite,
   listBranchesLite,
   type NoShowStats,
+  type DoctorBreakdown,
+  type DayBreakdown,
 } from "@/lib/admin/no-show-stats.functions";
 
 function isoOffset(days: number): string {
