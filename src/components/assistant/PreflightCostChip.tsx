@@ -85,7 +85,7 @@ export function PreflightCostChip({
             <span className="whitespace-nowrap">{L.badge}</span>
             <span className="opacity-70">·</span>
             <span className="tabular-nums whitespace-nowrap">
-              ~{formatTokens(inTok)} {L.in}
+              {calibrated ? "" : "~"}{formatTokens(inTok)} {L.in}
             </span>
             <span className="opacity-40">/</span>
             <span className="tabular-nums whitespace-nowrap">
