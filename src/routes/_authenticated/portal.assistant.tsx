@@ -103,7 +103,8 @@ function AssistantPage() {
 
       setMessages((m) => [...m, { role: "assistant", content: "", meta: initialMeta }]);
 
-      await streamChatWithResume({
+      let currentModel: string | undefined;
+      const result = await streamChatWithResume({
         surface: "portal",
         url: "/api/portal/ai-chat",
         token,
@@ -112,7 +113,7 @@ function AssistantPage() {
           messages: next,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (mdl) => updateLastMeta({ model: mdl }),
+        onModel: (mdl) => { currentModel = mdl; updateLastMeta({ model: mdl }); },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
@@ -127,6 +128,17 @@ function AssistantPage() {
             return copy;
           });
         },
+        budgetCheck: (acc) => {
+          const c = checkRunningBudget({
+            surface: "portal",
+            limits,
+            model: currentModel,
+            promptText,
+            outputSoFar: acc,
+          });
+          if (c.ok) return { ok: true };
+          return { ok: false, message: budgetBlockMessage(c, "ar") };
+        },
         onRetry: (phase) => {
           if (phase === "reconnecting") setError("انقطع الاتصال — جاري الاستئناف…");
           else if (phase === "resumed") setError(null);
@@ -140,6 +152,11 @@ function AssistantPage() {
         },
       });
       updateLastMeta({ endedAt: performance.now() });
+      commitSessionCredits(
+        "portal",
+        estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel),
+      );
+      if (result.budgetStop) setError(result.budgetStop.message);
     } catch (e: unknown) {
       if ((e as Error).name === "AbortError") {
         updateLastMeta({ endedAt: performance.now() });
