@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { submitBooking, clearBookingIdempotencyKey } from "@/lib/booking-submit";
 import { getBookingSessionId } from "@/lib/booking-hold";
 import { Button } from "@/components/ui/button";
