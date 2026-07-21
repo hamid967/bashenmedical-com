@@ -35,6 +35,11 @@ export function useRealtimeInvalidation() {
         { event: "*", schema: "public", table: "appointments" },
         invalidate,
       )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "slot_holds" },
+        invalidate,
+      )
       .subscribe();
 
     return () => {
