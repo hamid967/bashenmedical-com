@@ -196,6 +196,12 @@ export const Route = createFileRoute("/api/public/book/hold")({
         try { body = await request.json(); } catch { return json(400, { ok: false, message: "invalid_json" }); }
         const parsed = releaseSchema.safeParse(body);
         if (!parsed.success) return json(400, { ok: false, message: "invalid" });
+
+        const rl = checkRateLimit(`hold:del:${clientKey(parsed.data.session_id)}`, [
+          { windowMs: 60_000, max: 30 },
+        ]);
+        if (!rl.ok) return rateLimited(rl.retryAfter);
+
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           let q = supabaseAdmin
