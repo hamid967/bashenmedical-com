@@ -821,6 +821,45 @@ jobs:
         run: |
           cd tests/security && python test_role_access_matrix.py | tee ../../role-matrix-report.txt
 
+  post-merge-grants-pinned:
+    name: Security — A2/A3 grants pinned (post-merge)
+    runs-on: ubuntu-latest
+    # Post-merge only: after a push to main (so migrations have been applied
+    # to prod), re-verify that every function hardened in Batch A2/A3 still
+    # has EXECUTE revoked from PUBLIC/anon. Catches silent regressions from
+    # CREATE OR REPLACE / manual GRANTs that reset ACLs even when the
+    # generic SECDEF guard passes.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    timeout-minutes: 5
+    env:
+      PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+      PGPORT: ${{ secrets.SUPABASE_DB_PORT }}
+      PGUSER: ${{ secrets.SUPABASE_DB_USER }}
+      PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PGDATABASE: ${{ secrets.SUPABASE_DB_NAME }}
+      PGSSLMODE: require
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install psycopg2
+        run: python -m pip install --upgrade pip 'psycopg2-binary>=2.9'
+      - name: Verify pinned A2/A3 REVOKEs still in force
+        run: |
+          if [ -z "$PGHOST" ] || [ -z "$PGPASSWORD" ]; then
+            echo "::error::Cannot run post-merge grants guard — SUPABASE_DB_* secrets missing."
+            exit 1
+          fi
+          python tests/security/test_a2_a3_grants_pinned.py | tee a2-a3-pinned-report.txt
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a2-a3-pinned-report
+          path: a2-a3-pinned-report.txt
+          retention-days: 30
+
+
   record-deployment-marker:
     name: Register deployment marker for watchdog
     runs-on: ubuntu-latest
