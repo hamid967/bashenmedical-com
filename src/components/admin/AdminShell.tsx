@@ -22,6 +22,7 @@ import {
   Package,
   FileBarChart,
   Gauge,
+  Inbox,
 } from "lucide-react";
 
 export type AdminRole = "admin" | "super_admin" | "reception" | "doctor" | "nurse" | "hr" | "pharmacy";
