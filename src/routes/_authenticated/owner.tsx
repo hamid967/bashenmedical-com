@@ -41,7 +41,12 @@ export const Route = createFileRoute("/_authenticated/owner")({
   ),
 });
 
-const NAV = [
+const NAV: ReadonlyArray<{
+  to: string;
+  label: string;
+  icon: typeof LayoutDashboard;
+  exact?: boolean;
+}> = [
   { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, exact: true },
   { to: "/owner/pages", label: "الصفحات", icon: FileText },
   { to: "/owner/content", label: "المحتوى", icon: Palette },
@@ -49,7 +54,7 @@ const NAV = [
   { to: "/owner/navigation", label: "القوائم", icon: MenuIcon },
   { to: "/owner/services", label: "الخدمات", icon: Stethoscope },
   { to: "/owner/inquiries", label: "الطلبات", icon: Inbox },
-] as const;
+];
 
 function OwnerLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
