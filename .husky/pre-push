@@ -1,4 +1,12 @@
 #!/usr/bin/env sh
-# يشغّل فحوصات الأسرار وRLS قبل كل push، بنفس منطق CI.
+# يشغّل فحوصات الأسرار وRLS + رفض أي Tailwind مباشر داخل portal في السطور الجديدة/المعدَّلة قبل الـpush.
 # لتفعيل/إعادة تفعيل الـ hooks: bun run prepare
+set -e
 bun run check:rls
+
+# استنتج المرجع الأساسي (main ثم HEAD~1 كخيار احتياطي)
+BASE_REF="origin/main"
+if ! git rev-parse --verify --quiet "$BASE_REF" >/dev/null; then
+  BASE_REF="HEAD~1"
+fi
+LINT_BASE_REF="$BASE_REF" bun run lint:portal-tokens:changed

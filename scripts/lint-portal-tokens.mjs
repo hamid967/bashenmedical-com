@@ -18,10 +18,16 @@
  */
 import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
+import { execSync } from "node:child_process";
 
 const ROOT = process.cwd();
 const BASELINE_PATH = join(ROOT, "scripts", "portal-tokens-baseline.json");
 const UPDATE_BASELINE = process.argv.includes("--update-baseline");
+const STRICT_CHANGED = process.argv.includes("--strict-changed");
+const BASE_REF =
+  process.env.LINT_BASE_REF ||
+  process.env.GITHUB_BASE_REF ||
+  "origin/main";
 
 
 // المسارات المُراقَبة
@@ -131,6 +137,40 @@ for (const file of files) {
   }
 }
 
+
+// ── وضع صارم على الأسطر المُعدَّلة فقط (pre-merge zero-tolerance) ──
+// يرفض أي انتهاك جديد أُدخل في diff مقابل BASE_REF ويشير للمصدر بدقّة سطر:عمود.
+if (STRICT_CHANGED) {
+  const changed = collectChangedLines(BASE_REF); // Map<rel, Set<lineNo>>
+  const offenders = details.filter(
+    (d) => changed.get(d.rel)?.has(d.line),
+  );
+  if (offenders.length === 0) {
+    const trackedRels = [...changed.keys()].filter((r) =>
+      files.some((f) => relative(ROOT, f).replaceAll("\\", "/") === r),
+    );
+    console.log(
+      `✓ strict-changed — لا استخدام مباشر لـ Tailwind في السطور الجديدة/المعدّلة داخل portal ` +
+        `(المرجع: ${BASE_REF}${trackedRels.length ? `, ملفات مفحوصة: ${trackedRels.length}` : ""}).`,
+    );
+    process.exit(0);
+  }
+  console.error(
+    `\n✗ رُفض الدمج: ${offenders.length} استخدام مباشر لـ Tailwind داخل portal في التغييرات الحالية ` +
+      `(المرجع: ${BASE_REF}).\n`,
+  );
+  for (const d of offenders) {
+    console.error(
+      `  ${d.rel}:${d.line}\n    match: ${d.match}\n    fix:   ${d.reason}\n    line:  ${d.text}\n`,
+    );
+  }
+  console.error(
+    `طبّق الإصلاح باستخدام var(--portal-*) / var(--ds-*) أو مكوّنات portal-primitives.\n` +
+      `للاستثناء الموثّق أضِف تعليق  // tokens-allow  على نفس السطر.`,
+  );
+  process.exit(1);
+}
+
 // وضع تحديث الـ baseline
 if (UPDATE_BASELINE) {
   writeFileSync(
@@ -196,4 +236,54 @@ if (shrunk.length > 0) {
 console.log(
   `✓ نظافة Design Tokens v2 مُتحقَّقة — ${files.length} ملف بورتال، لا تراجع عن baseline (${details.length} انتهاك تاريخي مسموح، صفر جديد).`,
 );
+
+// ─────────────────────────────────────────────────────────────────────
+// git diff helper — يُرجع Map<relPath, Set<lineNo>> للأسطر المُضافة/المعدَّلة
+// في الملفات المفحوصة مقابل BASE_REF. آمن ضد فشل git (fork/shallow).
+// ─────────────────────────────────────────────────────────────────────
+function collectChangedLines(baseRef) {
+  const result = new Map();
+  const targeted = new Set(
+    files.map((f) => relative(ROOT, f).replaceAll("\\", "/")),
+  );
+
+  let raw = "";
+  const attempts = [baseRef, "HEAD~1", "HEAD"];
+  for (const ref of attempts) {
+    try {
+      raw = execSync(`git diff --unified=0 --no-color ${ref} -- ${[...targeted].map((p) => `'${p}'`).join(" ") || "'/dev/null'"}`, {
+        cwd: ROOT,
+        stdio: ["ignore", "pipe", "ignore"],
+        maxBuffer: 20 * 1024 * 1024,
+      }).toString();
+      if (raw) break;
+    } catch {
+      // جرّب المرجع التالي
+    }
+  }
+  if (!raw) return result;
+
+  let currentFile = null;
+  for (const line of raw.split(/\r?\n/)) {
+    if (line.startsWith("+++ b/")) {
+      const p = line.slice(6);
+      currentFile = targeted.has(p) ? p : null;
+      continue;
+    }
+    if (!currentFile) continue;
+    const m = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/);
+    if (m) {
+      const start = parseInt(m[1], 10);
+      const count = m[2] ? parseInt(m[2], 10) : 1;
+      if (count === 0) continue;
+      let set = result.get(currentFile);
+      if (!set) {
+        set = new Set();
+        result.set(currentFile, set);
+      }
+      for (let i = 0; i < count; i++) set.add(start + i);
+    }
+  }
+  return result;
+}
 
