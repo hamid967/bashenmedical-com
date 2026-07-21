@@ -5,6 +5,8 @@ import { useState, useMemo } from "react";
 import { RefreshCw, Search, X, ChevronLeft, ChevronRight, ShieldAlert } from "lucide-react";
 import { listAdminAuditLogs, listAuditFacets } from "@/lib/admin/audit-logs.functions";
 import { getMyRoles } from "@/lib/admin.functions";
+import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import type { Column } from "@/lib/export-utils";
 
 type AuditSearch = {
   q?: string;
