@@ -81,7 +81,7 @@ def main() -> None:
 
     doctors = rest_get(
         "doctors",
-        {"select": "id,slug,name,specialty_id,branch_id", "slug": f"eq.{DOC_SLUG}"},
+        {"select": "id,slug,name_ar,name_en,specialty_id,branch_id", "slug": f"eq.{DOC_SLUG}"},
     )
     if not doctors:
         fail(f"الطبيب '{DOC_SLUG}' غير موجود.")
