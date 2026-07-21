@@ -193,6 +193,14 @@ function AssistantPage() {
                       ))}
                     </div>
                   )}
+                  {!isUser && m.meta && (parsed.clean || parsed.actions.length > 0) && (
+                    <MessageCostBadge
+                      meta={{ ...m.meta, outputText: parsed.clean }}
+                      live={streaming && i === messages.length - 1}
+                      now={nowTick}
+                      lang="ar"
+                    />
+                  )}
                 </div>
               </div>
             );
