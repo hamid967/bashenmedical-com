@@ -8,6 +8,13 @@ import {
   formatCredits,
   formatTokens,
 } from "@/lib/ai/pricing";
+import {
+  budgetBlockMessage,
+  checkRunningBudget,
+  commitSessionCredits,
+  getDefaultLimits,
+  preflightBudget,
+} from "@/lib/ai/budget";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 
@@ -93,14 +100,22 @@ export function AIAssistantPanel({
     if (!text || streaming) return;
     setInput("");
     const next: Msg[] = [...messages, { role: "user", content: text }];
+    const startedAt = performance.now();
+    const promptText = next.map((m) => `${m.role}: ${m.content}`).join("\n");
+
+    const limits = getDefaultLimits("admin");
+    const pre = preflightBudget({ surface: "admin", limits, model, promptText });
+    if (!pre.ok) {
+      toast.error(budgetBlockMessage(pre, "ar"));
+      return;
+    }
+
     setMessages(next);
     setStreamed("");
     setStreaming(true);
     setUsage(null);
     setResumeNotice(null);
 
-    const startedAt = performance.now();
-    const promptText = next.map((m) => `${m.role}: ${m.content}`).join("\n");
     const meta0: MessageCostMeta = { startedAt, promptText, model };
     setStreamMeta(meta0);
 
