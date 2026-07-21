@@ -18,6 +18,11 @@ import {
 } from "@/lib/portal/appointments.functions";
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
+import {
+  PortalPageHeader,
+  PortalStatCard,
+  PortalEmptyState,
+} from "@/components/portal/ui";
 
 type Scope = "upcoming" | "past";
 type ApptStatus =
@@ -182,25 +187,22 @@ function MyAppointmentsPage() {
 
   return (
     <div dir="rtl" className="space-y-6 print:space-y-3">
-      {/* Header */}
-      <header className="flex flex-wrap items-start gap-3 print:hidden">
-        <div className="h-11 w-11 rounded-2xl grid place-items-center bg-[color:var(--portal-gradient-soft)] text-[color:var(--portal-primary)]">
-          <CalendarDays className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-[220px]">
-          <h1 className="text-xl font-bold text-[color:var(--portal-ink)]">مواعيدي</h1>
-          <p className="text-sm text-[color:var(--portal-ink-2)]">
-            تابع مواعيدك القادمة والسابقة، أكّد الحضور، أعِد الجدولة، أو اطلب متابعة.
-          </p>
-        </div>
-        <Link
-          to="/portal/book"
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
-          style={{ background: "var(--portal-gradient)" }}
-        >
-          <CalendarPlus className="h-4 w-4" /> حجز موعد جديد
-        </Link>
-      </header>
+      <div className="print:hidden">
+        <PortalPageHeader
+          title="مواعيدي"
+          description="تابع مواعيدك القادمة والسابقة، أكّد الحضور، أعِد الجدولة، أو اطلب متابعة."
+          breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "مواعيدي" }]}
+          actions={
+            <Link
+              to="/portal/book"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              <CalendarPlus className="h-4 w-4" /> حجز موعد جديد
+            </Link>
+          }
+        />
+      </div>
 
       {/* Tabs + filters */}
       <div className="glass-card p-3 sm:p-4 flex flex-wrap items-center gap-3 print:hidden">
