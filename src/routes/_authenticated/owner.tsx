@@ -1,5 +1,7 @@
 import { createFileRoute, Outlet, redirect, Link, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { getMyOwnerStatus } from "@/lib/owner.functions";
+import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   FileText,
@@ -12,6 +14,7 @@ import {
   Users,
   Settings,
   ScrollText,
+  ShieldCheck,
 } from "lucide-react";
 
 
@@ -82,6 +85,7 @@ const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     items: [
       { to: "/owner/accounts", label: "الحسابات", icon: Users, ownerOnly: true },
       { to: "/owner/settings", label: "الإعدادات", icon: Settings, ownerOnly: true },
+      { to: "/owner/security", label: "الأمان (MFA)", icon: ShieldCheck, ownerOnly: true },
       { to: "/owner/audit", label: "سجل النشاط", icon: ScrollText, ownerOnly: true },
     ],
   },
@@ -92,6 +96,22 @@ function OwnerLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { ownerStatus } = Route.useLoaderData();
   const isEditor = ownerStatus?.level === "editor";
+  const isOwner = ownerStatus?.level === "owner";
+
+  // MFA gate: super_admin sessions must be AAL2 to browse anywhere in /owner
+  // except the /owner/security page itself (where they enroll/challenge).
+  useEffect(() => {
+    if (!isOwner) return;
+    if (pathname.startsWith("/owner/security")) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (!cancelled && data?.currentLevel !== "aal2") {
+        window.location.assign("/owner/security");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isOwner, pathname]);
 
   return (
     <div className="min-h-dvh bg-slate-50 flex" dir="rtl">

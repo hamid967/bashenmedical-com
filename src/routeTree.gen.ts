@@ -134,6 +134,7 @@ import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPortalAppointmentsRouteImport } from './routes/_authenticated/portal.appointments'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
+import { Route as AuthenticatedOwnerSecurityRouteImport } from './routes/_authenticated/owner.security'
 import { Route as AuthenticatedOwnerAuditRouteImport } from './routes/_authenticated/owner.audit'
 import { Route as AuthenticatedOwnerAccountsRouteImport } from './routes/_authenticated/owner.accounts'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
@@ -860,6 +861,12 @@ const AuthenticatedOwnerSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedOwnerRoute,
   } as any)
+const AuthenticatedOwnerSecurityRoute =
+  AuthenticatedOwnerSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
 const AuthenticatedOwnerAuditRoute = AuthenticatedOwnerAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -1247,6 +1254,7 @@ export interface FileRoutesByFullPath {
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
+  '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
@@ -1418,6 +1426,7 @@ export interface FileRoutesByTo {
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
+  '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
@@ -1594,6 +1603,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/_authenticated/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/_authenticated/owner/audit': typeof AuthenticatedOwnerAuditRoute
+  '/_authenticated/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
@@ -1770,6 +1780,7 @@ export interface FileRouteTypes {
     | '/admin/web-vitals'
     | '/owner/accounts'
     | '/owner/audit'
+    | '/owner/security'
     | '/owner/settings'
     | '/patients/$patientId'
     | '/portal/appointments'
@@ -1941,6 +1952,7 @@ export interface FileRouteTypes {
     | '/admin/web-vitals'
     | '/owner/accounts'
     | '/owner/audit'
+    | '/owner/security'
     | '/owner/settings'
     | '/patients/$patientId'
     | '/portal/appointments'
@@ -2116,6 +2128,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/web-vitals'
     | '/_authenticated/owner/accounts'
     | '/_authenticated/owner/audit'
+    | '/_authenticated/owner/security'
     | '/_authenticated/owner/settings'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/portal/appointments'
@@ -3135,6 +3148,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerSettingsRouteImport
       parentRoute: typeof AuthenticatedOwnerRoute
     }
+    '/_authenticated/owner/security': {
+      id: '/_authenticated/owner/security'
+      path: '/security'
+      fullPath: '/owner/security'
+      preLoaderRoute: typeof AuthenticatedOwnerSecurityRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
     '/_authenticated/owner/audit': {
       id: '/_authenticated/owner/audit'
       path: '/audit'
@@ -3553,6 +3573,7 @@ const AuthenticatedOrdersUnifiedRouteWithChildren =
 interface AuthenticatedOwnerRouteChildren {
   AuthenticatedOwnerAccountsRoute: typeof AuthenticatedOwnerAccountsRoute
   AuthenticatedOwnerAuditRoute: typeof AuthenticatedOwnerAuditRoute
+  AuthenticatedOwnerSecurityRoute: typeof AuthenticatedOwnerSecurityRoute
   AuthenticatedOwnerSettingsRoute: typeof AuthenticatedOwnerSettingsRoute
   AuthenticatedOwnerIndexRoute: typeof AuthenticatedOwnerIndexRoute
   AuthenticatedOwnerPagesIdRoute: typeof AuthenticatedOwnerPagesIdRoute
@@ -3564,6 +3585,7 @@ interface AuthenticatedOwnerRouteChildren {
 const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
   AuthenticatedOwnerAccountsRoute: AuthenticatedOwnerAccountsRoute,
   AuthenticatedOwnerAuditRoute: AuthenticatedOwnerAuditRoute,
+  AuthenticatedOwnerSecurityRoute: AuthenticatedOwnerSecurityRoute,
   AuthenticatedOwnerSettingsRoute: AuthenticatedOwnerSettingsRoute,
   AuthenticatedOwnerIndexRoute: AuthenticatedOwnerIndexRoute,
   AuthenticatedOwnerPagesIdRoute: AuthenticatedOwnerPagesIdRoute,

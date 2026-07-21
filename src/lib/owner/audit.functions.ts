@@ -15,7 +15,7 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
       .parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     let q = supabaseAdmin
       .from("security_audit_log")

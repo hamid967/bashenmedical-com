@@ -101,7 +101,7 @@ export const deleteOwnerService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { error } = await context.supabase
       .from("service_catalog")
       .delete()
