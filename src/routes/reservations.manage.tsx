@@ -625,6 +625,8 @@ function ManagePage() {
                           setActiveCancelId(a.id);
                           setActiveReschedId(null);
                           setCancelReason("");
+                          setCancelPhase("reason");
+                          setCancelResult(null);
                           setErrorMsg(null);
                         }}
                       >
