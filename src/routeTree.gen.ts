@@ -134,6 +134,7 @@ import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
+import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -847,6 +848,12 @@ const AuthenticatedAdminReservationsUsageRoute =
     path: '/reservations-usage',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNphiesLogsRoute =
+  AuthenticatedAdminNphiesLogsRouteImport.update({
+    id: '/nphies-logs',
+    path: '/nphies-logs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNotificationLogsRoute =
   AuthenticatedAdminNotificationLogsRouteImport.update({
     id: '/notification-logs',
@@ -1127,6 +1134,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
@@ -1283,6 +1291,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
@@ -1443,6 +1452,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
@@ -1603,6 +1613,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/notification-logs'
+    | '/admin/nphies-logs'
     | '/admin/reservations-usage'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
@@ -1759,6 +1770,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/notification-logs'
+    | '/admin/nphies-logs'
     | '/admin/reservations-usage'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
@@ -1918,6 +1930,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/notification-logs'
+    | '/_authenticated/admin/nphies-logs'
     | '/_authenticated/admin/reservations-usage'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
@@ -2932,6 +2945,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminReservationsUsageRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/nphies-logs': {
+      id: '/_authenticated/admin/nphies-logs'
+      path: '/nphies-logs'
+      fullPath: '/admin/nphies-logs'
+      preLoaderRoute: typeof AuthenticatedAdminNphiesLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/notification-logs': {
       id: '/_authenticated/admin/notification-logs'
       path: '/notification-logs'
@@ -3177,6 +3197,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
+  AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
@@ -3191,6 +3212,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminNotificationLogsRoute:
     AuthenticatedAdminNotificationLogsRoute,
+  AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
   AuthenticatedAdminReservationsUsageRoute:
     AuthenticatedAdminReservationsUsageRoute,
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
