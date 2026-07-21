@@ -263,6 +263,7 @@
       "cancelled": "Cancelled",
       "completed": "Completed",
       "no_show": "No-show"
+    }
   },
   "a11y": {
     "stepNav": "Booking steps",
