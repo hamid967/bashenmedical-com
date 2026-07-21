@@ -109,14 +109,8 @@ export const sendTestNotification = createServerFn({ method: "POST" })
     const stamp = new Date().toLocaleTimeString("ar-SA");
     const body = `هذه رسالة اختبار لقناة «${label}» أُرسلت في ${stamp}. إن وصلتك يعني أن الإعدادات الحالية تعمل.`;
 
-    // Look up profile contact for reporting purposes only
-    const { data: prof } = await context.supabase
-      .from("profiles")
-      .select("phone, email:full_name")
-      .eq("id", context.userId)
-      .maybeSingle();
-
     // Always drop an in_app copy so the user sees it in /portal/notifications
+
     const { error } = await context.supabase.from("notifications").insert({
       audience: "patient",
       user_id: context.userId,
