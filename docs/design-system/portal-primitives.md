@@ -205,9 +205,110 @@ import { Mail, Phone } from "lucide-react";
 
 ---
 
-## 7) مراجع سريعة
+## 7) إضافة توكن جديد إلى `--ds-*` (Playbook)
+
+اتّبع الترتيب التالي حرفيًا. أي خطوة ناقصة = تسريب لون خام أو كسر بصري في portal.
+
+### الخطوة 1 — عرِّف التوكن الأولي (primitive) داخل `src/styles.css`
+
+الـprimitives هي **المصدر الوحيد للحقيقة**. أضِف التوكن ضمن كتلة `@theme` (أو داخل `:root`/`.dark` إن كان يعتمد على الوضع):
+
+```css
+/* src/styles.css */
+:root {
+  /* لون جديد لحالة "info" — قيمة oklch حقيقية، لا مرجع */
+  --ds-info:        oklch(0.62 0.14 240);
+  --ds-info-50:     oklch(0.96 0.03 240);
+  --ds-info-fg:     oklch(0.99 0 0);
+}
+.dark {
+  --ds-info:        oklch(0.68 0.14 240);
+  --ds-info-50:     oklch(0.24 0.05 240);
+  --ds-info-fg:     oklch(0.99 0 0);
+}
+```
+
+قواعد التسمية:
+- بادئة `--ds-` إجبارية.
+- المجموعة الدلالية أولًا ثم التدرّج: `--ds-<role>[-<shade|fg|border>]`.
+- استخدم `oklch(...)` دائمًا (متسق إدراكيًا مع بقية النظام). لا `#hex` ولا `hsl()`.
+- إن كان التوكن مساحيًا/حركيًا وليس لونيًا، اتّبع نفس النمط: `--ds-space-*`, `--ds-radius-*`, `--ds-dur-*`, `--ds-ease-*`, `--ds-shadow-*`.
+
+### الخطوة 2 — اربطه بطبقة portal داخل `.portal-root`
+
+توكنات `--portal-*` ما هي إلا **مرايا دلالية** للـprimitives. أضِف السطر داخل نفس الملف (`src/styles.css`, بحث: `.portal-root {`):
+
+```css
+.portal-root {
+  /* … */
+  --portal-info:     var(--ds-info);
+  --portal-info-50:  var(--ds-info-50);
+  --portal-on-info:  var(--ds-info-fg);
+}
+```
+
+هذه الطبقة تمنع المكوّنات من الاعتماد المباشر على primitives — كل تغيير لاحق في `--ds-*` ينعكس تلقائيًا بدون لمس components.
+
+### الخطوة 3 — أضِف قاعدة تحويل في الأداة الآلية (codemod)
+
+افتح `scripts/codemod-portal-tokens.mjs` وحدّث الخريطة المناسبة حتى يعرف الـcodemod كيف يحوّل Tailwind قديم إلى التوكن الجديد:
+
+```js
+// SEMANTIC_FAMILIES: تحديد ألوان Tailwind التي يجب أن تُترجَم للتوكن
+const SEMANTIC_FAMILIES = {
+  // … existing
+  info: ["blue", "sky", "cyan"], // مثال: لو أردت فصل info عن primary
+};
+```
+
+> إن كان التوكن غير لوني (مثل `--ds-radius-xl`)، أضِف بديلًا مباشرًا في `DIRECT` بدلًا من العائلات.
+
+### الخطوة 4 — اربط التوكن بالمكوّنات
+
+- **مكوّنات portal مشتركة** (`src/components/portal/ui/*`): استخدم `var(--portal-<role>)` — **لا** `var(--ds-*)` مباشرة.
+- **صفحات portal** (`src/routes/_authenticated/portal.*`): استخدم صيغة Tailwind arbitrary:
+  ```tsx
+  <div className="bg-[color:var(--portal-info-50)] text-[color:var(--portal-info)]">…</div>
+  ```
+- **صفحات/مكوّنات غير portal**: اعتمِد `var(--ds-<role>)` مباشرة.
+
+### الخطوة 5 — حدّث Storybook والتوثيق
+
+- أضِف عيّنة في `/design/storybook` تحت المجموعة الملائمة (Badges/Buttons/…): يعرض كل shade + حالة `text-on-*`، ويثبت أن الفاحص اللحظي لا يرصد لونًا خامًا.
+- أضِف التوكن إلى جدول القسم **2) خريطة التوكنات** أعلاه.
+
+### الخطوة 6 — اختبارات (إلزامية قبل الدمج)
+
+شغِّل الحزمة كاملة، وأصلح أي تعارض قبل الفتح:
+
+```bash
+bun run lint:portal-tokens              # baseline يجب ألا يرتفع
+bun run lint:portal-tokens:changed      # صفر انتهاكات على الأسطر المعدّلة
+bun run codemod:portal-tokens           # dry-run: تأكيد أن الخريطة تعرف التوكن
+python3 tests/visual/portal_visual_regression.py  # 0 فروق بصرية
+```
+
+عند تغيير قيمة توكن قائم (ليس إضافة)، توقّع فرقًا بصريًا مقصودًا:
+1. شغّل visual regression → راجع `/mnt/documents/visual-regression/report.html`.
+2. إن كان الفرق مقصودًا، حدّث اللقطات الأساسية: `python3 tests/visual/portal_visual_regression.py --update-baseline`.
+3. اذكر الـPRIMITIVE المتغيّر ونطاق الأثر في وصف الـPR.
+
+### الخطوة 7 — قائمة تحقق ذاتية (Definition of Done)
+
+- [ ] التوكن مُعرَّف في `:root` **و** `.dark` داخل `src/styles.css`.
+- [ ] مرآة `--portal-*` مضافة داخل `.portal-root` (إن كان يخصّ portal).
+- [ ] قاعدة codemod موجودة أو التوكن غير قابل للتحويل التلقائي (موثَّق في الـPR).
+- [ ] لا استعمال مباشر لـ `--ds-*` داخل صفحات/مكوّنات portal.
+- [ ] عيّنة حيّة في `/design/storybook` + سطر في هذا الملف.
+- [ ] `lint:portal-tokens:changed` أخضر و`portal_visual_regression.py` بلا فروق غير مقصودة.
+
+---
+
+## 8) مراجع سريعة
 
 - توكنات `--ds-*` مُعرَّفة في `src/styles.css` (بحث: `--ds-`).
 - مصدر مكوّنات portal: `src/components/portal/ui/*`.
+- أداة الترحيل الآلي: `scripts/codemod-portal-tokens.mjs` (`bun run codemod:portal-tokens -- --list-rules`).
 - تدقيق الحالة الحالية: [`audit-2026-07.md`](./audit-2026-07.md).
 - خارطة ترحيل portal v2: [`portal-v2.md`](./portal-v2.md).
+
