@@ -119,6 +119,7 @@ import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
 import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
+import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
 import { Route as AuthenticatedAdminRolePermissionsMatrixRouteImport } from './routes/_authenticated/admin.role-permissions-matrix'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
@@ -791,6 +792,12 @@ const AuthenticatedAdminNphiesLogsRoute =
     path: '/nphies-logs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRealtimeMonitorRoute =
+  AuthenticatedAdminRealtimeMonitorRouteImport.update({
+    id: '/realtime-monitor',
+    path: '/realtime-monitor',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminReservationsUsageRoute =
   AuthenticatedAdminReservationsUsageRouteImport.update({
     id: '/reservations-usage',
@@ -1389,6 +1396,7 @@ export interface FileRoutesByFullPath {
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
+  '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
@@ -1581,6 +1589,7 @@ export interface FileRoutesByTo {
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
+  '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
@@ -1778,6 +1787,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
+  '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/_authenticated/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
@@ -1975,6 +1985,7 @@ export interface FileRouteTypes {
     | '/admin/no-show-stats'
     | '/admin/notification-logs'
     | '/admin/nphies-logs'
+    | '/admin/realtime-monitor'
     | '/admin/reservations-usage'
     | '/admin/role-permissions-matrix'
     | '/admin/service-catalog'
@@ -2167,6 +2178,7 @@ export interface FileRouteTypes {
     | '/admin/no-show-stats'
     | '/admin/notification-logs'
     | '/admin/nphies-logs'
+    | '/admin/realtime-monitor'
     | '/admin/reservations-usage'
     | '/admin/role-permissions-matrix'
     | '/admin/service-catalog'
@@ -2363,6 +2375,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/no-show-stats'
     | '/_authenticated/admin/notification-logs'
     | '/_authenticated/admin/nphies-logs'
+    | '/_authenticated/admin/realtime-monitor'
     | '/_authenticated/admin/reservations-usage'
     | '/_authenticated/admin/role-permissions-matrix'
     | '/_authenticated/admin/service-catalog'
@@ -3306,6 +3319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNphiesLogsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/realtime-monitor': {
+      id: '/_authenticated/admin/realtime-monitor'
+      path: '/realtime-monitor'
+      fullPath: '/admin/realtime-monitor'
+      preLoaderRoute: typeof AuthenticatedAdminRealtimeMonitorRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/reservations-usage': {
       id: '/_authenticated/admin/reservations-usage'
       path: '/reservations-usage'
@@ -3923,6 +3943,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
   AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
+  AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
   AuthenticatedAdminRolePermissionsMatrixRoute: typeof AuthenticatedAdminRolePermissionsMatrixRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
@@ -3948,6 +3969,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNotificationLogsRoute:
     AuthenticatedAdminNotificationLogsRoute,
   AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
+  AuthenticatedAdminRealtimeMonitorRoute:
+    AuthenticatedAdminRealtimeMonitorRoute,
   AuthenticatedAdminReservationsUsageRoute:
     AuthenticatedAdminReservationsUsageRoute,
   AuthenticatedAdminRolePermissionsMatrixRoute:
