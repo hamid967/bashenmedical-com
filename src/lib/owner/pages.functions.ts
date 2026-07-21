@@ -25,7 +25,10 @@ const pageInput = z.object({
   content_en: z.string().max(200_000).default(""),
   seo_title: z.string().trim().max(200).nullish(),
   seo_description: z.string().trim().max(500).nullish(),
-  og_image: z.string().trim().url().max(500).nullish().or(z.literal("")),
+  og_image: z.string().trim().max(500).refine(
+    (v) => v === "" || /^https?:\/\//i.test(v) || v.startsWith("/"),
+    "رابط الصورة يجب أن يبدأ بـ http(s):// أو /",
+  ).nullish().or(z.literal("")),
   status: z.enum(["draft", "published"]).default("draft"),
   show_in_nav: z.boolean().default(false),
   nav_order: z.number().int().min(0).max(999).default(0),
