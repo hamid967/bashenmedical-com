@@ -284,6 +284,31 @@
     "ratingLabel": "التقييم {{rating}} من 5 من {{count}} مراجعة",
     "bookingDisabled": "الحجز غير متاح",
     "charsCount": "{{count}} من {{max}} حرف"
+  },
+  "patientExtra": {
+    "savedNote": "سيتم استخدام البيانات المحفوظة تلقائيًا — يمكنك تعديل أي حقل قبل التأكيد."
+  },
+  "otp": {
+    "linkedTitle": "تم ربط حجزك بحسابك",
+    "signedInAs": "مسجّل الدخول باسم {{email}}",
+    "linkedCount": "— تم ربط {{count}} حجز.",
+    "openPortal": "افتح لوحة المريض",
+    "cardTitle": "احفظ حجزك بحساب دائم",
+    "cardDesc": "أنشئ حسابك بالتحقق من بريدك الإلكتروني لإدارة مواعيدك، تقاريرك، وفواتيرك من مكان واحد.",
+    "emailPlaceholder": "بريدك الإلكتروني",
+    "sendCode": "إرسال الرمز",
+    "sent": "أُرسل الرمز إلى بريدك",
+    "codeSentTo": "أدخل الرمز المرسل إلى {{email}}",
+    "verifyLink": "تحقّق وربط",
+    "resendIn": "إعادة الإرسال بعد {{seconds}}ث",
+    "resend": "إعادة إرسال الرمز",
+    "changeEmail": "تغيير البريد",
+    "invalidEmail": "بريد إلكتروني غير صالح",
+    "codeMustBe6": "الرمز يجب أن يكون 6 أرقام",
+    "invalidCode": "رمز غير صحيح",
+    "linkFailed": "تعذّر ربط الحجوزات",
+    "linkedToast": "تم إنشاء حسابك وربط {{count}} حجز"
   }
 }
+
 
