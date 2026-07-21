@@ -9,6 +9,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { PortalShell } from "@/components/portal/PortalShell";
+import { PortalPageHeader } from "@/components/portal/ui";
+
 import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import {
   LayoutDashboard,
