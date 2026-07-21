@@ -208,7 +208,7 @@ function AuditLogPage() {
                 {ar ? "جارٍ التحميل..." : "Loading..."}
               </div>
             ) : q.isError ? (
-              <div className="p-8 text-center text-sm text-red-600">
+              <div className="p-8 text-center text-sm text-[color:var(--portal-error)]">
                 {(q.error as Error)?.message || (ar ? "تعذر تحميل السجل" : "Failed to load")}
               </div>
             ) : rows.length === 0 ? (
