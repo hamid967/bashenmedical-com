@@ -458,6 +458,13 @@ jobs:
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
         run: python tests/e2e/portal_reschedule_appointment.py
 
+      - name: Verify E2E waitlist fixtures (preflight)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/ci/verify-e2e-waitlist-fixtures.py
+
       - name: Run waitlist offer confirm E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
