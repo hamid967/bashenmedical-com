@@ -614,6 +614,9 @@ function HomePage() {
         </div>
       </section>
 
+      {/* ===== NEWLY JOINED DOCTORS ===== */}
+      <NewDoctorsSection />
+
       {/* ===== VISIT / MAP ===== */}
       <section className="py-16 md:py-20">
         <div className="container-app"><JazanDivider variant="subtle" className="mb-12" /></div>
