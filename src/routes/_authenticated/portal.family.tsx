@@ -437,7 +437,31 @@ function DependentCard({
     .join("");
   const rel = t(RELATIONSHIP_LABELS[row.relationship], lang);
   const missing = dependentMissingForBooking(row);
-  const canBook = missing.length === 0;
+  const verified = row.verification_status === "verified";
+  const rejected = row.verification_status === "rejected";
+  const bookingAllowed = row.access_scopes?.booking !== false;
+  const canBook = missing.length === 0 && verified && bookingAllowed;
+  const qc = useQueryClient();
+  const scopesMut = useMutation({
+    mutationFn: (patch: Partial<DependentAccessScopes>) =>
+      setDependentAccessScopes({ data: { id: row.id, scopes: patch } }),
+    onSuccess: () => {
+      toast.success(lang === "ar" ? "تم تحديث الصلاحيات" : "Access updated");
+      qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
+    },
+    onError: (e: any) =>
+      toast.error(e?.message ?? (lang === "ar" ? "تعذّر التحديث" : "Update failed")),
+  });
+  const badgeCls = verified
+    ? "bg-emerald-50 text-emerald-700"
+    : rejected
+      ? "bg-red-50 text-red-700"
+      : "bg-amber-50 text-amber-700";
+  const badgeLabel = verified
+    ? t("verified", lang)
+    : rejected
+      ? (lang === "ar" ? "مرفوض" : "Rejected")
+      : t("pending", lang);
   return (
     <div className="glass-card p-4 flex flex-col gap-3">
       <div className="flex items-center gap-3">
@@ -452,25 +476,17 @@ function DependentCard({
           <div className="text-xs text-[color:var(--portal-ink-2)] truncate">{rel}</div>
         </div>
         <span
-          className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 h-6 whitespace-nowrap ${
-            row.verified
-              ? "bg-emerald-50 text-emerald-700"
-              : "bg-amber-50 text-amber-700"
-          }`}
+          className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 h-6 whitespace-nowrap ${badgeCls}`}
         >
-          {row.verified ? (
-            <>
-              <BadgeCheck className="h-3 w-3" />
-              {t("verified", lang)}
-            </>
+          {verified ? (
+            <BadgeCheck className="h-3 w-3" />
           ) : (
-            <>
-              <ShieldAlert className="h-3 w-3" />
-              {t("pending", lang)}
-            </>
+            <ShieldAlert className="h-3 w-3" />
           )}
+          {badgeLabel}
         </span>
       </div>
+
 
       <dl className="text-xs grid gap-1.5 text-[color:var(--portal-ink-2)]">
         {row.date_of_birth && (
