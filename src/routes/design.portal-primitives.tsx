@@ -112,13 +112,12 @@ function PortalPrimitivesDocsPage() {
           title="Portal Primitives — دليل تفاعلي"
           description="جميع الأمثلة أدناه مبنية من مكوّنات portal الرسمية وتقرأ حصرًا من توكنات var(--ds-*). استخدمها كمرجع حيّ عند بناء أي صفحة داخل /portal/*."
           breadcrumbs={[
-            { label: "الرئيسية", href: "/" },
+            { label: "الرئيسية", to: "/" },
             { label: "التصميم" },
             { label: "Portal Primitives" },
           ]}
           actions={
             <PortalButton
-              as="a"
               variant="secondary"
               leadingIcon={<Search size={16} />}
               onClick={() => window.open("/docs/design-system/portal-primitives.md", "_blank")}
