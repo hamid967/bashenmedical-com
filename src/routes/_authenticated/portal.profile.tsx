@@ -7,10 +7,15 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@ta
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle, ArrowLeft, Loader2, RefreshCw, Save, User as UserIcon,
+  AlertTriangle, ArrowLeft, Loader2, RefreshCw, Save,
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { MutationErrorBanner } from "@/components/portal/MutationErrorBanner";
+import {
+  PortalPageHeader,
+  PortalCard,
+  PortalSkeleton,
+} from "@/components/portal/ui";
 
 const profileQuery = queryOptions({
   queryKey: ["portal", "my-profile-full"],
@@ -121,19 +126,15 @@ function ProfilePage() {
   };
 
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
-        <header className="mb-6 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl grid place-items-center text-white" style={{ background: "var(--portal-gradient)" }}>
-            <UserIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">الملف الشخصي</h1>
-            <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">بياناتك المستخدَمة في المواعيد والتواصل والفوترة</p>
-          </div>
-        </header>
+    <div dir="rtl">
+      <PortalPageHeader
+        title="الملف الشخصي"
+        description="بياناتك المستخدَمة في المواعيد والتواصل والفوترة"
+        breadcrumbs={[{ label: "البوابة", to: "/portal" }, { label: "الملف الشخصي" }]}
+      />
 
-        <form onSubmit={submit} className="glass-card p-5 sm:p-6 space-y-6">
+      <PortalCard as="section" className="p-5 sm:p-6">
+        <form onSubmit={submit} className="space-y-6">
           {mut.isError && (
             <MutationErrorBanner
               message={mut.error instanceof Error ? mut.error.message : "تعذّر حفظ التعديلات"}
@@ -190,28 +191,28 @@ function ProfilePage() {
           </Section>
 
           <div className="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-[color:var(--portal-border)]">
-            <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm">إلغاء</Link>
+            <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm">إلغاء</Link>
             <button type="submit" disabled={!dirty || mut.isPending}
-              className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-semibold text-white disabled:opacity-60"
+              className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
               style={{ background: "var(--portal-gradient)" }}>
               {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               حفظ التعديلات
             </button>
           </div>
         </form>
+      </PortalCard>
 
-        <p className="mt-6 text-center text-[11px] text-[color:var(--portal-ink-2)]">
-          لتحديث إعدادات الإشعارات والتأمين، انتقل إلى{" "}
-          <Link to="/portal/settings" className="underline">الإعدادات</Link> و{" "}
-          <Link to="/portal/insurance" className="underline">التأمين</Link>.
-        </p>
-      </main>
+      <p className="mt-6 text-center text-[11px] text-[color:var(--portal-ink-2)]">
+        لتحديث إعدادات الإشعارات والتأمين، انتقل إلى{" "}
+        <Link to="/portal/settings" className="underline">الإعدادات</Link> و{" "}
+        <Link to="/portal/insurance" className="underline">التأمين</Link>.
+      </p>
     </div>
   );
 }
 
 const inputCls =
-  "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30";
+  "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
