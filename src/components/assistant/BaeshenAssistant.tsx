@@ -127,6 +127,7 @@ export function BaeshenAssistant() {
       });
     };
 
+    let currentModel: string | undefined;
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
@@ -142,7 +143,7 @@ export function BaeshenAssistant() {
           save_history: !noSave,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (m) => updateLastMeta({ model: m }),
+        onModel: (m) => { currentModel = m; updateLastMeta({ model: m }); },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
@@ -156,6 +157,17 @@ export function BaeshenAssistant() {
             copy[copy.length - 1] = { role: "assistant", content: acc, meta: last?.meta };
             return copy;
           });
+        },
+        budgetCheck: (acc) => {
+          const c = checkRunningBudget({
+            surface: "public",
+            limits,
+            model: currentModel,
+            promptText,
+            outputSoFar: acc,
+          });
+          if (c.ok) return { ok: true };
+          return { ok: false, message: budgetBlockMessage(c, isAr ? "ar" : "en") };
         },
         onRetry: (phase) => {
           if (phase === "reconnecting") setError(t("انقطع الاتصال — جاري الاستئناف…", "Connection lost — resuming…"));
@@ -171,6 +183,13 @@ export function BaeshenAssistant() {
         },
       });
       updateLastMeta({ endedAt: performance.now() });
+      // Commit estimated credits for the session running total.
+      const promptTok = estimateTokens(promptText);
+      const outTok = estimateTokens(result.text);
+      commitSessionCredits("public", estimateCredits(promptTok, outTok, currentModel));
+      if (result.budgetStop) {
+        setError(result.budgetStop.message);
+      }
       if (!result.text) {
         setMessages((prev) => {
           const copy = prev.slice();
