@@ -309,6 +309,15 @@ export function BaeshenAssistant() {
                   />
                   {t("لا تحفظ", "Don't save")}
                 </label>
+                <SessionExportButton
+                  messages={messages}
+                  sessionCredits={sessionCredits}
+                  preEstimateTokens={preEstimate?.tokens}
+                  model={meterModel}
+                  conversationId={conversationId.current}
+                  surface={isAr ? "المساعد العام" : "Public Assistant"}
+                  lang={isAr ? "ar" : "en"}
+                />
                 <button
                   type="button"
                   onClick={newConversation}
