@@ -59,6 +59,7 @@ import { Route as HealthSearchRouteImport } from './routes/health.search'
 import { Route as HealthSlugRouteImport } from './routes/health.$slug'
 import { Route as ExcellenceSlugRouteImport } from './routes/excellence.$slug'
 import { Route as DoctorsSlugRouteImport } from './routes/doctors.$slug'
+import { Route as DesignStorybookRouteImport } from './routes/design.storybook'
 import { Route as DesignPortalPrimitivesRouteImport } from './routes/design.portal-primitives'
 import { Route as BranchesSlugRouteImport } from './routes/branches.$slug'
 import { Route as AccreditationsIdRouteImport } from './routes/accreditations.$id'
@@ -447,6 +448,11 @@ const ExcellenceSlugRoute = ExcellenceSlugRouteImport.update({
 const DoctorsSlugRoute = DoctorsSlugRouteImport.update({
   id: '/doctors/$slug',
   path: '/doctors/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DesignStorybookRoute = DesignStorybookRouteImport.update({
+  id: '/design/storybook',
+  path: '/design/storybook',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DesignPortalPrimitivesRoute = DesignPortalPrimitivesRouteImport.update({
@@ -1333,6 +1339,7 @@ export interface FileRoutesByFullPath {
   '/accreditations/$id': typeof AccreditationsIdRoute
   '/branches/$slug': typeof BranchesSlugRoute
   '/design/portal-primitives': typeof DesignPortalPrimitivesRoute
+  '/design/storybook': typeof DesignStorybookRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
@@ -1521,6 +1528,7 @@ export interface FileRoutesByTo {
   '/accreditations/$id': typeof AccreditationsIdRoute
   '/branches/$slug': typeof BranchesSlugRoute
   '/design/portal-primitives': typeof DesignPortalPrimitivesRoute
+  '/design/storybook': typeof DesignStorybookRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
@@ -1714,6 +1722,7 @@ export interface FileRoutesById {
   '/accreditations/$id': typeof AccreditationsIdRoute
   '/branches/$slug': typeof BranchesSlugRoute
   '/design/portal-primitives': typeof DesignPortalPrimitivesRoute
+  '/design/storybook': typeof DesignStorybookRoute
   '/doctors/$slug': typeof DoctorsSlugRoute
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
@@ -1907,6 +1916,7 @@ export interface FileRouteTypes {
     | '/accreditations/$id'
     | '/branches/$slug'
     | '/design/portal-primitives'
+    | '/design/storybook'
     | '/doctors/$slug'
     | '/excellence/$slug'
     | '/health/$slug'
@@ -2095,6 +2105,7 @@ export interface FileRouteTypes {
     | '/accreditations/$id'
     | '/branches/$slug'
     | '/design/portal-primitives'
+    | '/design/storybook'
     | '/doctors/$slug'
     | '/excellence/$slug'
     | '/health/$slug'
@@ -2287,6 +2298,7 @@ export interface FileRouteTypes {
     | '/accreditations/$id'
     | '/branches/$slug'
     | '/design/portal-primitives'
+    | '/design/storybook'
     | '/doctors/$slug'
     | '/excellence/$slug'
     | '/health/$slug'
@@ -2438,6 +2450,7 @@ export interface RootRouteChildren {
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   DesignPortalPrimitivesRoute: typeof DesignPortalPrimitivesRoute
+  DesignStorybookRoute: typeof DesignStorybookRoute
   DoctorsSlugRoute: typeof DoctorsSlugRoute
   HealthSlugRoute: typeof HealthSlugRoute
   HealthSearchRoute: typeof HealthSearchRoute
@@ -2832,6 +2845,13 @@ declare module '@tanstack/react-router' {
       path: '/doctors/$slug'
       fullPath: '/doctors/$slug'
       preLoaderRoute: typeof DoctorsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/design/storybook': {
+      id: '/design/storybook'
+      path: '/design/storybook'
+      fullPath: '/design/storybook'
+      preLoaderRoute: typeof DesignStorybookRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/design/portal-primitives': {
@@ -4248,6 +4268,7 @@ const rootRouteChildren: RootRouteChildren = {
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
     Char91DotwellKnownChar93OauthProtectedResourceRoute,
   DesignPortalPrimitivesRoute: DesignPortalPrimitivesRoute,
+  DesignStorybookRoute: DesignStorybookRoute,
   DoctorsSlugRoute: DoctorsSlugRoute,
   HealthSlugRoute: HealthSlugRoute,
   HealthSearchRoute: HealthSearchRoute,
