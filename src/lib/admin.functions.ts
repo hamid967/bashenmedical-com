@@ -142,6 +142,96 @@ export const getAdminStats = createServerFn({ method: "GET" })
     };
   });
 
+/**
+ * سلاسل زمنية للمطورين: مواعيد وطلبات وشكاوى واستفسارات يوميًا لعدد N من الأيام.
+ * range: 'week' (آخر 7 أيام) أو 'month' (آخر 30 يومًا).
+ */
+export const getAdminTrends = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: { range?: "week" | "month" }) => ({
+    range: input?.range === "month" ? "month" as const : "week" as const,
+  }))
+  .handler(async ({ context, data }) => {
+    const roles = await getRoles(context.supabase, context.userId);
+    ensureRole(roles, ["admin", "reception", "pharmacy"]);
+    const sb = context.supabase;
+
+    const days = data.range === "month" ? 30 : 7;
+    const now = new Date();
+    const start = new Date(now);
+    start.setUTCDate(start.getUTCDate() - (days - 1));
+    start.setUTCHours(0, 0, 0, 0);
+    const startIso = start.toISOString();
+
+    // بنِ قائمة الأيام (YYYY-MM-DD) بالتسلسل
+    const buckets: string[] = [];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(start);
+      d.setUTCDate(start.getUTCDate() + i);
+      buckets.push(d.toISOString().slice(0, 10));
+    }
+
+    const [apptsRes, ordersRes, inquiriesRes, complaintsRes, patientsRes] = await Promise.all([
+      sb.from("appointments").select("created_at").gte("created_at", startIso).limit(10000),
+      sb.from("medicine_orders").select("created_at").gte("created_at", startIso).limit(10000),
+      sb.from("service_inquiries").select("created_at").gte("created_at", startIso).limit(10000),
+      sb.from("complaints").select("created_at").gte("created_at", startIso).limit(10000),
+      sb.from("patients").select("created_at").gte("created_at", startIso).limit(10000),
+    ]);
+
+    const bucketize = (rows: Array<{ created_at: string | null }> | null) => {
+      const map = new Map<string, number>();
+      buckets.forEach((b) => map.set(b, 0));
+      (rows ?? []).forEach((r) => {
+        if (!r.created_at) return;
+        const key = new Date(r.created_at).toISOString().slice(0, 10);
+        if (map.has(key)) map.set(key, (map.get(key) ?? 0) + 1);
+      });
+      return buckets.map((day) => ({ day, count: map.get(day) ?? 0 }));
+    };
+
+    const appts = bucketize(apptsRes.data);
+    const orders = bucketize(ordersRes.data);
+    const inquiries = bucketize(inquiriesRes.data);
+    const complaints = bucketize(complaintsRes.data);
+    const patients = bucketize(patientsRes.data);
+
+    const sum = (arr: Array<{ count: number }>) => arr.reduce((a, b) => a + b.count, 0);
+    const midpoint = Math.floor(days / 2);
+    const growth = (arr: Array<{ count: number }>) => {
+      const first = arr.slice(0, midpoint).reduce((a, b) => a + b.count, 0);
+      const second = arr.slice(midpoint).reduce((a, b) => a + b.count, 0);
+      if (first === 0) return second > 0 ? 100 : 0;
+      return Math.round(((second - first) / first) * 100);
+    };
+
+    return {
+      range: data.range,
+      days,
+      series: {
+        appointments: appts,
+        orders,
+        inquiries,
+        complaints,
+        patients,
+      },
+      totals: {
+        appointments: sum(appts),
+        orders: sum(orders),
+        inquiries: sum(inquiries),
+        complaints: sum(complaints),
+        patients: sum(patients),
+      },
+      growth: {
+        appointments: growth(appts),
+        orders: growth(orders),
+        inquiries: growth(inquiries),
+        complaints: growth(complaints),
+        patients: growth(patients),
+      },
+    };
+  });
+
 export const listAppointments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
