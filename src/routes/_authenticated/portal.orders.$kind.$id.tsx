@@ -157,8 +157,9 @@ function MyOrderDetailsPage() {
   const Icon = KIND_ICONS[kindTyped];
 
   return (
-    <PortalShell>
+    <>
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+
         <div>
           <Link
             to="/portal/orders"
