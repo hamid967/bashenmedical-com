@@ -105,19 +105,8 @@ def main() -> None:
     # 3) availability_slots — على الأقل MIN_SLOTS متاحة في المستقبل
     today = date.today().isoformat()
     horizon = (date.today() + timedelta(days=14)).isoformat()
-    slots = rest_get(
-        "availability_slots",
-        {
-            "select": "slot_date,start_time,status",
-            "doctor_id": f"eq.{doc['id']}",
-            "status": "eq.available",
-            "slot_date": f"gte.{today}",
-            "slot_date": f"lte.{horizon}",  # noqa: F601 — postgrest يقبل مكرر
-            "limit": "500",
-        },
-    )
-    # PostgREST querystring المكرر يحتفظ بآخر قيمة فقط لنفس المفتاح؛
-    # نحتاج نمط and=() لدمج الشرطين معًا:
+    # PostgREST: نستخدم and=() لدمج شرطي slot_date في مفتاح واحد
+    # (تكرار نفس مفتاح querystring يحتفظ بآخر قيمة فقط).
     slots = rest_get(
         "availability_slots",
         {
@@ -133,6 +122,7 @@ def main() -> None:
             f"عدد الـ slots المتاحة ({len(slots)}) أقل من الحد الأدنى "
             f"({MIN_SLOTS}) للطبيب E2E خلال 14 يوم."
         )
+
 
     unique_days = {s["slot_date"] for s in slots}
     print(
