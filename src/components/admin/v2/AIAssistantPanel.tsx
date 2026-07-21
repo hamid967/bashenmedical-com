@@ -106,10 +106,14 @@ export function AIAssistantPanel({
       if (res.status === 401) throw new Error("غير مصرح بالوصول.");
       if (!res.ok || !res.body) throw new Error("تعذّر الاتصال بالمساعد.");
 
+      const modelHeader = res.headers.get("X-Model");
+      if (modelHeader) setModel(modelHeader);
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
       let acc = "";
+      let liveUsage: Usage | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -129,8 +133,33 @@ export function AIAssistantPanel({
               acc += delta;
               setStreamed(acc);
             }
+            // The gateway emits a final chunk with usage when stream_options.include_usage=true
+            if (j?.usage) {
+              liveUsage = {
+                prompt: Number(j.usage.prompt_tokens ?? 0),
+                completion: Number(j.usage.completion_tokens ?? 0),
+                total: Number(
+                  j.usage.total_tokens ??
+                    (j.usage.prompt_tokens ?? 0) + (j.usage.completion_tokens ?? 0),
+                ),
+              };
+              setUsage(liveUsage);
+            }
           } catch { /* ignore partial chunks */ }
         }
+      }
+
+      // Fallback: estimate output tokens from streamed text if gateway omitted usage
+      if (!liveUsage && acc) {
+        const promptTok = estimateTokens(next.map((m) => m.content).join("\n"));
+        const compTok = estimateTokens(acc);
+        liveUsage = { prompt: promptTok, completion: compTok, total: promptTok + compTok };
+        setUsage(liveUsage);
+      }
+      if (liveUsage) {
+        setSessionCredits((c) =>
+          c + estimateCredits(liveUsage!.prompt, liveUsage!.completion, modelHeader ?? model),
+        );
       }
 
       setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد." }]);
