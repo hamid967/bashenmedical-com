@@ -132,5 +132,9 @@ export const revokeMySession = createServerFn({ method: "POST" })
     if (!del.ok && del.status !== 204) {
       throw new Error(`Failed to revoke session (${del.status})`);
     }
+    await logAppEvent(context.supabase, "portal.session.revoked", {
+      session_id: data.sessionId,
+      user_id: userId,
+    });
     return { ok: true as const };
   });
