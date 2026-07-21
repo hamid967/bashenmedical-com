@@ -169,30 +169,25 @@ function PortalDashboardPage() {
 
   return (
     <PortalShell>
-      {/* Header */}
-      <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="h-10 w-10 rounded-xl grid place-items-center bg-primary/10 text-primary">
-            <LayoutDashboard className="h-5 w-5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold">لوحة التحكم</h1>
-            <p className="text-xs text-muted-foreground">
-              نظرة سريعة على طلباتك واستفساراتك وحالتها
-            </p>
-          </div>
-        </div>
-        <button
-          onClick={() => {
-            ordersQ.refetch();
-            inquiriesQ.refetch();
-          }}
-          className="inline-flex items-center gap-2 px-3 h-9 rounded-lg border border-border bg-card hover:bg-muted text-sm"
-        >
-          <RefreshCw className={`h-4 w-4 ${refetching ? "animate-spin" : ""}`} />
-          تحديث
-        </button>
-      </div>
+      <PortalPageHeader
+        title="لوحة التحكم"
+        description="نظرة سريعة على طلباتك واستفساراتك وحالتها"
+        breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "لوحة التحكم" }]}
+        actions={
+          <button
+            onClick={() => {
+              ordersQ.refetch();
+              inquiriesQ.refetch();
+            }}
+            className="inline-flex items-center gap-2 px-3 h-9 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] hover:bg-[color:var(--portal-surface-2)] text-sm portal-focus-ring"
+            aria-label="تحديث البيانات"
+          >
+            <RefreshCw className={`h-4 w-4 ${refetching ? "animate-spin" : ""}`} />
+            تحديث
+          </button>
+        }
+      />
+
 
       {loading ? (
         <div className="flex items-center justify-center py-16 text-muted-foreground">
