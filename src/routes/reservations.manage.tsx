@@ -265,7 +265,11 @@ function ManagePage() {
           waitlist_notified: res.waitlist_notified ?? false,
           cancelled_at: Date.now(),
         });
-        setUndoSecondsLeft(30);
+        {
+          const deadline = Date.now() + UNDO_WINDOW_MS;
+          setUndoDeadline(deadline);
+          setUndoMsLeft(UNDO_WINDOW_MS);
+        }
         setCancelPhase("done");
         sonner.success("تم إلغاء الحجز بنجاح.", {
           description: res.waitlist_notified
