@@ -235,35 +235,33 @@ function Field({ label, required, children }: { label: string; required?: boolea
 
 function Skeleton() {
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
-        <div className="h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse mb-6" />
-        <div className="glass-card p-6 space-y-4">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="h-10 rounded-xl bg-slate-200/60 animate-pulse" />
-          ))}
-        </div>
-      </main>
+    <div dir="rtl">
+      <div className="h-11 w-64 rounded-2xl bg-[color:var(--portal-surface-3)] animate-pulse mb-6" />
+      <PortalCard className="p-6 space-y-4">
+        {[0, 1, 2, 3, 4, 5].map((i) => (
+          <PortalSkeleton key={i} className="h-10" />
+        ))}
+      </PortalCard>
     </div>
   );
 }
 function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6" dir="rtl">
-      <div className="glass-card max-w-md w-full p-8 text-center">
-        <AlertTriangle className="mx-auto h-10 w-10 text-red-500 mb-2" />
-        <h2 className="text-lg font-bold">تعذّر تحميل الملف الشخصي</h2>
+    <div dir="rtl" className="grid place-items-center p-6">
+      <PortalCard className="max-w-md w-full p-8 text-center">
+        <AlertTriangle className="mx-auto h-10 w-10 text-[color:var(--portal-error)] mb-2" />
+        <h2 className="text-lg font-bold text-[color:var(--portal-ink)]">تعذّر تحميل الملف الشخصي</h2>
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">{error.message}</p>
         <div className="mt-6 flex justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-white text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
+          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
             <RefreshCw className="inline h-4 w-4 ms-1" />حاول مجددًا
           </button>
-          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm inline-flex items-center gap-1">
+          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" />العودة
           </Link>
         </div>
-      </div>
+      </PortalCard>
     </div>
   );
 }
