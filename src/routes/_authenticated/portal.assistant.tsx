@@ -12,6 +12,14 @@ import {
   parseAssistantActions,
 } from "@/components/portal/AssistantActionButton";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
+import {
+  budgetBlockMessage,
+  checkRunningBudget,
+  commitSessionCredits,
+  getDefaultLimits,
+  preflightBudget,
+} from "@/lib/ai/budget";
+import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
