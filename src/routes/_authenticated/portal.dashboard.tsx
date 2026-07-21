@@ -176,8 +176,9 @@ function PortalDashboardPage() {
   const refetching = ordersQ.isFetching || inquiriesQ.isFetching;
 
   return (
-    <PortalShell>
+    <>
       <PortalPageHeader
+
         title="لوحة التحكم"
         description="نظرة سريعة على طلباتك واستفساراتك وحالتها"
         breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "لوحة التحكم" }]}
