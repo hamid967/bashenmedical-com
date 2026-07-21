@@ -152,6 +152,7 @@ import { Route as ApiPublicReservationsSessionFromAuthRouteImport } from './rout
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/public/reservations/cancel'
+import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
 import { Route as ApiPublicInvoicesLookupRouteImport } from './routes/api/public/invoices/lookup'
 import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
 import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './routes/api/public/inquiries/mark-whatsapp-opened'
@@ -963,6 +964,11 @@ const ApiPublicReservationsCancelRoute =
     path: '/api/public/reservations/cancel',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
+  id: '/api/public/media/$',
+  path: '/api/public/media/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicInvoicesLookupRoute = ApiPublicInvoicesLookupRouteImport.update({
   id: '/api/public/invoices/lookup',
   path: '/api/public/invoices/lookup',
@@ -1271,6 +1277,7 @@ export interface FileRoutesByFullPath {
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -1438,6 +1445,7 @@ export interface FileRoutesByTo {
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -1610,6 +1618,7 @@ export interface FileRoutesById {
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
+  '/api/public/media/$': typeof ApiPublicMediaSplatRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -1782,6 +1791,7 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
     | '/api/public/invoices/lookup'
+    | '/api/public/media/$'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -1949,6 +1959,7 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
     | '/api/public/invoices/lookup'
+    | '/api/public/media/$'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -2120,6 +2131,7 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
     | '/api/public/invoices/lookup'
+    | '/api/public/media/$'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -2199,6 +2211,7 @@ export interface RootRouteChildren {
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
   ApiPublicInvoicesLookupRoute: typeof ApiPublicInvoicesLookupRoute
+  ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
   ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRouteWithChildren
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
@@ -3210,6 +3223,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReservationsCancelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/media/$': {
+      id: '/api/public/media/$'
+      path: '/api/public/media/$'
+      fullPath: '/api/public/media/$'
+      preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/invoices/lookup': {
       id: '/api/public/invoices/lookup'
       path: '/api/public/invoices/lookup'
@@ -3818,6 +3838,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicInquiriesMarkWhatsappOpenedRoute,
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
   ApiPublicInvoicesLookupRoute: ApiPublicInvoicesLookupRoute,
+  ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
   ApiPublicReservationsCancelRoute:
     ApiPublicReservationsCancelRouteWithChildren,
   ApiPublicReservationsListRoute: ApiPublicReservationsListRoute,

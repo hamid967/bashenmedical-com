@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { getOwnerPage, createOwnerPage, updateOwnerPage } from "@/lib/owner/pages.functions";
 import { Button } from "@/components/ui/button";
@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { ArrowRight, Save } from "lucide-react";
+import { ArrowRight, Save, ImagePlus } from "lucide-react";
 import { toast } from "sonner";
+import { MediaPicker, type PickedMedia } from "@/components/owner/MediaPicker";
 
 export const Route = createFileRoute("/_authenticated/owner/pages/$id")({
   head: () => ({ meta: [{ title: "تحرير صفحة · Site Builder" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -48,6 +49,44 @@ function PageEditor() {
   const [form, setForm] = useState<Form>(EMPTY);
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
+
+  // Media picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] =
+    useState<"content_ar" | "content_en" | "og_image" | null>(null);
+  const arRef = useRef<HTMLTextAreaElement>(null);
+  const enRef = useRef<HTMLTextAreaElement>(null);
+
+  function openPicker(target: "content_ar" | "content_en" | "og_image") {
+    setPickerTarget(target);
+    setPickerOpen(true);
+  }
+
+  function handlePick(media: PickedMedia) {
+    if (pickerTarget === "og_image") {
+      up("og_image", media.url);
+      return;
+    }
+    if (!pickerTarget) return;
+    const key = pickerTarget;
+    const ref = key === "content_ar" ? arRef.current : enRef.current;
+    const snippet = `![${media.alt.replace(/[\[\]]/g, "")}](${media.url})`;
+    setForm((f) => {
+      const current = f[key];
+      const start = ref?.selectionStart ?? current.length;
+      const end = ref?.selectionEnd ?? current.length;
+      const next = current.slice(0, start) + snippet + current.slice(end);
+      // Restore caret after React updates.
+      requestAnimationFrame(() => {
+        if (ref) {
+          const pos = start + snippet.length;
+          ref.focus();
+          ref.setSelectionRange(pos, pos);
+        }
+      });
+      return { ...f, [key]: next };
+    });
+  }
 
   useEffect(() => {
     if (isNew) return;
@@ -140,9 +179,14 @@ function PageEditor() {
                 <Input value={form.title_ar} onChange={(e) => up("title_ar", e.target.value)} />
               </div>
               <div>
-                <Label>المحتوى (عربي)</Label>
-                <Textarea value={form.content_ar} onChange={(e) => up("content_ar", e.target.value)}
-                  rows={18} className="font-mono text-sm" placeholder="يدعم Markdown أو HTML بسيط" />
+                <div className="flex items-center justify-between">
+                  <Label>المحتوى (عربي)</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openPicker("content_ar")}>
+                    <ImagePlus className="h-4 w-4 ml-1" /> إدراج صورة
+                  </Button>
+                </div>
+                <Textarea ref={arRef} value={form.content_ar} onChange={(e) => up("content_ar", e.target.value)}
+                  rows={18} className="font-mono text-sm mt-2" placeholder="يدعم Markdown أو HTML بسيط — استخدم ![alt](url) للصور" />
               </div>
             </TabsContent>
             <TabsContent value="en" className="space-y-3 pt-3">
@@ -151,9 +195,14 @@ function PageEditor() {
                 <Input dir="ltr" value={form.title_en} onChange={(e) => up("title_en", e.target.value)} />
               </div>
               <div>
-                <Label>Content (EN)</Label>
-                <Textarea dir="ltr" value={form.content_en} onChange={(e) => up("content_en", e.target.value)}
-                  rows={18} className="font-mono text-sm" placeholder="Markdown or simple HTML" />
+                <div className="flex items-center justify-between">
+                  <Label>Content (EN)</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openPicker("content_en")}>
+                    <ImagePlus className="h-4 w-4 ml-1" /> Insert image
+                  </Button>
+                </div>
+                <Textarea ref={enRef} dir="ltr" value={form.content_en} onChange={(e) => up("content_en", e.target.value)}
+                  rows={18} className="font-mono text-sm mt-2" placeholder="Markdown or simple HTML — use ![alt](url) for images" />
               </div>
             </TabsContent>
           </Tabs>
@@ -185,11 +234,21 @@ function PageEditor() {
             </div>
             <div>
               <Label>صورة OG (رابط)</Label>
-              <Input dir="ltr" value={form.og_image} onChange={(e) => up("og_image", e.target.value)} placeholder="https://…" />
+              <div className="flex gap-2 mt-1">
+                <Input dir="ltr" value={form.og_image} onChange={(e) => up("og_image", e.target.value)} placeholder="https://…" />
+                <Button type="button" variant="outline" size="icon" onClick={() => openPicker("og_image")} title="اختيار من مكتبة الوسائط">
+                  <ImagePlus className="h-4 w-4" />
+                </Button>
+              </div>
+              {form.og_image && (
+                <img src={form.og_image} alt="OG preview" className="mt-2 w-full h-32 object-cover rounded-md border" />
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <MediaPicker open={pickerOpen} onOpenChange={setPickerOpen} onPick={handlePick} />
     </div>
   );
 }
