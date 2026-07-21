@@ -264,5 +264,26 @@
       "completed": "مكتمل",
       "no_show": "لم يحضر"
     }
+  },
+  "a11y": {
+    "stepNav": "خطوات الحجز",
+    "stepN": "الخطوة {{n}}",
+    "stepCurrent": "الخطوة الحالية",
+    "stepDone": "مكتملة",
+    "stepUpcoming": "قادمة",
+    "stepAnnounce": "الخطوة {{current}} من {{total}}: {{title}}",
+    "prevMonth": "الشهر السابق",
+    "nextMonth": "الشهر التالي",
+    "datePast": "تاريخ سابق",
+    "dateTooFar": "خارج نطاق الحجز",
+    "dateUnavailable": "غير متاح",
+    "dateAvailable": "متاح",
+    "timeSlot": "الوقت {{time}}",
+    "timeBooked": "محجوز",
+    "editStep": "تعديل {{label}}",
+    "ratingLabel": "التقييم {{rating}} من 5 من {{count}} مراجعة",
+    "bookingDisabled": "الحجز غير متاح",
+    "charsCount": "{{count}} من {{max}} حرف"
   }
 }
+
