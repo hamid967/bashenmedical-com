@@ -106,8 +106,8 @@ async function logRequest(row: {
       latency_ms: row.latency_ms,
       http_status: row.http_status,
       error_message: row.error_message ?? null,
-      raw_request: row.input as unknown as Record<string, unknown>,
-      raw_response: (row.result ?? null) as unknown as Record<string, unknown> | null,
+      raw_request: JSON.parse(JSON.stringify(row.input)),
+      raw_response: row.result ? JSON.parse(JSON.stringify(row.result)) : null,
       ip: row.input.ip ?? null,
       user_agent: row.input.user_agent ?? null,
     });
