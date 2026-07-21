@@ -44,6 +44,9 @@ export type ConsentCatalogItem = {
   /** Long-form body shown when the patient expands the item. */
   body_ar: string;
   body_en: string;
+  /** Live in-app effect explaining what changes when granted / withdrawn. */
+  impact_ar: string;
+  impact_en: string;
   document_url?: string;
 };
 
@@ -61,6 +64,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "باستخدامك بوابة مجمع باعشن الطبي فإنك توافق على الشروط العامة للاستخدام، بما فيها الاستخدام العادل، وحظر إساءة الاستخدام، ومسؤوليتك عن حماية بيانات الدخول الخاصة بك.",
     body_en:
       "By using the Baeshen Medical portal you accept the terms of fair use, prohibited misuse, and responsibility for safeguarding your login credentials.",
+    impact_ar: "عند السحب: يتم إيقاف الوصول إلى بوابة المريض حتى إعادة الموافقة.",
+    impact_en: "When withdrawn: portal access is disabled until re-granted.",
   },
   {
     type: "privacy_policy",
@@ -75,6 +80,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "نلتزم بنظام حماية البيانات الشخصية (PDPL) الصادر من هيئة البيانات والذكاء الاصطناعي (سدايا). تُخزَّن بياناتك داخل المملكة، وتُشفَّر أثناء النقل والتخزين، ولا تُشارك مع أي طرف ثالث دون موافقتك الصريحة إلا لمتطلبات نظامية.",
     body_en:
       "We comply with Saudi PDPL (SDAIA). Data is stored inside KSA, encrypted at rest and in transit, and never shared with third parties without your explicit consent except where mandated by law.",
+    impact_ar: "مطلوبة قانونيًا لاستخدام أي خدمة رقمية في البوابة.",
+    impact_en: "Legally required to use any digital service in the portal.",
   },
   {
     type: "data_processing",
@@ -89,6 +96,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "توافق على معالجة بياناتك (الديموغرافية، الطبية، التأمينية، والمالية) بغرض تقديم الرعاية الصحية، إصدار الفواتير، ومتابعة الحالة. يمكنك سحب هذه الموافقة لاحقًا مع علمك بأن ذلك قد يؤثر على استمرارية بعض الخدمات.",
     body_en:
       "You consent to processing your demographic, medical, insurance and financial data to deliver care, issue invoices, and follow up. You may withdraw this consent later; some services may be affected.",
+    impact_ar: "عند السحب: تتوقف قدرة النظام على الحجز وإصدار الفواتير آليًا.",
+    impact_en: "When withdrawn: automated booking and invoicing stop.",
   },
   {
     type: "medical_treatment",
@@ -103,6 +112,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "أوافق على تلقّي الفحوصات والعلاج والإجراءات الروتينية التي يحددها الطبيب المعالج. سيتم شرح كل إجراء والمخاطر المتوقعة قبل التنفيذ، ولك الحق في رفض أي إجراء في أي وقت.",
     body_en:
       "I consent to examinations, treatment and routine procedures ordered by my treating physician. Each procedure and its risks will be explained beforehand, and I may refuse any procedure at any time.",
+    impact_ar: "مطلوبة قبل تنفيذ أي إجراء سريري.",
+    impact_en: "Required before any clinical procedure is performed.",
   },
   {
     type: "telemedicine",
@@ -117,6 +128,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "أفهم أن الاستشارة عن بُعد لها حدود مقارنة بالكشف الحضوري، وأن الطبيب قد يطلب زيارة العيادة عند الحاجة. تُسجَّل الجلسات ضمن سجلي الطبي فقط ولا تُشارك مع أي طرف خارجي.",
     body_en:
       "I understand telemedicine has limits versus in-person visits, and the doctor may request a clinic visit if needed. Sessions are logged in my medical record only.",
+    impact_ar: "عند السحب: يُخفى خيار حجز الاستشارات عن بُعد من واجهة الحجز.",
+    impact_en: "When withdrawn: telemedicine option is hidden from booking.",
   },
   {
     type: "share_medical_records",
@@ -131,6 +144,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "عند سحب هذه الموافقة، سيتوقف المجمع عن مشاركة سجلك الطبي مع أي جهة خارجية إلا في حالات الطوارئ الطبية أو المتطلبات النظامية.",
     body_en:
       "Withdrawing this consent stops sharing your record with external parties, except in medical emergencies or when legally required.",
+    impact_ar: "عند السحب: يُوقف زر «مشاركة السجل» في التقارير.",
+    impact_en: "When withdrawn: the “Share record” button is disabled in reports.",
   },
   {
     type: "insurance_data_sharing",
@@ -145,6 +160,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "مطلوب لتفعيل المطالبات المباشرة مع شركة التأمين. عند السحب سيتم تحويلك للدفع النقدي في زياراتك القادمة.",
     body_en:
       "Required to submit direct claims to your insurance provider. Withdrawing switches future visits to cash payment.",
+    impact_ar: "عند السحب: يتم التحويل تلقائيًا إلى الدفع النقدي.",
+    impact_en: "When withdrawn: future visits default to cash payment.",
   },
   {
     type: "photography_recording",
@@ -159,6 +176,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "تُستخدم الصور والتسجيلات لأغراض توثيق الحالة داخل ملفك الطبي فقط، ولن تُنشر أو تُستخدم للأغراض التعليمية أو التسويقية دون موافقة كتابية منفصلة.",
     body_en:
       "Media is used strictly for case documentation in your record and will not be published or used for teaching/marketing without a separate written consent.",
+    impact_ar: "عند السحب: لن يُلتقط أي تصوير سريري خلال زياراتك.",
+    impact_en: "When withdrawn: no clinical photography during your visits.",
   },
   {
     type: "research_participation",
@@ -173,6 +192,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "تُزال جميع المعرّفات الشخصية قبل الاستخدام البحثي. لا يترتب على الموافقة أو الرفض أي تأثير على جودة الرعاية المقدَّمة لك.",
     body_en:
       "All personal identifiers are removed before research use. Your decision does not affect the quality of care you receive.",
+    impact_ar: "عند السحب: تُستبعد بياناتك من أي دراسة بحثية جديدة.",
+    impact_en: "When withdrawn: your data is excluded from any new study.",
   },
   {
     type: "marketing_communications",
@@ -187,6 +208,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
       "لا يشمل هذا الخيار الإشعارات التشغيلية (تذكيرات المواعيد، جاهزية التقارير، الفواتير) — هذه تبقى دائمًا مفعّلة.",
     body_en:
       "Does not include operational alerts (appointment reminders, report readiness, invoices) which always remain enabled.",
+    impact_ar: "عند السحب: تُخفى بطاقات العروض والحملات من مركز الإشعارات فورًا.",
+    impact_en: "When withdrawn: promo/campaign cards are hidden from the notification center instantly.",
   },
 ];
 

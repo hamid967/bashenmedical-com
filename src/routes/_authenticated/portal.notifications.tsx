@@ -42,6 +42,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
+import { useHasConsent } from "@/hooks/useHasConsent";
+import { ShieldOff } from "lucide-react";
 
 
 /* ----------------------------- query --------------------------------- */
@@ -162,7 +164,19 @@ function NotificationsPage() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState<Filter>("all");
 
-  const items = q.data;
+  const marketingConsent = useHasConsent("marketing_communications");
+  const isMarketing = (n: PatientNotification) => {
+    const k = (n.kind || "").toLowerCase();
+    return k.includes("marketing") || k.includes("promo") || k.includes("campaign");
+  };
+
+  const visibleItems = useMemo(
+    () => (marketingConsent.granted ? q.data : q.data.filter((n) => !isMarketing(n))),
+    [q.data, marketingConsent.granted],
+  );
+  const hiddenMarketingCount = q.data.length - visibleItems.length;
+
+  const items = visibleItems;
   const unreadIds = useMemo(
     () => items.filter((n) => !n.read_at).map((n) => n.id),
     [items],
@@ -297,6 +311,25 @@ function NotificationsPage() {
             );
           })}
         </div>
+
+        {hiddenMarketingCount > 0 && (
+          <div
+            role="status"
+            className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 p-3 text-xs flex items-start gap-2"
+          >
+            <ShieldOff className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
+            <span className="flex-1">
+              تم إخفاء {hiddenMarketingCount} من الإشعارات التسويقية لأن موافقة
+              «الرسائل التسويقية» غير مفعّلة.{" "}
+              <Link
+                to="/portal/consents"
+                className="font-semibold text-[color:var(--portal-primary)] hover:underline"
+              >
+                إدارة الموافقات
+              </Link>
+            </span>
+          </div>
+        )}
 
         {/* List */}
         {filtered.length === 0 ? (
