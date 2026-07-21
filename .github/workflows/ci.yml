@@ -422,12 +422,20 @@ jobs:
 
 
 
+      - name: Cleanup E2E booking fixtures
+        if: always() && steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/ci/cleanup-e2e-booking-fixtures.py
+
       - name: Stop preview server
         if: always() && steps.verify_secrets.outputs.has_secrets == 'true'
         run: |
           if [ -f preview.pid ]; then
             kill "$(cat preview.pid)" 2>/dev/null || true
           fi
+
 
       - name: Upload E2E artifacts (screenshots, video, trace) on failure
         if: failure() && steps.verify_secrets.outputs.has_secrets == 'true'
