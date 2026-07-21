@@ -163,11 +163,12 @@ async def run() -> None:
         )
 
         # 2) Walk steps 1..4 (radiogroups) with keyboard only.
-        for label in ("service", "branch", "specialty", "doctor"):
-            await wait_step(page, {"service": 1, "branch": 2, "specialty": 3, "doctor": 4}[label])
-            await activate_first_radio(page, label)
-            await page.wait_for_timeout(500)
+        for label, n in (("service", 1), ("branch", 2), ("specialty", 3), ("doctor", 4)):
+            await wait_step(page, n)
+            await activate_first_radio(page, label, n)
+            await page.wait_for_timeout(600)
             await shot(page, f"02-{label}-selected")
+
 
         # 3) Step 5 — Date grid.
         await wait_step(page, 5)
