@@ -8,11 +8,18 @@
  * كل تحويل يستبدل نفس اللون بمرجع الرمز المُعرَّف.
  *
  * الاستخدام:
- *   node scripts/codemod-portal-tokens.mjs [--write] [--file <substr>] [--limit N] [--verbose]
- *   node scripts/codemod-portal-tokens.mjs --list-rules
+ *   node scripts/codemod-portal-tokens.mjs [options]
  *
- *   بدون --write: dry-run يعرض عدد التغييرات + عيّنة (Diff مختصر).
- *   مع --write : يحفظ الملفات ويطبع ملخّصًا.
+ *   بدون --write: dry-run افتراضي (يمكن تمرير --dry-run صراحةً للوضوح).
+ *   مع --write : يحفظ الملفات ويطبع ملخّصًا + Diff مختصر.
+ *
+ * تقييد النطاق (يمكن دمج أكثر من خيار):
+ *   --file <substr>        تصفية بسيطة على المسار (تحتفظ بالسلوك القديم).
+ *   --glob <pattern>       نمط glob؛ يقبل *, **, ?، وقابل للتكرار.
+ *   --paths <file>         ملف نصّي فيه مسار/glob في كل سطر (# للتعليق).
+ *   --limit N              حدّ أعلى لعدد الملفات المُغيَّرة.
+ *   --list-rules           اعرض قواعد التحويل واخرج.
+ *   --verbose              اعرض utilities قريبة لم تُحوَّل + تفصيل حسب المجلد.
  *
  * الضمانات:
  *   1. لا يعدّل أي سطر يحوي  // tokens-allow.
@@ -21,22 +28,59 @@
  *   3. أي تحويل ذو بديل غير مؤكّد (مثل shade نادر) يُترك ويُبلَّغ عنه في --verbose.
  *   4. عند --write ينشئ نسخة .bak لكل ملف مُعدَّل (يمكن حذفها بعد التحقق).
  */
-import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { join, relative, dirname } from "node:path";
 
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
 const WRITE = argv.includes("--write");
 const VERBOSE = argv.includes("--verbose");
 const LIST_RULES = argv.includes("--list-rules");
+const DRY_RUN_FLAG = argv.includes("--dry-run"); // معلوماتي؛ الوضع الافتراضي dry أصلًا
+function readOpt(name) {
+  const i = argv.indexOf(name);
+  return i >= 0 ? argv[i + 1] : undefined;
+}
+function readOptAll(name) {
+  const out = [];
+  for (let i = 0; i < argv.length; i++) if (argv[i] === name && argv[i + 1]) out.push(argv[i + 1]);
+  return out;
+}
 const LIMIT = (() => {
-  const i = argv.indexOf("--limit");
-  return i >= 0 ? parseInt(argv[i + 1] ?? "0", 10) || Infinity : Infinity;
+  const v = readOpt("--limit");
+  return v ? parseInt(v, 10) || Infinity : Infinity;
 })();
-const FILE_FILTER = (() => {
-  const i = argv.indexOf("--file");
-  return i >= 0 ? argv[i + 1] ?? "" : "";
-})();
+const FILE_FILTER = readOpt("--file") ?? "";
+const GLOB_PATTERNS = readOptAll("--glob");
+const PATHS_FILE = readOpt("--paths");
+
+if (PATHS_FILE) {
+  if (!existsSync(PATHS_FILE)) {
+    console.error(`--paths: الملف غير موجود: ${PATHS_FILE}`);
+    process.exit(2);
+  }
+  const lines = readFileSync(PATHS_FILE, "utf8")
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"));
+  GLOB_PATTERNS.push(...lines);
+}
+
+// glob → RegExp (يدعم **، *، ?). المطابقة على المسار النسبي بعد توحيد "/"
+function globToRegExp(g) {
+  let re = "";
+  for (let i = 0; i < g.length; i++) {
+    const c = g[i];
+    if (c === "*") {
+      if (g[i + 1] === "*") { re += ".*"; i++; if (g[i + 1] === "/") i++; }
+      else re += "[^/]*";
+    } else if (c === "?") re += "[^/]";
+    else if (".+^$(){}|[]\\".includes(c)) re += "\\" + c;
+    else re += c;
+  }
+  return new RegExp("^" + re + "$");
+}
+const GLOB_RES = GLOB_PATTERNS.map(globToRegExp);
 
 const TARGET_DIRS = ["src/routes/_authenticated", "src/components/portal"];
 const FILE_EXCEPTIONS = new Set([
@@ -199,8 +243,15 @@ const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d)))
     if (FILE_EXCEPTIONS.has(rel)) return false;
     if (!(rel.startsWith("src/components/portal/") || rel.startsWith("src/routes/_authenticated/portal"))) return false;
     if (FILE_FILTER && !rel.includes(FILE_FILTER)) return false;
+    if (GLOB_RES.length && !GLOB_RES.some((re) => re.test(rel))) return false;
     return true;
   });
+
+if (VERBOSE) {
+  console.log(`نطاق المطابقة: ${files.length} ملف بعد التصفية` +
+    (GLOB_PATTERNS.length ? ` (globs: ${GLOB_PATTERNS.length})` : "") +
+    (FILE_FILTER ? ` (--file="${FILE_FILTER}")` : ""));
+}
 
 // ─────────────────────────────────────────────────────────────────────
 // تحويل نطاق className
@@ -303,11 +354,34 @@ for (const f of files) {
 }
 
 // إخراج
-const mode = WRITE ? "WRITE" : "dry-run";
+const mode = WRITE ? "WRITE" : (DRY_RUN_FLAG ? "dry-run (تقدير)" : "dry-run");
 console.log(`portal-tokens codemod — ${mode}`);
-console.log(`ملفات مُتأثِّرة: ${totalFiles}  ·  استبدالات: ${totalReplacements}`);
-for (const p of perFile.slice(0, 30)) console.log(`  • ${p.rel}  (${p.changed})`);
-if (perFile.length > 30) console.log(`  … +${perFile.length - 30} ملف آخر`);
+console.log(`نطاق: ${files.length} ملف مُرشَّح  ·  مُتأثِّر: ${totalFiles}  ·  استبدالات: ${totalReplacements}`);
+
+// تفصيل حسب المجلد (يُعرض دائمًا حتى في dry-run)
+if (perFile.length) {
+  const byDir = new Map();
+  for (const p of perFile) {
+    const dir = dirname(p.rel);
+    const agg = byDir.get(dir) ?? { files: 0, changed: 0 };
+    agg.files++;
+    agg.changed += p.changed;
+    byDir.set(dir, agg);
+  }
+  const rows = [...byDir.entries()].sort((a, b) => b[1].changed - a[1].changed);
+  console.log(`\nتفصيل حسب المجلد:`);
+  const dirW = Math.min(60, Math.max(...rows.map(([d]) => d.length)));
+  for (const [dir, agg] of rows) {
+    console.log(`  ${dir.padEnd(dirW)}  ${String(agg.files).padStart(3)} ملف · ${String(agg.changed).padStart(4)} استبدال`);
+  }
+
+  const topN = VERBOSE ? perFile.length : Math.min(30, perFile.length);
+  console.log(`\nأعلى الملفات (${topN}${topN < perFile.length ? `/${perFile.length}` : ""}):`);
+  for (const p of perFile.sort((a, b) => b.changed - a.changed).slice(0, topN)) {
+    console.log(`  • ${p.rel}  (${p.changed})`);
+  }
+  if (!VERBOSE && perFile.length > 30) console.log(`  … +${perFile.length - 30} ملف آخر (شغّل بـ --verbose للقائمة الكاملة)`);
+}
 
 if (VERBOSE && skippedAll.length) {
   console.log(`\nتنبيه — utilities قريبة لم تُحوَّل (تحتاج قرار يدوي):`);
@@ -319,6 +393,9 @@ if (VERBOSE && skippedAll.length) {
 
 if (!WRITE) {
   console.log(`\nلتطبيق التغييرات:  bun run codemod:portal-tokens -- --write`);
-  console.log(`لعرض القواعد كاملة:  bun run codemod:portal-tokens -- --list-rules`);
+  console.log(`تقييد بـ glob:      bun run codemod:portal-tokens -- --glob "src/routes/_authenticated/portal.prescriptions*.tsx"`);
+  console.log(`تقييد بقائمة:       bun run codemod:portal-tokens -- --paths .codemod-scope.txt`);
+  console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
   console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
 }
+
