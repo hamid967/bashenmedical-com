@@ -232,6 +232,171 @@ export const getAdminTrends = createServerFn({ method: "GET" })
     };
   });
 
+/* ─────────────────────────────────────────────────────────────
+ * getAdminKpis — Expanded KPI grid for the Overview page.
+ * For each metric returns: current period, previous period,
+ * absolute + percent delta, and a per-day sparkline series.
+ * Range: 7d (default) / 30d / 90d.
+ * Role-scoped: pharmacy sees orders-only KPIs, reception sees
+ * appointments-only KPIs, admin/super_admin see everything.
+ * ───────────────────────────────────────────────────────────── */
+export type AdminKpiKey =
+  | "appointments"
+  | "appointments_today"
+  | "orders"
+  | "patients_new"
+  | "inquiries"
+  | "complaints";
+
+export type AdminKpi = {
+  key: AdminKpiKey;
+  label: string;
+  current: number;
+  previous: number;
+  deltaPct: number;
+  deltaAbs: number;
+  /** Higher is better? drives green/red semantics. */
+  positiveIsGood: boolean;
+  sparkline: { day: string; count: number }[];
+  drillTo: string | null;
+};
+
+export const getAdminKpis = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((input: { range?: "7d" | "30d" | "90d" }) => ({
+    range: input?.range === "30d" ? "30d" as const : input?.range === "90d" ? "90d" as const : "7d" as const,
+  }))
+  .handler(async ({ context, data }): Promise<{ range: string; kpis: AdminKpi[] }> => {
+    const roles = await getRoles(context.supabase, context.userId);
+    ensureRole(roles, ["admin", "reception", "pharmacy"]);
+    const sb = context.supabase;
+    const isAdmin = roles.includes("admin") || roles.includes("super_admin");
+    const isReception = isAdmin || roles.includes("reception");
+    const isPharmacy = isAdmin || roles.includes("pharmacy");
+
+    const days = data.range === "90d" ? 90 : data.range === "30d" ? 30 : 7;
+    const now = new Date();
+    const curStart = new Date(now);
+    curStart.setUTCDate(curStart.getUTCDate() - (days - 1));
+    curStart.setUTCHours(0, 0, 0, 0);
+    const prevStart = new Date(curStart);
+    prevStart.setUTCDate(prevStart.getUTCDate() - days);
+    const prevStartIso = prevStart.toISOString();
+    const curStartIso = curStart.toISOString();
+    const today = now.toISOString().slice(0, 10);
+
+    const buckets: string[] = [];
+    for (let i = 0; i < days; i++) {
+      const d = new Date(curStart);
+      d.setUTCDate(curStart.getUTCDate() + i);
+      buckets.push(d.toISOString().slice(0, 10));
+    }
+
+    const bucketize = (rows: Array<{ created_at: string | null }> | null | undefined) => {
+      const map = new Map<string, number>(buckets.map((b) => [b, 0] as const));
+      (rows ?? []).forEach((r) => {
+        if (!r.created_at) return;
+        const k = new Date(r.created_at).toISOString().slice(0, 10);
+        if (map.has(k)) map.set(k, (map.get(k) ?? 0) + 1);
+      });
+      return buckets.map((day) => ({ day, count: map.get(day) ?? 0 }));
+    };
+    const sum = (arr: Array<{ count: number }>) => arr.reduce((a, b) => a + b.count, 0);
+    const pct = (cur: number, prev: number) => {
+      if (prev === 0) return cur > 0 ? 100 : 0;
+      return Math.round(((cur - prev) / prev) * 100);
+    };
+
+    // Fetch current + previous windows in parallel (only tables the user's role touches).
+    const q = (table: string) =>
+      sb.from(table).select("created_at").gte("created_at", prevStartIso).limit(20000);
+
+    const [apptsRes, ordersRes, patientsRes, inquiriesRes, complaintsRes, apptsTodayRes] =
+      await Promise.all([
+        isReception ? q("appointments") : Promise.resolve({ data: [] }),
+        isPharmacy ? q("medicine_orders") : Promise.resolve({ data: [] }),
+        isAdmin ? q("patients") : Promise.resolve({ data: [] }),
+        isAdmin ? q("service_inquiries") : Promise.resolve({ data: [] }),
+        isAdmin ? q("complaints") : Promise.resolve({ data: [] }),
+        isReception
+          ? sb
+              .from("appointments")
+              .select("id", { count: "exact", head: true })
+              .eq("appointment_date", today)
+          : Promise.resolve({ count: 0 }),
+      ]);
+
+    const split = (rows: Array<{ created_at: string | null }> | null | undefined) => {
+      const cur: Array<{ created_at: string | null }> = [];
+      const prev: Array<{ created_at: string | null }> = [];
+      (rows ?? []).forEach((r) => {
+        if (!r.created_at) return;
+        if (r.created_at >= curStartIso) cur.push(r);
+        else prev.push(r);
+      });
+      return { cur, prev };
+    };
+
+    const build = (
+      key: AdminKpiKey,
+      label: string,
+      rows: Array<{ created_at: string | null }> | null | undefined,
+      opts: { drillTo: string | null; positiveIsGood?: boolean },
+    ): AdminKpi => {
+      const { cur, prev } = split(rows);
+      const spark = bucketize(cur);
+      const current = sum(spark);
+      const previous = prev.length;
+      return {
+        key,
+        label,
+        current,
+        previous,
+        deltaAbs: current - previous,
+        deltaPct: pct(current, previous),
+        positiveIsGood: opts.positiveIsGood ?? true,
+        sparkline: spark,
+        drillTo: opts.drillTo,
+      };
+    };
+
+    const kpis: AdminKpi[] = [];
+    if (isReception) {
+      kpis.push(
+        build("appointments", "المواعيد", apptsRes.data, { drillTo: "/appointments-queue" }),
+      );
+      const todayCount = (apptsTodayRes as { count: number | null }).count ?? 0;
+      kpis.push({
+        key: "appointments_today",
+        label: "مواعيد اليوم",
+        current: todayCount,
+        previous: 0,
+        deltaAbs: 0,
+        deltaPct: 0,
+        positiveIsGood: true,
+        sparkline: [],
+        drillTo: "/appointments-queue",
+      });
+    }
+    if (isPharmacy) {
+      kpis.push(build("orders", "طلبات الصيدلية", ordersRes.data, { drillTo: "/orders-unified" }));
+    }
+    if (isAdmin) {
+      kpis.push(
+        build("patients_new", "مرضى جدد", patientsRes.data, { drillTo: "/patients-management" }),
+        build("inquiries", "الاستفسارات", inquiriesRes.data, {
+          drillTo: "/service-inquiries-admin",
+        }),
+        build("complaints", "الشكاوى", complaintsRes.data, {
+          drillTo: "/complaints-admin",
+          positiveIsGood: false,
+        }),
+      );
+    }
+
+    return { range: data.range, kpis };
+  });
+
 export const listAppointments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
