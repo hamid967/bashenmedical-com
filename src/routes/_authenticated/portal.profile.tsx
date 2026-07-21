@@ -91,17 +91,44 @@ function ProfilePage() {
     setDirty(true);
   };
 
+  // Phase 10 — sensitive-field reauth dialog state
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pwValue, setPwValue] = useState("");
+  const [pwError, setPwError] = useState<string | null>(null);
+
   const mut = useMutation({
-    mutationFn: (payload: Partial<FormState>) => updateMyProfile({ data: payload as never }),
+    mutationFn: (payload: Partial<FormState> & { _password?: string }) =>
+      updateMyProfile({ data: payload as never }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portal", "my-profile-full"] });
       qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
       qc.invalidateQueries({ queryKey: ["portal", "dashboard-summary"] });
       toast.success("تم حفظ الملف الشخصي");
       setDirty(false);
+      setPwOpen(false);
+      setPwValue("");
+      setPwError(null);
     },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : "تعذّر الحفظ";
+      if (pwOpen) setPwError(msg);
+      else toast.error(msg);
+    },
   });
+
+  function buildPayload(pw?: string) {
+    return {
+      full_name: form.full_name.trim(),
+      phone: form.phone.trim() || null as unknown as string,
+      national_id: form.national_id.trim() || null as unknown as string,
+      date_of_birth: form.date_of_birth || null as unknown as string,
+      gender: (form.gender || null) as FormState["gender"],
+      preferred_language: form.preferred_language,
+      emergency_contact_name: form.emergency_contact_name.trim() || null as unknown as string,
+      emergency_contact_phone: form.emergency_contact_phone.trim() || null as unknown as string,
+      ...(pw ? { _password: pw } : {}),
+    };
+  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,17 +140,24 @@ function ProfilePage() {
       toast.error("رقم الجوال غير صالح");
       return;
     }
-    mut.mutate({
-      full_name: form.full_name.trim(),
-      phone: form.phone.trim() || null as unknown as string,
-      national_id: form.national_id.trim() || null as unknown as string,
-      date_of_birth: form.date_of_birth || null as unknown as string,
-      gender: (form.gender || null) as FormState["gender"],
-      preferred_language: form.preferred_language,
-      emergency_contact_name: form.emergency_contact_name.trim() || null as unknown as string,
-      emergency_contact_phone: form.emergency_contact_phone.trim() || null as unknown as string,
-    });
+    // Detect sensitive changes vs original values
+    const sensitiveChanged =
+      (form.phone.trim() || "") !== (p?.phone ?? "") ||
+      (form.national_id.trim() || "") !== (p?.national_id ?? "");
+    if (sensitiveChanged) {
+      setPwError(null);
+      setPwValue("");
+      setPwOpen(true);
+      return;
+    }
+    mut.mutate(buildPayload());
   };
+
+  const confirmSensitive = () => {
+    if (!pwValue) { setPwError("أدخل كلمة المرور"); return; }
+    mut.mutate(buildPayload(pwValue));
+  };
+
 
   return (
     <div dir="rtl">
