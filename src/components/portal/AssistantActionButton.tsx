@@ -134,7 +134,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
         >
           <div className="w-full max-w-md rounded-2xl bg-[color:var(--portal-surface)] p-6 shadow-2xl">
             <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-50 text-amber-600 shrink-0">
+              <div className="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] shrink-0">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div className="flex-1">
