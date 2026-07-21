@@ -327,37 +327,48 @@ function SidebarNav({
   onNavigate: () => void;
 }) {
   return (
-    <nav className="flex-1 overflow-y-auto p-3">
-      <ul className="space-y-1">
-        {NAV.map((item) => {
-          const active =
-            pathname === item.to ||
-            (item.to !== "/portal" && pathname.startsWith(item.to + "/")) ||
-            (item.to !== "/portal" && pathname.startsWith(item.to));
-          const Icon = item.icon;
-          return (
-            <li key={item.to}>
-              <Link
-                to={item.to}
-                onClick={onNavigate}
-                className={
-                  "flex items-center gap-3 px-3.5 h-11 rounded-2xl text-sm font-medium transition-all " +
-                  (active
-                    ? "text-white shadow-[0_10px_30px_-15px_rgba(15,108,189,0.6)]"
-                    : "text-[color:var(--portal-ink-2)] hover:bg-[color:var(--portal-gradient-soft)] hover:text-[color:var(--portal-primary)]")
-                }
-                style={active ? { background: "var(--portal-gradient)" } : undefined}
-              >
-                <Icon className="h-[18px] w-[18px] shrink-0" />
-                <span className="truncate">{isAr ? item.label_ar : item.label_en}</span>
-              </Link>
-            </li>
-          );
-        })}
+    <nav className="flex-1 overflow-y-auto p-3" aria-label={isAr ? "التنقل الرئيسي" : "Primary"}>
+      <ul className="space-y-4">
+        {NAV_GROUPS.map((group) => (
+          <li key={group.id}>
+            <div className="px-3 mb-1.5 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[color:var(--portal-ink-3)]">
+              {isAr ? group.label_ar : group.label_en}
+            </div>
+            <ul className="space-y-1">
+              {group.items.map((item) => {
+                const active =
+                  pathname === item.to ||
+                  (item.to !== "/portal" && pathname.startsWith(item.to + "/")) ||
+                  (item.to !== "/portal" && pathname === item.to);
+                const Icon = item.icon;
+                return (
+                  <li key={item.to}>
+                    <Link
+                      to={item.to}
+                      onClick={onNavigate}
+                      aria-current={active ? "page" : undefined}
+                      className={
+                        "flex items-center gap-3 px-3.5 h-11 rounded-2xl text-sm font-medium transition-all portal-focus-ring " +
+                        (active
+                          ? "text-white shadow-[var(--portal-shadow-elevated)]"
+                          : "text-[color:var(--portal-ink-2)] hover:bg-[color:var(--portal-gradient-soft)] hover:text-[color:var(--portal-primary)]")
+                      }
+                      style={active ? { background: "var(--portal-gradient)" } : undefined}
+                    >
+                      <Icon className="h-[18px] w-[18px] shrink-0" />
+                      <span className="truncate">{isAr ? item.label_ar : item.label_en}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </li>
+        ))}
       </ul>
     </nav>
   );
 }
+
 
 function SidebarFooter({
   isAr,
