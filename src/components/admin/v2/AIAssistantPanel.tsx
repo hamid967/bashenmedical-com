@@ -17,6 +17,7 @@ import {
 } from "@/lib/ai/budget";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
+import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 type Usage = { prompt: number; completion: number; total: number };
@@ -399,6 +400,17 @@ export function AIAssistantPanel({
 
         {/* Composer */}
         <div className="border-t p-3 shrink-0" style={{ borderColor: "var(--ac-line)" }}>
+          {!streaming && input.trim() && (
+            <div className="mb-2 flex justify-end">
+              <PreflightCostChip
+                input={input}
+                streaming={streaming}
+                model={model}
+                historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
+                lang="ar"
+              />
+            </div>
+          )}
           <div
             className="rounded-xl border flex items-end gap-2 p-2"
             style={{ borderColor: "var(--ac-line-strong)", background: "var(--ac-bg)" }}

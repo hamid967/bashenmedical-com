@@ -22,6 +22,7 @@ import {
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
+import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
 import { SessionExportButton } from "@/components/assistant/SessionExportButton";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
@@ -290,6 +291,18 @@ function AssistantPage() {
           sessionCredits={sessionCredits}
           lang="ar"
         />
+
+        {!streaming && input.trim() && (
+          <div className="px-3 sm:px-4 pt-2 flex justify-end bg-[color:var(--portal-surface)]">
+            <PreflightCostChip
+              input={input}
+              streaming={streaming}
+              model={activeModel}
+              historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
+              lang="ar"
+            />
+          </div>
+        )}
 
         <form
           onSubmit={(e) => { e.preventDefault(); send(input); }}

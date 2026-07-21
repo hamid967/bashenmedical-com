@@ -20,6 +20,7 @@ import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 import { AssistantCostMeter } from "./AssistantCostMeter";
+import { PreflightCostChip } from "./PreflightCostChip";
 import { SessionExportButton } from "./SessionExportButton";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
@@ -438,6 +439,17 @@ export function BaeshenAssistant() {
           />
 
           <form onSubmit={onSubmit} className="border-t bg-background p-3">
+            {!busy && input.trim() && (
+              <div className="mb-2 flex justify-end">
+                <PreflightCostChip
+                  input={input}
+                  streaming={busy}
+                  model={activeModel}
+                  historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
+                  lang={lang === "en" ? "en" : "ar"}
+                />
+              </div>
+            )}
             <div className="flex items-end gap-2">
               <Textarea
                 value={input}
