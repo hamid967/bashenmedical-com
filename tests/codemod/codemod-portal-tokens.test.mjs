@@ -54,12 +54,14 @@ describe("codemod-portal-tokens — fixtures", () => {
       const { src: actual, changed } = run(input);
 
       if (actual !== expected) {
-        // إخراج تشخيصي مفيد
-        console.error(`\n─── DIFF (${base}) ───`);
-        console.error("--- expected ---\n" + expected);
-        console.error("--- actual   ---\n" + actual);
+        // احفظ diff + الملفات الفعلية/المتوقّعة في tests/codemod/.tmp لرفعها كـ CI artifact.
+        const diff = unifiedDiff(expected, actual, base);
+        writeFileSync(join(TMP, `${base}.diff.txt`), diff);
+        writeFileSync(join(TMP, `${base}.actual.tsx`), actual);
+        writeFileSync(join(TMP, `${base}.expected.tsx`), expected);
+        console.error(`\n─── DIFF (${base}) — saved to tests/codemod/.tmp/${base}.diff.txt ───\n${diff}`);
       }
-      assert.equal(actual, expected, `مخرجات codemod تختلف عن expected لـ ${base}`);
+      assert.equal(actual, expected, `مخرجات codemod تختلف عن expected لـ ${base} (راجع tests/codemod/.tmp/${base}.diff.txt)`);
       assert.ok(changed > 0 || input === expected, "إحصاء changed يجب أن يعكس التغييرات");
     });
   }
