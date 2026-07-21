@@ -206,8 +206,8 @@ export function BaeshenAssistant() {
       });
       const endedAt = performance.now();
       updateLastMeta({ endedAt });
-      if (finalUsage && finalUsage.completion > 0 && result.text) {
-        recordUsageSample({ model: currentModel, text: result.text, kind: "output", tokens: finalUsage.completion });
+      if (usageRef.current && usageRef.current.completion > 0 && result.text) {
+        recordUsageSample({ model: currentModel, text: result.text, kind: "output", tokens: usageRef.current.completion });
       }
       // Commit estimated credits for the session running total.
       const promptTok = estimateTokens(promptText);
