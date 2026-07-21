@@ -438,6 +438,17 @@ export function BaeshenAssistant() {
           />
 
           <form onSubmit={onSubmit} className="border-t bg-background p-3">
+            {!busy && input.trim() && (
+              <div className="mb-2 flex justify-end">
+                <PreflightCostChip
+                  input={input}
+                  streaming={busy}
+                  model={activeModel}
+                  historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
+                  lang={lang === "en" ? "en" : "ar"}
+                />
+              </div>
+            )}
             <div className="flex items-end gap-2">
               <Textarea
                 value={input}
