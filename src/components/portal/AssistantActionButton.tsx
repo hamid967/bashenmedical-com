@@ -96,7 +96,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
 
   if (status === "done") {
     return (
-      <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+      <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-[color:var(--portal-success)]/25 bg-[color:var(--portal-success-50)] px-3 py-2 text-xs font-medium text-[color:var(--portal-success)]">
         <CheckCircle2 className="h-4 w-4" />
         تم التنفيذ: {label}
       </div>
