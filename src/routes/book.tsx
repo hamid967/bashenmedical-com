@@ -24,7 +24,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { submitBooking, clearBookingIdempotencyKey } from "@/lib/booking-submit";
 import { getBookingSessionId } from "@/lib/booking-hold";
 import { Button } from "@/components/ui/button";
@@ -221,6 +221,7 @@ function BookPage() {
     "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
   >("unknown");
   const [suggestion, setSuggestion] = useState<{ doctorId: string; doctorName: string; time: string; date: string } | null>(null);
+  const [sameDoctorTimes, setSameDoctorTimes] = useState<string[]>([]);
   const [findingAlt, setFindingAlt] = useState(false);
   // Success result survives reload — booking reference lives in
   // sessionStorage so the success screen (step=9) still renders after F5.
@@ -412,9 +413,46 @@ function BookPage() {
     return { doctorId: best.doctor.id as string, doctorName: name as string, time: best.time, date };
   }
 
+  // Find nearest same-doctor free times on the same date (up to 3, prefer >= preferredTime).
+  async function findAlternativeSameDoctorTimes(date: string, preferredTime: string | null): Promise<string[]> {
+    if (!state.doctorId) return [];
+    try {
+      const a = await fetchAvailability(date, state.doctorId, state.specialtyId, state.branchId);
+      if (!a.ok || !a.times?.length) return [];
+      const booked = new Set(a.booked ?? []);
+      const free = a.times.filter((t) => !booked.has(t) && t !== preferredTime);
+      if (!free.length) return [];
+      const after = preferredTime ? free.filter((t) => t >= preferredTime) : free;
+      const before = preferredTime ? free.filter((t) => t < preferredTime).reverse() : [];
+      return [...after, ...before].slice(0, 3);
+    } catch { return []; }
+  }
+
+  async function runAlternativesSearch(date: string, preferredTime: string | null) {
+    setFindingAlt(true);
+    try {
+      const [sameTimes, altDoc] = await Promise.all([
+        findAlternativeSameDoctorTimes(date, preferredTime),
+        findAlternativeDoctor(date, preferredTime),
+      ]);
+      setSameDoctorTimes(sameTimes);
+      if (altDoc) setSuggestion(altDoc);
+    } finally { setFindingAlt(false); }
+  }
+
   function acceptSuggestion() {
     if (!suggestion) return;
     dispatch({ t: "set", p: { doctorId: suggestion.doctorId, date: suggestion.date, time: suggestion.time } });
+    setSuggestion(null);
+    setSameDoctorTimes([]);
+    setErrorMsg(null);
+    setErrorKind("unknown");
+    goto(7);
+  }
+
+  function pickSameDoctorTime(time: string) {
+    dispatch({ t: "set", p: { time } });
+    setSameDoctorTimes([]);
     setSuggestion(null);
     setErrorMsg(null);
     setErrorKind("unknown");
@@ -425,6 +463,7 @@ function BookPage() {
     setErrorMsg(null);
     setErrorKind("unknown");
     setSuggestion(null);
+    setSameDoctorTimes([]);
     if (!patientValidation.ok) {
       setErrorMsg(t("page.fixPatient"));
       setErrorKind("validation");
@@ -439,19 +478,14 @@ function BookPage() {
       const fresh = await fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId);
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
-        setErrorMsg(t("page.slotTaken"));
+        setErrorMsg(t("page.conflictReason"));
         setErrorKind("conflict");
         // Refresh the availability query so StepTime shows the updated state.
         queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
         const prevTime = state.time;
         dispatch({ t: "set", p: { time: null } });
         goto(6);
-        // Fire-and-forget: look up an alternative doctor with the earliest slot.
-        setFindingAlt(true);
-        findAlternativeDoctor(state.date!, prevTime)
-          .then((alt) => { if (alt) setSuggestion(alt); })
-          .catch(() => {})
-          .finally(() => setFindingAlt(false));
+        void runAlternativesSearch(state.date!, prevTime);
         return;
       }
     } catch {/* network hiccup — let the real submit surface the error */}
@@ -483,12 +517,18 @@ function BookPage() {
       setResult({ reference: res.reference, phone: p.phone.trim(), email: p.email.trim().toLowerCase() || null });
       goto(9);
     } else {
-      setErrorMsg(res.message);
+      setErrorMsg(res.kind === "conflict" ? t("page.conflictReason") : res.message);
       setErrorKind(res.kind);
-      // On conflict, bounce back to step 6 so the user picks a fresh slot.
+      // On conflict (server-side race, HTTP 409), bounce back to step 6 and
+      // surface nearest alternatives (same doctor + alt doctor) so the user
+      // isn't stuck staring at a red banner.
       if (res.kind === "conflict") {
+        const prevTime = state.time;
+        // Invalidate availability so StepTime re-fetches and drops the taken slot.
+        queryClient.invalidateQueries({ queryKey: ["avail", state.date, state.doctorId, state.specialtyId, state.branchId] });
         dispatch({ t: "set", p: { time: null } });
         goto(6);
+        void runAlternativesSearch(state.date!, prevTime);
       }
     }
   }
@@ -582,28 +622,48 @@ function BookPage() {
             {state.step === 5 && <StepDate lang={lang} value={state.date} onPick={(v) => { dispatch({ t: "set", p: { date: v, time: null } }); goto(6); }} doctorId={state.doctorId} specialtyId={state.specialtyId} branchId={state.branchId} onChangeDoctor={() => goto(4)} onChangeBranch={() => goto(2)}/>}
             {state.step === 6 && (
               <>
-                {(findingAlt || suggestion) && (
-                  <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 md:p-4 text-sm">
-                    {findingAlt && !suggestion && (
-                      <span className="text-muted-foreground">{t("page.lookingAlt")}</span>
+                {(errorKind === "conflict" || findingAlt || suggestion || sameDoctorTimes.length > 0) && (
+                  <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-3 md:p-4 text-sm space-y-3">
+                    {errorKind === "conflict" && (
+                      <div className="flex items-start gap-2">
+                        <Clock className="h-5 w-5 text-destructive shrink-0 mt-0.5" aria-hidden />
+                        <div>
+                          <div className="font-bold text-destructive">{t("page.slotTaken")}</div>
+                          <p className="mt-0.5 text-xs text-destructive/90 leading-5">{t("page.conflictReason")}</p>
+                        </div>
+                      </div>
+                    )}
+                    {findingAlt && !suggestion && sameDoctorTimes.length === 0 && (
+                      <div className="text-muted-foreground">{t("page.lookingAlt")}</div>
+                    )}
+                    {sameDoctorTimes.length > 0 && (
+                      <div>
+                        <div className="font-medium mb-1.5">{t("page.nearestSlotsSameDoctor")}</div>
+                        <div className="flex flex-wrap gap-2">
+                          {sameDoctorTimes.map((tm) => (
+                            <Button key={tm} size="sm" variant="secondary" onClick={() => pickSameDoctorTime(tm)}>
+                              {tm}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
                     )}
                     {suggestion && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between border-t border-destructive/20 pt-3">
                         <div>
-                          <div className="font-medium">
-                            {t("page.altAvailable")} {suggestion.doctorName}
-                          </div>
-                          <div className="text-muted-foreground">
-                            {t("page.earliestSlot")}: {suggestion.time}
-                          </div>
+                          <div className="font-medium">{t("page.altAvailable")} {suggestion.doctorName}</div>
+                          <div className="text-muted-foreground">{t("page.earliestSlot")}: {suggestion.time}</div>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={acceptSuggestion}>{t("page.bookAlt")}</Button>
-                          <Button size="sm" variant="ghost" onClick={() => setSuggestion(null)}>
+                          <Button size="sm" variant="ghost" onClick={() => { setSuggestion(null); setSameDoctorTimes([]); setErrorKind("unknown"); setErrorMsg(null); }}>
                             {t("page.dismiss")}
                           </Button>
                         </div>
                       </div>
+                    )}
+                    {!findingAlt && !suggestion && sameDoctorTimes.length === 0 && errorKind === "conflict" && (
+                      <div className="text-xs text-muted-foreground">{t("page.noAlternatives")}</div>
                     )}
                   </div>
                 )}
