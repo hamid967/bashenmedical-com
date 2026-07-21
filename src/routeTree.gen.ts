@@ -108,6 +108,7 @@ import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedOwnerIndexRouteImport } from './routes/_authenticated/owner.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
+import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
 import { Route as ApiAdminAiChatRouteImport } from './routes/api/admin/ai-chat'
 import { Route as AuthenticatedPortalSettingsRouteImport } from './routes/_authenticated/portal.settings'
 import { Route as AuthenticatedPortalSessionsRouteImport } from './routes/_authenticated/portal.sessions'
@@ -715,6 +716,11 @@ const MediaStoriesSlugRoute = MediaStoriesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => MediaStoriesRoute,
+} as any)
+const ApiPortalAiChatRoute = ApiPortalAiChatRouteImport.update({
+  id: '/api/portal/ai-chat',
+  path: '/api/portal/ai-chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAdminAiChatRoute = ApiAdminAiChatRouteImport.update({
   id: '/api/admin/ai-chat',
@@ -1344,6 +1350,7 @@ export interface FileRoutesByFullPath {
   '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
+  '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/owner/': typeof AuthenticatedOwnerIndexRoute
@@ -1524,6 +1531,7 @@ export interface FileRoutesByTo {
   '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
+  '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/owner': typeof AuthenticatedOwnerIndexRoute
@@ -1709,6 +1717,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
+  '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/owner/': typeof AuthenticatedOwnerIndexRoute
@@ -1894,6 +1903,7 @@ export interface FileRouteTypes {
     | '/portal/sessions'
     | '/portal/settings'
     | '/api/admin/ai-chat'
+    | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/admin/'
     | '/owner/'
@@ -2074,6 +2084,7 @@ export interface FileRouteTypes {
     | '/portal/sessions'
     | '/portal/settings'
     | '/api/admin/ai-chat'
+    | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/admin'
     | '/owner'
@@ -2258,6 +2269,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/sessions'
     | '/_authenticated/portal/settings'
     | '/api/admin/ai-chat'
+    | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/owner/'
@@ -2353,6 +2365,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminAiChatRoute: typeof ApiAdminAiChatRoute
+  ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
   ApiPublicBookCancelRoute: typeof ApiPublicBookCancelRoute
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
@@ -3072,6 +3085,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/media/stories/$slug'
       preLoaderRoute: typeof MediaStoriesSlugRouteImport
       parentRoute: typeof MediaStoriesRoute
+    }
+    '/api/portal/ai-chat': {
+      id: '/api/portal/ai-chat'
+      path: '/api/portal/ai-chat'
+      fullPath: '/api/portal/ai-chat'
+      preLoaderRoute: typeof ApiPortalAiChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/admin/ai-chat': {
       id: '/api/admin/ai-chat'
@@ -4085,6 +4105,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminAiChatRoute: ApiAdminAiChatRoute,
+  ApiPortalAiChatRoute: ApiPortalAiChatRoute,
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
   ApiPublicBookCancelRoute: ApiPublicBookCancelRoute,
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,
