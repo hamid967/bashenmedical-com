@@ -20,6 +20,7 @@ import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 import { AssistantCostMeter } from "./AssistantCostMeter";
+import { SessionExportButton } from "./SessionExportButton";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
@@ -308,6 +309,15 @@ export function BaeshenAssistant() {
                   />
                   {t("لا تحفظ", "Don't save")}
                 </label>
+                <SessionExportButton
+                  messages={messages}
+                  sessionCredits={sessionCredits}
+                  preEstimateTokens={preEstimate?.inTok}
+                  model={meterModel}
+                  conversationId={conversationId.current}
+                  surface={isAr ? "المساعد العام" : "Public Assistant"}
+                  lang={isAr ? "ar" : "en"}
+                />
                 <button
                   type="button"
                   onClick={newConversation}
