@@ -44,6 +44,9 @@ export type ConsentCatalogItem = {
   /** Long-form body shown when the patient expands the item. */
   body_ar: string;
   body_en: string;
+  /** Live in-app effect explaining what changes when granted / withdrawn. */
+  impact_ar: string;
+  impact_en: string;
   document_url?: string;
 };
 
