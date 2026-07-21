@@ -24,7 +24,7 @@ import {
   Gauge,
 } from "lucide-react";
 
-export type AdminRole = "admin" | "reception" | "doctor" | "nurse" | "hr" | "pharmacy";
+export type AdminRole = "admin" | "super_admin" | "reception" | "doctor" | "nurse" | "hr" | "pharmacy";
 
 type NavItem = {
   to: string;
