@@ -399,6 +399,17 @@ export function AIAssistantPanel({
 
         {/* Composer */}
         <div className="border-t p-3 shrink-0" style={{ borderColor: "var(--ac-line)" }}>
+          {!streaming && input.trim() && (
+            <div className="mb-2 flex justify-end">
+              <PreflightCostChip
+                input={input}
+                streaming={streaming}
+                model={model}
+                historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
+                lang="ar"
+              />
+            </div>
+          )}
           <div
             className="rounded-xl border flex items-end gap-2 p-2"
             style={{ borderColor: "var(--ac-line-strong)", background: "var(--ac-bg)" }}
