@@ -300,6 +300,17 @@ export function AIAssistantPanel({
           )}
         </div>
 
+        {/* Cost transparency meter */}
+        <CostMeter
+          streaming={streaming}
+          model={model}
+          preEstimate={preEstimate}
+          usage={usage}
+          streamedText={streamed}
+          sessionCredits={sessionCredits}
+          hasInput={input.trim().length > 0}
+        />
+
         {/* Composer */}
         <div className="border-t p-3 shrink-0" style={{ borderColor: "var(--ac-line)" }}>
           <div
