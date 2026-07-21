@@ -112,6 +112,13 @@ function ManagePage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeCancelId, setActiveCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [cancelPhase, setCancelPhase] = useState<
+    "reason" | "processing" | "done"
+  >("reason");
+  const [cancelResult, setCancelResult] = useState<{
+    released: boolean;
+    waitlist_notified: boolean;
+  } | null>(null);
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
