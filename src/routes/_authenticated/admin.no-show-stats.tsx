@@ -73,9 +73,7 @@ function csvEscape(v: unknown): string {
   return s;
 }
 
-function downloadCsv(filename: string, rows: (string | number | null)[][]) {
-  const csv = "\uFEFF" + rows.map((r) => r.map(csvEscape).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+function triggerDownload(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -84,6 +82,26 @@ function downloadCsv(filename: string, rows: (string | number | null)[][]) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function downloadCsv(filename: string, rows: (string | number | null)[][]) {
+  const csv = "\uFEFF" + rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+  triggerDownload(filename, new Blob([csv], { type: "text/csv;charset=utf-8" }));
+}
+
+async function downloadXlsx(
+  filename: string,
+  sheetName: string,
+  rows: (string | number | null)[][],
+) {
+  const XLSX = await import("xlsx");
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || "Sheet1");
+  const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+  triggerDownload(filename, new Blob([buf], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  }));
 }
 
 function KpiCard({
