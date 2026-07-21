@@ -25,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/portal/assistant")({
   component: AssistantPage,
 });
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
 const SUGGESTIONS = [
   "متى موعدي القادم؟",
