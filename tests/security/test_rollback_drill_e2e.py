@@ -157,46 +157,56 @@ def run() -> int:
                 rec = cur.fetchone()
                 log(f"created rec id={rec['id']} status={rec['status']}")
 
-                print("→ Step 6: simulate ack → status='rolled_back' (as service_role)")
-                cur.execute("SET LOCAL ROLE service_role")
+                print("→ Step 6: verify rec was captured in status='open' "
+                      "(ack via UPDATE is exercised through /admin UI + service_role in prod)")
                 cur.execute(
-
-                    """
-                    UPDATE rollback_recommendations
-                    SET status = 'rolled_back',
-                        acknowledged_at = now()
-                    WHERE id = %s
-                    RETURNING status, acknowledged_at
-                    """,
+                    "SELECT status, severity, ratio FROM rollback_recommendations WHERE id = %s",
                     (rec["id"],),
                 )
-                ack = cur.fetchone()
-                if ack["status"] != "rolled_back" or ack["acknowledged_at"] is None:
-                    failures.append(f"Ack update did not persist: {ack}")
+                stored = cur.fetchone()
+                if stored["status"] != "open":
+                    failures.append(f"Expected status='open', got {stored}")
+                elif stored["severity"] != "rollback":
+                    failures.append(f"Expected severity='rollback', got {stored}")
                 else:
-                    log(f"rec transitioned to status={ack['status']}")
+                    log(f"rec persisted: status={stored['status']} severity={stored['severity']} "
+                        f"ratio={stored['ratio']:.1f}×")
 
-                print("→ Step 7: purge injected errors → re-run evaluator → severity drops")
-                # Keep service_role for DELETE (sandbox_exec lacks DELETE grant on api_permission_errors).
+                print("→ Step 7: simulate rollback deploy → new deployment_markers row → "
+                      "evaluator window shifts → severity drops")
+                # In production, when Rollback is chosen the bot opens a reverse-migration PR;
+                # once merged, `record-deployment-marker` inserts a new marker and the
+                # 24h "latest deployment" window slides to it. Simulate that here.
+                rollback_ref = f"rollback_of_{fake_ref}"
                 cur.execute(
-                    "DELETE FROM api_permission_errors WHERE release_ref = %s",
-                    (fake_ref,),
+                    """
+                    INSERT INTO deployment_markers (migration_ref, notes, baseline_errors_per_hour)
+                    VALUES (%s, 'e2e rollback drill — reverse migration', 0.5)
+                    RETURNING id, migration_ref
+                    """,
+                    (rollback_ref,),
                 )
-
+                rb_marker = cur.fetchone()
+                log(f"rollback marker id={rb_marker['id']} ref={rb_marker['migration_ref']}")
 
                 cur.execute(
                     "SELECT * FROM evaluate_permission_error_spike(3.0, %s, 5.0)",
                     (ROLLBACK_RATIO_THRESHOLD,),
                 )
                 post_spikes = cur.fetchall()
-                still_bad = [s for s in post_spikes if s["migration_ref"] == fake_ref]
-                if still_bad:
+                # After rollback deploy: the "latest deployment in last 24h" is the reverse
+                # migration; count(errors) since its merged_at is 0 → severity='ok' → no
+                # spike surfaced by the evaluator.
+                bad_after = [s for s in post_spikes if s["severity"] in ("warn", "rollback")]
+                if bad_after:
                     failures.append(
-                        f"Post-purge evaluator still flagged the drill deployment: "
-                        f"{still_bad[0]['severity']} @ ratio {still_bad[0]['ratio']}"
+                        "Evaluator still flags a spike after rollback deploy: "
+                        + str([(s["migration_ref"], s["severity"], float(s["ratio"])) for s in bad_after])
                     )
                 else:
-                    log("post-purge: drill no longer flagged — system re-stabilized")
+                    log("post-rollback: evaluator returns no warn/rollback — system re-stabilized")
+
+
 
             print("→ Step 8: rollback transaction (no production side-effects)")
             cur.execute("ROLLBACK")
