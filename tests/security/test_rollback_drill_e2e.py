@@ -180,12 +180,13 @@ def run() -> int:
                 rollback_ref = f"rollback_of_{fake_ref}"
                 cur.execute(
                     """
-                    INSERT INTO deployment_markers (migration_ref, notes, baseline_errors_per_hour)
-                    VALUES (%s, 'e2e rollback drill — reverse migration', 0.5)
+                    INSERT INTO deployment_markers (migration_ref, notes, baseline_errors_per_hour, merged_at)
+                    VALUES (%s, 'e2e rollback drill — reverse migration', 0.5, clock_timestamp())
                     RETURNING id, migration_ref
                     """,
                     (rollback_ref,),
                 )
+
                 rb_marker = cur.fetchone()
                 log(f"rollback marker id={rb_marker['id']} ref={rb_marker['migration_ref']}")
 
