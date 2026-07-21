@@ -27,6 +27,9 @@ jobs:
       - name: Lint insert routes (friendlyInsertError guardrails on book + pharmacy + …)
         run: bun run lint:inserts
 
+      - name: Portal Design Tokens v2 guard (no regression from baseline)
+        run: bun run lint:portal-tokens
+
       - name: Verify docs examples match lint:inserts rules
         run: bash tests/lint/book-docs-examples.sh
 
