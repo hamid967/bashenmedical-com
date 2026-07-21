@@ -7,6 +7,10 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Sparkles, AlertTriangle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PortalPageHeader, PortalCard } from "@/components/portal/ui";
+import {
+  AssistantActionButton,
+  parseAssistantActions,
+} from "@/components/portal/AssistantActionButton";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
   head: () => ({
