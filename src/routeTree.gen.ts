@@ -152,6 +152,7 @@ import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
+import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedOwnerServicesIndexRouteImport } from './routes/_authenticated/owner.services.index'
@@ -973,6 +974,12 @@ const AuthenticatedAdminClassicRoute =
     path: '/classic',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAuditLogsRoute =
+  AuthenticatedAdminAuditLogsRouteImport.update({
+    id: '/audit-logs',
+    path: '/audit-logs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const Char91DotmcpChar93InvokeToolToolRoute =
   Char91DotmcpChar93InvokeToolToolRouteImport.update({
     id: '/.mcp/invoke-tool/$tool',
@@ -1271,6 +1278,7 @@ export interface FileRoutesByFullPath {
   '/specialties/': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -1447,6 +1455,7 @@ export interface FileRoutesByTo {
   '/specialties': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -1628,6 +1637,7 @@ export interface FileRoutesById {
   '/specialties/': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -1809,6 +1819,7 @@ export interface FileRouteTypes {
     | '/specialties/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/audit-logs'
     | '/admin/classic'
     | '/admin/design-tokens'
     | '/admin/inbox'
@@ -1985,6 +1996,7 @@ export interface FileRouteTypes {
     | '/specialties'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/audit-logs'
     | '/admin/classic'
     | '/admin/design-tokens'
     | '/admin/inbox'
@@ -2165,6 +2177,7 @@ export interface FileRouteTypes {
     | '/specialties/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/audit-logs'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/inbox'
@@ -3327,6 +3340,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClassicRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/audit-logs': {
+      id: '/_authenticated/admin/audit-logs'
+      path: '/audit-logs'
+      fullPath: '/admin/audit-logs'
+      preLoaderRoute: typeof AuthenticatedAdminAuditLogsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/.mcp/invoke-tool/$tool': {
       id: '/.mcp/invoke-tool/$tool'
       path: '/.mcp/invoke-tool/$tool'
@@ -3591,6 +3611,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
@@ -3612,6 +3633,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
