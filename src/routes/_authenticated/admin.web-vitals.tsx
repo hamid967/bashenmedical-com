@@ -3,15 +3,38 @@
  * with per-flow path filtering (booking / reschedule-cancel / waitlist / custom).
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { Activity, Filter, Gauge, RefreshCw } from "lucide-react";
 import {
   getWebVitalsSummary,
   type MetricStats,
   type WebVitalMetric,
-  type WebVitalsSummary,
 } from "@/lib/admin/web-vitals.functions";
+import { getMyRoles } from "@/lib/admin.functions";
+import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import type { Column } from "@/lib/export-utils";
+
+type MetricRow = MetricStats & { rating: string };
+type PathRow = { path: string; count: number };
+
+const METRIC_COLS: Column<MetricRow>[] = [
+  { header: "المقياس", accessor: (r) => r.metric },
+  { header: "عدد العينات", accessor: (r) => r.count },
+  { header: "p50", accessor: (r) => (r.p50 === null ? "" : r.metric === "CLS" ? r.p50.toFixed(3) : Math.round(r.p50)) },
+  { header: "p75", accessor: (r) => (r.p75 === null ? "" : r.metric === "CLS" ? r.p75.toFixed(3) : Math.round(r.p75)) },
+  { header: "p95", accessor: (r) => (r.p95 === null ? "" : r.metric === "CLS" ? r.p95.toFixed(3) : Math.round(r.p95)) },
+  { header: "جيد", accessor: (r) => r.good },
+  { header: "بحاجة تحسين", accessor: (r) => r.needs },
+  { header: "ضعيف", accessor: (r) => r.poor },
+  { header: "التقييم (p75)", accessor: (r) => r.rating },
+];
+
+const PATH_COLS: Column<PathRow>[] = [
+  { header: "المسار", accessor: (r) => r.path, width: 60 },
+  { header: "عدد العينات", accessor: (r) => r.count },
+];
 
 type Preset = { id: string; label: string; path: string | null };
 
@@ -54,6 +77,12 @@ function WebVitalsPage() {
   const [customPath, setCustomPath] = useState<string>("");
   const [windowHours, setWindowHours] = useState<number>(24);
   const qc = useQueryClient();
+  const rolesFn = useServerFn(getMyRoles);
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => rolesFn() });
+  const isStaff = useMemo(() => {
+    const r = (rolesQ.data?.roles ?? []) as string[];
+    return r.includes("admin") || r.includes("super_admin");
+  }, [rolesQ.data]);
 
   const filters: Filters = useMemo(() => {
     const preset = PRESETS.find((p) => p.id === presetId);
@@ -65,6 +94,20 @@ function WebVitalsPage() {
   }, [presetId, customPath, windowHours]);
 
   const { data, isFetching } = useSuspenseQuery(summaryQuery(filters));
+
+  const windowLabel = windowHours < 24 ? `آخر ${windowHours} ساعة` : `آخر ${windowHours / 24} يوم`;
+  const activePath = data.pathContains ?? "الكل";
+  const exportSubtitle = `النافذة: ${windowLabel} · المسار: ${activePath}`;
+  const exportMeta: Record<string, string> = {
+    "النافذة الزمنية": windowLabel,
+    "فلتر المسار": activePath,
+    "إجمالي العينات": String(data.totalSamples),
+    "مقتطعة": data.truncated ? "نعم" : "لا",
+  };
+  const metricRows: MetricRow[] = data.stats.map((s) => ({
+    ...s,
+    rating: ratingLabel(ratingOf(s.metric, s.p75)),
+  }));
 
   return (
     <div className="admin-console" dir="rtl">
@@ -81,14 +124,37 @@ function WebVitalsPage() {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "web-vitals"] })}
-            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--ac-line)] px-3 h-9 text-sm hover:bg-[color:var(--ac-subtle)]"
-          >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-            تحديث
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportMenu
+              allowed={isStaff}
+              disabled={isFetching}
+              filename="web-vitals-summary"
+              title="ملخص Web Vitals"
+              subtitle={exportSubtitle}
+              meta={exportMeta}
+              columns={METRIC_COLS}
+              rows={metricRows}
+            />
+            <ExportMenu
+              allowed={isStaff}
+              disabled={isFetching}
+              filename="web-vitals-top-paths"
+              title="أكثر المسارات نشاطًا"
+              subtitle={exportSubtitle}
+              meta={exportMeta}
+              columns={PATH_COLS}
+              rows={data.topPaths}
+              label="تصدير المسارات"
+            />
+            <button
+              type="button"
+              onClick={() => qc.invalidateQueries({ queryKey: ["admin", "web-vitals"] })}
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--ac-line)] px-3 h-9 text-sm hover:bg-[color:var(--ac-subtle)]"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+              تحديث
+            </button>
+          </div>
         </header>
 
         {/* Filters */}
@@ -211,6 +277,10 @@ function ratingOf(metric: WebVitalMetric, v: number | null): "good" | "needs" | 
   if (v <= t[0]) return "good";
   if (v <= t[1]) return "needs";
   return "poor";
+}
+
+function ratingLabel(r: "good" | "needs" | "poor" | "none"): string {
+  return r === "good" ? "جيد" : r === "needs" ? "بحاجة تحسين" : r === "poor" ? "ضعيف" : "لا بيانات";
 }
 
 const RATING_STYLES: Record<"good" | "needs" | "poor" | "none", string> = {
