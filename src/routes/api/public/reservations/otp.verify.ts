@@ -142,6 +142,17 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
             });
           }
 
+          try {
+            const { logReservationEvent } = await import(
+              "@/lib/reservation-events.server"
+            );
+            await logReservationEvent({
+              event_type: "otp_verified",
+              phone,
+              ip,
+            });
+          } catch { /* telemetry best-effort */ }
+
           return jsonResponse(200, {
             ok: true,
             session_token,
