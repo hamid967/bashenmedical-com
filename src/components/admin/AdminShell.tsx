@@ -88,6 +88,7 @@ const NAV: NavGroup[] = [
       { to: "/admin/nphies-logs", label: "سجلات التأمين (NPHIES)", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/no-show-risk", label: "توقّع الغياب (Predictive)", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/no-show-stats", label: "إحصاءات عدم الحضور", icon: FileBarChart, roles: ["admin"] },
+      { to: "/admin/no-show-detail", label: "المواعيد عالية المخاطرة", icon: FileBarChart, roles: ["admin"] },
       { to: "/admin/super/permissions", label: "مصفوفة الصلاحيات (Super)", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/super/jazan-visual", label: "الهوية البصرية جازان (Super)", icon: Settings, roles: ["admin"] },
       { to: "/audit-log", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
