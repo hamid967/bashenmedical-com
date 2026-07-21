@@ -57,6 +57,7 @@ export function useI18n() {
       void inst.changeLanguage(l);
       if (typeof window !== "undefined") localStorage.setItem("lang", l);
     },
-    t: (key: string) => t(key) as string,
+    t: (key: string, params?: Record<string, string | number>) =>
+      t(key, params as Record<string, unknown> | undefined) as string,
   };
 }
