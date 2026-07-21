@@ -15,6 +15,7 @@
     "lint:portal-tokens": "node scripts/lint-portal-tokens.mjs",
     "lint:portal-tokens:update": "node scripts/lint-portal-tokens.mjs --update-baseline",
     "lint:portal-tokens:changed": "node scripts/lint-portal-tokens.mjs --strict-changed",
+    "codemod:portal-tokens": "node scripts/codemod-portal-tokens.mjs",
     "typecheck": "tsgo --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
