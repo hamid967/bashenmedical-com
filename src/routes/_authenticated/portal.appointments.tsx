@@ -18,6 +18,11 @@ import {
 } from "@/lib/portal/appointments.functions";
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
+import {
+  PortalPageHeader,
+  PortalStatCard,
+  PortalEmptyState,
+} from "@/components/portal/ui";
 
 type Scope = "upcoming" | "past";
 type ApptStatus =
@@ -182,25 +187,22 @@ function MyAppointmentsPage() {
 
   return (
     <div dir="rtl" className="space-y-6 print:space-y-3">
-      {/* Header */}
-      <header className="flex flex-wrap items-start gap-3 print:hidden">
-        <div className="h-11 w-11 rounded-2xl grid place-items-center bg-[color:var(--portal-gradient-soft)] text-[color:var(--portal-primary)]">
-          <CalendarDays className="h-5 w-5" />
-        </div>
-        <div className="flex-1 min-w-[220px]">
-          <h1 className="text-xl font-bold text-[color:var(--portal-ink)]">مواعيدي</h1>
-          <p className="text-sm text-[color:var(--portal-ink-2)]">
-            تابع مواعيدك القادمة والسابقة، أكّد الحضور، أعِد الجدولة، أو اطلب متابعة.
-          </p>
-        </div>
-        <Link
-          to="/portal/book"
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
-          style={{ background: "var(--portal-gradient)" }}
-        >
-          <CalendarPlus className="h-4 w-4" /> حجز موعد جديد
-        </Link>
-      </header>
+      <div className="print:hidden">
+        <PortalPageHeader
+          title="مواعيدي"
+          description="تابع مواعيدك القادمة والسابقة، أكّد الحضور، أعِد الجدولة، أو اطلب متابعة."
+          breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "مواعيدي" }]}
+          actions={
+            <Link
+              to="/portal/book"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              <CalendarPlus className="h-4 w-4" /> حجز موعد جديد
+            </Link>
+          }
+        />
+      </div>
 
       {/* Tabs + filters */}
       <div className="glass-card p-3 sm:p-4 flex flex-wrap items-center gap-3 print:hidden">
@@ -294,11 +296,11 @@ function MyAppointmentsPage() {
 
       {/* Summary counts */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 print:hidden">
-        <StatCard label="جديد" value={counts.new} tone="sky" />
-        <StatCard label="مؤكّد" value={counts.confirmed} tone="emerald" />
-        <StatCard label="مكتمل" value={counts.completed} tone="slate" />
-        <StatCard label="ملغى" value={counts.cancelled} tone="red" />
-        <StatCard label="لم يحضر" value={counts.no_show} tone="amber" />
+        <PortalStatCard label="جديد" value={counts.new} tone="primary" />
+        <PortalStatCard label="مؤكّد" value={counts.confirmed} tone="success" />
+        <PortalStatCard label="مكتمل" value={counts.completed} tone="muted" />
+        <PortalStatCard label="ملغى" value={counts.cancelled} tone="error" />
+        <PortalStatCard label="لم يحضر" value={counts.no_show} tone="warning" />
       </div>
 
       {/* List */}
@@ -412,23 +414,6 @@ function TabBtn({
   );
 }
 
-function StatCard({
-  label, value, tone,
-}: { label: string; value: number; tone: "sky" | "emerald" | "slate" | "red" | "amber" }) {
-  const map = {
-    sky: "from-teal-50 to-teal-100/60 text-teal-700",
-    emerald: "from-emerald-50 to-emerald-100/60 text-emerald-700",
-    slate: "from-slate-50 to-slate-100/60 text-slate-700",
-    red: "from-red-50 to-red-100/60 text-red-700",
-    amber: "from-amber-50 to-amber-100/60 text-amber-700",
-  }[tone];
-  return (
-    <div className={`rounded-2xl border border-white/60 bg-gradient-to-br ${map} p-3`}>
-      <div className="text-2xl font-bold tabular-nums">{value}</div>
-      <div className="text-xs font-medium opacity-80">{label}</div>
-    </div>
-  );
-}
 
 type ApptRow = ReturnType<typeof mapItemType>;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -851,28 +836,26 @@ function FollowUpDialog({
 
 function EmptyState({ scope }: { scope: Scope }) {
   return (
-    <div className="glass-card p-8 text-center">
-      <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-[color:var(--portal-gradient-soft)] text-[color:var(--portal-primary)] mb-4">
-        <CalendarDays className="h-7 w-7" />
-      </div>
-      <h3 className="text-lg font-bold text-[color:var(--portal-ink)]">
-        {scope === "upcoming" ? "لا توجد مواعيد قادمة" : "لا توجد مواعيد سابقة"}
-      </h3>
-      <p className="text-sm text-[color:var(--portal-ink-2)] mt-2">
-        {scope === "upcoming"
+    <PortalEmptyState
+      icon={<CalendarDays className="h-7 w-7" />}
+      title={scope === "upcoming" ? "لا توجد مواعيد قادمة" : "لا توجد مواعيد سابقة"}
+      description={
+        scope === "upcoming"
           ? "احجز موعدك القادم بسهولة مع أحد أطبائنا."
-          : "لم يتم تسجيل زيارات سابقة على حسابك حتى الآن."}
-      </p>
-      {scope === "upcoming" && (
-        <Link
-          to="/portal/book"
-          className="inline-flex items-center gap-2 h-10 mt-5 px-5 rounded-full text-white text-sm font-semibold shadow"
-          style={{ background: "var(--portal-gradient)" }}
-        >
-          <CalendarPlus className="h-4 w-4" /> حجز موعد
-        </Link>
-      )}
-    </div>
+          : "لم يتم تسجيل زيارات سابقة على حسابك حتى الآن."
+      }
+      action={
+        scope === "upcoming" ? (
+          <Link
+            to="/portal/book"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-white text-sm font-semibold shadow"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <CalendarPlus className="h-4 w-4" /> حجز موعد
+          </Link>
+        ) : undefined
+      }
+    />
   );
 }
 

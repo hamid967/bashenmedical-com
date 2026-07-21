@@ -23,6 +23,11 @@ import {
   Loader2,
   Info,
 } from "lucide-react";
+import {
+  PortalPageHeader,
+  PortalStatCard,
+  PortalEmptyState,
+} from "@/components/portal/ui";
 
 const invoicesQuery = (status: "all" | "outstanding" | "paid") =>
   queryOptions({
@@ -89,44 +94,42 @@ function PortalInvoicesPage() {
     <div className="portal-magazine min-h-full">
       <div className="max-w-6xl mx-auto px-4 lg:px-6 py-8 space-y-8">
         {/* Header */}
-        <header className="flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="text-xs uppercase tracking-widest text-[color:var(--mag-ink-3)] font-semibold">
-              الفواتير والدفعات
-            </div>
-            <h1 className="text-3xl lg:text-4xl font-bold mt-1">فواتيري</h1>
-            <p className="text-sm text-[color:var(--mag-ink-3)] mt-2 max-w-2xl">
-              اطلع على فواتيرك، حمّل نسخة PDF، وادفع المستحقات إلكترونيًا.
-            </p>
-          </div>
-          <Link
-            to="/portal/payments"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold hover:bg-[color:var(--mag-subtle)]"
-          >
-            <Wallet className="h-4 w-4" />
-            سجل المدفوعات
-          </Link>
-        </header>
+        <PortalPageHeader
+          eyebrow="الفواتير والدفعات"
+          title="فواتيري"
+          description="اطلع على فواتيرك، حمّل نسخة PDF، وادفع المستحقات إلكترونيًا."
+          breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "الفواتير" }]}
+          actions={
+            <Link
+              to="/portal/payments"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] text-sm font-semibold hover:bg-[color:var(--portal-surface-2)]"
+            >
+              <Wallet className="h-4 w-4" />
+              سجل المدفوعات
+            </Link>
+          }
+        />
 
         {/* KPIs */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <KpiCard
-            icon={Receipt}
+          <PortalStatCard
+            icon={<Receipt className="h-5 w-5" />}
             label="إجمالي الفواتير"
             value={fmtSAR(kpis.total)}
             hint={`${kpis.count} فاتورة`}
+            tone="primary"
           />
-          <KpiCard
-            icon={CheckCircle2}
+          <PortalStatCard
+            icon={<CheckCircle2 className="h-5 w-5" />}
             label="المسدد"
             value={fmtSAR(kpis.paid)}
             tone="success"
           />
-          <KpiCard
-            icon={AlertCircle}
+          <PortalStatCard
+            icon={<AlertCircle className="h-5 w-5" />}
             label="المستحق"
             value={fmtSAR(kpis.outstanding)}
-            tone={kpis.outstanding > 0 ? "danger" : "default"}
+            tone={kpis.outstanding > 0 ? "error" : "muted"}
           />
         </section>
 

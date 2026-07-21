@@ -70,6 +70,7 @@ import {
   Clock3,
   Languages,
 } from "lucide-react";
+import { PortalPageHeader, PortalEmptyState } from "@/components/portal/ui";
 
 const dependentsQuery = queryOptions({
   queryKey: ["portal", "dependents"],
@@ -322,62 +323,65 @@ function FamilyPage() {
 
   return (
     <div className="space-y-6 pb-24 md:pb-6" dir={dir}>
-      <header className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2">
+      <PortalPageHeader
+        title={
+          <span className="inline-flex items-center gap-2">
             <UsersRound className="h-6 w-6 text-[color:var(--portal-primary)]" />
             {t("title", lang)}
-          </h1>
-          <p className="text-sm text-[color:var(--portal-ink-2)] mt-1 max-w-xl">
-            {t("subtitle", lang)}
-          </p>
-        </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => langMutation.mutate(nextLang)}
-            disabled={langMutation.isPending}
-            className="rounded-full font-semibold"
-            aria-label={T.lang_switch_aria[lang]}
-          >
-            {langMutation.isPending ? (
-              <Loader2 className="h-4 w-4 ms-2 animate-spin" />
-            ) : (
-              <Languages className="h-4 w-4 ms-2" />
-            )}
-            {nextLang === "en" ? T.lang_toggle_to_en.en : T.lang_toggle_to_ar.ar}
-          </Button>
-          <Button
-            onClick={() => setDialog({ mode: "add" })}
-            className="rounded-full text-white font-semibold px-5"
-            style={{ background: "var(--portal-gradient)" }}
-          >
-            <UserPlus className="h-4 w-4 ms-2" />
-            {t("add", lang)}
-          </Button>
-        </div>
-      </header>
+          </span>
+        }
+        description={t("subtitle", lang)}
+        breadcrumbs={[
+          { label: lang === "ar" ? "الرئيسية" : "Home", to: "/portal" },
+          { label: t("title", lang) },
+        ]}
+        isAr={lang === "ar"}
+        actions={
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => langMutation.mutate(nextLang)}
+              disabled={langMutation.isPending}
+              className="rounded-full font-semibold"
+              aria-label={T.lang_switch_aria[lang]}
+            >
+              {langMutation.isPending ? (
+                <Loader2 className="h-4 w-4 ms-2 animate-spin" />
+              ) : (
+                <Languages className="h-4 w-4 ms-2" />
+              )}
+              {nextLang === "en" ? T.lang_toggle_to_en.en : T.lang_toggle_to_ar.ar}
+            </Button>
+            <Button
+              onClick={() => setDialog({ mode: "add" })}
+              className="rounded-full text-white font-semibold px-5"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              <UserPlus className="h-4 w-4 ms-2" />
+              {t("add", lang)}
+            </Button>
+          </div>
+        }
+      />
 
 
       {rows.length === 0 ? (
-        <div className="glass-card p-10 text-center">
-          <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-primary)] mb-4">
-            <UsersRound className="h-7 w-7" />
-          </div>
-          <h2 className="text-lg font-bold">{t("empty_title", lang)}</h2>
-          <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 max-w-md mx-auto">
-            {t("empty_body", lang)}
-          </p>
-          <Button
-            onClick={() => setDialog({ mode: "add" })}
-            className="mt-5 rounded-full text-white font-semibold px-5"
-            style={{ background: "var(--portal-gradient)" }}
-          >
-            <UserPlus className="h-4 w-4 ms-2" />
-            {t("add", lang)}
-          </Button>
-        </div>
+        <PortalEmptyState
+          icon={<UsersRound className="h-7 w-7" />}
+          title={t("empty_title", lang)}
+          description={t("empty_body", lang)}
+          action={
+            <Button
+              onClick={() => setDialog({ mode: "add" })}
+              className="rounded-full text-white font-semibold px-5"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              <UserPlus className="h-4 w-4 ms-2" />
+              {t("add", lang)}
+            </Button>
+          }
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {rows.map((r) => (
