@@ -198,16 +198,40 @@ function AssistantPage() {
             disabled={streaming}
             className="flex-1 min-h-[42px] max-h-[140px] resize-none rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-2)] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30"
           />
-          <button
-            type="submit"
-            disabled={streaming || !input.trim()}
-            aria-label="إرسال"
-            className="inline-flex items-center gap-1 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
-            style={{ background: "var(--portal-gradient)" }}
-          >
-            {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            <span>إرسال</span>
-          </button>
+          {streaming ? (
+            <button
+              type="button"
+              onClick={() => {
+                abortRef.current?.abort();
+                abortRef.current = null;
+                setStreaming(false);
+                setMessages((prev) => {
+                  const copy = prev.slice();
+                  const last = copy[copy.length - 1];
+                  if (last && last.role === "assistant") {
+                    copy[copy.length - 1] = { ...last, content: (last.content || "") + "\n\n_تم الإيقاف._" };
+                  }
+                  return copy;
+                });
+              }}
+              aria-label="إيقاف التوليد"
+              className="inline-flex items-center gap-1 h-10 px-4 rounded-full text-sm font-semibold bg-[color:var(--portal-danger)] text-white"
+            >
+              <Square className="h-4 w-4" />
+              <span>إيقاف</span>
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              aria-label="إرسال"
+              className="inline-flex items-center gap-1 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
+              style={{ background: "var(--portal-gradient)" }}
+            >
+              <Send className="h-4 w-4" />
+              <span>إرسال</span>
+            </button>
+          )}
         </form>
       </PortalCard>
 
