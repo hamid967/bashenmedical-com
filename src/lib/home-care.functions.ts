@@ -45,7 +45,9 @@ export const updateHomeCareRequest = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertStaff(context.supabase, context.userId);
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: { updated_at: string; status?: string; notes?: string } = {
+      updated_at: new Date().toISOString(),
+    };
     if (data.status) patch.status = data.status;
     if (data.notes !== undefined) patch.notes = data.notes;
     const { data: row, error } = await context.supabase
