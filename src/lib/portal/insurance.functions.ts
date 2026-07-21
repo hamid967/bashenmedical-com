@@ -295,10 +295,31 @@ async function logAttempt(
   const messageForLog = r.notes.length
     ? `${r.message} — ${r.notes.join(" · ")}`
     : r.message;
+
+  // Link the verification to the patient chart that belongs to this user so
+  // reception/doctor screens can surface it from the patient record. Missing
+  // patient row (no chart yet) is fine — the verification still lives under
+  // the user account.
+  let patientId: string | null = null;
+  try {
+    const { data: pat } = await supabase
+      .from("patients")
+      .select("id")
+      .eq("profile_id", userId)
+      .eq("is_active", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    patientId = (pat as { id?: string } | null)?.id ?? null;
+  } catch {
+    /* keep null */
+  }
+
   const { data: inserted, error } = await supabase
     .from("insurance_verifications")
     .insert({
       user_id: userId,
+      patient_id: patientId,
       doctor_id: data.doctor_id,
       provider_id: data.provider_id,
       appointment_id: data.appointment_id ?? null,

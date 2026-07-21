@@ -19,9 +19,14 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Loader2, ShieldCheck, ShieldAlert, Wallet, ArrowLeft } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, ShieldCheck, ShieldAlert, Wallet, ArrowLeft, History, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  verifyMyInsurance,
+  listMyInsuranceVerifications,
+} from "@/lib/portal/insurance.functions";
 
 type Provider = { id: string; name_ar: string; name_en: string };
 
@@ -89,6 +94,18 @@ function InsuranceVerifyPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<EligibilityResponse | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (alive) setUserId(data.user?.id ?? null);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+      setUserId(sess?.user?.id ?? null);
+    });
+    return () => { alive = false; sub.subscription.unsubscribe(); };
+  }, []);
 
   const { data: providers = [], isLoading: loadingProviders } = useQuery({
     queryKey: ["insurance-providers-standalone"],
@@ -101,10 +118,33 @@ function InsuranceVerifyPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Saved verifications — only for signed-in users, linked to patient chart.
+  const listMy = useServerFn(listMyInsuranceVerifications);
+  const verifyMy = useServerFn(verifyMyInsurance);
+  const { data: saved = [], refetch: refetchSaved } = useQuery({
+    queryKey: ["my-insurance-verifications", userId],
+    queryFn: () => listMy({ data: { limit: 10 } }),
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
+
   const canSubmit = useMemo(
     () => !!doctorId && !!providerId && !loading,
     [doctorId, providerId, loading],
   );
+
+  function reuseSaved(row: {
+    doctor_id: string | null;
+    provider_id: string | null;
+    id: string;
+  }) {
+    if (row.doctor_id) setDoctorId(row.doctor_id);
+    if (row.provider_id) setProviderId(row.provider_id);
+    // policy_hint is masked; leave the field blank to force a fresh entry
+    // only when the user actually wants to change payer info.
+    setResult(null);
+    setError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -113,28 +153,53 @@ function InsuranceVerifyPage() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch("/api/public/insurance/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          doctor_id: doctorId,
-          provider_id: providerId,
-          policy_number: policy || undefined,
-          member_id: memberId || undefined,
-          patient_national_id: nationalId || undefined,
-        }),
-      });
-      const body = (await res.json().catch(() => null)) as EligibilityResponse | null;
-      if (!body || body.ok === false) {
-        setError(
-          (body as { message?: string } | null)?.message ??
-            "تعذّر التحقق من الأهلية حاليًا. حاول مجددًا.",
-        );
-        return;
+      if (userId) {
+        // Signed-in: persist under the user account + link to patient chart
+        // so reception/doctor can reuse it without re-entry.
+        const r = await verifyMy({
+          data: {
+            doctor_id: doctorId,
+            provider_id: providerId,
+            policy_number: policy || undefined,
+          },
+        });
+        setResult({
+          ok: true,
+          eligible: r.eligible,
+          reason: r.reason,
+          message: r.message,
+          coverage_percent: r.coverage_percent,
+          consultation_fee: r.consultation_fee,
+          covered_amount: r.covered_amount,
+          patient_share: r.patient_share,
+          source: "sandbox",
+        });
+        refetchSaved();
+      } else {
+        // Guest: transient check only (public API doesn't persist).
+        const res = await fetch("/api/public/insurance/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            doctor_id: doctorId,
+            provider_id: providerId,
+            policy_number: policy || undefined,
+            member_id: memberId || undefined,
+            patient_national_id: nationalId || undefined,
+          }),
+        });
+        const body = (await res.json().catch(() => null)) as EligibilityResponse | null;
+        if (!body || body.ok === false) {
+          setError(
+            (body as { message?: string } | null)?.message ??
+              "تعذّر التحقق من الأهلية حاليًا. حاول مجددًا.",
+          );
+          return;
+        }
+        setResult(body);
       }
-      setResult(body);
-    } catch {
-      setError("خطأ في الشبكة. حاول مجددًا.");
+    } catch (err) {
+      setError((err as Error)?.message ?? "خطأ في الشبكة. حاول مجددًا.");
     } finally {
       setLoading(false);
     }
@@ -158,9 +223,62 @@ function InsuranceVerifyPage() {
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">
           تحقق من أهلية تأمينك الصحي وتقدير حصتك من التكلفة قبل الحجز. النتائج
-          تصدر عبر منصة <span className="font-semibold">NPHIES</span> ولن تُحفظ
-          بياناتك الشخصية على هذه الصفحة.
+          تصدر عبر منصة <span className="font-semibold">NPHIES</span>.
+          {userId
+            ? " تُحفظ نتائج التحقق تلقائيًا في حسابك وتُربط بملفك الطبي لإعادة استخدامها لاحقًا دون إعادة الإدخال."
+            : " سجّل الدخول لحفظ النتائج في حسابك وربطها بملفك الطبي."}
         </p>
+
+        {userId && saved.length > 0 && (
+          <div className="rounded-2xl border bg-card/60 p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold flex items-center gap-1.5">
+                <History className="h-4 w-4 text-primary" />
+                عمليات تحقق سابقة — إعادة الاستخدام
+              </h2>
+              <button
+                onClick={() => refetchSaved()}
+                type="button"
+                className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+              >
+                <RefreshCw className="h-3 w-3" /> تحديث
+              </button>
+            </div>
+            <ul className="divide-y">
+              {saved.slice(0, 5).map((row) => {
+                const doctor = doctors.find((d) => d.id === row.doctor_id);
+                return (
+                  <li key={row.id} className="py-2 flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-xs">
+                      <div className="font-medium">
+                        {row.provider_name_ar ?? "—"}
+                        <span className="text-muted-foreground"> · </span>
+                        {doctor?.name_ar ?? doctor?.name_en ?? "طبيب"}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {row.eligible ? "مؤهل" : "غير مؤهل"}
+                        {row.coverage_percent != null ? ` · تغطية ${row.coverage_percent}%` : ""}
+                        {row.patient_share != null
+                          ? ` · حصتك ${Number(row.patient_share).toLocaleString("ar-SA")} ر.س`
+                          : ""}
+                        {row.policy_hint ? ` · بوليصة ${row.policy_hint}` : ""}
+                        {" · "}
+                        {new Date(row.created_at).toLocaleDateString("ar-SA")}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => reuseSaved(row)}
+                      className="text-xs rounded-md border px-2 py-1 hover:bg-accent"
+                    >
+                      استخدام هذه البيانات
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
