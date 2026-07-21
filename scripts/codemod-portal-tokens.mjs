@@ -8,11 +8,18 @@
  * كل تحويل يستبدل نفس اللون بمرجع الرمز المُعرَّف.
  *
  * الاستخدام:
- *   node scripts/codemod-portal-tokens.mjs [--write] [--file <substr>] [--limit N] [--verbose]
- *   node scripts/codemod-portal-tokens.mjs --list-rules
+ *   node scripts/codemod-portal-tokens.mjs [options]
  *
- *   بدون --write: dry-run يعرض عدد التغييرات + عيّنة (Diff مختصر).
- *   مع --write : يحفظ الملفات ويطبع ملخّصًا.
+ *   بدون --write: dry-run افتراضي (يمكن تمرير --dry-run صراحةً للوضوح).
+ *   مع --write : يحفظ الملفات ويطبع ملخّصًا + Diff مختصر.
+ *
+ * تقييد النطاق (يمكن دمج أكثر من خيار):
+ *   --file <substr>        تصفية بسيطة على المسار (تحتفظ بالسلوك القديم).
+ *   --glob <pattern>       نمط glob؛ يقبل *, **, ?، وقابل للتكرار.
+ *   --paths <file>         ملف نصّي فيه مسار/glob في كل سطر (# للتعليق).
+ *   --limit N              حدّ أعلى لعدد الملفات المُغيَّرة.
+ *   --list-rules           اعرض قواعد التحويل واخرج.
+ *   --verbose              اعرض utilities قريبة لم تُحوَّل + تفصيل حسب المجلد.
  *
  * الضمانات:
  *   1. لا يعدّل أي سطر يحوي  // tokens-allow.
@@ -21,22 +28,59 @@
  *   3. أي تحويل ذو بديل غير مؤكّد (مثل shade نادر) يُترك ويُبلَّغ عنه في --verbose.
  *   4. عند --write ينشئ نسخة .bak لكل ملف مُعدَّل (يمكن حذفها بعد التحقق).
  */
-import { readFileSync, writeFileSync, readdirSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { join, relative, dirname } from "node:path";
 
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
 const WRITE = argv.includes("--write");
 const VERBOSE = argv.includes("--verbose");
 const LIST_RULES = argv.includes("--list-rules");
+const DRY_RUN_FLAG = argv.includes("--dry-run"); // معلوماتي؛ الوضع الافتراضي dry أصلًا
+function readOpt(name) {
+  const i = argv.indexOf(name);
+  return i >= 0 ? argv[i + 1] : undefined;
+}
+function readOptAll(name) {
+  const out = [];
+  for (let i = 0; i < argv.length; i++) if (argv[i] === name && argv[i + 1]) out.push(argv[i + 1]);
+  return out;
+}
 const LIMIT = (() => {
-  const i = argv.indexOf("--limit");
-  return i >= 0 ? parseInt(argv[i + 1] ?? "0", 10) || Infinity : Infinity;
+  const v = readOpt("--limit");
+  return v ? parseInt(v, 10) || Infinity : Infinity;
 })();
-const FILE_FILTER = (() => {
-  const i = argv.indexOf("--file");
-  return i >= 0 ? argv[i + 1] ?? "" : "";
-})();
+const FILE_FILTER = readOpt("--file") ?? "";
+const GLOB_PATTERNS = readOptAll("--glob");
+const PATHS_FILE = readOpt("--paths");
+
+if (PATHS_FILE) {
+  if (!existsSync(PATHS_FILE)) {
+    console.error(`--paths: الملف غير موجود: ${PATHS_FILE}`);
+    process.exit(2);
+  }
+  const lines = readFileSync(PATHS_FILE, "utf8")
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l && !l.startsWith("#"));
+  GLOB_PATTERNS.push(...lines);
+}
+
+// glob → RegExp (يدعم **، *، ?). المطابقة على المسار النسبي بعد توحيد "/"
+function globToRegExp(g) {
+  let re = "";
+  for (let i = 0; i < g.length; i++) {
+    const c = g[i];
+    if (c === "*") {
+      if (g[i + 1] === "*") { re += ".*"; i++; if (g[i + 1] === "/") i++; }
+      else re += "[^/]*";
+    } else if (c === "?") re += "[^/]";
+    else if (".+^$(){}|[]\\".includes(c)) re += "\\" + c;
+    else re += c;
+  }
+  return new RegExp("^" + re + "$");
+}
+const GLOB_RES = GLOB_PATTERNS.map(globToRegExp);
 
 const TARGET_DIRS = ["src/routes/_authenticated", "src/components/portal"];
 const FILE_EXCEPTIONS = new Set([
