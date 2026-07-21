@@ -101,41 +101,58 @@ function PrefsPage() {
         <form onSubmit={submit} className="glass-card p-5 sm:p-6 space-y-8">
           <Section title="قنوات الإشعار" hint="اختر قناة واحدة على الأقل. سنستخدم القنوات المفعّلة معًا حسب توفّرها.">
             <ChannelToggle
+              channelKey="in_app"
               icon={<Bell className="h-4 w-4" />}
               label="داخل التطبيق"
               hint="إشعارات فورية داخل بوابة المريض."
               checked={form.channel_in_app}
               onChange={(v) => set("channel_in_app", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="push"
               icon={<BellRing className="h-4 w-4" />}
               label="إشعارات المتصفح (Push)"
               hint="تظهر على جهازك حتى وإن لم تكن البوابة مفتوحة."
               checked={form.channel_push}
               onChange={(v) => set("channel_push", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="email"
               icon={<Mail className="h-4 w-4" />}
               label="البريد الإلكتروني"
               hint="عند توفر بريدك في الملف الشخصي."
               checked={form.channel_email}
               onChange={(v) => set("channel_email", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="sms"
               icon={<MessageSquare className="h-4 w-4" />}
               label="رسالة SMS"
               hint="عند توفر رقم جوالك المُتحقق منه."
               checked={form.channel_sms}
               onChange={(v) => set("channel_sms", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="whatsapp"
               icon={<MessageCircle className="h-4 w-4" />}
               label="واتساب"
               hint="نرسل عبر واتساب الأعمال عند توفّر تكامل الرسائل."
               checked={form.channel_whatsapp}
               onChange={(v) => set("channel_whatsapp", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
-          </Section>
+            <p className="text-[11px] text-[color:var(--portal-ink-2)]">
+              زرّ «اختبار» يُنشئ رسالة اختبار داخل التطبيق فورًا لتتحقق من قالب القناة قبل الحفظ.
+            </p>
 
           <Section title="تكرار التنبيهات">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
