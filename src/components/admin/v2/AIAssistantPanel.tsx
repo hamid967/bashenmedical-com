@@ -36,6 +36,15 @@ export function AIAssistantPanel({
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [streamMeta, setStreamMeta] = useState<MessageCostMeta | null>(null);
+  const [nowTick, setNowTick] = useState(0);
+
+  useEffect(() => {
+    if (!streaming) return;
+    const id = window.setInterval(() => setNowTick(performance.now()), 500);
+    setNowTick(performance.now());
+    return () => window.clearInterval(id);
+  }, [streaming]);
 
   // Live pre-flight estimate from the composer input + conversation history
   const preEstimate = useMemo(() => {
