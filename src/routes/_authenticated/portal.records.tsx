@@ -163,6 +163,7 @@ function RecordsPage() {
   });
 
   if (!data.patient) {
+    return (
       <PortalEmptyState
         icon={<FileText className="h-7 w-7" />}
         title="لا يوجد ملف طبي مرتبط بعد"
