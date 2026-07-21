@@ -350,7 +350,7 @@ function SidebarNav({
                       className={
                         "flex items-center gap-3 px-3.5 h-11 rounded-2xl text-sm font-medium transition-all portal-focus-ring " +
                         (active
-                          ? "text-white shadow-[var(--portal-shadow-elevated)]"
+                          ? "text-[color:var(--portal-on-primary)] shadow-[var(--portal-shadow-elevated)]"
                           : "text-[color:var(--portal-ink-2)] hover:bg-[color:var(--portal-gradient-soft)] hover:text-[color:var(--portal-primary)]")
                       }
                       style={active ? { background: "var(--portal-gradient)" } : undefined}
