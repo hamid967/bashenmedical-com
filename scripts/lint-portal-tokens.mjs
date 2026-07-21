@@ -16,10 +16,13 @@
  *
  * الخروج: 0 عند نظافة الشجرة، 1 عند وجود انتهاك.
  */
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync, writeFileSync, existsSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const ROOT = process.cwd();
+const BASELINE_PATH = join(ROOT, "scripts", "portal-tokens-baseline.json");
+const UPDATE_BASELINE = process.argv.includes("--update-baseline");
+
 
 // المسارات المُراقَبة
 const TARGET_DIRS = [
