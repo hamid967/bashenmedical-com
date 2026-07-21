@@ -105,7 +105,7 @@ function AdminDashboard() {
   return (
     <div
       dir="rtl"
-      className="-m-4 lg:-m-8 min-h-[calc(100vh-4rem)] p-6 lg:p-10 rounded-none"
+      className="-m-4 lg:-m-8 min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-10 rounded-none"
       style={{
         background: OCEAN.bg,
         color: "#e0e7ff",
@@ -113,25 +113,25 @@ function AdminDashboard() {
       }}
     >
       {/* Header */}
-      <header className="mb-10 flex flex-wrap justify-between items-end gap-6">
-        <div>
+      <header className="mb-6 sm:mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 sm:flex sm:flex-wrap sm:justify-between sm:items-end sm:gap-6">
+        <div className="min-w-0">
           <div
-            className="text-[11px] font-bold tracking-[0.3em] uppercase mb-2"
+            className="text-[10px] sm:text-[11px] font-bold tracking-[0.25em] sm:tracking-[0.3em] uppercase mb-2"
             style={{ color: OCEAN.glow, opacity: 0.75 }}
           >
             لوحة القيادة
           </div>
-          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-1" style={{ fontFamily: SORA }}>
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 leading-tight" style={{ fontFamily: SORA }}>
             أهلاً بك في مركز باعشن
           </h1>
-          <p style={{ color: OCEAN.glow, opacity: 0.8 }} className="text-sm">
+          <p style={{ color: OCEAN.glow, opacity: 0.8 }} className="text-xs sm:text-sm">
             نظرة سريعة على عمليات اليوم مع اختصارات لأهم أدواتك حسب دورك.
           </p>
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap justify-end shrink-0 max-w-[45%] sm:max-w-none">
           {roles.length === 0 && (
             <span
-              className="px-3 py-1.5 rounded-full text-xs font-bold"
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap"
               style={{ background: "rgba(245, 158, 11, 0.15)", color: "#fbbf24" }}
             >
               لم يتم منح دور بعد
@@ -140,7 +140,7 @@ function AdminDashboard() {
           {roles.map((r) => (
             <span
               key={r}
-              className="px-3 py-1.5 rounded-full text-xs font-bold"
+              className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap"
               style={{ background: `${OCEAN.accent}33`, color: OCEAN.glow, border: `1px solid ${OCEAN.accent}55` }}
             >
               {r}
@@ -151,7 +151,7 @@ function AdminDashboard() {
 
       {/* KPIs */}
       {stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-10">
           <KpiCard
             label="طلبات قيد المعالجة"
             value={stats.ordersPending}
@@ -166,16 +166,17 @@ function AdminDashboard() {
         </div>
       )}
 
+
       {/* Trends section — daily/weekly stats for developers */}
       <TrendsSection />
 
       {/* Magazine grid: Featured Inbox + Primary shortcuts */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
 
         {/* Featured Unified Inbox */}
         <Link
           to="/admin/inbox"
-          className="lg:col-span-8 relative overflow-hidden rounded-[2rem] p-8 lg:p-10 group transition-transform hover:-translate-y-0.5"
+          className="lg:col-span-8 relative overflow-hidden rounded-3xl sm:rounded-[2rem] p-5 sm:p-8 lg:p-10 group transition-transform hover:-translate-y-0.5"
           style={{
             background: OCEAN.panel,
             border: `1px solid ${OCEAN.panel2}`,
@@ -186,30 +187,32 @@ function AdminDashboard() {
             style={{ background: `${OCEAN.accent}22` }}
           />
           <div className="relative z-10">
-            <div className="flex justify-between items-start mb-6 flex-wrap gap-4">
-              <div>
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-3 mb-5 sm:mb-6 sm:flex sm:flex-wrap sm:justify-between sm:gap-4">
+              <div className="min-w-0">
                 <span
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold mb-3"
+                  className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-[11px] font-bold mb-2 sm:mb-3"
                   style={{ background: OCEAN.accent, color: "#e0e7ff" }}
                 >
                   <Sparkles className="h-3 w-3" /> البريد الموحّد
                 </span>
-                <h2 className="text-2xl lg:text-3xl font-bold mb-2 text-white" style={{ fontFamily: SORA }}>
+                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2 text-white leading-tight" style={{ fontFamily: SORA }}>
                   صندوق الوارد الموحّد اليوم
                 </h2>
-                <p style={{ color: OCEAN.glow, opacity: 0.8 }} className="text-sm">
+                <p style={{ color: OCEAN.glow, opacity: 0.8 }} className="text-xs sm:text-sm">
                   إدارة كافة المراسلات والطلبات من منصة واحدة
                 </p>
               </div>
               <span
-                className="px-5 py-2.5 rounded-full font-bold text-sm inline-flex items-center gap-2 group-hover:scale-105 transition-transform"
+                className="px-3 sm:px-5 py-2 sm:py-2.5 rounded-full font-bold text-xs sm:text-sm inline-flex items-center gap-1.5 sm:gap-2 shrink-0 group-hover:scale-105 transition-transform whitespace-nowrap"
                 style={{ background: "white", color: OCEAN.panel }}
               >
-                فتح الصندوق <ArrowLeft className="h-4 w-4" />
+                <span className="hidden sm:inline">فتح الصندوق</span>
+                <span className="sm:hidden">فتح</span>
+                <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </span>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2.5 sm:space-y-3">
               <InboxRow accent color={OCEAN.glow} label="طلبات مرضى جديدة" hint={`${stats?.appointmentsPending ?? 0} بانتظار التأكيد`} />
               <InboxRow color={OCEAN.accent} label="طلبات صيدلية ومختبر" hint={`${stats?.ordersPending ?? 0} قيد المعالجة`} />
               <InboxRow color={OCEAN.accent} label="شكاوى وطلبات دعم" hint="راجع صفحة الشكاوى" />
@@ -218,7 +221,7 @@ function AdminDashboard() {
         </Link>
 
         {/* Primary bento shortcuts */}
-        <div className="lg:col-span-4 grid grid-cols-2 gap-4">
+        <div className="lg:col-span-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-3 sm:gap-4">
           {primary.slice(0, 6).map((l) => (
             <ShortcutTile key={l.to} link={l} />
           ))}
@@ -228,34 +231,35 @@ function AdminDashboard() {
       {/* Secondary shortcuts row */}
       {secondary.length > 0 && (
         <>
-          <div className="flex items-center gap-3 mb-4 mt-2">
+          <div className="flex items-center gap-3 mb-3 sm:mb-4 mt-2">
             <span className="w-1 h-5 rounded-full" style={{ background: OCEAN.glow }} />
-            <h3 className="text-lg font-bold text-white" style={{ fontFamily: SORA }}>
+            <h3 className="text-base sm:text-lg font-bold text-white" style={{ fontFamily: SORA }}>
               وصول إضافي
             </h3>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
             {secondary.map((l) => {
               const Icon = l.icon;
               return (
                 <Link
                   key={l.to}
                   to={l.to}
-                  className="p-4 rounded-2xl text-center text-sm font-bold flex flex-col items-center gap-2 transition-all hover:-translate-y-0.5"
+                  className="p-3 sm:p-4 rounded-2xl text-center text-xs sm:text-sm font-bold flex flex-col items-center gap-1.5 sm:gap-2 transition-all hover:-translate-y-0.5"
                   style={{
                     background: `${OCEAN.panel}80`,
                     border: `1px solid ${OCEAN.panel2}`,
                     color: "#e0e7ff",
                   }}
                 >
-                  <span style={{ color: OCEAN.glow, display: "inline-flex" }}><Icon className="h-5 w-5" /></span>
-                  {l.label}
+                  <span style={{ color: OCEAN.glow, display: "inline-flex" }}><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
+                  <span className="truncate max-w-full">{l.label}</span>
                 </Link>
               );
             })}
           </div>
         </>
       )}
+
     </div>
   );
 }
@@ -289,28 +293,29 @@ function KpiCard({
 
   const body = (
     <div
-      className="p-6 rounded-3xl h-full transition-all hover:-translate-y-0.5"
+      className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl h-full transition-all hover:-translate-y-0.5"
       style={{ ...style, transition: "border-color 0.2s, transform 0.2s" }}
     >
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-3 sm:mb-4 gap-2">
         <div
-          className="text-[11px] font-bold uppercase tracking-[0.15em]"
+          className="text-[10px] sm:text-[11px] font-bold uppercase tracking-[0.12em] sm:tracking-[0.15em] min-w-0 truncate"
           style={{ color: labelColor }}
         >
           {label}
         </div>
-        <span style={{ color: labelColor, opacity: 0.7, display: "inline-flex" }}><Icon className="h-5 w-5" /></span>
+        <span style={{ color: labelColor, opacity: 0.7, display: "inline-flex" }} className="shrink-0"><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
       </div>
-      <div className="text-4xl font-bold" style={{ fontFamily: SORA }}>
+      <div className="text-2xl sm:text-3xl lg:text-4xl font-bold" style={{ fontFamily: SORA }}>
         {value}
       </div>
       {hint && (
-        <div className="text-xs mt-2" style={{ color: labelColor, opacity: 0.7 }}>
+        <div className="text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate" style={{ color: labelColor, opacity: 0.7 }}>
           {hint}
         </div>
       )}
     </div>
   );
+
 
   return to ? (
     <Link to={to} className="block">
@@ -326,18 +331,17 @@ function ShortcutTile({ link }: { link: QuickLink }) {
   return (
     <Link
       to={link.to}
-      className="rounded-3xl p-5 flex flex-col items-center justify-center text-center gap-3 transition-all hover:-translate-y-0.5 group"
+      className="rounded-2xl sm:rounded-3xl p-3 sm:p-5 flex flex-col items-center justify-center text-center gap-2 sm:gap-3 transition-all hover:-translate-y-0.5 group min-h-[92px] sm:min-h-[110px]"
       style={{
         background: `${OCEAN.panel2}33`,
         border: `1px solid ${OCEAN.panel2}`,
         color: "#e0e7ff",
-        minHeight: "110px",
       }}
     >
       <span style={{ color: OCEAN.glow, display: "inline-flex" }}>
-        <Icon className="h-6 w-6 transition-transform group-hover:scale-110" />
+        <Icon className="h-5 w-5 sm:h-6 sm:w-6 transition-transform group-hover:scale-110" />
       </span>
-      <span className="text-sm font-bold">{link.label}</span>
+      <span className="text-xs sm:text-sm font-bold truncate max-w-full">{link.label}</span>
     </Link>
   );
 }
@@ -355,7 +359,7 @@ function InboxRow({
 }) {
   return (
     <div
-      className="flex items-center gap-4 p-4 rounded-2xl"
+      className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl sm:rounded-2xl"
       style={{
         background: `${OCEAN.panel2}4d`,
         border: "1px solid rgba(255,255,255,0.05)",
@@ -369,13 +373,14 @@ function InboxRow({
             : { background: "transparent", border: `1px solid ${color}` }
         }
       />
-      <div className="flex-1 font-bold text-white text-sm">{label}</div>
-      <div className="text-xs" style={{ color: OCEAN.glow, opacity: 0.7 }}>
+      <div className="flex-1 min-w-0 font-bold text-white text-xs sm:text-sm truncate">{label}</div>
+      <div className="text-[11px] sm:text-xs shrink-0 text-end" style={{ color: OCEAN.glow, opacity: 0.7 }}>
         {hint}
       </div>
     </div>
   );
 }
+
 
 // ============================================================
 // Trends section — real data, developer-focused daily/weekly
@@ -412,23 +417,23 @@ function TrendsSection() {
 
   return (
     <section
-      className="rounded-[2rem] p-6 lg:p-8 mb-8"
+      className="rounded-3xl sm:rounded-[2rem] p-4 sm:p-6 lg:p-8 mb-6 sm:mb-8"
       style={{ background: OCEAN.panel, border: `1px solid ${OCEAN.panel2}` }}
     >
-      <header className="flex flex-wrap justify-between items-center gap-4 mb-6">
-        <div>
+      <header className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-5 sm:mb-6 sm:flex sm:flex-wrap sm:justify-between sm:gap-4">
+        <div className="min-w-0">
           <div
-            className="text-[11px] font-bold tracking-[0.3em] uppercase mb-1.5"
+            className="text-[10px] sm:text-[11px] font-bold tracking-[0.25em] sm:tracking-[0.3em] uppercase mb-1.5"
             style={{ color: OCEAN.glow, opacity: 0.75 }}
           >
             إحصائيات المطوّرين
           </div>
-          <h2 className="text-xl lg:text-2xl font-bold text-white" style={{ fontFamily: SORA }}>
+          <h2 className="text-base sm:text-xl lg:text-2xl font-bold text-white leading-tight" style={{ fontFamily: SORA }}>
             الاتجاهات {range === "week" ? "اليومية (٧ أيام)" : "الأسبوعية (٣٠ يومًا)"}
           </h2>
         </div>
         <div
-          className="inline-flex rounded-full p-1"
+          className="inline-flex rounded-full p-1 shrink-0"
           style={{ background: `${OCEAN.bg}`, border: `1px solid ${OCEAN.panel2}` }}
         >
           {(["week", "month"] as const).map((r) => (
@@ -436,7 +441,7 @@ function TrendsSection() {
               key={r}
               type="button"
               onClick={() => setRange(r)}
-              className="px-4 py-1.5 rounded-full text-xs font-bold transition-colors"
+              className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold transition-colors"
               style={
                 range === r
                   ? { background: OCEAN.glow, color: OCEAN.panel }
@@ -451,11 +456,11 @@ function TrendsSection() {
 
       {isError && (
         <div
-          className="p-4 rounded-2xl text-sm mb-4 flex justify-between items-center gap-3"
+          className="p-3 sm:p-4 rounded-2xl text-xs sm:text-sm mb-4 flex justify-between items-center gap-3"
           style={{ background: "rgba(248,113,113,0.1)", color: "#fca5a5", border: "1px solid rgba(248,113,113,0.3)" }}
         >
-          <span>تعذّر تحميل الإحصائيات: {(error as Error)?.message ?? "خطأ غير معروف"}</span>
-          <button onClick={() => refetch()} className="underline text-xs font-bold">
+          <span className="min-w-0 truncate">تعذّر تحميل الإحصائيات: {(error as Error)?.message ?? "خطأ غير معروف"}</span>
+          <button onClick={() => refetch()} className="underline text-xs font-bold shrink-0">
             إعادة المحاولة
           </button>
         </div>
@@ -463,7 +468,7 @@ function TrendsSection() {
 
       {/* Totals + growth badges */}
       {data && (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3 mb-5 sm:mb-6">
           {SERIES_META.map((s) => {
             const total = data.totals[s.key];
             const growth = data.growth[s.key];
@@ -471,23 +476,23 @@ function TrendsSection() {
             return (
               <div
                 key={s.key}
-                className="p-4 rounded-2xl"
+                className="p-3 sm:p-4 rounded-2xl"
                 style={{
                   background: `${OCEAN.panel2}4d`,
                   border: `1px solid ${OCEAN.panel2}`,
                 }}
               >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                  <span className="text-xs font-bold" style={{ color: OCEAN.glow, opacity: 0.85 }}>
+                <div className="flex items-center gap-2 mb-1.5 sm:mb-2 min-w-0">
+                  <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />
+                  <span className="text-[11px] sm:text-xs font-bold truncate" style={{ color: OCEAN.glow, opacity: 0.85 }}>
                     {s.label}
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-white" style={{ fontFamily: SORA }}>
+                <div className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: SORA }}>
                   {total.toLocaleString("ar-EG")}
                 </div>
                 <div
-                  className="text-[11px] font-bold mt-1"
+                  className="text-[10px] sm:text-[11px] font-bold mt-1"
                   style={{ color: up ? "#5cbdb9" : "#fca5a5" }}
                 >
                   {up ? "▲" : "▼"} {Math.abs(growth)}٪ vs السابق
@@ -500,9 +505,10 @@ function TrendsSection() {
 
       {/* Chart */}
       <div
-        className="rounded-2xl p-4"
-        style={{ background: `${OCEAN.bg}80`, border: `1px solid ${OCEAN.panel2}`, height: 320 }}
+        className="rounded-2xl p-3 sm:p-4 h-[240px] sm:h-[320px]"
+        style={{ background: `${OCEAN.bg}80`, border: `1px solid ${OCEAN.panel2}` }}
       >
+
         {isLoading || isFetching ? (
           <div className="h-full grid place-items-center text-sm" style={{ color: OCEAN.glow }}>
             جارٍ التحميل…
