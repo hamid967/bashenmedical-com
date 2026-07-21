@@ -5,7 +5,7 @@
     "src/routes/_authenticated/portal.calendar.tsx": 45,
     "src/routes/_authenticated/portal.complaints.tsx": 3,
     "src/routes/_authenticated/portal.consents.tsx": 29,
-    "src/routes/_authenticated/portal.dashboard.tsx": 8,
+    "src/routes/_authenticated/portal.dashboard.tsx": 5,
     "src/routes/_authenticated/portal.family.tsx": 35,
     "src/routes/_authenticated/portal.inquiries.tsx": 4,
     "src/routes/_authenticated/portal.insurance.tsx": 12,

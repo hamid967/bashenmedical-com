@@ -96,7 +96,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
 
   if (status === "done") {
     return (
-      <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
+      <div className="mt-2 inline-flex items-center gap-2 rounded-xl border border-[color:var(--portal-success)]/25 bg-[color:var(--portal-success-50)] px-3 py-2 text-xs font-medium text-[color:var(--portal-success)]">
         <CheckCircle2 className="h-4 w-4" />
         تم التنفيذ: {label}
       </div>
@@ -116,7 +116,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
       >
         <Icon className="h-4 w-4" />
         {label}
-        <span className="ms-1 inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-1.5 py-0.5 text-[10px] font-medium">
+        <span className="ms-1 inline-flex items-center gap-1 rounded-full bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] px-1.5 py-0.5 text-[10px] font-medium">
           <ShieldQuestion className="h-3 w-3" />
           يتطلب تأكيد
         </span>
@@ -124,7 +124,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
 
       {(status === "confirming" || status === "running" || status === "failed") && (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 grid place-items-center bg-[color:var(--portal-ink)]/40 p-4"
           role="dialog"
           aria-modal="true"
           dir="rtl"
@@ -134,7 +134,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
         >
           <div className="w-full max-w-md rounded-2xl bg-[color:var(--portal-surface)] p-6 shadow-2xl">
             <div className="flex items-start gap-3">
-              <div className="grid h-10 w-10 place-items-center rounded-full bg-amber-50 text-amber-600 shrink-0">
+              <div className="grid h-10 w-10 place-items-center rounded-full bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] shrink-0">
                 <AlertTriangle className="h-5 w-5" />
               </div>
               <div className="flex-1">
@@ -200,8 +200,8 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
                 type="button"
                 onClick={run}
                 disabled={status === "running"}
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-semibold text-white disabled:opacity-60 ${
-                  isCancel ? "bg-red-600 hover:bg-red-700" : "bg-[color:var(--portal-primary)] hover:opacity-90"
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60 ${
+                  isCancel ? "bg-[color:var(--portal-error)] hover:opacity-90" : "bg-[color:var(--portal-primary)] hover:opacity-90"
                 }`}
               >
                 {status === "running" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
