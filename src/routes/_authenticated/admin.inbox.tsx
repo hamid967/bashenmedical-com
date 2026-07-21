@@ -218,6 +218,5 @@ function UnifiedInboxPage() {
           </div>
         </Card>
       </div>
-    </AdminShell>
   );
 }
