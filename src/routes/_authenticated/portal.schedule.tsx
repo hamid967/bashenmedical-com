@@ -49,7 +49,7 @@ function ScheduleError({ error, reset }: { error: Error; reset: () => void }) {
       <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 break-words">{error.message}</p>
       <button
         onClick={() => { router.invalidate(); reset(); }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" /> إعادة المحاولة
@@ -73,7 +73,7 @@ function DoctorSchedulePage() {
         </p>
         <Link
           to="/portal"
-          className="mt-6 inline-flex rounded-full px-5 h-10 items-center text-sm font-semibold text-white"
+          className="mt-6 inline-flex rounded-full px-5 h-10 items-center text-sm font-semibold text-[color:var(--portal-on-primary)]"
           style={{ background: "var(--portal-gradient)" }}
         >
           العودة إلى البوابة
@@ -91,7 +91,7 @@ function DoctorSchedulePage() {
       <div className="glass-card p-6 flex flex-wrap items-center gap-4 justify-between">
         <div className="flex items-center gap-4">
           <div
-            className="h-14 w-14 rounded-2xl grid place-items-center text-white text-lg font-bold shadow-md"
+            className="h-14 w-14 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)] text-lg font-bold shadow-md"
             style={{ background: "var(--portal-gradient)" }}
           >
             {(doctor?.name_ar ?? "د").trim().slice(0, 1)}
@@ -230,7 +230,7 @@ function WeeklyAvailabilitySection() {
           <label className="text-xs font-semibold">اليوم</label>
           <select
             value={weekday} onChange={(e) => setWeekday(Number(e.target.value))}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm"
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm"
           >
             {WEEKDAYS.map((w, i) => <option key={i} value={i}>{w}</option>)}
           </select>
@@ -239,14 +239,14 @@ function WeeklyAvailabilitySection() {
           <label className="text-xs font-semibold">من</label>
           <input
             type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm"
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm"
           />
         </div>
         <div>
           <label className="text-xs font-semibold">إلى</label>
           <input
             type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm"
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm"
           />
         </div>
         <div>
@@ -254,12 +254,12 @@ function WeeklyAvailabilitySection() {
           <input
             type="number" min={5} max={240} step={5} value={slot}
             onChange={(e) => setSlot(Number(e.target.value))}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm"
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm"
           />
         </div>
         <button
           type="submit" disabled={createMut.isPending}
-          className="h-10 rounded-lg text-white text-sm font-semibold inline-flex items-center justify-center gap-1.5"
+          className="h-10 rounded-lg text-[color:var(--portal-on-primary)] text-sm font-semibold inline-flex items-center justify-center gap-1.5"
           style={{ background: "var(--portal-gradient)" }}
         >
           {createMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
@@ -378,31 +378,31 @@ function TimeSlotsSection() {
         <div>
           <label className="text-xs font-semibold">التاريخ</label>
           <input type="date" value={genDate} min={todayIso()} onChange={(e) => setGenDate(e.target.value)}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm" />
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         </div>
         <div>
           <label className="text-xs font-semibold">من</label>
           <input type="time" value={gStart} onChange={(e) => setGStart(e.target.value)}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm" />
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         </div>
         <div>
           <label className="text-xs font-semibold">إلى</label>
           <input type="time" value={gEnd} onChange={(e) => setGEnd(e.target.value)}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm" />
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         </div>
         <div>
           <label className="text-xs font-semibold">المدة (د)</label>
           <input type="number" min={5} max={240} value={gDur} onChange={(e) => setGDur(Number(e.target.value))}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm" />
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         </div>
         <div>
           <label className="text-xs font-semibold">فاصل (د)</label>
           <input type="number" min={0} max={120} value={gBreak} onChange={(e) => setGBreak(Number(e.target.value))}
-            className="mt-1 w-full h-10 rounded-lg border bg-white px-2 text-sm" />
+            className="mt-1 w-full h-10 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         </div>
         <button
           type="button" onClick={() => genMut.mutate()} disabled={genMut.isPending}
-          className="h-10 rounded-lg text-white text-sm font-semibold inline-flex items-center justify-center gap-1.5"
+          className="h-10 rounded-lg text-[color:var(--portal-on-primary)] text-sm font-semibold inline-flex items-center justify-center gap-1.5"
           style={{ background: "var(--portal-gradient)" }}
         >
           {genMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
@@ -413,10 +413,10 @@ function TimeSlotsSection() {
       <div className="flex items-center gap-3 mb-4">
         <label className="text-xs font-semibold">عرض من</label>
         <input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)}
-          className="h-9 rounded-lg border bg-white px-2 text-sm" />
+          className="h-9 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         <label className="text-xs font-semibold">إلى</label>
         <input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)}
-          className="h-9 rounded-lg border bg-white px-2 text-sm" />
+          className="h-9 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
       </div>
 
       {slotsQ.isLoading ? (
@@ -525,20 +525,20 @@ function LeavesSection() {
           <div>
             <label className="text-xs font-semibold">من</label>
             <input type="date" value={startDate} min={todayIso()} onChange={(e) => setStartDate(e.target.value)}
-              className="mt-1 w-full h-9 rounded-lg border bg-white px-2 text-sm" />
+              className="mt-1 w-full h-9 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
           </div>
           <div>
             <label className="text-xs font-semibold">إلى</label>
             <input type="date" value={endDate} min={startDate} onChange={(e) => setEndDate(e.target.value)}
-              className="mt-1 w-full h-9 rounded-lg border bg-white px-2 text-sm" />
+              className="mt-1 w-full h-9 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
           </div>
         </div>
         <input type="text" value={reason} onChange={(e) => setReason(e.target.value)}
           placeholder="السبب (اختياري)" maxLength={500}
-          className="w-full h-9 rounded-lg border bg-white px-2 text-sm" />
+          className="w-full h-9 rounded-lg border bg-[color:var(--portal-surface)] px-2 text-sm" />
         <button
           type="button" onClick={() => createMut.mutate()} disabled={createMut.isPending}
-          className="w-full h-9 rounded-lg text-white text-sm font-semibold inline-flex items-center justify-center gap-1.5"
+          className="w-full h-9 rounded-lg text-[color:var(--portal-on-primary)] text-sm font-semibold inline-flex items-center justify-center gap-1.5"
           style={{ background: "var(--portal-gradient)" }}
         >
           {createMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}

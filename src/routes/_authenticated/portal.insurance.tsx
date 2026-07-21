@@ -163,10 +163,9 @@ function InsurancePage() {
   });
 
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-4xl" dir="rtl">
         <header className="mb-6 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl grid place-items-center text-white" style={{ background: "var(--portal-gradient)" }}>
+          <div className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]" style={{ background: "var(--portal-gradient)" }}>
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
@@ -257,12 +256,12 @@ function InsurancePage() {
           <div className="mt-4 flex flex-wrap items-center justify-end gap-2">
             {(p?.insurance_provider || p?.insurance_policy_no) && (
               <button type="button" onClick={() => removeMut.mutate()} disabled={removeMut.isPending}
-                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full border border-red-200 bg-white text-sm text-red-700 hover:bg-red-50 disabled:opacity-60">
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full border border-red-200 bg-[color:var(--portal-surface)] text-sm text-red-700 hover:bg-red-50 disabled:opacity-60">
                 <ShieldOff className="h-4 w-4" />إزالة
               </button>
             )}
             <button type="button" onClick={onSave} disabled={!dirty || mut.isPending}
-              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
               style={{ background: "var(--portal-gradient)" }}>
               {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               حفظ
@@ -312,13 +311,12 @@ function InsurancePage() {
             </ul>
           )}
         </section>
-      </main>
-    </div>
+      </div>
   );
 }
 
 const inputCls =
-  "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30";
+  "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30";
 
 function FieldError({ msg }: { msg: string }) {
   return <p role="alert" className="mt-1 text-[11px] font-semibold text-red-600">{msg}</p>;
@@ -334,12 +332,12 @@ function Metric({ label, value, tone }: { label: string; value: string; tone?: "
 function EmptyState() {
   return (
     <div className="glass-card p-8 text-center">
-      <div className="mx-auto h-12 w-12 rounded-2xl grid place-items-center bg-white border border-[color:var(--portal-border)] text-[color:var(--portal-primary)]">
+      <div className="mx-auto h-12 w-12 rounded-2xl grid place-items-center bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] text-[color:var(--portal-primary)]">
         <ShieldCheck className="h-6 w-6" />
       </div>
       <h3 className="mt-3 font-bold">لا يوجد سجل تحقق بعد</h3>
       <p className="mt-1 text-sm text-[color:var(--portal-ink-2)]">سيظهر التحقق تلقائيًا عند حجز موعد وإدخال بيانات وثيقتك.</p>
-      <Link to="/portal/book" className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm font-semibold text-white" style={{ background: "var(--portal-gradient)" }}>
+      <Link to="/portal/book" className="mt-4 inline-flex items-center gap-1.5 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)]" style={{ background: "var(--portal-gradient)" }}>
         <CalendarPlus className="h-4 w-4" />احجز موعدًا
       </Link>
     </div>
@@ -347,8 +345,7 @@ function EmptyState() {
 }
 function Skeleton() {
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-8">
+    <div className="mx-auto max-w-4xl" dir="rtl">
         <div className="h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse mb-6" />
         <div className="glass-card p-6 space-y-3">
           {[0, 1].map((i) => <div key={i} className="h-10 rounded-xl bg-slate-200/60 animate-pulse" />)}
@@ -356,8 +353,7 @@ function Skeleton() {
         <div className="mt-6 space-y-3">
           {[0, 1, 2].map((i) => <div key={i} className="glass-card h-24 animate-pulse bg-slate-100" />)}
         </div>
-      </main>
-    </div>
+      </div>
   );
 }
 function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
@@ -369,10 +365,10 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
         <h2 className="text-lg font-bold">تعذّر تحميل بيانات التأمين</h2>
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">{error.message}</p>
         <div className="mt-4 flex justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-white text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
+          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
             <RefreshCw className="inline h-4 w-4 ms-1" />حاول مجددًا
           </button>
-          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm inline-flex items-center gap-1">
+          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" />العودة
           </Link>
         </div>

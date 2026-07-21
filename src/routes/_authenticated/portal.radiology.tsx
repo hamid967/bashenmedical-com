@@ -64,7 +64,7 @@ function RadiologyError({ error, reset }: { error: Error; reset: () => void }) {
       </p>
       <button
         onClick={() => { router.invalidate(); reset(); }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" /> إعادة المحاولة
@@ -285,7 +285,7 @@ function RadiologyPage() {
                   <button
                     disabled={!r.file_path || loadingId === r.id}
                     onClick={() => openViewer(r)}
-                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold text-white disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
                     style={{ background: "var(--portal-gradient)" }}
                   >
                     {loadingId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
@@ -294,7 +294,7 @@ function RadiologyPage() {
                   <button
                     disabled={!r.file_path || downloadingId === r.id}
                     onClick={() => downloadFile(r)}
-                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold bg-white/80 hover:bg-white text-[color:var(--portal-ink)] disabled:opacity-50"
+                    className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold bg-white/80 hover:bg-[color:var(--portal-surface)] text-[color:var(--portal-ink)] disabled:opacity-50"
                   >
                     {downloadingId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                     تنزيل
@@ -373,7 +373,7 @@ function AiSummaryCard() {
 
   return (
     <div
-      className="rounded-3xl p-5 md:p-6 text-white shadow-lg relative overflow-hidden"
+      className="rounded-3xl p-5 md:p-6 text-[color:var(--portal-on-primary)] shadow-lg relative overflow-hidden"
       style={{ background: "var(--portal-gradient)" }}
     >
       <div className="absolute inset-0 opacity-20 pointer-events-none"

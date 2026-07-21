@@ -89,7 +89,7 @@ function RxError({ error, reset }: { error: Error; reset: () => void }) {
       </p>
       <button
         onClick={() => { router.invalidate(); reset(); }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" /> إعادة المحاولة
@@ -381,7 +381,7 @@ function AiReminderCard({ upcoming, activeCount }: { upcoming: UpcomingAppointme
 
   return (
     <div
-      className="rounded-3xl p-5 md:p-6 text-white shadow-lg relative overflow-hidden"
+      className="rounded-3xl p-5 md:p-6 text-[color:var(--portal-on-primary)] shadow-lg relative overflow-hidden"
       style={{ background: "var(--portal-gradient)" }}
     >
       <div
@@ -570,7 +570,7 @@ function ReminderLogSection() {
           <button
             onClick={() => refetch()}
             disabled={isFetching}
-            className="h-9 rounded-full px-3 text-xs font-semibold bg-white/70 ring-1 ring-white/60 inline-flex items-center gap-1.5 hover:bg-white disabled:opacity-60"
+            className="h-9 rounded-full px-3 text-xs font-semibold bg-white/70 ring-1 ring-white/60 inline-flex items-center gap-1.5 hover:bg-[color:var(--portal-surface)] disabled:opacity-60"
           >
             {isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
             تحديث
@@ -1049,14 +1049,14 @@ function PreferencesCard() {
           <button
             onClick={reset}
             disabled={mut.isPending || isLoading}
-            className="inline-flex items-center gap-1.5 rounded-full h-9 px-3 text-xs font-semibold bg-white/70 ring-1 ring-white/60 hover:bg-white text-[color:var(--portal-ink-2)] disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full h-9 px-3 text-xs font-semibold bg-white/70 ring-1 ring-white/60 hover:bg-[color:var(--portal-surface)] text-[color:var(--portal-ink-2)] disabled:opacity-50"
           >
             <RefreshCw className="h-3.5 w-3.5" /> استعادة الافتراضي
           </button>
           <button
             onClick={() => mut.mutate(form)}
             disabled={!dirty || mut.isPending || isLoading}
-            className="inline-flex items-center gap-1.5 rounded-full h-9 px-4 text-xs font-semibold text-white disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-full h-9 px-4 text-xs font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
             style={{ background: "var(--portal-gradient)" }}
           >
             {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
@@ -1260,7 +1260,7 @@ function ExportPreviewModal({
       dir="rtl"
     >
       <div
-        className="w-full max-w-2xl max-h-[85vh] rounded-3xl bg-white shadow-2xl flex flex-col overflow-hidden text-[color:var(--portal-ink)]"
+        className="w-full max-w-2xl max-h-[85vh] rounded-3xl bg-[color:var(--portal-surface)] shadow-2xl flex flex-col overflow-hidden text-[color:var(--portal-ink)]"
         onClick={(e) => e.stopPropagation()}
       >
         <header className="p-5 border-b border-slate-100 flex items-start justify-between gap-3">
@@ -1321,7 +1321,7 @@ function ExportPreviewModal({
                       {items.map(({ idx, slot }) => (
                         <li
                           key={idx}
-                          className="flex items-start gap-2 rounded-xl bg-white px-3 py-2 ring-1 ring-slate-100"
+                          className="flex items-start gap-2 rounded-xl bg-[color:var(--portal-surface)] px-3 py-2 ring-1 ring-slate-100"
                         >
                           <input
                             type="checkbox"
@@ -1374,7 +1374,7 @@ function ExportPreviewModal({
                 {upcoming.map((a) => (
                   <li
                     key={a.id}
-                    className="flex items-start gap-2 rounded-xl bg-white px-3 py-2 ring-1 ring-slate-100"
+                    className="flex items-start gap-2 rounded-xl bg-[color:var(--portal-surface)] px-3 py-2 ring-1 ring-slate-100"
                   >
                     <input
                       type="checkbox"
@@ -1406,14 +1406,14 @@ function ExportPreviewModal({
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="rounded-full h-10 px-4 text-sm font-semibold bg-white ring-1 ring-slate-200 hover:bg-slate-50"
+              className="rounded-full h-10 px-4 text-sm font-semibold bg-[color:var(--portal-surface)] ring-1 ring-slate-200 hover:bg-slate-50"
             >
               إلغاء
             </button>
             <button
               onClick={handleExport}
               disabled={totalEvents === 0}
-              className="inline-flex items-center gap-2 rounded-full h-10 px-4 text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-full h-10 px-4 text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
               style={{ background: "var(--portal-gradient)" }}
             >
               <CalendarPlus className="h-4 w-4" /> تنزيل .ics
@@ -1427,7 +1427,7 @@ function ExportPreviewModal({
 
 function FilterPill({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-white ring-1 ring-slate-200 px-2.5 h-6 text-[color:var(--portal-ink-2)]">
+    <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--portal-surface)] ring-1 ring-slate-200 px-2.5 h-6 text-[color:var(--portal-ink-2)]">
       {icon}
       {label}
     </span>

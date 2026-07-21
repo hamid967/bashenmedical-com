@@ -260,7 +260,7 @@ function InvoiceRow({
       <span className={`mag-chip ${statusStyle(inv.status)}`}>{statusLabel(inv.status)}</span>
       <button
         onClick={onOpen}
-        className="h-10 px-4 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] transition-colors"
+        className="h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] transition-colors"
       >
         {isPaid ? "التفاصيل" : "دفع الآن"}
       </button>
@@ -300,7 +300,7 @@ function InvoiceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
       <div className="absolute inset-0 bg-slate-900/40" onClick={onClose} />
-      <div className="relative ms-auto h-full w-full max-w-lg bg-white shadow-xl flex flex-col">
+      <div className="relative ms-auto h-full w-full max-w-lg bg-[color:var(--portal-surface)] shadow-xl flex flex-col">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div className="font-bold">تفاصيل الفاتورة</div>
           <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
@@ -397,7 +397,7 @@ function InvoiceDetails({
           href={invoice.pdf_path}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-[color:var(--mag-line)] bg-white text-sm font-semibold hover:bg-[color:var(--mag-subtle)]"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm font-semibold hover:bg-[color:var(--mag-subtle)]"
         >
           <FileText className="h-4 w-4" />
           تحميل PDF
@@ -437,7 +437,7 @@ function InvoiceDetails({
           <button
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending}
-            className="w-full h-12 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 flex items-center justify-center gap-2"
           >
             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
             دفع {fmtSAR(invoice.due_amount, invoice.currency)}
@@ -472,7 +472,7 @@ function InvoiceDetails({
                     {refundable && (
                       <Link
                         to="/portal/refunds"
-                        className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] bg-white text-xs font-semibold hover:bg-[color:var(--mag-subtle)]"
+                        className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]"
                       >
                         طلب استرداد
                       </Link>

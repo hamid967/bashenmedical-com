@@ -70,7 +70,7 @@ function PortalPaymentsPage() {
           </div>
           <Link
             to="/portal/invoices"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-white bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
           >
             <Receipt className="h-4 w-4" /> الذهاب إلى الفواتير
           </Link>

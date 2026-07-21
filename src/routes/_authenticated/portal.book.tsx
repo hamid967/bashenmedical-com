@@ -100,7 +100,7 @@ function BookError({ error, reset }: { error: Error; reset: () => void }) {
           router.invalidate();
           reset();
         }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" />
@@ -416,14 +416,14 @@ function BookPage() {
                 setSlotId("");
                 setDate(undefined);
               }}
-              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
+              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
               style={{ background: "var(--portal-gradient)" }}
             >
               حجز موعد آخر
             </button>
             <Link
               to="/portal"
-              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-white"
+              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]"
             >
               العودة إلى اللوحة
             </Link>
@@ -460,7 +460,7 @@ function BookPage() {
           <div className="mt-6 flex justify-center gap-3 flex-wrap">
             <Link
               to="/portal/family"
-              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
+              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
               style={{ background: "var(--portal-gradient)" }}
             >
               <UserRound className="h-4 w-4" />
@@ -469,7 +469,7 @@ function BookPage() {
             <Link
               to="/portal/book"
               search={{}}
-              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-white"
+              className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]"
             >
               حجز لنفسي بدلًا من ذلك
             </Link>
@@ -530,7 +530,7 @@ function BookPage() {
           <div>
             <Label className="text-xs mb-1 block">الفرع</Label>
             <Select value={branchId || undefined} onValueChange={(v) => setBranchId(v)}>
-              <SelectTrigger className="bg-white">
+              <SelectTrigger className="bg-[color:var(--portal-surface)]">
                 <SelectValue placeholder="اختر الفرع" />
               </SelectTrigger>
               <SelectContent className="pointer-events-auto">
@@ -545,7 +545,7 @@ function BookPage() {
           <div>
             <Label className="text-xs mb-1 block">التخصص</Label>
             <Select value={specialtyId || undefined} onValueChange={(v) => setSpecialtyId(v)}>
-              <SelectTrigger className="bg-white">
+              <SelectTrigger className="bg-[color:var(--portal-surface)]">
                 <SelectValue placeholder="اختر التخصص" />
               </SelectTrigger>
               <SelectContent className="pointer-events-auto">
@@ -598,7 +598,7 @@ function BookPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full grid place-items-center text-white font-bold shrink-0" style={{ background: "var(--portal-gradient)" }}>
+                    <div className="h-12 w-12 rounded-full grid place-items-center text-[color:var(--portal-on-primary)] font-bold shrink-0" style={{ background: "var(--portal-gradient)" }}>
                       {d.photo_url ? (
                         <img src={d.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
                       ) : (
@@ -630,7 +630,7 @@ function BookPage() {
                 <CalendarCheck className="h-5 w-5 text-[color:var(--portal-primary)]" />
                 اختر التاريخ
               </h2>
-              <div className="rounded-2xl border border-[color:var(--portal-border)] bg-white p-2 inline-block pointer-events-auto">
+              <div className="rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-2 inline-block pointer-events-auto">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -720,7 +720,7 @@ function BookPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label className="text-xs mb-1 block">الاسم الكامل</Label>
-              <Input value={patientName} onChange={(e) => setPatientName(e.target.value)} className="bg-white" />
+              <Input value={patientName} onChange={(e) => setPatientName(e.target.value)} className="bg-[color:var(--portal-surface)]" />
             </div>
             <div>
               <Label className="text-xs mb-1 block">رقم الجوال</Label>
@@ -728,7 +728,7 @@ function BookPage() {
                 value={patientPhone}
                 onChange={(e) => setPatientPhone(e.target.value)}
                 inputMode="tel"
-                className="bg-white"
+                className="bg-[color:var(--portal-surface)]"
               />
             </div>
             <div className="md:col-span-2">
@@ -737,7 +737,7 @@ function BookPage() {
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={3}
-                className="bg-white"
+                className="bg-[color:var(--portal-surface)]"
                 placeholder="مثال: متابعة، فحص دوري، شكوى محددة..."
               />
             </div>
@@ -745,7 +745,7 @@ function BookPage() {
 
           <div className="mt-5 rounded-2xl bg-[color:var(--portal-primary)]/5 border border-[color:var(--portal-primary)]/15 p-4 grid gap-2 sm:grid-cols-2">
             {dependent && (
-              <div className="sm:col-span-2 -mx-1 -mt-1 mb-1 px-3 py-2 rounded-xl bg-[color:var(--portal-primary)] text-white text-sm font-semibold flex items-center gap-2">
+              <div className="sm:col-span-2 -mx-1 -mt-1 mb-1 px-3 py-2 rounded-xl bg-[color:var(--portal-primary)] text-[color:var(--portal-on-primary)] text-sm font-semibold flex items-center gap-2">
                 <UserRound className="h-4 w-4" />
                 <span>حجز نيابةً عن:</span>
                 <span className="font-bold">{dependent.full_name}</span>
@@ -768,7 +768,7 @@ function BookPage() {
 
 
           {/* Appointment cost & insurance eligibility */}
-          <div className="mt-5 rounded-2xl border border-[color:var(--portal-border)] bg-white p-4">
+          <div className="mt-5 rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-4">
             <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
               <h3 className="text-sm font-bold flex items-center gap-2">
                 <BadgeCheck className="h-4 w-4 text-[color:var(--portal-primary)]" />
@@ -781,7 +781,7 @@ function BookPage() {
               <div>
                 <Label className="text-xs mb-1 block">جهة التأمين</Label>
                 <Select value={providerId || undefined} onValueChange={(v) => setProviderId(v)}>
-                  <SelectTrigger className="bg-white">
+                  <SelectTrigger className="bg-[color:var(--portal-surface)]">
                     <SelectValue placeholder="اختر جهة التأمين" />
                   </SelectTrigger>
                   <SelectContent className="pointer-events-auto">
@@ -801,7 +801,7 @@ function BookPage() {
                   onChange={(e) => setPolicyNumber(e.target.value)}
                   placeholder="POL-123456"
                   dir="ltr"
-                  className="bg-white"
+                  className="bg-[color:var(--portal-surface)]"
                 />
               </div>
             </div>
@@ -916,7 +916,7 @@ function BookPage() {
           {/* Verification history */}
           {doctorId && (
             <details
-              className="mt-3 rounded-2xl border border-[color:var(--portal-border)] bg-white p-3 group"
+              className="mt-3 rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-3 group"
               open={historyQ.isError}
             >
               <summary className="cursor-pointer text-sm font-semibold flex items-center justify-between gap-2">
@@ -958,7 +958,7 @@ function BookPage() {
                       type="button"
                       onClick={() => historyQ.refetch()}
                       disabled={historyQ.isFetching}
-                      className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60"
+                      className="inline-flex items-center gap-1 rounded-full border border-red-300 bg-[color:var(--portal-surface)] px-2.5 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-100 disabled:opacity-60"
                     >
                       {historyQ.isFetching ? (
                         <Loader2 className="h-3 w-3 animate-spin" />
@@ -1065,7 +1065,7 @@ function BookPage() {
               size="lg"
               onClick={handleConfirm}
               disabled={bookMut.isPending}
-              className="rounded-full text-white font-semibold px-6"
+              className="rounded-full text-[color:var(--portal-on-primary)] font-semibold px-6"
               style={{ background: "var(--portal-gradient)" }}
             >
               {bookMut.isPending ? (
@@ -1094,7 +1094,7 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-center gap-3 text-sm">
-      <span className="h-8 w-8 rounded-lg grid place-items-center bg-white text-[color:var(--portal-primary)] border border-[color:var(--portal-border)] shrink-0">
+      <span className="h-8 w-8 rounded-lg grid place-items-center bg-[color:var(--portal-surface)] text-[color:var(--portal-primary)] border border-[color:var(--portal-border)] shrink-0">
         {icon}
       </span>
       <div className="min-w-0">

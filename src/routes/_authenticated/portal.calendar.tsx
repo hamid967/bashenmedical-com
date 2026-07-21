@@ -299,7 +299,7 @@ function DoctorCalendarPage() {
             ) : (
               <ul className="space-y-2">
                 {dayAppts.map(a => (
-                  <li key={a.id} className="p-3 rounded-lg border border-slate-200 bg-white">
+                  <li key={a.id} className="p-3 rounded-lg border border-slate-200 bg-[color:var(--portal-surface)]">
                     <div className="flex items-start gap-2">
                       <div className="text-sm font-bold text-[color:var(--portal-accent)] tabular-nums">
                         {hhmm(a.appointment_time)}
@@ -360,7 +360,7 @@ function DoctorCalendarPage() {
             ) : (
               <ul className="space-y-2">
                 {daySlots.map(s => (
-                  <li key={s.id} className="p-2 rounded-lg border border-slate-200 bg-white flex items-center gap-2">
+                  <li key={s.id} className="p-2 rounded-lg border border-slate-200 bg-[color:var(--portal-surface)] flex items-center gap-2">
                     <div className="text-sm font-semibold tabular-nums flex-1">
                       {hhmm(s.start_time)} — {hhmm(s.end_time)}
                     </div>
@@ -453,7 +453,7 @@ function RescheduleDialog({
   const [time, setTime] = useState(target.time);
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
-      <div dir="rtl" className="bg-white rounded-xl shadow-xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
+      <div dir="rtl" className="bg-[color:var(--portal-surface)] rounded-xl shadow-xl w-full max-w-sm p-5" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold mb-1">إعادة جدولة الموعد</h3>
         <p className="text-sm text-slate-500 mb-4">{target.patient}</p>
         <div className="space-y-3">
@@ -539,13 +539,13 @@ function PatientCalendarPage() {
         </div>
         <Link
           to="/portal/appointments"
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-white border border-[color:var(--portal-border)] text-sm font-semibold hover:bg-slate-50"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] text-sm font-semibold hover:bg-slate-50"
         >
           <CalendarClock className="h-4 w-4" /> قائمة المواعيد
         </Link>
         <Link
           to="/portal/book"
-          className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
+          className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold shadow"
           style={{ background: "var(--portal-gradient)" }}
         >
           <CalendarPlus className="h-4 w-4" /> حجز جديد
@@ -652,7 +652,7 @@ function PatientCalendarPage() {
         ) : (
           <ul className="space-y-2">
             {dayAppts.map((a) => (
-              <li key={a.id} className="p-3 rounded-lg border border-slate-200 bg-white">
+              <li key={a.id} className="p-3 rounded-lg border border-slate-200 bg-[color:var(--portal-surface)]">
                 <div className="flex items-start gap-3">
                   <div className="text-sm font-bold text-[color:var(--portal-primary)] tabular-nums min-w-[48px]">
                     {hhmm(a.appointment_time)}

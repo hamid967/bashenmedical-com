@@ -72,10 +72,9 @@ function PrefsPage() {
   };
 
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-3xl" dir="rtl">
         <header className="mb-6 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl grid place-items-center text-white" style={{ background: "var(--portal-gradient)" }}>
+          <div className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]" style={{ background: "var(--portal-gradient)" }}>
             <Bell className="h-5 w-5" />
           </div>
           <div>
@@ -141,7 +140,7 @@ function PrefsPage() {
                     className={`text-right rounded-2xl border p-4 transition ${
                       active
                         ? "border-[color:var(--portal-primary)] bg-[color:var(--portal-primary)]/5"
-                        : "border-[color:var(--portal-border)] bg-white hover:border-[color:var(--portal-primary)]/40"
+                        : "border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] hover:border-[color:var(--portal-primary)]/40"
                     }`}
                   >
                     <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{opt.label}</div>
@@ -211,13 +210,13 @@ function PrefsPage() {
               <Link to="/portal/notifications" className="underline">الإشعارات</Link>.
             </p>
             <div className="flex gap-2">
-              <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm inline-flex items-center">
+              <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm inline-flex items-center">
                 إلغاء
               </Link>
               <button
                 type="submit"
                 disabled={!dirty || mut.isPending}
-                className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-semibold text-white disabled:opacity-60"
+                className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
                 style={{ background: "var(--portal-gradient)" }}
               >
                 {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
@@ -226,13 +225,12 @@ function PrefsPage() {
             </div>
           </div>
         </form>
-      </main>
-    </div>
+      </div>
   );
 }
 
 const inputCls =
-  "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-white px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30 disabled:opacity-50";
+  "w-full h-10 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-3 text-sm focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30 disabled:opacity-50";
 
 function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
@@ -264,7 +262,7 @@ function ChannelToggle({
     <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition ${
       checked
         ? "border-[color:var(--portal-primary)] bg-[color:var(--portal-primary)]/5"
-        : "border-[color:var(--portal-border)] bg-white hover:border-[color:var(--portal-primary)]/40"
+        : "border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] hover:border-[color:var(--portal-primary)]/40"
     }`}>
       <div className="h-9 w-9 rounded-xl grid place-items-center bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-primary)]">
         {icon}
@@ -285,16 +283,14 @@ function ChannelToggle({
 
 function Skeleton() {
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-8">
+    <div className="mx-auto max-w-3xl" dir="rtl">
         <div className="h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse mb-6" />
         <div className="glass-card p-6 space-y-4">
           {[0, 1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-12 rounded-xl bg-slate-200/60 animate-pulse" />
           ))}
         </div>
-      </main>
-    </div>
+      </div>
   );
 }
 
@@ -308,7 +304,7 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">{error.message}</p>
         <button
           onClick={() => { router.invalidate(); reset(); }}
-          className="mt-6 h-10 px-4 rounded-full text-white text-sm font-semibold inline-flex items-center gap-1"
+          className="mt-6 h-10 px-4 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold inline-flex items-center gap-1"
           style={{ background: "var(--portal-gradient)" }}
         >
           <RefreshCw className="h-4 w-4" /> حاول مجددًا

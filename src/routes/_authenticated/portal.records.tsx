@@ -67,7 +67,7 @@ function RecordsError({ error, reset }: { error: Error; reset: () => void }) {
       </p>
       <button
         onClick={() => { router.invalidate(); reset(); }}
-        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+        className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         <RefreshCw className="h-4 w-4" /> إعادة المحاولة
@@ -171,7 +171,7 @@ function RecordsPage() {
         action={
           <Link
             to="/portal/book"
-            className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
+            className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
             style={{ background: "var(--portal-gradient)" }}
           >
             احجز أول موعد
@@ -208,7 +208,7 @@ function RecordsPage() {
 
       {/* AI summary card */}
       <section
-        className="rounded-3xl p-5 md:p-6 text-white shadow-lg relative overflow-hidden"
+        className="rounded-3xl p-5 md:p-6 text-[color:var(--portal-on-primary)] shadow-lg relative overflow-hidden"
         style={{ background: "var(--portal-gradient)" }}
       >
         <div className="absolute -top-8 -left-8 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
@@ -219,7 +219,7 @@ function RecordsPage() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-xs text-white/70">ملخص ذكي بواسطة AI</div>
+              <div className="text-xs text-[color:var(--portal-on-primary)]/70">ملخص ذكي بواسطة AI</div>
               <h2 className="text-lg font-bold">
                 {aiSummary?.headline ?? "احصل على قراءة سريعة لسجلك الطبي"}
               </h2>
@@ -238,18 +238,18 @@ function RecordsPage() {
         {aiSummary && (
           <div className="relative mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-white/10 border border-white/15 p-4">
-              <div className="text-xs text-white/70 mb-2">أبرز النقاط</div>
+              <div className="text-xs text-[color:var(--portal-on-primary)]/70 mb-2">أبرز النقاط</div>
               <ul className="space-y-2 text-sm">
                 {aiSummary.highlights.map((h, i) => (
                   <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-white/80" />
+                    <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-[color:var(--portal-on-primary)]/80" />
                     <span>{h}</span>
                   </li>
                 ))}
               </ul>
             </div>
             <div className="rounded-2xl bg-white/10 border border-white/15 p-4">
-              <div className="text-xs text-white/70 mb-2">متابعات مقترحة</div>
+              <div className="text-xs text-[color:var(--portal-on-primary)]/70 mb-2">متابعات مقترحة</div>
               <ul className="space-y-2 text-sm">
                 {aiSummary.followUps.map((f, i) => (
                   <li key={i} className="flex items-start gap-2">
@@ -264,7 +264,7 @@ function RecordsPage() {
                     />
                     <div>
                       <div className="font-semibold">{f.title}</div>
-                      <div className="text-white/80 text-xs mt-0.5">{f.detail}</div>
+                      <div className="text-[color:var(--portal-on-primary)]/80 text-xs mt-0.5">{f.detail}</div>
                     </div>
                   </li>
                 ))}
@@ -272,7 +272,7 @@ function RecordsPage() {
             </div>
           </div>
         )}
-        <p className="relative mt-4 text-xs text-white/70">
+        <p className="relative mt-4 text-xs text-[color:var(--portal-on-primary)]/70">
           هذا الملخص لأغراض معلوماتية فقط ولا يُعدّ استشارة طبية. راجع طبيبك عند الحاجة.
         </p>
       </section>
@@ -328,7 +328,7 @@ function RecordsPage() {
                         >
                           <Icon className="h-4 w-4" />
                         </span>
-                        <div className="rounded-2xl border border-[color:var(--portal-border)] bg-white p-4 hover:shadow-sm transition-shadow">
+                        <div className="rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-4 hover:shadow-sm transition-shadow">
                           <div className="flex items-start justify-between gap-3 flex-wrap">
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">

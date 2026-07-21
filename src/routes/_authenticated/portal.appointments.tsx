@@ -195,7 +195,7 @@ function MyAppointmentsPage() {
           actions={
             <Link
               to="/portal/book"
-              className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-white text-sm font-semibold shadow"
+              className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold shadow"
               style={{ background: "var(--portal-gradient)" }}
             >
               <CalendarPlus className="h-4 w-4" /> حجز موعد جديد
@@ -206,7 +206,7 @@ function MyAppointmentsPage() {
 
       {/* Tabs + filters */}
       <div className="glass-card p-3 sm:p-4 flex flex-wrap items-center gap-3 print:hidden">
-        <div className="inline-flex rounded-full bg-white border border-[color:var(--portal-border)] p-1">
+        <div className="inline-flex rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] p-1">
           <TabBtn active={scope === "upcoming"} onClick={() => setScope("upcoming")}>
             القادمة
           </TabBtn>
@@ -215,7 +215,7 @@ function MyAppointmentsPage() {
           </TabBtn>
         </div>
 
-        <div className="flex-1 min-w-[180px] flex items-center gap-2 h-10 rounded-full bg-white border border-[color:var(--portal-border)] px-3">
+        <div className="flex-1 min-w-[180px] flex items-center gap-2 h-10 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] px-3">
           <Search className="h-4 w-4 text-slate-400" />
           <input
             value={search}
@@ -225,7 +225,7 @@ function MyAppointmentsPage() {
           />
         </div>
 
-        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-white border border-[color:var(--portal-border)] px-3 text-sm">
+        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] px-3 text-sm">
           <Filter className="h-4 w-4 text-slate-400" />
           <select
             className="bg-transparent outline-none"
@@ -242,7 +242,7 @@ function MyAppointmentsPage() {
           </select>
         </label>
 
-        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-white border border-[color:var(--portal-border)] px-3 text-sm">
+        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] px-3 text-sm">
           <CalendarDays className="h-4 w-4 text-slate-400" />
           <span className="text-[11px] text-[color:var(--portal-ink-3)]">من</span>
           <input
@@ -255,7 +255,7 @@ function MyAppointmentsPage() {
           />
         </label>
 
-        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-white border border-[color:var(--portal-border)] px-3 text-sm">
+        <label className="inline-flex items-center gap-2 h-10 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] px-3 text-sm">
           <CalendarDays className="h-4 w-4 text-slate-400" />
           <span className="text-[11px] text-[color:var(--portal-ink-3)]">إلى</span>
           <input
@@ -271,7 +271,7 @@ function MyAppointmentsPage() {
         {hasActiveFilters && (
           <button
             onClick={clearFilters}
-            className="inline-flex items-center gap-1.5 h-10 px-3 rounded-full bg-white border border-[color:var(--portal-border)] text-xs font-semibold text-[color:var(--portal-ink-2)] hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 h-10 px-3 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] text-xs font-semibold text-[color:var(--portal-ink-2)] hover:bg-slate-50"
             aria-label="مسح كل الفلاتر"
           >
             <XCircle className="h-3.5 w-3.5" /> مسح الفلاتر
@@ -280,7 +280,7 @@ function MyAppointmentsPage() {
 
         <button
           onClick={() => q.refetch()}
-          className="inline-grid place-items-center h-10 w-10 rounded-full bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
+          className="inline-grid place-items-center h-10 w-10 rounded-full bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] hover:bg-slate-50"
           aria-label="تحديث"
         >
           <RefreshCw className={`h-4 w-4 ${q.isFetching ? "animate-spin" : ""}`} />
@@ -574,7 +574,7 @@ function AppointmentCard({
             href={mapsUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] hover:bg-slate-50"
           >
             <MapPin className="h-4 w-4" /> الاتجاهات
           </a>
@@ -582,13 +582,13 @@ function AppointmentCard({
         <button
           type="button"
           onClick={onTimeline}
-          className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
+          className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] hover:bg-slate-50"
         >
           <History className="h-4 w-4" /> سجل الحالة
         </button>
         <button
           onClick={() => window.print()}
-          className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-white border border-[color:var(--portal-border)] hover:bg-slate-50"
+          className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] hover:bg-slate-50"
         >
           <Printer className="h-4 w-4" /> طباعة التأكيد
         </button>
@@ -645,7 +645,7 @@ function Modal({ children, onClose, title }: { children: React.ReactNode; onClos
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md p-5"
+        className="bg-[color:var(--portal-surface)] rounded-2xl shadow-xl w-full max-w-md p-5"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
@@ -703,13 +703,13 @@ function RescheduleDialog({
         </p>
       </div>
       <div className="mt-5 flex gap-2 justify-end">
-        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-white">
+        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]">
           إلغاء
         </button>
         <button
           onClick={() => onSubmit(date, time)}
           disabled={pending || !date || !time}
-          className="h-9 px-4 rounded-full text-sm text-white font-semibold shadow disabled:opacity-50"
+          className="h-9 px-4 rounded-full text-sm text-[color:var(--portal-on-primary)] font-semibold shadow disabled:opacity-50"
           style={{ background: "var(--portal-gradient)" }}
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "تأكيد"}
@@ -747,13 +747,13 @@ function CancelDialog({
         />
       </label>
       <div className="mt-5 flex gap-2 justify-end">
-        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-white">
+        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]">
           تراجع
         </button>
         <button
           onClick={() => onSubmit(reason.trim())}
           disabled={pending}
-          className="h-9 px-4 rounded-full text-sm text-white font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-50"
+          className="h-9 px-4 rounded-full text-sm text-[color:var(--portal-on-primary)] font-semibold bg-red-600 hover:bg-red-700 disabled:opacity-50"
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "تأكيد الإلغاء"}
         </button>
@@ -816,13 +816,13 @@ function FollowUpDialog({
         </p>
       </div>
       <div className="mt-5 flex gap-2 justify-end">
-        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-white">
+        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]">
           إلغاء
         </button>
         <button
           onClick={() => onSubmit(date, time, reason.trim())}
           disabled={pending || !date || !time}
-          className="h-9 px-4 rounded-full text-sm text-white font-semibold shadow disabled:opacity-50"
+          className="h-9 px-4 rounded-full text-sm text-[color:var(--portal-on-primary)] font-semibold shadow disabled:opacity-50"
           style={{ background: "var(--portal-gradient)" }}
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "إرسال الطلب"}
@@ -848,7 +848,7 @@ function EmptyState({ scope }: { scope: Scope }) {
         scope === "upcoming" ? (
           <Link
             to="/portal/book"
-            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-white text-sm font-semibold shadow"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold shadow"
             style={{ background: "var(--portal-gradient)" }}
           >
             <CalendarPlus className="h-4 w-4" /> حجز موعد
@@ -871,14 +871,14 @@ function ErrorState({ error }: { error: Error }) {
       <div className="mt-5 flex justify-center gap-2">
         <button
           onClick={() => router.invalidate()}
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-white font-semibold text-sm shadow"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-[color:var(--portal-on-primary)] font-semibold text-sm shadow"
           style={{ background: "var(--portal-gradient)" }}
         >
           <RefreshCw className="h-4 w-4" /> إعادة المحاولة
         </button>
         <Link
           to="/portal"
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-sm bg-white border border-[color:var(--portal-border)]"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-sm bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)]"
         >
           <ChevronLeft className="h-4 w-4" /> الرئيسية
         </Link>
@@ -913,7 +913,7 @@ function CheckInSuccessDialog({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl"
+        className="bg-[color:var(--portal-surface)] rounded-2xl w-full max-w-md p-6 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex flex-col items-center text-center">
@@ -972,7 +972,7 @@ function CheckInSuccessDialog({
 
         <button
           onClick={onClose}
-          className="mt-6 w-full inline-flex items-center justify-center gap-2 h-11 rounded-full text-white text-sm font-semibold shadow"
+          className="mt-6 w-full inline-flex items-center justify-center gap-2 h-11 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold shadow"
           style={{ background: "var(--portal-gradient)" }}
         >
           <ChevronLeft className="h-4 w-4" /> العودة إلى قائمة مواعيدي
@@ -1056,7 +1056,7 @@ function TimelineDialog({
                       : "bg-white border-[color:var(--portal-border)]"
                   }`}
                 >
-                  {isCurrent && <span className="h-1.5 w-1.5 rounded-full bg-white" />}
+                  {isCurrent && <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--portal-surface)]" />}
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}>
@@ -1091,7 +1091,7 @@ function TimelineDialog({
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold bg-[color:var(--portal-primary)] text-white hover:opacity-90"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-full text-xs font-semibold bg-[color:var(--portal-primary)] text-[color:var(--portal-on-primary)] hover:opacity-90"
         >
           إغلاق
         </button>
