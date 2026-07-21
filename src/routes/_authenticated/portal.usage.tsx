@@ -77,12 +77,12 @@ function UsagePage() {
     <div className="space-y-6" dir={isAr ? "rtl" : "ltr"}>
       <PortalPageHeader
         title={isAr ? "سجل الاستخدام" : "AI Usage History"}
-        subtitle={
+        description={
           isAr
             ? "التكلفة والزمن والتوكنات والطراز لكل رسالة."
             : "Cost, latency, tokens and model for each message."
         }
-        icon={Activity}
+        isAr={isAr}
       />
 
       <div className="flex flex-wrap gap-2">
