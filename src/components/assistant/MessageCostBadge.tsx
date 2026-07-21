@@ -230,7 +230,7 @@ export function MessageCostBadge({
             </span>
             <span>
               {t("المصدر", "Source")}:{" "}
-              {isEst ? t("تقدير محلي", "local estimate") : t("قياس فعلي", "server usage")}
+              {sourceLabel}
             </span>
             {live ? (
               <span className="text-amber-600">{t("قيد التوليد…", "generating…")}</span>
