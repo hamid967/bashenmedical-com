@@ -21,6 +21,7 @@ import {
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
+import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
   head: () => ({
