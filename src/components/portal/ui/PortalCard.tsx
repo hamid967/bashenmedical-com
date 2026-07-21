@@ -22,7 +22,7 @@ export const PortalCard = forwardRef<HTMLDivElement, {
       : variant === "sunken"
         ? "portal-card-sunken"
         : variant === "outline"
-          ? "border border-[color:var(--portal-border)] rounded-[var(--portal-radius-lg)] bg-transparent"
+          ? "border border-[color:var(--ds-border)] rounded-[var(--ds-radius-lg)] bg-transparent"
           : "portal-card";
   const hover = interactive ? "portal-card-hover cursor-pointer" : "";
   const Tag = as as "div";
