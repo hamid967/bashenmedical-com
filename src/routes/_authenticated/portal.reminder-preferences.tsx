@@ -10,8 +10,11 @@ import { AlertTriangle, Bell, BellRing, Loader2, Mail, MessageCircle, MessageSqu
 import {
   getMyReminderPreferences,
   updateMyReminderPreferences,
+  sendTestNotification,
   type ReminderPreferences,
+  type TestChannel,
 } from "@/lib/portal/reminder-preferences.functions";
+import { Send } from "lucide-react";
 
 const prefsQuery = queryOptions({
   queryKey: ["portal", "reminder-preferences"],
