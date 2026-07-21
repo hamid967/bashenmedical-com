@@ -131,18 +131,30 @@ export const Route = createFileRoute("/api/public/book/hold")({
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const nowIso = new Date().toISOString();
 
-          // Best-effort cleanup: mark this session's older active holds as released
-          // so a user browsing several slots doesn't accumulate a queue of holds.
+          // Best-effort cleanup: release this session's older active holds
+          // so browsing several slots doesn't accumulate a queue of holds.
           await supabaseAdmin
             .from("slot_holds")
-            .update({ released_at: new Date().toISOString() })
+            .update({ released_at: nowIso })
             .eq("session_id", session_id)
             .is("released_at", null);
 
-          // If the same slot already has an unexpired hold owned by a different
+          // Release ANY expired-but-not-yet-released hold on the target slot
+          // so the partial unique index `slot_holds_active_uidx` (WHERE
+          // released_at IS NULL) doesn't block a fresh hold on a stale row.
+          await supabaseAdmin
+            .from("slot_holds")
+            .update({ released_at: nowIso })
+            .eq("doctor_id", doctor_id)
+            .eq("appointment_date", appointment_date)
+            .eq("appointment_time", timeHHMMSS)
+            .is("released_at", null)
+            .lte("expires_at", nowIso);
+
+          // If the same slot still has an unexpired hold owned by a different
           // session, block. A real appointment on that slot also blocks.
-          const nowIso = new Date().toISOString();
           const { data: activeHolds } = await supabaseAdmin
             .from("slot_holds")
             .select("id,session_id,expires_at")
@@ -182,8 +194,18 @@ export const Route = createFileRoute("/api/public/book/hold")({
             .select("id,expires_at")
             .maybeSingle();
 
-          if (error || !inserted) {
-            return json(500, { ok: false, kind: "db", message: error?.message ?? "hold_failed" });
+          if (error) {
+            // Race: two concurrent holders lost to the partial unique index
+            // `slot_holds_active_uidx`. Postgres returns 23505 → surface as
+            // a clean 409 so the client can pick another slot.
+            const code = (error as { code?: string }).code;
+            if (code === "23505") {
+              return json(409, { ok: false, kind: "conflict", message: "held_by_other" });
+            }
+            return json(500, { ok: false, kind: "db", message: error.message ?? "hold_failed" });
+          }
+          if (!inserted) {
+            return json(500, { ok: false, kind: "db", message: "hold_failed" });
           }
           return json(200, { ok: true, id: inserted.id, expires_at: inserted.expires_at });
         } catch (e) {
