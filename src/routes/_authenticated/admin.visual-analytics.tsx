@@ -194,8 +194,7 @@ function VisualAnalyticsPage() {
   };
 
   return (
-    <AdminShell>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <header className="flex flex-wrap items-center gap-3">
           <div>
             <h1 className="text-2xl font-bold">لوحة تحليلات بصرية</h1>
