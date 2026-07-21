@@ -321,6 +321,71 @@ function BookingConfirmationPage() {
               scheduledAt={`${appt.appointment_date}T${appt.appointment_time}`}
             />
 
+            {/* Predictive no-show risk — helps the patient understand
+                probability of missing the appointment and act early. */}
+            {appt.status !== "cancelled" && appt.status !== "completed" && (() => {
+              const level = riskLevel(appt.no_show_risk);
+              const score = appt.no_show_risk ?? 0;
+              const cfg = {
+                low: {
+                  cls: "border-green-500/30 bg-green-500/5 text-green-800",
+                  bar: "bg-green-500",
+                  titleAr: "احتمال الحضور مرتفع",
+                  titleEn: "High likelihood of attendance",
+                  descAr: "بيانات حجزك تشير إلى التزام جيد. حافظ على تفعيل التذكيرات وسيصلك تنبيه قبل الموعد.",
+                  descEn: "Your booking profile shows strong commitment. Keep reminders on and you'll be notified before your visit.",
+                },
+                medium: {
+                  cls: "border-amber-500/30 bg-amber-500/5 text-amber-900",
+                  bar: "bg-amber-500",
+                  titleAr: "احتمال متوسط لعدم الحضور",
+                  titleEn: "Moderate no-show risk",
+                  descAr: "ننصح بتفعيل تذكير الواتساب وتأكيد الحضور مبكرًا، أو إعادة الجدولة إذا لم يناسبك الموعد.",
+                  descEn: "We recommend enabling WhatsApp reminders and confirming attendance early, or rescheduling if the time doesn't suit you.",
+                },
+                high: {
+                  cls: "border-red-500/30 bg-red-500/5 text-red-800",
+                  bar: "bg-red-500",
+                  titleAr: "احتمال مرتفع لعدم الحضور",
+                  titleEn: "High no-show risk",
+                  descAr: "يرجى تأكيد الحضور عبر واتساب أو إعادة جدولة الموعد لتفادي إلغائه تلقائيًا وإتاحته لمريض آخر.",
+                  descEn: "Please confirm attendance via WhatsApp or reschedule to avoid automatic cancellation and free the slot for another patient.",
+                },
+              }[level];
+              return (
+                <div className={`rounded-2xl border p-5 ${cfg.cls}`}>
+                  <div className="flex items-start gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                        <div className="text-sm font-bold">
+                          {lang === "ar" ? cfg.titleAr : cfg.titleEn}
+                        </div>
+                        <div className="text-[11px] opacity-70 font-mono">
+                          {lang === "ar" ? "درجة التوقّع" : "Risk score"}: {score}/100
+                        </div>
+                      </div>
+                      <div className="mt-2 h-1.5 w-full rounded-full bg-black/10 overflow-hidden">
+                        <div
+                          className={`h-full ${cfg.bar} transition-all`}
+                          style={{ width: `${Math.min(100, Math.max(4, score))}%` }}
+                        />
+                      </div>
+                      <p className="mt-3 text-xs leading-6 opacity-90">
+                        {lang === "ar" ? cfg.descAr : cfg.descEn}
+                      </p>
+                      <p className="mt-2 text-[11px] opacity-70">
+                        {lang === "ar"
+                          ? "تقدير آلي بناءً على بيانات الحجز (وقت الموعد، سجل الحضور، التذكيرات، التأمين). لا يؤثّر على أولوية موعدك."
+                          : "Automatic estimate based on booking data (time, attendance history, reminders, insurance). It does not affect your appointment priority."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+
+
+
 
             {/* QR + quick actions row */}
             <div className="rounded-2xl border border-border bg-card p-6 flex flex-col sm:flex-row items-center gap-6 print:break-inside-avoid">
