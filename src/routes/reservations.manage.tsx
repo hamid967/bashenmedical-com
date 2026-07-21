@@ -233,24 +233,66 @@ function ManagePage() {
   const cancelAppt = useMutation({
     mutationFn: async (input: { id: string; reason: string }) => {
       if (!sessionToken) throw new Error("no session");
-      return apiPost<{ ok: boolean; message?: string }>(
-        "/api/public/reservations/cancel",
-        {
-          session_token: sessionToken,
-          appointment_id: input.id,
-          reason: input.reason || undefined,
-        },
+      setCancelPhase("processing");
+      // Optimistic UI: mark the appointment cancelled immediately.
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a.id === input.id ? { ...a, status: "cancelled" } : a,
+        ),
       );
+      return apiPost<{
+        ok: boolean;
+        message?: string;
+        released?: boolean;
+        waitlist_notified?: boolean;
+        already_cancelled?: boolean;
+      }>("/api/public/reservations/cancel", {
+        session_token: sessionToken,
+        appointment_id: input.id,
+        reason: input.reason || undefined,
+      });
     },
-    onSuccess: (res) => {
+    onSuccess: (res, input) => {
       if (res.ok) {
-        setToast("تم إلغاء الحجز.");
-        setActiveCancelId(null);
-        setCancelReason("");
+        setCancelResult({
+          released: res.released ?? false,
+          waitlist_notified: res.waitlist_notified ?? false,
+        });
+        setCancelPhase("done");
+        sonner.success("تم إلغاء الحجز بنجاح.", {
+          description: res.waitlist_notified
+            ? "تم إشعار مريض من قائمة الانتظار بالوقت المتاح."
+            : res.released
+              ? "تم تحرير الموعد وأصبح متاحًا للحجز."
+              : undefined,
+        });
+        // Reconcile with server in background
         if (sessionToken) listAppts.mutate(sessionToken);
       } else {
+        // Rollback optimistic change
+        setAppointments((prev) =>
+          prev.map((a) =>
+            a.id === input.id && a.status === "cancelled"
+              ? { ...a, status: "confirmed" }
+              : a,
+          ),
+        );
+        setCancelPhase("reason");
         setErrorMsg(res.message ?? "تعذّر الإلغاء.");
+        sonner.error(res.message ?? "تعذّر الإلغاء.");
       }
+    },
+    onError: (_err, input) => {
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a.id === input.id && a.status === "cancelled"
+            ? { ...a, status: "confirmed" }
+            : a,
+        ),
+      );
+      setCancelPhase("reason");
+      setErrorMsg("خطأ في الشبكة. حاول مرة أخرى.");
+      sonner.error("خطأ في الشبكة.");
     },
   });
 
