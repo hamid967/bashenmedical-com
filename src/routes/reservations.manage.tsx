@@ -337,11 +337,13 @@ function ManagePage() {
         setActiveCancelId(null);
         setCancelResult(null);
         setCancelPhase("reason");
-        setUndoSecondsLeft(0);
+        setUndoDeadline(null);
+        setUndoMsLeft(0);
         if (sessionToken) listAppts.mutate(sessionToken);
       } else {
         sonner.error(res.message ?? "تعذّر الاسترجاع.");
-        setUndoSecondsLeft(0);
+        setUndoDeadline(null);
+        setUndoMsLeft(0);
       }
     },
     onError: () => {
@@ -349,12 +351,25 @@ function ManagePage() {
     },
   });
 
-  // Countdown for undo window (30s).
+  // Precise countdown for undo window — updates ~10x/sec and disables at 0.
   useEffect(() => {
-    if (undoSecondsLeft <= 0) return;
-    const t = setTimeout(() => setUndoSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [undoSecondsLeft]);
+    if (undoDeadline === null) return;
+    let raf = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const tick = () => {
+      const left = undoDeadline - Date.now();
+      setUndoMsLeft(left > 0 ? left : 0);
+      if (left <= 0) return;
+      timer = setTimeout(() => {
+        raf = requestAnimationFrame(tick);
+      }, 100);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [undoDeadline]);
 
   const rescheduleAppt = useMutation({
     mutationFn: async (input: { id: string; date: string; time: string }) => {
