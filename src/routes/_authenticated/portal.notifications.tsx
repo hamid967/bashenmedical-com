@@ -312,6 +312,25 @@ function NotificationsPage() {
           })}
         </div>
 
+        {hiddenMarketingCount > 0 && (
+          <div
+            role="status"
+            className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 p-3 text-xs flex items-start gap-2"
+          >
+            <ShieldOff className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
+            <span className="flex-1">
+              تم إخفاء {hiddenMarketingCount} من الإشعارات التسويقية لأن موافقة
+              «الرسائل التسويقية» غير مفعّلة.{" "}
+              <Link
+                to="/portal/consents"
+                className="font-semibold text-[color:var(--portal-primary)] hover:underline"
+              >
+                إدارة الموافقات
+              </Link>
+            </span>
+          </div>
+        )}
+
         {/* List */}
         {filtered.length === 0 ? (
           <EmptyState filter={filter} />
