@@ -223,9 +223,62 @@ function InsuranceVerifyPage() {
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">
           تحقق من أهلية تأمينك الصحي وتقدير حصتك من التكلفة قبل الحجز. النتائج
-          تصدر عبر منصة <span className="font-semibold">NPHIES</span> ولن تُحفظ
-          بياناتك الشخصية على هذه الصفحة.
+          تصدر عبر منصة <span className="font-semibold">NPHIES</span>.
+          {userId
+            ? " تُحفظ نتائج التحقق تلقائيًا في حسابك وتُربط بملفك الطبي لإعادة استخدامها لاحقًا دون إعادة الإدخال."
+            : " سجّل الدخول لحفظ النتائج في حسابك وربطها بملفك الطبي."}
         </p>
+
+        {userId && saved.length > 0 && (
+          <div className="rounded-2xl border bg-card/60 p-4 space-y-2">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold flex items-center gap-1.5">
+                <History className="h-4 w-4 text-primary" />
+                عمليات تحقق سابقة — إعادة الاستخدام
+              </h2>
+              <button
+                onClick={() => refetchSaved()}
+                type="button"
+                className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1"
+              >
+                <RefreshCw className="h-3 w-3" /> تحديث
+              </button>
+            </div>
+            <ul className="divide-y">
+              {saved.slice(0, 5).map((row) => {
+                const doctor = doctors.find((d) => d.id === row.doctor_id);
+                return (
+                  <li key={row.id} className="py-2 flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-xs">
+                      <div className="font-medium">
+                        {row.provider_name_ar ?? "—"}
+                        <span className="text-muted-foreground"> · </span>
+                        {doctor?.name_ar ?? doctor?.name_en ?? "طبيب"}
+                      </div>
+                      <div className="text-muted-foreground">
+                        {row.eligible ? "مؤهل" : "غير مؤهل"}
+                        {row.coverage_percent != null ? ` · تغطية ${row.coverage_percent}%` : ""}
+                        {row.patient_share != null
+                          ? ` · حصتك ${Number(row.patient_share).toLocaleString("ar-SA")} ر.س`
+                          : ""}
+                        {row.policy_hint ? ` · بوليصة ${row.policy_hint}` : ""}
+                        {" · "}
+                        {new Date(row.created_at).toLocaleDateString("ar-SA")}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => reuseSaved(row)}
+                      className="text-xs rounded-md border px-2 py-1 hover:bg-accent"
+                    >
+                      استخدام هذه البيانات
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
