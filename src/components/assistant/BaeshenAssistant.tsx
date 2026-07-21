@@ -9,6 +9,14 @@ import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/site";
 import { classifyUserMessage } from "@/lib/ai/safety";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
+import {
+  budgetBlockMessage,
+  checkRunningBudget,
+  commitSessionCredits,
+  getDefaultLimits,
+  preflightBudget,
+} from "@/lib/ai/budget";
+import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 
@@ -91,6 +99,15 @@ export function BaeshenAssistant() {
     const promptText = historyForPrompt
       .map((m) => `${m.role}: ${m.content}`)
       .join("\n");
+
+    // Pre-flight budget check — block obviously oversized prompts before we spend anything.
+    const limits = getDefaultLimits("public");
+    const pre = preflightBudget({ surface: "public", limits, promptText });
+    if (!pre.ok) {
+      setError(budgetBlockMessage(pre, isAr ? "ar" : "en"));
+      return;
+    }
+
     const initialMeta: MessageCostMeta = { startedAt, promptText };
     const next2: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "", meta: initialMeta }];
     setMessages(next2);
@@ -110,6 +127,7 @@ export function BaeshenAssistant() {
       });
     };
 
+    let currentModel: string | undefined;
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
@@ -125,7 +143,7 @@ export function BaeshenAssistant() {
           save_history: !noSave,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (m) => updateLastMeta({ model: m }),
+        onModel: (m) => { currentModel = m; updateLastMeta({ model: m }); },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
@@ -139,6 +157,17 @@ export function BaeshenAssistant() {
             copy[copy.length - 1] = { role: "assistant", content: acc, meta: last?.meta };
             return copy;
           });
+        },
+        budgetCheck: (acc) => {
+          const c = checkRunningBudget({
+            surface: "public",
+            limits,
+            model: currentModel,
+            promptText,
+            outputSoFar: acc,
+          });
+          if (c.ok) return { ok: true };
+          return { ok: false, message: budgetBlockMessage(c, isAr ? "ar" : "en") };
         },
         onRetry: (phase) => {
           if (phase === "reconnecting") setError(t("انقطع الاتصال — جاري الاستئناف…", "Connection lost — resuming…"));
@@ -154,6 +183,13 @@ export function BaeshenAssistant() {
         },
       });
       updateLastMeta({ endedAt: performance.now() });
+      // Commit estimated credits for the session running total.
+      const promptTok = estimateTokens(promptText);
+      const outTok = estimateTokens(result.text);
+      commitSessionCredits("public", estimateCredits(promptTok, outTok, currentModel));
+      if (result.budgetStop) {
+        setError(result.budgetStop.message);
+      }
       if (!result.text) {
         setMessages((prev) => {
           const copy = prev.slice();
