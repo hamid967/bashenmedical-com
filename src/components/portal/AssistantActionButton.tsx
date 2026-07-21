@@ -116,7 +116,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
       >
         <Icon className="h-4 w-4" />
         {label}
-        <span className="ms-1 inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-700 px-1.5 py-0.5 text-[10px] font-medium">
+        <span className="ms-1 inline-flex items-center gap-1 rounded-full bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] px-1.5 py-0.5 text-[10px] font-medium">
           <ShieldQuestion className="h-3 w-3" />
           يتطلب تأكيد
         </span>
