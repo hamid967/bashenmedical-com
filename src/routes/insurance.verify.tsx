@@ -94,6 +94,18 @@ function InsuranceVerifyPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<EligibilityResponse | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (alive) setUserId(data.user?.id ?? null);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+      setUserId(sess?.user?.id ?? null);
+    });
+    return () => { alive = false; sub.subscription.unsubscribe(); };
+  }, []);
 
   const { data: providers = [], isLoading: loadingProviders } = useQuery({
     queryKey: ["insurance-providers-standalone"],
@@ -106,10 +118,33 @@ function InsuranceVerifyPage() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Saved verifications — only for signed-in users, linked to patient chart.
+  const listMy = useServerFn(listMyInsuranceVerifications);
+  const verifyMy = useServerFn(verifyMyInsurance);
+  const { data: saved = [], refetch: refetchSaved } = useQuery({
+    queryKey: ["my-insurance-verifications", userId],
+    queryFn: () => listMy({ data: { limit: 10 } }),
+    enabled: !!userId,
+    staleTime: 30_000,
+  });
+
   const canSubmit = useMemo(
     () => !!doctorId && !!providerId && !loading,
     [doctorId, providerId, loading],
   );
+
+  function reuseSaved(row: {
+    doctor_id: string | null;
+    provider_id: string | null;
+    id: string;
+  }) {
+    if (row.doctor_id) setDoctorId(row.doctor_id);
+    if (row.provider_id) setProviderId(row.provider_id);
+    // policy_hint is masked; leave the field blank to force a fresh entry
+    // only when the user actually wants to change payer info.
+    setResult(null);
+    setError(null);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -118,28 +153,53 @@ function InsuranceVerifyPage() {
     setError(null);
     setResult(null);
     try {
-      const res = await fetch("/api/public/insurance/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          doctor_id: doctorId,
-          provider_id: providerId,
-          policy_number: policy || undefined,
-          member_id: memberId || undefined,
-          patient_national_id: nationalId || undefined,
-        }),
-      });
-      const body = (await res.json().catch(() => null)) as EligibilityResponse | null;
-      if (!body || body.ok === false) {
-        setError(
-          (body as { message?: string } | null)?.message ??
-            "تعذّر التحقق من الأهلية حاليًا. حاول مجددًا.",
-        );
-        return;
+      if (userId) {
+        // Signed-in: persist under the user account + link to patient chart
+        // so reception/doctor can reuse it without re-entry.
+        const r = await verifyMy({
+          data: {
+            doctor_id: doctorId,
+            provider_id: providerId,
+            policy_number: policy || undefined,
+          },
+        });
+        setResult({
+          ok: true,
+          eligible: r.eligible,
+          reason: r.reason,
+          message: r.message,
+          coverage_percent: r.coverage_percent,
+          consultation_fee: r.consultation_fee,
+          covered_amount: r.covered_amount,
+          patient_share: r.patient_share,
+          source: "sandbox",
+        });
+        refetchSaved();
+      } else {
+        // Guest: transient check only (public API doesn't persist).
+        const res = await fetch("/api/public/insurance/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            doctor_id: doctorId,
+            provider_id: providerId,
+            policy_number: policy || undefined,
+            member_id: memberId || undefined,
+            patient_national_id: nationalId || undefined,
+          }),
+        });
+        const body = (await res.json().catch(() => null)) as EligibilityResponse | null;
+        if (!body || body.ok === false) {
+          setError(
+            (body as { message?: string } | null)?.message ??
+              "تعذّر التحقق من الأهلية حاليًا. حاول مجددًا.",
+          );
+          return;
+        }
+        setResult(body);
       }
-      setResult(body);
-    } catch {
-      setError("خطأ في الشبكة. حاول مجددًا.");
+    } catch (err) {
+      setError((err as Error)?.message ?? "خطأ في الشبكة. حاول مجددًا.");
     } finally {
       setLoading(false);
     }
