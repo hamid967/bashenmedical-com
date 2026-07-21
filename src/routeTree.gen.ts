@@ -53,6 +53,7 @@ import { Route as ReservationsManageRouteImport } from './routes/reservations.ma
 import { Route as OrdersRefRouteImport } from './routes/orders.$ref'
 import { Route as MediaStoriesRouteImport } from './routes/media.stories'
 import { Route as MediaNewsRouteImport } from './routes/media.news'
+import { Route as InvoicesLookupRouteImport } from './routes/invoices.lookup'
 import { Route as HealthSearchRouteImport } from './routes/health.search'
 import { Route as HealthSlugRouteImport } from './routes/health.$slug'
 import { Route as ExcellenceSlugRouteImport } from './routes/excellence.$slug'
@@ -139,6 +140,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/public/reservations/cancel'
+import { Route as ApiPublicInvoicesLookupRouteImport } from './routes/api/public/invoices/lookup'
 import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
 import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './routes/api/public/inquiries/mark-whatsapp-opened'
 import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
@@ -379,6 +381,11 @@ const MediaStoriesRoute = MediaStoriesRouteImport.update({
 const MediaNewsRoute = MediaNewsRouteImport.update({
   id: '/media/news',
   path: '/media/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvoicesLookupRoute = InvoicesLookupRouteImport.update({
+  id: '/invoices/lookup',
+  path: '/invoices/lookup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthSearchRoute = HealthSearchRouteImport.update({
@@ -872,6 +879,11 @@ const ApiPublicReservationsCancelRoute =
     path: '/api/public/reservations/cancel',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicInvoicesLookupRoute = ApiPublicInvoicesLookupRouteImport.update({
+  id: '/api/public/invoices/lookup',
+  path: '/api/public/invoices/lookup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicInsuranceVerifyRoute =
   ApiPublicInsuranceVerifyRouteImport.update({
     id: '/api/public/insurance/verify',
@@ -1079,6 +1091,7 @@ export interface FileRoutesByFullPath {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
@@ -1144,6 +1157,7 @@ export interface FileRoutesByFullPath {
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -1230,6 +1244,7 @@ export interface FileRoutesByTo {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
@@ -1295,6 +1310,7 @@ export interface FileRoutesByTo {
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -1385,6 +1401,7 @@ export interface FileRoutesById {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
@@ -1450,6 +1467,7 @@ export interface FileRoutesById {
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
+  '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -1540,6 +1558,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
@@ -1605,6 +1624,7 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
+    | '/api/public/invoices/lookup'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -1691,6 +1711,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
@@ -1756,6 +1777,7 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
+    | '/api/public/invoices/lookup'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -1845,6 +1867,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
@@ -1910,6 +1933,7 @@ export interface FileRouteTypes {
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
     | '/api/public/insurance/verify'
+    | '/api/public/invoices/lookup'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -1959,6 +1983,7 @@ export interface RootRouteChildren {
   DoctorsSlugRoute: typeof DoctorsSlugRoute
   HealthSlugRoute: typeof HealthSlugRoute
   HealthSearchRoute: typeof HealthSearchRoute
+  InvoicesLookupRoute: typeof InvoicesLookupRoute
   MediaNewsRoute: typeof MediaNewsRoute
   MediaStoriesRoute: typeof MediaStoriesRouteWithChildren
   OrdersRefRoute: typeof OrdersRefRoute
@@ -1982,6 +2007,7 @@ export interface RootRouteChildren {
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
+  ApiPublicInvoicesLookupRoute: typeof ApiPublicInvoicesLookupRoute
   ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRoute
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
@@ -2297,6 +2323,13 @@ declare module '@tanstack/react-router' {
       path: '/media/news'
       fullPath: '/media/news'
       preLoaderRoute: typeof MediaNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invoices/lookup': {
+      id: '/invoices/lookup'
+      path: '/invoices/lookup'
+      fullPath: '/invoices/lookup'
+      preLoaderRoute: typeof InvoicesLookupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health/search': {
@@ -2901,6 +2934,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReservationsCancelRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/invoices/lookup': {
+      id: '/api/public/invoices/lookup'
+      path: '/api/public/invoices/lookup'
+      fullPath: '/api/public/invoices/lookup'
+      preLoaderRoute: typeof ApiPublicInvoicesLookupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/insurance/verify': {
       id: '/api/public/insurance/verify'
       path: '/api/public/insurance/verify'
@@ -3405,6 +3445,7 @@ const rootRouteChildren: RootRouteChildren = {
   DoctorsSlugRoute: DoctorsSlugRoute,
   HealthSlugRoute: HealthSlugRoute,
   HealthSearchRoute: HealthSearchRoute,
+  InvoicesLookupRoute: InvoicesLookupRoute,
   MediaNewsRoute: MediaNewsRoute,
   MediaStoriesRoute: MediaStoriesRouteWithChildren,
   OrdersRefRoute: OrdersRefRoute,
@@ -3429,6 +3470,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicInquiriesMarkWhatsappOpenedRoute:
     ApiPublicInquiriesMarkWhatsappOpenedRoute,
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
+  ApiPublicInvoicesLookupRoute: ApiPublicInvoicesLookupRoute,
   ApiPublicReservationsCancelRoute: ApiPublicReservationsCancelRoute,
   ApiPublicReservationsListRoute: ApiPublicReservationsListRoute,
   ApiPublicReservationsRescheduleRoute: ApiPublicReservationsRescheduleRoute,
