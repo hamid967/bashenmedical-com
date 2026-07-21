@@ -85,3 +85,60 @@ export const updateMyReminderPreferences = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/* ----------------- Test a single channel template ----------------- */
+
+const CHANNELS = ["in_app", "push", "email", "sms", "whatsapp"] as const;
+export type TestChannel = (typeof CHANNELS)[number];
+
+const TestInput = z.object({ channel: z.enum(CHANNELS) });
+
+const CHANNEL_LABELS_AR: Record<TestChannel, string> = {
+  in_app: "داخل التطبيق",
+  push: "إشعارات المتصفح",
+  email: "البريد الإلكتروني",
+  sms: "رسالة SMS",
+  whatsapp: "واتساب",
+};
+
+export const sendTestNotification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => TestInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const label = CHANNEL_LABELS_AR[data.channel];
+    const stamp = new Date().toLocaleTimeString("ar-SA");
+    const body = `هذه رسالة اختبار لقناة «${label}» أُرسلت في ${stamp}. إن وصلتك يعني أن الإعدادات الحالية تعمل.`;
+
+    // Look up profile contact for reporting purposes only
+    const { data: prof } = await context.supabase
+      .from("profiles")
+      .select("phone, email:full_name")
+      .eq("id", context.userId)
+      .maybeSingle();
+
+    // Always drop an in_app copy so the user sees it in /portal/notifications
+    const { error } = await context.supabase.from("notifications").insert({
+      audience: "patient",
+      user_id: context.userId,
+      kind: "test.channel",
+      title: `اختبار قناة ${label}`,
+      body,
+      channel: "in_app",
+      send_status: "sent",
+      sent_at: new Date().toISOString(),
+      metadata: { tested_channel: data.channel },
+    });
+    if (error) throw new Error(error.message);
+
+    const externalPending = data.channel !== "in_app";
+    return {
+      ok: true,
+      channel: data.channel,
+      preview: body,
+      externalPending,
+      note: externalPending
+        ? `تم إنشاء رسالة اختبار داخل التطبيق. الإرسال الفعلي عبر ${label} يتم فقط بعد حفظ التفضيلات وتفعيل مزود القناة لدى المركز.`
+        : `تم إرسال رسالة اختبار داخل التطبيق. افتح صفحة الإشعارات لعرضها.`,
+      contact: prof ?? null,
+    };
+  });
