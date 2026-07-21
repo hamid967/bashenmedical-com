@@ -209,6 +209,11 @@ function BookPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [state.step]);
 
+  // Auto-recover expired hold: when the 5-minute reservation lapses while
+  // the user is past the time picker (steps 7–8), bounce back to step 6
+  // with a toast so they can pick a fresh time instead of hitting a wall
+  // at submit.
+
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [errorKind, setErrorKind] = useState<
