@@ -9,8 +9,9 @@ import {
   formatTokens,
 } from "@/lib/ai/pricing";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
+import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 type Usage = { prompt: number; completion: number; total: number };
 
 const STORAGE_KEY = "admin-ai-panel-messages-v1";
