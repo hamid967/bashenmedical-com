@@ -91,17 +91,44 @@ function ProfilePage() {
     setDirty(true);
   };
 
+  // Phase 10 — sensitive-field reauth dialog state
+  const [pwOpen, setPwOpen] = useState(false);
+  const [pwValue, setPwValue] = useState("");
+  const [pwError, setPwError] = useState<string | null>(null);
+
   const mut = useMutation({
-    mutationFn: (payload: Partial<FormState>) => updateMyProfile({ data: payload as never }),
+    mutationFn: (payload: Partial<FormState> & { _password?: string }) =>
+      updateMyProfile({ data: payload as never }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["portal", "my-profile-full"] });
       qc.invalidateQueries({ queryKey: ["portal", "my-profile"] });
       qc.invalidateQueries({ queryKey: ["portal", "dashboard-summary"] });
       toast.success("تم حفظ الملف الشخصي");
       setDirty(false);
+      setPwOpen(false);
+      setPwValue("");
+      setPwError(null);
     },
-    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : "تعذّر الحفظ";
+      if (pwOpen) setPwError(msg);
+      else toast.error(msg);
+    },
   });
+
+  function buildPayload(pw?: string) {
+    return {
+      full_name: form.full_name.trim(),
+      phone: form.phone.trim() || null as unknown as string,
+      national_id: form.national_id.trim() || null as unknown as string,
+      date_of_birth: form.date_of_birth || null as unknown as string,
+      gender: (form.gender || null) as FormState["gender"],
+      preferred_language: form.preferred_language,
+      emergency_contact_name: form.emergency_contact_name.trim() || null as unknown as string,
+      emergency_contact_phone: form.emergency_contact_phone.trim() || null as unknown as string,
+      ...(pw ? { _password: pw } : {}),
+    };
+  }
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -113,17 +140,24 @@ function ProfilePage() {
       toast.error("رقم الجوال غير صالح");
       return;
     }
-    mut.mutate({
-      full_name: form.full_name.trim(),
-      phone: form.phone.trim() || null as unknown as string,
-      national_id: form.national_id.trim() || null as unknown as string,
-      date_of_birth: form.date_of_birth || null as unknown as string,
-      gender: (form.gender || null) as FormState["gender"],
-      preferred_language: form.preferred_language,
-      emergency_contact_name: form.emergency_contact_name.trim() || null as unknown as string,
-      emergency_contact_phone: form.emergency_contact_phone.trim() || null as unknown as string,
-    });
+    // Detect sensitive changes vs original values
+    const sensitiveChanged =
+      (form.phone.trim() || "") !== (p?.phone ?? "") ||
+      (form.national_id.trim() || "") !== (p?.national_id ?? "");
+    if (sensitiveChanged) {
+      setPwError(null);
+      setPwValue("");
+      setPwOpen(true);
+      return;
+    }
+    mut.mutate(buildPayload());
   };
+
+  const confirmSensitive = () => {
+    if (!pwValue) { setPwError("أدخل كلمة المرور"); return; }
+    mut.mutate(buildPayload(pwValue));
+  };
+
 
   return (
     <div dir="rtl">
@@ -202,11 +236,58 @@ function ProfilePage() {
         </form>
       </PortalCard>
 
+      {/* Phase 10 — Privacy & security quick links */}
+      <PortalCard as="section" className="mt-6 p-5 sm:p-6">
+        <h2 className="text-sm font-semibold text-[color:var(--portal-ink-2)] mb-3">الخصوصية والأمان</h2>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <li><Link to="/portal/sessions" className="block rounded-xl px-3 py-2 border border-[color:var(--portal-border)] hover:bg-[color:var(--portal-surface-2)]">الجلسات والأجهزة النشطة</Link></li>
+          <li><Link to="/portal/consents" className="block rounded-xl px-3 py-2 border border-[color:var(--portal-border)] hover:bg-[color:var(--portal-surface-2)]">الموافقات والخصوصية</Link></li>
+          <li><Link to="/portal/reminder-preferences" className="block rounded-xl px-3 py-2 border border-[color:var(--portal-border)] hover:bg-[color:var(--portal-surface-2)]">تفضيلات التذكيرات</Link></li>
+          <li><Link to="/portal/notifications" className="block rounded-xl px-3 py-2 border border-[color:var(--portal-border)] hover:bg-[color:var(--portal-surface-2)]">مركز الإشعارات</Link></li>
+        </ul>
+      </PortalCard>
+
       <p className="mt-6 text-center text-[11px] text-[color:var(--portal-ink-2)]">
         لتحديث إعدادات الإشعارات والتأمين، انتقل إلى{" "}
         <Link to="/portal/settings" className="underline">الإعدادات</Link> و{" "}
         <Link to="/portal/insurance" className="underline">التأمين</Link>.
       </p>
+
+      {/* Sensitive change reauth dialog */}
+      {pwOpen && (
+        <div className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-2xl bg-[color:var(--portal-surface)] p-6 shadow-xl">
+            <h3 className="text-base font-bold text-[color:var(--portal-ink)]">تأكيد التغييرات الحسّاسة</h3>
+            <p className="mt-1 text-xs text-[color:var(--portal-ink-2)]">
+              يتطلب تحديث رقم الجوال أو الهوية إعادة إدخال كلمة المرور.
+            </p>
+            <input
+              type="password"
+              autoFocus
+              value={pwValue}
+              onChange={(e) => { setPwValue(e.target.value); setPwError(null); }}
+              onKeyDown={(e) => { if (e.key === "Enter") confirmSensitive(); }}
+              placeholder="كلمة المرور"
+              className={`${inputCls} mt-4`}
+            />
+            {pwError && <p className="mt-2 text-xs text-[color:var(--portal-error)]">{pwError}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => { setPwOpen(false); setPwValue(""); setPwError(null); }}
+                className="h-9 px-3 rounded-full border border-[color:var(--portal-border)] text-sm"
+              >إلغاء</button>
+              <button
+                type="button"
+                onClick={confirmSensitive}
+                disabled={mut.isPending}
+                className="h-9 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
+                style={{ background: "var(--portal-gradient)" }}
+              >{mut.isPending ? "جارٍ التحقق…" : "تأكيد"}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
