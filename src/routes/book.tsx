@@ -47,6 +47,7 @@ import { SummarySidebar } from "@/components/booking/SummarySidebar";
 import { WaitlistCTA } from "@/components/booking/WaitlistCTA";
 import { SlotHoldBanner } from "@/components/booking/SlotHoldBanner";
 import { useSlotHold } from "@/hooks/useSlotHold";
+import { useRealtimePublicSlots } from "@/hooks/use-realtime-public-slots";
 import { releaseHold } from "@/lib/booking-hold";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
@@ -241,6 +242,9 @@ function BookPage() {
       else sessionStorage.removeItem(RESULT_KEY);
     } catch {/* ignore */}
   }, [result]);
+
+  // Realtime: refresh availability when other users book/cancel
+  useRealtimePublicSlots({ doctorId: state.doctorId ?? undefined, branchId: state.branchId ?? undefined });
 
   const { data: branches = [] }    = useQuery({ queryKey: ["branches"], queryFn: fetchBranches, staleTime: 30 * 60_000 });
   const { data: specialties = [] } = useQuery({ queryKey: ["specialties-active"], queryFn: fetchSpecialties, staleTime: 30 * 60_000 });
