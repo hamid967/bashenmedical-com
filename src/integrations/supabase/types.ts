@@ -3926,8 +3926,10 @@ export type Database = {
           national_id: string | null
           notification_prefs: Json
           phone: string | null
+          phone_verified_at: string | null
           preferred_language: string
           updated_at: string
+          verified_phone: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -3945,8 +3947,10 @@ export type Database = {
           national_id?: string | null
           notification_prefs?: Json
           phone?: string | null
+          phone_verified_at?: string | null
           preferred_language?: string
           updated_at?: string
+          verified_phone?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -3964,8 +3968,10 @@ export type Database = {
           national_id?: string | null
           notification_prefs?: Json
           phone?: string | null
+          phone_verified_at?: string | null
           preferred_language?: string
           updated_at?: string
+          verified_phone?: string | null
         }
         Relationships: [
           {
@@ -5821,6 +5827,10 @@ export type Database = {
           _permission_key: string
           _role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: undefined
+      }
+      set_verified_phone: {
+        Args: { _phone: string; _user_id: string }
         Returns: undefined
       }
       specialty_doctor_counts: {
