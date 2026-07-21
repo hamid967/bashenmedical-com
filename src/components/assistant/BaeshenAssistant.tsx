@@ -149,6 +149,7 @@ export function BaeshenAssistant() {
     };
 
     let currentModel: string | undefined;
+    let finalUsage: { prompt: number; completion: number; total: number } | null = null;
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
