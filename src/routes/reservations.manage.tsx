@@ -832,15 +832,38 @@ function ManagePage() {
                               </li>
                             </ul>
                           </div>
-                          <div className="flex justify-end">
+                          <div className="flex items-center justify-between gap-2">
                             <Button
                               variant="outline"
+                              size="sm"
+                              onClick={() => undoCancel.mutate(a.id)}
+                              disabled={undoSecondsLeft <= 0 || undoCancel.isPending}
+                              className="border-amber-300 text-amber-900 hover:bg-amber-50"
+                              aria-label={`تراجع عن الإلغاء (متبقٍّ ${undoSecondsLeft} ثانية)`}
+                            >
+                              {undoCancel.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                                  جاري الاسترجاع…
+                                </>
+                              ) : undoSecondsLeft > 0 ? (
+                                <>
+                                  <RefreshCw className="h-4 w-4 ml-1.5" />
+                                  تراجع عن الإلغاء ({undoSecondsLeft}ث)
+                                </>
+                              ) : (
+                                "انتهت مهلة التراجع"
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={() => {
                                 setActiveCancelId(null);
                                 setCancelReason("");
                                 setCancelResult(null);
                                 setCancelPhase("reason");
+                                setUndoSecondsLeft(0);
                               }}
                             >
                               إغلاق
