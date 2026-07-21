@@ -386,7 +386,7 @@ type SortableTableProps<T> = {
 const PAGE_SIZES = [10, 25, 50, 100];
 
 function SortableTable<T>({
-  title, rows, columns, rowKey, onExport, defaultSort, searchPlaceholder, searchFilter,
+  title, rows, columns, rowKey, onExport, onExportXlsx, defaultSort, searchPlaceholder, searchFilter,
 }: SortableTableProps<T>) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortState<T>>(defaultSort);
@@ -447,6 +447,12 @@ function SortableTable<T>({
             className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
             <Download className="h-3.5 w-3.5" /> تصدير CSV
           </button>
+          {onExportXlsx && (
+            <button onClick={onExportXlsx} disabled={!rows.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+              <Download className="h-3.5 w-3.5" /> تصدير XLSX
+            </button>
+          )}
         </div>
       </div>
       <div className="overflow-x-auto">
