@@ -15,19 +15,27 @@ export async function assertOwnerAccess(): Promise<void> {
 }
 
 /**
- * Public server fn: returns { isOwner: boolean } for the current user.
- * Used by the /owner route's beforeLoad gate.
+ * Public server fn: returns access level for the current user on Site Builder.
+ * - isOwner: super_admin (full access, incl. delete)
+ * - isEditor: content_manager (edit only, cannot delete)
+ * Used by the /owner route's beforeLoad gate and UI role-aware controls.
  */
 export const getMyOwnerStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("has_role", {
-      _user_id: context.userId,
-      _role: "super_admin",
-    });
-    if (error) {
-      console.error("[owner.gate] has_role failed:", error);
-      return { isOwner: false };
-    }
-    return { isOwner: Boolean(data) };
+    const [ownerRes, editorRes] = await Promise.all([
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "super_admin" }),
+      context.supabase.rpc("has_role", { _user_id: context.userId, _role: "content_manager" }),
+    ]);
+    if (ownerRes.error) console.error("[owner.gate] has_role super_admin failed:", ownerRes.error);
+    if (editorRes.error) console.error("[owner.gate] has_role content_manager failed:", editorRes.error);
+    const isOwner = Boolean(ownerRes.data);
+    const isEditor = Boolean(editorRes.data);
+    return {
+      isOwner,
+      isEditor,
+      // legacy: allow entry when either role is present
+      hasAccess: isOwner || isEditor,
+      level: isOwner ? ("owner" as const) : isEditor ? ("editor" as const) : ("none" as const),
+    };
   });
