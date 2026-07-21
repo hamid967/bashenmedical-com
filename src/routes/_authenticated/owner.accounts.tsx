@@ -275,6 +275,9 @@ function AccountsPage() {
                               </button>
                             </div>
                           </div>
+                          <div className="mt-4">
+                            <UserPermissionsPanel userId={u.id} />
+                          </div>
                         </td>
                       </tr>
                     )}
