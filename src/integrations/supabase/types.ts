@@ -5036,6 +5036,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_resource_permissions: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          permission: Database["public"]["Enums"]["resource_permission"]
+          resource_id: string
+          resource_kind: Database["public"]["Enums"]["resource_kind"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission?: Database["public"]["Enums"]["resource_permission"]
+          resource_id: string
+          resource_kind: Database["public"]["Enums"]["resource_kind"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          permission?: Database["public"]["Enums"]["resource_permission"]
+          resource_id?: string
+          resource_kind?: Database["public"]["Enums"]["resource_kind"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           branch_id: string | null
@@ -5188,6 +5218,14 @@ export type Database = {
         Returns: number
       }
       can_access_patient: { Args: { _patient_id: string }; Returns: boolean }
+      can_edit_page: {
+        Args: { _page_id: string; _user_id: string }
+        Returns: boolean
+      }
+      can_edit_service: {
+        Args: { _service_id: string; _user_id: string }
+        Returns: boolean
+      }
       can_write_patient_clinical: {
         Args: { _patient_id: string }
         Returns: boolean
@@ -5352,6 +5390,15 @@ export type Database = {
       }
       has_permission: {
         Args: { _permission_key: string; _user_id: string }
+        Returns: boolean
+      }
+      has_resource_permission: {
+        Args: {
+          _kind: Database["public"]["Enums"]["resource_kind"]
+          _min: Database["public"]["Enums"]["resource_permission"]
+          _resource_id: string
+          _user_id: string
+        }
         Returns: boolean
       }
       has_role: {
@@ -5935,6 +5982,8 @@ export type Database = {
         | "failed"
         | "skipped"
       patient_status: "active" | "inactive" | "archived" | "deceased"
+      resource_kind: "service" | "page"
+      resource_permission: "view" | "edit" | "manage"
       service_inquiry_internal_status:
         | "new"
         | "contacted"
@@ -6167,6 +6216,8 @@ export const Constants = {
         "skipped",
       ],
       patient_status: ["active", "inactive", "archived", "deceased"],
+      resource_kind: ["service", "page"],
+      resource_permission: ["view", "edit", "manage"],
       service_inquiry_internal_status: [
         "new",
         "contacted",

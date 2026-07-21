@@ -12,6 +12,7 @@ import {
   deleteAccount,
 } from "@/lib/owner/accounts.functions";
 import { Loader2, Search, Shield, UserX, KeyRound, Mail, Trash2, UserCheck } from "lucide-react";
+import { UserPermissionsPanel } from "@/components/owner/UserPermissionsPanel";
 
 export const Route = createFileRoute("/_authenticated/owner/accounts")({
   head: () => ({
@@ -273,6 +274,9 @@ function AccountsPage() {
                                 <Trash2 className="h-3.5 w-3.5" /> حذف الحساب نهائيًا
                               </button>
                             </div>
+                          </div>
+                          <div className="mt-4">
+                            <UserPermissionsPanel userId={u.id} />
                           </div>
                         </td>
                       </tr>
