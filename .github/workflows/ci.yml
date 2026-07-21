@@ -467,11 +467,22 @@ jobs:
         run: python tests/e2e/portal_reschedule_appointment.py
 
       - name: Verify E2E waitlist fixtures (preflight)
+        id: verify_waitlist
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          E2E_VERIFY_REPORT: ${{ github.workspace }}/verify-artifacts/waitlist-fixtures.json
         run: python scripts/ci/verify-e2e-waitlist-fixtures.py
+
+      - name: Upload waitlist preflight report
+        if: always() && steps.verify_secrets.outputs.has_secrets == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-waitlist-fixtures-report
+          path: verify-artifacts/waitlist-fixtures.json
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Run waitlist offer confirm E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
