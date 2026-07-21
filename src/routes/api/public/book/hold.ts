@@ -119,6 +119,13 @@ export const Route = createFileRoute("/api/public/book/hold")({
           return json(400, { ok: false, kind: "validation", message: parsed.error.issues[0]?.message ?? "invalid" });
         }
         const { doctor_id, branch_id, appointment_date, appointment_time, session_id } = parsed.data;
+
+        const rl = checkRateLimit(`hold:post:${clientKey(session_id)}`, [
+          { windowMs: 60_000, max: 10 },
+          { windowMs: 300_000, max: 30 },
+        ]);
+        if (!rl.ok) return rateLimited(rl.retryAfter);
+
         const timeHHMMSS = appointment_time.length === 5 ? `${appointment_time}:00` : appointment_time;
         const expires_at = new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString();
 
