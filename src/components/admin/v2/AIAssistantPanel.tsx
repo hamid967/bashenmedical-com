@@ -18,6 +18,7 @@ import {
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
+import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 type Usage = { prompt: number; completion: number; total: number };
@@ -200,9 +201,10 @@ export function AIAssistantPanel({
       if (result.budgetStop) toast.warning(result.budgetStop.message);
 
 
+      const endedAt = performance.now();
       const finalMeta: MessageCostMeta = {
         startedAt,
-        endedAt: performance.now(),
+        endedAt,
         model: currentModel,
         promptText,
         usage: liveUsage ?? undefined,
@@ -210,6 +212,15 @@ export function AIAssistantPanel({
       setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد.", meta: finalMeta }]);
       setStreamed("");
       setStreamMeta(null);
+      if (liveUsage) {
+        const spent = estimateCredits(liveUsage.prompt, liveUsage.completion, currentModel);
+        notifyMessageThresholds({
+          credits: spent,
+          elapsedMs: endedAt - startedAt,
+          lang: "ar",
+          surface: "admin",
+        });
+      }
     } catch (e) {
       if ((e as Error).name === "AbortError") {
         setStreamed("");

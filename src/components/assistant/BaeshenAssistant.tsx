@@ -17,6 +17,7 @@ import {
   preflightBudget,
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
+import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 import { AssistantCostMeter } from "./AssistantCostMeter";
@@ -201,13 +202,20 @@ export function BaeshenAssistant() {
           return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
         },
       });
-      updateLastMeta({ endedAt: performance.now() });
+      const endedAt = performance.now();
+      updateLastMeta({ endedAt });
       // Commit estimated credits for the session running total.
       const promptTok = estimateTokens(promptText);
       const outTok = estimateTokens(result.text);
       const spent = estimateCredits(promptTok, outTok, currentModel);
       commitSessionCredits("public", spent);
       setSessionCredits((v) => v + spent);
+      notifyMessageThresholds({
+        credits: spent,
+        elapsedMs: endedAt - startedAt,
+        lang: isAr ? "ar" : "en",
+        surface: "public",
+      });
       if (result.budgetStop) {
         setError(result.budgetStop.message);
       }
