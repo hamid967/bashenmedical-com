@@ -136,6 +136,18 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
               .not("status", "in", "(cancelled,no_show)")
               .limit(1);
             if (conflict && conflict.length > 0) {
+              try {
+                const { logReservationEvent } = await import(
+                  "@/lib/reservation-events.server"
+                );
+                await logReservationEvent({
+                  event_type: "cancel_undo_failed",
+                  phone: sess.phone,
+                  appointment_id: appt.id,
+                  meta: { reason: "slot_taken" },
+                  ip,
+                });
+              } catch { /* telemetry best-effort */ }
               return jsonResponse(409, {
                 ok: false,
                 message: "لم يعد الموعد متاحًا — تم حجزه من قِبل شخص آخر.",
