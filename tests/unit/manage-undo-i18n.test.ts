@@ -7,6 +7,7 @@ import { describe, it, expect } from "bun:test";
 import i18n from "@/lib/i18n/config";
 import arCommon from "@/locales/ar/common.json";
 import enCommon from "@/locales/en/common.json";
+import urCommon from "@/locales/ur/common.json";
 
 const INTERPOLATED_KEYS = [
   "manage.undo.button_active",
