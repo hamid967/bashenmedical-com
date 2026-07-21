@@ -124,7 +124,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
 
       {(status === "confirming" || status === "running" || status === "failed") && (
         <div
-          className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+          className="fixed inset-0 z-50 grid place-items-center bg-[color:var(--portal-ink)]/40 p-4"
           role="dialog"
           aria-modal="true"
           dir="rtl"
