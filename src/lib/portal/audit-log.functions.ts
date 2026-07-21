@@ -35,9 +35,10 @@ export interface MyAuditRow {
   reason: string | null;
   ip_address: string | null;
   user_agent: string | null;
-  metadata: Record<string, unknown> | null;
+  metadata: unknown;
   created_at: string;
 }
+
 
 export const listMyAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
