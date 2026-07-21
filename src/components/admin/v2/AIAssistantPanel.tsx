@@ -84,6 +84,7 @@ export function AIAssistantPanel({
     setMessages(next);
     setStreamed("");
     setStreaming(true);
+    setUsage(null);
 
     const controller = new AbortController();
     abortRef.current = controller;
