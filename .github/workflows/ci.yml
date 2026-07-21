@@ -46,6 +46,15 @@ jobs:
       - name: Portal codemod — fixture regression tests
         run: bun run test:codemod
 
+      - name: Upload codemod fixture diffs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codemod-fixture-diffs
+          path: tests/codemod/.tmp/**
+          if-no-files-found: ignore
+          retention-days: 7
+
 
 
       - name: Verify docs examples match lint:inserts rules
