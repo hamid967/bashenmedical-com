@@ -22,6 +22,7 @@ import {
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
+import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
 import { SessionExportButton } from "@/components/assistant/SessionExportButton";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
