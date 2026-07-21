@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { MessageCircle, X, Send, Loader2, Sparkles, Trash2, PhoneCall, Bot } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Sparkles, Trash2, PhoneCall, Bot, Square } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -158,6 +158,24 @@ export function BaeshenAssistant() {
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     void send(input);
+  }
+
+  function stopGeneration() {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setBusy(false);
+    setMessages((prev) => {
+      const copy = prev.slice();
+      const last = copy[copy.length - 1];
+      if (last && last.role === "assistant") {
+        const suffix = t("\n\n_تم الإيقاف._", "\n\n_Stopped._");
+        copy[copy.length - 1] = {
+          role: "assistant",
+          content: (last.content || "") + suffix,
+        };
+      }
+      return copy;
+    });
   }
 
   function newConversation() {
@@ -324,8 +342,15 @@ export function BaeshenAssistant() {
                 className="min-h-[44px] resize-none"
                 disabled={busy}
               />
-              <Button type="submit" size="icon" disabled={busy || !input.trim()}>
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <Button
+                type={busy ? "button" : "submit"}
+                size="icon"
+                onClick={busy ? stopGeneration : undefined}
+                disabled={!busy && !input.trim()}
+                aria-label={busy ? t("إيقاف التوليد", "Stop generating") : t("إرسال", "Send")}
+                variant={busy ? "destructive" : "default"}
+              >
+                {busy ? <Square className="h-4 w-4" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
