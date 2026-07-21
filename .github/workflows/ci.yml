@@ -450,11 +450,14 @@ jobs:
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
         run: python tests/e2e/portal_reschedule_appointment.py
 
-
-
-
-
-
+      - name: Run waitlist offer confirm E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python tests/e2e/waitlist_offer_confirm.py
 
 
       - name: Cleanup E2E booking fixtures
