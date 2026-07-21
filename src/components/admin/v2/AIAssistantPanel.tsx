@@ -195,6 +195,8 @@ export function AIAssistantPanel({
         const compTok = estimateTokens(acc);
         liveUsage = { prompt: promptTok, completion: compTok, total: promptTok + compTok };
         setUsage(liveUsage);
+      } else if (liveUsage && liveUsage.completion > 0 && acc) {
+        recordUsageSample({ model: currentModel, text: acc, kind: "output", tokens: liveUsage.completion });
       }
       if (liveUsage) {
         const spent = estimateCredits(liveUsage.prompt, liveUsage.completion, currentModel);
