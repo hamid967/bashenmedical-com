@@ -289,12 +289,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function ChannelToggle({
-  icon, label, hint, checked, onChange,
+  channelKey, icon, label, hint, checked, onChange, onTest, testing,
 }: {
-  icon: React.ReactNode; label: string; hint: string; checked: boolean; onChange: (v: boolean) => void;
+  channelKey: TestChannel;
+  icon: React.ReactNode; label: string; hint: string;
+  checked: boolean; onChange: (v: boolean) => void;
+  onTest: (c: TestChannel) => void;
+  testing: TestChannel | null;
 }) {
+  const isBusy = testing === channelKey;
   return (
-    <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition ${
+    <div className={`flex items-center gap-3 rounded-2xl border p-4 transition ${
       checked
         ? "border-[color:var(--portal-primary)] bg-[color:var(--portal-primary)]/5"
         : "border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] hover:border-[color:var(--portal-primary)]/40"
@@ -302,17 +307,28 @@ function ChannelToggle({
       <div className="h-9 w-9 rounded-xl grid place-items-center bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-primary)]">
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
+      <label className="flex-1 min-w-0 cursor-pointer">
         <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
         <div className="text-[11px] text-[color:var(--portal-ink-2)]">{hint}</div>
-      </div>
+      </label>
+      <button
+        type="button"
+        onClick={() => onTest(channelKey)}
+        disabled={isBusy || testing !== null}
+        className="inline-flex items-center gap-1 h-8 px-3 rounded-full border border-[color:var(--portal-border)] text-[11px] font-semibold text-[color:var(--portal-ink)] hover:border-[color:var(--portal-primary)]/50 disabled:opacity-50"
+        title="إرسال رسالة اختبار لهذه القناة"
+      >
+        {isBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+        اختبار
+      </button>
       <input
         type="checkbox"
+        aria-label={label}
         className="h-5 w-5 accent-[color:var(--portal-primary)]"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />
-    </label>
+    </div>
   );
 }
 
