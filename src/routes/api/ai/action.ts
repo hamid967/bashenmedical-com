@@ -70,9 +70,15 @@ export const Route = createFileRoute("/api/ai/action")({
 
         try {
           if (tool === "cancel_appointment") {
-            output = await cancelAppointment(sb, auth.userId, parsed.data);
+            output = await cancelAppointment(
+              sb, auth.userId,
+              parsed.data as z.infer<(typeof ToolSchemas)["cancel_appointment"]>,
+            );
           } else if (tool === "reschedule_appointment") {
-            output = await rescheduleAppointment(sb, auth.userId, parsed.data);
+            output = await rescheduleAppointment(
+              sb, auth.userId,
+              parsed.data as z.infer<(typeof ToolSchemas)["reschedule_appointment"]>,
+            );
           }
         } catch (err) {
           outcome = "error";
