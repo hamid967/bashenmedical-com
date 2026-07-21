@@ -128,16 +128,18 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
           let waitlist_notified = false;
           try {
             const since = new Date(cancelledAt.getTime() - 2_000).toISOString();
-            const { data: notified } = await supabaseAdmin
-              .from("appointment_waitlist")
-              .select("id")
-              .eq("doctor_id", appt.doctor_id)
-              .eq("branch_id", appt.branch_id)
-              .eq("preferred_date", appt.appointment_date)
-              .eq("status", "notified")
-              .gte("notified_at", since)
-              .limit(1);
-            waitlist_notified = !!(notified && notified.length > 0);
+            if (appt.doctor_id && appt.branch_id) {
+              const { data: notified } = await supabaseAdmin
+                .from("appointment_waitlist")
+                .select("id")
+                .eq("doctor_id", appt.doctor_id)
+                .eq("branch_id", appt.branch_id)
+                .eq("offered_date", appt.appointment_date)
+                .eq("status", "notified")
+                .gte("notified_at", since)
+                .limit(1);
+              waitlist_notified = !!(notified && notified.length > 0);
+            }
           } catch {
             /* non-fatal */
           }
