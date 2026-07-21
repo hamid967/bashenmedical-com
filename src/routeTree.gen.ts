@@ -53,6 +53,7 @@ import { Route as ReservationsManageRouteImport } from './routes/reservations.ma
 import { Route as OrdersRefRouteImport } from './routes/orders.$ref'
 import { Route as MediaStoriesRouteImport } from './routes/media.stories'
 import { Route as MediaNewsRouteImport } from './routes/media.news'
+import { Route as InvoicesLookupRouteImport } from './routes/invoices.lookup'
 import { Route as HealthSearchRouteImport } from './routes/health.search'
 import { Route as HealthSlugRouteImport } from './routes/health.$slug'
 import { Route as ExcellenceSlugRouteImport } from './routes/excellence.$slug'
@@ -380,6 +381,11 @@ const MediaStoriesRoute = MediaStoriesRouteImport.update({
 const MediaNewsRoute = MediaNewsRouteImport.update({
   id: '/media/news',
   path: '/media/news',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvoicesLookupRoute = InvoicesLookupRouteImport.update({
+  id: '/invoices/lookup',
+  path: '/invoices/lookup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthSearchRoute = HealthSearchRouteImport.update({
@@ -1085,6 +1091,7 @@ export interface FileRoutesByFullPath {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
@@ -1237,6 +1244,7 @@ export interface FileRoutesByTo {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
@@ -1393,6 +1401,7 @@ export interface FileRoutesById {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
   '/orders/$ref': typeof OrdersRefRoute
@@ -1549,6 +1558,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
@@ -1701,6 +1711,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
@@ -1856,6 +1867,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
     | '/orders/$ref'
@@ -1971,6 +1983,7 @@ export interface RootRouteChildren {
   DoctorsSlugRoute: typeof DoctorsSlugRoute
   HealthSlugRoute: typeof HealthSlugRoute
   HealthSearchRoute: typeof HealthSearchRoute
+  InvoicesLookupRoute: typeof InvoicesLookupRoute
   MediaNewsRoute: typeof MediaNewsRoute
   MediaStoriesRoute: typeof MediaStoriesRouteWithChildren
   OrdersRefRoute: typeof OrdersRefRoute
@@ -2310,6 +2323,13 @@ declare module '@tanstack/react-router' {
       path: '/media/news'
       fullPath: '/media/news'
       preLoaderRoute: typeof MediaNewsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invoices/lookup': {
+      id: '/invoices/lookup'
+      path: '/invoices/lookup'
+      fullPath: '/invoices/lookup'
+      preLoaderRoute: typeof InvoicesLookupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health/search': {
@@ -3425,6 +3445,7 @@ const rootRouteChildren: RootRouteChildren = {
   DoctorsSlugRoute: DoctorsSlugRoute,
   HealthSlugRoute: HealthSlugRoute,
   HealthSearchRoute: HealthSearchRoute,
+  InvoicesLookupRoute: InvoicesLookupRoute,
   MediaNewsRoute: MediaNewsRoute,
   MediaStoriesRoute: MediaStoriesRouteWithChildren,
   OrdersRefRoute: OrdersRefRoute,
