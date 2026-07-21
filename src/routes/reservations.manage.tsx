@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { bmcOgImageMeta } from "@/lib/og-meta";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/reservations/manage")({
   head: () => ({
@@ -102,6 +103,7 @@ function formatDate(iso: string): string {
 }
 
 function ManagePage() {
+  const { t } = useI18n();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"phone" | "code" | "list">("phone");
@@ -345,17 +347,17 @@ function ManagePage() {
           prior_waitlist_notified: cancelResult?.waitlist_notified ?? false,
           restored_at: Date.now(),
         });
-        sonner.success("تم استرجاع الحجز.", {
+        sonner.success(t("manage.undo.toast_success"), {
           description: res.slot_rebooked
-            ? "تم إعادة تثبيت الموعد بنجاح."
-            : "أعيدت حالة الحجز — سيتواصل معك الفريق للتأكيد.",
+            ? t("manage.undo.toast_success_rebooked")
+            : t("manage.undo.toast_success_pending"),
         });
         setCancelPhase("done");
         setUndoDeadline(null);
         setUndoMsLeft(0);
         if (sessionToken) listAppts.mutate(sessionToken);
       } else {
-        sonner.error(res.message ?? "تعذّر الاسترجاع.");
+        sonner.error(res.message ?? t("manage.undo.toast_failed"));
         setUndoDeadline(null);
         setUndoMsLeft(0);
       }
@@ -873,19 +875,19 @@ function ManagePage() {
                             <div className="rounded-md border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
                               <div className="flex items-center gap-2 font-semibold">
                                 <RefreshCw className="h-4 w-4" />
-                                تم استرجاع الحجز
+                                {t("manage.undo.restored_title")}
                               </div>
                               <ul className="mt-2 space-y-1 text-xs">
                                 <li className="flex items-start gap-1.5">
                                   <CheckCircle2 className="h-3.5 w-3.5 mt-0.5" />
                                   <span>
-                                    الحالة الآن:{" "}
+                                    {t("manage.undo.status_now")}{" "}
                                     <strong>
                                       {undoResult.restored_status === "confirmed"
-                                        ? "مؤكَّد"
+                                        ? t("status_confirmed")
                                         : undoResult.restored_status}
                                     </strong>{" "}
-                                    (بعد أن كانت: ملغى)
+                                    {t("manage.undo.was_cancelled_note")}
                                   </span>
                                 </li>
                                 <li className="flex items-start gap-1.5">
@@ -895,12 +897,12 @@ function ManagePage() {
                                     <AlertCircle className="h-3.5 w-3.5 mt-0.5" />
                                   )}
                                   <span>
-                                    السلوت:{" "}
+                                    {t("manage.undo.slot_label")}{" "}
                                     {undoResult.slot_rebooked
                                       ? undoResult.prior_released
-                                        ? "أُعيد تثبيته بنجاح (كان محرَّرًا)."
-                                        : "تم تثبيته."
-                                      : "لم يُعَد تثبيته تلقائيًا — سيراجعه الفريق."}
+                                        ? t("manage.undo.slot_rebooked_from_released")
+                                        : t("manage.undo.slot_rebooked_kept")
+                                      : t("manage.undo.slot_not_rebooked")}
                                   </span>
                                 </li>
                                 <li className="flex items-start gap-1.5">
@@ -910,12 +912,12 @@ function ManagePage() {
                                     <span className="mt-0.5">•</span>
                                   )}
                                   <span>
-                                    قائمة الانتظار:{" "}
+                                    {t("manage.undo.waitlist_label")}{" "}
                                     {undoResult.waitlist_reverted
-                                      ? "تم إرجاع صف الإشعار إلى «قيد الانتظار»."
+                                      ? t("manage.undo.waitlist_reverted")
                                       : undoResult.prior_waitlist_notified
-                                        ? "تعذّر التراجع عن الإشعار — قد يكون المريض المُبلَّغ قد قبل بالفعل."
-                                        : "لم يُرسَل أي إشعار عند الإلغاء — لا شيء للتراجع عنه."}
+                                        ? t("manage.undo.waitlist_revert_failed")
+                                        : t("manage.undo.waitlist_nothing")}
                                   </span>
                                 </li>
                               </ul>
@@ -933,24 +935,24 @@ function ManagePage() {
                                   aria-live="polite"
                                   aria-label={
                                     undoExpired
-                                      ? "انتهت مهلة التراجع البالغة 30 ثانية"
-                                      : `تراجع عن الإلغاء، متبقٍّ ${undoSecondsLeft} ثانية`
+                                      ? t("manage.undo.aria_expired")
+                                      : t("manage.undo.aria_active", { seconds: undoSecondsLeft })
                                   }
                                 >
                                   {undoCancel.isPending ? (
                                     <>
                                       <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                                      جاري الاسترجاع…
+                                      {t("manage.undo.button_pending")}
                                     </>
                                   ) : !undoExpired ? (
                                     <>
                                       <RefreshCw className="h-4 w-4 ml-1.5" />
-                                      تراجع عن الإلغاء ({undoSecondsLeft}ث)
+                                      {t("manage.undo.button_active", { seconds: undoSecondsLeft })}
                                     </>
                                   ) : (
                                     <>
                                       <AlertCircle className="h-4 w-4 ml-1.5" />
-                                      انتهت مهلة التراجع
+                                      {t("manage.undo.button_expired")}
                                     </>
                                   )}
                                 </Button>
@@ -969,7 +971,7 @@ function ManagePage() {
                                   setUndoResult(null);
                                 }}
                               >
-                                إغلاق
+                                {t("manage.undo.close")}
                               </Button>
                             </div>
                             {undoExpired && !undoResult && (
@@ -977,7 +979,7 @@ function ManagePage() {
                                 className="text-xs text-amber-800/80"
                                 role="status"
                               >
-                                انقضت مهلة الـ 30 ثانية المتاحة للتراجع؛ لم يعد بالإمكان استرجاع هذا الحجز تلقائيًا. يمكنك إعادة الحجز من جديد أو التواصل مع الفريق للمساعدة.
+                                {t("manage.undo.expired_note")}
                               </p>
                             )}
                           </div>
