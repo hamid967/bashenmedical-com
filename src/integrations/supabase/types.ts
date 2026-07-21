@@ -309,6 +309,60 @@ export type Database = {
           },
         ]
       }
+      ai_stream_events: {
+        Row: {
+          aborted: boolean
+          completed: boolean
+          completion_tokens: number | null
+          created_at: string
+          delta_count: number
+          error_status: number | null
+          error_type: string | null
+          id: string
+          latency_ms: number
+          model: string | null
+          prompt_tokens: number | null
+          resume_attempts: number
+          surface: string
+          ttfb_ms: number | null
+          user_id: string | null
+        }
+        Insert: {
+          aborted?: boolean
+          completed?: boolean
+          completion_tokens?: number | null
+          created_at?: string
+          delta_count?: number
+          error_status?: number | null
+          error_type?: string | null
+          id?: string
+          latency_ms?: number
+          model?: string | null
+          prompt_tokens?: number | null
+          resume_attempts?: number
+          surface: string
+          ttfb_ms?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          aborted?: boolean
+          completed?: boolean
+          completion_tokens?: number | null
+          created_at?: string
+          delta_count?: number
+          error_status?: number | null
+          error_type?: string | null
+          id?: string
+          latency_ms?: number
+          model?: string | null
+          prompt_tokens?: number | null
+          resume_attempts?: number
+          surface?: string
+          ttfb_ms?: number | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       ai_tool_invocations: {
         Row: {
           actor: string | null
