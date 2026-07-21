@@ -119,7 +119,9 @@ function ManagePage() {
   const [cancelResult, setCancelResult] = useState<{
     released: boolean;
     waitlist_notified: boolean;
+    cancelled_at: number;
   } | null>(null);
+  const [undoSecondsLeft, setUndoSecondsLeft] = useState<number>(0);
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
