@@ -259,6 +259,7 @@ function NoShowStatsPage() {
         searchFilter={(r, q) => (r.doctor_name_ar ?? "بدون تخصيص").toLowerCase().includes(q)}
         rowKey={(r) => r.doctor_id ?? "unassigned"}
         onExport={exportDoctorsCsv}
+        onExportXlsx={exportDoctorsXlsx}
         defaultSort={{ key: "no_show_rate", dir: "desc" }}
         columns={[
           { key: "doctor_name_ar", label: "الطبيب", align: "start",
@@ -295,6 +296,7 @@ function NoShowStatsPage() {
         searchFilter={(r, q) => r.appointment_date.includes(q)}
         rowKey={(r) => r.appointment_date}
         onExport={exportDaysCsv}
+        onExportXlsx={exportDaysXlsx}
         defaultSort={{ key: "appointment_date", dir: "asc" }}
         columns={[
           { key: "appointment_date", label: "التاريخ", align: "start",
@@ -324,10 +326,16 @@ function NoShowStatsPage() {
       <section className="rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-sm font-bold">توزيع أسباب الإلغاء</h2>
-          <button onClick={exportReasonsCsv} disabled={!stats.cancelReasons.length}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
-            <Download className="h-3.5 w-3.5" /> تصدير CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={exportReasonsCsv} disabled={!stats.cancelReasons.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+              <Download className="h-3.5 w-3.5" /> تصدير CSV
+            </button>
+            <button onClick={exportReasonsXlsx} disabled={!stats.cancelReasons.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+              <Download className="h-3.5 w-3.5" /> تصدير XLSX
+            </button>
+          </div>
         </div>
         <div className="p-4 space-y-2">
           {stats.cancelReasons.length === 0 && (
@@ -369,6 +377,7 @@ type SortableTableProps<T> = {
   columns: Column<T>[];
   rowKey: (row: T) => string;
   onExport: () => void;
+  onExportXlsx?: () => void;
   defaultSort: SortState<T>;
   searchPlaceholder: string;
   searchFilter: (row: T, query: string) => boolean;
