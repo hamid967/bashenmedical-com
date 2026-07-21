@@ -243,6 +243,9 @@ function BookPage() {
     } catch {/* ignore */}
   }, [result]);
 
+  // Realtime: refresh availability when other users book/cancel
+  useRealtimePublicSlots({ doctorId: state.doctorId, branchId: state.branchId });
+
   const { data: branches = [] }    = useQuery({ queryKey: ["branches"], queryFn: fetchBranches, staleTime: 30 * 60_000 });
   const { data: specialties = [] } = useQuery({ queryKey: ["specialties-active"], queryFn: fetchSpecialties, staleTime: 30 * 60_000 });
   const { data: doctors = [] } = useQuery({
