@@ -8,11 +8,14 @@ import { useState } from "react";
 import { ArrowDownToLine, ArrowUpFromLine, Clock, Coins, Cpu, Info, ExternalLink } from "lucide-react";
 import {
   estimateCredits,
-  estimateTokens,
   formatCredits,
   formatTokens,
   getRate,
 } from "@/lib/ai/pricing";
+import {
+  estimateTokensCalibrated,
+  isHighConfidence,
+} from "@/lib/ai/token-calibration";
 import {
   Dialog,
   DialogContent,
@@ -79,20 +82,31 @@ export function MessageCostBadge({
     ? meta.elapsedMs
     : Math.max(0, (now ?? performance.now()) - meta.startedAt);
 
-  const inTok = meta.usage?.prompt ?? estimateTokens(meta.promptText ?? "");
-  const outTok = meta.usage?.completion ?? estimateTokens(meta.outputText ?? "");
+  const t = (ar: string, en: string) => (lang === "ar" ? ar : en);
+  const dir = lang === "ar" ? "rtl" : "ltr";
+
+  const inEst = estimateTokensCalibrated(meta.promptText ?? "", { model: meta.model, kind: "input" });
+  const outEst = estimateTokensCalibrated(meta.outputText ?? "", { model: meta.model, kind: "output" });
+  const inTok = meta.usage?.prompt ?? inEst.tokens;
+  const outTok = meta.usage?.completion ?? outEst.tokens;
   const totalTok = meta.usage?.total ?? inTok + outTok;
   const rate = getRate(meta.model);
   const inCredits = (inTok * rate.inPer1M) / 1_000_000;
   const outCredits = (outTok * rate.outPer1M) / 1_000_000;
   const credits = estimateCredits(inTok, outTok, meta.model);
-  const isEst = !meta.usage;
+  const hasServerUsage = !!meta.usage;
+  const calibratedEnough =
+    (meta.promptText ? isHighConfidence(inEst) : true) &&
+    (meta.outputText ? isHighConfidence(outEst) : true);
+  const isEst = !hasServerUsage && !calibratedEnough;
+  const sourceLabel = hasServerUsage
+    ? t("قياس فعلي", "server usage")
+    : calibratedEnough
+      ? t("تقدير معاير", "calibrated estimate")
+      : t("تقدير محلي", "local estimate");
 
   const modelShort =
     (meta.model ?? "").split("/").pop() || (lang === "ar" ? "افتراضي" : "default");
-
-  const t = (ar: string, en: string) => (lang === "ar" ? ar : en);
-  const dir = lang === "ar" ? "rtl" : "ltr";
 
   return (
     <div className="mt-1.5" dir={dir}>
@@ -216,7 +230,7 @@ export function MessageCostBadge({
             </span>
             <span>
               {t("المصدر", "Source")}:{" "}
-              {isEst ? t("تقدير محلي", "local estimate") : t("قياس فعلي", "server usage")}
+              {sourceLabel}
             </span>
             {live ? (
               <span className="text-amber-600">{t("قيد التوليد…", "generating…")}</span>

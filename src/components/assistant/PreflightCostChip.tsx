@@ -13,10 +13,10 @@
 import { Coins, Info } from "lucide-react";
 import {
   estimateCredits,
-  estimateTokens,
   formatCredits,
   formatTokens,
 } from "@/lib/ai/pricing";
+import { estimateTokensCalibrated } from "@/lib/ai/token-calibration";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export function PreflightCostChip({
@@ -38,9 +38,13 @@ export function PreflightCostChip({
   const trimmed = input.trim();
   if (streaming || trimmed.length === 0) return null;
 
-  const inTok = estimateTokens(input) + Math.ceil(historyChars / 3.5);
+  const draftEst = estimateTokensCalibrated(input, { model, kind: "input" });
+  // Approximate history as the same input-side ratio the calibrator learned.
+  const historyTok = historyChars > 0 ? Math.ceil(historyChars / draftEst.cpt) : 0;
+  const inTok = draftEst.tokens + historyTok;
   const outTok = Math.max(64, Math.min(512, Math.round(inTok * 0.6)));
   const credits = estimateCredits(inTok, outTok, model);
+  const calibrated = draftEst.calibrated;
 
   const L = isAr
     ? {
@@ -48,14 +52,18 @@ export function PreflightCostChip({
         in: "مدخلات",
         out: "مخرجات متوقعة",
         credits: "ائتمان",
-        tip: "تقدير تقريبي بناءً على النص الحالي وسجل الرسائل. التكلفة الفعلية تعتمد على النموذج والاستجابة.",
+        tip: calibrated
+          ? "تقدير معاير بناءً على قياسات فعلية سابقة لهذا النموذج ولغة النص. قد يختلف الفعلي بنسبة صغيرة."
+          : "تقدير تقريبي بناءً على النص الحالي وسجل الرسائل. تتحسّن الدقة تلقائيًا بعد أول ردود من النموذج.",
       }
     : {
         badge: "Before send",
         in: "input",
         out: "expected output",
         credits: "cr",
-        tip: "Approximate estimate based on your current draft and message history. Actual cost depends on the model and response.",
+        tip: calibrated
+          ? "Calibrated estimate using recent real usage from this model and script. Actual cost may differ slightly."
+          : "Approximate estimate — accuracy improves automatically after the first few real responses from this model.",
       };
 
   return (
@@ -77,7 +85,7 @@ export function PreflightCostChip({
             <span className="whitespace-nowrap">{L.badge}</span>
             <span className="opacity-70">·</span>
             <span className="tabular-nums whitespace-nowrap">
-              ~{formatTokens(inTok)} {L.in}
+              {calibrated ? "" : "~"}{formatTokens(inTok)} {L.in}
             </span>
             <span className="opacity-40">/</span>
             <span className="tabular-nums whitespace-nowrap">

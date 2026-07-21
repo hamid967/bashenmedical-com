@@ -17,6 +17,7 @@ import {
   preflightBudget,
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
+import { recordUsageSample } from "@/lib/ai/token-calibration";
 import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
@@ -148,6 +149,7 @@ export function BaeshenAssistant() {
     };
 
     let currentModel: string | undefined;
+    const usageRef: { current: { prompt: number; completion: number; total: number } | null } = { current: null };
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
@@ -168,7 +170,9 @@ export function BaeshenAssistant() {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
           const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
-          updateLastMeta({ usage: { prompt, completion, total } });
+          usageRef.current = { prompt, completion, total };
+          updateLastMeta({ usage: usageRef.current });
+          if (prompt > 0) recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: prompt });
         },
         onDelta: (_delta, acc) => {
           setMessages((prev) => {
@@ -204,6 +208,9 @@ export function BaeshenAssistant() {
       });
       const endedAt = performance.now();
       updateLastMeta({ endedAt });
+      if (usageRef.current && usageRef.current.completion > 0 && result.text) {
+        recordUsageSample({ model: currentModel, text: result.text, kind: "output", tokens: usageRef.current.completion });
+      }
       // Commit estimated credits for the session running total.
       const promptTok = estimateTokens(promptText);
       const outTok = estimateTokens(result.text);

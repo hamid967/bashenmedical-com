@@ -20,6 +20,7 @@ import {
   preflightBudget,
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
+import { recordUsageSample } from "@/lib/ai/token-calibration";
 import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
@@ -123,6 +124,7 @@ function AssistantPage() {
       setMessages((m) => [...m, { role: "assistant", content: "", meta: initialMeta }]);
 
       let currentModel: string | undefined;
+      const usageRef: { current: { prompt: number; completion: number; total: number } | null } = { current: null };
       const result = await streamChatWithResume({
         surface: "portal",
         url: "/api/portal/ai-chat",
@@ -137,7 +139,9 @@ function AssistantPage() {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
           const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
-          updateLastMeta({ usage: { prompt, completion, total } });
+          usageRef.current = { prompt, completion, total };
+          updateLastMeta({ usage: usageRef.current });
+          if (prompt > 0) recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: prompt });
         },
         onDelta: (_delta, acc) => {
           setMessages((m) => {
@@ -172,6 +176,9 @@ function AssistantPage() {
       });
       const endedAt = performance.now();
       updateLastMeta({ endedAt });
+      if (usageRef.current && usageRef.current.completion > 0 && result.text) {
+        recordUsageSample({ model: currentModel, text: result.text, kind: "output", tokens: usageRef.current.completion });
+      }
       const spent = estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel);
       commitSessionCredits("portal", spent);
       setSessionCredits((v) => v + spent);

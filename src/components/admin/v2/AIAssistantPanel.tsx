@@ -19,6 +19,7 @@ import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resu
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
 import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
+import { recordUsageSample } from "@/lib/ai/token-calibration";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 type Usage = { prompt: number; completion: number; total: number };
@@ -170,6 +171,9 @@ export function AIAssistantPanel({
           };
           setUsage(liveUsage);
           setStreamMeta((prev) => (prev ? { ...prev, usage: liveUsage ?? undefined } : prev));
+          if (liveUsage.prompt > 0) {
+            recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: liveUsage.prompt });
+          }
         },
         onRetry: (phase, attempt) => {
           if (phase === "reconnecting") setResumeNotice(`انقطع الاتصال — استئناف (${attempt})…`);
@@ -191,6 +195,11 @@ export function AIAssistantPanel({
         const compTok = estimateTokens(acc);
         liveUsage = { prompt: promptTok, completion: compTok, total: promptTok + compTok };
         setUsage(liveUsage);
+      } else if (liveUsage && acc) {
+        const u = liveUsage as Usage;
+        if (u.completion > 0) {
+          recordUsageSample({ model: currentModel, text: acc, kind: "output", tokens: u.completion });
+        }
       }
       if (liveUsage) {
         const spent = estimateCredits(liveUsage.prompt, liveUsage.completion, currentModel);
