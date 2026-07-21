@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, X, Send, Loader2, AlertCircle, RotateCcw } from "lucide-react";
+import { Sparkles, X, Send, Loader2, AlertCircle, RotateCcw, Coins } from "lucide-react";
 import { toast } from "sonner";
+import {
+  estimateTokens,
+  estimateCredits,
+  formatCredits,
+  formatTokens,
+} from "@/lib/ai/pricing";
 
 type Msg = { role: "user" | "assistant"; content: string };
+type Usage = { prompt: number; completion: number; total: number };
 
 const STORAGE_KEY = "admin-ai-panel-messages-v1";
 
@@ -20,9 +27,24 @@ export function AIAssistantPanel({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [streamed, setStreamed] = useState("");
+  const [model, setModel] = useState<string>("google/gemini-2.5-flash");
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [sessionCredits, setSessionCredits] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Live pre-flight estimate from the composer input + conversation history
+  const preEstimate = useMemo(() => {
+    const historyChars = messages.reduce((n, m) => n + m.content.length, 0);
+    const inTok = estimateTokens(input) + Math.ceil(historyChars / 3.5);
+    const outTok = Math.max(64, Math.min(512, Math.round(inTok * 0.6)));
+    return {
+      inTok,
+      outTok,
+      credits: estimateCredits(inTok, outTok, model),
+    };
+  }, [input, messages, model]);
 
   // Load from localStorage once
   useEffect(() => {
@@ -62,6 +84,7 @@ export function AIAssistantPanel({
     setMessages(next);
     setStreamed("");
     setStreaming(true);
+    setUsage(null);
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -83,10 +106,14 @@ export function AIAssistantPanel({
       if (res.status === 401) throw new Error("غير مصرح بالوصول.");
       if (!res.ok || !res.body) throw new Error("تعذّر الاتصال بالمساعد.");
 
+      const modelHeader = res.headers.get("X-Model");
+      if (modelHeader) setModel(modelHeader);
+
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buf = "";
       let acc = "";
+      let liveUsage: Usage | null = null;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -106,8 +133,33 @@ export function AIAssistantPanel({
               acc += delta;
               setStreamed(acc);
             }
+            // The gateway emits a final chunk with usage when stream_options.include_usage=true
+            if (j?.usage) {
+              liveUsage = {
+                prompt: Number(j.usage.prompt_tokens ?? 0),
+                completion: Number(j.usage.completion_tokens ?? 0),
+                total: Number(
+                  j.usage.total_tokens ??
+                    (j.usage.prompt_tokens ?? 0) + (j.usage.completion_tokens ?? 0),
+                ),
+              };
+              setUsage(liveUsage);
+            }
           } catch { /* ignore partial chunks */ }
         }
+      }
+
+      // Fallback: estimate output tokens from streamed text if gateway omitted usage
+      if (!liveUsage && acc) {
+        const promptTok = estimateTokens(next.map((m) => m.content).join("\n"));
+        const compTok = estimateTokens(acc);
+        liveUsage = { prompt: promptTok, completion: compTok, total: promptTok + compTok };
+        setUsage(liveUsage);
+      }
+      if (liveUsage) {
+        setSessionCredits((c) =>
+          c + estimateCredits(liveUsage!.prompt, liveUsage!.completion, modelHeader ?? model),
+        );
       }
 
       setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد." }]);
@@ -127,6 +179,8 @@ export function AIAssistantPanel({
   function clearChat() {
     setMessages([]);
     setStreamed("");
+    setUsage(null);
+    setSessionCredits(0);
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
   }
 
@@ -246,6 +300,17 @@ export function AIAssistantPanel({
           )}
         </div>
 
+        {/* Cost transparency meter */}
+        <CostMeter
+          streaming={streaming}
+          model={model}
+          preEstimate={preEstimate}
+          usage={usage}
+          streamedText={streamed}
+          sessionCredits={sessionCredits}
+          hasInput={input.trim().length > 0}
+        />
+
         {/* Composer */}
         <div className="border-t p-3 shrink-0" style={{ borderColor: "var(--ac-line)" }}>
           <div
@@ -324,5 +389,106 @@ function MessageBubble({
         {content}
       </div>
     </div>
+  );
+}
+
+function CostMeter({
+  streaming,
+  model,
+  preEstimate,
+  usage,
+  streamedText,
+  sessionCredits,
+  hasInput,
+}: {
+  streaming: boolean;
+  model: string;
+  preEstimate: { inTok: number; outTok: number; credits: number };
+  usage: Usage | null;
+  streamedText: string;
+  sessionCredits: number;
+  hasInput: boolean;
+}) {
+  const liveOutTok = streaming ? estimateTokens(streamedText) : 0;
+  const liveCredits = streaming
+    ? estimateCredits(preEstimate.inTok, liveOutTok, model)
+    : 0;
+
+  let state: "idle" | "pre" | "live" | "final" = "idle";
+  if (usage) state = "final";
+  else if (streaming) state = "live";
+  else if (hasInput) state = "pre";
+
+  const label = {
+    idle: "شفافية التكلفة",
+    pre: "قبل الإرسال · تقدير",
+    live: "أثناء التوليد",
+    final: "بعد الاكتمال · فعلي",
+  }[state];
+
+  const stateColor = {
+    idle: "var(--ac-ink-3)",
+    pre: "var(--ac-ink-2)",
+    live: "var(--ac-accent-ink)",
+    final: "var(--ac-success, var(--ac-accent-ink))",
+  }[state];
+
+  return (
+    <div
+      className="px-3 py-2 border-t text-[11px] flex flex-wrap items-center gap-x-3 gap-y-1"
+      style={{ borderColor: "var(--ac-line)", background: "var(--ac-subtle)", color: "var(--ac-ink-2)" }}
+      role="status"
+      aria-live="polite"
+    >
+      <div className="flex items-center gap-1.5 font-semibold" style={{ color: stateColor }}>
+        <Coins className="h-3.5 w-3.5" />
+        <span>{label}</span>
+      </div>
+
+      {state === "pre" && (
+        <>
+          <Metric label="مدخلات" value={`~${formatTokens(preEstimate.inTok)}`} />
+          <Metric label="مخرجات متوقعة" value={`~${formatTokens(preEstimate.outTok)}`} />
+          <Metric label="التكلفة" value={`~${formatCredits(preEstimate.credits)} ائتمان`} strong />
+        </>
+      )}
+
+      {state === "live" && (
+        <>
+          <Metric label="مدخلات" value={`~${formatTokens(preEstimate.inTok)}`} />
+          <Metric label="مخرجات" value={formatTokens(liveOutTok)} />
+          <Metric label="جارٍ" value={`~${formatCredits(liveCredits)} ائتمان`} strong />
+        </>
+      )}
+
+      {state === "final" && usage && (
+        <>
+          <Metric label="مدخلات" value={formatTokens(usage.prompt)} />
+          <Metric label="مخرجات" value={formatTokens(usage.completion)} />
+          <Metric
+            label="التكلفة"
+            value={`${formatCredits(estimateCredits(usage.prompt, usage.completion, model))} ائتمان`}
+            strong
+          />
+        </>
+      )}
+
+      {sessionCredits > 0 && (
+        <span className="ms-auto opacity-80">
+          الإجمالي: {formatCredits(sessionCredits)} ائتمان
+        </span>
+      )}
+    </div>
+  );
+}
+
+function Metric({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      <span className="opacity-70">{label}:</span>
+      <span style={{ fontWeight: strong ? 700 : 500, color: strong ? "var(--ac-ink)" : undefined }}>
+        {value}
+      </span>
+    </span>
   );
 }
