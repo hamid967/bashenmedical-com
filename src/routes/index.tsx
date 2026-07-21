@@ -340,6 +340,8 @@ function HomePage() {
                 {isAr ? "تصفّح الأطباء" : "Browse doctors"}
               </Link>
             </div>
+
+            <DoctorAutocomplete />
           </div>
 
           {/* Stats strip */}
