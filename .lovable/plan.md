@@ -1,132 +1,76 @@
-# إعادة تصميم لوحة المريض + توحيد Design System
+# خطة إغلاق ثغرات UX في /book — الحجز الذكي + QA
 
-قائد الدفعة: **UX/UI + Frontend + QA** — بإشراف م. حامد.
-النطاق: مسارات `/portal/*` (34 صفحة) + طبقة `src/components/ui` + توكنز `src/styles.css`.
-مبدأ: لا تغيير في منطق الأعمال؛ تغييرات بصرية/تنظيمية فقط. الحد الأدنى لتغييرات الـ backend = صفر.
+منطقة الشغل ضخمة (~4,500 سطر عبر `book.tsx` + 20 مكوّن `booking/*` + `BranchBookingForm` + `CenterBookingForm` + `useSlotHold` + 3 endpoints في `api/public/book/*`). التنفيذ يتم على **4 دفعات صغيرة**، كل واحدة تُغلق تلقائيًا باختبار Playwright قبل الانتقال للدفعة التالية — بحيث تشوف الأثر خطوة‑بخطوة ولا نغرق في PR واحد.
 
----
+## المبدأ الحاكم
 
-## المرحلة 1 — Design System v2 (يوم 1–2)
-
-### 1.1 توحيد التوكنز في `src/styles.css`
-- تدقيق `@theme` الحالي: توحيد ألوان الحالة (success/warning/danger/info) بصيغة `oklch`.
-- إضافة **surfaces متدرجة**: `--surface-1..4`, `--surface-elevated`, `--surface-sunken`.
-- Radii/Shadows/Motion: `--radius-{sm,md,lg,xl,2xl}`, `--shadow-{soft,elevated,glow}`, `--ease-out-quart`, `--dur-{fast,base,slow}`.
-- Typography scale: مقياس عربي/إنجليزي متطابق مع `line-height` مدروس للـRTL.
-- **Jazan motif tokens**: gradient/pattern محفوظ في CSS variables، بدون شعارات حكومية.
-
-### 1.2 مكونات مشتركة جديدة تحت `src/components/portal/ui/`
-- `PortalPageHeader` — عنوان + وصف + breadcrumb + إجراءات.
-- `PortalCard` / `PortalStatCard` / `PortalEmptyState` / `PortalSkeleton`.
-- `PortalSection` — عنوان قسم + محتوى بمسافات متسقة.
-- `PortalDataList` — بديل موحّد للجداول على الموبايل.
-- `PortalBadge` (حالات: مؤكد/معلق/ملغى/مكتمل) — ألوان دلالية فقط.
-- كل المكونات تستخدم shadcn primitives + تلتزم `text-foreground`/`bg-background`.
-
-### 1.3 توثيق `docs/design-system/portal-v2.md`
-سُلّم الألوان، الخطوط، المسافات، دليل الاستخدام، أمثلة قبل/بعد.
+- لا تعديل على سكيمة قاعدة البيانات.
+- لا تعديل على منطق الحجز الأساسي (holds, waitlist, atomic guard). فقط تحسينات UX + رسائل + a11y + توازي AR/EN + تصلّب مسارات الخطأ.
+- كل دفعة تنتهي بـ typecheck نظيف + اختبار e2e يمر.
 
 ---
 
-## المرحلة 2 — إعادة تصميم شل اللوحة (يوم 3)
+## الدفعة 1 — UX الويزارد (رحلة `/book` الرئيسية)
 
-- `portal.tsx`: shell جديد بـ `SidebarProvider` (desktop) + `BottomNav` (mobile ≤ md).
-- **معمار المعلومات** — تجميع 34 صفحة في 6 مجموعات:
-  1. **الرئيسية**: dashboard, index
-  2. **الحجوزات**: appointments, book, calendar, schedule, family
-  3. **السجل الطبي**: records, prescriptions, laboratory, radiology, reports, reports.downloads, consents
-  4. **المدفوعات**: invoices, payments, refunds, insurance, orders
-  5. **التواصل**: doctors, notifications, complaints, inquiries, messaging
-  6. **الحساب**: profile, settings, sessions, reminder-preferences
-- شريط علوي: تحية باسم المريض + إشعارات + مبدّل لغة + قائمة حساب.
-- RTL/LTR بلا كسر — اختبار كامل بالعربي والإنجليزي.
+**الملفات:** `src/routes/book.tsx`, `src/components/booking/Stepper.tsx`, `SlotHoldBanner.tsx`, `StepDate.tsx`, `StepTime.tsx`, `StepReview.tsx`, `StepSuccess.tsx`, `SummarySidebar.tsx`.
 
----
+- **رسائل الخطأ الموحّدة**: تحويل كل رسائل `/api/public/book/*` (validation / conflict / db / hold_expired / already_booked / held_by_other) إلى مفاتيح ترجمة موحّدة، وعرضها في `SubmitErrorBanner` مع CTA مناسب (إعادة اختيار وقت / تسجيل في قائمة الانتظار / تحديث الشاشة).
+- **حالات التحميل**: Skeletons موحّدة لخطوات التوفر (`StepDate`/`StepTime`) بدل Spinner فارغ + رسالة "لا توجد أوقات متاحة" مع CTA لقائمة الانتظار.
+- **العودة/التقدّم**: تأكيد سلوك back/forward يحفظ الخطوة والبيانات (اختبارات موجودة) + إضافة `useBlocker` عند وجود بيانات غير محفوظة في الخطوات 3–7.
+- **العدّاد**: تحسين `SlotHoldBanner` — تحذير مرئي عند تبقّي < 60 ثانية + انتقال سلس عند الانتهاء (إعادة إلى `StepTime` مع رسالة واضحة بدل صفحة خطأ).
+- **زر التالي**: تعطيل ذكي مع سبب مرئي (tooltip / نص أسفل الزر) بدل زر معطّل صامت.
 
-## المرحلة 3 — إعادة تصميم الصفحات ذات الأولوية (يوم 4–6)
-
-بالترتيب:
-1. `portal.dashboard.tsx` — بطاقات ذكية (الموعد القادم، آخر النتائج، الفواتير المستحقة).
-2. `portal.appointments.tsx` — قوائم مدمجة (قادم/سابق/ملغى) + إجراءات سريعة.
-3. `portal.records.tsx` + `prescriptions/laboratory/radiology/reports` — نمط بصري موحّد.
-4. `portal.invoices.tsx` + `payments/refunds` — عرض مالي واضح مع حالات دلالية.
-5. `portal.family.tsx` + `profile/settings` — نماذج نظيفة، قوائم بأزرار كبيرة.
-
-الباقي (17 صفحة) يرث shell + tokens تلقائياً ويُهذّب تكراراً بمقاربة "أدنى تغيير".
+**نهاية الدفعة:** `tests/e2e/book-ux-messages.py` يتحقق من عرض رسائل خطأ عربية واضحة لكل حالة.
 
 ---
 
-## المرحلة 4 — إمكانية الوصول والأداء (يوم 7)
+## الدفعة 2 — A11y + لوحة المفاتيح + قارئ الشاشة
 
-- تشغيل `tests/a11y/axe_baseline.py` على كل مسارات `/portal/*` (AR/EN).
-- تصحيح أي مخالفة `color-contrast`/`label`/`button-name`.
-- قياس Web Vitals عبر `src/lib/observability/web-vitals.ts` — هدف: LCP < 2.5s, CLS < 0.1, INP < 200ms.
+**الملفات:** `Stepper.tsx`, `StepShell.tsx`, `Field.tsx`, كل `Step*.tsx`, `SlotHoldBanner.tsx`, `SubmitErrorBanner.tsx`, `BranchBookingForm.tsx`, `CenterBookingForm.tsx`.
 
----
+- **Focus management**: عند الانتقال بين الخطوات، ينتقل التركيز تلقائيًا إلى عنوان الخطوة (`h2` مع `tabIndex={-1}` + `focus()` عند التغيير).
+- **aria-live**: منطقة `role="status"` لعدّاد الحجز، و`role="alert"` لرسائل الخطأ داخل الويزارد.
+- **Labels**: مراجعة كل حقول `Field.tsx` + `StepPatient` + `StepDate` للتأكد من `htmlFor` صريح، وليس فقط placeholder.
+- **زر التالي/السابق**: حجم لمس ≥ 44×44 (تصنيف `min-h-11 min-w-11` على الموبايل) + focus-visible واضح.
+- **RTL/LTR**: مراجعة `dir` على الأيقونات (Chevron) والحقول (`inputMode="tel"` للجوال) والأرقام (`ar-SA-u-nu-latn`).
+- **Contrast**: مراجعة أي `text-muted-foreground/50` أو ألوان أرقام العدّاد على الخلفيات الملوّنة.
 
-## Definition of Done (DoD)
-
-- [ ] كل توكنز الألوان/المسافات/الظلال في `src/styles.css` (لا hex/rgb inline).
-- [ ] صفر استخدام لـ `text-white`/`bg-black`/`text-gray-*` في `src/routes/_authenticated/portal.*`.
-- [ ] كل صفحة `/portal/*` تستخدم `PortalPageHeader` + `PortalCard` أو ما يعادلها.
-- [ ] Sidebar (desktop) + BottomNav (mobile) يعملان في AR/EN بدون كسر.
-- [ ] `bun run build` أخضر بلا تحذيرات TS/Lint جديدة.
-- [ ] `tsgo` أخضر.
-- [ ] axe: **صفر مخالفات** critical/serious على كل مسارات `/portal/*`.
-- [ ] Lighthouse mobile: Perf ≥ 85, A11y ≥ 95, SEO ≥ 90 على `dashboard` و`appointments`.
-- [ ] لا تعديل على أي schema/RLS/serverFn (backend مجمّد لهذه الدفعة).
-- [ ] توثيق `docs/design-system/portal-v2.md` مكتمل مع أمثلة قبل/بعد.
-- [ ] لقطات قبل/بعد لأهم 5 صفحات في `docs/audit/portal-redesign-2026-07/`.
+**نهاية الدفعة:** `tests/a11y/book_axe_zero_violations.py` يجب أن يعطي 0 مخالفات على `/book` (AR + EN) للفئات: `label`, `button-name`, `color-contrast`, `aria-required-attr`, `focus-visible`.
 
 ---
 
-## اختبارات القبول
+## الدفعة 3 — توازي AR/EN في كامل الرحلة
 
-### E2E (Playwright تحت `tests/e2e/portal-redesign/`)
-1. `portal_shell_desktop.py` — sidebar يظهر، الروابط تنتقل، الحالة النشطة صحيحة (AR/EN).
-2. `portal_shell_mobile.py` — BottomNav ظاهر @ 375px، 5 عناصر رئيسية تعمل.
-3. `portal_dashboard_render.py` — بطاقات الملخص تظهر خلال < 3s، لا CLS مرئي.
-4. `portal_appointments_flow.py` — عرض قائمة + فتح تفاصيل موعد بدون خطأ console.
-5. `portal_rtl_ltr_parity.py` — تبديل اللغة يعيد بناء التخطيط بلا كسر بصري (screenshot diff).
+**الملفات:** `src/locales/{ar,en}/booking.json`, كل ملفات `booking/*` + النموذجين المباشرين.
 
-### A11y (تحت `tests/a11y/`)
-6. `portal_axe_full.py` — axe على 34 مسار × لغتين = صفر critical/serious.
-7. `portal_keyboard_nav.py` — Tab يمر على كل التفاعليات بترتيب منطقي مع focus مرئي.
+- **جرد**: سكربت `scripts/audit-book-i18n.mjs` يمشي على كل السلاسل النصية في `book.tsx` + `components/booking/*` + `BranchBookingForm` + `CenterBookingForm` ويرصد أي `hardcoded` عربي/إنجليزي غير مربوط بـ `t()`.
+- **إكمال المفاتيح المفقودة** في `booking.json` (AR + EN) — خصوصًا رسائل الخطأ الجديدة من الدفعة 1.
+- **التواريخ والأرقام**: توحيد `formatDate`/`formatTime` على `ar-SA-u-nu-latn` و`en-US` حسب اللغة الحالية، مع دعم AM/PM بالعربي.
+- **اتجاه الأرقام في العدّاد**: منع `flip` في `dir="rtl"` باستخدام `dir="ltr"` صريح على العدّاد والأرقام الطبية (MRN).
+- **رسائل السيرفر**: تعديل `/api/public/book/{hold,availability,create}` لإرجاع `kind` كودي فقط (بدون رسائل)، ويتم ترجمة الـ `kind` على العميل.
 
-### Visual/Design
-8. `portal_tokens_lint.py` — grep على `src/routes/_authenticated/portal.*` يمنع hex/tailwind ألوان مباشرة.
-9. `portal_component_usage.py` — كل صفحة portal تستورد `PortalPageHeader`.
-
-### Performance
-10. `portal_lighthouse.mjs` — تشغيل Lighthouse CI على 3 صفحات، فشل إذا < عتبات DoD.
+**نهاية الدفعة:** `tests/e2e/book_bilingual_parity.py` يفتح `/book?lang=ar` و`/book?lang=en` ويقارن أن كل خطوة عندها نص بنفس اللغة (لا تسرّب لغة معاكسة).
 
 ---
 
-## تقسيم بالفرق (فريق حامد)
+## الدفعة 4 — E2E شامل (تغطية مسارات النجاح والفشل)
 
-| الفريق | المسؤولية |
-|---|---|
-| UX/UI & Design | توكنز v2 + معمار المعلومات + مكتبة `PortalCard` |
-| Frontend Engineering | shell جديد + هجرة الصفحات + BottomNav |
-| Identity & Creative | Jazan motif tokens (خلفيات لطيفة، بلا شعارات) |
-| QA & Testing | 10 اختبارات القبول أعلاه + سكربتات axe |
-| Content | مراجعة كل عناوين/أوصاف الصفحات (AR/EN) |
-| Security | تأكيد صفر مساس بـ RLS/serverFn |
+**الملفات:** `tests/e2e/book-*.py` (جديدة + توسيع الموجود).
 
----
+اختبارات جديدة (Playwright + Python):
 
-## المخاطر والحدود
+1. `book_full_journey_ar.py` — رحلة كاملة عربي من `/doctors` → `/book` → نجاح → QR + PDF.
+2. `book_full_journey_en.py` — نفس الرحلة بالإنجليزي.
+3. `book_hold_expired_recovery.py` — انتظار انتهاء الـ hold ثم التحقق من الرسالة والعودة السلسة.
+4. `book_slot_taken_during_review.py` — محاكاة `already_booked` عند step 8 والتحقق من عرض قائمة الانتظار كخيار.
+5. `book_branch_form_full.py` — رحلة كاملة عبر `BranchBookingForm`.
+6. `book_center_form_full.py` — رحلة كاملة عبر `CenterBookingForm`.
+7. `book_keyboard_only.py` — إتمام الحجز بلوحة المفاتيح فقط (Tab/Enter/Escape).
 
-- **مجمّد**: أي schema/RLS/serverFn/booking logic — يتطلب تفويض منفصل من م. حامد.
-- **خارج النطاق**: صفحات `/admin/*` (دفعة لاحقة).
-- **العودة للخلف**: كل تغيير خلف feature flag `VITE_PORTAL_V2` إن طلب م. حامد ذلك.
+كل الاختبارات تُضاف إلى `.github/workflows/ci.yml` ضمن مصفوفة الحجز.
 
 ---
 
-## أول 3 خطوات بعد الموافقة
+## سؤال للمهندس حامد قبل البدء
 
-1. كتابة `src/styles.css` v2 tokens + `docs/design-system/portal-v2.md`.
-2. إنشاء `src/components/portal/ui/*` (7 مكونات).
-3. تحديث `portal.tsx` بالـ shell الجديد + هجرة `portal.dashboard.tsx` كأول عرض عملي.
-
-هل أبدأ التنفيذ من الخطوة 1؟
+أبدأ فورًا بـ **الدفعة 1 (UX الويزارد)**، أم تفضّل ترتيب مختلف (مثلًا A11y أولًا لأنها أعلى قيمة لبعض المستخدمين)؟
