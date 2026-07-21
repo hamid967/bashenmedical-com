@@ -99,6 +99,11 @@ export function AIAssistantPanel({
     setUsage(null);
     setResumeNotice(null);
 
+    const startedAt = performance.now();
+    const promptText = next.map((m) => `${m.role}: ${m.content}`).join("\n");
+    const meta0: MessageCostMeta = { startedAt, promptText, model };
+    setStreamMeta(meta0);
+
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -121,6 +126,7 @@ export function AIAssistantPanel({
         onModel: (m) => {
           currentModel = m;
           setModel(m);
+          setStreamMeta((prev) => (prev ? { ...prev, model: m } : prev));
         },
         onDelta: (_delta, acc) => setStreamed(acc),
         onUsage: (u) => {
@@ -134,6 +140,7 @@ export function AIAssistantPanel({
             ),
           };
           setUsage(liveUsage);
+          setStreamMeta((prev) => (prev ? { ...prev, usage: liveUsage ?? undefined } : prev));
         },
         onRetry: (phase, attempt) => {
           if (phase === "reconnecting") setResumeNotice(`انقطع الاتصال — استئناف (${attempt})…`);
@@ -162,14 +169,24 @@ export function AIAssistantPanel({
         );
       }
 
-      setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد." }]);
+      const finalMeta: MessageCostMeta = {
+        startedAt,
+        endedAt: performance.now(),
+        model: currentModel,
+        promptText,
+        usage: liveUsage ?? undefined,
+      };
+      setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد.", meta: finalMeta }]);
       setStreamed("");
+      setStreamMeta(null);
     } catch (e) {
       if ((e as Error).name === "AbortError") {
         setStreamed("");
+        setStreamMeta(null);
       } else {
         const msg = e instanceof StreamHttpError ? e.message : (e as Error).message || "خطأ غير متوقع";
         toast.error(msg);
+        setStreamMeta(null);
       }
     } finally {
       setStreaming(false);
