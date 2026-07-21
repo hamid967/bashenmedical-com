@@ -312,7 +312,7 @@ export function BaeshenAssistant() {
                 <SessionExportButton
                   messages={messages}
                   sessionCredits={sessionCredits}
-                  preEstimateTokens={preEstimate?.tokens}
+                  preEstimateTokens={preEstimate?.inTok}
                   model={meterModel}
                   conversationId={conversationId.current}
                   surface={isAr ? "المساعد العام" : "Public Assistant"}
