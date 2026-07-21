@@ -411,7 +411,67 @@ function NotificationRow({
   );
 }
 
+/* -------------------- provider-confirmed delivery -------------------- */
+
+const CHANNEL_META: Record<
+  DeliveryStatus["channel"],
+  { Icon: typeof Mail; label: string }
+> = {
+  email: { Icon: Mail, label: "البريد" },
+  sms: { Icon: Smartphone, label: "SMS" },
+  whatsapp: { Icon: MessageCircle, label: "واتساب" },
+  push: { Icon: BellRing, label: "إشعار" },
+  in_app: { Icon: Bell, label: "داخل التطبيق" },
+};
+
+function DeliveryStrip({ deliveries }: { deliveries: DeliveryStatus[] }) {
+  // Intentionally render nothing when no provider has confirmed anything —
+  // avoids showing a misleading "sent" state that only means we handed the
+  // message to the queue.
+  if (!deliveries || deliveries.length === 0) return null;
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-1.5" aria-label="حالة تسليم المزود">
+      <span className="text-[11px] text-[color:var(--portal-ink-2)]">التسليم:</span>
+      {deliveries.map((d) => {
+        const meta = CHANNEL_META[d.channel];
+        const delivered = d.status === "delivered";
+        const cls = delivered
+          ? "bg-emerald-50 text-emerald-700 border-emerald-100"
+          : "bg-red-50 text-red-700 border-red-100";
+        const StatusIcon = delivered ? CheckCircle2 : XCircle;
+        const stateLabel =
+          d.status === "delivered"
+            ? "تم التسليم"
+            : d.status === "bounced"
+              ? "ارتد"
+              : "فشل";
+        const at = new Date(d.at);
+        const title = `${meta.label} · ${stateLabel}${
+          d.provider ? ` · ${d.provider}` : ""
+        } · ${at.toLocaleString("ar-SA-u-nu-latn", {
+          day: "numeric",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit",
+        })}`;
+        return (
+          <span
+            key={`${d.channel}-${d.at}`}
+            title={title}
+            className={`inline-flex items-center gap-1 h-6 px-2 rounded-full border text-[11px] ${cls}`}
+          >
+            <meta.Icon className="h-3 w-3" aria-hidden />
+            <span>{meta.label}</span>
+            <StatusIcon className="h-3 w-3" aria-hidden />
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 /* --------------------------- ux states ------------------------------- */
+
 
 function EmptyState({ filter }: { filter: Filter }) {
   const isUnread = filter === "unread";
