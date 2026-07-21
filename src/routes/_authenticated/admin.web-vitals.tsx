@@ -9,8 +9,10 @@ import { useMemo, useState } from "react";
 import { Activity, Filter, Gauge, RefreshCw } from "lucide-react";
 import {
   getWebVitalsSummary,
+  listWebVitalsRaw,
   type MetricStats,
   type WebVitalMetric,
+  type WebVitalRawRow,
 } from "@/lib/admin/web-vitals.functions";
 import { getMyRoles } from "@/lib/admin.functions";
 import { ExportMenu } from "@/components/admin/v2/ExportMenu";
@@ -34,6 +36,15 @@ const METRIC_COLS: Column<MetricRow>[] = [
 const PATH_COLS: Column<PathRow>[] = [
   { header: "المسار", accessor: (r) => r.path, width: 60 },
   { header: "عدد العينات", accessor: (r) => r.count },
+];
+
+const RAW_COLS: Column<WebVitalRawRow>[] = [
+  { header: "الوقت", accessor: (r) => (r.ts ? new Date(r.ts).toLocaleString("ar-SA") : "") },
+  { header: "المقياس", accessor: (r) => r.metric },
+  { header: "القيمة", accessor: (r) => (r.metric === "CLS" ? Number(r.value).toFixed(3) : Math.round(Number(r.value))) },
+  { header: "المسار/URL", accessor: (r) => r.url, width: 60 },
+  { header: "User-Agent", accessor: (r) => r.user_agent ?? "", width: 60 },
+  { header: "metric_id", accessor: (r) => r.metric_id ?? "" },
 ];
 
 type Preset = { id: string; label: string; path: string | null };
