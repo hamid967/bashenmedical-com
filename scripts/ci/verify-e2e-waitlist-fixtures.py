@@ -185,21 +185,136 @@ def _run(cli: ReportingClient, rep: Report) -> None:
     row = cli.rows(
         cli.get("/rest/v1/appointment_waitlist", {
             "id": f"eq.{wl_id}",
-            "select": "id,status,offered_hold_id,offered_expires_at",
+            "select": "id,status,doctor_id,branch_id,offered_date,offered_time,"
+                      "offered_hold_id,offered_expires_at",
         }),
         "read-back waitlist",
     )
     ok = bool(row and row[0].get("status") == "notified"
               and row[0].get("offered_hold_id") == hold_id)
-    # cleanup regardless
-    cli.delete(f"/rest/v1/appointment_waitlist?id=eq.{wl_id}")
-    cli.delete(f"/rest/v1/slot_holds?id=eq.{hold_id}")
     rep.add_check("appointment_waitlist.read_back", ok,
                   status=(row[0].get("status") if row else None),
                   offered_hold_id=(row[0].get("offered_hold_id") if row else None))
     if not ok:
+        cli.delete(f"/rest/v1/appointment_waitlist?id=eq.{wl_id}")
+        cli.delete(f"/rest/v1/slot_holds?id=eq.{hold_id}")
         rep.fail(f"read-back waitlist mismatch: {row!r}")
         cli.fail(f"read-back waitlist غير مطابق: {row!r}")
+
+    # 3b) integrity — offered_hold_id / offered_expires_at ↔ slot_holds
+    # لا يوجد FK فعلي بين appointment_waitlist.offered_hold_id و slot_holds.id،
+    # لذا نتحقق يدويًا من الاتساق قبل تشغيل اختبارات waitlist.
+    rep.step("integrity.offer_hold_link")
+    wl = row[0]
+    hold_row = cli.rows(
+        cli.get("/rest/v1/slot_holds", {
+            "id": f"eq.{wl['offered_hold_id']}",
+            "select": "id,doctor_id,branch_id,appointment_date,appointment_time,"
+                      "expires_at,released_at",
+        }),
+        "read slot_hold for integrity check",
+    )
+    integrity_errors: list[str] = []
+    if not hold_row:
+        integrity_errors.append("offered_hold_id لا يشير إلى صف موجود في slot_holds")
+    else:
+        h = hold_row[0]
+        if h["doctor_id"] != wl["doctor_id"]:
+            integrity_errors.append(
+                f"doctor_id غير متطابق: hold={h['doctor_id']} wl={wl['doctor_id']}"
+            )
+        if h.get("branch_id") != wl.get("branch_id"):
+            integrity_errors.append(
+                f"branch_id غير متطابق: hold={h.get('branch_id')} wl={wl.get('branch_id')}"
+            )
+        if str(h["appointment_date"]) != str(wl["offered_date"]):
+            integrity_errors.append(
+                f"appointment_date/offered_date غير متطابقين: "
+                f"{h['appointment_date']} vs {wl['offered_date']}"
+            )
+        # time may come back as "HH:MM:SS" — قارِن على أول 5 محارف (HH:MM)
+        if str(h["appointment_time"])[:5] != str(wl["offered_time"])[:5]:
+            integrity_errors.append(
+                f"appointment_time/offered_time غير متطابقين: "
+                f"{h['appointment_time']} vs {wl['offered_time']}"
+            )
+        if h.get("released_at") is not None:
+            integrity_errors.append("slot_hold مُحرَّر (released_at ليس NULL)")
+        # anchor expiries على now UTC وقارن ISO عبر datetime
+        try:
+            now_utc = datetime.now(timezone.utc)
+            h_exp = datetime.fromisoformat(h["expires_at"].replace("Z", "+00:00"))
+            wl_exp = datetime.fromisoformat(
+                wl["offered_expires_at"].replace("Z", "+00:00")
+            )
+            if h_exp <= now_utc:
+                integrity_errors.append(f"slot_holds.expires_at في الماضي: {h_exp}")
+            if wl_exp <= now_utc:
+                integrity_errors.append(
+                    f"offered_expires_at في الماضي: {wl_exp}"
+                )
+            # يجب أن يكون offered_expires_at ≤ hold.expires_at (لا نعِد بأكثر مما نمسك)
+            if wl_exp > h_exp + timedelta(seconds=1):
+                integrity_errors.append(
+                    f"offered_expires_at ({wl_exp}) يتجاوز slot_holds.expires_at ({h_exp})"
+                )
+        except Exception as e:
+            integrity_errors.append(f"تعذّر تحليل expires_at: {e}")
+
+    rep.add_check(
+        "integrity.offer_hold_link",
+        not integrity_errors,
+        hold_id=wl["offered_hold_id"],
+        errors=integrity_errors or None,
+    )
+
+    # cleanup — تُنفَّذ دائمًا بعد اكتمال الفحوصات
+    cli.delete(f"/rest/v1/appointment_waitlist?id=eq.{wl_id}")
+    cli.delete(f"/rest/v1/slot_holds?id=eq.{hold_id}")
+
+    if integrity_errors:
+        rep.fail("integrity check failed: " + " | ".join(integrity_errors))
+        cli.fail("integrity check failed:\n  - " + "\n  - ".join(integrity_errors))
+
+    # 3c) integrity — لا صفوف 'notified' يتيمة لطبيب الاختبار قبل بدء الـE2E
+    rep.step("integrity.orphan_scan")
+    stale = cli.rows(
+        cli.get("/rest/v1/appointment_waitlist", {
+            "doctor_id": f"eq.{doctor['id']}",
+            "status": "eq.notified",
+            "select": "id,offered_hold_id,offered_expires_at",
+            "limit": "50",
+        }),
+        "scan pre-existing notified waitlist rows",
+    )
+    orphans: list[dict] = []
+    for r in stale:
+        hid = r.get("offered_hold_id")
+        if not hid:
+            orphans.append({"id": r["id"], "reason": "missing offered_hold_id"})
+            continue
+        hrow = cli.rows(
+            cli.get("/rest/v1/slot_holds", {
+                "id": f"eq.{hid}",
+                "select": "id,released_at,expires_at",
+            }),
+            "lookup linked hold",
+        )
+        if not hrow:
+            orphans.append({"id": r["id"], "reason": "hold missing"})
+        elif hrow[0].get("released_at") is not None:
+            orphans.append({"id": r["id"], "reason": "hold released"})
+    # نُبلِّغ فقط — لا نُفشل الـpreflight بسبب حالة تاريخية،
+    # لكن نضع ok=False عند العثور على يتامى ليظهر في التقرير.
+    rep.add_check(
+        "integrity.orphan_scan",
+        not orphans,
+        scanned=len(stale),
+        orphans=orphans or None,
+    )
+    if orphans:
+        print(f"[{TAG}] WARN: {len(orphans)} orphan notified waitlist row(s) "
+              f"for doctor={doctor['id']}: {orphans}")
 
     # 4) soft check — availability_slot
     rep.step("availability_slots.soft")
