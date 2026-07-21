@@ -440,20 +440,21 @@ function AuthPage() {
           </div>
 
           {/* Social Auth */}
-          <div className="relative grid grid-cols-2 gap-3 mb-4">
-            <button
-              type="button"
-              onClick={() => handleOAuth("google")}
-              disabled={!!oauthLoading}
-              className="flex items-center justify-center gap-2 h-11 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#1FAEFF]/40 transition-all disabled:opacity-60 text-sm font-medium"
-            >
-              {oauthLoading === "google" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <GoogleIcon />
-              )}
-              Google
-            </button>
+          <button
+            type="button"
+            onClick={() => handleOAuth("google")}
+            disabled={!!oauthLoading}
+            aria-label="تسجيل الدخول عبر Google"
+            className="w-full flex items-center justify-center gap-3 h-12 rounded-xl bg-white text-slate-900 hover:bg-white/90 transition-all disabled:opacity-60 text-sm font-semibold shadow-lg shadow-black/20 mb-3"
+          >
+            {oauthLoading === "google" ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <GoogleIcon />
+            )}
+            <span>المتابعة عبر Google</span>
+          </button>
+          <div className="relative grid grid-cols-1 gap-3 mb-4">
             <button
               type="button"
               onClick={() => handleOAuth("apple")}
@@ -468,6 +469,7 @@ function AuthPage() {
               Apple
             </button>
           </div>
+
 
           {/* Divider */}
           <div className="relative flex items-center mb-5">
