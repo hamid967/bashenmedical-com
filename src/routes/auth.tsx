@@ -428,11 +428,14 @@ function AuthPage() {
                 <span className="text-white text-3xl font-black">ب</span>
               </div>
             </div>
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#1FAEFF]/40 bg-[#1FAEFF]/10 px-3 py-1 text-[11px] font-semibold text-[#48C7FF]">
+              بوابة المراجعين
+            </div>
             <h2 className="text-2xl font-bold">
               {mode === "signin" ? "مرحباً بك مجدداً" : "أنشئ حسابك"}
             </h2>
             <p className="text-white/50 text-sm font-light mt-1">
-              بوابة مجمع باعشن الطبي الرقمية
+              سجّل دخولك للوصول إلى لوحة تحكمك الخاصة
             </p>
           </div>
 

@@ -341,6 +341,13 @@ function HomePage() {
                 <Search className="h-4 w-4" />
                 {isAr ? "تصفّح الأطباء" : "Browse doctors"}
               </Link>
+              <Link
+                to="/portal/dashboard"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-teal)]/40 bg-[var(--jazan-teal)]/10 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] hover:bg-[var(--jazan-teal)]/15 transition"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {isAr ? "بوابة المراجعين" : "Patient portal"}
+              </Link>
             </div>
 
             <DoctorAutocomplete />
