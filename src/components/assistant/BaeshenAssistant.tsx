@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { MessageCircle, X, Send, Loader2, Sparkles, Trash2, PhoneCall, Bot } from "lucide-react";
+import { MessageCircle, X, Send, Loader2, Sparkles, Trash2, PhoneCall, Bot, Square } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
