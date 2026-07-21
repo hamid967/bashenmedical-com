@@ -774,3 +774,61 @@ jobs:
         with:
           header: post-a2-e2e
           path: e2e-post-a2-comment.md
+
+  security-secdef-guard:
+    name: Security — SECURITY DEFINER privileges (blocking)
+    runs-on: ubuntu-latest
+    # Blocking gate: runs on every PR and on push to main. Fails the check
+    # whenever a SECURITY DEFINER function is callable by PUBLIC/anon in a
+    # way that violates the allowlist — preventing new migrations from
+    # regressing the A2 hardening.
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'pull_request'
+    timeout-minutes: 10
+    env:
+      PGHOST: ${{ secrets.SUPABASE_DB_HOST }}
+      PGPORT: ${{ secrets.SUPABASE_DB_PORT }}
+      PGUSER: ${{ secrets.SUPABASE_DB_USER }}
+      PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PGDATABASE: ${{ secrets.SUPABASE_DB_NAME }}
+      PGSSLMODE: require
+    steps:
+      - name: Verify DB secrets present
+        id: gate
+        run: |
+          if [ -z "$PGHOST" ] || [ -z "$PGPASSWORD" ]; then
+            echo "::error::SECDEF guard cannot run — DB secrets missing. Configure SUPABASE_DB_* repo secrets."
+            exit 1
+          fi
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - name: Install psycopg2
+        run: python -m pip install --upgrade pip 'psycopg2-binary>=2.9'
+      - name: Detect new migrations in this PR
+        id: mig
+        if: github.event_name == 'pull_request'
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1 || true
+          added=$(git diff --name-only --diff-filter=A "origin/${{ github.base_ref }}"...HEAD -- 'supabase/migrations/*.sql' | wc -l)
+          echo "added_migrations=$added" >> "$GITHUB_OUTPUT"
+          echo "This PR adds $added new migration file(s)."
+      - name: Run SECURITY DEFINER privilege audit (blocking)
+        run: |
+          python tests/security/test_secdef_privileges.py | tee secdef-report.txt
+      - name: Sticky PR comment on failure
+        if: failure() && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: secdef-guard
+          message: |
+            ## ❌ SECURITY DEFINER privilege guard failed
+
+            This PR either introduces or exposes a `SECURITY DEFINER` function that
+            is callable by `PUBLIC` / `anon` outside the allowlist. Merging is
+            blocked until the migration explicitly `REVOKE`s access, adds the
+            function to `PUBLIC_READ_ALLOWLIST` with justification, or drops
+            `SECURITY DEFINER`.
+
+            See the job log for the exact function signature and violation.
