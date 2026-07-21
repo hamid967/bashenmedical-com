@@ -1,6 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getAdminStats, getMyRoles } from "@/lib/admin.functions";
+import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+import { getAdminStats, getMyRoles, getAdminTrends } from "@/lib/admin.functions";
 import type { AdminRole } from "@/components/admin/AdminShell";
 import {
   CalendarCheck,
@@ -155,8 +166,12 @@ function AdminDashboard() {
         </div>
       )}
 
+      {/* Trends section — daily/weekly stats for developers */}
+      <TrendsSection />
+
       {/* Magazine grid: Featured Inbox + Primary shortcuts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+
         {/* Featured Unified Inbox */}
         <Link
           to="/admin/inbox"
@@ -361,3 +376,177 @@ function InboxRow({
     </div>
   );
 }
+
+// ============================================================
+// Trends section — real data, developer-focused daily/weekly
+// ============================================================
+
+const trendsQuery = (range: "week" | "month") =>
+  queryOptions({
+    queryKey: ["admin", "trends", range],
+    queryFn: () => getAdminTrends({ data: { range } }),
+    staleTime: 60_000,
+  });
+
+const SERIES_META = [
+  { key: "appointments", label: "المواعيد", color: "#5cbdb9" },
+  { key: "orders", label: "الطلبات", color: "#2d8a9e" },
+  { key: "inquiries", label: "الاستفسارات", color: "#fbbf24" },
+  { key: "patients", label: "مرضى جدد", color: "#a78bfa" },
+  { key: "complaints", label: "الشكاوى", color: "#f87171" },
+] as const;
+
+function TrendsSection() {
+  const [range, setRange] = useState<"week" | "month">("week");
+  const { data, isLoading, isError, error, refetch, isFetching } = useQuery(trendsQuery(range));
+
+  const chartData =
+    data?.series.appointments.map((row, i) => ({
+      day: row.day.slice(5), // MM-DD
+      appointments: row.count,
+      orders: data.series.orders[i]?.count ?? 0,
+      inquiries: data.series.inquiries[i]?.count ?? 0,
+      patients: data.series.patients[i]?.count ?? 0,
+      complaints: data.series.complaints[i]?.count ?? 0,
+    })) ?? [];
+
+  return (
+    <section
+      className="rounded-[2rem] p-6 lg:p-8 mb-8"
+      style={{ background: OCEAN.panel, border: `1px solid ${OCEAN.panel2}` }}
+    >
+      <header className="flex flex-wrap justify-between items-center gap-4 mb-6">
+        <div>
+          <div
+            className="text-[11px] font-bold tracking-[0.3em] uppercase mb-1.5"
+            style={{ color: OCEAN.glow, opacity: 0.75 }}
+          >
+            إحصائيات المطوّرين
+          </div>
+          <h2 className="text-xl lg:text-2xl font-bold text-white" style={{ fontFamily: SORA }}>
+            الاتجاهات {range === "week" ? "اليومية (٧ أيام)" : "الأسبوعية (٣٠ يومًا)"}
+          </h2>
+        </div>
+        <div
+          className="inline-flex rounded-full p-1"
+          style={{ background: `${OCEAN.bg}`, border: `1px solid ${OCEAN.panel2}` }}
+        >
+          {(["week", "month"] as const).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRange(r)}
+              className="px-4 py-1.5 rounded-full text-xs font-bold transition-colors"
+              style={
+                range === r
+                  ? { background: OCEAN.glow, color: OCEAN.panel }
+                  : { background: "transparent", color: OCEAN.glow, opacity: 0.7 }
+              }
+            >
+              {r === "week" ? "أسبوع" : "شهر"}
+            </button>
+          ))}
+        </div>
+      </header>
+
+      {isError && (
+        <div
+          className="p-4 rounded-2xl text-sm mb-4 flex justify-between items-center gap-3"
+          style={{ background: "rgba(248,113,113,0.1)", color: "#fca5a5", border: "1px solid rgba(248,113,113,0.3)" }}
+        >
+          <span>تعذّر تحميل الإحصائيات: {(error as Error)?.message ?? "خطأ غير معروف"}</span>
+          <button onClick={() => refetch()} className="underline text-xs font-bold">
+            إعادة المحاولة
+          </button>
+        </div>
+      )}
+
+      {/* Totals + growth badges */}
+      {data && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+          {SERIES_META.map((s) => {
+            const total = data.totals[s.key];
+            const growth = data.growth[s.key];
+            const up = growth >= 0;
+            return (
+              <div
+                key={s.key}
+                className="p-4 rounded-2xl"
+                style={{
+                  background: `${OCEAN.panel2}4d`,
+                  border: `1px solid ${OCEAN.panel2}`,
+                }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
+                  <span className="text-xs font-bold" style={{ color: OCEAN.glow, opacity: 0.85 }}>
+                    {s.label}
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-white" style={{ fontFamily: SORA }}>
+                  {total.toLocaleString("ar-EG")}
+                </div>
+                <div
+                  className="text-[11px] font-bold mt-1"
+                  style={{ color: up ? "#5cbdb9" : "#fca5a5" }}
+                >
+                  {up ? "▲" : "▼"} {Math.abs(growth)}٪ vs السابق
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Chart */}
+      <div
+        className="rounded-2xl p-4"
+        style={{ background: `${OCEAN.bg}80`, border: `1px solid ${OCEAN.panel2}`, height: 320 }}
+      >
+        {isLoading || isFetching ? (
+          <div className="h-full grid place-items-center text-sm" style={{ color: OCEAN.glow }}>
+            جارٍ التحميل…
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <defs>
+                {SERIES_META.map((s) => (
+                  <linearGradient key={s.key} id={`g-${s.key}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor={s.color} stopOpacity={0.4} />
+                    <stop offset="100%" stopColor={s.color} stopOpacity={0.02} />
+                  </linearGradient>
+                ))}
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke={OCEAN.panel2} opacity={0.5} />
+              <XAxis dataKey="day" stroke={OCEAN.glow} tick={{ fontSize: 11 }} />
+              <YAxis stroke={OCEAN.glow} tick={{ fontSize: 11 }} allowDecimals={false} />
+              <Tooltip
+                contentStyle={{
+                  background: OCEAN.panel,
+                  border: `1px solid ${OCEAN.panel2}`,
+                  borderRadius: 12,
+                  color: "#e0e7ff",
+                }}
+                labelStyle={{ color: OCEAN.glow, fontWeight: 700 }}
+              />
+              <Legend wrapperStyle={{ fontSize: 12 }} />
+              {SERIES_META.map((s) => (
+                <Area
+                  key={s.key}
+                  type="monotone"
+                  dataKey={s.key}
+                  name={s.label}
+                  stroke={s.color}
+                  strokeWidth={2}
+                  fill={`url(#g-${s.key})`}
+                />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        )}
+      </div>
+    </section>
+  );
+}
+
