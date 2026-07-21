@@ -95,6 +95,7 @@ import { Route as ExcellenceSlugRouteImport } from './routes/excellence.$slug'
 import { Route as HealthIndexRouteImport } from './routes/health.index'
 import { Route as HealthSlugRouteImport } from './routes/health.$slug'
 import { Route as HealthSearchRouteImport } from './routes/health.search'
+import { Route as InsuranceVerifyRouteImport } from './routes/insurance.verify'
 import { Route as InvoicesLookupRouteImport } from './routes/invoices.lookup'
 import { Route as MediaNewsRouteImport } from './routes/media.news'
 import { Route as MediaStoriesRouteImport } from './routes/media.stories'
@@ -657,6 +658,11 @@ const HealthSearchRoute = HealthSearchRouteImport.update({
   id: '/health/search',
   path: '/health/search',
   getParentRoute: () => rootRouteImport,
+} as any)
+const InsuranceVerifyRoute = InsuranceVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => InsuranceRoute,
 } as any)
 const InvoicesLookupRoute = InvoicesLookupRouteImport.update({
   id: '/invoices/lookup',
@@ -1278,7 +1284,7 @@ export interface FileRoutesByFullPath {
   '/excellence': typeof ExcellenceRouteWithChildren
   '/faq': typeof FaqRoute
   '/home-care': typeof HomeCareRoute
-  '/insurance': typeof InsuranceRoute
+  '/insurance': typeof InsuranceRouteWithChildren
   '/international-patients': typeof InternationalPatientsRoute
   '/lookup': typeof LookupRoute
   '/mcp': typeof McpRoute
@@ -1344,6 +1350,7 @@ export interface FileRoutesByFullPath {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/insurance/verify': typeof InsuranceVerifyRoute
   '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
@@ -1470,7 +1477,7 @@ export interface FileRoutesByTo {
   '/excellence': typeof ExcellenceRouteWithChildren
   '/faq': typeof FaqRoute
   '/home-care': typeof HomeCareRoute
-  '/insurance': typeof InsuranceRoute
+  '/insurance': typeof InsuranceRouteWithChildren
   '/international-patients': typeof InternationalPatientsRoute
   '/lookup': typeof LookupRoute
   '/mcp': typeof McpRoute
@@ -1533,6 +1540,7 @@ export interface FileRoutesByTo {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/insurance/verify': typeof InsuranceVerifyRoute
   '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
@@ -1661,7 +1669,7 @@ export interface FileRoutesById {
   '/excellence': typeof ExcellenceRouteWithChildren
   '/faq': typeof FaqRoute
   '/home-care': typeof HomeCareRoute
-  '/insurance': typeof InsuranceRoute
+  '/insurance': typeof InsuranceRouteWithChildren
   '/international-patients': typeof InternationalPatientsRoute
   '/lookup': typeof LookupRoute
   '/mcp': typeof McpRoute
@@ -1727,6 +1735,7 @@ export interface FileRoutesById {
   '/excellence/$slug': typeof ExcellenceSlugRoute
   '/health/$slug': typeof HealthSlugRoute
   '/health/search': typeof HealthSearchRoute
+  '/insurance/verify': typeof InsuranceVerifyRoute
   '/invoices/lookup': typeof InvoicesLookupRoute
   '/media/news': typeof MediaNewsRoute
   '/media/stories': typeof MediaStoriesRouteWithChildren
@@ -1921,6 +1930,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/insurance/verify'
     | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
@@ -2110,6 +2120,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/insurance/verify'
     | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
@@ -2303,6 +2314,7 @@ export interface FileRouteTypes {
     | '/excellence/$slug'
     | '/health/$slug'
     | '/health/search'
+    | '/insurance/verify'
     | '/invoices/lookup'
     | '/media/news'
     | '/media/stories'
@@ -2431,7 +2443,7 @@ export interface RootRouteChildren {
   ExcellenceRoute: typeof ExcellenceRouteWithChildren
   FaqRoute: typeof FaqRoute
   HomeCareRoute: typeof HomeCareRoute
-  InsuranceRoute: typeof InsuranceRoute
+  InsuranceRoute: typeof InsuranceRouteWithChildren
   InternationalPatientsRoute: typeof InternationalPatientsRoute
   LookupRoute: typeof LookupRoute
   McpRoute: typeof McpRoute
@@ -3098,6 +3110,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/health/search'
       preLoaderRoute: typeof HealthSearchRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/insurance/verify': {
+      id: '/insurance/verify'
+      path: '/verify'
+      fullPath: '/insurance/verify'
+      preLoaderRoute: typeof InsuranceVerifyRouteImport
+      parentRoute: typeof InsuranceRoute
     }
     '/invoices/lookup': {
       id: '/invoices/lookup'
@@ -4189,6 +4208,18 @@ const ExcellenceRouteWithChildren = ExcellenceRoute._addFileChildren(
   ExcellenceRouteChildren,
 )
 
+interface InsuranceRouteChildren {
+  InsuranceVerifyRoute: typeof InsuranceVerifyRoute
+}
+
+const InsuranceRouteChildren: InsuranceRouteChildren = {
+  InsuranceVerifyRoute: InsuranceVerifyRoute,
+}
+
+const InsuranceRouteWithChildren = InsuranceRoute._addFileChildren(
+  InsuranceRouteChildren,
+)
+
 interface ReservationsRouteChildren {
   ReservationsManageRoute: typeof ReservationsManageRoute
   ReservationsNewRoute: typeof ReservationsNewRoute
@@ -4248,7 +4279,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExcellenceRoute: ExcellenceRouteWithChildren,
   FaqRoute: FaqRoute,
   HomeCareRoute: HomeCareRoute,
-  InsuranceRoute: InsuranceRoute,
+  InsuranceRoute: InsuranceRouteWithChildren,
   InternationalPatientsRoute: InternationalPatientsRoute,
   LookupRoute: LookupRoute,
   McpRoute: McpRoute,
