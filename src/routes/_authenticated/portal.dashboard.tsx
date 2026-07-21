@@ -35,6 +35,10 @@ import {
   Clock,
   XCircle,
   RefreshCw,
+  FileText,
+  AlertTriangle,
+  CreditCard,
+  CalendarClock,
 } from "lucide-react";
 import {
   getMyRecentOrders,
@@ -44,6 +48,7 @@ import {
   listMyInquiries,
   type MyInquiry,
 } from "@/lib/portal/inquiries.functions";
+import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
 import type { OrderTableKind } from "@/lib/unified-status";
 
 const KIND_LABELS_AR: Record<OrderTableKind, string> = {
@@ -113,6 +118,143 @@ function InquiryStatusBadge({ status }: { status: string }) {
   );
 }
 
+const SEVERITY_STYLES: Record<"info" | "warning" | "critical", string> = {
+  info: "border-sky-200 bg-sky-50 text-sky-800",
+  warning: "border-amber-200 bg-amber-50 text-amber-800",
+  critical: "border-red-200 bg-red-50 text-red-800",
+};
+
+function formatMoney(n: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat("ar-SA-u-nu-latn", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(n);
+  } catch {
+    return `${n.toFixed(2)} ${currency}`;
+  }
+}
+
+type Snapshot = import("@/lib/portal/snapshot.functions").QuickSnapshot;
+
+function QuickSnapshotGrid({ data, loading }: { data: Snapshot | undefined; loading: boolean }) {
+  if (loading && !data) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-32 rounded-[var(--portal-radius-lg)] border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] animate-pulse"
+          />
+        ))}
+      </div>
+    );
+  }
+  if (!data) return null;
+
+  const next = data.nextAppointment;
+  const reports = data.newReports;
+  const actions = data.requiredActions;
+  const pay = data.outstandingPayments;
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+      {/* الموعد القادم */}
+      <Link
+        to="/portal/appointments"
+        className="portal-focus-ring rounded-[var(--portal-radius-lg)] border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] p-4 hover:bg-[color:var(--portal-surface-2)] transition-colors"
+      >
+        <div className="flex items-center gap-2 text-xs text-[color:var(--portal-ink-3)] mb-2">
+          <CalendarClock className="h-4 w-4 text-[color:var(--portal-primary)]" />
+          موعدي القادم
+        </div>
+        {next ? (
+          <>
+            <div className="text-base font-bold leading-tight">{formatDate(next.date)}</div>
+            <div className="text-xs text-[color:var(--portal-ink-3)] mt-1">
+              {next.time ?? ""}
+              {next.doctor?.name_ar ? ` — د. ${next.doctor.name_ar}` : ""}
+            </div>
+            {next.branch?.name_ar ? (
+              <div className="text-[11px] text-[color:var(--portal-ink-3)] mt-1 truncate">
+                {next.branch.name_ar}
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <div className="text-sm text-[color:var(--portal-ink-3)]">لا يوجد موعد قادم</div>
+        )}
+      </Link>
+
+      {/* التقارير الجديدة */}
+      <Link
+        to="/portal/reports"
+        className="portal-focus-ring rounded-[var(--portal-radius-lg)] border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] p-4 hover:bg-[color:var(--portal-surface-2)] transition-colors"
+      >
+        <div className="flex items-center gap-2 text-xs text-[color:var(--portal-ink-3)] mb-2">
+          <FileText className="h-4 w-4 text-[color:var(--portal-primary)]" />
+          تقارير جديدة (٧ أيام)
+        </div>
+        <div className="text-2xl font-bold tabular-nums leading-tight">{reports.count}</div>
+        {reports.items[0]?.title ? (
+          <div className="text-xs text-[color:var(--portal-ink-3)] mt-1 truncate">
+            {reports.items[0].title}
+          </div>
+        ) : (
+          <div className="text-xs text-[color:var(--portal-ink-3)] mt-1">
+            {reports.count === 0 ? "لا توجد تقارير جديدة" : "اضغط للعرض"}
+          </div>
+        )}
+      </Link>
+
+      {/* الإجراءات المطلوبة */}
+      <div className="rounded-[var(--portal-radius-lg)] border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] p-4">
+        <div className="flex items-center gap-2 text-xs text-[color:var(--portal-ink-3)] mb-2">
+          <AlertTriangle className="h-4 w-4 text-amber-600" />
+          إجراءات مطلوبة
+        </div>
+        <div className="text-2xl font-bold tabular-nums leading-tight">{actions.count}</div>
+        {actions.items.length > 0 ? (
+          <div className="mt-2 space-y-1">
+            {actions.items.slice(0, 2).map((a) => (
+              <Link
+                key={a.id}
+                to={a.href as any}
+                className={`block text-[11px] rounded-md border px-2 py-1 truncate ${SEVERITY_STYLES[a.severity]}`}
+                title={a.label}
+              >
+                {a.label}
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="text-xs text-[color:var(--portal-ink-3)] mt-1">لا شيء يحتاج انتباهك</div>
+        )}
+      </div>
+
+      {/* الدفعات المستحقة */}
+      <Link
+        to="/portal/invoices"
+        className="portal-focus-ring rounded-[var(--portal-radius-lg)] border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] p-4 hover:bg-[color:var(--portal-surface-2)] transition-colors"
+      >
+        <div className="flex items-center gap-2 text-xs text-[color:var(--portal-ink-3)] mb-2">
+          <CreditCard className="h-4 w-4 text-[color:var(--portal-primary)]" />
+          دفعات مستحقة
+        </div>
+        <div className="text-2xl font-bold tabular-nums leading-tight">
+          {formatMoney(pay.total, pay.currency)}
+        </div>
+        <div className="text-xs text-[color:var(--portal-ink-3)] mt-1">
+          {pay.count > 0 ? `عبر ${pay.count} فاتورة` : "لا توجد فواتير مستحقة"}
+        </div>
+      </Link>
+    </div>
+  );
+}
+
+
+
 export const Route = createFileRoute("/_authenticated/portal/dashboard")({
   head: () => ({
     meta: [
@@ -130,6 +272,13 @@ export const Route = createFileRoute("/_authenticated/portal/dashboard")({
 function PortalDashboardPage() {
   const ordersFn = useServerFn(getMyRecentOrders);
   const inquiriesFn = useServerFn(listMyInquiries);
+  const snapshotFn = useServerFn(getPortalQuickSnapshot);
+
+  const snapshotQ = useQuery({
+    queryKey: ["portal", "quick-snapshot"],
+    queryFn: () => snapshotFn(),
+    staleTime: 15_000,
+  });
 
   const ordersQ = useQuery({
     queryKey: ["portal", "my-orders", "all"],
@@ -145,6 +294,7 @@ function PortalDashboardPage() {
 
   const orders = ordersQ.data ?? [];
   const inquiries = inquiriesQ.data ?? [];
+  const snap = snapshotQ.data;
 
   const orderCounts = useMemo(() => {
     const m: Record<string, number> = {};
@@ -185,18 +335,21 @@ function PortalDashboardPage() {
         actions={
           <button
             onClick={() => {
+              snapshotQ.refetch();
               ordersQ.refetch();
               inquiriesQ.refetch();
             }}
             className="inline-flex items-center gap-2 px-3 h-9 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] hover:bg-[color:var(--portal-surface-2)] text-sm portal-focus-ring"
             aria-label="تحديث البيانات"
           >
-            <RefreshCw className={`h-4 w-4 ${refetching ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${refetching || snapshotQ.isFetching ? "animate-spin" : ""}`} />
             تحديث
           </button>
         }
       />
 
+      {/* لقطة سريعة — 4 بطاقات مباشرة من قاعدة البيانات */}
+      <QuickSnapshotGrid data={snap} loading={snapshotQ.isLoading} />
 
       {loading ? (
         <div className="flex items-center justify-center py-16 text-muted-foreground">
