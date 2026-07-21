@@ -33,6 +33,8 @@ import { join, relative, dirname } from "node:path";
 
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
+import { pathToFileURL } from "node:url";
+const IS_MAIN = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 const WRITE = argv.includes("--write");
 const VERBOSE = argv.includes("--verbose");
 const LIST_RULES = argv.includes("--list-rules");
