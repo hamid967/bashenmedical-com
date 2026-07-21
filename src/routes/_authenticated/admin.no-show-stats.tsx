@@ -228,98 +228,73 @@ function NoShowStatsPage() {
       </section>
 
       {/* By doctor */}
-      <section className="rounded-2xl border border-border bg-card">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-sm font-bold">التوزيع حسب الطبيب</h2>
-          <button onClick={exportDoctorsCsv} disabled={!stats.byDoctor.length}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
-            <Download className="h-3.5 w-3.5" /> تصدير CSV
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-xs text-muted-foreground">
-              <tr>
-                <th className="text-start p-3">الطبيب</th>
-                <th className="text-center p-3">الإجمالي</th>
-                <th className="text-center p-3">مكتمل</th>
-                <th className="text-center p-3">لم يحضر</th>
-                <th className="text-center p-3">ملغى</th>
-                <th className="text-center p-3">متوسط المخاطرة</th>
-                <th className="text-center p-3">نسبة عدم الحضور</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.byDoctor.length === 0 && (
-                <tr><td colSpan={7} className="p-6 text-center text-sm text-muted-foreground">لا توجد بيانات في هذا النطاق.</td></tr>
-              )}
-              {stats.byDoctor.map((r) => (
-                <tr key={r.doctor_id ?? "unassigned"} className="border-t border-border/60">
-                  <td className="p-3 font-medium">{r.doctor_name_ar ?? "بدون تخصيص"}</td>
-                  <td className="p-3 text-center tabular-nums">{r.total}</td>
-                  <td className="p-3 text-center tabular-nums text-green-700">{r.completed}</td>
-                  <td className="p-3 text-center tabular-nums text-red-700">{r.no_show}</td>
-                  <td className="p-3 text-center tabular-nums text-amber-700">{r.cancelled}</td>
-                  <td className="p-3 text-center tabular-nums">{r.avg_risk ?? "—"}</td>
-                  <td className="p-3 text-center">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      r.no_show_rate >= 15 ? "bg-red-500/10 text-red-700" :
-                      r.no_show_rate >= 8 ? "bg-amber-500/10 text-amber-800" :
-                      "bg-green-500/10 text-green-700"
-                    }`}>{r.no_show_rate}%</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <SortableTable<DoctorBreakdown>
+        title="التوزيع حسب الطبيب"
+        rows={stats.byDoctor}
+        searchPlaceholder="بحث باسم الطبيب…"
+        searchFilter={(r, q) => (r.doctor_name_ar ?? "بدون تخصيص").toLowerCase().includes(q)}
+        rowKey={(r) => r.doctor_id ?? "unassigned"}
+        onExport={exportDoctorsCsv}
+        defaultSort={{ key: "no_show_rate", dir: "desc" }}
+        columns={[
+          { key: "doctor_name_ar", label: "الطبيب", align: "start",
+            accessor: (r) => r.doctor_name_ar ?? "بدون تخصيص",
+            cell: (r) => <span className="font-medium">{r.doctor_name_ar ?? "بدون تخصيص"}</span> },
+          { key: "total", label: "الإجمالي", align: "center", accessor: (r) => r.total,
+            cell: (r) => <span className="tabular-nums">{r.total}</span> },
+          { key: "completed", label: "مكتمل", align: "center", accessor: (r) => r.completed,
+            cell: (r) => <span className="tabular-nums text-green-700">{r.completed}</span> },
+          { key: "no_show", label: "لم يحضر", align: "center", accessor: (r) => r.no_show,
+            cell: (r) => <span className="tabular-nums text-red-700">{r.no_show}</span> },
+          { key: "cancelled", label: "ملغى", align: "center", accessor: (r) => r.cancelled,
+            cell: (r) => <span className="tabular-nums text-amber-700">{r.cancelled}</span> },
+          { key: "avg_risk", label: "متوسط المخاطرة", align: "center",
+            accessor: (r) => r.avg_risk ?? -1,
+            cell: (r) => <span className="tabular-nums">{r.avg_risk ?? "—"}</span> },
+          { key: "no_show_rate", label: "نسبة عدم الحضور", align: "center",
+            accessor: (r) => r.no_show_rate,
+            cell: (r) => (
+              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                r.no_show_rate >= 15 ? "bg-red-500/10 text-red-700" :
+                r.no_show_rate >= 8 ? "bg-amber-500/10 text-amber-800" :
+                "bg-green-500/10 text-green-700"
+              }`}>{r.no_show_rate}%</span>
+            ) },
+        ]}
+      />
 
       {/* By day */}
-      <section className="rounded-2xl border border-border bg-card">
-        <div className="flex items-center justify-between p-4 border-b border-border">
-          <h2 className="text-sm font-bold">التوزيع حسب اليوم</h2>
-          <button onClick={exportDaysCsv} disabled={!stats.byDay.length}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
-            <Download className="h-3.5 w-3.5" /> تصدير CSV
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-xs text-muted-foreground">
-              <tr>
-                <th className="text-start p-3">التاريخ</th>
-                <th className="text-center p-3">الإجمالي</th>
-                <th className="text-center p-3">مكتمل</th>
-                <th className="text-center p-3">لم يحضر</th>
-                <th className="text-center p-3">ملغى</th>
-                <th className="text-center p-3">نسبة عدم الحضور</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.byDay.length === 0 && (
-                <tr><td colSpan={6} className="p-6 text-center text-sm text-muted-foreground">لا توجد بيانات في هذا النطاق.</td></tr>
-              )}
-              {stats.byDay.map((r) => (
-                <tr key={r.appointment_date} className="border-t border-border/60">
-                  <td className="p-3 font-mono text-xs">{r.appointment_date}</td>
-                  <td className="p-3 text-center tabular-nums">{r.total}</td>
-                  <td className="p-3 text-center tabular-nums text-green-700">{r.completed}</td>
-                  <td className="p-3 text-center tabular-nums text-red-700">{r.no_show}</td>
-                  <td className="p-3 text-center tabular-nums text-amber-700">{r.cancelled}</td>
-                  <td className="p-3 text-center">
-                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                      r.no_show_rate >= 15 ? "bg-red-500/10 text-red-700" :
-                      r.no_show_rate >= 8 ? "bg-amber-500/10 text-amber-800" :
-                      "bg-green-500/10 text-green-700"
-                    }`}>{r.no_show_rate}%</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <SortableTable<DayBreakdown>
+        title="التوزيع حسب اليوم"
+        rows={stats.byDay}
+        searchPlaceholder="بحث بالتاريخ (YYYY-MM-DD)…"
+        searchFilter={(r, q) => r.appointment_date.includes(q)}
+        rowKey={(r) => r.appointment_date}
+        onExport={exportDaysCsv}
+        defaultSort={{ key: "appointment_date", dir: "asc" }}
+        columns={[
+          { key: "appointment_date", label: "التاريخ", align: "start",
+            accessor: (r) => r.appointment_date,
+            cell: (r) => <span className="font-mono text-xs">{r.appointment_date}</span> },
+          { key: "total", label: "الإجمالي", align: "center", accessor: (r) => r.total,
+            cell: (r) => <span className="tabular-nums">{r.total}</span> },
+          { key: "completed", label: "مكتمل", align: "center", accessor: (r) => r.completed,
+            cell: (r) => <span className="tabular-nums text-green-700">{r.completed}</span> },
+          { key: "no_show", label: "لم يحضر", align: "center", accessor: (r) => r.no_show,
+            cell: (r) => <span className="tabular-nums text-red-700">{r.no_show}</span> },
+          { key: "cancelled", label: "ملغى", align: "center", accessor: (r) => r.cancelled,
+            cell: (r) => <span className="tabular-nums text-amber-700">{r.cancelled}</span> },
+          { key: "no_show_rate", label: "نسبة عدم الحضور", align: "center",
+            accessor: (r) => r.no_show_rate,
+            cell: (r) => (
+              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                r.no_show_rate >= 15 ? "bg-red-500/10 text-red-700" :
+                r.no_show_rate >= 8 ? "bg-amber-500/10 text-amber-800" :
+                "bg-green-500/10 text-green-700"
+              }`}>{r.no_show_rate}%</span>
+            ) },
+        ]}
+      />
 
       {/* Cancel reasons */}
       <section className="rounded-2xl border border-border bg-card">
