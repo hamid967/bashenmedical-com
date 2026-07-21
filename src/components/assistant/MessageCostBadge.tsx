@@ -5,7 +5,7 @@
  * All values are display-only estimates when server usage is missing.
  */
 import { useState } from "react";
-import { ArrowDownToLine, ArrowUpFromLine, ChevronDown, Clock, Coins, Cpu } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Clock, Coins, Cpu, Info, ExternalLink } from "lucide-react";
 import {
   estimateCredits,
   estimateTokens,
@@ -13,6 +13,13 @@ import {
   formatTokens,
   getRate,
 } from "@/lib/ai/pricing";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export type MessageCostMeta = {
   /** performance.now() at request start */
