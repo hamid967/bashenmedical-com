@@ -318,6 +318,13 @@ jobs:
           tail -n 200 preview.log || true
           exit 1
 
+      - name: Seed E2E booking fixtures (idempotent)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python scripts/ci/ensure-e2e-booking-fixtures.py
+
       - name: Run booking E2E (AR full journey)
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
@@ -330,6 +337,9 @@ jobs:
         env:
           E2E_BASE_URL: http://127.0.0.1:8080
           E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+          E2E_BRANCH_NAME: "فرع اختبار E2E"
+          E2E_SPECIALTY_NAME: "تخصص اختبار"
+          E2E_DOCTOR_NAME: "د. اختبار E2E"
         run: python tests/e2e/book_full_journey_en.py
 
       - name: Run booking E2E (slot-hold banner)
@@ -337,6 +347,9 @@ jobs:
         env:
           E2E_BASE_URL: http://127.0.0.1:8080
           E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+          E2E_BRANCH_NAME: "فرع اختبار E2E"
+          E2E_SPECIALTY_NAME: "تخصص اختبار"
+          E2E_DOCTOR_NAME: "د. اختبار E2E"
         run: python tests/e2e/book_hold_banner_ar.py
 
       - name: Run booking E2E (conflict → step 6)
@@ -344,6 +357,9 @@ jobs:
         env:
           E2E_BASE_URL: http://127.0.0.1:8080
           E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+          E2E_BRANCH_NAME: "فرع اختبار E2E"
+          E2E_SPECIALTY_NAME: "تخصص اختبار"
+          E2E_DOCTOR_NAME: "د. اختبار E2E"
         run: python tests/e2e/book_conflict_returns_to_step6.py
 
       - name: Run booking E2E (BranchBookingForm render)
@@ -359,6 +375,7 @@ jobs:
           E2E_BASE_URL: http://127.0.0.1:8080
           E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
         run: python tests/e2e/book_center_form_render.py
+
 
 
       - name: Run public booking API edge cases E2E
