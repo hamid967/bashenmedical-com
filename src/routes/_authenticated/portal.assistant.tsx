@@ -297,7 +297,7 @@ function AssistantPage() {
             <PreflightCostChip
               input={input}
               streaming={streaming}
-              model={currentModel}
+              model={activeModel}
               historyChars={messages.reduce((n, m) => n + m.content.length, 0)}
               lang="ar"
             />
