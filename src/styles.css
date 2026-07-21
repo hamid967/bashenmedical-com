@@ -416,6 +416,61 @@ html.reduce-motion *::after {
     #FCFDFB;
 }
 
+/* v2 — portal ui utilities */
+@utility portal-card-elevated {
+  background: var(--portal-surface-elevated);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-lg);
+  box-shadow: var(--portal-shadow-elevated);
+  backdrop-filter: blur(18px) saturate(160%);
+}
+@utility portal-card-sunken {
+  background: var(--portal-surface-sunken);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-lg);
+}
+@utility portal-focus-ring {
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--portal-shadow-glow);
+  }
+}
+@utility portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--portal-primary-50);
+  color: var(--portal-primary);
+  border: 1px solid color-mix(in oklab, var(--portal-primary) 18%, transparent);
+}
+@utility portal-badge-success {
+  background: var(--portal-success-50);
+  color: var(--portal-success);
+  border-color: color-mix(in oklab, var(--portal-success) 22%, transparent);
+}
+@utility portal-badge-warning {
+  background: var(--portal-warning-50);
+  color: var(--portal-warning);
+  border-color: color-mix(in oklab, var(--portal-warning) 22%, transparent);
+}
+@utility portal-badge-error {
+  background: var(--portal-error-50);
+  color: var(--portal-error);
+  border-color: color-mix(in oklab, var(--portal-error) 22%, transparent);
+}
+@utility portal-badge-muted {
+  background: var(--portal-surface-3);
+  color: var(--portal-ink-2);
+  border-color: var(--portal-border);
+}
+
+
 
 @keyframes portal-shimmer {
   0% { transform: translateX(-100%); }
