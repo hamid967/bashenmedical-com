@@ -196,16 +196,27 @@ export function BaeshenAssistant() {
               <Bot className="h-5 w-5 text-primary" />
               {t("مساعد باعشن الذكي", "Baeshen AI Assistant")}
             </SheetTitle>
-            <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
-              <span>{t("مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.", "Safe search & booking helper. Not medical advice.")}</span>
-              <button
-                type="button"
-                onClick={newConversation}
-                className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-muted"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {t("محادثة جديدة", "New chat")}
-              </button>
+            <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span className="min-w-0 truncate">{t("مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.", "Safe search & booking helper. Not medical advice.")}</span>
+              <div className="flex shrink-0 items-center gap-1">
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 hover:bg-muted" title={t("لا تحفظ سجل هذه الجلسة", "Do not save this session")}>
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 accent-primary"
+                    checked={noSave}
+                    onChange={(e) => toggleNoSave(e.target.checked)}
+                  />
+                  {t("لا تحفظ", "Don't save")}
+                </label>
+                <button
+                  type="button"
+                  onClick={newConversation}
+                  className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-muted"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {t("محادثة جديدة", "New chat")}
+                </button>
+              </div>
             </div>
           </SheetHeader>
 
