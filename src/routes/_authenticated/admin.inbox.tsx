@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RefreshCw, Inbox } from "lucide-react";
+import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import type { Column } from "@/lib/export-utils";
 
 const SearchSchema = z.object({
   date: z.string().optional(),
@@ -55,6 +57,17 @@ const CHANNEL_LABELS: Record<string, string> = {
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
+
+const INBOX_EXPORT_COLS: Column<InboxItem>[] = [
+  { header: "المصدر", accessor: (r) => SOURCE_LABELS[r.source] ?? r.source },
+  { header: "القناة", accessor: (r) => CHANNEL_LABELS[r.channel] ?? r.channel },
+  { header: "المرجع", accessor: (r) => r.reference ?? "" },
+  { header: "المريض", accessor: (r) => r.patient_name },
+  { header: "الجوال", accessor: (r) => r.patient_phone ?? "" },
+  { header: "الموضوع", accessor: (r) => r.subject },
+  { header: "الحالة", accessor: (r) => r.status },
+  { header: "الوقت", accessor: (r) => new Date(r.created_at).toLocaleString("ar-SA") },
+];
 
 function UnifiedInboxPage() {
   const search = Route.useSearch();
@@ -108,13 +121,23 @@ function UnifiedInboxPage() {
             <Badge variant="secondary">إجمالي: {items.length}</Badge>
             <Badge>مفتوح: {totalOpen}</Badge>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "unified-inbox"] })}
-          >
-            <RefreshCw className="ml-2 h-4 w-4" /> تحديث
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportMenu<InboxItem>
+              filename={`inbox-${date}`}
+              title="الصندوق الموحد"
+              subtitle={`تاريخ: ${date}${channel ? ` • قناة: ${CHANNEL_LABELS[channel] ?? channel}` : ""}${source ? ` • مصدر: ${SOURCE_LABELS[source] ?? source}` : ""}${q ? ` • بحث: ${q}` : ""}`}
+              meta={{ "المجموع": String(items.length), "المفتوح": String(totalOpen) }}
+              columns={INBOX_EXPORT_COLS}
+              rows={items}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => qc.invalidateQueries({ queryKey: ["admin", "unified-inbox"] })}
+            >
+              <RefreshCw className="ml-2 h-4 w-4" /> تحديث
+            </Button>
+          </div>
         </header>
 
         <Card className="p-4">

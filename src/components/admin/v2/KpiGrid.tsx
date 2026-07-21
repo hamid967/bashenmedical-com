@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { getAdminKpis, type AdminKpi, type AdminKpiKey } from "@/lib/admin.functions";
 import { KpiCard, KpiCardError, KpiCardSkeleton } from "./KpiCard";
+import { ExportMenu } from "./ExportMenu";
+import type { Column } from "@/lib/export-utils";
 
 const OCEAN = {
   bg: "#081628",
@@ -42,6 +44,14 @@ const RANGE_LABELS: Record<Range, string> = {
   "90d": "٩٠ يوم",
 };
 
+const KPI_EXPORT_COLS: Column<AdminKpi>[] = [
+  { header: "المؤشر", accessor: (k) => k.label },
+  { header: "القيمة الحالية", accessor: (k) => k.current },
+  { header: "القيمة السابقة", accessor: (k) => k.previous },
+  { header: "الفرق", accessor: (k) => k.deltaAbs },
+  { header: "النسبة %", accessor: (k) => (k.deltaPct == null ? "" : `${k.deltaPct.toFixed(1)}%`) },
+];
+
 export function KpiGrid() {
   const [range, setRange] = useState<Range>("7d");
   const fetchKpis = useServerFn(getAdminKpis);
@@ -66,28 +76,39 @@ export function KpiGrid() {
             مقارنة بالفترة السابقة المكافئة
           </p>
         </div>
-        <div
-          className="inline-flex rounded-full p-1"
-          style={{ background: OCEAN.bg, border: `1px solid ${OCEAN.panel2}` }}
-        >
-          {(Object.keys(RANGE_LABELS) as Range[]).map((r) => {
-            const active = r === range;
-            return (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRange(r)}
-                className="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold transition-colors"
-                style={
-                  active
-                    ? { background: OCEAN.glow, color: OCEAN.panel }
-                    : { color: OCEAN.glow, opacity: 0.7 }
-                }
-              >
-                {RANGE_LABELS[r]}
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-2">
+          <ExportMenu
+            allowed
+            disabled={isLoading || isError}
+            filename={`kpis-${range}`}
+            title={`المؤشرات الرئيسية (${RANGE_LABELS[range]})`}
+            subtitle="مقارنة بالفترة السابقة المكافئة"
+            columns={KPI_EXPORT_COLS}
+            rows={data?.kpis ?? []}
+          />
+          <div
+            className="inline-flex rounded-full p-1"
+            style={{ background: OCEAN.bg, border: `1px solid ${OCEAN.panel2}` }}
+          >
+            {(Object.keys(RANGE_LABELS) as Range[]).map((r) => {
+              const active = r === range;
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRange(r)}
+                  className="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold transition-colors"
+                  style={
+                    active
+                      ? { background: OCEAN.glow, color: OCEAN.panel }
+                      : { color: OCEAN.glow, opacity: 0.7 }
+                  }
+                >
+                  {RANGE_LABELS[r]}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 

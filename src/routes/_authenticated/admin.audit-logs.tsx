@@ -5,6 +5,8 @@ import { useState, useMemo } from "react";
 import { RefreshCw, Search, X, ChevronLeft, ChevronRight, ShieldAlert } from "lucide-react";
 import { listAdminAuditLogs, listAuditFacets } from "@/lib/admin/audit-logs.functions";
 import { getMyRoles } from "@/lib/admin.functions";
+import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import type { Column } from "@/lib/export-utils";
 
 type AuditSearch = {
   q?: string;
@@ -34,6 +36,17 @@ export const Route = createFileRoute("/_authenticated/admin/audit-logs")({
 });
 
 const PAGE_SIZE = 50;
+
+const AUDIT_EXPORT_COLS: Column<any>[] = [
+  { header: "الوقت", accessor: (r) => (r.created_at ? new Date(r.created_at).toLocaleString("ar-SA") : "") },
+  { header: "الكيان", accessor: (r) => r.entity_type ?? "" },
+  { header: "العملية", accessor: (r) => r.action ?? "" },
+  { header: "معرّف السجل", accessor: (r) => r.entity_id ?? "" },
+  { header: "المستخدم", accessor: (r) => r.actor_id ?? "" },
+  { header: "الدور", accessor: (r) => r.actor_role ?? "" },
+  { header: "IP", accessor: (r) => r.ip_address ?? "" },
+  { header: "User-Agent", accessor: (r) => r.user_agent ?? "" },
+];
 
 function AuditLogsPage() {
   const search = Route.useSearch();
@@ -209,11 +222,45 @@ function AuditLogsPage() {
           >
             <X className="h-4 w-4" /> مسح الفلاتر
           </button>
+          <ExportMenu
+            allowed={isStaff}
+            disabled={list.isLoading}
+            filename="audit-logs"
+            title="سجل التدقيق (Audit Logs)"
+            subtitle={`فلاتر: ${entityType || "الكل"} / ${action || "الكل"}${from ? ` — من ${from}` : ""}${to ? ` — إلى ${to}` : ""}${q ? ` — بحث: ${q}` : ""}`}
+            meta={{ "الإجمالي": String(total) }}
+            columns={AUDIT_EXPORT_COLS}
+            rows={rows}
+            fetchAll={async () => {
+              const CHUNK = 500;
+              const MAX = 5000;
+              const cap = Math.min(total, MAX);
+              const out: any[] = [];
+              for (let off = 0; off < cap; off += CHUNK) {
+                const res = await listFn({
+                  data: {
+                    q: q || undefined,
+                    entity_type: entityType || undefined,
+                    action: action || undefined,
+                    from: from ? new Date(from).toISOString() : undefined,
+                    to: to ? new Date(to).toISOString() : undefined,
+                    limit: CHUNK,
+                    offset: off,
+                  },
+                });
+                out.push(...(res?.rows ?? []));
+                if (!res?.rows?.length) break;
+              }
+              return out;
+            }}
+          />
           <div className="ms-auto text-xs text-muted-foreground self-center">
             الإجمالي: {total.toLocaleString("ar-SA")}
           </div>
         </div>
       </div>
+
+      {/* Table below */}
 
       <div className="overflow-x-auto rounded-lg border border-border bg-card">
         <table className="min-w-full text-sm">
