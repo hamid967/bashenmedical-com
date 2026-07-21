@@ -201,13 +201,20 @@ export function BaeshenAssistant() {
           return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
         },
       });
-      updateLastMeta({ endedAt: performance.now() });
+      const endedAt = performance.now();
+      updateLastMeta({ endedAt });
       // Commit estimated credits for the session running total.
       const promptTok = estimateTokens(promptText);
       const outTok = estimateTokens(result.text);
       const spent = estimateCredits(promptTok, outTok, currentModel);
       commitSessionCredits("public", spent);
       setSessionCredits((v) => v + spent);
+      notifyMessageThresholds({
+        credits: spent,
+        elapsedMs: endedAt - startedAt,
+        lang: isAr ? "ar" : "en",
+        surface: "public",
+      });
       if (result.budgetStop) {
         setError(result.budgetStop.message);
       }
