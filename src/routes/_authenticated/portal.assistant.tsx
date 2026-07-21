@@ -138,6 +138,7 @@ function AssistantPage() {
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
           const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
           updateLastMeta({ usage: { prompt, completion, total } });
+          if (prompt > 0) recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: prompt });
         },
         onDelta: (_delta, acc) => {
           setMessages((m) => {
