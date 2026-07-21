@@ -179,9 +179,14 @@ function PageEditor() {
                 <Input value={form.title_ar} onChange={(e) => up("title_ar", e.target.value)} />
               </div>
               <div>
-                <Label>المحتوى (عربي)</Label>
-                <Textarea value={form.content_ar} onChange={(e) => up("content_ar", e.target.value)}
-                  rows={18} className="font-mono text-sm" placeholder="يدعم Markdown أو HTML بسيط" />
+                <div className="flex items-center justify-between">
+                  <Label>المحتوى (عربي)</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openPicker("content_ar")}>
+                    <ImagePlus className="h-4 w-4 ml-1" /> إدراج صورة
+                  </Button>
+                </div>
+                <Textarea ref={arRef} value={form.content_ar} onChange={(e) => up("content_ar", e.target.value)}
+                  rows={18} className="font-mono text-sm mt-2" placeholder="يدعم Markdown أو HTML بسيط — استخدم ![alt](url) للصور" />
               </div>
             </TabsContent>
             <TabsContent value="en" className="space-y-3 pt-3">
@@ -190,9 +195,14 @@ function PageEditor() {
                 <Input dir="ltr" value={form.title_en} onChange={(e) => up("title_en", e.target.value)} />
               </div>
               <div>
-                <Label>Content (EN)</Label>
-                <Textarea dir="ltr" value={form.content_en} onChange={(e) => up("content_en", e.target.value)}
-                  rows={18} className="font-mono text-sm" placeholder="Markdown or simple HTML" />
+                <div className="flex items-center justify-between">
+                  <Label>Content (EN)</Label>
+                  <Button type="button" variant="outline" size="sm" onClick={() => openPicker("content_en")}>
+                    <ImagePlus className="h-4 w-4 ml-1" /> Insert image
+                  </Button>
+                </div>
+                <Textarea ref={enRef} dir="ltr" value={form.content_en} onChange={(e) => up("content_en", e.target.value)}
+                  rows={18} className="font-mono text-sm mt-2" placeholder="Markdown or simple HTML — use ![alt](url) for images" />
               </div>
             </TabsContent>
           </Tabs>
