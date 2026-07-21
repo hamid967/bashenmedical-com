@@ -4,16 +4,22 @@ import LanguageDetector from "i18next-browser-languagedetector";
 
 import arCommon from "@/locales/ar/common.json";
 import enCommon from "@/locales/en/common.json";
+import urCommon from "@/locales/ur/common.json";
 import arBooking from "@/locales/ar/booking.json";
 import enBooking from "@/locales/en/booking.json";
 
-export const SUPPORTED_LANGS = ["ar", "en"] as const;
+export const SUPPORTED_LANGS = ["ar", "en", "ur"] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 export const DEFAULT_LANG: Lang = "ar";
+// RTL languages — used by the i18n layout hook to set `dir="rtl"`.
+export const RTL_LANGS: readonly Lang[] = ["ar", "ur"] as const;
 
 export const resources = {
   ar: { common: arCommon, booking: arBooking },
   en: { common: enCommon, booking: enBooking },
+  // Urdu currently ships only the `manage.undo.*` copy; all other keys
+  // fall back to `DEFAULT_LANG` (ar) via i18next's fallbackLng.
+  ur: { common: urCommon },
 } as const;
 
 if (!i18n.isInitialized) {

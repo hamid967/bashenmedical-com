@@ -4,12 +4,15 @@ import { I18nextProvider, useTranslation } from "react-i18next";
 import i18n, {
   DEFAULT_LANG,
   SUPPORTED_LANGS,
+  RTL_LANGS,
   syncClientLanguage,
   type Lang,
 } from "@/lib/i18n/config";
 
 export type { Lang };
-export { SUPPORTED_LANGS, DEFAULT_LANG };
+export { SUPPORTED_LANGS, DEFAULT_LANG, RTL_LANGS };
+
+const isRtl = (lang: Lang) => (RTL_LANGS as readonly string[]).includes(lang);
 
 function normalizeLang(raw: string | undefined): Lang {
   if (!raw) return DEFAULT_LANG;
