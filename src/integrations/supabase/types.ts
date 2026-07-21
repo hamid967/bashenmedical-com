@@ -95,6 +95,39 @@ export type Database = {
         }
         Relationships: []
       }
+      api_permission_errors: {
+        Row: {
+          id: number
+          message: string | null
+          occurred_at: string
+          release_ref: string | null
+          role_hint: string | null
+          route: string
+          sqlstate: string | null
+          status_code: number
+        }
+        Insert: {
+          id?: number
+          message?: string | null
+          occurred_at?: string
+          release_ref?: string | null
+          role_hint?: string | null
+          route: string
+          sqlstate?: string | null
+          status_code: number
+        }
+        Update: {
+          id?: number
+          message?: string | null
+          occurred_at?: string
+          release_ref?: string | null
+          role_hint?: string | null
+          route?: string
+          sqlstate?: string | null
+          status_code?: number
+        }
+        Relationships: []
+      }
       appointment_audit: {
         Row: {
           appointment_id: string
@@ -1158,6 +1191,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      deployment_markers: {
+        Row: {
+          baseline_errors_per_hour: number
+          created_at: string
+          id: string
+          merged_at: string
+          migration_ref: string
+          notes: string | null
+        }
+        Insert: {
+          baseline_errors_per_hour?: number
+          created_at?: string
+          id?: string
+          merged_at?: string
+          migration_ref: string
+          notes?: string | null
+        }
+        Update: {
+          baseline_errors_per_hour?: number
+          created_at?: string
+          id?: string
+          merged_at?: string
+          migration_ref?: string
+          notes?: string | null
+        }
+        Relationships: []
       }
       doctor_branches: {
         Row: {
@@ -4455,6 +4515,56 @@ export type Database = {
           },
         ]
       }
+      rollback_recommendations: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          baseline_per_hour: number
+          deployment_id: string
+          id: string
+          observed_per_hour: number
+          ratio: number
+          severity: string
+          status: string
+          top_routes: Json
+          triggered_at: string
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          baseline_per_hour: number
+          deployment_id: string
+          id?: string
+          observed_per_hour: number
+          ratio: number
+          severity: string
+          status?: string
+          top_routes?: Json
+          triggered_at?: string
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          baseline_per_hour?: number
+          deployment_id?: string
+          id?: string
+          observed_per_hour?: number
+          ratio?: number
+          severity?: string
+          status?: string
+          top_routes?: Json
+          triggered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rollback_recommendations_deployment_id_fkey"
+            columns: ["deployment_id"]
+            isOneToOne: false
+            referencedRelation: "deployment_markers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       second_opinion_requests: {
         Row: {
           admin_notes: string | null
@@ -5169,6 +5279,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      _purge_old_permission_errors: { Args: never; Returns: undefined }
       assign_user_role: {
         Args: {
           _branch_id?: string
@@ -5342,6 +5453,23 @@ export type Database = {
       estimate_appointment_cost: {
         Args: { _doctor_id: string; _provider_id: string }
         Returns: Json
+      }
+      evaluate_permission_error_spike: {
+        Args: {
+          _min_observed_per_hour?: number
+          _rollback_ratio?: number
+          _warn_ratio?: number
+        }
+        Returns: {
+          baseline: number
+          deployment_id: string
+          merged_at: string
+          migration_ref: string
+          observed: number
+          ratio: number
+          severity: string
+          top_routes: Json
+        }[]
       }
       generate_mrn: { Args: { _branch_id: string }; Returns: string }
       generate_refund_receipt_reference: { Args: never; Returns: string }
@@ -5795,6 +5923,16 @@ export type Database = {
           _quantity?: number
         }
         Returns: Json
+      }
+      record_permission_error: {
+        Args: {
+          _message?: string
+          _role_hint?: string
+          _route: string
+          _sqlstate?: string
+          _status_code: number
+        }
+        Returns: undefined
       }
       release_expired_slot_holds: { Args: never; Returns: number }
       release_slot: { Args: { p_appointment_id: string }; Returns: boolean }

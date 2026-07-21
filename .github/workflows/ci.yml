@@ -821,6 +821,37 @@ jobs:
         run: |
           cd tests/security && python test_role_access_matrix.py | tee ../../role-matrix-report.txt
 
+  record-deployment-marker:
+    name: Register deployment marker for watchdog
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: []
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - name: Detect newly merged migration
+        id: mig
+        run: |
+          ref=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'supabase/migrations/*.sql' | tail -n1 | xargs -I{} basename {} .sql)
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          if [ -z "$ref" ]; then echo "No new migration in this push."; fi
+      - name: POST deployment marker
+        if: steps.mig.outputs.ref != ''
+        env:
+          APP_URL: ${{ vars.APP_URL || 'https://project--550c7bc5-80b4-4118-853f-28cc7bd42f26.lovable.app' }}
+          ANON_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          REF: ${{ steps.mig.outputs.ref }}
+        run: |
+          if [ -z "$ANON_KEY" ]; then
+            echo "::warning::SUPABASE_PUBLISHABLE_KEY not set — skipping deployment marker."
+            exit 0
+          fi
+          curl -fsSL -X POST "$APP_URL/api/public/hooks/record-deployment" \
+            -H "Content-Type: application/json" \
+            -H "apikey: $ANON_KEY" \
+            -d "{\"ref\":\"$REF\",\"notes\":\"pushed by ${{ github.actor }} sha ${{ github.sha }}\"}"
+
+
       - name: Sticky PR comment on failure
         if: failure() && github.event_name == 'pull_request'
         uses: marocchino/sticky-pull-request-comment@v2

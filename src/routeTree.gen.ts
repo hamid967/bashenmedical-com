@@ -168,6 +168,8 @@ import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './rout
 import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
 import { Route as ApiPublicHooksWebVitalsRouteImport } from './routes/api/public/hooks/web-vitals'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
+import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
+import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
 import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
@@ -1066,6 +1068,18 @@ const ApiPublicHooksSendRemindersRoute =
     path: '/api/public/hooks/send-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksRecordDeploymentRoute =
+  ApiPublicHooksRecordDeploymentRouteImport.update({
+    id: '/api/public/hooks/record-deployment',
+    path: '/api/public/hooks/record-deployment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksPermissionWatchdogRoute =
+  ApiPublicHooksPermissionWatchdogRouteImport.update({
+    id: '/api/public/hooks/permission-watchdog',
+    path: '/api/public/hooks/permission-watchdog',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookWaitlistConfirmRoute =
   ApiPublicBookWaitlistConfirmRouteImport.update({
     id: '/api/public/book/waitlist-confirm',
@@ -1343,6 +1357,8 @@ export interface FileRoutesByFullPath {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
+  '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
@@ -1520,6 +1536,8 @@ export interface FileRoutesByTo {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
+  '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
@@ -1702,6 +1720,8 @@ export interface FileRoutesById {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
+  '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
@@ -1884,6 +1904,8 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/hooks/permission-watchdog'
+    | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
     | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
@@ -2061,6 +2083,8 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/hooks/permission-watchdog'
+    | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
     | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
@@ -2242,6 +2266,8 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/hooks/permission-watchdog'
+    | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
     | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
@@ -2322,6 +2348,8 @@ export interface RootRouteChildren {
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
+  ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
+  ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicHooksWebVitalsRoute: typeof ApiPublicHooksWebVitalsRoute
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
@@ -3452,6 +3480,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/record-deployment': {
+      id: '/api/public/hooks/record-deployment'
+      path: '/api/public/hooks/record-deployment'
+      fullPath: '/api/public/hooks/record-deployment'
+      preLoaderRoute: typeof ApiPublicHooksRecordDeploymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/permission-watchdog': {
+      id: '/api/public/hooks/permission-watchdog'
+      path: '/api/public/hooks/permission-watchdog'
+      fullPath: '/api/public/hooks/permission-watchdog'
+      preLoaderRoute: typeof ApiPublicHooksPermissionWatchdogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/waitlist-confirm': {
       id: '/api/public/book/waitlist-confirm'
       path: '/api/public/book/waitlist-confirm'
@@ -4030,6 +4072,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
+  ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
+  ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicHooksWebVitalsRoute: ApiPublicHooksWebVitalsRoute,
   ApiPublicInquiriesCreateRoute: ApiPublicInquiriesCreateRoute,
