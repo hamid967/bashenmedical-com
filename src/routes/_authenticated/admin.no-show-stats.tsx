@@ -188,7 +188,7 @@ function NoShowStatsPage() {
         <div>
           <h1 className="text-2xl font-bold">إحصاءات عدم الحضور</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            توزيع الحالات وأسباب الإلغاء ومعدل عدم الحضور حسب الطبيب واليوم — قابل للتصدير CSV.
+            توزيع الحالات وأسباب الإلغاء ومعدل عدم الحضور حسب الطبيب واليوم — قابل للتصدير CSV و XLSX.
           </p>
         </div>
       </header>
