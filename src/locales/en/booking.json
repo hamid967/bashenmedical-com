@@ -263,6 +263,26 @@
       "cancelled": "Cancelled",
       "completed": "Completed",
       "no_show": "No-show"
-    }
+  },
+  "a11y": {
+    "stepNav": "Booking steps",
+    "stepN": "Step {{n}}",
+    "stepCurrent": "Current step",
+    "stepDone": "Completed",
+    "stepUpcoming": "Upcoming",
+    "stepAnnounce": "Step {{current}} of {{total}}: {{title}}",
+    "prevMonth": "Previous month",
+    "nextMonth": "Next month",
+    "datePast": "Past date",
+    "dateTooFar": "Beyond booking window",
+    "dateUnavailable": "Unavailable",
+    "dateAvailable": "Available",
+    "timeSlot": "Time {{time}}",
+    "timeBooked": "Booked",
+    "editStep": "Edit {{label}}",
+    "ratingLabel": "Rated {{rating}} out of 5 from {{count}} reviews",
+    "bookingDisabled": "Booking disabled",
+    "charsCount": "{{count}} of {{max}} characters"
   }
 }
+
