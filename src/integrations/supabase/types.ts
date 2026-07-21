@@ -2298,6 +2298,7 @@ export type Database = {
           estimated_cost: number | null
           id: string
           message: string | null
+          patient_id: string | null
           patient_share: number | null
           policy_hint: string | null
           provider_id: string | null
@@ -2315,6 +2316,7 @@ export type Database = {
           estimated_cost?: number | null
           id?: string
           message?: string | null
+          patient_id?: string | null
           patient_share?: number | null
           policy_hint?: string | null
           provider_id?: string | null
@@ -2332,6 +2334,7 @@ export type Database = {
           estimated_cost?: number | null
           id?: string
           message?: string | null
+          patient_id?: string | null
           patient_share?: number | null
           policy_hint?: string | null
           provider_id?: string | null
@@ -2351,6 +2354,13 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "insurance_verifications_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
             referencedColumns: ["id"]
           },
           {
