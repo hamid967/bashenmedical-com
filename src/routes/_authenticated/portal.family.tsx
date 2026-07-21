@@ -13,12 +13,15 @@ import {
   createDependent,
   updateDependent,
   deleteDependent,
+  setDependentAccessScopes,
   listDependentAppointments,
   countDependentAppointments,
   cancelDependentActiveAppointments,
   type Dependent,
+  type DependentAccessScopes,
   type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
+
 
 
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
