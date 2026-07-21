@@ -6,3 +6,5 @@ export { PortalSkeleton, PortalCardSkeleton } from "./PortalSkeleton";
 export { PortalSection } from "./PortalSection";
 export { PortalBadge, type PortalBadgeTone } from "./PortalBadge";
 export { PortalDataList, type PortalDataListItem } from "./PortalDataList";
+export { PortalButton, type PortalButtonProps } from "./PortalButton";
+export { PortalInput, type PortalInputProps } from "./PortalInput";
