@@ -39,6 +39,8 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
   const [state, setState] = useState<State>({
     holdId: null,
     expiresAt: null,
+    createdAt: null,
+    durationMs: 0,
     secondsLeft: 0,
     expired: false,
     conflict: false,
@@ -61,7 +63,7 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
     keyRef.current = key;
 
     if (!enabled || !doctorId || !date || !time) {
-      setState({ holdId: null, expiresAt: null, secondsLeft: 0, expired: false, conflict: false, error: null });
+      setState({ holdId: null, expiresAt: null, createdAt: null, durationMs: 0, secondsLeft: 0, expired: false, conflict: false, error: null });
       return;
     }
 
@@ -75,6 +77,8 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
           setState({
             holdId: null,
             expiresAt: null,
+            createdAt: null,
+            durationMs: 0,
             secondsLeft: 0,
             expired: false,
             conflict: res.kind === "conflict",
@@ -85,10 +89,13 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
         }
         activeIdRef.current = res.id;
         const expMs = new Date(res.expires_at).getTime();
+        const nowMs = Date.now();
         setState({
           holdId: res.id,
           expiresAt: expMs,
-          secondsLeft: Math.max(0, Math.floor((expMs - Date.now()) / 1000)),
+          createdAt: nowMs,
+          durationMs: Math.max(1_000, expMs - nowMs),
+          secondsLeft: Math.max(0, Math.floor((expMs - nowMs) / 1000)),
           expired: false,
           conflict: false,
           error: null,
