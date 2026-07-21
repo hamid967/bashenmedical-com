@@ -144,20 +144,33 @@ function AssistantPage() {
             </div>
           )}
 
-          {messages.map((m, i) => (
-            <div key={i} className={m.role === "user" ? "flex justify-start" : "flex justify-end"}>
-              <div
-                className={
-                  "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap leading-6 " +
-                  (m.role === "user"
-                    ? "bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-ink)]"
-                    : "bg-[color:var(--portal-surface-2)] text-[color:var(--portal-ink)] border border-[color:var(--portal-border)]")
-                }
-              >
-                {m.content || (streaming ? <span className="opacity-60">…</span> : "")}
+          {messages.map((m, i) => {
+            const isUser = m.role === "user";
+            const parsed = isUser
+              ? { clean: m.content, actions: [] as ReturnType<typeof parseAssistantActions>["actions"] }
+              : parseAssistantActions(m.content);
+            return (
+              <div key={i} className={isUser ? "flex justify-start" : "flex justify-end"}>
+                <div
+                  className={
+                    "max-w-[85%] rounded-2xl px-4 py-2.5 text-sm whitespace-pre-wrap leading-6 " +
+                    (isUser
+                      ? "bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-ink)]"
+                      : "bg-[color:var(--portal-surface-2)] text-[color:var(--portal-ink)] border border-[color:var(--portal-border)]")
+                  }
+                >
+                  {parsed.clean || (streaming && !isUser ? <span className="opacity-60">…</span> : "")}
+                  {parsed.actions.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {parsed.actions.map((a, k) => (
+                        <AssistantActionButton key={`${i}-${k}`} action={a} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {error && (
             <div className="mx-auto max-w-md rounded-xl border border-[color:var(--portal-error)]/40 bg-[color:var(--portal-error)]/5 p-3 text-sm text-[color:var(--portal-error)] flex items-start gap-2">
