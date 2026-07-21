@@ -100,6 +100,25 @@
       "other": "Other"
     }
   },
+  "insurance": {
+    "title": "Payment method",
+    "self": "Self-pay",
+    "insurance": "Insurance",
+    "paymentMethod": "Payment method",
+    "provider": "Insurance provider",
+    "selectProvider": "Select a provider…",
+    "policyNumber": "Policy number (optional)",
+    "memberId": "Member ID (optional)",
+    "verifyCta": "Verify eligibility",
+    "verifying": "Verifying…",
+    "verifyFailed": "Could not verify insurance. Try again.",
+    "network": "Network error. Please try again.",
+    "eligible": "Eligible",
+    "notEligible": "Not confirmed eligible",
+    "fee": "Consultation fee",
+    "coverage": "Coverage",
+    "patientShare": "Patient share"
+  },
   "hold": {
     "holding": "This slot is held for you",
     "endingSoon": "Your temporary hold is about to expire",

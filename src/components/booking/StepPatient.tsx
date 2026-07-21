@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
 import { Field } from "./Field";
 import { DependentPicker, type SelfOrDependent } from "./DependentPicker";
+import { InsuranceSection } from "./InsuranceSection";
 import { NAME_MAX, PHONE_MAX, REASON_MAX, type PatientErrors, type State } from "./types";
 
-export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "en"; value: State["patient"]; errors: PatientErrors; onChange: (p: Partial<State["patient"]>) => void }) {
+export function StepPatient({ lang, doctorId, value, errors, onChange }: { lang: "ar" | "en"; doctorId: string | null; value: State["patient"]; errors: PatientErrors; onChange: (p: Partial<State["patient"]>) => void }) {
   const { t } = useTranslation("booking");
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const mark = (k: string) => setTouched((tt) => (tt[k] ? tt : { ...tt, [k]: true }));
@@ -136,6 +137,13 @@ export function StepPatient({ lang, value, errors, onChange }: { lang: "ar" | "e
             {t("a11y.charsCount", "{{count}} من {{max}} حرف", { count: value.reason.length, max: REASON_MAX })}
           </div>
         </div>
+        <InsuranceSection
+          lang={lang}
+          doctorId={doctorId}
+          value={value}
+          onChange={onChange}
+        />
+
         <div className="sm:col-span-2 rounded-xl bg-muted/50 p-4 space-y-2">
           <div className="font-semibold text-sm">{t("patient.reminders")}</div>
           <label className="flex items-center gap-2 text-sm">
