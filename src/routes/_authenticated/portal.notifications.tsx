@@ -205,13 +205,12 @@ function NotificationsPage() {
   }, []);
 
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-3xl" dir="rtl">
         {/* Header */}
         <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className="h-11 w-11 rounded-2xl grid place-items-center text-white"
+              className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]"
               style={{ background: "var(--portal-gradient)" }}
               aria-hidden
             >
@@ -231,7 +230,7 @@ function NotificationsPage() {
             <button
               type="button"
               onClick={() => invalidate()}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
               aria-label="تحديث القائمة"
             >
               <RefreshCw className="h-4 w-4" />
@@ -241,7 +240,7 @@ function NotificationsPage() {
               type="button"
               disabled={unreadIds.length === 0 || markMut.isPending}
               onClick={() => markMut.mutate(undefined)}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-semibold text-white disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
               style={{ background: "var(--portal-gradient)" }}
             >
               <CheckCheck className="h-4 w-4" />
@@ -259,7 +258,7 @@ function NotificationsPage() {
         <div
           role="tablist"
           aria-label="تصنيف الإشعارات"
-          className="mb-4 inline-flex rounded-full border border-[color:var(--portal-border)] bg-white p-1 text-sm"
+          className="mb-4 inline-flex rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-1 text-sm"
         >
           {(
             [
@@ -276,7 +275,7 @@ function NotificationsPage() {
                 onClick={() => setFilter(t.k)}
                 className={`px-4 h-8 rounded-full transition ${
                   active
-                    ? "text-white shadow-sm"
+                    ? "text-[color:var(--portal-on-primary)] shadow-sm"
                     : "text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-ink)]"
                 }`}
                 style={active ? { background: "var(--portal-gradient)" } : undefined}
@@ -307,8 +306,7 @@ function NotificationsPage() {
         <p className="mt-8 text-center text-[11px] text-[color:var(--portal-ink-2)]">
           يتم تحديث الإشعارات لحظيًا عند وصول تنبيه جديد.
         </p>
-      </main>
-    </div>
+      </div>
   );
 }
 
@@ -369,7 +367,7 @@ function NotificationRow({
             <Link
               to={action.to}
               search={action.search as never}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-[color:var(--portal-on-primary)]"
               style={{ background: "var(--portal-gradient)" }}
             >
               {action.label}
@@ -380,7 +378,7 @@ function NotificationRow({
               type="button"
               onClick={onMarkRead}
               disabled={markingDisabled}
-              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-xs text-[color:var(--portal-ink)] hover:bg-slate-50 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-xs text-[color:var(--portal-ink)] hover:bg-slate-50 disabled:opacity-50"
             >
               <CheckCircle2 className="h-3.5 w-3.5" />
               تعليم كمقروء
@@ -404,7 +402,7 @@ function EmptyState({ filter }: { filter: Filter }) {
   return (
     <div className="glass-card p-8 sm:p-10 text-center">
       <div
-        className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-white border border-[color:var(--portal-border)] text-[color:var(--portal-primary)]"
+        className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] text-[color:var(--portal-primary)]"
         aria-hidden
       >
         {isUnread ? <CheckCheck className="h-7 w-7" /> : <BellOff className="h-7 w-7" />}
@@ -419,7 +417,7 @@ function EmptyState({ filter }: { filter: Filter }) {
       </p>
       <Link
         to="/portal"
-        className="mt-6 inline-flex items-center gap-1.5 h-10 px-5 rounded-full text-sm font-semibold text-white"
+        className="mt-6 inline-flex items-center gap-1.5 h-10 px-5 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
         العودة إلى لوحة البوابة
@@ -430,8 +428,7 @@ function EmptyState({ filter }: { filter: Filter }) {
 
 function SkeletonState() {
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-3xl px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-3xl" dir="rtl">
         <div className="mb-6 h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse" />
         <div className="mb-4 h-10 w-56 rounded-full bg-slate-200/60 animate-pulse" />
         <ul className="space-y-3">
@@ -446,8 +443,7 @@ function SkeletonState() {
             </li>
           ))}
         </ul>
-      </main>
-    </div>
+      </div>
   );
 }
 
@@ -470,7 +466,7 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-white"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)]"
             style={{ background: "var(--portal-gradient)" }}
           >
             <RefreshCw className="h-4 w-4" />
@@ -478,7 +474,7 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <Link
             to="/portal"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold border border-[color:var(--portal-border)] bg-white"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]"
           >
             <Inbox className="h-4 w-4" />
             العودة إلى البوابة

@@ -143,13 +143,12 @@ function ConsentsPage() {
     }, [q.data]);
 
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-4xl" dir="rtl">
         {/* Header */}
         <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div
-              className="h-11 w-11 rounded-2xl grid place-items-center text-white"
+              className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]"
               style={{ background: "var(--portal-gradient)" }}
               aria-hidden
             >
@@ -167,7 +166,7 @@ function ConsentsPage() {
           <button
             type="button"
             onClick={() => invalidate()}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
           >
             <RefreshCw className="h-4 w-4" />
             تحديث
@@ -340,7 +339,7 @@ function ConsentRow({
               <button
                 type="button"
                 onClick={() => onWithdraw(active)}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-red-200 bg-white text-sm text-red-700 hover:bg-red-50"
+                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-red-200 bg-[color:var(--portal-surface)] text-sm text-red-700 hover:bg-red-50"
               >
                 <ShieldOff className="h-4 w-4" />
                 سحب الموافقة
@@ -350,7 +349,7 @@ function ConsentRow({
                 type="button"
                 onClick={onGrant}
                 disabled={granting}
-                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-white disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60"
                 style={{ background: "var(--portal-gradient)" }}
               >
                 {granting ? (
@@ -426,7 +425,7 @@ function WithdrawDialog({
       aria-labelledby="withdraw-title"
       dir="rtl"
     >
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-[color:var(--portal-border)]">
+      <div className="w-full max-w-md rounded-2xl bg-[color:var(--portal-surface)] shadow-2xl border border-[color:var(--portal-border)]">
         <div className="p-5 border-b border-[color:var(--portal-border)] flex items-start justify-between gap-3">
           <div>
             <h3
@@ -470,7 +469,7 @@ function WithdrawDialog({
               rows={3}
               maxLength={500}
               placeholder="مثل: لم أعد بحاجة لهذه الخدمة"
-              className="mt-1 block w-full rounded-xl border border-[color:var(--portal-border)] bg-white px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30"
+              className="mt-1 block w-full rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-3 py-2 text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--portal-primary)]/30"
             />
             <span className="mt-1 block text-[11px] text-[color:var(--portal-ink-2)]">
               {reason.length} / 500
@@ -482,7 +481,7 @@ function WithdrawDialog({
           <button
             type="button"
             onClick={onClose}
-            className="h-9 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
+            className="h-9 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
           >
             إلغاء
           </button>
@@ -490,7 +489,7 @@ function WithdrawDialog({
             type="button"
             disabled={pending}
             onClick={() => onConfirm(reason.trim() || undefined)}
-            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-red-600 text-[color:var(--portal-on-primary)] text-sm font-semibold hover:bg-red-700 disabled:opacity-60"
           >
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
             تأكيد السحب
@@ -519,7 +518,7 @@ function StatCard({
       ? "bg-emerald-50 text-emerald-700 border-emerald-100"
       : tone === "warn"
         ? "bg-amber-50 text-amber-700 border-amber-100"
-        : "bg-white text-[color:var(--portal-ink)] border-[color:var(--portal-border)]";
+        : "bg-[color:var(--portal-surface)] text-[color:var(--portal-ink)] border-[color:var(--portal-border)]";
   return (
     <div className={`rounded-2xl border p-4 flex items-center gap-3 ${toneClass}`}>
       <div className="h-10 w-10 rounded-xl bg-white/70 grid place-items-center" aria-hidden>
@@ -585,8 +584,7 @@ function StatusPill({ status }: { status: ConsentRecord["status"] }) {
 
 function SkeletonState() {
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-4xl px-4 sm:px-6 py-6 sm:py-8">
+    <div className="mx-auto max-w-4xl" dir="rtl">
         <div className="mb-6 h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse" />
         <div className="mb-6 grid grid-cols-3 gap-3">
           {[0, 1, 2].map((i) => (
@@ -604,8 +602,7 @@ function SkeletonState() {
             </li>
           ))}
         </ul>
-      </main>
-    </div>
+      </div>
   );
 }
 
@@ -633,7 +630,7 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-white"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)]"
             style={{ background: "var(--portal-gradient)" }}
           >
             <RefreshCw className="h-4 w-4" />
@@ -641,7 +638,7 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <Link
             to="/portal"
-            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold border border-[color:var(--portal-border)] bg-white"
+            className="inline-flex items-center gap-2 h-10 px-4 rounded-full text-sm font-semibold border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]"
           >
             <ArrowLeft className="h-4 w-4" />
             العودة إلى البوابة
