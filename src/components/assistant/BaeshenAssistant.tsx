@@ -42,6 +42,15 @@ export function BaeshenAssistant() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const conversationId = useRef<string | null>(null);
   const [noSave, setNoSave] = useState(false);
+  const [nowTick, setNowTick] = useState(0);
+
+  // Tick every 500ms while streaming so the elapsed-time badge updates smoothly.
+  useEffect(() => {
+    if (!busy) return;
+    const id = window.setInterval(() => setNowTick(performance.now()), 500);
+    setNowTick(performance.now());
+    return () => window.clearInterval(id);
+  }, [busy]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
