@@ -126,6 +126,14 @@ function ManagePage() {
   const [undoMsLeft, setUndoMsLeft] = useState<number>(0);
   const undoExpired = undoDeadline !== null && undoMsLeft <= 0;
   const undoSecondsLeft = Math.max(0, Math.ceil(undoMsLeft / 1000));
+  const [undoResult, setUndoResult] = useState<{
+    restored_status: string;
+    slot_rebooked: boolean;
+    waitlist_reverted: boolean;
+    prior_released: boolean;
+    prior_waitlist_notified: boolean;
+    restored_at: number;
+  } | null>(null);
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
