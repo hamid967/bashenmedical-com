@@ -233,7 +233,7 @@ function AdminDashboard() {
                     color: "#e0e7ff",
                   }}
                 >
-                  <Icon className="h-5 w-5" style={{ color: OCEAN.glow }} />
+                  <span style={{ color: OCEAN.glow, display: "inline-flex" }}><Icon className="h-5 w-5" /></span>
                   {l.label}
                 </Link>
               );
