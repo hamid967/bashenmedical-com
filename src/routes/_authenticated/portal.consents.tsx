@@ -238,7 +238,7 @@ function ConsentsPage() {
         <p className="mt-8 text-center text-[11px] text-[color:var(--portal-ink-2)]">
           توافق أنت وحدك على حساباتك — يمكنك سحب أي موافقة اختيارية في أي وقت.
         </p>
-      </main>
+      
 
       {withdrawTarget && (
         <WithdrawDialog
