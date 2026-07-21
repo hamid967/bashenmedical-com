@@ -144,15 +144,14 @@ function MyOrderDetailsPage() {
 
   if (!kindTyped) {
     return (
-      <PortalShell>
-        <div className="text-center py-10">
-          <p className="text-red-600">نوع طلب غير معروف.</p>
-          <Link to="/portal/orders" className="text-primary underline mt-4 inline-block">
-            العودة إلى طلباتي
-          </Link>
-        </div>
-      </PortalShell>
+      <div className="text-center py-10">
+        <p className="text-red-600">نوع طلب غير معروف.</p>
+        <Link to="/portal/orders" className="text-primary underline mt-4 inline-block">
+          العودة إلى طلباتي
+        </Link>
+      </div>
     );
+
   }
 
   const Icon = KIND_ICONS[kindTyped];
