@@ -25,6 +25,8 @@ type Args = {
 type State = {
   holdId: string | null;
   expiresAt: number | null; // ms epoch
+  createdAt: number | null; // ms epoch — anchor for the visual progress ring
+  durationMs: number;       // total hold window at issue time, for the ring denominator
   secondsLeft: number;
   expired: boolean;
   conflict: boolean;
