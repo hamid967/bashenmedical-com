@@ -17,6 +17,7 @@ import {
   preflightBudget,
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
+import { recordUsageSample } from "@/lib/ai/token-calibration";
 import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
