@@ -147,6 +147,7 @@ import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes
 import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
 import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_authenticated/admin.no-show-detail'
+import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
@@ -940,6 +941,12 @@ const AuthenticatedAdminNoShowDetailRoute =
     path: '/no-show-detail',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDesignTokensRoute =
+  AuthenticatedAdminDesignTokensRouteImport.update({
+    id: '/design-tokens',
+    path: '/design-tokens',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminClassicRoute =
   AuthenticatedAdminClassicRouteImport.update({
     id: '/classic',
@@ -1244,6 +1251,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1416,6 +1424,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1593,6 +1602,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1770,6 +1780,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
+    | '/admin/design-tokens'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -1942,6 +1953,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
+    | '/admin/design-tokens'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -2118,6 +2130,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
+    | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/no-show-detail'
     | '/_authenticated/admin/no-show-risk'
     | '/_authenticated/admin/no-show-stats'
@@ -3241,6 +3254,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNoShowDetailRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/design-tokens': {
+      id: '/_authenticated/admin/design-tokens'
+      path: '/design-tokens'
+      fullPath: '/admin/design-tokens'
+      preLoaderRoute: typeof AuthenticatedAdminDesignTokensRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/classic': {
       id: '/_authenticated/admin/classic'
       path: '/classic'
@@ -3513,6 +3533,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
+  AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminNoShowDetailRoute: typeof AuthenticatedAdminNoShowDetailRoute
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
   AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
@@ -3531,6 +3552,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
+  AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminNoShowDetailRoute: AuthenticatedAdminNoShowDetailRoute,
   AuthenticatedAdminNoShowRiskRoute: AuthenticatedAdminNoShowRiskRoute,
   AuthenticatedAdminNoShowStatsRoute: AuthenticatedAdminNoShowStatsRoute,
