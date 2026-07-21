@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { holdSlot, releaseHold, type HoldResult } from "@/lib/booking-hold";
+import { supabase } from "@/integrations/supabase/client";
 
 type Args = {
   enabled: boolean;
