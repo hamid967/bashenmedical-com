@@ -403,4 +403,8 @@ if (!WRITE) {
   console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
   console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
 }
+} // /runCli
+
+export { transformSource, transformClassLiteral, mapUtility, DIRECT, SEMANTIC_FAMILIES, INK_FAMILIES };
+
 
