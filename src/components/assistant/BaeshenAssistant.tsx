@@ -86,12 +86,30 @@ export function BaeshenAssistant() {
     const cls = classifyUserMessage(trimmed);
     setShowEmergency(cls.kind === "emergency");
 
-    const next: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "" }];
-    setMessages(next);
+    const startedAt = performance.now();
+    const promptText = next
+      .slice(0, -1)
+      .map((m) => `${m.role}: ${m.content}`)
+      .join("\n");
+    const initialMeta: MessageCostMeta = { startedAt, promptText };
+    const next2: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "", meta: initialMeta }];
+    setMessages(next2);
     setBusy(true);
 
     const controller = new AbortController();
     abortRef.current = controller;
+
+    const updateLastMeta = (patch: Partial<MessageCostMeta>) => {
+      setMessages((prev) => {
+        const copy = prev.slice();
+        const last = copy[copy.length - 1];
+        if (last && last.role === "assistant") {
+          copy[copy.length - 1] = { ...last, meta: { ...(last.meta ?? initialMeta), ...patch } };
+        }
+        return copy;
+      });
+    };
+
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
@@ -100,16 +118,24 @@ export function BaeshenAssistant() {
         token: bearer,
         signal: controller.signal,
         buildBody: (resumePartial) => ({
-          messages: next.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
+          messages: next2.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
           conversation_id: noSave ? null : conversationId.current,
           lang: isAr ? "ar" : "en",
           save_history: !noSave,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
+        onModel: (m) => updateLastMeta({ model: m }),
+        onUsage: (u) => {
+          const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
+          const completion = Number((u.completion_tokens as number | undefined) ?? 0);
+          const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
+          updateLastMeta({ usage: { prompt, completion, total } });
+        },
         onDelta: (_delta, acc) => {
           setMessages((prev) => {
             const copy = prev.slice();
-            copy[copy.length - 1] = { role: "assistant", content: acc };
+            const last = copy[copy.length - 1];
+            copy[copy.length - 1] = { role: "assistant", content: acc, meta: last?.meta };
             return copy;
           });
         },
@@ -126,15 +152,20 @@ export function BaeshenAssistant() {
           return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
         },
       });
+      updateLastMeta({ endedAt: performance.now() });
       if (!result.text) {
         setMessages((prev) => {
           const copy = prev.slice();
-          copy[copy.length - 1] = { role: "assistant", content: t("لم أستطع توليد رد الآن.", "No response was generated.") };
+          const last = copy[copy.length - 1];
+          copy[copy.length - 1] = { role: "assistant", content: t("لم أستطع توليد رد الآن.", "No response was generated."), meta: last?.meta };
           return copy;
         });
       }
     } catch (err) {
-      if ((err as Error).name === "AbortError") return;
+      if ((err as Error).name === "AbortError") {
+        updateLastMeta({ endedAt: performance.now() });
+        return;
+      }
       const msg = err instanceof StreamHttpError
         ? err.message
         : (err as Error).message || t("حدث خطأ.", "Something went wrong.");
