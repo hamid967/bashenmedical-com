@@ -502,19 +502,61 @@ jobs:
               echo "**Artifact bundle (zip):** [download](${{ steps.upload_e2e_artifacts.outputs.artifact-url }})"
               echo ""
             fi
-            echo "<details><summary>Captured files</summary>"
+            echo "### Per-test artifacts"
             echo ""
+
             if [ -d e2e-artifacts ]; then
+              base_url="${{ steps.upload_e2e_artifacts.outputs.artifact-url }}"
+              # Per-test breakdown (cancel / reschedule / waitlist and any others)
+              for slug in portal-cancel portal-reschedule waitlist-confirm; do
+                dir="e2e-artifacts/$slug"
+                [ -d "$dir" ] || continue
+                case "$slug" in
+                  portal-cancel)      title="🛑 Cancel appointment" ;;
+                  portal-reschedule)  title="🔁 Reschedule appointment" ;;
+                  waitlist-confirm)   title="📥 Waitlist offer confirm" ;;
+                  *)                  title="$slug" ;;
+                esac
+                echo "### $title (\`$slug\`)"
+                echo ""
+                shots=$(find "$dir" -type f -iname '*.png' | sort)
+                hars=$(find "$dir" -type f -iname '*.har' | sort)
+                traces=$(find "$dir" -type f -iname '*.zip' | sort)
+                videos=$(find "$dir" -type f -iname '*.webm' | sort)
+                emit() {
+                  local label="$1"; shift
+                  local files="$1"
+                  [ -z "$files" ] && return
+                  echo "- **$label:**"
+                  while IFS= read -r f; do
+                    [ -z "$f" ] && continue
+                    rel="${f#e2e-artifacts/}"
+                    if [ -n "$base_url" ]; then
+                      echo "  - [\`$rel\`]($base_url) (download bundle, then open \`$rel\`)"
+                    else
+                      echo "  - \`$rel\`"
+                    fi
+                  done <<< "$files"
+                }
+                emit "Screenshots" "$shots"
+                emit "HAR (network)" "$hars"
+                emit "Playwright trace" "$traces"
+                emit "Video" "$videos"
+                echo ""
+              done
+              echo "<details><summary>All captured files</summary>"
+              echo ""
               echo '```text'
               (cd e2e-artifacts && find . -type f \( -iname '*.png' -o -iname '*.har' -o -iname '*.zip' -o -iname '*.webm' -o -iname '*.log' \) | sort) || true
               echo '```'
+              echo ""
+              echo "</details>"
             else
               echo "_No e2e-artifacts directory produced._"
             fi
             echo ""
-            echo "</details>"
-            echo ""
             echo "**Legend:** \`*.png\` screenshots · \`*.har\` network trace · \`trace*.zip\` Playwright trace (open at [trace.playwright.dev](https://trace.playwright.dev/)) · \`*.webm\` video · \`preview.log\` server log"
+
           } > e2e-comment.md
           echo "path=e2e-comment.md" >> "$GITHUB_OUTPUT"
 
