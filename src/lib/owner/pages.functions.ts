@@ -115,7 +115,7 @@ export const deleteOwnerPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertOwner(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId);
     const { error } = await context.supabase
       .from("custom_pages")
       .delete()
