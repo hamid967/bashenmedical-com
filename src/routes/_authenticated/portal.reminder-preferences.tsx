@@ -10,8 +10,11 @@ import { AlertTriangle, Bell, BellRing, Loader2, Mail, MessageCircle, MessageSqu
 import {
   getMyReminderPreferences,
   updateMyReminderPreferences,
+  sendTestNotification,
   type ReminderPreferences,
+  type TestChannel,
 } from "@/lib/portal/reminder-preferences.functions";
+import { Send } from "lucide-react";
 
 const prefsQuery = queryOptions({
   queryKey: ["portal", "reminder-preferences"],
@@ -59,6 +62,18 @@ function PrefsPage() {
     onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
   });
 
+  const [testing, setTesting] = useState<TestChannel | null>(null);
+  const testMut = useMutation({
+    mutationFn: (channel: TestChannel) => sendTestNotification({ data: { channel } }),
+    onMutate: (channel) => setTesting(channel),
+    onSettled: () => setTesting(null),
+    onSuccess: (res) => {
+      toast.success(res.note, { description: res.preview, duration: 6000 });
+      qc.invalidateQueries({ queryKey: ["portal", "notifications"] });
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر إرسال الاختبار"),
+  });
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     const anyChannel =
@@ -86,41 +101,61 @@ function PrefsPage() {
         <form onSubmit={submit} className="glass-card p-5 sm:p-6 space-y-8">
           <Section title="قنوات الإشعار" hint="اختر قناة واحدة على الأقل. سنستخدم القنوات المفعّلة معًا حسب توفّرها.">
             <ChannelToggle
+              channelKey="in_app"
               icon={<Bell className="h-4 w-4" />}
               label="داخل التطبيق"
               hint="إشعارات فورية داخل بوابة المريض."
               checked={form.channel_in_app}
               onChange={(v) => set("channel_in_app", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="push"
               icon={<BellRing className="h-4 w-4" />}
               label="إشعارات المتصفح (Push)"
               hint="تظهر على جهازك حتى وإن لم تكن البوابة مفتوحة."
               checked={form.channel_push}
               onChange={(v) => set("channel_push", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="email"
               icon={<Mail className="h-4 w-4" />}
               label="البريد الإلكتروني"
               hint="عند توفر بريدك في الملف الشخصي."
               checked={form.channel_email}
               onChange={(v) => set("channel_email", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="sms"
               icon={<MessageSquare className="h-4 w-4" />}
               label="رسالة SMS"
               hint="عند توفر رقم جوالك المُتحقق منه."
               checked={form.channel_sms}
               onChange={(v) => set("channel_sms", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
             <ChannelToggle
+              channelKey="whatsapp"
               icon={<MessageCircle className="h-4 w-4" />}
               label="واتساب"
               hint="نرسل عبر واتساب الأعمال عند توفّر تكامل الرسائل."
               checked={form.channel_whatsapp}
               onChange={(v) => set("channel_whatsapp", v)}
+              onTest={(c) => testMut.mutate(c)}
+              testing={testing}
             />
+            <p className="text-[11px] text-[color:var(--portal-ink-2)]">
+              زرّ «اختبار» يُنشئ رسالة اختبار داخل التطبيق فورًا لتتحقق من قالب القناة قبل الحفظ.
+            </p>
           </Section>
+
+
 
           <Section title="تكرار التنبيهات">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -254,12 +289,17 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function ChannelToggle({
-  icon, label, hint, checked, onChange,
+  channelKey, icon, label, hint, checked, onChange, onTest, testing,
 }: {
-  icon: React.ReactNode; label: string; hint: string; checked: boolean; onChange: (v: boolean) => void;
+  channelKey: TestChannel;
+  icon: React.ReactNode; label: string; hint: string;
+  checked: boolean; onChange: (v: boolean) => void;
+  onTest: (c: TestChannel) => void;
+  testing: TestChannel | null;
 }) {
+  const isBusy = testing === channelKey;
   return (
-    <label className={`flex items-center gap-3 rounded-2xl border p-4 cursor-pointer transition ${
+    <div className={`flex items-center gap-3 rounded-2xl border p-4 transition ${
       checked
         ? "border-[color:var(--portal-primary)] bg-[color:var(--portal-primary)]/5"
         : "border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] hover:border-[color:var(--portal-primary)]/40"
@@ -267,17 +307,28 @@ function ChannelToggle({
       <div className="h-9 w-9 rounded-xl grid place-items-center bg-[color:var(--portal-primary)]/10 text-[color:var(--portal-primary)]">
         {icon}
       </div>
-      <div className="flex-1 min-w-0">
+      <label className="flex-1 min-w-0 cursor-pointer">
         <div className="text-sm font-semibold text-[color:var(--portal-ink)]">{label}</div>
         <div className="text-[11px] text-[color:var(--portal-ink-2)]">{hint}</div>
-      </div>
+      </label>
+      <button
+        type="button"
+        onClick={() => onTest(channelKey)}
+        disabled={isBusy || testing !== null}
+        className="inline-flex items-center gap-1 h-8 px-3 rounded-full border border-[color:var(--portal-border)] text-[11px] font-semibold text-[color:var(--portal-ink)] hover:border-[color:var(--portal-primary)]/50 disabled:opacity-50"
+        title="إرسال رسالة اختبار لهذه القناة"
+      >
+        {isBusy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+        اختبار
+      </button>
       <input
         type="checkbox"
+        aria-label={label}
         className="h-5 w-5 accent-[color:var(--portal-primary)]"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
       />
-    </label>
+    </div>
   );
 }
 
