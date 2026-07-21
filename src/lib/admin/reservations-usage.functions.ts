@@ -45,14 +45,7 @@ export type ReservationsUsageSummary = {
   daily: DailyRow[];
 };
 
-async function assertAdmin(ctx: { supabase: any; userId: string }) {
-  const { data, error } = await ctx.supabase.rpc("has_role", {
-    _user_id: ctx.userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("مطلوب صلاحية مسؤول");
-}
+import { assertConsoleAccess as assertAdmin } from "./_guard";
 
 function safeRate(num: number, den: number): number | null {
   if (den <= 0) return null;
