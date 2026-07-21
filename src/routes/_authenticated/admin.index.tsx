@@ -1,6 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getAdminStats, getMyRoles } from "@/lib/admin.functions";
+import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend,
+} from "recharts";
+import { getAdminStats, getMyRoles, getAdminTrends } from "@/lib/admin.functions";
 import type { AdminRole } from "@/components/admin/AdminShell";
 import {
   CalendarCheck,
