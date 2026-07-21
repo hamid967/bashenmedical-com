@@ -63,7 +63,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
           const { data: appt, error: readErr } = await supabaseAdmin
             .from("appointments")
             .select(
-              "id, status, appointment_date, patient_phone",
+              "id, status, appointment_date, appointment_time, doctor_id, branch_id, patient_phone",
             )
             .eq("id", parsed.data.appointment_id)
             .maybeSingle();
@@ -80,7 +80,13 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
             });
           }
           if (appt.status === "cancelled") {
-            return jsonResponse(200, { ok: true, message: "تم الإلغاء مسبقًا." });
+            return jsonResponse(200, {
+              ok: true,
+              message: "تم الإلغاء مسبقًا.",
+              already_cancelled: true,
+              released: false,
+              waitlist_notified: false,
+            });
           }
           if (appt.status === "completed" || appt.status === "no_show") {
             return jsonResponse(409, {
@@ -96,11 +102,12 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
             });
           }
 
+          const cancelledAt = new Date();
           const { error: updErr } = await supabaseAdmin
             .from("appointments")
             .update({
               status: "cancelled",
-              cancelled_at: new Date().toISOString(),
+              cancelled_at: cancelledAt.toISOString(),
               notes: parsed.data.reason
                 ? `[سبب الإلغاء] ${parsed.data.reason}`
                 : undefined,
@@ -112,11 +119,37 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
               message: "تعذّر تنفيذ الإلغاء.",
             });
           }
-          await supabaseAdmin.rpc("release_slot", {
+          const { data: released } = await supabaseAdmin.rpc("release_slot", {
             p_appointment_id: parsed.data.appointment_id,
           });
 
-          return jsonResponse(200, { ok: true });
+          // Check if any waitlist entry for the freed slot was promoted
+          // to 'notified' by the DB trigger (trg_waitlist_on_appt_cancel).
+          let waitlist_notified = false;
+          try {
+            const since = new Date(cancelledAt.getTime() - 2_000).toISOString();
+            if (appt.doctor_id && appt.branch_id) {
+              const { data: notified } = await supabaseAdmin
+                .from("appointment_waitlist")
+                .select("id")
+                .eq("doctor_id", appt.doctor_id)
+                .eq("branch_id", appt.branch_id)
+                .eq("offered_date", appt.appointment_date)
+                .eq("status", "notified")
+                .gte("notified_at", since)
+                .limit(1);
+              waitlist_notified = !!(notified && notified.length > 0);
+            }
+          } catch {
+            /* non-fatal */
+          }
+
+          return jsonResponse(200, {
+            ok: true,
+            released: released === true,
+            waitlist_notified,
+            cancelled_at: cancelledAt.toISOString(),
+          });
         } catch {
           return jsonResponse(500, {
             ok: false,

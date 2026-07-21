@@ -15,6 +15,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { toast as sonner } from "sonner";
 import {
   ArrowRight,
   Phone,
@@ -112,6 +113,13 @@ function ManagePage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeCancelId, setActiveCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
+  const [cancelPhase, setCancelPhase] = useState<
+    "reason" | "processing" | "done"
+  >("reason");
+  const [cancelResult, setCancelResult] = useState<{
+    released: boolean;
+    waitlist_notified: boolean;
+  } | null>(null);
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
@@ -225,24 +233,66 @@ function ManagePage() {
   const cancelAppt = useMutation({
     mutationFn: async (input: { id: string; reason: string }) => {
       if (!sessionToken) throw new Error("no session");
-      return apiPost<{ ok: boolean; message?: string }>(
-        "/api/public/reservations/cancel",
-        {
-          session_token: sessionToken,
-          appointment_id: input.id,
-          reason: input.reason || undefined,
-        },
+      setCancelPhase("processing");
+      // Optimistic UI: mark the appointment cancelled immediately.
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a.id === input.id ? { ...a, status: "cancelled" } : a,
+        ),
       );
+      return apiPost<{
+        ok: boolean;
+        message?: string;
+        released?: boolean;
+        waitlist_notified?: boolean;
+        already_cancelled?: boolean;
+      }>("/api/public/reservations/cancel", {
+        session_token: sessionToken,
+        appointment_id: input.id,
+        reason: input.reason || undefined,
+      });
     },
-    onSuccess: (res) => {
+    onSuccess: (res, input) => {
       if (res.ok) {
-        setToast("تم إلغاء الحجز.");
-        setActiveCancelId(null);
-        setCancelReason("");
+        setCancelResult({
+          released: res.released ?? false,
+          waitlist_notified: res.waitlist_notified ?? false,
+        });
+        setCancelPhase("done");
+        sonner.success("تم إلغاء الحجز بنجاح.", {
+          description: res.waitlist_notified
+            ? "تم إشعار مريض من قائمة الانتظار بالوقت المتاح."
+            : res.released
+              ? "تم تحرير الموعد وأصبح متاحًا للحجز."
+              : undefined,
+        });
+        // Reconcile with server in background
         if (sessionToken) listAppts.mutate(sessionToken);
       } else {
+        // Rollback optimistic change
+        setAppointments((prev) =>
+          prev.map((a) =>
+            a.id === input.id && a.status === "cancelled"
+              ? { ...a, status: "confirmed" }
+              : a,
+          ),
+        );
+        setCancelPhase("reason");
         setErrorMsg(res.message ?? "تعذّر الإلغاء.");
+        sonner.error(res.message ?? "تعذّر الإلغاء.");
       }
+    },
+    onError: (_err, input) => {
+      setAppointments((prev) =>
+        prev.map((a) =>
+          a.id === input.id && a.status === "cancelled"
+            ? { ...a, status: "confirmed" }
+            : a,
+        ),
+      );
+      setCancelPhase("reason");
+      setErrorMsg("خطأ في الشبكة. حاول مرة أخرى.");
+      sonner.error("خطأ في الشبكة.");
     },
   });
 
@@ -575,6 +625,8 @@ function ManagePage() {
                           setActiveCancelId(a.id);
                           setActiveReschedId(null);
                           setCancelReason("");
+                          setCancelPhase("reason");
+                          setCancelResult(null);
                           setErrorMsg(null);
                         }}
                       >
@@ -584,49 +636,166 @@ function ManagePage() {
                   )}
 
                   {activeCancelId === a.id && (
-                    <div className="border-t pt-4 space-y-3">
-                      <div className="text-sm font-semibold">تأكيد إلغاء الحجز</div>
-                      <div>
-                        <Label htmlFor={`reason-${a.id}`}>سبب الإلغاء (اختياري)</Label>
-                        <Textarea
-                          id={`reason-${a.id}`}
-                          value={cancelReason}
-                          onChange={(e) => setCancelReason(e.target.value)}
-                          placeholder="اذكر السبب باختصار…"
-                          maxLength={500}
-                          className="mt-1.5"
-                        />
-                      </div>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setActiveCancelId(null);
-                            setCancelReason("");
-                          }}
-                          disabled={cancelAppt.isPending}
-                        >
-                          تراجع
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          className="flex-1"
-                          disabled={cancelAppt.isPending}
-                          onClick={() =>
-                            cancelAppt.mutate({ id: a.id, reason: cancelReason })
-                          }
-                        >
-                          {cancelAppt.isPending ? (
-                            <>
-                              <Loader2 className="h-4 w-4 animate-spin ml-2" /> جاري…
-                            </>
-                          ) : (
-                            "تأكيد الإلغاء"
-                          )}
-                        </Button>
-                      </div>
+                    <div className="border-t pt-4 space-y-4">
+                      {/* Stepper */}
+                      <ol className="flex items-center gap-2 text-xs font-medium">
+                        {[
+                          { k: "reason", label: "١. السبب" },
+                          { k: "processing", label: "٢. المعالجة" },
+                          { k: "done", label: "٣. تم" },
+                        ].map((s, i, arr) => {
+                          const order = ["reason", "processing", "done"];
+                          const active = order.indexOf(cancelPhase) >= i;
+                          const current = cancelPhase === s.k;
+                          return (
+                            <li key={s.k} className="flex items-center gap-2">
+                              <span
+                                className={`inline-flex h-6 min-w-6 items-center justify-center rounded-full px-2 border ${
+                                  current
+                                    ? "bg-destructive text-destructive-foreground border-destructive"
+                                    : active
+                                      ? "bg-emerald-100 text-emerald-800 border-emerald-200"
+                                      : "bg-muted text-muted-foreground border-transparent"
+                                }`}
+                              >
+                                {s.label}
+                              </span>
+                              {i < arr.length - 1 && (
+                                <span className="h-px w-6 bg-border" />
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ol>
+
+                      {cancelPhase === "reason" && (
+                        <>
+                          <div>
+                            <Label htmlFor={`reason-${a.id}`}>
+                              سبب الإلغاء (اختياري)
+                            </Label>
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                              {[
+                                "ظرف طارئ",
+                                "تغيير الخطط",
+                                "تحسّنت الحالة",
+                                "سأحجز وقتًا آخر",
+                              ].map((r) => (
+                                <button
+                                  key={r}
+                                  type="button"
+                                  onClick={() => setCancelReason(r)}
+                                  className={`rounded-full border px-3 py-1 text-xs transition ${
+                                    cancelReason === r
+                                      ? "border-destructive/40 bg-destructive/10 text-destructive"
+                                      : "border-border bg-background hover:bg-muted"
+                                  }`}
+                                >
+                                  {r}
+                                </button>
+                              ))}
+                            </div>
+                            <Textarea
+                              id={`reason-${a.id}`}
+                              value={cancelReason}
+                              onChange={(e) => setCancelReason(e.target.value)}
+                              placeholder="أو اذكر السبب بحرية…"
+                              maxLength={500}
+                              className="mt-2"
+                            />
+                          </div>
+                          <div
+                            className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-2.5 text-xs text-amber-900"
+                            role="note"
+                          >
+                            <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                            سيتم تحرير الموعد فورًا وإتاحته لآخرين، وقد يتم
+                            إشعار مريض على قائمة الانتظار إن وُجد.
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setActiveCancelId(null);
+                                setCancelReason("");
+                              }}
+                            >
+                              تراجع
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() =>
+                                cancelAppt.mutate({
+                                  id: a.id,
+                                  reason: cancelReason,
+                                })
+                              }
+                            >
+                              تأكيد الإلغاء
+                            </Button>
+                          </div>
+                        </>
+                      )}
+
+                      {cancelPhase === "processing" && (
+                        <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-4 text-sm">
+                          <Loader2 className="h-5 w-5 animate-spin text-destructive" />
+                          <div>
+                            <div className="font-medium">
+                              جاري إلغاء الحجز…
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              تحرير الموعد وإشعار قائمة الانتظار.
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {cancelPhase === "done" && cancelResult && (
+                        <div className="space-y-3">
+                          <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+                            <div className="flex items-center gap-2 font-semibold">
+                              <CheckCircle2 className="h-4 w-4" />
+                              تم إلغاء الحجز بنجاح
+                            </div>
+                            <ul className="mt-2 space-y-1 text-xs">
+                              <li className="flex items-center gap-1.5">
+                                {cancelResult.released ? (
+                                  <CheckCircle2 className="h-3.5 w-3.5" />
+                                ) : (
+                                  <AlertCircle className="h-3.5 w-3.5" />
+                                )}
+                                {cancelResult.released
+                                  ? "تم تحرير الموعد وأصبح متاحًا للحجز."
+                                  : "تعذّر تحرير الموعد تلقائيًا — سيقوم الفريق بمراجعته."}
+                              </li>
+                              <li className="flex items-center gap-1.5">
+                                <CheckCircle2 className="h-3.5 w-3.5" />
+                                {cancelResult.waitlist_notified
+                                  ? "تم إشعار مريض على قائمة الانتظار."
+                                  : "لا يوجد مرضى في قائمة الانتظار لهذا الموعد."}
+                              </li>
+                            </ul>
+                          </div>
+                          <div className="flex justify-end">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setActiveCancelId(null);
+                                setCancelReason("");
+                                setCancelResult(null);
+                                setCancelPhase("reason");
+                              }}
+                            >
+                              إغلاق
+                            </Button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
 
