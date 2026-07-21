@@ -609,6 +609,7 @@ function BookPage() {
             {state.step >= 6 && state.step <= 8 && state.time && (slotHold.holdId || slotHold.conflict || slotHold.expired) && (
               <SlotHoldBanner
                 secondsLeft={slotHold.secondsLeft}
+                totalSeconds={slotHold.durationMs ? Math.round(slotHold.durationMs / 1000) : undefined}
                 expired={slotHold.expired}
                 conflict={slotHold.conflict}
                 onRefresh={slotHold.refresh}

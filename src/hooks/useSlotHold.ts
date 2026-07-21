@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { holdSlot, releaseHold, type HoldResult } from "@/lib/booking-hold";
+import { supabase } from "@/integrations/supabase/client";
 
 type Args = {
   enabled: boolean;
@@ -24,6 +25,8 @@ type Args = {
 type State = {
   holdId: string | null;
   expiresAt: number | null; // ms epoch
+  createdAt: number | null; // ms epoch — anchor for the visual progress ring
+  durationMs: number;       // total hold window at issue time, for the ring denominator
   secondsLeft: number;
   expired: boolean;
   conflict: boolean;
@@ -36,6 +39,8 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
   const [state, setState] = useState<State>({
     holdId: null,
     expiresAt: null,
+    createdAt: null,
+    durationMs: 0,
     secondsLeft: 0,
     expired: false,
     conflict: false,
@@ -58,7 +63,7 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
     keyRef.current = key;
 
     if (!enabled || !doctorId || !date || !time) {
-      setState({ holdId: null, expiresAt: null, secondsLeft: 0, expired: false, conflict: false, error: null });
+      setState({ holdId: null, expiresAt: null, createdAt: null, durationMs: 0, secondsLeft: 0, expired: false, conflict: false, error: null });
       return;
     }
 
@@ -72,6 +77,8 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
           setState({
             holdId: null,
             expiresAt: null,
+            createdAt: null,
+            durationMs: 0,
             secondsLeft: 0,
             expired: false,
             conflict: res.kind === "conflict",
@@ -82,10 +89,13 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
         }
         activeIdRef.current = res.id;
         const expMs = new Date(res.expires_at).getTime();
+        const nowMs = Date.now();
         setState({
           holdId: res.id,
           expiresAt: expMs,
-          secondsLeft: Math.max(0, Math.floor((expMs - Date.now()) / 1000)),
+          createdAt: nowMs,
+          durationMs: Math.max(1_000, expMs - nowMs),
+          secondsLeft: Math.max(0, Math.floor((expMs - nowMs) / 1000)),
           expired: false,
           conflict: false,
           error: null,
@@ -119,6 +129,53 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
       if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
     };
   }, [state.expiresAt]);
+
+  // Realtime: reflect server-side extensions (expires_at bumped) or early
+  // release (row deleted / released_at set) on the visible countdown so the
+  // banner and progress ring stay in sync with the actual hold row.
+  useEffect(() => {
+    const id = state.holdId;
+    if (!id) return;
+    const channel = supabase
+      .channel(`slot_hold:${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "slot_holds", filter: `id=eq.${id}` },
+        (payload) => {
+          const row = payload.new as { expires_at?: string; released_at?: string | null };
+          if (row.released_at) {
+            setState((s) => (s.holdId === id ? { ...s, expired: true, secondsLeft: 0 } : s));
+            return;
+          }
+          if (row.expires_at) {
+            const expMs = new Date(row.expires_at).getTime();
+            setState((s) => {
+              if (s.holdId !== id) return s;
+              const nowMs = Date.now();
+              return {
+                ...s,
+                expiresAt: expMs,
+                createdAt: nowMs,
+                durationMs: Math.max(s.durationMs, expMs - nowMs),
+                secondsLeft: Math.max(0, Math.floor((expMs - nowMs) / 1000)),
+                expired: false,
+              };
+            });
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "slot_holds", filter: `id=eq.${id}` },
+        () => {
+          setState((s) => (s.holdId === id ? { ...s, expired: true, secondsLeft: 0 } : s));
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [state.holdId]);
 
   // Release on unmount.
   useEffect(() => {
