@@ -60,6 +60,18 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           });
         }
 
+        const rlSess = checkRateLimit(`resv-cancel-undo:sess:${sess.phone}`, [
+          { windowMs: 60_000, max: 8 },
+          { windowMs: 3_600_000, max: 40 },
+        ]);
+        if (!rlSess.ok) {
+          return jsonResponse(429, {
+            ok: false,
+            message: `طلبات كثيرة على هذه الجلسة. حاول بعد ${rlSess.retryAfter} ثانية.`,
+          });
+        }
+
+
         try {
           const { supabaseAdmin } = await import(
             "@/integrations/supabase/client.server"
