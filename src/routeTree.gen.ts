@@ -144,6 +144,7 @@ import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authen
 import { Route as AuthenticatedOwnerSecurityRouteImport } from './routes/_authenticated/owner.security'
 import { Route as AuthenticatedOwnerAuditRouteImport } from './routes/_authenticated/owner.audit'
 import { Route as AuthenticatedOwnerAccountsRouteImport } from './routes/_authenticated/owner.accounts'
+import { Route as AuthenticatedMyAiHistoryRouteImport } from './routes/_authenticated/my.ai-history'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
 import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
@@ -932,6 +933,12 @@ const AuthenticatedOwnerAccountsRoute =
     path: '/accounts',
     getParentRoute: () => AuthenticatedOwnerRoute,
   } as any)
+const AuthenticatedMyAiHistoryRoute =
+  AuthenticatedMyAiHistoryRouteImport.update({
+    id: '/ai-history',
+    path: '/ai-history',
+    getParentRoute: () => AuthenticatedMyRoute,
+  } as any)
 const AuthenticatedAdminWebVitalsRoute =
   AuthenticatedAdminWebVitalsRouteImport.update({
     id: '/web-vitals',
@@ -1296,7 +1303,7 @@ export interface FileRoutesByFullPath {
   '/mcp-status': typeof AuthenticatedMcpStatusRoute
   '/message-templates': typeof AuthenticatedMessageTemplatesRoute
   '/messaging-settings': typeof AuthenticatedMessagingSettingsRoute
-  '/my': typeof AuthenticatedMyRoute
+  '/my': typeof AuthenticatedMyRouteWithChildren
   '/notifications-queue': typeof AuthenticatedNotificationsQueueRoute
   '/nurses': typeof AuthenticatedNursesRoute
   '/orders-unified': typeof AuthenticatedOrdersUnifiedRouteWithChildren
@@ -1352,6 +1359,7 @@ export interface FileRoutesByFullPath {
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
+  '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
@@ -1484,7 +1492,7 @@ export interface FileRoutesByTo {
   '/mcp-status': typeof AuthenticatedMcpStatusRoute
   '/message-templates': typeof AuthenticatedMessageTemplatesRoute
   '/messaging-settings': typeof AuthenticatedMessagingSettingsRoute
-  '/my': typeof AuthenticatedMyRoute
+  '/my': typeof AuthenticatedMyRouteWithChildren
   '/notifications-queue': typeof AuthenticatedNotificationsQueueRoute
   '/nurses': typeof AuthenticatedNursesRoute
   '/orders-unified': typeof AuthenticatedOrdersUnifiedRouteWithChildren
@@ -1538,6 +1546,7 @@ export interface FileRoutesByTo {
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
+  '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
@@ -1673,7 +1682,7 @@ export interface FileRoutesById {
   '/_authenticated/mcp-status': typeof AuthenticatedMcpStatusRoute
   '/_authenticated/message-templates': typeof AuthenticatedMessageTemplatesRoute
   '/_authenticated/messaging-settings': typeof AuthenticatedMessagingSettingsRoute
-  '/_authenticated/my': typeof AuthenticatedMyRoute
+  '/_authenticated/my': typeof AuthenticatedMyRouteWithChildren
   '/_authenticated/notifications-queue': typeof AuthenticatedNotificationsQueueRoute
   '/_authenticated/nurses': typeof AuthenticatedNursesRoute
   '/_authenticated/orders-unified': typeof AuthenticatedOrdersUnifiedRouteWithChildren
@@ -1729,6 +1738,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
+  '/_authenticated/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/_authenticated/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/_authenticated/owner/audit': typeof AuthenticatedOwnerAuditRoute
   '/_authenticated/owner/security': typeof AuthenticatedOwnerSecurityRoute
@@ -1920,6 +1930,7 @@ export interface FileRouteTypes {
     | '/admin/service-inquiries'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
+    | '/my/ai-history'
     | '/owner/accounts'
     | '/owner/audit'
     | '/owner/security'
@@ -2106,6 +2117,7 @@ export interface FileRouteTypes {
     | '/admin/service-inquiries'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
+    | '/my/ai-history'
     | '/owner/accounts'
     | '/owner/audit'
     | '/owner/security'
@@ -2296,6 +2308,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/admin/visual-analytics'
     | '/_authenticated/admin/web-vitals'
+    | '/_authenticated/my/ai-history'
     | '/_authenticated/owner/accounts'
     | '/_authenticated/owner/audit'
     | '/_authenticated/owner/security'
@@ -3403,6 +3416,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerAccountsRouteImport
       parentRoute: typeof AuthenticatedOwnerRoute
     }
+    '/_authenticated/my/ai-history': {
+      id: '/_authenticated/my/ai-history'
+      path: '/ai-history'
+      fullPath: '/my/ai-history'
+      preLoaderRoute: typeof AuthenticatedMyAiHistoryRouteImport
+      parentRoute: typeof AuthenticatedMyRoute
+    }
     '/_authenticated/admin/web-vitals': {
       id: '/_authenticated/admin/web-vitals'
       path: '/web-vitals'
@@ -3849,6 +3869,18 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedMyRouteChildren {
+  AuthenticatedMyAiHistoryRoute: typeof AuthenticatedMyAiHistoryRoute
+}
+
+const AuthenticatedMyRouteChildren: AuthenticatedMyRouteChildren = {
+  AuthenticatedMyAiHistoryRoute: AuthenticatedMyAiHistoryRoute,
+}
+
+const AuthenticatedMyRouteWithChildren = AuthenticatedMyRoute._addFileChildren(
+  AuthenticatedMyRouteChildren,
+)
+
 interface AuthenticatedOrdersUnifiedRouteChildren {
   AuthenticatedOrdersUnifiedKindIdRoute: typeof AuthenticatedOrdersUnifiedKindIdRoute
 }
@@ -4006,7 +4038,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMcpStatusRoute: typeof AuthenticatedMcpStatusRoute
   AuthenticatedMessageTemplatesRoute: typeof AuthenticatedMessageTemplatesRoute
   AuthenticatedMessagingSettingsRoute: typeof AuthenticatedMessagingSettingsRoute
-  AuthenticatedMyRoute: typeof AuthenticatedMyRoute
+  AuthenticatedMyRoute: typeof AuthenticatedMyRouteWithChildren
   AuthenticatedNotificationsQueueRoute: typeof AuthenticatedNotificationsQueueRoute
   AuthenticatedNursesRoute: typeof AuthenticatedNursesRoute
   AuthenticatedOrdersUnifiedRoute: typeof AuthenticatedOrdersUnifiedRouteWithChildren
@@ -4052,7 +4084,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMcpStatusRoute: AuthenticatedMcpStatusRoute,
   AuthenticatedMessageTemplatesRoute: AuthenticatedMessageTemplatesRoute,
   AuthenticatedMessagingSettingsRoute: AuthenticatedMessagingSettingsRoute,
-  AuthenticatedMyRoute: AuthenticatedMyRoute,
+  AuthenticatedMyRoute: AuthenticatedMyRouteWithChildren,
   AuthenticatedNotificationsQueueRoute: AuthenticatedNotificationsQueueRoute,
   AuthenticatedNursesRoute: AuthenticatedNursesRoute,
   AuthenticatedOrdersUnifiedRoute: AuthenticatedOrdersUnifiedRouteWithChildren,

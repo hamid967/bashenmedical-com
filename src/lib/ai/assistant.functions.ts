@@ -60,3 +60,45 @@ export const deleteMyAiConversation = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+/** Fetch messages of a conversation the caller owns (RLS-enforced). */
+export const listMyAiMessages = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((i: unknown) => {
+    const o = i as { conversationId?: string };
+    if (!o?.conversationId || typeof o.conversationId !== "string") {
+      throw new Error("conversationId required");
+    }
+    return { conversationId: o.conversationId };
+  })
+  .handler(async ({ context, data }) => {
+    // Verify ownership implicitly via RLS on the parent row
+    const { data: conv, error: convErr } = await context.supabase
+      .from("ai_conversations")
+      .select("id, title, lang, scope, started_at, last_activity_at")
+      .eq("id", data.conversationId)
+      .maybeSingle();
+    if (convErr) throw new Error(convErr.message);
+    if (!conv) throw new Error("not_found");
+
+    const { data: msgs, error: msgErr } = await context.supabase
+      .from("ai_messages")
+      .select("id, role, content, created_at")
+      .eq("conversation_id", data.conversationId)
+      .order("created_at", { ascending: true })
+      .limit(500);
+    if (msgErr) throw new Error(msgErr.message);
+    return { conversation: conv, messages: msgs ?? [] };
+  });
+
+/** Bulk delete all of the caller's AI conversations (and messages via cascade). */
+export const clearMyAiConversations = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { error } = await context.supabase
+      .from("ai_conversations")
+      .delete()
+      .eq("user_id", context.userId);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });

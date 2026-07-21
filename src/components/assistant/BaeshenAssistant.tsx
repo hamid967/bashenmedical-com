@@ -13,6 +13,7 @@ import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 type Msg = { role: "user" | "assistant"; content: string };
 
 const CID_KEY = "baeshen.ai.cid";
+const NO_SAVE_KEY = "baeshen.ai.no_save";
 const SUGGESTIONS_AR = [
   "ما هي الخدمات المتوفرة في المجمع؟",
   "أبغى أحجز موعد مع طبيب أسنان",
@@ -38,11 +39,27 @@ export function BaeshenAssistant() {
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const conversationId = useRef<string | null>(null);
+  const [noSave, setNoSave] = useState(false);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     conversationId.current = window.localStorage.getItem(CID_KEY);
+    setNoSave(window.localStorage.getItem(NO_SAVE_KEY) === "1");
   }, []);
+
+  function toggleNoSave(next: boolean) {
+    setNoSave(next);
+    if (typeof window === "undefined") return;
+    if (next) {
+      window.localStorage.setItem(NO_SAVE_KEY, "1");
+      // If disabling save, drop the current conversation id so we don't
+      // append to an already-saved thread server-side.
+      conversationId.current = null;
+      window.localStorage.removeItem(CID_KEY);
+    } else {
+      window.localStorage.removeItem(NO_SAVE_KEY);
+    }
+  }
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -76,8 +93,9 @@ export function BaeshenAssistant() {
         signal: controller.signal,
         body: JSON.stringify({
           messages: next.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
-          conversation_id: conversationId.current,
+          conversation_id: noSave ? null : conversationId.current,
           lang: isAr ? "ar" : "en",
+          save_history: !noSave,
         }),
       });
       if (res.status === 503) throw new Error(t("المساعد معطّل مؤقتًا.", "Assistant is temporarily disabled."));
@@ -178,16 +196,27 @@ export function BaeshenAssistant() {
               <Bot className="h-5 w-5 text-primary" />
               {t("مساعد باعشن الذكي", "Baeshen AI Assistant")}
             </SheetTitle>
-            <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
-              <span>{t("مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.", "Safe search & booking helper. Not medical advice.")}</span>
-              <button
-                type="button"
-                onClick={newConversation}
-                className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-muted"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                {t("محادثة جديدة", "New chat")}
-              </button>
+            <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span className="min-w-0 truncate">{t("مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.", "Safe search & booking helper. Not medical advice.")}</span>
+              <div className="flex shrink-0 items-center gap-1">
+                <label className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 hover:bg-muted" title={t("لا تحفظ سجل هذه الجلسة", "Do not save this session")}>
+                  <input
+                    type="checkbox"
+                    className="h-3 w-3 accent-primary"
+                    checked={noSave}
+                    onChange={(e) => toggleNoSave(e.target.checked)}
+                  />
+                  {t("لا تحفظ", "Don't save")}
+                </label>
+                <button
+                  type="button"
+                  onClick={newConversation}
+                  className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-muted"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  {t("محادثة جديدة", "New chat")}
+                </button>
+              </div>
             </div>
           </SheetHeader>
 
