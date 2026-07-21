@@ -18,12 +18,21 @@ export async function assertHasRole(
   userId: string,
   role: Role = "admin",
 ) {
-  const { data, error } = await supabase.rpc("has_role", {
-    _user_id: userId,
-    _role: role,
-  });
-  if (error) throw new Error("تعذّر التحقق من الصلاحية.");
-  if (!data) throw new Error("ليست لديك الصلاحية لإدارة استفسارات الخدمات.");
+  // Console-side callers pass "admin"; super_admin is granted implicitly so a
+  // top-level owner never sees a permission wall on inquiries management.
+  const rolesToCheck: Role[] =
+    role === "admin" ? ["admin", "super_admin"] : [role];
+  const checks = await Promise.all(
+    rolesToCheck.map((r) =>
+      supabase.rpc("has_role", { _user_id: userId, _role: r }),
+    ),
+  );
+  if (checks.some((c) => c.error)) {
+    throw new Error("تعذّر التحقق من الصلاحية.");
+  }
+  if (!checks.some((c) => c.data === true)) {
+    throw new Error("ليست لديك الصلاحية لإدارة استفسارات الخدمات.");
+  }
   return true;
 }
 

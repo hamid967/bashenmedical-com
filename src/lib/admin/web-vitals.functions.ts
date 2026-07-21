@@ -31,14 +31,7 @@ export type WebVitalsSummary = {
   topPaths: { path: string; count: number }[];
 };
 
-async function assertAdmin(ctx: { supabase: any; userId: string }) {
-  const { data, error } = await ctx.supabase.rpc("has_role", {
-    _user_id: ctx.userId,
-    _role: "admin",
-  });
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("مطلوب صلاحية مسؤول");
-}
+import { assertConsoleAccess as assertAdmin } from "./_guard";
 
 // Thresholds (web.dev "good"/"needs improvement"/"poor")
 const THRESHOLDS: Record<WebVitalMetric, [number, number]> = {
