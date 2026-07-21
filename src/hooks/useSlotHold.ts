@@ -130,6 +130,53 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
     };
   }, [state.expiresAt]);
 
+  // Realtime: reflect server-side extensions (expires_at bumped) or early
+  // release (row deleted / released_at set) on the visible countdown so the
+  // banner and progress ring stay in sync with the actual hold row.
+  useEffect(() => {
+    const id = state.holdId;
+    if (!id) return;
+    const channel = supabase
+      .channel(`slot_hold:${id}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "slot_holds", filter: `id=eq.${id}` },
+        (payload) => {
+          const row = payload.new as { expires_at?: string; released_at?: string | null };
+          if (row.released_at) {
+            setState((s) => (s.holdId === id ? { ...s, expired: true, secondsLeft: 0 } : s));
+            return;
+          }
+          if (row.expires_at) {
+            const expMs = new Date(row.expires_at).getTime();
+            setState((s) => {
+              if (s.holdId !== id) return s;
+              const nowMs = Date.now();
+              return {
+                ...s,
+                expiresAt: expMs,
+                createdAt: nowMs,
+                durationMs: Math.max(s.durationMs, expMs - nowMs),
+                secondsLeft: Math.max(0, Math.floor((expMs - nowMs) / 1000)),
+                expired: false,
+              };
+            });
+          }
+        },
+      )
+      .on(
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "slot_holds", filter: `id=eq.${id}` },
+        () => {
+          setState((s) => (s.holdId === id ? { ...s, expired: true, secondsLeft: 0 } : s));
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [state.holdId]);
+
   // Release on unmount.
   useEffect(() => {
     return () => {
