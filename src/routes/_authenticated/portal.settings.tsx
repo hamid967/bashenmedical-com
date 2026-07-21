@@ -337,8 +337,8 @@ function Toggle({
 function Switch({ value, onChange, disabled }: { value: boolean; onChange: (v: boolean) => void; disabled?: boolean }) {
   return (
     <button type="button" role="switch" aria-checked={value} disabled={disabled} onClick={() => onChange(!value)}
-      className={`h-6 w-11 rounded-full transition relative disabled:cursor-not-allowed ${value ? "bg-emerald-500" : "bg-slate-300"}`}>
-      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${value ? "right-0.5" : "right-[calc(100%-1.375rem)]"}`} />
+      className={`h-6 w-11 rounded-full transition relative disabled:cursor-not-allowed ${value ? "bg-[color:var(--portal-success)]" : "bg-[color:var(--portal-surface-3)]"}`}>
+      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-[color:var(--portal-surface)] shadow transition-all ${value ? "right-0.5" : "right-[calc(100%-1.375rem)]"}`} />
     </button>
   );
 }
