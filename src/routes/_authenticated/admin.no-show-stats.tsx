@@ -73,9 +73,7 @@ function csvEscape(v: unknown): string {
   return s;
 }
 
-function downloadCsv(filename: string, rows: (string | number | null)[][]) {
-  const csv = "\uFEFF" + rows.map((r) => r.map(csvEscape).join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+function triggerDownload(filename: string, blob: Blob) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -84,6 +82,26 @@ function downloadCsv(filename: string, rows: (string | number | null)[][]) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+function downloadCsv(filename: string, rows: (string | number | null)[][]) {
+  const csv = "\uFEFF" + rows.map((r) => r.map(csvEscape).join(",")).join("\n");
+  triggerDownload(filename, new Blob([csv], { type: "text/csv;charset=utf-8" }));
+}
+
+async function downloadXlsx(
+  filename: string,
+  sheetName: string,
+  rows: (string | number | null)[][],
+) {
+  const XLSX = await import("xlsx");
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || "Sheet1");
+  const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
+  triggerDownload(filename, new Blob([buf], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  }));
 }
 
 function KpiCard({
@@ -133,7 +151,7 @@ function NoShowStatsPage() {
     setApplied({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "" });
   }
 
-  function exportDoctorsCsv() {
+  function doctorsData(): (string | number | null)[][] {
     const header = ["الطبيب", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "مؤكد", "متوسط المخاطرة", "نسبة عدم الحضور %"];
     const rows = stats.byDoctor.map((r) => [
       r.doctor_name_ar ?? "بدون تخصيص",
@@ -141,22 +159,28 @@ function NoShowStatsPage() {
       r.avg_risk ?? "",
       r.no_show_rate,
     ]);
-    downloadCsv(`no-show_by-doctor_${applied.from}_${applied.to}.csv`, [header, ...rows]);
+    return [header, ...rows];
   }
-
-  function exportDaysCsv() {
+  function daysData(): (string | number | null)[][] {
     const header = ["التاريخ", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "نسبة عدم الحضور %"];
     const rows = stats.byDay.map((r) => [
       r.appointment_date, r.total, r.completed, r.no_show, r.cancelled, r.no_show_rate,
     ]);
-    downloadCsv(`no-show_by-day_${applied.from}_${applied.to}.csv`, [header, ...rows]);
+    return [header, ...rows];
   }
-
-  function exportReasonsCsv() {
+  function reasonsData(): (string | number | null)[][] {
     const header = ["سبب الإلغاء", "العدد"];
     const rows = stats.cancelReasons.map((r) => [r.reason, r.count]);
-    downloadCsv(`cancel-reasons_${applied.from}_${applied.to}.csv`, [header, ...rows]);
+    return [header, ...rows];
   }
+
+  const stamp = `${applied.from}_${applied.to}`;
+  const exportDoctorsCsv = () => downloadCsv(`no-show_by-doctor_${stamp}.csv`, doctorsData());
+  const exportDoctorsXlsx = () => downloadXlsx(`no-show_by-doctor_${stamp}.xlsx`, "الأطباء", doctorsData());
+  const exportDaysCsv = () => downloadCsv(`no-show_by-day_${stamp}.csv`, daysData());
+  const exportDaysXlsx = () => downloadXlsx(`no-show_by-day_${stamp}.xlsx`, "الأيام", daysData());
+  const exportReasonsCsv = () => downloadCsv(`cancel-reasons_${stamp}.csv`, reasonsData());
+  const exportReasonsXlsx = () => downloadXlsx(`cancel-reasons_${stamp}.xlsx`, "الأسباب", reasonsData());
 
   return (
     <div className="p-6 space-y-6">
@@ -164,7 +188,7 @@ function NoShowStatsPage() {
         <div>
           <h1 className="text-2xl font-bold">إحصاءات عدم الحضور</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            توزيع الحالات وأسباب الإلغاء ومعدل عدم الحضور حسب الطبيب واليوم — قابل للتصدير CSV.
+            توزيع الحالات وأسباب الإلغاء ومعدل عدم الحضور حسب الطبيب واليوم — قابل للتصدير CSV و XLSX.
           </p>
         </div>
       </header>
@@ -235,6 +259,7 @@ function NoShowStatsPage() {
         searchFilter={(r, q) => (r.doctor_name_ar ?? "بدون تخصيص").toLowerCase().includes(q)}
         rowKey={(r) => r.doctor_id ?? "unassigned"}
         onExport={exportDoctorsCsv}
+        onExportXlsx={exportDoctorsXlsx}
         defaultSort={{ key: "no_show_rate", dir: "desc" }}
         columns={[
           { key: "doctor_name_ar", label: "الطبيب", align: "start",
@@ -271,6 +296,7 @@ function NoShowStatsPage() {
         searchFilter={(r, q) => r.appointment_date.includes(q)}
         rowKey={(r) => r.appointment_date}
         onExport={exportDaysCsv}
+        onExportXlsx={exportDaysXlsx}
         defaultSort={{ key: "appointment_date", dir: "asc" }}
         columns={[
           { key: "appointment_date", label: "التاريخ", align: "start",
@@ -300,10 +326,16 @@ function NoShowStatsPage() {
       <section className="rounded-2xl border border-border bg-card">
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-sm font-bold">توزيع أسباب الإلغاء</h2>
-          <button onClick={exportReasonsCsv} disabled={!stats.cancelReasons.length}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
-            <Download className="h-3.5 w-3.5" /> تصدير CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={exportReasonsCsv} disabled={!stats.cancelReasons.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+              <Download className="h-3.5 w-3.5" /> تصدير CSV
+            </button>
+            <button onClick={exportReasonsXlsx} disabled={!stats.cancelReasons.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+              <Download className="h-3.5 w-3.5" /> تصدير XLSX
+            </button>
+          </div>
         </div>
         <div className="p-4 space-y-2">
           {stats.cancelReasons.length === 0 && (
@@ -345,6 +377,7 @@ type SortableTableProps<T> = {
   columns: Column<T>[];
   rowKey: (row: T) => string;
   onExport: () => void;
+  onExportXlsx?: () => void;
   defaultSort: SortState<T>;
   searchPlaceholder: string;
   searchFilter: (row: T, query: string) => boolean;
@@ -353,7 +386,7 @@ type SortableTableProps<T> = {
 const PAGE_SIZES = [10, 25, 50, 100];
 
 function SortableTable<T>({
-  title, rows, columns, rowKey, onExport, defaultSort, searchPlaceholder, searchFilter,
+  title, rows, columns, rowKey, onExport, onExportXlsx, defaultSort, searchPlaceholder, searchFilter,
 }: SortableTableProps<T>) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortState<T>>(defaultSort);
@@ -414,6 +447,12 @@ function SortableTable<T>({
             className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
             <Download className="h-3.5 w-3.5" /> تصدير CSV
           </button>
+          {onExportXlsx && (
+            <button onClick={onExportXlsx} disabled={!rows.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+              <Download className="h-3.5 w-3.5" /> تصدير XLSX
+            </button>
+          )}
         </div>
       </div>
       <div className="overflow-x-auto">
