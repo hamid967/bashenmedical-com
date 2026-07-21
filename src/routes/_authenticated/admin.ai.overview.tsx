@@ -5,7 +5,10 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertConsoleAccess } from "@/lib/admin/_guard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Bot, Activity, ShieldAlert, MessagesSquare } from "lucide-react";
+import { AlertCircle, Bot, Activity, ShieldAlert, MessagesSquare, Wrench, Timer, DollarSign, PhoneForwarded } from "lucide-react";
+
+interface ToolStat { tool: string; total: number; ok: number; error: number; denied: number; timeout: number; success_rate: number; avg_latency_ms: number; p95_latency_ms: number; cost_usd: number }
+interface HandoffStat { scope: string; conversations: number; handoffs: number; rate: number }
 
 interface AiOverview {
   flags: { key: string; enabled: boolean; notes: string | null }[];
