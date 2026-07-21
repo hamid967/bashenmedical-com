@@ -164,7 +164,19 @@ function NotificationsPage() {
   const qc = useQueryClient();
   const [filter, setFilter] = useState<Filter>("all");
 
-  const items = q.data;
+  const marketingConsent = useHasConsent("marketing_communications");
+  const isMarketing = (n: PatientNotification) => {
+    const k = (n.kind || "").toLowerCase();
+    return k.includes("marketing") || k.includes("promo") || k.includes("campaign");
+  };
+
+  const visibleItems = useMemo(
+    () => (marketingConsent.granted ? q.data : q.data.filter((n) => !isMarketing(n))),
+    [q.data, marketingConsent.granted],
+  );
+  const hiddenMarketingCount = q.data.length - visibleItems.length;
+
+  const items = visibleItems;
   const unreadIds = useMemo(
     () => items.filter((n) => !n.read_at).map((n) => n.id),
     [items],
