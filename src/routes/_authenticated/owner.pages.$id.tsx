@@ -234,11 +234,21 @@ function PageEditor() {
             </div>
             <div>
               <Label>صورة OG (رابط)</Label>
-              <Input dir="ltr" value={form.og_image} onChange={(e) => up("og_image", e.target.value)} placeholder="https://…" />
+              <div className="flex gap-2 mt-1">
+                <Input dir="ltr" value={form.og_image} onChange={(e) => up("og_image", e.target.value)} placeholder="https://…" />
+                <Button type="button" variant="outline" size="icon" onClick={() => openPicker("og_image")} title="اختيار من مكتبة الوسائط">
+                  <ImagePlus className="h-4 w-4" />
+                </Button>
+              </div>
+              {form.og_image && (
+                <img src={form.og_image} alt="OG preview" className="mt-2 w-full h-32 object-cover rounded-md border" />
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <MediaPicker open={pickerOpen} onOpenChange={setPickerOpen} onPick={handlePick} />
     </div>
   );
 }
