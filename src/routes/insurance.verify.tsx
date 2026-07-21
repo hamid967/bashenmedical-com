@@ -19,9 +19,14 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Loader2, ShieldCheck, ShieldAlert, Wallet, ArrowLeft } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useMemo, useState } from "react";
+import { Loader2, ShieldCheck, ShieldAlert, Wallet, ArrowLeft, History, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  verifyMyInsurance,
+  listMyInsuranceVerifications,
+} from "@/lib/portal/insurance.functions";
 
 type Provider = { id: string; name_ar: string; name_en: string };
 
