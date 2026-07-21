@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import {
   AlertTriangle, ArrowLeft, Bell, CheckCircle2, Globe, Loader2, Mail, MessageSquare,
-  RefreshCw, Save, Send, ShieldCheck, Smartphone, XCircle,
+  MonitorSmartphone, RefreshCw, Save, Send, ShieldCheck, Smartphone, XCircle,
 } from "lucide-react";
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -253,6 +253,10 @@ function SettingsPage() {
         <div className="space-y-2 text-sm">
           <Link to="/portal/consents" className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-4 py-3 hover:bg-[color:var(--portal-surface-2)]">
             <span className="flex items-center gap-2 text-[color:var(--portal-ink)]"><ShieldCheck className="h-4 w-4" />الموافقات وسياسات الخصوصية</span>
+            <ArrowLeft className="h-4 w-4 text-[color:var(--portal-ink-2)] -rotate-180" />
+          </Link>
+          <Link to="/portal/sessions" className="flex items-center justify-between gap-3 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] px-4 py-3 hover:bg-[color:var(--portal-surface-2)]">
+            <span className="flex items-center gap-2 text-[color:var(--portal-ink)]"><MonitorSmartphone className="h-4 w-4" />الجلسات والأجهزة النشطة</span>
             <ArrowLeft className="h-4 w-4 text-[color:var(--portal-ink-2)] -rotate-180" />
           </Link>
         </div>
