@@ -20,6 +20,7 @@ import {
   preflightBudget,
 } from "@/lib/ai/budget";
 import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
+import { notifyMessageThresholds } from "@/lib/ai/message-alerts";
 import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 import { AssistantCostMeter } from "@/components/assistant/AssistantCostMeter";
 import { PreflightCostChip } from "@/components/assistant/PreflightCostChip";
@@ -169,10 +170,12 @@ function AssistantPage() {
           return "تعذّر الاتصال بالمساعد";
         },
       });
-      updateLastMeta({ endedAt: performance.now() });
+      const endedAt = performance.now();
+      updateLastMeta({ endedAt });
       const spent = estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel);
       commitSessionCredits("portal", spent);
       setSessionCredits((v) => v + spent);
+      notifyMessageThresholds({ credits: spent, elapsedMs: endedAt - startedAt, surface: "portal" });
       if (result.budgetStop) setError(result.budgetStop.message);
     } catch (e: unknown) {
       if ((e as Error).name === "AbortError") {
