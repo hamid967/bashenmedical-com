@@ -102,10 +102,13 @@
   },
   "hold": {
     "holding": "This slot is held for you",
+    "endingSoon": "Your temporary hold is about to expire",
+    "timeLeft": "Time left: {{time}}",
     "expired": "Your temporary hold expired. Refresh or pick another time.",
     "conflict": "This slot is no longer available. Please pick another time.",
     "refresh": "Refresh",
-    "changeTime": "Change time"
+    "changeTime": "Change time",
+    "autoRecover": "Your temporary hold expired — pick a new time."
   },
   "review": {
     "title": "Review your booking",
