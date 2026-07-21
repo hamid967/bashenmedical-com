@@ -70,6 +70,48 @@ export const getMyRoles = createServerFn({ method: "GET" })
     return { userId: context.userId, roles };
   });
 
+/**
+ * Hardened server-side gate for the /admin console.
+ *
+ * Defense in depth: uses the `has_role` SECURITY DEFINER RPC (not just a
+ * SELECT on user_roles, which could be masked by future RLS changes),
+ * accepts admin OR super_admin, logs every denial to security_audit_log,
+ * and returns the confirmed role. Any /admin route MUST call this in its
+ * beforeLoad — client-side role checks alone are not sufficient.
+ */
+export const assertAdminAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const sb = context.supabase;
+    const uid = context.userId;
+
+    const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
+      sb.rpc("has_role", { _user_id: uid, _role: "admin" }),
+      sb.rpc("has_role", { _user_id: uid, _role: "super_admin" }),
+    ]);
+
+    if (!isAdmin && !isSuper) {
+      // Best-effort audit — never let logging block the deny response.
+      try {
+        await sb.from("security_audit_log").insert({
+          action: "admin_console_access_denied",
+          actor: uid,
+          reason: "missing admin/super_admin role",
+          metadata: { path: "/admin" },
+        });
+      } catch {
+        /* swallow — RLS or transient failure must not mask the 403 */
+      }
+      throw new Error("ADMIN_FORBIDDEN");
+    }
+
+    return {
+      userId: uid,
+      isAdmin: !!isAdmin,
+      isSuperAdmin: !!isSuper,
+    };
+  });
+
 export const getAdminStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {

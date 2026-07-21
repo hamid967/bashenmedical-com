@@ -1,11 +1,14 @@
 import { createFileRoute, Outlet, useRouter, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { AdminShell, type AdminRole } from "@/components/admin/AdminShell";
-import { getMyRoles } from "@/lib/admin.functions";
+import { getMyRoles, assertAdminAccess } from "@/lib/admin.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { AlertTriangle, RefreshCw, ShieldAlert, Home } from "lucide-react";
 
-const CONSOLE_ROLES: AdminRole[] = ["admin", "reception", "doctor", "nurse", "hr", "pharmacy"];
+// Console entry is now restricted to admin/super_admin. Operational roles
+// (reception/doctor/nurse/hr/pharmacy) reach their tools through dedicated
+// staff routes, not the /admin shell.
+const CONSOLE_ROLES: AdminRole[] = ["admin", "super_admin"];
 
 const rolesQuery = queryOptions({
   queryKey: ["admin", "my-roles"],
@@ -25,9 +28,18 @@ export const Route = createFileRoute("/_authenticated/admin")({
     if (search && typeof search.tab === "string" && location.pathname === "/admin") {
       throw redirect({ to: "/admin/classic", search: search as never });
     }
-    // Server-side role gate — verify actual roles before rendering the shell.
-    // Any signed-in user without staff roles is a patient/portal user, so send
-    // them straight to /portal instead of the public homepage.
+
+    // Hardened server-side gate. Uses the has_role RPC (SECURITY DEFINER)
+    // and audit-logs every denial. Runs BEFORE any admin data is fetched
+    // and before the AdminShell renders, so a spoofed client cache cannot
+    // buy access. Any thrown error → redirect to /portal.
+    try {
+      await assertAdminAccess();
+    } catch {
+      throw redirect({ to: "/portal" });
+    }
+
+    // Warm the roles cache for the layout (used to render nav sections).
     let rolesData: { roles?: string[] } | null = null;
     try {
       rolesData = await context.queryClient.ensureQueryData(rolesQuery);
