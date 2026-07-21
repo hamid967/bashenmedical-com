@@ -6,7 +6,7 @@ import { assertOwnerOnly } from "./_access";
 export const getClinicSettings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data, error } = await supabaseAdmin
       .from("clinic_settings")
@@ -32,7 +32,7 @@ export const updateClinicSettings = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => UpdateSchema.parse(d))
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("clinic_settings")

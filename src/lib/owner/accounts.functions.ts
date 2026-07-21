@@ -55,7 +55,7 @@ export const listAccounts = createServerFn({ method: "POST" })
     role: d?.role ?? "all",
   }))
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const hasFilter = data.status !== "all" || data.role !== "all" || Boolean(data.search);
@@ -151,7 +151,7 @@ export const grantRole = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("user_roles")
@@ -172,7 +172,7 @@ export const revokeRole = createServerFn({ method: "POST" })
     z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     if (data.user_id === context.userId && data.role === "super_admin") {
       throw new Error("لا يمكنك إزالة دور super_admin من حسابك.");
     }
@@ -193,7 +193,7 @@ export const sendPasswordReset = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) => z.object({ email: z.string().email() }).parse(d))
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.generateLink({
       type: "recovery",
@@ -217,7 +217,7 @@ export const setUserPassword = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
       password: data.password,
@@ -233,7 +233,7 @@ export const setUserBan = createServerFn({ method: "POST" })
     z.object({ user_id: z.string().uuid(), disable: z.boolean() }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     if (data.user_id === context.userId && data.disable) {
       throw new Error("لا يمكنك تعطيل حسابك.");
     }
@@ -260,7 +260,7 @@ export const deleteAccount = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertOwnerOnly(context.supabase, context.userId);
+    await assertOwnerOnly(context.supabase, context.userId, context.claims);
     if (data.user_id === context.userId) {
       throw new Error("لا يمكنك حذف حسابك.");
     }
