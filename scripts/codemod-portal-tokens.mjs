@@ -239,24 +239,7 @@ function walk(dir, out = []) {
   }
   return out;
 }
-if (IS_MAIN) runCli();
-
-function runCli() {
-const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d)))
-  .filter((p) => {
-    const rel = relative(ROOT, p).replaceAll("\\", "/");
-    if (FILE_EXCEPTIONS.has(rel)) return false;
-    if (!(rel.startsWith("src/components/portal/") || rel.startsWith("src/routes/_authenticated/portal"))) return false;
-    if (FILE_FILTER && !rel.includes(FILE_FILTER)) return false;
-    if (GLOB_RES.length && !GLOB_RES.some((re) => re.test(rel))) return false;
-    return true;
-  });
-
-if (VERBOSE) {
-  console.log(`نطاق المطابقة: ${files.length} ملف بعد التصفية` +
-    (GLOB_PATTERNS.length ? ` (globs: ${GLOB_PATTERNS.length})` : "") +
-    (FILE_FILTER ? ` (--file="${FILE_FILTER}")` : ""));
-}
+// (تنفيذ CLI في نهاية الملف بعد تعريف الدوال)
 
 // ─────────────────────────────────────────────────────────────────────
 // تحويل نطاق className
