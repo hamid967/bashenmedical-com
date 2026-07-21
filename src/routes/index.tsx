@@ -32,6 +32,7 @@ import { JazanSectionLabel } from "@/components/jazan/JazanSectionLabel";
 import { JazanDivider } from "@/components/jazan/JazanDivider";
 import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 import { DoctorAutocomplete } from "@/components/home/DoctorAutocomplete";
+import { NewDoctorsSection } from "@/components/home/NewDoctorsSection";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE = "مجمع باعشن الطبي بصبيا جازان | Baeshen Medical";
@@ -613,6 +614,9 @@ function HomePage() {
           </SkeletonSwap>
         </div>
       </section>
+
+      {/* ===== NEWLY JOINED DOCTORS ===== */}
+      <NewDoctorsSection />
 
       {/* ===== VISIT / MAP ===== */}
       <section className="py-16 md:py-20">
