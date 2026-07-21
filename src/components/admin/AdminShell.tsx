@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState } from "react";
+import { AdminNotificationsBell } from "./AdminNotificationsBell";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
@@ -222,18 +223,8 @@ export function AdminShell({
             <Menu className="h-5 w-5" />
           </button>
           <div className="flex-1" />
-          <Link
-            to="/notifications-queue"
-            className="relative p-2 rounded-md hover:bg-[color:var(--ac-subtle)]"
-            aria-label="الإشعارات"
-          >
-            <Bell className="h-5 w-5 text-[color:var(--ac-ink-2)]" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -end-0.5 min-w-[18px] h-[18px] px-1 rounded-full bg-[color:var(--ac-danger)] text-white text-[10px] font-bold grid place-items-center">
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
-          </Link>
+          <AdminNotificationsBell />
+
           <div className="hidden sm:flex items-center gap-2 pe-1 ps-3 border-s border-[color:var(--ac-line)]">
             <div className="text-end leading-tight">
               <div className="text-sm font-semibold">{userName ?? "مستخدم"}</div>
