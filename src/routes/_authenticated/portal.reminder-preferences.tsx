@@ -153,6 +153,9 @@ function PrefsPage() {
             <p className="text-[11px] text-[color:var(--portal-ink-2)]">
               زرّ «اختبار» يُنشئ رسالة اختبار داخل التطبيق فورًا لتتحقق من قالب القناة قبل الحفظ.
             </p>
+          </Section>
+
+
 
           <Section title="تكرار التنبيهات">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
