@@ -121,7 +121,11 @@ function ManagePage() {
     waitlist_notified: boolean;
     cancelled_at: number;
   } | null>(null);
-  const [undoSecondsLeft, setUndoSecondsLeft] = useState<number>(0);
+  const UNDO_WINDOW_MS = 30_000;
+  const [undoDeadline, setUndoDeadline] = useState<number | null>(null);
+  const [undoMsLeft, setUndoMsLeft] = useState<number>(0);
+  const undoExpired = undoDeadline !== null && undoMsLeft <= 0;
+  const undoSecondsLeft = Math.max(0, Math.ceil(undoMsLeft / 1000));
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
@@ -261,7 +265,11 @@ function ManagePage() {
           waitlist_notified: res.waitlist_notified ?? false,
           cancelled_at: Date.now(),
         });
-        setUndoSecondsLeft(30);
+        {
+          const deadline = Date.now() + UNDO_WINDOW_MS;
+          setUndoDeadline(deadline);
+          setUndoMsLeft(UNDO_WINDOW_MS);
+        }
         setCancelPhase("done");
         sonner.success("تم إلغاء الحجز بنجاح.", {
           description: res.waitlist_notified
@@ -329,11 +337,13 @@ function ManagePage() {
         setActiveCancelId(null);
         setCancelResult(null);
         setCancelPhase("reason");
-        setUndoSecondsLeft(0);
+        setUndoDeadline(null);
+        setUndoMsLeft(0);
         if (sessionToken) listAppts.mutate(sessionToken);
       } else {
         sonner.error(res.message ?? "تعذّر الاسترجاع.");
-        setUndoSecondsLeft(0);
+        setUndoDeadline(null);
+        setUndoMsLeft(0);
       }
     },
     onError: () => {
@@ -341,12 +351,25 @@ function ManagePage() {
     },
   });
 
-  // Countdown for undo window (30s).
+  // Precise countdown for undo window — updates ~10x/sec and disables at 0.
   useEffect(() => {
-    if (undoSecondsLeft <= 0) return;
-    const t = setTimeout(() => setUndoSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(t);
-  }, [undoSecondsLeft]);
+    if (undoDeadline === null) return;
+    let raf = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const tick = () => {
+      const left = undoDeadline - Date.now();
+      setUndoMsLeft(left > 0 ? left : 0);
+      if (left <= 0) return;
+      timer = setTimeout(() => {
+        raf = requestAnimationFrame(tick);
+      }, 100);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      if (timer) clearTimeout(timer);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [undoDeadline]);
 
   const rescheduleAppt = useMutation({
     mutationFn: async (input: { id: string; date: string; time: string }) => {
@@ -832,42 +855,61 @@ function ManagePage() {
                               </li>
                             </ul>
                           </div>
-                          <div className="flex items-center justify-between gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => undoCancel.mutate(a.id)}
-                              disabled={undoSecondsLeft <= 0 || undoCancel.isPending}
-                              className="border-amber-300 text-amber-900 hover:bg-amber-50"
-                              aria-label={`تراجع عن الإلغاء (متبقٍّ ${undoSecondsLeft} ثانية)`}
-                            >
-                              {undoCancel.isPending ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                                  جاري الاسترجاع…
-                                </>
-                              ) : undoSecondsLeft > 0 ? (
-                                <>
-                                  <RefreshCw className="h-4 w-4 ml-1.5" />
-                                  تراجع عن الإلغاء ({undoSecondsLeft}ث)
-                                </>
-                              ) : (
-                                "انتهت مهلة التراجع"
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setActiveCancelId(null);
-                                setCancelReason("");
-                                setCancelResult(null);
-                                setCancelPhase("reason");
-                                setUndoSecondsLeft(0);
-                              }}
-                            >
-                              إغلاق
-                            </Button>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => undoCancel.mutate(a.id)}
+                                disabled={undoExpired || undoDeadline === null || undoCancel.isPending}
+                                className="border-amber-300 text-amber-900 hover:bg-amber-50 disabled:opacity-60"
+                                aria-live="polite"
+                                aria-label={
+                                  undoExpired
+                                    ? "انتهت مهلة التراجع البالغة 30 ثانية"
+                                    : `تراجع عن الإلغاء، متبقٍّ ${undoSecondsLeft} ثانية`
+                                }
+                              >
+                                {undoCancel.isPending ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                                    جاري الاسترجاع…
+                                  </>
+                                ) : !undoExpired ? (
+                                  <>
+                                    <RefreshCw className="h-4 w-4 ml-1.5" />
+                                    تراجع عن الإلغاء ({undoSecondsLeft}ث)
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertCircle className="h-4 w-4 ml-1.5" />
+                                    انتهت مهلة التراجع
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveCancelId(null);
+                                  setCancelReason("");
+                                  setCancelResult(null);
+                                  setCancelPhase("reason");
+                                  setUndoDeadline(null);
+                                  setUndoMsLeft(0);
+                                }}
+                              >
+                                إغلاق
+                              </Button>
+                            </div>
+                            {undoExpired && (
+                              <p
+                                className="text-xs text-amber-800/80"
+                                role="status"
+                              >
+                                انقضت مهلة الـ 30 ثانية المتاحة للتراجع؛ لم يعد بالإمكان استرجاع هذا الحجز تلقائيًا. يمكنك إعادة الحجز من جديد أو التواصل مع الفريق للمساعدة.
+                              </p>
+                            )}
                           </div>
                         </div>
                       )}
