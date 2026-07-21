@@ -13,13 +13,14 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { createClient } from "@supabase/supabase-js";
+import { checkEligibility } from "@/lib/nphies/adapter.server";
 
 const schema = z.object({
   doctor_id: z.string().uuid("doctor غير صالح"),
   provider_id: z.string().uuid("جهة تأمين غير صالحة"),
   policy_number: z.string().trim().max(64).optional().nullable(),
   member_id: z.string().trim().max(64).optional().nullable(),
+  patient_national_id: z.string().trim().max(32).optional().nullable(),
 });
 
 function json(status: number, body: Record<string, unknown>) {
@@ -47,22 +48,6 @@ export const Route = createFileRoute("/api/public/insurance/verify")({
           });
         }
 
-        const url = process.env.SUPABASE_URL;
-        const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
-        if (!url || !anonKey) {
-          return json(500, { ok: false, message: "تعذّر التحقق حاليًا" });
-        }
-
-        const supa = createClient(url, anonKey, {
-          auth: {
-            storage: undefined,
-            persistSession: false,
-            autoRefreshToken: false,
-          },
-        });
-
-        // Soft policy-shape check (max 64 chars, alnum + dashes) — a real
-        // payer API would call out here.
         const policy = (parsed.data.policy_number ?? "").trim();
         if (policy && (policy.length < 4 || !/^[A-Za-z0-9\-\/]{4,64}$/.test(policy))) {
           return json(200, {
@@ -73,52 +58,46 @@ export const Route = createFileRoute("/api/public/insurance/verify")({
           });
         }
 
-        const { data, error } = await supa.rpc("estimate_appointment_cost", {
-          _doctor_id: parsed.data.doctor_id,
-          _provider_id: parsed.data.provider_id,
-        });
-        if (error) {
+        try {
+          const { mode, result } = await checkEligibility({
+            doctor_id: parsed.data.doctor_id,
+            provider_id: parsed.data.provider_id,
+            policy_number: parsed.data.policy_number ?? null,
+            member_id: parsed.data.member_id ?? null,
+            patient_national_id: parsed.data.patient_national_id ?? null,
+            ip: request.headers.get("x-forwarded-for"),
+            user_agent: request.headers.get("user-agent"),
+          });
+
+          const messageByReason: Record<string, string> = {
+            ok: "التأمين مؤهل. تفاصيل التكلفة موضّحة أدناه.",
+            fee_unknown: "التأمين مؤهل، وسيتم احتساب التكلفة النهائية عند الاستقبال.",
+            no_provider: "لم يتم اختيار جهة تأمين.",
+            provider_inactive:
+              "جهة التأمين غير معتمدة حاليًا. تواصل مع الاستقبال للتأكيد.",
+          };
+
+          return json(200, {
+            ok: true,
+            eligible: result.eligible,
+            reason: result.reason,
+            message:
+              messageByReason[result.reason] ??
+              (result.eligible
+                ? "التأمين مؤهل."
+                : "لم نتمكّن من تأكيد الأهلية. تواصل مع الاستقبال."),
+            coverage_percent: result.coverage_percent,
+            coverage_tier: result.coverage_tier ?? null,
+            consultation_fee: result.consultation_fee,
+            covered_amount: result.covered_amount,
+            patient_share: result.patient_share,
+            source: mode,
+          });
+        } catch {
           return json(500, { ok: false, message: "تعذّر التحقق حاليًا" });
         }
-
-        const est = (data ?? {}) as {
-          eligible?: boolean;
-          reason?: string;
-          consultation_fee?: number | null;
-          coverage_percent?: number | null;
-          coverage_tier?: string | null;
-          covered_amount?: number | null;
-          estimated_cost?: number | null;
-          patient_share?: number | null;
-        };
-
-        const eligible = est.eligible === true;
-        const messageByReason: Record<string, string> = {
-          ok: "التأمين مؤهل. الحصة المتوقعة على المريض موضّحة أدناه.",
-          fee_unknown:
-            "التأمين مؤهل، وسيتم احتساب التكلفة النهائية عند الاستقبال.",
-          no_provider: "لم يتم اختيار جهة تأمين.",
-          provider_inactive:
-            "جهة التأمين غير معتمدة حاليًا. تواصل مع الاستقبال للتأكيد.",
-        };
-
-        return json(200, {
-          ok: true,
-          eligible,
-          reason: est.reason ?? (eligible ? "ok" : "unknown"),
-          message:
-            messageByReason[est.reason ?? ""] ??
-            (eligible
-              ? "التأمين مؤهل."
-              : "لم نتمكّن من تأكيد الأهلية. تواصل مع الاستقبال."),
-          coverage_percent: est.coverage_percent ?? null,
-          coverage_tier: est.coverage_tier ?? null,
-          consultation_fee: est.consultation_fee ?? null,
-          covered_amount: est.covered_amount ?? null,
-          estimated_cost: est.estimated_cost ?? null,
-          patient_share: est.patient_share ?? null,
-        });
       },
     },
   },
 });
+
