@@ -1,9 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Sparkles, X, Send, Loader2, AlertCircle, RotateCcw } from "lucide-react";
+import { Sparkles, X, Send, Loader2, AlertCircle, RotateCcw, Coins } from "lucide-react";
 import { toast } from "sonner";
+import {
+  estimateTokens,
+  estimateCredits,
+  formatCredits,
+  formatTokens,
+} from "@/lib/ai/pricing";
 
 type Msg = { role: "user" | "assistant"; content: string };
+type Usage = { prompt: number; completion: number; total: number };
 
 const STORAGE_KEY = "admin-ai-panel-messages-v1";
 
