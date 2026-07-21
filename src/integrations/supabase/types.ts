@@ -284,6 +284,7 @@ export type Database = {
           insurance_status: string
           is_demo: boolean
           national_id: string | null
+          no_show_risk: number | null
           notes: string | null
           patient_email: string | null
           patient_id: string | null
@@ -317,6 +318,7 @@ export type Database = {
           insurance_status?: string
           is_demo?: boolean
           national_id?: string | null
+          no_show_risk?: number | null
           notes?: string | null
           patient_email?: string | null
           patient_id?: string | null
@@ -350,6 +352,7 @@ export type Database = {
           insurance_status?: string
           is_demo?: boolean
           national_id?: string | null
+          no_show_risk?: number | null
           notes?: string | null
           patient_email?: string | null
           patient_id?: string | null
@@ -5066,6 +5069,10 @@ export type Database = {
         }
         Returns: string
       }
+      calculate_no_show_risk: {
+        Args: { _appt: Database["public"]["Tables"]["appointments"]["Row"] }
+        Returns: number
+      }
       can_access_patient: { Args: { _patient_id: string }; Returns: boolean }
       can_write_patient_clinical: {
         Args: { _patient_id: string }
@@ -5672,6 +5679,19 @@ export type Database = {
           _rating: number
         }
         Returns: string
+      }
+      suggest_overbooking: {
+        Args: { _from?: string; _to?: string }
+        Returns: {
+          appointment_date: string
+          appointment_time: string
+          avg_risk: number
+          booked_count: number
+          branch_id: string
+          doctor_id: string
+          expected_shows: number
+          suggested_overbook: number
+        }[]
       }
       track_appointment: {
         Args: { _phone_last4: string; _ref: string }
