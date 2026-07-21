@@ -308,6 +308,18 @@ function BookPage() {
     time: state.time,
   });
 
+  // Auto-recover expired hold: bounce back to step 6 when the 5-minute
+  // reservation lapses beyond the time picker so the user picks fresh.
+  useEffect(() => {
+    if (!slotHold.expired) return;
+    if (state.step < 7 || state.step > 8) return;
+    dispatch({ t: "set", p: { time: null } });
+    goto(6);
+    toast.info(t("hold.autoRecover", "انتهى وقت الحجز المؤقت — اختر وقتًا جديدًا."));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotHold.expired, state.step]);
+
+
   // Warn before losing an unsent draft: any patient input on step ≥ 4 counts.
   useEffect(() => {
     if (typeof window === "undefined") return;
