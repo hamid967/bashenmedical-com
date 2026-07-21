@@ -42,13 +42,14 @@ export async function reportPermissionError(ctx: Ctx): Promise<void> {
     await supabase.rpc("record_permission_error", {
       _status_code: ctx.statusCode,
       _route: ctx.route.slice(0, 512),
-      _sqlstate: ctx.sqlstate ?? null,
+      _sqlstate: ctx.sqlstate ?? undefined,
       _message: (ctx.message ?? "").slice(0, 500),
-      _role_hint: ctx.roleHint ?? null,
+      _role_hint: ctx.roleHint ?? undefined,
     });
   } catch {
     /* swallow — telemetry must never break the app */
   }
+
 }
 
 /** Call once during app bootstrap on the client. Idempotent. */
