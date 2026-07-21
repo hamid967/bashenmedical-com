@@ -110,13 +110,23 @@ function UnifiedInboxPage() {
             <Badge variant="secondary">إجمالي: {items.length}</Badge>
             <Badge>مفتوح: {totalOpen}</Badge>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "unified-inbox"] })}
-          >
-            <RefreshCw className="ml-2 h-4 w-4" /> تحديث
-          </Button>
+          <div className="flex items-center gap-2">
+            <ExportMenu<InboxItem>
+              filename={`inbox-${date}`}
+              title="الصندوق الموحد"
+              subtitle={`تاريخ: ${date}${channel ? ` • قناة: ${CHANNEL_LABELS[channel] ?? channel}` : ""}${source ? ` • مصدر: ${SOURCE_LABELS[source] ?? source}` : ""}${q ? ` • بحث: ${q}` : ""}`}
+              meta={{ "المجموع": String(items.length), "المفتوح": String(totalOpen) }}
+              columns={INBOX_EXPORT_COLS}
+              rows={items}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => qc.invalidateQueries({ queryKey: ["admin", "unified-inbox"] })}
+            >
+              <RefreshCw className="ml-2 h-4 w-4" /> تحديث
+            </Button>
+          </div>
         </header>
 
         <Card className="p-4">
