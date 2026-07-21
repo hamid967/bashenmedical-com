@@ -9,7 +9,11 @@ import {
   Stethoscope,
   Inbox,
   ArrowLeft,
+  Users,
+  Settings,
+  ScrollText,
 } from "lucide-react";
+
 
 export const Route = createFileRoute("/_authenticated/owner")({
   beforeLoad: async () => {
@@ -46,20 +50,43 @@ export const Route = createFileRoute("/_authenticated/owner")({
   ),
 });
 
-const NAV: ReadonlyArray<{
+type NavItem = {
   to: string;
   label: string;
   icon: typeof LayoutDashboard;
   exact?: boolean;
-}> = [
-  { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, exact: true },
-  { to: "/owner/pages", label: "الصفحات", icon: FileText },
-  { to: "/owner/content", label: "المحتوى", icon: Palette },
-  { to: "/owner/media", label: "الوسائط", icon: ImageIcon },
-  { to: "/owner/navigation", label: "القوائم", icon: MenuIcon },
-  { to: "/owner/services", label: "الخدمات", icon: Stethoscope },
-  { to: "/admin/service-inquiries", label: "الطلبات", icon: Inbox },
+  ownerOnly?: boolean;
+};
+type NavGroup = { label: string; items: ReadonlyArray<NavItem> };
+
+const NAV_GROUPS: ReadonlyArray<NavGroup> = [
+  {
+    label: "المحتوى",
+    items: [
+      { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, exact: true },
+      { to: "/owner/pages", label: "الصفحات", icon: FileText },
+      { to: "/owner/content", label: "المحتوى", icon: Palette },
+      { to: "/owner/media", label: "الوسائط", icon: ImageIcon },
+      { to: "/owner/navigation", label: "القوائم", icon: MenuIcon },
+      { to: "/owner/services", label: "الخدمات", icon: Stethoscope },
+    ],
+  },
+  {
+    label: "العمليات",
+    items: [
+      { to: "/admin/service-inquiries", label: "الطلبات", icon: Inbox, ownerOnly: true },
+    ],
+  },
+  {
+    label: "الإدارة",
+    items: [
+      { to: "/owner/accounts", label: "الحسابات", icon: Users, ownerOnly: true },
+      { to: "/owner/settings", label: "الإعدادات", icon: Settings, ownerOnly: true },
+      { to: "/owner/audit", label: "سجل النشاط", icon: ScrollText, ownerOnly: true },
+    ],
+  },
 ];
+
 
 function OwnerLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -84,26 +111,42 @@ function OwnerLayout() {
             {isEditor ? "صلاحية تعديل فقط" : "صلاحية كاملة"}
           </div>
         </div>
-        <nav className="flex-1 p-3 space-y-1">
-          {NAV.filter((i) => !(isEditor && i.to.startsWith("/admin"))).map((item) => {
-            const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
-            const Icon = item.icon;
+        <nav className="flex-1 p-3 space-y-4 overflow-y-auto">
+          {NAV_GROUPS.map((group) => {
+            const items = group.items.filter((i) => !(isEditor && i.ownerOnly));
+            if (items.length === 0) return null;
             return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
-                  active
-                    ? "bg-blue-600 text-white font-semibold"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </Link>
+              <div key={group.label}>
+                <div className="px-3 pb-1.5 text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
+                  {group.label}
+                </div>
+                <div className="space-y-1">
+                  {items.map((item) => {
+                    const active = item.exact
+                      ? pathname === item.to
+                      : pathname.startsWith(item.to);
+                    const Icon = item.icon;
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition ${
+                          active
+                            ? "bg-blue-600 text-white font-semibold"
+                            : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span>{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
+
         <div className="p-3 border-t border-slate-800">
           <Link
             to="/"
