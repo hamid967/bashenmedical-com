@@ -154,6 +154,7 @@ import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
+import { Route as ApiPublicReservationsOtpSendRouteImport } from './routes/api/public/reservations/otp.send'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
 
@@ -951,6 +952,12 @@ const AuthenticatedAdminSuperJazanVisualRoute =
     path: '/super/jazan-visual',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const ApiPublicReservationsOtpSendRoute =
+  ApiPublicReservationsOtpSendRouteImport.update({
+    id: '/api/public/reservations/otp/send',
+    path: '/api/public/reservations/otp/send',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedPortalOrdersKindIdRoute =
   AuthenticatedPortalOrdersKindIdRouteImport.update({
     id: '/$kind/$id',
@@ -1111,6 +1118,7 @@ export interface FileRoutesByFullPath {
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
+  '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -1257,6 +1265,7 @@ export interface FileRoutesByTo {
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
+  '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1407,6 +1416,7 @@ export interface FileRoutesById {
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
+  '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1557,6 +1567,7 @@ export interface FileRouteTypes {
     | '/api/public/insurance/verify'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
+    | '/api/public/reservations/otp/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1703,6 +1714,7 @@ export interface FileRouteTypes {
     | '/api/public/insurance/verify'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
+    | '/api/public/reservations/otp/send'
   id:
     | '__root__'
     | '/'
@@ -1852,6 +1864,7 @@ export interface FileRouteTypes {
     | '/api/public/insurance/verify'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
+    | '/api/public/reservations/otp/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1917,6 +1930,7 @@ export interface RootRouteChildren {
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
+  ApiPublicReservationsOtpSendRoute: typeof ApiPublicReservationsOtpSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -2936,6 +2950,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuperJazanVisualRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/api/public/reservations/otp/send': {
+      id: '/api/public/reservations/otp/send'
+      path: '/api/public/reservations/otp/send'
+      fullPath: '/api/public/reservations/otp/send'
+      preLoaderRoute: typeof ApiPublicReservationsOtpSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/portal/orders/$kind/$id': {
       id: '/_authenticated/portal/orders/$kind/$id'
       path: '/$kind/$id'
@@ -3324,6 +3345,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicInquiriesMarkWhatsappOpenedRoute:
     ApiPublicInquiriesMarkWhatsappOpenedRoute,
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
+  ApiPublicReservationsOtpSendRoute: ApiPublicReservationsOtpSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
