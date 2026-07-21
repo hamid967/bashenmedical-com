@@ -20,6 +20,7 @@ import { estimateCredits, estimateTokens } from "@/lib/ai/pricing";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 import { AssistantCostMeter } from "./AssistantCostMeter";
+import { PreflightCostChip } from "./PreflightCostChip";
 import { SessionExportButton } from "./SessionExportButton";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
