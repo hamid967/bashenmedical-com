@@ -15,18 +15,13 @@ interface AiOverview {
   routes: { route_name: string; model_id: string; enabled: boolean; fallback_id: string | null }[];
   conversations_24h: number;
   messages_24h: number;
-  safety_incidents_24h: {
-    kind: string;
-    severity: string;
-    count: number;
-  }[];
-  latest_incidents: {
-    id: string;
-    kind: string;
-    severity: string;
-    created_at: string;
-    action_taken: string | null;
-  }[];
+  avg_response_ms: number;
+  p95_response_ms: number;
+  total_cost_usd: number;
+  safety_incidents_24h: { kind: string; severity: string; count: number }[];
+  latest_incidents: { id: string; kind: string; severity: string; created_at: string; action_taken: string | null }[];
+  tool_stats: ToolStat[];
+  handoff_by_scope: HandoffStat[];
 }
 
 const getAiOverview = createServerFn({ method: "GET" })
