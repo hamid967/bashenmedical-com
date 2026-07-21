@@ -296,11 +296,11 @@ function MyAppointmentsPage() {
 
       {/* Summary counts */}
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 print:hidden">
-        <StatCard label="جديد" value={counts.new} tone="sky" />
-        <StatCard label="مؤكّد" value={counts.confirmed} tone="emerald" />
-        <StatCard label="مكتمل" value={counts.completed} tone="slate" />
-        <StatCard label="ملغى" value={counts.cancelled} tone="red" />
-        <StatCard label="لم يحضر" value={counts.no_show} tone="amber" />
+        <PortalStatCard label="جديد" value={counts.new} tone="primary" />
+        <PortalStatCard label="مؤكّد" value={counts.confirmed} tone="success" />
+        <PortalStatCard label="مكتمل" value={counts.completed} tone="muted" />
+        <PortalStatCard label="ملغى" value={counts.cancelled} tone="error" />
+        <PortalStatCard label="لم يحضر" value={counts.no_show} tone="warning" />
       </div>
 
       {/* List */}
@@ -853,28 +853,26 @@ function FollowUpDialog({
 
 function EmptyState({ scope }: { scope: Scope }) {
   return (
-    <div className="glass-card p-8 text-center">
-      <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-[color:var(--portal-gradient-soft)] text-[color:var(--portal-primary)] mb-4">
-        <CalendarDays className="h-7 w-7" />
-      </div>
-      <h3 className="text-lg font-bold text-[color:var(--portal-ink)]">
-        {scope === "upcoming" ? "لا توجد مواعيد قادمة" : "لا توجد مواعيد سابقة"}
-      </h3>
-      <p className="text-sm text-[color:var(--portal-ink-2)] mt-2">
-        {scope === "upcoming"
+    <PortalEmptyState
+      icon={<CalendarDays className="h-7 w-7" />}
+      title={scope === "upcoming" ? "لا توجد مواعيد قادمة" : "لا توجد مواعيد سابقة"}
+      description={
+        scope === "upcoming"
           ? "احجز موعدك القادم بسهولة مع أحد أطبائنا."
-          : "لم يتم تسجيل زيارات سابقة على حسابك حتى الآن."}
-      </p>
-      {scope === "upcoming" && (
-        <Link
-          to="/portal/book"
-          className="inline-flex items-center gap-2 h-10 mt-5 px-5 rounded-full text-white text-sm font-semibold shadow"
-          style={{ background: "var(--portal-gradient)" }}
-        >
-          <CalendarPlus className="h-4 w-4" /> حجز موعد
-        </Link>
-      )}
-    </div>
+          : "لم يتم تسجيل زيارات سابقة على حسابك حتى الآن."
+      }
+      action={
+        scope === "upcoming" ? (
+          <Link
+            to="/portal/book"
+            className="inline-flex items-center gap-2 h-10 px-5 rounded-full text-white text-sm font-semibold shadow"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <CalendarPlus className="h-4 w-4" /> حجز موعد
+          </Link>
+        ) : undefined
+      }
+    />
   );
 }
 
