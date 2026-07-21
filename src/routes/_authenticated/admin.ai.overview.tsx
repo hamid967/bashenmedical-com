@@ -340,7 +340,8 @@ function AiOverviewPage() {
   );
 }
 
-function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: string; value: number; tone?: "danger" | "default" }) {
+function KpiCard({ icon, label, value, tone, sub }: { icon: React.ReactNode; label: string; value: number | string; tone?: "danger" | "default"; sub?: string }) {
+  const display = typeof value === "number" ? value.toLocaleString("ar-SA") : value;
   return (
     <Card>
       <CardContent className="flex items-center gap-3 p-4">
@@ -349,7 +350,8 @@ function KpiCard({ icon, label, value, tone }: { icon: React.ReactNode; label: s
         </div>
         <div>
           <div className="text-xs text-muted-foreground">{label}</div>
-          <div className="text-xl font-semibold">{value.toLocaleString("ar-SA")}</div>
+          <div className="text-xl font-semibold">{display}</div>
+          {sub && <div className="text-[11px] text-muted-foreground">{sub}</div>}
         </div>
       </CardContent>
     </Card>
