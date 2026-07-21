@@ -308,8 +308,10 @@ export const getAdminKpis = createServerFn({ method: "GET" })
     };
 
     // Fetch current + previous windows in parallel (only tables the user's role touches).
-    const q = (table: string) =>
-      sb.from(table).select("created_at").gte("created_at", prevStartIso).limit(20000);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sbAny: any = sb;
+    const q = (table: string): Promise<{ data: Array<{ created_at: string | null }> | null }> =>
+      sbAny.from(table).select("created_at").gte("created_at", prevStartIso).limit(20000);
 
     const [apptsRes, ordersRes, patientsRes, inquiriesRes, complaintsRes, apptsTodayRes] =
       await Promise.all([
