@@ -855,42 +855,61 @@ function ManagePage() {
                               </li>
                             </ul>
                           </div>
-                          <div className="flex items-center justify-between gap-2">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => undoCancel.mutate(a.id)}
-                              disabled={undoSecondsLeft <= 0 || undoCancel.isPending}
-                              className="border-amber-300 text-amber-900 hover:bg-amber-50"
-                              aria-label={`تراجع عن الإلغاء (متبقٍّ ${undoSecondsLeft} ثانية)`}
-                            >
-                              {undoCancel.isPending ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                                  جاري الاسترجاع…
-                                </>
-                              ) : undoSecondsLeft > 0 ? (
-                                <>
-                                  <RefreshCw className="h-4 w-4 ml-1.5" />
-                                  تراجع عن الإلغاء ({undoSecondsLeft}ث)
-                                </>
-                              ) : (
-                                "انتهت مهلة التراجع"
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                setActiveCancelId(null);
-                                setCancelReason("");
-                                setCancelResult(null);
-                                setCancelPhase("reason");
-                                setUndoSecondsLeft(0);
-                              }}
-                            >
-                              إغلاق
-                            </Button>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => undoCancel.mutate(a.id)}
+                                disabled={undoExpired || undoDeadline === null || undoCancel.isPending}
+                                className="border-amber-300 text-amber-900 hover:bg-amber-50 disabled:opacity-60"
+                                aria-live="polite"
+                                aria-label={
+                                  undoExpired
+                                    ? "انتهت مهلة التراجع البالغة 30 ثانية"
+                                    : `تراجع عن الإلغاء، متبقٍّ ${undoSecondsLeft} ثانية`
+                                }
+                              >
+                                {undoCancel.isPending ? (
+                                  <>
+                                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                                    جاري الاسترجاع…
+                                  </>
+                                ) : !undoExpired ? (
+                                  <>
+                                    <RefreshCw className="h-4 w-4 ml-1.5" />
+                                    تراجع عن الإلغاء ({undoSecondsLeft}ث)
+                                  </>
+                                ) : (
+                                  <>
+                                    <AlertCircle className="h-4 w-4 ml-1.5" />
+                                    انتهت مهلة التراجع
+                                  </>
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setActiveCancelId(null);
+                                  setCancelReason("");
+                                  setCancelResult(null);
+                                  setCancelPhase("reason");
+                                  setUndoDeadline(null);
+                                  setUndoMsLeft(0);
+                                }}
+                              >
+                                إغلاق
+                              </Button>
+                            </div>
+                            {undoExpired && (
+                              <p
+                                className="text-xs text-amber-800/80"
+                                role="status"
+                              >
+                                انقضت مهلة الـ 30 ثانية المتاحة للتراجع؛ لم يعد بالإمكان استرجاع هذا الحجز تلقائيًا. يمكنك إعادة الحجز من جديد أو التواصل مع الفريق للمساعدة.
+                              </p>
+                            )}
                           </div>
                         </div>
                       )}
