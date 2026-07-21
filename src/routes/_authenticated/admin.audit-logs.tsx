@@ -37,6 +37,17 @@ export const Route = createFileRoute("/_authenticated/admin/audit-logs")({
 
 const PAGE_SIZE = 50;
 
+const AUDIT_EXPORT_COLS: Column<any>[] = [
+  { header: "الوقت", accessor: (r) => (r.created_at ? new Date(r.created_at).toLocaleString("ar-SA") : "") },
+  { header: "الكيان", accessor: (r) => r.entity_type ?? "" },
+  { header: "العملية", accessor: (r) => r.action ?? "" },
+  { header: "معرّف السجل", accessor: (r) => r.entity_id ?? "" },
+  { header: "المستخدم", accessor: (r) => r.actor_id ?? "" },
+  { header: "الدور", accessor: (r) => r.actor_role ?? "" },
+  { header: "IP", accessor: (r) => r.ip_address ?? "" },
+  { header: "User-Agent", accessor: (r) => r.user_agent ?? "" },
+];
+
 function AuditLogsPage() {
   const search = Route.useSearch();
   const rolesFn = useServerFn(getMyRoles);
