@@ -40,6 +40,14 @@ jobs:
           git fetch origin "${{ github.base_ref }}" --depth=200
           bun run lint:portal-tokens:changed
 
+      - name: Portal codemod — fail if any un-codemodded Tailwind remains
+        run: bun run codemod:portal-tokens:check
+
+      - name: Portal codemod — fixture regression tests
+        run: bun run test:codemod
+
+
+
       - name: Verify docs examples match lint:inserts rules
         run: bash tests/lint/book-docs-examples.sh
 
