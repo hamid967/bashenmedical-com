@@ -1,19 +1,14 @@
 /**
  * Owner — Custom Pages CRUD (Site Builder).
- * Guarded by super_admin via has_role RPC.
+ * Read/create/update: super_admin OR content_manager (editor).
+ * Delete: super_admin only.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { assertContentAccess, assertOwnerOnly } from "./_access";
 
-async function assertOwner(supabase: any, userId: string) {
-  const { data, error } = await supabase.rpc("has_role", {
-    _user_id: userId,
-    _role: "super_admin",
-  });
-  if (error) throw new Error("تعذّر التحقق من الصلاحية.");
-  if (!data) throw new Error("هذه الصفحة مخصصة لمالك الموقع فقط.");
-}
+const assertOwner = assertContentAccess;
 
 const slugSchema = z
   .string()
