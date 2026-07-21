@@ -87,6 +87,7 @@ function AssistantPage() {
       setMessages((m) => [...m, { role: "assistant", content: "", meta: initialMeta }]);
 
       await streamChatWithResume({
+        surface: "portal",
         url: "/api/portal/ai-chat",
         token,
         signal: controller.signal,

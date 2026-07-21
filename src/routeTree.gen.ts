@@ -109,6 +109,7 @@ import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
@@ -175,6 +176,7 @@ import { Route as AuthenticatedOwnerPagesIdRouteImport } from './routes/_authent
 import { Route as AuthenticatedOwnerServicesIndexRouteImport } from './routes/_authenticated/owner.services.index'
 import { Route as AuthenticatedOwnerServicesIdRouteImport } from './routes/_authenticated/owner.services.$id'
 import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './routes/_authenticated/portal.reports.downloads'
+import { Route as ApiPublicAiStreamMetricsRouteImport } from './routes/api/public/ai/stream-metrics'
 import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/public/book/availability'
 import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/book/cancel'
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
@@ -730,6 +732,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminAiStreamingRoute =
+  AuthenticatedAdminAiStreamingRouteImport.update({
+    id: '/ai-streaming',
+    path: '/ai-streaming',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAuditLogsRoute =
   AuthenticatedAdminAuditLogsRouteImport.update({
     id: '/audit-logs',
@@ -1117,6 +1125,12 @@ const AuthenticatedPortalReportsDownloadsRoute =
     path: '/downloads',
     getParentRoute: () => AuthenticatedPortalReportsRoute,
   } as any)
+const ApiPublicAiStreamMetricsRoute =
+  ApiPublicAiStreamMetricsRouteImport.update({
+    id: '/api/public/ai/stream-metrics',
+    path: '/api/public/ai/stream-metrics',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookAvailabilityRoute =
   ApiPublicBookAvailabilityRouteImport.update({
     id: '/api/public/book/availability',
@@ -1365,6 +1379,7 @@ export interface FileRoutesByFullPath {
   '/specialties/': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1430,6 +1445,7 @@ export interface FileRoutesByFullPath {
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
+  '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1555,6 +1571,7 @@ export interface FileRoutesByTo {
   '/specialties': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1620,6 +1637,7 @@ export interface FileRoutesByTo {
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
+  '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1750,6 +1768,7 @@ export interface FileRoutesById {
   '/specialties/': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1815,6 +1834,7 @@ export interface FileRoutesById {
   '/_authenticated/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/_authenticated/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/_authenticated/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
+  '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1945,6 +1965,7 @@ export interface FileRouteTypes {
     | '/specialties/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/ai-streaming'
     | '/admin/audit-logs'
     | '/admin/classic'
     | '/admin/design-tokens'
@@ -2010,6 +2031,7 @@ export interface FileRouteTypes {
     | '/owner/pages/$id'
     | '/owner/services/$id'
     | '/portal/reports/downloads'
+    | '/api/public/ai/stream-metrics'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2135,6 +2157,7 @@ export interface FileRouteTypes {
     | '/specialties'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/ai-streaming'
     | '/admin/audit-logs'
     | '/admin/classic'
     | '/admin/design-tokens'
@@ -2200,6 +2223,7 @@ export interface FileRouteTypes {
     | '/owner/pages/$id'
     | '/owner/services/$id'
     | '/portal/reports/downloads'
+    | '/api/public/ai/stream-metrics'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2329,6 +2353,7 @@ export interface FileRouteTypes {
     | '/specialties/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/audit-logs'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/design-tokens'
@@ -2394,6 +2419,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner/pages/$id'
     | '/_authenticated/owner/services/$id'
     | '/_authenticated/portal/reports/downloads'
+    | '/api/public/ai/stream-metrics'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2482,6 +2508,7 @@ export interface RootRouteChildren {
   ApiAiActionRoute: typeof ApiAiActionRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
+  ApiPublicAiStreamMetricsRoute: typeof ApiPublicAiStreamMetricsRoute
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
   ApiPublicBookCancelRoute: typeof ApiPublicBookCancelRoute
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
@@ -3209,6 +3236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ai-streaming': {
+      id: '/_authenticated/admin/ai-streaming'
+      path: '/ai-streaming'
+      fullPath: '/admin/ai-streaming'
+      preLoaderRoute: typeof AuthenticatedAdminAiStreamingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/audit-logs': {
       id: '/_authenticated/admin/audit-logs'
       path: '/audit-logs'
@@ -3671,6 +3705,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPortalReportsDownloadsRouteImport
       parentRoute: typeof AuthenticatedPortalReportsRoute
     }
+    '/api/public/ai/stream-metrics': {
+      id: '/api/public/ai/stream-metrics'
+      path: '/api/public/ai/stream-metrics'
+      fullPath: '/api/public/ai/stream-metrics'
+      preLoaderRoute: typeof ApiPublicAiStreamMetricsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/availability': {
       id: '/api/public/book/availability'
       path: '/api/public/book/availability'
@@ -3872,6 +3913,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
@@ -3895,6 +3937,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
   AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
@@ -4319,6 +4362,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiActionRoute: ApiAiActionRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiPortalAiChatRoute: ApiPortalAiChatRoute,
+  ApiPublicAiStreamMetricsRoute: ApiPublicAiStreamMetricsRoute,
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
   ApiPublicBookCancelRoute: ApiPublicBookCancelRoute,
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,

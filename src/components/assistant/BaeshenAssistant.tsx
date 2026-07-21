@@ -114,6 +114,7 @@ export function BaeshenAssistant() {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
       const result = await streamChatWithResume({
+        surface: "public",
         url: "/api/ai/chat",
         token: bearer,
         signal: controller.signal,
