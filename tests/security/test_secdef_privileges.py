@@ -65,7 +65,11 @@ PUBLIC_READ_ALLOWLIST = {
     "update_reminders_by_ref",
     "list_reminder_preferences_by_ref",
     "submit_public_rating",
+    # Telemetry reporter — bounded SECURITY DEFINER writer; anon must be able
+    # to log its own 401/403 for the permission-watchdog. See A3 migration.
+    "record_permission_error",
 }
+
 
 # Functions we expect to be REVOKED from anon (runtime probe list).
 # Must start denied — if any becomes callable, regression.
