@@ -290,6 +290,17 @@ export function AIAssistantPanel({
               <Loader2 className="h-4 w-4 animate-spin" /> يفكر…
             </div>
           )}
+          {resumeNotice && (
+            <div
+              className="flex items-center gap-2 rounded-md border px-3 py-2 text-xs"
+              style={{ borderColor: "var(--ac-warning, #d97706)", color: "var(--ac-warning, #d97706)" }}
+              role="status"
+              aria-live="polite"
+            >
+              <RotateCcw className="h-3.5 w-3.5 animate-spin" />
+              {resumeNotice}
+            </div>
+          )}
         </div>
 
         {/* Cost transparency meter */}
