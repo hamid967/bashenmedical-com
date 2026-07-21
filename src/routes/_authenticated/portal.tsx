@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { PortalShell } from "@/components/portal/PortalShell";
+import { PortalCard } from "@/components/portal/ui";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
@@ -64,11 +65,11 @@ function PortalError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   return (
     <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6">
-      <div className="glass-card max-w-md w-full p-8 text-center">
-        <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
+      <PortalCard className="max-w-md w-full p-8 text-center">
+        <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] mb-4">
           <AlertTriangle className="h-7 w-7" />
         </div>
-        <h2 className="text-xl font-bold">تعذّر تحميل البوابة</h2>
+        <h2 className="text-xl font-bold text-[color:var(--portal-ink)]">تعذّر تحميل البوابة</h2>
         <p className="text-sm text-[color:var(--portal-ink-2)] mt-2 break-words">
           {error.message || "حدث خطأ غير متوقع."}
         </p>
@@ -78,7 +79,7 @@ function PortalError({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-white"
+            className="inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
             style={{ background: "var(--portal-gradient)" }}
           >
             <RefreshCw className="h-4 w-4" />
@@ -86,13 +87,13 @@ function PortalError({ error, reset }: { error: Error; reset: () => void }) {
           </button>
           <a
             href="/"
-            className="inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-white"
+            className="inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)]"
           >
             <Home className="h-4 w-4" />
             الرئيسية
           </a>
         </div>
-      </div>
+      </PortalCard>
     </div>
   );
 }
@@ -100,17 +101,17 @@ function PortalError({ error, reset }: { error: Error; reset: () => void }) {
 function PortalNotFound() {
   return (
     <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6">
-      <div className="glass-card max-w-md w-full p-8 text-center">
+      <PortalCard className="max-w-md w-full p-8 text-center">
         <h2 className="text-6xl font-bold text-[color:var(--portal-primary)]">404</h2>
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">الصفحة غير موجودة داخل البوابة.</p>
         <a
           href="/portal"
-          className="mt-6 inline-flex rounded-full px-5 h-10 items-center text-sm font-semibold text-white"
+          className="mt-6 inline-flex rounded-full px-5 h-10 items-center text-sm font-semibold text-[color:var(--portal-on-primary)]"
           style={{ background: "var(--portal-gradient)" }}
         >
           العودة إلى الرئيسية
         </a>
-      </div>
+      </PortalCard>
     </div>
   );
 }

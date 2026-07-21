@@ -7,6 +7,13 @@ import {
   AlertTriangle, ArrowLeft, CalendarPlus, RefreshCw, Star, Stethoscope, UserRound,
 } from "lucide-react";
 import { listMyDoctors, type MyDoctor } from "@/lib/portal/my-doctors.functions";
+import {
+  PortalPageHeader,
+  PortalCard,
+  PortalEmptyState,
+  PortalBadge,
+  PortalCardSkeleton,
+} from "@/components/portal/ui";
 
 const myDoctorsQuery = queryOptions({
   queryKey: ["portal", "my-doctors"],
@@ -40,50 +47,64 @@ function MyDoctorsPage() {
   const doctors = q.data;
 
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-6 sm:py-8">
-        <header className="mb-6 flex items-center gap-3">
-          <div className="h-11 w-11 rounded-2xl grid place-items-center text-white" style={{ background: "var(--portal-gradient)" }}>
-            <Stethoscope className="h-5 w-5" />
-          </div>
-          <div className="flex-1">
-            <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">أطبائي</h1>
-            <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">
-              الأطباء الذين لديك تاريخ زيارات معهم — {doctors.length} طبيب
-            </p>
-          </div>
+    <div dir="rtl">
+      <PortalPageHeader
+        title="أطبائي"
+        description={`الأطباء الذين لديك تاريخ زيارات معهم — ${doctors.length} طبيب`}
+        actions={
           <button
             type="button"
             onClick={() => q.refetch()}
             disabled={q.isFetching}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-white text-xs font-semibold text-[color:var(--portal-ink)] hover:bg-slate-50 disabled:opacity-60"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--portal-ink)] hover:bg-[color:var(--portal-surface-2)] disabled:opacity-60"
             aria-label="تحديث"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${q.isFetching ? "animate-spin" : ""}`} />
             تحديث
           </button>
-        </header>
+        }
+      />
 
-        {doctors.length === 0 ? (
-          <EmptyState />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {doctors.map((d) => <DoctorCard key={d.id} d={d} />)}
-          </div>
-        )}
-      </main>
+      {doctors.length === 0 ? (
+        <PortalEmptyState
+          icon={<Stethoscope className="h-7 w-7" />}
+          title="لم تزُر أي طبيب بعد"
+          description="بعد أول موعد، سيظهر الطبيب هنا مع ملخّص زياراتك وآخر تاريخ زيارة."
+          action={
+            <>
+              <Link
+                to="/portal/book"
+                className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)]"
+                style={{ background: "var(--portal-gradient)" }}
+              >
+                <CalendarPlus className="h-4 w-4" />احجز أول موعد
+              </Link>
+              <Link
+                to="/doctors"
+                className="h-10 px-5 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm inline-flex items-center gap-1.5"
+              >
+                <UserRound className="h-4 w-4" />استعرض الأطباء
+              </Link>
+            </>
+          }
+        />
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {doctors.map((d) => <DoctorCard key={d.id} d={d} />)}
+        </div>
+      )}
     </div>
   );
 }
 
 function DoctorCard({ d }: { d: MyDoctor }) {
   return (
-    <article className="glass-card p-4 sm:p-5 flex flex-col">
+    <PortalCard as="article" className="p-4 sm:p-5 flex flex-col">
       <div className="flex items-start gap-3">
         {d.photo_url ? (
           <img src={d.photo_url} alt={d.name_ar} className="h-14 w-14 rounded-2xl object-cover border border-[color:var(--portal-border)]" />
         ) : (
-          <div className="h-14 w-14 rounded-2xl bg-slate-100 grid place-items-center text-[color:var(--portal-ink-2)]">
+          <div className="h-14 w-14 rounded-2xl bg-[color:var(--portal-surface-3)] grid place-items-center text-[color:var(--portal-ink-2)]">
             <UserRound className="h-6 w-6" />
           </div>
         )}
@@ -91,14 +112,14 @@ function DoctorCard({ d }: { d: MyDoctor }) {
           <h3 className="font-bold text-[color:var(--portal-ink)] leading-tight">{d.name_ar}</h3>
           {d.title_ar && <p className="mt-0.5 text-xs text-[color:var(--portal-ink-2)]">{d.title_ar}</p>}
           {d.specialty_ar && (
-            <p className="mt-1 inline-flex items-center h-5 px-1.5 rounded-md bg-teal-50 text-teal-700 border border-teal-100 text-[10px] font-semibold">
-              {d.specialty_ar}
-            </p>
+            <div className="mt-1">
+              <PortalBadge tone="success">{d.specialty_ar}</PortalBadge>
+            </div>
           )}
         </div>
         {d.avg_rating != null && (
-          <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-amber-700">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-500" />
+          <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-[color:var(--portal-warning)]">
+            <Star className="h-3.5 w-3.5 fill-current" />
             {d.avg_rating.toFixed(1)}
           </span>
         )}
@@ -121,7 +142,7 @@ function DoctorCard({ d }: { d: MyDoctor }) {
         <Link
           to="/portal/book"
           search={{ doctorId: d.id, date: suggestNextDate(d.last_visit_date) }}
-          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-white"
+          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full text-xs font-semibold text-[color:var(--portal-on-primary)]"
           style={{ background: "var(--portal-gradient)" }}
           aria-label={`احجز موعدًا جديدًا مع ${d.name_ar}`}
         >
@@ -129,14 +150,10 @@ function DoctorCard({ d }: { d: MyDoctor }) {
           احجز مع هذا الطبيب
         </Link>
       </div>
-    </article>
+    </PortalCard>
   );
 }
 
-/**
- * Suggest a booking date: last visit + ~90 days, but never in the past;
- * fall back to a week from today when there is no prior visit.
- */
 function suggestNextDate(lastVisit: string | null): string {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -156,72 +173,47 @@ function suggestNextDate(lastVisit: string | null): string {
   }
   return candidate.toISOString().slice(0, 10);
 }
+
 function Stat({ label, value, tone, span }: { label: string; value: string; tone?: "ok" | "muted"; span?: boolean }) {
   const cls = tone === "ok"
-    ? "bg-emerald-50 border-emerald-100 text-emerald-800"
-    : tone === "muted"
-      ? "bg-slate-50 border-slate-200 text-[color:var(--portal-ink-2)]"
-      : "bg-slate-50 border-slate-200 text-[color:var(--portal-ink)]";
+    ? "bg-[color:var(--portal-success-50)] border-transparent text-[color:var(--portal-success)]"
+    : "bg-[color:var(--portal-surface-2)] border-[color:var(--portal-border)] text-[color:var(--portal-ink)]";
   return (
     <div className={`rounded-lg border px-2 py-1.5 ${cls} ${span ? "col-span-2" : ""}`}>
-      <div className="text-[10px] text-[color:var(--portal-ink-2)]">{label}</div>
+      <div className="text-[10px] text-[color:var(--portal-ink-3)]">{label}</div>
       <div className="font-semibold text-xs">{value}</div>
     </div>
   );
 }
 
-function EmptyState() {
-  return (
-    <div className="glass-card p-10 text-center">
-      <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-white border border-[color:var(--portal-border)] text-[color:var(--portal-primary)]">
-        <Stethoscope className="h-7 w-7" />
-      </div>
-      <h2 className="mt-4 text-lg font-bold">لم تزُر أي طبيب بعد</h2>
-      <p className="mt-1 text-sm text-[color:var(--portal-ink-2)] max-w-md mx-auto">
-        بعد أول موعد، سيظهر الطبيب هنا مع ملخّص زياراتك وآخر تاريخ زيارة.
-      </p>
-      <div className="mt-6 flex justify-center gap-2">
-        <Link to="/portal/book" className="inline-flex items-center gap-1.5 h-10 px-5 rounded-full text-sm font-semibold text-white" style={{ background: "var(--portal-gradient)" }}>
-          <CalendarPlus className="h-4 w-4" />احجز أول موعد
-        </Link>
-        <Link to="/doctors" className="h-10 px-5 rounded-full border border-[color:var(--portal-border)] bg-white text-sm inline-flex items-center gap-1.5">
-          <UserRound className="h-4 w-4" />استعرض الأطباء
-        </Link>
-      </div>
-    </div>
-  );
-}
 function Skeleton() {
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh" dir="rtl">
-      <main className="mx-auto max-w-5xl px-4 sm:px-6 py-8">
-        <div className="h-11 w-56 rounded-2xl bg-slate-200/60 animate-pulse mb-6" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[0, 1, 2, 3, 4, 5].map((i) => (
-            <div key={i} className="glass-card p-5 h-56 bg-slate-100 animate-pulse" />
-          ))}
-        </div>
-      </main>
+    <div dir="rtl">
+      <div className="h-11 w-56 rounded-2xl bg-[color:var(--portal-surface-3)] animate-pulse mb-6" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {[0, 1, 2, 3, 4, 5].map((i) => <PortalCardSkeleton key={i} />)}
+      </div>
     </div>
   );
 }
+
 function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   return (
-    <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6" dir="rtl">
-      <div className="glass-card max-w-md w-full p-8 text-center">
-        <AlertTriangle className="mx-auto h-10 w-10 text-red-500 mb-2" />
-        <h2 className="text-lg font-bold">تعذّر تحميل قائمة أطبائك</h2>
+    <div dir="rtl" className="grid place-items-center p-6">
+      <PortalCard className="max-w-md w-full p-8 text-center">
+        <AlertTriangle className="mx-auto h-10 w-10 text-[color:var(--portal-error)] mb-2" />
+        <h2 className="text-lg font-bold text-[color:var(--portal-ink)]">تعذّر تحميل قائمة أطبائك</h2>
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">{error.message}</p>
         <div className="mt-4 flex justify-center gap-2">
-          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-white text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
+          <button onClick={() => { router.invalidate(); reset(); }} className="h-10 px-4 rounded-full text-[color:var(--portal-on-primary)] text-sm font-semibold" style={{ background: "var(--portal-gradient)" }}>
             <RefreshCw className="inline h-4 w-4 ms-1" />حاول مجددًا
           </button>
-          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-white text-sm inline-flex items-center gap-1">
+          <Link to="/portal" className="h-10 px-4 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" />العودة
           </Link>
         </div>
-      </div>
+      </PortalCard>
     </div>
   );
 }
