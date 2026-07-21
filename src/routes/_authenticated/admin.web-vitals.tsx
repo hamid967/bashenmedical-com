@@ -77,6 +77,12 @@ function WebVitalsPage() {
   const [customPath, setCustomPath] = useState<string>("");
   const [windowHours, setWindowHours] = useState<number>(24);
   const qc = useQueryClient();
+  const rolesFn = useServerFn(getMyRoles);
+  const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => rolesFn() });
+  const isStaff = useMemo(() => {
+    const r = (rolesQ.data?.roles ?? []) as string[];
+    return r.includes("admin") || r.includes("super_admin");
+  }, [rolesQ.data]);
 
   const filters: Filters = useMemo(() => {
     const preset = PRESETS.find((p) => p.id === presetId);
@@ -88,6 +94,20 @@ function WebVitalsPage() {
   }, [presetId, customPath, windowHours]);
 
   const { data, isFetching } = useSuspenseQuery(summaryQuery(filters));
+
+  const windowLabel = windowHours < 24 ? `آخر ${windowHours} ساعة` : `آخر ${windowHours / 24} يوم`;
+  const activePath = data.pathContains ?? "الكل";
+  const exportSubtitle = `النافذة: ${windowLabel} · المسار: ${activePath}`;
+  const exportMeta: Record<string, string> = {
+    "النافذة الزمنية": windowLabel,
+    "فلتر المسار": activePath,
+    "إجمالي العينات": String(data.totalSamples),
+    "مقتطعة": data.truncated ? "نعم" : "لا",
+  };
+  const metricRows: MetricRow[] = data.stats.map((s) => ({
+    ...s,
+    rating: ratingLabel(ratingOf(s.metric, s.p75)),
+  }));
 
   return (
     <div className="admin-console" dir="rtl">
@@ -104,14 +124,37 @@ function WebVitalsPage() {
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "web-vitals"] })}
-            className="inline-flex items-center gap-2 rounded-full border border-[color:var(--ac-line)] px-3 h-9 text-sm hover:bg-[color:var(--ac-subtle)]"
-          >
-            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
-            تحديث
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <ExportMenu
+              allowed={isStaff}
+              disabled={isFetching}
+              filename="web-vitals-summary"
+              title="ملخص Web Vitals"
+              subtitle={exportSubtitle}
+              meta={exportMeta}
+              columns={METRIC_COLS}
+              rows={metricRows}
+            />
+            <ExportMenu
+              allowed={isStaff}
+              disabled={isFetching}
+              filename="web-vitals-top-paths"
+              title="أكثر المسارات نشاطًا"
+              subtitle={exportSubtitle}
+              meta={exportMeta}
+              columns={PATH_COLS}
+              rows={data.topPaths}
+              label="تصدير المسارات"
+            />
+            <button
+              type="button"
+              onClick={() => qc.invalidateQueries({ queryKey: ["admin", "web-vitals"] })}
+              className="inline-flex items-center gap-2 rounded-full border border-[color:var(--ac-line)] px-3 h-9 text-sm hover:bg-[color:var(--ac-subtle)]"
+            >
+              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
+              تحديث
+            </button>
+          </div>
         </header>
 
         {/* Filters */}
