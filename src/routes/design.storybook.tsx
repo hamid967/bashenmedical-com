@@ -329,10 +329,10 @@ const groups: StoryGroup[] = [
             <PortalCardBody>
               <PortalDataList
                 items={[
-                  { label: "المريض", value: "أحمد الغامدي" },
-                  { label: "التاريخ", value: "22 يوليو 2026" },
-                  { label: "الفرع", value: "صبيا الرئيسي" },
-                  { label: "الحالة", value: <PortalBadge tone="success">مؤكّد</PortalBadge> },
+                  { key: "patient", label: "المريض", value: "أحمد الغامدي" },
+                  { key: "date", label: "التاريخ", value: "22 يوليو 2026" },
+                  { key: "branch", label: "الفرع", value: "صبيا الرئيسي" },
+                  { key: "status", label: "الحالة", value: <PortalBadge tone="success">مؤكّد</PortalBadge> },
                 ]}
               />
             </PortalCardBody>
