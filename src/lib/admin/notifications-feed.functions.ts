@@ -71,7 +71,7 @@ export const listAdminFeed = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const items: AdminFeedItem[] = ((rows ?? []) as Array<{
+    const items: AdminFeedItem[] = ((rows ?? []) as unknown as Array<{
       id: string;
       actor_id: string | null;
       action: string;
