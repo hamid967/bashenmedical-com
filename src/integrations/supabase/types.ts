@@ -302,6 +302,7 @@ export type Database = {
         Row: {
           appointment_date: string
           appointment_time: string
+          booked_for_dependent_id: string | null
           branch_id: string | null
           cancelled_at: string | null
           created_at: string
@@ -336,6 +337,7 @@ export type Database = {
         Insert: {
           appointment_date: string
           appointment_time: string
+          booked_for_dependent_id?: string | null
           branch_id?: string | null
           cancelled_at?: string | null
           created_at?: string
@@ -370,6 +372,7 @@ export type Database = {
         Update: {
           appointment_date?: string
           appointment_time?: string
+          booked_for_dependent_id?: string | null
           branch_id?: string | null
           cancelled_at?: string | null
           created_at?: string
@@ -402,6 +405,13 @@ export type Database = {
           whatsapp_opt_in?: boolean
         }
         Relationships: [
+          {
+            foreignKeyName: "appointments_booked_for_dependent_fk"
+            columns: ["booked_for_dependent_id"]
+            isOneToOne: false
+            referencedRelation: "dependents"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "appointments_branch_id_fkey"
             columns: ["branch_id"]
@@ -1141,6 +1151,7 @@ export type Database = {
       }
       dependents: {
         Row: {
+          access_scopes: Json
           created_at: string
           date_of_birth: string | null
           full_name: string
@@ -1152,9 +1163,15 @@ export type Database = {
           phone: string | null
           relationship: string
           updated_at: string
+          verification_method: string | null
+          verification_notes: string | null
+          verification_status: string
           verified: boolean
+          verified_at: string | null
+          verified_by: string | null
         }
         Insert: {
+          access_scopes?: Json
           created_at?: string
           date_of_birth?: string | null
           full_name: string
@@ -1166,9 +1183,15 @@ export type Database = {
           phone?: string | null
           relationship: string
           updated_at?: string
+          verification_method?: string | null
+          verification_notes?: string | null
+          verification_status?: string
           verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Update: {
+          access_scopes?: Json
           created_at?: string
           date_of_birth?: string | null
           full_name?: string
@@ -1180,7 +1203,12 @@ export type Database = {
           phone?: string | null
           relationship?: string
           updated_at?: string
+          verification_method?: string | null
+          verification_notes?: string | null
+          verification_status?: string
           verified?: boolean
+          verified_at?: string | null
+          verified_by?: string | null
         }
         Relationships: [
           {
@@ -5335,6 +5363,10 @@ export type Database = {
         Returns: number
       }
       can_access_patient: { Args: { _patient_id: string }; Returns: boolean }
+      can_book_for_dependent: {
+        Args: { _dependent: string; _guardian: string }
+        Returns: boolean
+      }
       can_edit_page: {
         Args: { _page_id: string; _user_id: string }
         Returns: boolean
@@ -5977,6 +6009,40 @@ export type Database = {
           doctor_count: number
           specialty_id: string
         }[]
+      }
+      staff_set_dependent_verification: {
+        Args: {
+          _dependent: string
+          _method: string
+          _notes: string
+          _status: string
+        }
+        Returns: {
+          access_scopes: Json
+          created_at: string
+          date_of_birth: string | null
+          full_name: string
+          gender: string | null
+          guardian_user_id: string
+          id: string
+          national_id: string | null
+          patient_id: string | null
+          phone: string | null
+          relationship: string
+          updated_at: string
+          verification_method: string | null
+          verification_notes: string | null
+          verification_status: string
+          verified: boolean
+          verified_at: string | null
+          verified_by: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "dependents"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       submit_public_rating: {
         Args: {

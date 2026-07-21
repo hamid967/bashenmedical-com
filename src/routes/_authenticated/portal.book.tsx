@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { getBookingOptions } from "@/lib/portal/booking.functions";
-import { listAvailableSlots, bookSlot } from "@/lib/slots.functions";
+import { listAvailableSlots, bookSlot, bookSlotAsGuardian } from "@/lib/slots.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { getDependent } from "@/lib/portal/dependents.functions";
 import {
@@ -269,20 +269,33 @@ function BookPage() {
       gender?: "male" | "female" | null;
       dependentId?: string | null;
     }) =>
-      bookSlot({
-        data: {
-          slotId: payload.slotId,
-          patientName: payload.patientName,
-          patientPhone: payload.patientPhone,
-          reason: payload.reason,
-          nationalId: payload.nationalId ?? null,
-          gender: payload.gender ?? null,
-          notes: payload.dependentId ? `dependent:${payload.dependentId}` : null,
-          // Only link to the guardian's own patient record when NOT booking
-          // for a dependent — the dependent may not have a patient record yet.
-          patientId: payload.dependentId ? undefined : profile?.id ?? undefined,
-        },
-      }),
+      payload.dependentId
+        ? bookSlotAsGuardian({
+            data: {
+              slotId: payload.slotId,
+              patientName: payload.patientName,
+              patientPhone: payload.patientPhone,
+              reason: payload.reason,
+              nationalId: payload.nationalId ?? null,
+              gender: payload.gender ?? null,
+              notes: `dependent:${payload.dependentId}`,
+              patientId: undefined,
+              dependentId: payload.dependentId,
+            },
+          })
+        : bookSlot({
+            data: {
+              slotId: payload.slotId,
+              patientName: payload.patientName,
+              patientPhone: payload.patientPhone,
+              reason: payload.reason,
+              nationalId: payload.nationalId ?? null,
+              gender: payload.gender ?? null,
+              notes: null,
+              patientId: profile?.id ?? undefined,
+            },
+          }),
+
     onSuccess: async (res) => {
       toast.success("تم تأكيد الحجز بنجاح");
       setConfirmed({ id: res.appointmentId, date: dateStr, time: slot });
