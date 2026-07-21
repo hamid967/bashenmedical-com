@@ -149,6 +149,7 @@ import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes
 import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
 import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_authenticated/admin.no-show-detail'
+import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -955,6 +956,11 @@ const AuthenticatedAdminNoShowDetailRoute =
     path: '/no-show-detail',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminInboxRoute = AuthenticatedAdminInboxRouteImport.update({
+  id: '/inbox',
+  path: '/inbox',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminDesignTokensRoute =
   AuthenticatedAdminDesignTokensRouteImport.update({
     id: '/design-tokens',
@@ -1267,6 +1273,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1442,6 +1449,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1622,6 +1630,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/_authenticated/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1802,6 +1811,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/design-tokens'
+    | '/admin/inbox'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -1977,6 +1987,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/classic'
     | '/admin/design-tokens'
+    | '/admin/inbox'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -2156,6 +2167,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/design-tokens'
+    | '/_authenticated/admin/inbox'
     | '/_authenticated/admin/no-show-detail'
     | '/_authenticated/admin/no-show-risk'
     | '/_authenticated/admin/no-show-stats'
@@ -3294,6 +3306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNoShowDetailRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/inbox': {
+      id: '/_authenticated/admin/inbox'
+      path: '/inbox'
+      fullPath: '/admin/inbox'
+      preLoaderRoute: typeof AuthenticatedAdminInboxRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/design-tokens': {
       id: '/_authenticated/admin/design-tokens'
       path: '/design-tokens'
@@ -3574,6 +3593,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
+  AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
   AuthenticatedAdminNoShowDetailRoute: typeof AuthenticatedAdminNoShowDetailRoute
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
   AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
@@ -3594,6 +3614,7 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
+  AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
   AuthenticatedAdminNoShowDetailRoute: AuthenticatedAdminNoShowDetailRoute,
   AuthenticatedAdminNoShowRiskRoute: AuthenticatedAdminNoShowRiskRoute,
   AuthenticatedAdminNoShowStatsRoute: AuthenticatedAdminNoShowStatsRoute,

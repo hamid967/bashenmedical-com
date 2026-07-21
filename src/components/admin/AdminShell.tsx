@@ -22,6 +22,7 @@ import {
   Package,
   FileBarChart,
   Gauge,
+  Inbox,
 } from "lucide-react";
 
 export type AdminRole = "admin" | "super_admin" | "reception" | "doctor" | "nurse" | "hr" | "pharmacy";
@@ -46,6 +47,7 @@ const NAV: NavGroup[] = [
   {
     title: "العمليات",
     items: [
+      { to: "/admin/inbox", label: "الصندوق الموحد", icon: Inbox, roles: ["admin", "super_admin", "reception"] },
       { to: "/appointments-queue", label: "طابور المواعيد", icon: CalendarCheck, roles: ["admin", "reception", "doctor"] },
       { to: "/calendar", label: "التقويم", icon: CalendarCheck },
       { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
