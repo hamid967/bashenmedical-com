@@ -1,78 +1,96 @@
-# الدفعة 5 — بيانات حجز حقيقية على CI (Zero-Flake)
+# خطة تطوير نظام الحجوزات — رؤية 2030
 
-**الهدف:** كل اختبار E2E للحجز يشتغل على fixtures ثابتة معروفة الخصائص، مع seed قبل الاختبارات وcleanup بعدها، بدون أي أثر جانبي على البيانات الإنتاجية.
+الهدف: الانتقال من نظام حجز رقمي إلى منظومة رعاية استباقية ذكية متوافقة مع رؤية 2030 الصحية (تجربة مريض شاملة، بيانات موحّدة، ذكاء اصطناعي، تكامل وطني، إتاحة كاملة).
 
-## 1. Fixtures ثابتة معروفة الـ slugs
+## المحاور الستة
 
-جميع الصفوف مُميّزة بـ `slug` يبدأ بـ `e2e-` لضمان تنظيف آمن ومحدود.
+### 1) Patient 360 & Unified Identity
+- ربط المريض برقم الهوية/الإقامة (`national_id`) + توحيد السجل الطبي (MRN موحّد عبر الفروع).
+- تكامل مع منصة **نفاذ الوطني الموحّد** لتسجيل دخول بدون كلمة مرور.
+- تكامل **صحتي / وصفتي / أنا** لسحب الملف الصحي والوصفات واللقاحات.
+- بروفايل موحّد يجمع: الحجوزات + الفواتير + التقارير + التأمين + العائلة.
 
-| الجدول | البيانات |
-|---|---|
-| `branches` | `slug='e2e-branch'`, `name_ar='فرع اختبار E2E'`, `name_en='E2E Test Branch'`, `is_active=true`, `city_ar='الرياض'` |
-| `specialties` | `slug='e2e-specialty'`, `name_ar='تخصص اختبار'`, `name_en='E2E Specialty'`, `is_active=true` |
-| `doctors` | `slug='e2e-doctor'`, `name_ar='د. اختبار E2E'`, `name_en='Dr. E2E Test'`, `specialty_id=<↑>`, `branch_id=<↑>`, `gender='male'`, `is_active=true` |
-| `doctor_branches` | ربط `(doctor, branch, is_primary=true)` |
-| `availability_slots` | 14 يوم قادمة × 6 سلوتس/يوم (09:00–12:00 كل 30د) بحالة `available` |
+### 2) Smart Booking 2.0 (AI-Assisted)
+- **Triage ذكي**: نموذج LLM (Lovable AI Gateway) يقترح التخصص/الطبيب المناسب من وصف الأعراض بالعربية/الإنجليزية.
+- **Auto-Rebooking**: عند إلغاء طبيب لموعده، النظام يعيد جدولة كل المرضى تلقائياً بأقرب بديل مناسب مع إشعار الموافقة.
+- **Predictive No-Show**: تقدير احتمال عدم الحضور واقتراح Overbooking محسوب أو تعزيز التذكير.
+- **Voice Booking**: حجز صوتي (Web Speech + STT) للمسنين وذوي الإعاقة.
+- **WhatsApp Booking Bot** كامل عبر Cloud API (Sprint مستقل).
 
-كل الـ INSERTs تستخدم `ON CONFLICT (slug) DO UPDATE`/`DO NOTHING` → **idempotent**.
+### 3) Omnichannel & Real-Time
+- **Realtime Slots** عبر Supabase Realtime: تحديث فوري للـ availability لكل المتصفحات المفتوحة (لا تعارض في القبض).
+- قنوات دخول موحّدة: Web + PWA + WhatsApp + Voice + Kiosk (فرع) + رابط عميق من صحتي.
+- **Digital Front Door**: صفحة `/book` واحدة تتكيّف حسب السياق (زائر، مريض معروف، عائلة، تأمين).
 
-## 2. سكربتات
+### 4) Insurance & Financial 2030
+- تكامل **NPHIES** المباشر للتحقق من الأهلية وطلب الموافقة المسبقة قبل تأكيد الحجز.
+- **Cost Transparency**: عرض السعر التقديري + نسبة التغطية + مبلغ المريض قبل التأكيد.
+- **Split Payment**: بطاقة + محفظة (Apple Pay / STC Pay / mada Pay) + خطة تقسيط (Tabby/Tamara) لعمليات >1000 ريال.
+- إصدار **فاتورة ZATCA E-Invoice Phase 2** تلقائياً (QR + XML) بعد الدفع.
 
-- `scripts/ci/ensure-e2e-booking-fixtures.py` — يزرع الـ fixtures عبر REST + service_role (مطابقة لنمط `ensure-e2e-admin.py`). يعيد `E2E_BRANCH_SLUG` و`E2E_DOCTOR_SLUG` لـ stdout كـ GitHub outputs.
-- `scripts/ci/cleanup-e2e-booking-fixtures.py` — يحذف بدقة:
-  1. `appointments` حيث `doctor_id = E2E_DOCTOR_ID`
-  2. `slot_holds` لنفس الـ doctor
-  3. `availability_slots` (تنحذف تلقائيًا مع الطبيب لكن نصرّح للسرعة)
-  4. `doctor_branches` → `doctors` → `specialties` → `branches` بترتيب الاعتماد
-  يعمل دائمًا حتى لو فشل الـ E2E (`if: always()`).
+### 5) Post-Visit Continuity of Care
+- **Follow-up تلقائي**: بعد N يوم من الزيارة، اقتراح موعد متابعة حسب البروتوكول الطبي للتخصص.
+- **Care Plans**: خطة رعاية للأمراض المزمنة (سكري/ضغط) مع تذكيرات دواء + قراءات + مواعيد دورية.
+- **Second Opinion داخلي** بضغطة زر من تقرير موجود.
+- **Home-Care Bridge**: تحويل حجز عيادة إلى زيارة منزلية إن كان مناسباً طبياً.
 
-## 3. تعديل الاختبارات لاستهداف الـ fixtures
+### 6) Governance, Accessibility & Trust
+- **CBAHI/JCI-ready audit trail**: كل تعديل حجز/إلغاء/تأمين مُسجَّل في `appointment_audit` بتوقيع رقمي.
+- **PDPL/HIPAA-aligned**: تشفير PII، سياسات RLS مشدّدة، سجل موافقات (`consent_records`) لكل مشاركة بيانات.
+- **WCAG 2.2 AA** كامل + **صمم للجميع**: قارئ شاشة، تباين، لغة إشارة (فيديو للتعليمات).
+- **Multi-language**: AR/EN/UR + إضافة FR/HI حسب ديموغرافيا المرضى.
+- **SLA Dashboard**: p95 للحجز <15s، توفر 99.9%، زمن رد OTP <5s.
 
-بدل `.first` عشوائي على كل خطوة، الاختبارات ستقرأ من env vars:
-- `E2E_BRANCH_NAME` (default `فرع اختبار E2E`) — يُستخدم في selector Step 2
-- `E2E_SPECIALTY_NAME` (default `تخصص اختبار`) — Step 3
-- `E2E_DOCTOR_NAME` (default `د. اختبار E2E`) — Step 4
-
-هذا يضمن أن الاختبار لا يتأثر بترتيب البيانات الحقيقية ولا يحجز طبيبًا حقيقيًا بالخطأ.
-
-تحديث:
-- `book_full_journey_en.py`
-- `book_hold_banner_ar.py`
-- `book_conflict_returns_to_step6.py`
-- `tests/e2e/_helpers.py` (يضيف `pick_by_text(locator, text)` مساعِد)
-
-الاختبارات `book_branch_form_render.py` و`book_center_form_render.py` تعتمد على `/branches/{slug}` و`/excellence/{slug}` لبيانات حقيقية → تبقى كما هي (تُختبر عرض form فقط، لا حجز).
-
-## 4. CI wiring
-
-في job `e2e-booking` بـ `.github/workflows/ci.yml`:
+## المراحل (Sprints)
 
 ```text
-1. Verify secrets                     (existing)
-2. Setup Node/Python/Playwright       (existing)
-3. Build app                          (existing)
-4. ensure-e2e-admin.py                (existing)
-5. + ensure-e2e-booking-fixtures.py   ← NEW  (pre-tests)
-6. Start preview server               (existing)
-7. Run 6 booking E2E scripts          (existing, mildly updated)
-8. Upload artifacts (if failure)      (existing)
-9. + cleanup-e2e-booking-fixtures.py  ← NEW  (if: always())
+Q1 2026 — Foundation
+  S1: NPHIES Eligibility + Cost Transparency
+  S2: Realtime Slots + Predictive No-Show v1
+  S3: نفاذ SSO + Patient 360 unified view
+
+Q2 2026 — Intelligence
+  S4: AI Triage (Lovable AI) + Voice Booking
+  S5: Auto-Rebooking Engine + Waitlist 2.0
+  S6: WhatsApp Booking Bot (Cloud API)
+
+Q3 2026 — Financial & Continuity
+  S7: ZATCA E-Invoice Phase 2 + Split Payment
+  S8: Follow-up Scheduler + Chronic Care Plans
+  S9: Home-Care Bridge + Second Opinion 1-click
+
+Q4 2026 — Trust & Scale
+  S10: PDPL Compliance Pack + Consent Ledger
+  S11: WCAG 2.2 AA audit + Sign-Language content
+  S12: SLA Observability + Chaos testing
 ```
 
-env المُصدَّرة للاختبارات: `E2E_BRANCH_NAME`, `E2E_SPECIALTY_NAME`, `E2E_DOCTOR_NAME`.
+## التقنيات (تفاصيل تنفيذية)
 
-## 5. تفاصيل تقنية
+- **قاعدة البيانات**: جداول جديدة — `care_plans`, `follow_up_rules`, `nphies_requests`, `triage_sessions`, `voice_booking_transcripts`, `no_show_predictions`. كل جدول مع GRANTs + RLS من اليوم الأول.
+- **Server Functions**: `createServerFn` لكل عمليات NPHIES/ZATCA/نفاذ (أسرار في env، تحقق توقيع، rate-limit).
+- **Realtime**: Supabase Realtime على `availability_slots` + broadcast channel للـ `slot_holds`.
+- **AI**: `lovable-ai` gateway بموديل `google/gemini-2.5-flash` للـ triage (رخيص/سريع)، `gpt-5` للحالات المعقدة.
+- **Observability**: توسيع `web_vitals` + `security_audit_log` + جدول `sla_events` مع لوحة `/admin/sla`.
+- **Testing**: كل Sprint = ≥3 E2E جدد (AR+EN+UR) + preflight CI + artifacts on failure (نمطنا الحالي).
 
-- **الأمان:** الـ slug prefix `e2e-` يمنع cleanup من لمس بيانات حقيقية. الفحص الأول في cleanup: `SELECT id FROM doctors WHERE slug LIKE 'e2e-%'` ثم يعمل على الـ IDs فقط.
-- **الـ RLS:** service_role يتخطى RLS، لذلك السكربتات تكتب مباشرة عبر PostgREST/REST مع `apikey + Bearer` كما في `ensure-e2e-admin.py`.
-- **التصادم مع الحجز الحقيقي:** الاختبار الوحيد الذي يُنشئ `appointment` هو `book_full_journey_en.py`. الـ cleanup يحذف كل `appointments` للطبيب E2E → لا تراكم.
-- **التوقيت:** slots تُحسب من `today()` بتوقيت الرياض إلى `today() + 14 days`، ما يضمن دائمًا وجود يوم متاح بغضّ النظر عن يوم التشغيل.
-- **الاختبار المحلي:** السكربتات تعمل محليًا بنفس env vars؛ يمكن للمطور تشغيل `python scripts/ci/ensure-e2e-booking-fixtures.py` ثم `E2E_BRANCH_NAME=... python tests/e2e/book_full_journey_en.py`.
+## KPIs 2030
 
-## معايير القبول (DoD)
+| المؤشر | اليوم | هدف 2030 |
+|---|---|---|
+| زمن إتمام الحجز | ~90s | <30s |
+| نسبة الحجوزات بدون موظف | ~60% | >95% |
+| No-show rate | ~18% | <7% |
+| قنوات الحجز | 2 | 6 |
+| توفر النظام | 99% | 99.95% |
+| رضا المريض (CSAT) | — | >4.7/5 |
+| WCAG compliance | جزئي | AA كامل |
 
-- [ ] `ensure-e2e-booking-fixtures.py` idempotent (تشغيلين متتاليين → نفس النتيجة، لا صفوف مكرّرة)
-- [ ] `cleanup-e2e-booking-fixtures.py` لا يمس أي صف لا يبدأ slug بـ `e2e-`
-- [ ] الـ 3 اختبارات المُعدّلة تختار الـ fixture بالاسم لا بـ `.first` عشوائي
-- [ ] Cleanup يعمل حتى لو فشلت الاختبارات (`if: always()`)
-- [ ] Job الـ E2E يخضر بشكل ثابت 3 مرات متتالية على PR
+## المخاطر والتخفيف
+
+- **NPHIES/نفاذ**: تعتمد موافقات حكومية → ابدأ بطلب الاعتماد بالتوازي مع Sprint 1.
+- **AI Triage**: مسؤولية طبية → إظهار تنبيه "اقتراح غير تشخيصي" + مراجعة طبيب قبل التأكيد للحالات الحرجة.
+- **Predictive No-Show**: تحيّز محتمل → مراجعة النموذج ربعياً + عدم استخدامه لرفض حجز.
+
+## نقطة البداية المقترحة
+Sprint 1 (NPHIES Eligibility + Cost Transparency) — أعلى أثر مالي وتجربة مريض، ويفتح الباب للتكاملات الحكومية اللاحقة. أبدأ به فور موافقتك.

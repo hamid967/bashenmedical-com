@@ -44,10 +44,37 @@ export function StepReview({
           ))}
         </dl>
 
-        {isInsurance && est && est.eligible && est.patient_share != null && (
-          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 flex items-center justify-between">
-            <span>{t("insurance.patientShare")}</span>
-            <span className="font-mono font-semibold">{est.patient_share} SAR</span>
+        {isInsurance && est && est.eligible && (
+          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+            <div className="font-semibold mb-2 flex items-center gap-2">
+              <span>{t("insurance.costBreakdown")}</span>
+            </div>
+            <dl className="space-y-1.5">
+              {est.consultation_fee != null && (
+                <div className="flex items-center justify-between">
+                  <dt className="text-emerald-800">{t("insurance.fee")}</dt>
+                  <dd className="font-mono">{est.consultation_fee} SAR</dd>
+                </div>
+              )}
+              {est.coverage_percent != null && (
+                <div className="flex items-center justify-between">
+                  <dt className="text-emerald-800">{t("insurance.coverage")}</dt>
+                  <dd className="font-mono">{est.coverage_percent}%</dd>
+                </div>
+              )}
+              {est.covered_amount != null && (
+                <div className="flex items-center justify-between">
+                  <dt className="text-emerald-800">{t("insurance.coveredAmount")}</dt>
+                  <dd className="font-mono">−{est.covered_amount} SAR</dd>
+                </div>
+              )}
+              {est.patient_share != null && (
+                <div className="flex items-center justify-between border-t border-emerald-200 pt-1.5 mt-1.5">
+                  <dt className="font-semibold">{t("insurance.patientShare")}</dt>
+                  <dd className="font-mono font-bold text-base">{est.patient_share} SAR</dd>
+                </div>
+              )}
+            </dl>
           </div>
         )}
 

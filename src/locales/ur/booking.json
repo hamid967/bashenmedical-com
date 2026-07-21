@@ -113,7 +113,9 @@
     "notEligible": "اہلیت کی تصدیق نہیں ہوئی",
     "fee": "مشاورت کی فیس",
     "coverage": "کوریج",
-    "patientShare": "مریض کا حصہ"
+    "coveredAmount": "انشورنس ادا کرے گا",
+    "patientShare": "مریض کا حصہ",
+    "costBreakdown": "لاگت کی تفصیل"
   },
   "review": {
     "title": "اپنی بکنگ کا جائزہ لیں",

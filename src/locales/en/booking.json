@@ -117,7 +117,9 @@
     "notEligible": "Not confirmed eligible",
     "fee": "Consultation fee",
     "coverage": "Coverage",
-    "patientShare": "Patient share"
+    "coveredAmount": "Insurance covers",
+    "patientShare": "Patient share",
+    "costBreakdown": "Cost breakdown"
   },
   "hold": {
     "holding": "This slot is held for you",

@@ -2544,6 +2544,93 @@ export type Database = {
           },
         ]
       }
+      nphies_requests: {
+        Row: {
+          consultation_fee: number | null
+          coverage_percent: number | null
+          covered_amount: number | null
+          created_at: string
+          doctor_id: string | null
+          eligible: boolean | null
+          error_message: string | null
+          http_status: number | null
+          id: string
+          ip: unknown
+          latency_ms: number | null
+          member_id: string | null
+          mode: string
+          patient_national_id: string | null
+          patient_share: number | null
+          policy_number: string | null
+          provider_id: string | null
+          raw_request: Json | null
+          raw_response: Json | null
+          reason: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          consultation_fee?: number | null
+          coverage_percent?: number | null
+          covered_amount?: number | null
+          created_at?: string
+          doctor_id?: string | null
+          eligible?: boolean | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          ip?: unknown
+          latency_ms?: number | null
+          member_id?: string | null
+          mode: string
+          patient_national_id?: string | null
+          patient_share?: number | null
+          policy_number?: string | null
+          provider_id?: string | null
+          raw_request?: Json | null
+          raw_response?: Json | null
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          consultation_fee?: number | null
+          coverage_percent?: number | null
+          covered_amount?: number | null
+          created_at?: string
+          doctor_id?: string | null
+          eligible?: boolean | null
+          error_message?: string | null
+          http_status?: number | null
+          id?: string
+          ip?: unknown
+          latency_ms?: number | null
+          member_id?: string | null
+          mode?: string
+          patient_national_id?: string | null
+          patient_share?: number | null
+          policy_number?: string | null
+          provider_id?: string | null
+          raw_request?: Json | null
+          raw_response?: Json | null
+          reason?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nphies_requests_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nphies_requests_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       nurse_calls: {
         Row: {
           accepted_at: string | null
