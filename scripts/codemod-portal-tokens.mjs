@@ -354,11 +354,34 @@ for (const f of files) {
 }
 
 // إخراج
-const mode = WRITE ? "WRITE" : "dry-run";
+const mode = WRITE ? "WRITE" : (DRY_RUN_FLAG ? "dry-run (تقدير)" : "dry-run");
 console.log(`portal-tokens codemod — ${mode}`);
-console.log(`ملفات مُتأثِّرة: ${totalFiles}  ·  استبدالات: ${totalReplacements}`);
-for (const p of perFile.slice(0, 30)) console.log(`  • ${p.rel}  (${p.changed})`);
-if (perFile.length > 30) console.log(`  … +${perFile.length - 30} ملف آخر`);
+console.log(`نطاق: ${files.length} ملف مُرشَّح  ·  مُتأثِّر: ${totalFiles}  ·  استبدالات: ${totalReplacements}`);
+
+// تفصيل حسب المجلد (يُعرض دائمًا حتى في dry-run)
+if (perFile.length) {
+  const byDir = new Map();
+  for (const p of perFile) {
+    const dir = dirname(p.rel);
+    const agg = byDir.get(dir) ?? { files: 0, changed: 0 };
+    agg.files++;
+    agg.changed += p.changed;
+    byDir.set(dir, agg);
+  }
+  const rows = [...byDir.entries()].sort((a, b) => b[1].changed - a[1].changed);
+  console.log(`\nتفصيل حسب المجلد:`);
+  const dirW = Math.min(60, Math.max(...rows.map(([d]) => d.length)));
+  for (const [dir, agg] of rows) {
+    console.log(`  ${dir.padEnd(dirW)}  ${String(agg.files).padStart(3)} ملف · ${String(agg.changed).padStart(4)} استبدال`);
+  }
+
+  const topN = VERBOSE ? perFile.length : Math.min(30, perFile.length);
+  console.log(`\nأعلى الملفات (${topN}${topN < perFile.length ? `/${perFile.length}` : ""}):`);
+  for (const p of perFile.sort((a, b) => b.changed - a.changed).slice(0, topN)) {
+    console.log(`  • ${p.rel}  (${p.changed})`);
+  }
+  if (!VERBOSE && perFile.length > 30) console.log(`  … +${perFile.length - 30} ملف آخر (شغّل بـ --verbose للقائمة الكاملة)`);
+}
 
 if (VERBOSE && skippedAll.length) {
   console.log(`\nتنبيه — utilities قريبة لم تُحوَّل (تحتاج قرار يدوي):`);
@@ -370,6 +393,9 @@ if (VERBOSE && skippedAll.length) {
 
 if (!WRITE) {
   console.log(`\nلتطبيق التغييرات:  bun run codemod:portal-tokens -- --write`);
-  console.log(`لعرض القواعد كاملة:  bun run codemod:portal-tokens -- --list-rules`);
+  console.log(`تقييد بـ glob:      bun run codemod:portal-tokens -- --glob "src/routes/_authenticated/portal.prescriptions*.tsx"`);
+  console.log(`تقييد بقائمة:       bun run codemod:portal-tokens -- --paths .codemod-scope.txt`);
+  console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
   console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
 }
+
