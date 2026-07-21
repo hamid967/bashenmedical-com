@@ -15,7 +15,11 @@
     "altAvailable": "Alternative doctor available:",
     "earliestSlot": "Earliest slot",
     "bookAlt": "Book alternative",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "conflictReason": "This slot was just booked by another patient (concurrent conflict). To avoid double-booking, we picked nearby alternatives for you below:",
+    "nearestSlotsSameDoctor": "Nearest available slots with the same doctor:",
+    "pickSlot": "Book this time",
+    "noAlternatives": "No alternatives available right now — try another date or join the waitlist."
   },
   "steps": {
     "service": "Service",
