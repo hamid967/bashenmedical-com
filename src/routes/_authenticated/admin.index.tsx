@@ -12,6 +12,7 @@ import {
   Legend,
 } from "recharts";
 import { getAdminStats, getMyRoles, getAdminTrends } from "@/lib/admin.functions";
+import { KpiGrid } from "@/components/admin/v2/KpiGrid";
 import type { AdminRole } from "@/components/admin/AdminShell";
 import {
   CalendarCheck,
