@@ -88,6 +88,14 @@ function PageEditor() {
     });
   }
 
+  useEffect(() => {
+    if (isNew) return;
+    (async () => {
+      try {
+        const row: any = await getFn({ data: { id } });
+        setForm({
+          slug: row.slug ?? "",
+          title_ar: row.title_ar ?? "",
           title_en: row.title_en ?? "",
           content_ar: row.content_ar ?? "",
           content_en: row.content_en ?? "",
