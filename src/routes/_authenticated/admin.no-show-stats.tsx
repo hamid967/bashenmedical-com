@@ -151,6 +151,45 @@ function NoShowStatsPage() {
     setApplied({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "" });
   }
 
+  const QUICK_RANGES: { key: string; label: string; days?: number; months?: number }[] = [
+    { key: "7d", label: "آخر 7 أيام", days: 7 },
+    { key: "30d", label: "آخر 30 يومًا", days: 30 },
+    { key: "90d", label: "آخر 90 يومًا", days: 90 },
+    { key: "6m", label: "آخر 6 أشهر", months: 6 },
+    { key: "12m", label: "آخر 12 شهرًا", months: 12 },
+    { key: "ytd", label: "منذ بداية السنة" },
+  ];
+
+  function applyQuickRange(r: { key: string; days?: number; months?: number }) {
+    const today = new Date();
+    const end = today.toISOString().slice(0, 10);
+    const start = new Date(today);
+    if (r.key === "ytd") {
+      start.setMonth(0, 1);
+    } else if (r.days) {
+      start.setDate(start.getDate() - (r.days - 1));
+    } else if (r.months) {
+      start.setMonth(start.getMonth() - r.months);
+      start.setDate(start.getDate() + 1);
+    }
+    const startStr = start.toISOString().slice(0, 10);
+    setFrom(startStr); setTo(end);
+    setApplied({ from: startStr, to: end, doctorId, branchId });
+  }
+
+  const activeQuickKey = useMemo(() => {
+    const today = new Date().toISOString().slice(0, 10);
+    if (applied.to !== today) return null;
+    for (const r of QUICK_RANGES) {
+      const s = new Date();
+      if (r.key === "ytd") s.setMonth(0, 1);
+      else if (r.days) s.setDate(s.getDate() - (r.days - 1));
+      else if (r.months) { s.setMonth(s.getMonth() - r.months); s.setDate(s.getDate() + 1); }
+      if (s.toISOString().slice(0, 10) === applied.from) return r.key;
+    }
+    return null;
+  }, [applied.from, applied.to]);
+
   function doctorsData(): (string | number | null)[][] {
     const header = ["الطبيب", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "مؤكد", "متوسط المخاطرة", "نسبة عدم الحضور %"];
     const rows = stats.byDoctor.map((r) => [
@@ -235,6 +274,20 @@ function NoShowStatsPage() {
               مسح
             </button>
           </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap mt-3">
+          <span className="text-[11px] text-muted-foreground">نطاقات سريعة:</span>
+          {QUICK_RANGES.map((r) => {
+            const active = activeQuickKey === r.key;
+            return (
+              <button key={r.key} onClick={() => applyQuickRange(r)}
+                className={`rounded-full border px-3 py-1 text-xs ${active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border hover:bg-muted"}`}>
+                {r.label}
+              </button>
+            );
+          })}
         </div>
         <p className="mt-3 text-[11px] text-muted-foreground">
           النطاق النشط: {applied.from} → {applied.to} · {activeDoctorName}
