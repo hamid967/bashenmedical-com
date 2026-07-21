@@ -1467,6 +1467,45 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_reservation_sessions: {
+        Row: {
+          attempts: number
+          code_expires_at: string
+          code_hash: string
+          created_at: string
+          id: string
+          ip: string | null
+          phone: string
+          session_expires_at: string | null
+          session_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_expires_at: string
+          code_hash: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          phone: string
+          session_expires_at?: string | null
+          session_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_expires_at?: string
+          code_hash?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          phone?: string
+          session_expires_at?: string | null
+          session_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       health_articles: {
         Row: {
           author_name: string | null
