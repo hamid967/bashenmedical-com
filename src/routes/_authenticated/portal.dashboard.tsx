@@ -418,7 +418,8 @@ function PortalDashboardPage() {
           </PortalCard>
         </>
       )}
-    </PortalShell>
+    </>
   );
 }
+
 
