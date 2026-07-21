@@ -14,6 +14,24 @@ export const Route = createFileRoute("/careers")({
       { property: "og:url", content: "https://bashenmedical.com/careers" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/careers" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "@id": "https://bashenmedical.com/careers",
+          name: "الوظائف الشاغرة — مجمع باعشن الطبي",
+          description:
+            "فرص وظيفية للأطباء والممرضين والفنيين والإداريين في محافظة صبيا.",
+          url: "https://bashenmedical.com/careers",
+          inLanguage: "ar-SA",
+          isPartOf: { "@id": "https://bashenmedical.com/#website" },
+          publisher: { "@id": "https://bashenmedical.com/#organization" },
+          about: { "@type": "Thing", name: "Medical Careers" },
+        }),
+      },
+    ],
   }),
   component: CareersPage,
 });
