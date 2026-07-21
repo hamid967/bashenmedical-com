@@ -315,6 +315,21 @@ function ConsentRow({
             </div>
           )}
 
+          {/* Live in-app impact */}
+          <div
+            className={`mt-3 rounded-xl border px-3 py-2 text-xs flex items-start gap-2 ${
+              active
+                ? "bg-slate-50 border-slate-200 text-[color:var(--portal-ink-2)]"
+                : "bg-amber-50 border-amber-100 text-amber-900"
+            }`}
+          >
+            <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden />
+            <span>
+              <span className="font-semibold">الأثر المباشر داخل التطبيق:</span>{" "}
+              {catalog.impact_ar}
+            </span>
+          </div>
+
           {/* Expand full text */}
           <button
             type="button"
