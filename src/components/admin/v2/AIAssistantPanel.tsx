@@ -27,9 +27,24 @@ export function AIAssistantPanel({
   const [input, setInput] = useState("");
   const [streaming, setStreaming] = useState(false);
   const [streamed, setStreamed] = useState("");
+  const [model, setModel] = useState<string>("google/gemini-2.5-flash");
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [sessionCredits, setSessionCredits] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  // Live pre-flight estimate from the composer input + conversation history
+  const preEstimate = useMemo(() => {
+    const historyChars = messages.reduce((n, m) => n + m.content.length, 0);
+    const inTok = estimateTokens(input) + Math.ceil(historyChars / 3.5);
+    const outTok = Math.max(64, Math.min(512, Math.round(inTok * 0.6)));
+    return {
+      inTok,
+      outTok,
+      credits: estimateCredits(inTok, outTok, model),
+    };
+  }, [input, messages, model]);
 
   // Load from localStorage once
   useEffect(() => {
