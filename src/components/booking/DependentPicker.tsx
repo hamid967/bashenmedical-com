@@ -141,10 +141,9 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
         ))}
       </div>
       <p className="mt-2 text-[11px] text-muted-foreground">
-        {lang === "ar"
-          ? "سيتم استخدام البيانات المحفوظة تلقائيًا — يمكنك تعديل أي حقل قبل التأكيد."
-          : "Saved details will be filled in — you can edit any field before confirming."}
+        {t("patientExtra.savedNote")}
       </p>
+
     </div>
   );
 }
