@@ -45,7 +45,7 @@ function OwnerPagesList() {
           <p className="text-sm text-slate-500 mt-1">أنشئ صفحات مخصصة (عنّا، الرسالة، إلخ) وانشرها للجمهور.</p>
         </div>
         <Button asChild>
-          <Link to="/owner/pages/new"><Plus className="h-4 w-4 ml-1" /> صفحة جديدة</Link>
+          <Link to="/owner/pages/$id" params={{ id: "new" }}><Plus className="h-4 w-4 ml-1" /> صفحة جديدة</Link>
         </Button>
       </div>
 
