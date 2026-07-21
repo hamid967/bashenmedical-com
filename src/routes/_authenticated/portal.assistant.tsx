@@ -76,6 +76,15 @@ function AssistantPage() {
     const startedAt = performance.now();
     const promptText = next.map((m) => `${m.role}: ${m.content}`).join("\n");
     const initialMeta: MessageCostMeta = { startedAt, promptText };
+
+    const limits = getDefaultLimits("portal");
+    const pre = preflightBudget({ surface: "portal", limits, promptText });
+    if (!pre.ok) {
+      setError(budgetBlockMessage(pre, "ar"));
+      setStreaming(false);
+      return;
+    }
+
     const updateLastMeta = (patch: Partial<MessageCostMeta>) => {
       setMessages((m) => {
         const copy = m.slice();
