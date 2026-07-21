@@ -126,6 +126,14 @@ function ManagePage() {
   const [undoMsLeft, setUndoMsLeft] = useState<number>(0);
   const undoExpired = undoDeadline !== null && undoMsLeft <= 0;
   const undoSecondsLeft = Math.max(0, Math.ceil(undoMsLeft / 1000));
+  const [undoResult, setUndoResult] = useState<{
+    restored_status: string;
+    slot_rebooked: boolean;
+    waitlist_reverted: boolean;
+    prior_released: boolean;
+    prior_waitlist_notified: boolean;
+    restored_at: number;
+  } | null>(null);
   const [activeReschedId, setActiveReschedId] = useState<string | null>(null);
   const [rescheduleDate, setRescheduleDate] = useState("");
   const [rescheduleTime, setRescheduleTime] = useState("");
@@ -329,14 +337,20 @@ function ManagePage() {
             a.id === id ? { ...a, status: res.restored_status ?? "confirmed" } : a,
           ),
         );
+        setUndoResult({
+          restored_status: res.restored_status ?? "confirmed",
+          slot_rebooked: res.slot_rebooked ?? false,
+          waitlist_reverted: res.waitlist_reverted ?? false,
+          prior_released: cancelResult?.released ?? false,
+          prior_waitlist_notified: cancelResult?.waitlist_notified ?? false,
+          restored_at: Date.now(),
+        });
         sonner.success("تم استرجاع الحجز.", {
           description: res.slot_rebooked
             ? "تم إعادة تثبيت الموعد بنجاح."
             : "أعيدت حالة الحجز — سيتواصل معك الفريق للتأكيد.",
         });
-        setActiveCancelId(null);
-        setCancelResult(null);
-        setCancelPhase("reason");
+        setCancelPhase("done");
         setUndoDeadline(null);
         setUndoMsLeft(0);
         if (sessionToken) listAppts.mutate(sessionToken);
@@ -855,41 +869,96 @@ function ManagePage() {
                               </li>
                             </ul>
                           </div>
+                          {undoResult && (
+                            <div className="rounded-md border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+                              <div className="flex items-center gap-2 font-semibold">
+                                <RefreshCw className="h-4 w-4" />
+                                تم استرجاع الحجز
+                              </div>
+                              <ul className="mt-2 space-y-1 text-xs">
+                                <li className="flex items-start gap-1.5">
+                                  <CheckCircle2 className="h-3.5 w-3.5 mt-0.5" />
+                                  <span>
+                                    الحالة الآن:{" "}
+                                    <strong>
+                                      {undoResult.restored_status === "confirmed"
+                                        ? "مؤكَّد"
+                                        : undoResult.restored_status}
+                                    </strong>{" "}
+                                    (بعد أن كانت: ملغى)
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-1.5">
+                                  {undoResult.slot_rebooked ? (
+                                    <CheckCircle2 className="h-3.5 w-3.5 mt-0.5" />
+                                  ) : (
+                                    <AlertCircle className="h-3.5 w-3.5 mt-0.5" />
+                                  )}
+                                  <span>
+                                    السلوت:{" "}
+                                    {undoResult.slot_rebooked
+                                      ? undoResult.prior_released
+                                        ? "أُعيد تثبيته بنجاح (كان محرَّرًا)."
+                                        : "تم تثبيته."
+                                      : "لم يُعَد تثبيته تلقائيًا — سيراجعه الفريق."}
+                                  </span>
+                                </li>
+                                <li className="flex items-start gap-1.5">
+                                  {undoResult.waitlist_reverted ? (
+                                    <CheckCircle2 className="h-3.5 w-3.5 mt-0.5" />
+                                  ) : (
+                                    <span className="mt-0.5">•</span>
+                                  )}
+                                  <span>
+                                    قائمة الانتظار:{" "}
+                                    {undoResult.waitlist_reverted
+                                      ? "تم إرجاع صف الإشعار إلى «قيد الانتظار»."
+                                      : undoResult.prior_waitlist_notified
+                                        ? "تعذّر التراجع عن الإشعار — قد يكون المريض المُبلَّغ قد قبل بالفعل."
+                                        : "لم يُرسَل أي إشعار عند الإلغاء — لا شيء للتراجع عنه."}
+                                  </span>
+                                </li>
+                              </ul>
+                            </div>
+                          )}
                           <div className="flex flex-col gap-2">
                             <div className="flex items-center justify-between gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => undoCancel.mutate(a.id)}
-                                disabled={undoExpired || undoDeadline === null || undoCancel.isPending}
-                                className="border-amber-300 text-amber-900 hover:bg-amber-50 disabled:opacity-60"
-                                aria-live="polite"
-                                aria-label={
-                                  undoExpired
-                                    ? "انتهت مهلة التراجع البالغة 30 ثانية"
-                                    : `تراجع عن الإلغاء، متبقٍّ ${undoSecondsLeft} ثانية`
-                                }
-                              >
-                                {undoCancel.isPending ? (
-                                  <>
-                                    <Loader2 className="h-4 w-4 animate-spin ml-2" />
-                                    جاري الاسترجاع…
-                                  </>
-                                ) : !undoExpired ? (
-                                  <>
-                                    <RefreshCw className="h-4 w-4 ml-1.5" />
-                                    تراجع عن الإلغاء ({undoSecondsLeft}ث)
-                                  </>
-                                ) : (
-                                  <>
-                                    <AlertCircle className="h-4 w-4 ml-1.5" />
-                                    انتهت مهلة التراجع
-                                  </>
-                                )}
-                              </Button>
+                              {!undoResult && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => undoCancel.mutate(a.id)}
+                                  disabled={undoExpired || undoDeadline === null || undoCancel.isPending}
+                                  className="border-amber-300 text-amber-900 hover:bg-amber-50 disabled:opacity-60"
+                                  aria-live="polite"
+                                  aria-label={
+                                    undoExpired
+                                      ? "انتهت مهلة التراجع البالغة 30 ثانية"
+                                      : `تراجع عن الإلغاء، متبقٍّ ${undoSecondsLeft} ثانية`
+                                  }
+                                >
+                                  {undoCancel.isPending ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 animate-spin ml-2" />
+                                      جاري الاسترجاع…
+                                    </>
+                                  ) : !undoExpired ? (
+                                    <>
+                                      <RefreshCw className="h-4 w-4 ml-1.5" />
+                                      تراجع عن الإلغاء ({undoSecondsLeft}ث)
+                                    </>
+                                  ) : (
+                                    <>
+                                      <AlertCircle className="h-4 w-4 ml-1.5" />
+                                      انتهت مهلة التراجع
+                                    </>
+                                  )}
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="sm"
+                                className={undoResult ? "ml-auto" : ""}
                                 onClick={() => {
                                   setActiveCancelId(null);
                                   setCancelReason("");
@@ -897,12 +966,13 @@ function ManagePage() {
                                   setCancelPhase("reason");
                                   setUndoDeadline(null);
                                   setUndoMsLeft(0);
+                                  setUndoResult(null);
                                 }}
                               >
                                 إغلاق
                               </Button>
                             </div>
-                            {undoExpired && (
+                            {undoExpired && !undoResult && (
                               <p
                                 className="text-xs text-amber-800/80"
                                 role="status"
