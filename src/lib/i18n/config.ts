@@ -39,7 +39,7 @@ if (!i18n.isInitialized) {
     resources,
     lng: DEFAULT_LANG,
     fallbackLng: DEFAULT_LANG,
-    supportedLngs: SUPPORTED_LANGS as unknown as string[],
+    supportedLngs: [...SUPPORTED_LANGS, ...EXTRA_LOCALES] as string[],
     defaultNS: "common",
     ns: ["common", "booking"],
     interpolation: { escapeValue: false },
