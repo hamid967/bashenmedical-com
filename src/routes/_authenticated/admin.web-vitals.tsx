@@ -3,15 +3,38 @@
  * with per-flow path filtering (booking / reschedule-cancel / waitlist / custom).
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { Activity, Filter, Gauge, RefreshCw } from "lucide-react";
 import {
   getWebVitalsSummary,
   type MetricStats,
   type WebVitalMetric,
-  type WebVitalsSummary,
 } from "@/lib/admin/web-vitals.functions";
+import { getMyRoles } from "@/lib/admin.functions";
+import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import type { Column } from "@/lib/export-utils";
+
+type MetricRow = MetricStats & { rating: string };
+type PathRow = { path: string; count: number };
+
+const METRIC_COLS: Column<MetricRow>[] = [
+  { header: "المقياس", accessor: (r) => r.metric },
+  { header: "عدد العينات", accessor: (r) => r.count },
+  { header: "p50", accessor: (r) => (r.p50 === null ? "" : r.metric === "CLS" ? r.p50.toFixed(3) : Math.round(r.p50)) },
+  { header: "p75", accessor: (r) => (r.p75 === null ? "" : r.metric === "CLS" ? r.p75.toFixed(3) : Math.round(r.p75)) },
+  { header: "p95", accessor: (r) => (r.p95 === null ? "" : r.metric === "CLS" ? r.p95.toFixed(3) : Math.round(r.p95)) },
+  { header: "جيد", accessor: (r) => r.good },
+  { header: "بحاجة تحسين", accessor: (r) => r.needs },
+  { header: "ضعيف", accessor: (r) => r.poor },
+  { header: "التقييم (p75)", accessor: (r) => r.rating },
+];
+
+const PATH_COLS: Column<PathRow>[] = [
+  { header: "المسار", accessor: (r) => r.path, width: 60 },
+  { header: "عدد العينات", accessor: (r) => r.count },
+];
 
 type Preset = { id: string; label: string; path: string | null };
 
