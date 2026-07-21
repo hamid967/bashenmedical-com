@@ -4192,6 +4192,48 @@ export type Database = {
           },
         ]
       }
+      reservation_manage_events: {
+        Row: {
+          appointment_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          ip: string | null
+          meta: Json
+          phone_hash: string | null
+          released: boolean | null
+          slot_rebooked: boolean | null
+          waitlist_notified: boolean | null
+          waitlist_reverted: boolean | null
+        }
+        Insert: {
+          appointment_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          phone_hash?: string | null
+          released?: boolean | null
+          slot_rebooked?: boolean | null
+          waitlist_notified?: boolean | null
+          waitlist_reverted?: boolean | null
+        }
+        Update: {
+          appointment_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          ip?: string | null
+          meta?: Json
+          phone_hash?: string | null
+          released?: boolean | null
+          slot_rebooked?: boolean | null
+          waitlist_notified?: boolean | null
+          waitlist_reverted?: boolean | null
+        }
+        Relationships: []
+      }
       role_permissions: {
         Row: {
           created_at: string
