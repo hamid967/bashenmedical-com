@@ -226,6 +226,20 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
             /* non-fatal */
           }
 
+          try {
+            const { logReservationEvent } = await import(
+              "@/lib/reservation-events.server"
+            );
+            await logReservationEvent({
+              event_type: "cancel_undo_success",
+              phone: sess.phone,
+              appointment_id: appt.id,
+              slot_rebooked,
+              waitlist_reverted,
+              ip,
+            });
+          } catch { /* telemetry best-effort */ }
+
           return jsonResponse(200, {
             ok: true,
             restored_status: "confirmed",
