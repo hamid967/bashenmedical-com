@@ -221,6 +221,7 @@ function BookPage() {
     "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
   >("unknown");
   const [suggestion, setSuggestion] = useState<{ doctorId: string; doctorName: string; time: string; date: string } | null>(null);
+  const [sameDoctorTimes, setSameDoctorTimes] = useState<string[]>([]);
   const [findingAlt, setFindingAlt] = useState(false);
   // Success result survives reload — booking reference lives in
   // sessionStorage so the success screen (step=9) still renders after F5.
