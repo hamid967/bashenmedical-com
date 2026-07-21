@@ -160,6 +160,24 @@ export function BaeshenAssistant() {
     void send(input);
   }
 
+  function stopGeneration() {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    setBusy(false);
+    setMessages((prev) => {
+      const copy = prev.slice();
+      const last = copy[copy.length - 1];
+      if (last && last.role === "assistant") {
+        const suffix = t("\n\n_تم الإيقاف._", "\n\n_Stopped._");
+        copy[copy.length - 1] = {
+          role: "assistant",
+          content: (last.content || "") + suffix,
+        };
+      }
+      return copy;
+    });
+  }
+
   function newConversation() {
     abortRef.current?.abort();
     setMessages([]);
