@@ -10,8 +10,9 @@ import { whatsappUrl } from "@/lib/site";
 import { classifyUserMessage } from "@/lib/ai/safety";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
+import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
 const CID_KEY = "baeshen.ai.cid";
 const NO_SAVE_KEY = "baeshen.ai.no_save";
