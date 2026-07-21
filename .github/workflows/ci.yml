@@ -461,6 +461,7 @@ jobs:
 
 
       - name: Upload E2E artifacts (screenshots, video, trace) on failure
+        id: upload_e2e_artifacts
         if: failure() && steps.verify_secrets.outputs.has_secrets == 'true'
         uses: actions/upload-artifact@v4
         with:
@@ -470,4 +471,43 @@ jobs:
             preview.log
           if-no-files-found: warn
           retention-days: 14
+
+      - name: Build E2E artifact report
+        id: e2e_report
+        if: failure() && steps.verify_secrets.outputs.has_secrets == 'true' && github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "## ❌ Booking E2E failed"
+            echo ""
+            echo "**Run:** [\`${{ github.run_id }}\` / attempt ${{ github.run_attempt }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }})"
+            echo ""
+            if [ -n "${{ steps.upload_e2e_artifacts.outputs.artifact-url }}" ]; then
+              echo "**Artifact bundle (zip):** [download](${{ steps.upload_e2e_artifacts.outputs.artifact-url }})"
+              echo ""
+            fi
+            echo "<details><summary>Captured files</summary>"
+            echo ""
+            if [ -d e2e-artifacts ]; then
+              echo '```text'
+              (cd e2e-artifacts && find . -type f \( -iname '*.png' -o -iname '*.har' -o -iname '*.zip' -o -iname '*.webm' -o -iname '*.log' \) | sort) || true
+              echo '```'
+            else
+              echo "_No e2e-artifacts directory produced._"
+            fi
+            echo ""
+            echo "</details>"
+            echo ""
+            echo "**Legend:** \`*.png\` screenshots · \`*.har\` network trace · \`trace*.zip\` Playwright trace (open at [trace.playwright.dev](https://trace.playwright.dev/)) · \`*.webm\` video · \`preview.log\` server log"
+          } > e2e-comment.md
+          echo "path=e2e-comment.md" >> "$GITHUB_OUTPUT"
+
+      - name: Comment PR with E2E artifact links on failure
+        if: failure() && steps.verify_secrets.outputs.has_secrets == 'true' && github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: e2e-booking-artifacts
+          path: e2e-comment.md
+
 
