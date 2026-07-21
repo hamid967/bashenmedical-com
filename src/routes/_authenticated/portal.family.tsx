@@ -569,7 +569,22 @@ function DependentCard({
                 {missing.map((k) => (
                   <li key={k}>{t(k, lang)}</li>
                 ))}
+                {!verified && (
+                  <li>
+                    {lang === "ar"
+                      ? "توثيق العلاقة من الاستقبال"
+                      : "Relationship verification by reception"}
+                  </li>
+                )}
+                {verified && !bookingAllowed && (
+                  <li>
+                    {lang === "ar"
+                      ? "تفعيل صلاحية الحجز نيابةً من قائمة الصلاحيات أعلاه"
+                      : "Enable the ‘Booking’ scope above"}
+                  </li>
+                )}
               </ul>
+
             </div>
           </div>
         </div>
