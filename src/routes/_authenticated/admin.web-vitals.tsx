@@ -158,6 +158,37 @@ function WebVitalsPage() {
               rows={data.topPaths}
               label="تصدير المسارات"
             />
+            <ExportMenu
+              allowed={isStaff}
+              disabled={isFetching}
+              filename="web-vitals-raw"
+              title="Web Vitals — السجلات الخام"
+              subtitle={exportSubtitle}
+              meta={exportMeta}
+              columns={RAW_COLS}
+              rows={[]}
+              label="تصدير كل النتائج"
+              fetchAll={async () => {
+                const MAX = 50_000;
+                const PAGE = 1000;
+                const out: WebVitalRawRow[] = [];
+                let before: string | null = null;
+                for (let i = 0; i < Math.ceil(MAX / PAGE); i++) {
+                  const res = await rawFn({
+                    data: {
+                      windowHours: filters.windowHours,
+                      pathContains: filters.pathContains ?? undefined,
+                      limit: PAGE,
+                      before: before ?? undefined,
+                    },
+                  });
+                  out.push(...res.rows);
+                  if (!res.hasMore || !res.nextBefore || out.length >= MAX) break;
+                  before = res.nextBefore;
+                }
+                return out;
+              }}
+            />
             <button
               type="button"
               onClick={() => qc.invalidateQueries({ queryKey: ["admin", "web-vitals"] })}
