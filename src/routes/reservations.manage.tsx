@@ -36,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { bmcOgImageMeta } from "@/lib/og-meta";
+import { useI18n } from "@/lib/i18n";
 
 export const Route = createFileRoute("/reservations/manage")({
   head: () => ({
@@ -102,6 +103,7 @@ function formatDate(iso: string): string {
 }
 
 function ManagePage() {
+  const { t } = useI18n();
   const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"phone" | "code" | "list">("phone");
