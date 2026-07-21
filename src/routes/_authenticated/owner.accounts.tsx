@@ -12,6 +12,7 @@ import {
   deleteAccount,
 } from "@/lib/owner/accounts.functions";
 import { Loader2, Search, Shield, UserX, KeyRound, Mail, Trash2, UserCheck } from "lucide-react";
+import { UserPermissionsPanel } from "@/components/owner/UserPermissionsPanel";
 
 export const Route = createFileRoute("/_authenticated/owner/accounts")({
   head: () => ({
