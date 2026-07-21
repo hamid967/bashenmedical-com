@@ -327,3 +327,159 @@ function NoShowStatsPage() {
     </div>
   );
 }
+
+type SortDir = "asc" | "desc";
+type SortState<T> = { key: keyof T & string; dir: SortDir };
+
+type Column<T> = {
+  key: keyof T & string;
+  label: string;
+  align?: "start" | "center" | "end";
+  accessor: (row: T) => string | number;
+  cell: (row: T) => React.ReactNode;
+};
+
+type SortableTableProps<T> = {
+  title: string;
+  rows: T[];
+  columns: Column<T>[];
+  rowKey: (row: T) => string;
+  onExport: () => void;
+  defaultSort: SortState<T>;
+  searchPlaceholder: string;
+  searchFilter: (row: T, query: string) => boolean;
+};
+
+const PAGE_SIZES = [10, 25, 50, 100];
+
+function SortableTable<T>({
+  title, rows, columns, rowKey, onExport, defaultSort, searchPlaceholder, searchFilter,
+}: SortableTableProps<T>) {
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortState<T>>(defaultSort);
+  const [pageSize, setPageSize] = useState(25);
+  const [page, setPage] = useState(1);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => searchFilter(r, q));
+  }, [rows, query, searchFilter]);
+
+  const sorted = useMemo(() => {
+    const col = columns.find((c) => c.key === sort.key);
+    if (!col) return filtered;
+    const dir = sort.dir === "asc" ? 1 : -1;
+    return [...filtered].sort((a, b) => {
+      const av = col.accessor(a);
+      const bv = col.accessor(b);
+      if (typeof av === "number" && typeof bv === "number") return (av - bv) * dir;
+      return String(av).localeCompare(String(bv), "ar") * dir;
+    });
+  }, [filtered, sort, columns]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
+  const safePage = Math.min(page, totalPages);
+  const start = (safePage - 1) * pageSize;
+  const pageRows = sorted.slice(start, start + pageSize);
+
+  function toggleSort(key: keyof T & string) {
+    setSort((prev) => prev.key === key
+      ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
+      : { key, dir: "desc" });
+    setPage(1);
+  }
+
+  return (
+    <section className="rounded-2xl border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 p-4 border-b border-border flex-wrap">
+        <h2 className="text-sm font-bold">{title}</h2>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative">
+            <Search className="h-3.5 w-3.5 absolute start-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <input
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+              placeholder={searchPlaceholder}
+              aria-label={searchPlaceholder}
+              className="ps-7 pe-2 py-1.5 text-xs rounded-md border border-border bg-background w-56"
+            />
+          </div>
+          <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+            aria-label="عدد الصفوف لكل صفحة"
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-xs">
+            {PAGE_SIZES.map((n) => <option key={n} value={n}>{n}/صفحة</option>)}
+          </select>
+          <button onClick={onExport} disabled={!rows.length}
+            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+            <Download className="h-3.5 w-3.5" /> تصدير CSV
+          </button>
+        </div>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/40 text-xs text-muted-foreground">
+            <tr>
+              {columns.map((c) => {
+                const active = sort.key === c.key;
+                const Icon = !active ? ArrowUpDown : sort.dir === "asc" ? ArrowUp : ArrowDown;
+                const alignClass = c.align === "center" ? "text-center" : c.align === "end" ? "text-end" : "text-start";
+                const flexClass = c.align === "center" ? "justify-center" : c.align === "end" ? "justify-end" : "justify-start";
+                return (
+                  <th key={c.key} className={`${alignClass} p-3`}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSort(c.key)}
+                      className={`inline-flex items-center gap-1 ${flexClass} hover:text-foreground ${active ? "text-foreground font-semibold" : ""}`}
+                      aria-label={`فرز حسب ${c.label}`}
+                    >
+                      {c.label}
+                      <Icon className="h-3 w-3 opacity-70" />
+                    </button>
+                  </th>
+                );
+              })}
+            </tr>
+          </thead>
+          <tbody>
+            {pageRows.length === 0 ? (
+              <tr><td colSpan={columns.length} className="p-6 text-center text-sm text-muted-foreground">
+                {query ? "لا نتائج تطابق البحث." : "لا توجد بيانات في هذا النطاق."}
+              </td></tr>
+            ) : pageRows.map((r) => (
+              <tr key={rowKey(r)} className="border-t border-border/60">
+                {columns.map((c) => (
+                  <td key={c.key}
+                    className={`p-3 ${c.align === "center" ? "text-center" : c.align === "end" ? "text-end" : ""}`}>
+                    {c.cell(r)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="flex items-center justify-between gap-2 p-3 border-t border-border text-xs text-muted-foreground flex-wrap">
+        <span>
+          {sorted.length === 0 ? "٠" : `${start + 1}–${Math.min(start + pageSize, sorted.length)}`} من {sorted.length}
+          {query && rows.length !== sorted.length && ` (مفلتر من ${rows.length})`}
+        </span>
+        <div className="flex items-center gap-1">
+          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage <= 1}
+            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 hover:bg-muted disabled:opacity-40"
+            aria-label="السابق">
+            <ChevronRight className="h-3.5 w-3.5 rtl:hidden" /><ChevronLeft className="h-3.5 w-3.5 hidden rtl:inline" />
+            <span>السابق</span>
+          </button>
+          <span className="px-2 tabular-nums">{safePage} / {totalPages}</span>
+          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+            className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 hover:bg-muted disabled:opacity-40"
+            aria-label="التالي">
+            <span>التالي</span>
+            <ChevronLeft className="h-3.5 w-3.5 rtl:hidden" /><ChevronRight className="h-3.5 w-3.5 hidden rtl:inline" />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
