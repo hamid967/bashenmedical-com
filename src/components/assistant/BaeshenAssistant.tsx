@@ -416,6 +416,17 @@ export function BaeshenAssistant() {
             )}
           </div>
 
+          <AssistantCostMeter
+            streaming={busy}
+            hasInput={input.trim().length > 0}
+            model={meterModel}
+            preEstimate={preEstimate}
+            usage={meterUsage}
+            streamedText={meterStreamedText}
+            sessionCredits={sessionCredits}
+            lang={isAr ? "ar" : "en"}
+          />
+
           <form onSubmit={onSubmit} className="border-t bg-background p-3">
             <div className="flex items-end gap-2">
               <Textarea
