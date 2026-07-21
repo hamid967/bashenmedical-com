@@ -14,13 +14,15 @@ import {
 export const Route = createFileRoute("/_authenticated/owner")({
   beforeLoad: async () => {
     try {
-      const { isOwner } = await getMyOwnerStatus();
-      if (!isOwner) throw redirect({ to: "/portal" });
+      const status = await getMyOwnerStatus();
+      if (!status.hasAccess) throw redirect({ to: "/portal" });
+      return { ownerStatus: status };
     } catch (e) {
       if ((e as any)?.isRedirect) throw e;
       throw redirect({ to: "/portal" });
     }
   },
+  loader: ({ context }) => ({ ownerStatus: (context as any).ownerStatus }),
   head: () => ({
     meta: [
       { title: "Site Builder | مجمع باعشن الطبي" },
@@ -38,6 +40,9 @@ export const Route = createFileRoute("/_authenticated/owner")({
         </Link>
       </div>
     </div>
+  ),
+  notFoundComponent: () => (
+    <div className="p-8 text-center text-slate-600" dir="rtl">الصفحة غير موجودة</div>
   ),
 });
 
