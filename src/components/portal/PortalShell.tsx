@@ -94,6 +94,7 @@ const NAV_GROUPS: NavGroup[] = [
     label_en: "Account",
     items: [
       { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
+      { to: "/portal/assistant", icon: Sparkles, label_ar: "المساعد الذكي", label_en: "AI Assistant" },
       { to: "/portal/sessions", icon: ShieldCheck, label_ar: "الجلسات النشطة", label_en: "Sessions" },
       { to: "/portal/reminder-preferences", icon: Bell, label_ar: "تفضيلات الإشعار", label_en: "Reminder Prefs" },
       { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
