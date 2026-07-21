@@ -279,6 +279,10 @@ function ratingOf(metric: WebVitalMetric, v: number | null): "good" | "needs" | 
   return "poor";
 }
 
+function ratingLabel(r: "good" | "needs" | "poor" | "none"): string {
+  return r === "good" ? "جيد" : r === "needs" ? "بحاجة تحسين" : r === "poor" ? "ضعيف" : "لا بيانات";
+}
+
 const RATING_STYLES: Record<"good" | "needs" | "poor" | "none", string> = {
   good: "bg-emerald-50 text-emerald-700 border-emerald-200",
   needs: "bg-amber-50 text-amber-700 border-amber-200",
