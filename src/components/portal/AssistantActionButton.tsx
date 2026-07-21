@@ -200,8 +200,8 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
                 type="button"
                 onClick={run}
                 disabled={status === "running"}
-                className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-semibold text-white disabled:opacity-60 ${
-                  isCancel ? "bg-red-600 hover:bg-red-700" : "bg-[color:var(--portal-primary)] hover:opacity-90"
+                className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60 ${
+                  isCancel ? "bg-[color:var(--portal-error)] hover:opacity-90" : "bg-[color:var(--portal-primary)] hover:opacity-90"
                 }`}
               >
                 {status === "running" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
