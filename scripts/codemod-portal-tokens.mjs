@@ -39,6 +39,7 @@ const WRITE = argv.includes("--write");
 const VERBOSE = argv.includes("--verbose");
 const LIST_RULES = argv.includes("--list-rules");
 const DRY_RUN_FLAG = argv.includes("--dry-run"); // معلوماتي؛ الوضع الافتراضي dry أصلًا
+const CHECK = argv.includes("--check") || argv.includes("--fail-if-uncodemed");
 function readOpt(name) {
   const i = argv.indexOf(name);
   return i >= 0 ? argv[i + 1] : undefined;
@@ -397,12 +398,25 @@ if (VERBOSE && skippedAll.length) {
   if (flat.length > 40) console.log(`  … +${flat.length - 40}`);
 }
 
-if (!WRITE) {
+if (!WRITE && !CHECK) {
   console.log(`\nلتطبيق التغييرات:  bun run codemod:portal-tokens -- --write`);
   console.log(`تقييد بـ glob:      bun run codemod:portal-tokens -- --glob "src/routes/_authenticated/portal.prescriptions*.tsx"`);
   console.log(`تقييد بقائمة:       bun run codemod:portal-tokens -- --paths .codemod-scope.txt`);
   console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
   console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
+}
+
+if (CHECK) {
+  if (WRITE) {
+    console.error(`\n✗ لا يمكن الجمع بين --check و --write.`);
+    process.exit(2);
+  }
+  if (totalFiles > 0) {
+    console.error(`\n✗ فحص codemod فشل: ${totalFiles} ملف داخل portal لا يزال يحوي utilities قابلة للتحويل (${totalReplacements} استبدال).`);
+    console.error(`  شغّل:  bun run codemod:portal-tokens -- --write   ثم راجع الـ diff.`);
+    process.exit(1);
+  }
+  console.log(`\n✓ فحص codemod نجح: لا utilities قابلة للتحويل داخل portal.`);
 }
 } // /runCli
 
