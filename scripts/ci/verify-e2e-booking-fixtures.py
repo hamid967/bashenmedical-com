@@ -69,12 +69,12 @@ def fail(msg: str) -> None:
 
 def main() -> None:
     # 1) fixtures وجود
-    branches = rest_get("branches", {"select": "id,slug,name", "slug": f"eq.{BRANCH_SLUG}"})
+    branches = rest_get("branches", {"select": "id,slug,name_ar,name_en", "slug": f"eq.{BRANCH_SLUG}"})
     if not branches:
         fail(f"الفرع '{BRANCH_SLUG}' غير موجود.")
     branch = branches[0]
 
-    specs = rest_get("specialties", {"select": "id,slug,name", "slug": f"eq.{SPEC_SLUG}"})
+    specs = rest_get("specialties", {"select": "id,slug,name_ar,name_en", "slug": f"eq.{SPEC_SLUG}"})
     if not specs:
         fail(f"التخصص '{SPEC_SLUG}' غير موجود.")
     spec = specs[0]
@@ -126,8 +126,8 @@ def main() -> None:
 
     unique_days = {s["slot_date"] for s in slots}
     print(
-        f"[verify] OK — branch={branch['name']!r} specialty={spec['name']!r} "
-        f"doctor={doc['name']!r} available_slots={len(slots)} days={len(unique_days)}"
+        f"[verify] OK — branch={branch["name_ar"]!r} specialty={spec["name_ar"]!r} "
+        f"doctor={doc["name_ar"]!r} available_slots={len(slots)} days={len(unique_days)}"
     )
 
 
