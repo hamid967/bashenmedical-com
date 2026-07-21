@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RefreshCw, Inbox } from "lucide-react";
+import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import type { Column } from "@/lib/export-utils";
 
 const SearchSchema = z.object({
   date: z.string().optional(),
