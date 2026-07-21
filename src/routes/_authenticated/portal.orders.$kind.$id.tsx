@@ -7,7 +7,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { PortalShell } from "@/components/portal/PortalShell";
+
 import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import { OrderProgressSteps } from "@/components/OrderProgressSteps";
 import {
@@ -144,22 +144,22 @@ function MyOrderDetailsPage() {
 
   if (!kindTyped) {
     return (
-      <PortalShell>
-        <div className="text-center py-10">
-          <p className="text-red-600">نوع طلب غير معروف.</p>
-          <Link to="/portal/orders" className="text-primary underline mt-4 inline-block">
-            العودة إلى طلباتي
-          </Link>
-        </div>
-      </PortalShell>
+      <div className="text-center py-10">
+        <p className="text-red-600">نوع طلب غير معروف.</p>
+        <Link to="/portal/orders" className="text-primary underline mt-4 inline-block">
+          العودة إلى طلباتي
+        </Link>
+      </div>
     );
+
   }
 
   const Icon = KIND_ICONS[kindTyped];
 
   return (
-    <PortalShell>
+    <>
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
+
         <div>
           <Link
             to="/portal/orders"
@@ -295,6 +295,7 @@ function MyOrderDetailsPage() {
           </section>
         </div>
       )}
-    </PortalShell>
+    </>
   );
+
 }

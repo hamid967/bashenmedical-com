@@ -8,7 +8,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { PortalShell } from "@/components/portal/PortalShell";
+
 import {
   PortalPageHeader,
   PortalStatCard,
@@ -176,8 +176,9 @@ function PortalDashboardPage() {
   const refetching = ordersQ.isFetching || inquiriesQ.isFetching;
 
   return (
-    <PortalShell>
+    <>
       <PortalPageHeader
+
         title="لوحة التحكم"
         description="نظرة سريعة على طلباتك واستفساراتك وحالتها"
         breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "لوحة التحكم" }]}
@@ -417,7 +418,8 @@ function PortalDashboardPage() {
           </PortalCard>
         </>
       )}
-    </PortalShell>
+    </>
   );
 }
+
 
