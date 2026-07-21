@@ -84,13 +84,13 @@ const INQUIRY_STATUS_LABELS: Record<string, string> = {
 };
 
 const INQUIRY_STATUS_STYLES: Record<string, string> = {
-  new: "bg-sky-50 text-sky-700 border-sky-200",
-  in_progress: "bg-amber-50 text-amber-700 border-amber-200",
-  contacted: "bg-indigo-50 text-indigo-700 border-indigo-200",
-  scheduled: "bg-violet-50 text-violet-700 border-violet-200",
-  completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  closed: "bg-neutral-100 text-neutral-600 border-neutral-200",
-  cancelled: "bg-red-50 text-red-700 border-red-200",
+  new: "bg-[color:var(--portal-info-50)] text-[color:var(--portal-info)] border-[color:var(--portal-info)]/25",
+  in_progress: "bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] border-[color:var(--portal-warning)]/25",
+  contacted: "bg-indigo-50 text-indigo-700 border-indigo-200", // tokens-allow — semantic hue not in portal palette
+  scheduled: "bg-violet-50 text-violet-700 border-violet-200", // tokens-allow — semantic hue not in portal palette
+  completed: "bg-[color:var(--portal-success-50)] text-[color:var(--portal-success)] border-[color:var(--portal-success)]/25",
+  closed: "bg-[color:var(--portal-surface-3)] text-[color:var(--portal-ink-2)] border-[color:var(--portal-border)]",
+  cancelled: "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] border-[color:var(--portal-error)]/25",
 };
 
 function formatDate(iso: string): string {
