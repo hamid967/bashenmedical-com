@@ -171,6 +171,9 @@ export function AIAssistantPanel({
           };
           setUsage(liveUsage);
           setStreamMeta((prev) => (prev ? { ...prev, usage: liveUsage ?? undefined } : prev));
+          if (liveUsage.prompt > 0) {
+            recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: liveUsage.prompt });
+          }
         },
         onRetry: (phase, attempt) => {
           if (phase === "reconnecting") setResumeNotice(`انقطع الاتصال — استئناف (${attempt})…`);
