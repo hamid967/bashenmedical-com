@@ -295,6 +295,7 @@ function MyOrderDetailsPage() {
           </section>
         </div>
       )}
-    </PortalShell>
+    </>
   );
+
 }
