@@ -97,15 +97,16 @@ const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d))).filter(
   isPortalFile,
 );
 
-let violations = 0;
+const counts = {}; // file(rel) → violations
+const details = []; // {rel,line,match,reason,text}
 
 for (const file of files) {
   const src = readFileSync(file, "utf8");
   const lines = src.split(/\r?\n/);
+  const rel = relative(ROOT, file).replaceAll("\\", "/");
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line.includes("tokens-allow")) continue; // إفلات صريح
-    // تجاهل الأسطر التي هي تعليقات JSDoc/تعليقات مضمّنة بحتة
+    if (line.includes("tokens-allow")) continue;
     const trimmed = line.trim();
     if (
       trimmed.startsWith("*") ||
@@ -117,25 +118,82 @@ for (const file of files) {
     for (const rule of RULES) {
       const m = line.match(rule.pattern);
       if (m) {
-        violations++;
-        const rel = relative(ROOT, file);
-        console.error(
-          `\n✗ ${rel}:${i + 1}\n  match: ${m[0]}\n  fix:   ${rule.reason}\n  line:  ${line.trim().slice(0, 160)}`,
-        );
+        counts[rel] = (counts[rel] ?? 0) + 1;
+        details.push({
+          rel,
+          line: i + 1,
+          match: m[0],
+          reason: rule.reason,
+          text: line.trim().slice(0, 160),
+        });
       }
     }
   }
 }
 
-if (violations > 0) {
+// وضع تحديث الـ baseline
+if (UPDATE_BASELINE) {
+  writeFileSync(
+    BASELINE_PATH,
+    JSON.stringify({ files: counts }, null, 2) + "\n",
+  );
+  console.log(
+    `✓ حُدِّث baseline (${Object.keys(counts).length} ملف · ${details.length} انتهاك سابق مقبول).\n` +
+      `  ${relative(ROOT, BASELINE_PATH)}\n` +
+      `القاعدة من الآن ستمنع أي زيادة أو إدخال جديد.`,
+  );
+  process.exit(0);
+}
+
+// تحميل baseline
+let baseline = { files: {} };
+if (existsSync(BASELINE_PATH)) {
+  try {
+    baseline = JSON.parse(readFileSync(BASELINE_PATH, "utf8"));
+  } catch {
+    console.error(`تعذّر قراءة ${BASELINE_PATH} — أعِد التوليد بـ --update-baseline`);
+    process.exit(2);
+  }
+}
+
+const regressions = []; // ملفات تجاوزت baseline
+for (const [rel, n] of Object.entries(counts)) {
+  const allowed = baseline.files?.[rel] ?? 0;
+  if (n > allowed) regressions.push({ rel, allowed, actual: n });
+}
+// ملفات في baseline ولم تعد موجودة/انخفضت → تنبيه لتحديث الـ baseline (غير فادح)
+const shrunk = [];
+for (const [rel, allowed] of Object.entries(baseline.files ?? {})) {
+  const n = counts[rel] ?? 0;
+  if (n < allowed) shrunk.push({ rel, allowed, actual: n });
+}
+
+if (regressions.length > 0) {
+  const regressedFiles = new Set(regressions.map((r) => r.rel));
+  for (const d of details) {
+    if (!regressedFiles.has(d.rel)) continue;
+    console.error(
+      `\n✗ ${d.rel}:${d.line}\n  match: ${d.match}\n  fix:   ${d.reason}\n  line:  ${d.text}`,
+    );
+  }
   console.error(
-    `\n${violations} انتهاك لقاعدة Design Tokens v2 في ${files.length} ملف بورتال.\n` +
-      `راجع /admin/design-tokens لخريطة التحويل الكاملة.\n` +
-      `لتجاوز سطر بحاجة فعلية أضِف تعليق  // tokens-allow  في نهايته.`,
+    `\nتراجع Design Tokens v2 في ${regressions.length} ملف:\n` +
+      regressions
+        .map((r) => `  - ${r.rel}: ${r.actual} (المسموح ${r.allowed})`)
+        .join("\n") +
+      `\n\nإما أن تُصلح الانتهاكات (راجع /admin/design-tokens) أو تضع  // tokens-allow  عند الحاجة الحقيقية.\n` +
+      `عند إتمام إصلاح فعلي شغّل:  bun run lint:portal-tokens:update`,
   );
   process.exit(1);
 }
 
+if (shrunk.length > 0) {
+  console.log(
+    `ℹ️  انخفضت انتهاكات ${shrunk.length} ملف عن baseline — حدِّث الـ baseline بـ: bun run lint:portal-tokens:update`,
+  );
+}
+
 console.log(
-  `✓ نظافة Design Tokens v2 مُتحقَّقة في ${files.length} ملف بورتال.`,
+  `✓ نظافة Design Tokens v2 مُتحقَّقة — ${files.length} ملف بورتال، لا تراجع عن baseline (${details.length} انتهاك تاريخي مسموح، صفر جديد).`,
 );
+
