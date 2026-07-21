@@ -20,6 +20,25 @@ export const Route = createFileRoute("/international-patients")({
       { property: "og:url", content: "https://bashenmedical.com/international-patients" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/international-patients" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "MedicalWebPage",
+          "@id": "https://bashenmedical.com/international-patients",
+          name: "International Patients — Baeshen Medical",
+          description:
+            "End-to-end support for international patients in Jazan: medical visa, hotel booking, translator, second opinion, and follow-up.",
+          url: "https://bashenmedical.com/international-patients",
+          inLanguage: ["ar-SA", "en"],
+          isPartOf: { "@id": "https://bashenmedical.com/#website" },
+          provider: { "@id": "https://bashenmedical.com/#organization" },
+          audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+          availableLanguage: ["Arabic", "English"],
+        }),
+      },
+    ],
   }),
   component: IntlPage,
 });

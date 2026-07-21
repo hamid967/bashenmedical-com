@@ -26,6 +26,29 @@ export const Route = createFileRoute("/pharmacy")({
       { property: "og:url", content: "https://bashenmedical.com/pharmacy" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/pharmacy" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": ["Pharmacy", "MedicalWebPage"],
+          "@id": "https://bashenmedical.com/pharmacy",
+          name: "صيدليات باعشن — طلب وتوصيل الأدوية",
+          description:
+            "خدمة توصيل الأدوية من صيدليات باعشن داخل صبيا وجازان مع رفع الوصفة الطبية.",
+          url: "https://bashenmedical.com/pharmacy",
+          inLanguage: "ar-SA",
+          isPartOf: { "@id": "https://bashenmedical.com/#website" },
+          parentOrganization: { "@id": "https://bashenmedical.com/#organization" },
+          areaServed: [{ "@type": "City", name: "Sabya" }, { "@type": "AdministrativeArea", name: "Jazan Region" }],
+          potentialAction: {
+            "@type": "OrderAction",
+            target: "https://bashenmedical.com/pharmacy",
+            deliveryMethod: ["http://purl.org/goodrelations/v1#DeliveryModeOwnFleet"],
+          },
+        }),
+      },
+    ],
   }),
   component: PharmacyPage,
 });

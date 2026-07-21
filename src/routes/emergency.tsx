@@ -15,6 +15,29 @@ export const Route = createFileRoute("/emergency")({
       { property: "og:url", content: "https://bashenmedical.com/emergency" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/emergency" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": ["EmergencyService", "MedicalWebPage"],
+          "@id": "https://bashenmedical.com/emergency",
+          name: "الطوارئ 24/7 — مجمع باعشن الطبي",
+          description:
+            "خدمة الطوارئ الطبية على مدار الساعة بمجمع باعشن الطبي، صبيا، جازان.",
+          url: "https://bashenmedical.com/emergency",
+          inLanguage: "ar-SA",
+          areaServed: [{ "@type": "City", name: "Sabya" }, { "@type": "AdministrativeArea", name: "Jazan Region" }],
+          provider: { "@id": "https://bashenmedical.com/#organization" },
+          hoursAvailable: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+            opens: "00:00",
+            closes: "23:59",
+          },
+        }),
+      },
+    ],
   }),
   component: EmergencyPage,
 });

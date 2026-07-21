@@ -19,6 +19,26 @@ export const Route = createFileRoute("/home-care")({
       { property: "og:url", content: "https://bashenmedical.com/home-care" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/home-care" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": ["MedicalWebPage", "MedicalBusiness"],
+          "@id": "https://bashenmedical.com/home-care",
+          name: "الرعاية المنزلية — مجمع باعشن الطبي",
+          description:
+            "خدمات طبية منزلية: زيارة طبيب، تمريض، سحب عينات، علاج طبيعي وتوصيل أدوية في صبيا وجازان.",
+          url: "https://bashenmedical.com/home-care",
+          inLanguage: "ar-SA",
+          isPartOf: { "@id": "https://bashenmedical.com/#website" },
+          provider: { "@id": "https://bashenmedical.com/#organization" },
+          areaServed: [{ "@type": "City", name: "Sabya" }, { "@type": "AdministrativeArea", name: "Jazan Region" }],
+          medicalSpecialty: ["GeneralPractice", "Nursing", "Physiotherapy"],
+          audience: { "@type": "MedicalAudience", audienceType: "Patient" },
+        }),
+      },
+    ],
   }),
   component: HomeCarePage,
 });

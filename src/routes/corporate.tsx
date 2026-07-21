@@ -23,6 +23,24 @@ export const Route = createFileRoute("/corporate")({
       { property: "og:url", content: "https://bashenmedical.com/corporate" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/corporate" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "MedicalWebPage",
+          "@id": "https://bashenmedical.com/corporate",
+          name: "خدمات الشركات — اتفاقيات مجمع باعشن الطبي",
+          description:
+            "اتفاقيات طبية للشركات: فحوصات ما قبل التوظيف، رعاية للموظفين، وخصومات مؤسسية.",
+          url: "https://bashenmedical.com/corporate",
+          inLanguage: "ar-SA",
+          isPartOf: { "@id": "https://bashenmedical.com/#website" },
+          publisher: { "@id": "https://bashenmedical.com/#organization" },
+          audience: { "@type": "BusinessAudience", audienceType: "Corporate" },
+        }),
+      },
+    ],
   }),
   component: CorporatePage,
 });
