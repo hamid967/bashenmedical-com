@@ -374,6 +374,10 @@ function NotificationRow({
           </p>
         ) : null}
 
+        <DeliveryStrip deliveries={n.deliveries} />
+
+
+
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {action ? (
             <Link
