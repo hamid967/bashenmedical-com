@@ -66,7 +66,16 @@ type AppointmentSummary = {
   created_at: string;
   reminder_24h: boolean | null;
   reminder_2h: boolean | null;
+  no_show_risk: number | null;
 };
+
+type RiskLevel = "low" | "medium" | "high";
+function riskLevel(score: number | null | undefined): RiskLevel {
+  const s = score ?? 0;
+  if (s >= 60) return "high";
+  if (s >= 30) return "medium";
+  return "low";
+}
 
 const WEEKDAYS_AR = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
