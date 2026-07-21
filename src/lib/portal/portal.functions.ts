@@ -94,9 +94,10 @@ export const updateMyProfile = createServerFn({ method: "POST" })
       // Best-effort audit trail
       try {
         await supabase.from("security_audit_log").insert({
-          user_id: userId,
+          actor: userId,
           action: "sensitive_profile_change",
-          resource: "profiles",
+          table_name: "profiles",
+          record_id: userId,
           metadata: { fields: changedSensitive },
         } as never);
       } catch { /* audit failures must not block the update */ }
