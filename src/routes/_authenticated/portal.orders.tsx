@@ -108,8 +108,9 @@ function MyOrdersPage() {
   }, [q.data]);
 
   return (
-    <PortalShell>
+    <>
       <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
+
         <div className="flex items-center gap-2">
           <div className="h-10 w-10 rounded-xl grid place-items-center bg-primary/10 text-primary">
             <Inbox className="h-5 w-5" />
