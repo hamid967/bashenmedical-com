@@ -58,10 +58,10 @@ const ACTION_META: Record<
 
 function toneClasses(tone: "danger" | "warn" | "info" | "ok") {
   switch (tone) {
-    case "danger": return "bg-red-500/10 text-red-600 border-red-500/20";
-    case "warn": return "bg-amber-500/10 text-amber-600 border-amber-500/20";
-    case "ok": return "bg-emerald-500/10 text-emerald-600 border-emerald-500/20";
-    default: return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+    case "danger": return "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] border-[color:var(--portal-error)]/20";
+    case "warn": return "bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] border-[color:var(--portal-warning)]/20";
+    case "ok": return "bg-[color:var(--portal-success-50)] text-[color:var(--portal-success)] border-[color:var(--portal-success)]/20";
+    default: return "bg-[color:var(--portal-info-50)] text-[color:var(--portal-info)] border-[color:var(--portal-info)]/20";
   }
 }
 
