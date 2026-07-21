@@ -42,7 +42,7 @@ export async function logReservationEvent(input: ReservationEventInput): Promise
       waitlist_notified: input.waitlist_notified ?? null,
       slot_rebooked: input.slot_rebooked ?? null,
       waitlist_reverted: input.waitlist_reverted ?? null,
-      meta: input.meta ?? {},
+      meta: (input.meta ?? {}) as never,
       ip: input.ip ?? null,
     });
   } catch {
