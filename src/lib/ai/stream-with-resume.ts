@@ -13,6 +13,8 @@
  *  - the stream completed normally ([DONE] received)
  */
 
+import { reportStreamMetric, type StreamSurface } from "./stream-telemetry";
+
 export type StreamRetryPhase = "reconnecting" | "resumed" | "failed";
 
 export interface StreamWithResumeOptions {
@@ -33,6 +35,8 @@ export interface StreamWithResumeOptions {
   mapStatusError?: (status: number) => string | null;
   /** Max resume attempts after the first try. Default 2. */
   maxRetries?: number;
+  /** Surface tag for telemetry (public/portal/admin). */
+  surface?: StreamSurface;
 }
 
 export interface StreamWithResumeResult {
