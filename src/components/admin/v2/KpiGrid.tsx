@@ -68,28 +68,39 @@ export function KpiGrid() {
             مقارنة بالفترة السابقة المكافئة
           </p>
         </div>
-        <div
-          className="inline-flex rounded-full p-1"
-          style={{ background: OCEAN.bg, border: `1px solid ${OCEAN.panel2}` }}
-        >
-          {(Object.keys(RANGE_LABELS) as Range[]).map((r) => {
-            const active = r === range;
-            return (
-              <button
-                key={r}
-                type="button"
-                onClick={() => setRange(r)}
-                className="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold transition-colors"
-                style={
-                  active
-                    ? { background: OCEAN.glow, color: OCEAN.panel }
-                    : { color: OCEAN.glow, opacity: 0.7 }
-                }
-              >
-                {RANGE_LABELS[r]}
-              </button>
-            );
-          })}
+        <div className="flex items-center gap-2">
+          <ExportMenu
+            allowed
+            disabled={isLoading || isError}
+            filename={`kpis-${range}`}
+            title={`المؤشرات الرئيسية (${RANGE_LABELS[range]})`}
+            subtitle="مقارنة بالفترة السابقة المكافئة"
+            columns={KPI_EXPORT_COLS}
+            rows={data?.kpis ?? []}
+          />
+          <div
+            className="inline-flex rounded-full p-1"
+            style={{ background: OCEAN.bg, border: `1px solid ${OCEAN.panel2}` }}
+          >
+            {(Object.keys(RANGE_LABELS) as Range[]).map((r) => {
+              const active = r === range;
+              return (
+                <button
+                  key={r}
+                  type="button"
+                  onClick={() => setRange(r)}
+                  className="px-2.5 sm:px-3 py-1 rounded-full text-[10px] sm:text-xs font-bold transition-colors"
+                  style={
+                    active
+                      ? { background: OCEAN.glow, color: OCEAN.panel }
+                      : { color: OCEAN.glow, opacity: 0.7 }
+                  }
+                >
+                  {RANGE_LABELS[r]}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
