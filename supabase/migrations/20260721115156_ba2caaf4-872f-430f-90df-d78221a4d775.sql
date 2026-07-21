@@ -1,0 +1,1 @@
+CREATE POLICY "Users can view their own audit log" ON public.security_audit_log FOR SELECT TO authenticated USING (actor = auth.uid());
