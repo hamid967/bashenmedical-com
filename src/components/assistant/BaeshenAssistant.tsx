@@ -52,6 +52,22 @@ export function BaeshenAssistant() {
   const conversationId = useRef<string | null>(null);
   const [noSave, setNoSave] = useState(false);
   const [nowTick, setNowTick] = useState(0);
+  const [activeModel, setActiveModel] = useState<string | undefined>();
+  const [sessionCredits, setSessionCredits] = useState(0);
+
+  // Live pre-flight estimate from composer input + running history.
+  const preEstimate = useMemo(() => {
+    const historyChars = messages.reduce((n, m) => n + m.content.length, 0);
+    const inTok = estimateTokens(input) + Math.ceil(historyChars / 3.5);
+    const outTok = Math.max(64, Math.min(512, Math.round(inTok * 0.6)));
+    return { inTok, outTok, credits: estimateCredits(inTok, outTok, activeModel) };
+  }, [input, messages, activeModel]);
+
+  const lastMsg = messages[messages.length - 1];
+  const lastAssistant = lastMsg && lastMsg.role === "assistant" ? lastMsg : null;
+  const meterStreamedText = busy && lastAssistant ? lastAssistant.content : "";
+  const meterUsage = !busy && lastAssistant?.meta?.usage ? lastAssistant.meta.usage : null;
+  const meterModel = lastAssistant?.meta?.model ?? activeModel;
 
   // Tick every 500ms while streaming so the elapsed-time badge updates smoothly.
   useEffect(() => {
