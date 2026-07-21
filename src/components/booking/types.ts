@@ -8,6 +8,19 @@ import { z } from "zod";
 export type ServiceType = "clinic" | "radiology" | "lab" | "followup";
 export type Gender = "male" | "female";
 
+export type PayerType = "self" | "insurance";
+
+export type InsuranceEstimate = {
+  eligible: boolean;
+  reason?: string | null;
+  message?: string | null;
+  coverage_percent?: number | null;
+  consultation_fee?: number | null;
+  covered_amount?: number | null;
+  estimated_cost?: number | null;
+  patient_share?: number | null;
+} | null;
+
 export type State = {
   step: number; // 1..9
   serviceType: ServiceType | null;
@@ -25,6 +38,11 @@ export type State = {
     reason: string;
     reminder24h: boolean;
     reminder2h: boolean;
+    payerType: PayerType;
+    insuranceProviderId: string | null;
+    insurancePolicyNumber: string;
+    insuranceMemberId: string;
+    insuranceEstimate: InsuranceEstimate;
   };
 };
 
@@ -45,6 +63,11 @@ export const INITIAL: State = {
     reason: "",
     reminder24h: true,
     reminder2h: true,
+    payerType: "self",
+    insuranceProviderId: null,
+    insurancePolicyNumber: "",
+    insuranceMemberId: "",
+    insuranceEstimate: null,
   },
 };
 

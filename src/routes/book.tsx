@@ -452,6 +452,7 @@ function BookPage() {
       }
     } catch {/* network hiccup — let the real submit surface the error */}
     const p = state.patient;
+    const isInsurance = p.payerType === "insurance";
     const res = await submitBooking({
       patient_name: p.name.trim(),
       patient_phone: p.phone.trim(),
@@ -465,6 +466,9 @@ function BookPage() {
       doctor_id: state.doctorId,
       reminder_24h: p.reminder24h,
       reminder_2h: p.reminder2h,
+      insurance_provider_id: isInsurance ? p.insuranceProviderId : null,
+      insurance_policy_number: isInsurance ? p.insurancePolicyNumber.trim() || null : null,
+      insurance_member_id: isInsurance ? p.insuranceMemberId.trim() || null : null,
     });
     setSubmitting(false);
     if (res.ok) {
@@ -613,7 +617,7 @@ function BookPage() {
                 </div>
               </>
             )}
-            {state.step === 7 && <StepPatient lang={lang} value={state.patient} errors={patientValidation.errors} onChange={(p) => dispatch({ t: "setPatient", p })}/>}
+            {state.step === 7 && <StepPatient lang={lang} doctorId={state.doctorId} value={state.patient} errors={patientValidation.errors} onChange={(p) => dispatch({ t: "setPatient", p })}/>}
             {state.step === 8 && <StepReview lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} errorMsg={errorMsg} errorKind={errorKind} submitting={submitting} onSubmit={handleSubmit} patientValid={patientValidation.ok} onEditPatient={() => goto(7)}/>}
             {state.step === 9 && result && <StepSuccess lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} reference={result.reference} phone={result.phone} email={result.email ?? null} onNewBooking={handleReset}/>}
           </div>

@@ -15,6 +15,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { toast as sonner } from "sonner";
 import {
   ArrowRight,
@@ -141,27 +142,80 @@ function ManagePage() {
   const [rescheduleTime, setRescheduleTime] = useState("");
   const [toast, setToast] = useState<string | null>(null);
 
-  // Restore session from sessionStorage after hydration
+  // Restore session from sessionStorage after hydration, OR try to mint
+  // one automatically for the currently signed-in user so authenticated
+  // patients never see the phone/OTP step.
   useEffect(() => {
-    try {
-      const raw = window.sessionStorage.getItem(SESSION_KEY);
-      if (!raw) return;
-      const s = JSON.parse(raw) as {
-        token: string;
-        expires: string;
-        phone_masked?: string;
-      };
-      if (new Date(s.expires).getTime() > Date.now()) {
-        setSessionToken(s.token);
-        setSessionExpiresAt(s.expires);
-        setPhoneMasked(s.phone_masked ?? "");
-        setStep("list");
-      } else {
-        window.sessionStorage.removeItem(SESSION_KEY);
+    let cancelled = false;
+    (async () => {
+      try {
+        const raw = window.sessionStorage.getItem(SESSION_KEY);
+        if (raw) {
+          const s = JSON.parse(raw) as {
+            token: string;
+            expires: string;
+            phone_masked?: string;
+          };
+          if (new Date(s.expires).getTime() > Date.now()) {
+            setSessionToken(s.token);
+            setSessionExpiresAt(s.expires);
+            setPhoneMasked(s.phone_masked ?? "");
+            setStep("list");
+            return;
+          }
+          window.sessionStorage.removeItem(SESSION_KEY);
+        }
+      } catch {
+        /* ignore */
       }
-    } catch {
-      /* ignore */
-    }
+
+      // No stored session — try auto-session for signed-in users.
+      try {
+        const { data: sess } = await supabase.auth.getSession();
+        const accessToken = sess?.session?.access_token;
+        if (!accessToken) return;
+        const res = await fetch(
+          "/api/public/reservations/session-from-auth",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${accessToken}`,
+            },
+          },
+        );
+        const body = (await res.json().catch(() => null)) as {
+          ok?: boolean;
+          session_token?: string;
+          session_expires_at?: string;
+          phone_masked?: string;
+        } | null;
+        if (cancelled || !body?.ok || !body.session_token || !body.session_expires_at) {
+          return;
+        }
+        setSessionToken(body.session_token);
+        setSessionExpiresAt(body.session_expires_at);
+        setPhoneMasked(body.phone_masked ?? "");
+        try {
+          window.sessionStorage.setItem(
+            SESSION_KEY,
+            JSON.stringify({
+              token: body.session_token,
+              expires: body.session_expires_at,
+              phone_masked: body.phone_masked ?? "",
+            }),
+          );
+        } catch {
+          /* ignore */
+        }
+        setStep("list");
+      } catch {
+        /* silent — user just falls back to the OTP form */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const sendOtp = useMutation({

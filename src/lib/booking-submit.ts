@@ -24,6 +24,9 @@ export type BookingSubmitPayload = {
   doctor_id?: string | null;
   reminder_24h?: boolean;
   reminder_2h?: boolean;
+  insurance_provider_id?: string | null;
+  insurance_policy_number?: string | null;
+  insurance_member_id?: string | null;
 };
 
 export type BookingSubmitKind =

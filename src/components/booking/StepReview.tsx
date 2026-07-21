@@ -20,6 +20,8 @@ export function StepReview({
   const branch = branches.find((b) => b.id === state.branchId);
   const spec   = specialties.find((s) => s.id === state.specialtyId);
   const doc    = doctors.find((d: any) => d.id === state.doctorId);
+  const est = state.patient.insuranceEstimate;
+  const isInsurance = state.patient.payerType === "insurance";
   const rows = [
     { label: t("review.branch"), value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—" },
     { label: t("review.specialty"), value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—" },
@@ -28,6 +30,7 @@ export function StepReview({
     { label: t("review.time"), value: state.time ?? "—" },
     { label: t("review.name"), value: state.patient.name },
     { label: t("review.phone"), value: state.patient.phone },
+    { label: t("insurance.paymentMethod"), value: t(`insurance.${state.patient.payerType}`) },
   ];
   return (
     <StepShell lang={lang} title={t("review.title")}>
@@ -40,6 +43,13 @@ export function StepReview({
             </div>
           ))}
         </dl>
+
+        {isInsurance && est && est.eligible && est.patient_share != null && (
+          <div className="mt-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900 flex items-center justify-between">
+            <span>{t("insurance.patientShare")}</span>
+            <span className="font-mono font-semibold">{est.patient_share} SAR</span>
+          </div>
+        )}
 
         {!patientValid && (
           <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive flex items-center justify-between gap-3">
