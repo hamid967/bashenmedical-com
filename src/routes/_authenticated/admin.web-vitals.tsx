@@ -89,6 +89,7 @@ function WebVitalsPage() {
   const [windowHours, setWindowHours] = useState<number>(24);
   const qc = useQueryClient();
   const rolesFn = useServerFn(getMyRoles);
+  const rawFn = useServerFn(listWebVitalsRaw);
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => rolesFn() });
   const isStaff = useMemo(() => {
     const r = (rolesQ.data?.roles ?? []) as string[];
