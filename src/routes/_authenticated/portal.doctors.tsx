@@ -191,7 +191,7 @@ function Skeleton() {
     <div dir="rtl">
       <div className="h-11 w-56 rounded-2xl bg-[color:var(--portal-surface-3)] animate-pulse mb-6" />
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[0, 1, 2, 3, 4, 5].map((i) => <PortalCardSkeleton key={i} lines={4} />)}
+        {[0, 1, 2, 3, 4, 5].map((i) => <PortalCardSkeleton key={i} />)}
       </div>
     </div>
   );
