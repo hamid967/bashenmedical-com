@@ -10,8 +10,9 @@ import { whatsappUrl } from "@/lib/site";
 import { classifyUserMessage } from "@/lib/ai/safety";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
 import { AssistantActionCard, extractActions } from "./AssistantActionCard";
+import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
 const CID_KEY = "baeshen.ai.cid";
 const NO_SAVE_KEY = "baeshen.ai.no_save";
@@ -41,6 +42,15 @@ export function BaeshenAssistant() {
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const conversationId = useRef<string | null>(null);
   const [noSave, setNoSave] = useState(false);
+  const [nowTick, setNowTick] = useState(0);
+
+  // Tick every 500ms while streaming so the elapsed-time badge updates smoothly.
+  useEffect(() => {
+    if (!busy) return;
+    const id = window.setInterval(() => setNowTick(performance.now()), 500);
+    setNowTick(performance.now());
+    return () => window.clearInterval(id);
+  }, [busy]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -76,12 +86,30 @@ export function BaeshenAssistant() {
     const cls = classifyUserMessage(trimmed);
     setShowEmergency(cls.kind === "emergency");
 
-    const next: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "" }];
-    setMessages(next);
+    const startedAt = performance.now();
+    const historyForPrompt: Msg[] = [...messages, { role: "user", content: trimmed }];
+    const promptText = historyForPrompt
+      .map((m) => `${m.role}: ${m.content}`)
+      .join("\n");
+    const initialMeta: MessageCostMeta = { startedAt, promptText };
+    const next2: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "", meta: initialMeta }];
+    setMessages(next2);
     setBusy(true);
 
     const controller = new AbortController();
     abortRef.current = controller;
+
+    const updateLastMeta = (patch: Partial<MessageCostMeta>) => {
+      setMessages((prev) => {
+        const copy = prev.slice();
+        const last = copy[copy.length - 1];
+        if (last && last.role === "assistant") {
+          copy[copy.length - 1] = { ...last, meta: { ...(last.meta ?? initialMeta), ...patch } };
+        }
+        return copy;
+      });
+    };
+
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
@@ -90,16 +118,24 @@ export function BaeshenAssistant() {
         token: bearer,
         signal: controller.signal,
         buildBody: (resumePartial) => ({
-          messages: next.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
+          messages: next2.slice(0, -1).map((m) => ({ role: m.role, content: m.content })),
           conversation_id: noSave ? null : conversationId.current,
           lang: isAr ? "ar" : "en",
           save_history: !noSave,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
+        onModel: (m) => updateLastMeta({ model: m }),
+        onUsage: (u) => {
+          const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
+          const completion = Number((u.completion_tokens as number | undefined) ?? 0);
+          const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
+          updateLastMeta({ usage: { prompt, completion, total } });
+        },
         onDelta: (_delta, acc) => {
           setMessages((prev) => {
             const copy = prev.slice();
-            copy[copy.length - 1] = { role: "assistant", content: acc };
+            const last = copy[copy.length - 1];
+            copy[copy.length - 1] = { role: "assistant", content: acc, meta: last?.meta };
             return copy;
           });
         },
@@ -116,15 +152,20 @@ export function BaeshenAssistant() {
           return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
         },
       });
+      updateLastMeta({ endedAt: performance.now() });
       if (!result.text) {
         setMessages((prev) => {
           const copy = prev.slice();
-          copy[copy.length - 1] = { role: "assistant", content: t("لم أستطع توليد رد الآن.", "No response was generated.") };
+          const last = copy[copy.length - 1];
+          copy[copy.length - 1] = { role: "assistant", content: t("لم أستطع توليد رد الآن.", "No response was generated."), meta: last?.meta };
           return copy;
         });
       }
     } catch (err) {
-      if ((err as Error).name === "AbortError") return;
+      if ((err as Error).name === "AbortError") {
+        updateLastMeta({ endedAt: performance.now() });
+        return;
+      }
       const msg = err instanceof StreamHttpError
         ? err.message
         : (err as Error).message || t("حدث خطأ.", "Something went wrong.");
@@ -300,6 +341,14 @@ export function BaeshenAssistant() {
                           isAr={isAr}
                         />
                       ))}
+                      {m.role === "assistant" && m.meta && (body || actions.length > 0) && (
+                        <MessageCostBadge
+                          meta={{ ...m.meta, outputText: body }}
+                          live={busy && i === messages.length - 1}
+                          now={nowTick}
+                          lang={isAr ? "ar" : "en"}
+                        />
+                      )}
                     </div>
                   </div>
                 );

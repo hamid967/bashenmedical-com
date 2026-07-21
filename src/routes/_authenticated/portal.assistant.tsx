@@ -12,6 +12,7 @@ import {
   parseAssistantActions,
 } from "@/components/portal/AssistantActionButton";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
+import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 
 export const Route = createFileRoute("/_authenticated/portal/assistant")({
   head: () => ({
@@ -24,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/portal/assistant")({
   component: AssistantPage,
 });
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
 const SUGGESTIONS = [
   "متى موعدي القادم؟",
@@ -40,10 +41,18 @@ function AssistantPage() {
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [nowTick, setNowTick] = useState(0);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, streaming]);
+
+  useEffect(() => {
+    if (!streaming) return;
+    const id = window.setInterval(() => setNowTick(performance.now()), 500);
+    setNowTick(performance.now());
+    return () => window.clearInterval(id);
+  }, [streaming]);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -56,12 +65,26 @@ function AssistantPage() {
     const controller = new AbortController();
     abortRef.current = controller;
 
+    const startedAt = performance.now();
+    const promptText = next.map((m) => `${m.role}: ${m.content}`).join("\n");
+    const initialMeta: MessageCostMeta = { startedAt, promptText };
+    const updateLastMeta = (patch: Partial<MessageCostMeta>) => {
+      setMessages((m) => {
+        const copy = m.slice();
+        const last = copy[copy.length - 1];
+        if (last && last.role === "assistant") {
+          copy[copy.length - 1] = { ...last, meta: { ...(last.meta ?? initialMeta), ...patch } };
+        }
+        return copy;
+      });
+    };
+
     try {
       const { data: sess } = await supabase.auth.getSession();
       const token = sess.session?.access_token;
       if (!token) throw new Error("يجب تسجيل الدخول");
 
-      setMessages((m) => [...m, { role: "assistant", content: "" }]);
+      setMessages((m) => [...m, { role: "assistant", content: "", meta: initialMeta }]);
 
       await streamChatWithResume({
         url: "/api/portal/ai-chat",
@@ -71,10 +94,18 @@ function AssistantPage() {
           messages: next,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
+        onModel: (mdl) => updateLastMeta({ model: mdl }),
+        onUsage: (u) => {
+          const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
+          const completion = Number((u.completion_tokens as number | undefined) ?? 0);
+          const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
+          updateLastMeta({ usage: { prompt, completion, total } });
+        },
         onDelta: (_delta, acc) => {
           setMessages((m) => {
             const copy = m.slice();
-            copy[copy.length - 1] = { role: "assistant", content: acc };
+            const last = copy[copy.length - 1];
+            copy[copy.length - 1] = { role: "assistant", content: acc, meta: last?.meta };
             return copy;
           });
         },
@@ -90,8 +121,12 @@ function AssistantPage() {
           return "تعذّر الاتصال بالمساعد";
         },
       });
+      updateLastMeta({ endedAt: performance.now() });
     } catch (e: unknown) {
-      if ((e as Error).name === "AbortError") return;
+      if ((e as Error).name === "AbortError") {
+        updateLastMeta({ endedAt: performance.now() });
+        return;
+      }
       const msg = e instanceof StreamHttpError ? e.message : e instanceof Error ? e.message : "خطأ غير متوقع";
       setError(msg);
     } finally {
@@ -157,6 +192,14 @@ function AssistantPage() {
                         <AssistantActionButton key={`${i}-${k}`} action={a} />
                       ))}
                     </div>
+                  )}
+                  {!isUser && m.meta && (parsed.clean || parsed.actions.length > 0) && (
+                    <MessageCostBadge
+                      meta={{ ...m.meta, outputText: parsed.clean }}
+                      live={streaming && i === messages.length - 1}
+                      now={nowTick}
+                      lang="ar"
+                    />
                   )}
                 </div>
               </div>

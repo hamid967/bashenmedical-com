@@ -9,8 +9,9 @@ import {
   formatTokens,
 } from "@/lib/ai/pricing";
 import { streamChatWithResume, StreamHttpError } from "@/lib/ai/stream-with-resume";
+import { MessageCostBadge, type MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 type Usage = { prompt: number; completion: number; total: number };
 
 const STORAGE_KEY = "admin-ai-panel-messages-v1";
@@ -35,6 +36,15 @@ export function AIAssistantPanel({
   const abortRef = useRef<AbortController | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [streamMeta, setStreamMeta] = useState<MessageCostMeta | null>(null);
+  const [nowTick, setNowTick] = useState(0);
+
+  useEffect(() => {
+    if (!streaming) return;
+    const id = window.setInterval(() => setNowTick(performance.now()), 500);
+    setNowTick(performance.now());
+    return () => window.clearInterval(id);
+  }, [streaming]);
 
   // Live pre-flight estimate from the composer input + conversation history
   const preEstimate = useMemo(() => {
@@ -89,6 +99,11 @@ export function AIAssistantPanel({
     setUsage(null);
     setResumeNotice(null);
 
+    const startedAt = performance.now();
+    const promptText = next.map((m) => `${m.role}: ${m.content}`).join("\n");
+    const meta0: MessageCostMeta = { startedAt, promptText, model };
+    setStreamMeta(meta0);
+
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -111,6 +126,7 @@ export function AIAssistantPanel({
         onModel: (m) => {
           currentModel = m;
           setModel(m);
+          setStreamMeta((prev) => (prev ? { ...prev, model: m } : prev));
         },
         onDelta: (_delta, acc) => setStreamed(acc),
         onUsage: (u) => {
@@ -124,6 +140,7 @@ export function AIAssistantPanel({
             ),
           };
           setUsage(liveUsage);
+          setStreamMeta((prev) => (prev ? { ...prev, usage: liveUsage ?? undefined } : prev));
         },
         onRetry: (phase, attempt) => {
           if (phase === "reconnecting") setResumeNotice(`انقطع الاتصال — استئناف (${attempt})…`);
@@ -152,14 +169,24 @@ export function AIAssistantPanel({
         );
       }
 
-      setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد." }]);
+      const finalMeta: MessageCostMeta = {
+        startedAt,
+        endedAt: performance.now(),
+        model: currentModel,
+        promptText,
+        usage: liveUsage ?? undefined,
+      };
+      setMessages([...next, { role: "assistant", content: acc || "لا يوجد رد.", meta: finalMeta }]);
       setStreamed("");
+      setStreamMeta(null);
     } catch (e) {
       if ((e as Error).name === "AbortError") {
         setStreamed("");
+        setStreamMeta(null);
       } else {
         const msg = e instanceof StreamHttpError ? e.message : (e as Error).message || "خطأ غير متوقع";
         toast.error(msg);
+        setStreamMeta(null);
       }
     } finally {
       setStreaming(false);
@@ -282,12 +309,38 @@ export function AIAssistantPanel({
           )}
 
           {messages.map((m, i) => (
-            <MessageBubble key={i} role={m.role} content={m.content} />
+            <div key={i}>
+              <MessageBubble role={m.role} content={m.content} />
+              {m.role === "assistant" && m.meta && (
+                <div className="mt-1 pr-2">
+                  <MessageCostBadge meta={{ ...m.meta, outputText: m.content }} lang="ar" />
+                </div>
+              )}
+            </div>
           ))}
-          {streaming && streamed && <MessageBubble role="assistant" content={streamed} streaming />}
+          {streaming && streamed && (
+            <div>
+              <MessageBubble role="assistant" content={streamed} streaming />
+              {streamMeta && (
+                <div className="mt-1 pr-2">
+                  <MessageCostBadge
+                    meta={{ ...streamMeta, outputText: streamed }}
+                    live
+                    now={nowTick}
+                    lang="ar"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           {streaming && !streamed && (
-            <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ac-ink-3)" }}>
-              <Loader2 className="h-4 w-4 animate-spin" /> يفكر…
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ac-ink-3)" }}>
+                <Loader2 className="h-4 w-4 animate-spin" /> يفكر…
+              </div>
+              {streamMeta && (
+                <MessageCostBadge meta={streamMeta} live now={nowTick} lang="ar" />
+              )}
             </div>
           )}
           {resumeNotice && (
