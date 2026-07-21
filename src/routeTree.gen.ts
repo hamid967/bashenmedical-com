@@ -88,6 +88,7 @@ import { Route as AuthenticatedMcpStatusRouteImport } from './routes/_authentica
 import { Route as AuthenticatedInventoryManagementRouteImport } from './routes/_authenticated/inventory-management'
 import { Route as AuthenticatedIntroSettingsRouteImport } from './routes/_authenticated/intro-settings'
 import { Route as AuthenticatedHrManagementRouteImport } from './routes/_authenticated/hr-management'
+import { Route as AuthenticatedHomeCareAdminRouteImport } from './routes/_authenticated/home-care-admin'
 import { Route as AuthenticatedDoctorsManagementRouteImport } from './routes/_authenticated/doctors-management'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCorporateAdminRouteImport } from './routes/_authenticated/corporate-admin'
@@ -592,6 +593,12 @@ const AuthenticatedHrManagementRoute =
   AuthenticatedHrManagementRouteImport.update({
     id: '/hr-management',
     path: '/hr-management',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedHomeCareAdminRoute =
+  AuthenticatedHomeCareAdminRouteImport.update({
+    id: '/home-care-admin',
+    path: '/home-care-admin',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedDoctorsManagementRoute =
@@ -1203,6 +1210,7 @@ export interface FileRoutesByFullPath {
   '/corporate-admin': typeof AuthenticatedCorporateAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doctors-management': typeof AuthenticatedDoctorsManagementRoute
+  '/home-care-admin': typeof AuthenticatedHomeCareAdminRoute
   '/hr-management': typeof AuthenticatedHrManagementRoute
   '/intro-settings': typeof AuthenticatedIntroSettingsRoute
   '/inventory-management': typeof AuthenticatedInventoryManagementRoute
@@ -1378,6 +1386,7 @@ export interface FileRoutesByTo {
   '/corporate-admin': typeof AuthenticatedCorporateAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/doctors-management': typeof AuthenticatedDoctorsManagementRoute
+  '/home-care-admin': typeof AuthenticatedHomeCareAdminRoute
   '/hr-management': typeof AuthenticatedHrManagementRoute
   '/intro-settings': typeof AuthenticatedIntroSettingsRoute
   '/inventory-management': typeof AuthenticatedInventoryManagementRoute
@@ -1554,6 +1563,7 @@ export interface FileRoutesById {
   '/_authenticated/corporate-admin': typeof AuthenticatedCorporateAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/doctors-management': typeof AuthenticatedDoctorsManagementRoute
+  '/_authenticated/home-care-admin': typeof AuthenticatedHomeCareAdminRoute
   '/_authenticated/hr-management': typeof AuthenticatedHrManagementRoute
   '/_authenticated/intro-settings': typeof AuthenticatedIntroSettingsRoute
   '/_authenticated/inventory-management': typeof AuthenticatedInventoryManagementRoute
@@ -1732,6 +1742,7 @@ export interface FileRouteTypes {
     | '/corporate-admin'
     | '/dashboard'
     | '/doctors-management'
+    | '/home-care-admin'
     | '/hr-management'
     | '/intro-settings'
     | '/inventory-management'
@@ -1907,6 +1918,7 @@ export interface FileRouteTypes {
     | '/corporate-admin'
     | '/dashboard'
     | '/doctors-management'
+    | '/home-care-admin'
     | '/hr-management'
     | '/intro-settings'
     | '/inventory-management'
@@ -2082,6 +2094,7 @@ export interface FileRouteTypes {
     | '/_authenticated/corporate-admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/doctors-management'
+    | '/_authenticated/home-care-admin'
     | '/_authenticated/hr-management'
     | '/_authenticated/intro-settings'
     | '/_authenticated/inventory-management'
@@ -2839,6 +2852,13 @@ declare module '@tanstack/react-router' {
       path: '/hr-management'
       fullPath: '/hr-management'
       preLoaderRoute: typeof AuthenticatedHrManagementRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/home-care-admin': {
+      id: '/_authenticated/home-care-admin'
+      path: '/home-care-admin'
+      fullPath: '/home-care-admin'
+      preLoaderRoute: typeof AuthenticatedHomeCareAdminRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/doctors-management': {
@@ -3725,6 +3745,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCorporateAdminRoute: typeof AuthenticatedCorporateAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedDoctorsManagementRoute: typeof AuthenticatedDoctorsManagementRoute
+  AuthenticatedHomeCareAdminRoute: typeof AuthenticatedHomeCareAdminRoute
   AuthenticatedHrManagementRoute: typeof AuthenticatedHrManagementRoute
   AuthenticatedIntroSettingsRoute: typeof AuthenticatedIntroSettingsRoute
   AuthenticatedInventoryManagementRoute: typeof AuthenticatedInventoryManagementRoute
@@ -3770,6 +3791,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCorporateAdminRoute: AuthenticatedCorporateAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedDoctorsManagementRoute: AuthenticatedDoctorsManagementRoute,
+  AuthenticatedHomeCareAdminRoute: AuthenticatedHomeCareAdminRoute,
   AuthenticatedHrManagementRoute: AuthenticatedHrManagementRoute,
   AuthenticatedIntroSettingsRoute: AuthenticatedIntroSettingsRoute,
   AuthenticatedInventoryManagementRoute: AuthenticatedInventoryManagementRoute,

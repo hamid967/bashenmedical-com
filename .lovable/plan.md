@@ -1,70 +1,163 @@
-# خطة توحيد Design Tokens v2 على portal/*
 
-## الوضع الحالي
+# المرحلة الأولى — تقرير الفحص الشامل (Read-only Audit)
 
-- **primitives جاهزة** في `src/components/portal/ui/`: `PortalPageHeader`, `PortalCard*`, `PortalStatCard`, `PortalSection`, `PortalBadge`, `PortalDataList`, `PortalEmptyState`, `PortalSkeleton`.
-- **5 صفحات مُهاجرة**: `dashboard`, `appointments`, `invoices`, `records`, `family`.
-- **23 صفحة متبقية** (~13 ألف سطر) تستخدم أنماطًا قديمة (Card من shadcn مباشرة، ألوان hex، spacing متضارب).
+مقدَّم للمهندس حامد — لا تعديلات نُفِّذت بعد. ينتظر اعتمادكم قبل الانتقال للمرحلة الثالثة.
 
-## الهدف
+## 1. حجم المشروع (Snapshot)
 
-نقل كل الصفحات المتبقية لتستخدم primitives الموحّدة، بحيث:
-1. أي تغيير في tokens مستقبلًا ينعكس تلقائيًا على كل الصفحات.
-2. اختفاء أي `text-white/bg-black/#hex` من طبقة العرض في `portal/*`.
-3. اتساق spacing/typography/spacing scale + focus/motion.
+| البند | العدد |
+|---|---|
+| ملفات المسارات (routes) | 177 |
+| مسارات عامة (public) | 52 |
+| مسارات محمية (`_authenticated/*`) | 97 |
+| مسارات API عامة (`/api/public/*`) | 22 |
+| Server functions (`*.functions.ts`) | 80 |
+| Server-only helpers (`*.server.ts`) | 8 |
+| جداول Supabase | 92 (169 هجرة تراكمية) |
 
-## نطاق الدفعات
+## 2. نتائج الفحوصات الآلية
 
-نُقسّم العمل إلى 5 دفعات حسب التقارب الوظيفي؛ كل دفعة = PR منفصل + typecheck + لقطة قبل/بعد.
+### 2.1 TypeScript (blocker وحيد)
+- `src/routes/waitlist.tsx:149` — `<Link to="/track">` ينقصه `search` مطلوب من الـtype-safe router. **P0 صغير، إصلاح سطر واحد.**
 
-### الدفعة 1 — Landing & Nav (سريعة)
-`portal.index.tsx`, `portal.tsx`, `portal.doctors.tsx`, `portal.settings.tsx`, `portal.profile.tsx`
+### 2.2 Lint / Portal Tokens
+- Design Tokens v2 baseline صحيح (501 مخالفة تاريخية مسموحة، صفر جديد).
 
-### الدفعة 2 — Communications
-`portal.notifications.tsx`, `portal.complaints.tsx`, `portal.inquiries.tsx`, `portal.reminder-preferences.tsx`, `portal.sessions.tsx`
+### 2.3 SSR / Console
+- تحذير متكرر `disableCsrfMiddlewareWarning` (تلوث سجلات) + `renderToReadableStream aborted` أثناء التنقل السريع — غير قاتل لكن يجب إسكاته أو معالجته.
 
-### الدفعة 3 — Records & Reports
-`portal.laboratory.tsx`, `portal.radiology.tsx`, `portal.reports.tsx`, `portal.reports.downloads.tsx`, `portal.prescriptions.tsx`, `portal.consents.tsx`
+### 2.4 Supabase Linter — 111 تنبيه
+تصنيف تقريبي:
+- **WARN — Public EXECUTE على SECURITY DEFINER**: ~90 دالة يمكن استدعاؤها من `anon`. أعلى أولوية أمنية.
+- **WARN — Extension in `public`** ×1.
+- **WARN — Function search_path mutable** (بقايا) — منخفض.
+- **INFO — RLS Enabled / policies exist** (تأكيدات لا تتطلب فعلاً).
 
-### الدفعة 4 — Booking & Scheduling
-`portal.book.tsx`, `portal.calendar.tsx`, `portal.schedule.tsx`
+### 2.5 لا يوجد
+- `src/pages/`، ولا `react-router-dom`، ولا `_authenticated/index.tsx` (لا صراع على `/`).
 
-### الدفعة 5 — Billing & Insurance
-`portal.orders.tsx`, `portal.orders.$kind.$id.tsx`, `portal.payments.tsx`, `portal.refunds.tsx`, `portal.insurance.tsx`
+## 3. جرد لوحة الإدارة الحالية (97 مسار)
 
-## قواعد التحويل (لكل ملف)
+هناك **تشتت واضح**: نفس المفهوم موزّع على عدة صفحات دون واجهة موحدة.
 
-1. استبدال هيكل الصفحة العلوي بـ `PortalPageHeader` (title, subtitle, breadcrumbs, actions).
-2. استبدال كل `<Card>` من shadcn بـ `PortalCard` / `PortalCardHeader` / `PortalCardBody` / `PortalCardFooter`.
-3. استبدال KPI blocks اليدوية بـ `PortalStatCard`.
-4. استبدال قوائم key–value بـ `PortalDataList`.
-5. استبدال "لا توجد بيانات" بـ `PortalEmptyState`.
-6. استبدال loaders يدوية بـ `PortalCardSkeleton`.
-7. أي `Badge` حالة (نجاح/تحذير/خطر/معلومة) → `PortalBadge` بـ `tone`.
-8. إزالة كل `bg-white/text-black/#hex` من JSX واستخدام tokens (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`).
-9. تجميع الأقسام داخل `PortalSection` لتوحيد `spacing-y`.
-10. الإبقاء على كل business logic كما هي — لا تغيير في hooks/loaders/mutations.
+### 3.1 مسارات إدارة تعمل جزئيًا ومكرَّرة (يجب دمجها)
+- `admin.tsx` + `admin.index.tsx` + `admin.classic.tsx` + `admin.lazy.tsx` → 4 نقاط دخول لنفس اللوحة.
+- `dashboard.tsx` + `command-center.tsx` + `admin.index.tsx` → 3 لوحات مؤشرات متوازية.
+- `orders-unified.tsx` موجود لكن `admin.service-inquiries.tsx` و `complaints-admin.tsx` و `second-opinion-admin.tsx` و `corporate-admin.tsx` منفصلة → لا "صندوق طلبات موحّد" حقيقي.
+- `patients-management.tsx` + `patients.index.tsx` + `patients-analytics.tsx` — 3 مسارات للمرضى.
+- `admin.no-show-*` ×3 + `admin.reservations-usage` + `admin.web-vitals` + `admin.visual-analytics` — تحليلات مبعثرة.
 
-## اختبار وضمان الجودة
+### 3.2 مسارات إدارة موجودة لكن ليست في القائمة الجانبية الرئيسية
+`inventory-management`, `pharmacy-management`, `hr-management`, `nurses`, `qr-cards`, `ratings`, `intro-settings`, `messaging-settings`, `message-templates`, `notifications-queue`, `audit-log`, `rbac`, `mcp-status`, `transition-alerts` — يصعب اكتشافها.
 
-- Typecheck نظيف بعد كل دفعة.
-- E2E موجود: تشغيل السيناريوهات الحرجة (`book`, `cancel`, `reschedule`, `waitlist`) بعد كل دفعة تلامسها.
-- لقطات Playwright قبل/بعد (`/tmp/browser/portal-v2/<page>-{before,after}.png`) للصفحات المُهاجرة في كل دفعة.
-- تحقق axe سريع على 3 صفحات من كل دفعة.
+### 3.3 لوحة Owner
+`owner.*` (10 مسارات) منفصلة تمامًا عن `admin.*` — نموذجان للتنقل يخلقان ارتباكًا.
 
-## التفاصيل التقنية
+## 4. صندوق الطلبات — الوضع الحالي
 
-- لا تعديل على `src/components/portal/ui/*` — فقط استهلاك.
-- لا migrations، لا server functions جديدة.
-- إذا احتاجت صفحة نمطًا غير موجود في primitives (نادر)، أُضيف variant جديد داخل primitive نفسه بدل يدويّ في الصفحة.
-- ملفات > 700 سطر (appointments سابقًا، prescriptions, refunds, family) تُحوّل بـ `line_replace` مركّز على أجزاء JSX فقط، دون كسر الملف.
+مصادر الطلبات الواردة موجودة كجداول لكنها **غير مجمّعة في inbox واحد**:
 
-## المخرجات
+| المصدر | الجدول | الواجهة الإدارية | مربوط بلوحة موحّدة؟ |
+|---|---|---|---|
+| نموذج الحجز | `appointments` | `appointments-queue`, `calendar` | لا |
+| استفسارات الخدمات | `service_inquiries` | `admin.service-inquiries` | لا |
+| واتساب/تواصل | `service_inquiries` (source=whatsapp) | مختلط | جزئي |
+| الشكاوى | `complaints` | `complaints-admin` | لا |
+| رأي ثانٍ | `second_opinion_requests` | `second-opinion-admin` | لا |
+| الشركات | `corporate_requests` | `corporate-admin` | لا |
+| الرعاية المنزلية | `home_care_requests` | — | **غير موجود** |
+| قصص المرضى | `patient_stories` | `patient-stories-admin` | لا |
+| قائمة الانتظار | `appointment_waitlist` | مضمّن في calendar | جزئي |
 
-- 23 ملف مُحدّث.
-- 0 hex/hardcoded colors في `src/routes/_authenticated/portal.*.tsx`.
-- تقرير موجز في نهاية كل دفعة: عدد الأسطر المتغيرة، لقطات قبل/بعد، حالة typecheck/tests.
+→ **`orders-unified.tsx` موجود لكنه لا يستهلك جميع المصادر أعلاه.**
 
-## البدء
+## 5. المشكلات المصنّفة حسب الخطورة
 
-سأبدأ فورًا بالدفعة 1 (Landing & Nav) بعد الموافقة. الوقت المتوقع لكل دفعة: 2–3 دورات.
+### P0 (قاتل / أمني)
+1. Public EXECUTE على ~90 دالة SECURITY DEFINER — يفتح سطح هجوم واسع.
+2. TS error في `waitlist.tsx` — يكسر build صارم.
+3. `home_care_requests` بلا واجهة إدارية → طلبات المرضى تضيع.
+
+### P1 (تشتّت وظيفي)
+4. تعدد صفحات admin/dashboard/command-center بدون واجهة موحّدة.
+5. لا "Unified Inbox" حقيقي — الطلبات موزّعة على 6+ صفحات.
+6. `owner.*` منفصلة عن `admin.*` بلا Sidebar موحّد.
+7. لا "Assignment / Ownership" (تعيين موظف) على `service_inquiries` / `complaints` / `second_opinion` بشكل موحّد.
+8. لا "حالة موحّدة" (جديد/مراجعة/تم التواصل/بانتظار/مكتمل) عبر أنواع الطلبات.
+
+### P2 (نظافة)
+9. تحذيرات `disableCsrfMiddlewareWarning` تُلوّث السجلات.
+10. `admin.lazy.tsx` و `admin.classic.tsx` تبدو تجارب قديمة.
+11. `Extension in public` warning من Supabase.
+
+### P3 (تحسينات مستقبلية)
+12. مسارات إدارة ليست في القائمة الجانبية (اكتشاف صعب).
+13. لا اختصارات لوحة مفاتيح ولا Command-K بحث شامل.
+
+## 6. Change Manifest — للمراحل التالية
+
+المراحل مقسومة إلى دفعات آمنة قابلة للتراجع. **لن أنفّذ أي دفعة قبل اعتمادكم صراحةً**.
+
+### Batch A — إصلاحات P0 (منخفضة الخطورة، سريعة)
+| # | التغيير | ملفات | خطر | تراجع |
+|---|---|---|---|---|
+| A1 | إصلاح TS في `waitlist.tsx` (إضافة `search={{}}`) | 1 ملف | لا | git |
+| A2 | Migration: `REVOKE EXECUTE ... FROM anon, public` على الدوال الداخلية (~90 دالة) مع الحفاظ على `GRANT EXECUTE ... TO authenticated` حيث تُستخدم فعلاً من المتصفح | migration واحدة | **متوسط** — قد تكسر مسارات تستدعي RPC مباشرة من العميل | migration reversal + اختبار مسارات المتصفح المتأثرة قبل الدمج |
+| A3 | إنشاء واجهة إدارية لـ `home_care_requests` (قراءة + حالة + ملاحظات) | 1 route جديد + queries | منخفض | حذف الملف |
+
+**اعتماد مطلوب على A2** لأنه أمني/متوسط الخطر — أحتاج قائمة الدوال الـ~90 وتصويت "احتفظ/ألغِ" على كل مجموعة قبل الدفع.
+
+### Batch B — توحيد صندوق الطلبات (P1 محوري)
+| # | التغيير | ملفات | خطر |
+|---|---|---|---|
+| B1 | View SQL موحّد `admin_unified_inbox` يجمع الجداول السبعة أعلاه بأعمدة موحّدة (ref, type, patient_name, phone, service, source, branch, created_at, priority, status, assignee, last_update) | migration + RLS | متوسط |
+| B2 | صفحة `admin.inbox.tsx` جديدة تستهلك الـview مع فلاتر (النوع، الحالة، المصدر، الفرع، المسؤول) + إجراءات جماعية آمنة | 1 route + مكوّنات | منخفض |
+| B3 | تطبيع الحالات: إضافة enum موحّد `request_status` + عمود `assignee_id` + جدول `request_events` (audit) — تطبيق على الجداول السبعة عبر triggers لا تكسر البيانات القائمة | migration | **عالٍ — يحتاج اعتماد صريح** |
+| B4 | ربط الإجراءات (تعيين، تحديث حالة، ملاحظة، ردّ للمريض، إنشاء موعد، دمج مكرر، أرشفة) بـserver functions محمية بـRBAC | ~8 server fns جديدة | متوسط |
+
+### Batch C — توحيد التنقل والصفحات الفائضة
+| # | التغيير | خطر |
+|---|---|---|
+| C1 | Sidebar موحّد يجمع Admin + Owner تحت `_authenticated/console/*` مع أدوار (super_admin / branch_manager / reception / doctor / content_manager) | متوسط — يمس التنقل |
+| C2 | إزالة `admin.lazy.tsx`, `admin.classic.tsx` بعد التأكد من عدم وجود روابط داخلية/خارجية | منخفض بعد grep شامل |
+| C3 | دمج `dashboard` + `command-center` + `admin.index` في `console/overview` | متوسط |
+| C4 | نقل التحليلات إلى `console/analytics/*` (web-vitals, no-show, reservations-usage, visual) | منخفض |
+
+### Batch D — إدارة الحجز الموحّدة
+| # | التغيير | خطر |
+|---|---|---|
+| D1 | صفحة `console/calendar` تعرض تقويم يومي/أسبوعي/شهري + فلاتر طبيب/فرع/تخصص + drag-to-reschedule محمي بـserver fn | متوسط |
+| D2 | منع التعارض على مستوى DB (unique partial index على doctor_id+start_at حيث status NOT IN cancelled) | متوسط |
+| D3 | تكامل مع قائمة الانتظار وإجازات الأطباء والحضور/No-show كتبويبات في نفس الصفحة | منخفض |
+
+### Batch E — RBAC وتدقيق
+| # | التغيير | خطر |
+|---|---|---|
+| E1 | استكمال الأدوار (11 دور) مع صلاحيات تفصيلية عبر `role_permissions` + `user_resource_permissions` القائمين | متوسط |
+| E2 | Audit log غير قابل للتعديل (append-only + RLS ينع UPDATE/DELETE للجميع عدا service_role) لكل عمل إداري حساس | متوسط |
+| E3 | Rate limiting server-side على كل الـmutations الإدارية عبر `src/lib/rate-limit.server.ts` القائم | منخفض |
+
+### Batch F — نظافة وتلميع (P2/P3)
+- إسكات CSRF warning عبر خيار موثّق أو تفعيل الحماية.
+- Command-K بحث شامل + اختصارات.
+- توحيد حالات التحميل/الفراغ/الفشل بمكوّنات portal الحالية.
+- Playwright E2E لكل دور × كل تدفق أساسي.
+
+## 7. الاعتمادات المطلوبة الآن من المهندس حامد
+
+قبل التنفيذ أحتاج قرارًا واضحًا على:
+
+1. **Batch A2** — الموافقة على مراجعة قائمة الدوال قبل REVOKE (سأُنتج القائمة الكاملة عند الاعتماد).
+2. **Batch B3** — الموافقة على تطبيع الحالات (تغيير schema يمس 7 جداول).
+3. **Batch C1** — الموافقة على دمج Admin + Owner تحت `_authenticated/console/*` (يغيّر روابط داخلية).
+4. **ترتيب الأولوية**: هل نبدأ بـ A → B → C → D → E → F، أم تعديل الترتيب؟
+5. **نطاق الحذف**: الموافقة على حذف `admin.lazy.tsx` و`admin.classic.tsx` بعد التحقق.
+
+## 8. ما لن أفعله دون اعتماد صريح
+- أي migration يمس RLS/policies/GRANTs.
+- أي حذف ملف.
+- أي دمج routes يغيّر URLs قائمة.
+- أي تغيير على `owner.*` أو `admin.*` structure.
+
+## 9. الخطوة التالية المقترحة
+بمجرد اعتمادكم، أبدأ بـ **Batch A** كاملة (A1+A2+A3) في تسليم واحد، ثم أعرض تقرير التحقق قبل الانتقال لـ Batch B.

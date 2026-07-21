@@ -148,6 +148,7 @@ function WaitlistStatusPage() {
             </div>
             <Link
               to="/track"
+              search={{ ref: bookedRef ?? undefined, phone4: undefined }}
               className="mt-4 inline-flex items-center justify-center w-full gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 font-semibold hover:opacity-90"
             >
               متابعة الحجز
