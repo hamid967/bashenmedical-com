@@ -9,7 +9,13 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { PortalShell } from "@/components/portal/PortalShell";
-import { PortalPageHeader } from "@/components/portal/ui";
+import {
+  PortalPageHeader,
+  PortalStatCard,
+  PortalCard,
+  PortalCardHeader,
+  PortalEmptyState,
+} from "@/components/portal/ui";
 
 import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import {
@@ -199,96 +205,108 @@ function PortalDashboardPage() {
         <>
           {/* KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <KpiTile
-              icon={<Inbox className="h-4 w-4" />}
-              label="إجمالي طلباتي"
-              value={orders.length}
-              to="/portal/orders"
-              tone="primary"
-            />
-            <KpiTile
-              icon={<Clock className="h-4 w-4" />}
+            <Link to="/portal/orders" className="block portal-focus-ring rounded-[var(--portal-radius-lg)]">
+              <PortalStatCard
+                icon={<Inbox className="h-5 w-5" />}
+                label="إجمالي طلباتي"
+                value={orders.length}
+                tone="primary"
+              />
+            </Link>
+            <PortalStatCard
+              icon={<Clock className="h-5 w-5" />}
               label="قيد المعالجة"
               value={orderStatusBuckets.open}
-              tone="amber"
+              tone="warning"
             />
-            <KpiTile
-              icon={<CheckCircle2 className="h-4 w-4" />}
+            <PortalStatCard
+              icon={<CheckCircle2 className="h-5 w-5" />}
               label="مكتملة"
               value={orderStatusBuckets.done}
-              tone="emerald"
+              tone="success"
             />
-            <KpiTile
-              icon={<XCircle className="h-4 w-4" />}
+            <PortalStatCard
+              icon={<XCircle className="h-5 w-5" />}
               label="ملغاة/مرفوضة"
               value={orderStatusBuckets.cancelled}
-              tone="rose"
+              tone="error"
             />
           </div>
 
           {/* Orders by kind */}
-          <section className="bg-card border border-border rounded-2xl p-4 md:p-5 mb-6">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-bold flex items-center gap-2">
-                <Inbox className="h-4 w-4 text-primary" />
-                طلباتي حسب النوع
-              </h2>
-              <Link
-                to="/portal/orders"
-                className="text-xs text-primary hover:underline inline-flex items-center gap-1"
-              >
-                عرض الكل
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Link>
-            </div>
-            {orders.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
-                لا توجد طلبات بعد.
-              </p>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {(Object.keys(KIND_LABELS_AR) as OrderTableKind[]).map((k) => {
-                  const Icon = KIND_ICONS[k];
-                  const n = orderCounts[k] ?? 0;
-                  return (
-                    <div
-                      key={k}
-                      className="flex items-center gap-2 p-3 rounded-xl border border-border bg-background"
-                    >
-                      <div className="h-8 w-8 rounded-lg grid place-items-center bg-primary/10 text-primary shrink-0">
-                        <Icon className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-[11px] text-muted-foreground truncate">
-                          {KIND_LABELS_AR[k]}
+          <PortalCard as="section" className="mb-6">
+            <PortalCardHeader
+              title={
+                <span className="flex items-center gap-2">
+                  <Inbox className="h-4 w-4 text-[color:var(--portal-primary)]" />
+                  طلباتي حسب النوع
+                </span>
+              }
+              action={
+                <Link
+                  to="/portal/orders"
+                  className="text-xs text-[color:var(--portal-primary)] hover:underline inline-flex items-center gap-1"
+                >
+                  عرض الكل
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Link>
+              }
+            />
+            <div className="px-5 pb-5">
+              {orders.length === 0 ? (
+                <p className="text-sm text-[color:var(--portal-ink-3)] py-4 text-center">
+                  لا توجد طلبات بعد.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {(Object.keys(KIND_LABELS_AR) as OrderTableKind[]).map((k) => {
+                    const Icon = KIND_ICONS[k];
+                    const n = orderCounts[k] ?? 0;
+                    return (
+                      <div
+                        key={k}
+                        className="flex items-center gap-2 p-3 rounded-xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)]"
+                      >
+                        <div className="h-8 w-8 rounded-lg grid place-items-center bg-[color:var(--portal-primary-50)] text-[color:var(--portal-primary)] shrink-0">
+                          <Icon className="h-4 w-4" />
                         </div>
-                        <div className="text-lg font-bold leading-tight">{n}</div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] text-[color:var(--portal-ink-3)] truncate">
+                            {KIND_LABELS_AR[k]}
+                          </div>
+                          <div className="text-lg font-bold leading-tight">{n}</div>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </PortalCard>
 
           {/* Recent orders */}
-          <section className="bg-card border border-border rounded-2xl overflow-hidden mb-6">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-sm font-bold">أحدث الطلبات</h2>
-              <Link
-                to="/portal/orders"
-                className="text-xs text-primary hover:underline inline-flex items-center gap-1"
-              >
-                عرض الكل
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Link>
-            </div>
+          <PortalCard as="section" className="overflow-hidden mb-6">
+            <PortalCardHeader
+              title="أحدث الطلبات"
+              action={
+                <Link
+                  to="/portal/orders"
+                  className="text-xs text-[color:var(--portal-primary)] hover:underline inline-flex items-center gap-1"
+                >
+                  عرض الكل
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Link>
+              }
+            />
             {orders.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
-                لم تقم بأي طلب بعد.
-              </p>
+              <div className="px-5 pb-5">
+                <PortalEmptyState
+                  icon={<Inbox className="h-6 w-6" />}
+                  title="لم تقم بأي طلب بعد"
+                />
+              </div>
             ) : (
-              <ul className="divide-y divide-border">
+              <ul className="divide-y divide-[color:var(--portal-border)]">
                 {orders.slice(0, 5).map((o: MyRecentOrder) => {
                   const Icon = KIND_ICONS[o.kind];
                   return (
@@ -296,60 +314,63 @@ function PortalDashboardPage() {
                       <Link
                         to="/portal/orders/$kind/$id"
                         params={{ kind: o.kind, id: o.id }}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-muted/40 transition-colors"
+                        className="flex items-center gap-3 py-3 px-5 hover:bg-[color:var(--portal-surface-2)] transition-colors"
                       >
-                        <div className="h-9 w-9 shrink-0 rounded-lg grid place-items-center bg-primary/10 text-primary">
+                        <div className="h-9 w-9 shrink-0 rounded-lg grid place-items-center bg-[color:var(--portal-primary-50)] text-[color:var(--portal-primary)]">
                           <Icon className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate">{o.title}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-[color:var(--portal-ink-3)]">
                             {formatDate(o.created_at)}
                           </p>
                         </div>
                         <OrderStatusBadge kind={o.kind} status={o.status} raw />
-                        <ChevronLeft className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <ChevronLeft className="h-4 w-4 text-[color:var(--portal-ink-3)] shrink-0" />
                       </Link>
                     </li>
                   );
                 })}
               </ul>
             )}
-          </section>
+          </PortalCard>
 
           {/* Inquiries */}
-          <section className="bg-card border border-border rounded-2xl overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div>
-                <h2 className="text-sm font-bold flex items-center gap-2">
-                  <MessageSquareWarning className="h-4 w-4 text-primary" />
+          <PortalCard as="section" className="overflow-hidden">
+            <PortalCardHeader
+              title={
+                <span className="flex items-center gap-2">
+                  <MessageSquareWarning className="h-4 w-4 text-[color:var(--portal-primary)]" />
                   استفساراتي وحالتها
-                </h2>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
-                  تظهر جميع استفساراتك المرتبطة بحسابك بعد اكتمال التحقق
-                </p>
-              </div>
-              <Link
-                to="/portal/inquiries"
-                className="text-xs text-primary hover:underline inline-flex items-center gap-1"
-              >
-                عرض الكل
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </Link>
-            </div>
+                </span>
+              }
+              description="تظهر جميع استفساراتك المرتبطة بحسابك بعد اكتمال التحقق"
+              action={
+                <Link
+                  to="/portal/inquiries"
+                  className="text-xs text-[color:var(--portal-primary)] hover:underline inline-flex items-center gap-1"
+                >
+                  عرض الكل
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </Link>
+              }
+            />
 
             {inquiries.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-8 text-center">
-                لا توجد استفسارات مرتبطة بحسابك.
-              </p>
+              <div className="px-5 pb-5">
+                <PortalEmptyState
+                  icon={<MessageSquareWarning className="h-6 w-6" />}
+                  title="لا توجد استفسارات مرتبطة بحسابك"
+                />
+              </div>
             ) : (
               <>
                 {/* Inquiry status summary */}
-                <div className="flex flex-wrap gap-2 p-4 border-b border-border bg-muted/20">
+                <div className="flex flex-wrap gap-2 px-5 py-3 border-t border-[color:var(--portal-border)] bg-[color:var(--portal-surface-2)]">
                   {Object.entries(inquiryStatusCounts).map(([status, count]) => (
                     <div
                       key={status}
-                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-border bg-card text-xs"
+                      className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] text-xs"
                     >
                       <InquiryStatusBadge status={status} />
                       <span className="font-semibold tabular-nums">{count}</span>
@@ -357,28 +378,28 @@ function PortalDashboardPage() {
                   ))}
                 </div>
 
-                <ul className="divide-y divide-border">
+                <ul className="divide-y divide-[color:var(--portal-border)]">
                   {inquiries.slice(0, 6).map((i: MyInquiry) => (
                     <li key={i.id}>
                       <Link
                         to="/portal/inquiries"
                         search={{ ref: i.request_number }}
-                        className="flex items-center gap-3 py-3 px-4 hover:bg-muted/40 transition-colors"
+                        className="flex items-center gap-3 py-3 px-5 hover:bg-[color:var(--portal-surface-2)] transition-colors"
                       >
-                        <div className="h-9 w-9 shrink-0 rounded-lg grid place-items-center bg-primary/10 text-primary">
+                        <div className="h-9 w-9 shrink-0 rounded-lg grid place-items-center bg-[color:var(--portal-primary-50)] text-[color:var(--portal-primary)]">
                           <MessageSquareWarning className="h-4 w-4" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold truncate">
                             {i.service_label ?? "استفسار عن خدمة"}
                             {i.branch_name ? (
-                              <span className="text-muted-foreground font-normal">
+                              <span className="text-[color:var(--portal-ink-3)] font-normal">
                                 {" "}
                                 — {i.branch_name}
                               </span>
                             ) : null}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-[color:var(--portal-ink-3)]">
                             {formatDate(i.created_at)}
                             <span className="ms-2 font-mono" dir="ltr">
                               {i.request_number}
@@ -386,14 +407,14 @@ function PortalDashboardPage() {
                           </p>
                         </div>
                         <InquiryStatusBadge status={i.internal_status} />
-                        <ChevronLeft className="h-4 w-4 text-muted-foreground shrink-0" />
+                        <ChevronLeft className="h-4 w-4 text-[color:var(--portal-ink-3)] shrink-0" />
                       </Link>
                     </li>
                   ))}
                 </ul>
               </>
             )}
-          </section>
+          </PortalCard>
         </>
       )}
     </PortalShell>
