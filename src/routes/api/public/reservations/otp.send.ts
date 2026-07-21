@@ -102,6 +102,17 @@ export const Route = createFileRoute("/api/public/reservations/otp/send")({
           const devEcho =
             process.env.NODE_ENV !== "production" ? { dev_code: code } : {};
 
+          try {
+            const { logReservationEvent } = await import(
+              "@/lib/reservation-events.server"
+            );
+            await logReservationEvent({
+              event_type: "otp_sent",
+              phone,
+              ip,
+            });
+          } catch { /* telemetry best-effort */ }
+
           return jsonResponse(200, {
             ok: true,
             message: "تم إرسال رمز التحقق إلى جوالك.",

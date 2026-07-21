@@ -141,6 +141,17 @@ export const Route = createFileRoute("/api/public/reservations/reschedule")({
               : "تعذّر تنفيذ إعادة الجدولة.";
             return jsonResponse(409, { ok: false, message: msg });
           }
+          try {
+            const { logReservationEvent } = await import(
+              "@/lib/reservation-events.server"
+            );
+            await logReservationEvent({
+              event_type: "reschedule",
+              phone: sess.phone,
+              appointment_id: parsed.data.appointment_id,
+              ip,
+            });
+          } catch { /* telemetry best-effort */ }
           return jsonResponse(200, { ok: true });
         } catch {
           return jsonResponse(500, {

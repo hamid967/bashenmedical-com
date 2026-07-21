@@ -106,6 +106,18 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           const cancelledAt = new Date(appt.cancelled_at).getTime();
           const ageSec = (Date.now() - cancelledAt) / 1000;
           if (ageSec > UNDO_WINDOW_SECONDS) {
+            try {
+              const { logReservationEvent } = await import(
+                "@/lib/reservation-events.server"
+              );
+              await logReservationEvent({
+                event_type: "cancel_undo_failed",
+                phone: sess.phone,
+                appointment_id: appt.id,
+                meta: { reason: "expired" },
+                ip,
+              });
+            } catch { /* telemetry best-effort */ }
             return jsonResponse(410, {
               ok: false,
               message: "انتهت مهلة التراجع (30 ثانية).",
@@ -124,6 +136,18 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
               .not("status", "in", "(cancelled,no_show)")
               .limit(1);
             if (conflict && conflict.length > 0) {
+              try {
+                const { logReservationEvent } = await import(
+                  "@/lib/reservation-events.server"
+                );
+                await logReservationEvent({
+                  event_type: "cancel_undo_failed",
+                  phone: sess.phone,
+                  appointment_id: appt.id,
+                  meta: { reason: "slot_taken" },
+                  ip,
+                });
+              } catch { /* telemetry best-effort */ }
               return jsonResponse(409, {
                 ok: false,
                 message: "لم يعد الموعد متاحًا — تم حجزه من قِبل شخص آخر.",
@@ -201,6 +225,20 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           } catch {
             /* non-fatal */
           }
+
+          try {
+            const { logReservationEvent } = await import(
+              "@/lib/reservation-events.server"
+            );
+            await logReservationEvent({
+              event_type: "cancel_undo_success",
+              phone: sess.phone,
+              appointment_id: appt.id,
+              slot_rebooked,
+              waitlist_reverted,
+              ip,
+            });
+          } catch { /* telemetry best-effort */ }
 
           return jsonResponse(200, {
             ok: true,

@@ -158,6 +158,20 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
             /* non-fatal */
           }
 
+          try {
+            const { logReservationEvent } = await import(
+              "@/lib/reservation-events.server"
+            );
+            await logReservationEvent({
+              event_type: "cancel",
+              phone: sess.phone,
+              appointment_id: appt.id,
+              released: released === true,
+              waitlist_notified,
+              ip,
+            });
+          } catch { /* telemetry best-effort */ }
+
           return jsonResponse(200, {
             ok: true,
             released: released === true,
