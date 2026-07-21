@@ -312,28 +312,79 @@ html.reduce-motion *::after {
    Only active under .portal-root so the marketing site stays untouched.
    ========================================================================== */
 .portal-root {
+  /* v2 — Design tokens for the patient portal.
+     Rule: components MUST reference these tokens; no hex/rgb inline. */
   --portal-primary: #075E63;
+  --portal-primary-600: #064F53;
+  --portal-primary-50: #E6F1F1;
   --portal-secondary: #0B8585;
   --portal-accent: #C7A46B;
   --portal-bg: #FCFDFB;
   --portal-card: #FFFFFF;
+
+  /* Surfaces (elevation ladder) */
+  --portal-surface-1: #FFFFFF;
+  --portal-surface-2: #F7FAF9;
+  --portal-surface-3: #EEF4F3;
+  --portal-surface-sunken: #F1F6F5;
+  --portal-surface-elevated: rgba(255, 255, 255, 0.92);
+
+  /* Status (semantic) */
   --portal-success: #16A34A;
+  --portal-success-50: #E7F7EE;
   --portal-warning: #D97706;
+  --portal-warning-50: #FDF3E4;
   --portal-error: #C0392B;
+  --portal-error-50: #FBEAE7;
+  --portal-info: #0B8585;
+  --portal-info-50: #E6F1F1;
+
+  /* Ink (foreground scale) */
   --portal-ink: #173B42;
   --portal-ink-2: #64777C;
   --portal-ink-3: #8B9A9E;
   --portal-border: #DCEAE8;
-  --portal-radius: 20px;
+  --portal-border-strong: #C7DAD6;
+
+  /* Radii */
+  --portal-radius-sm: 10px;
+  --portal-radius-md: 14px;
+  --portal-radius-lg: 20px;
+  --portal-radius-xl: 28px;
+  --portal-radius-2xl: 36px;
+  --portal-radius: 20px; /* legacy alias */
+
+  /* Shadows */
   --portal-shadow-sm: 0 1px 2px rgba(7, 94, 99, 0.05), 0 4px 12px -6px rgba(7, 94, 99, 0.08);
   --portal-shadow: 0 4px 14px -6px rgba(7, 94, 99, 0.10), 0 20px 60px -30px rgba(7, 94, 99, 0.18);
+  --portal-shadow-elevated: 0 10px 30px -12px rgba(7, 94, 99, 0.22), 0 30px 80px -40px rgba(7, 94, 99, 0.28);
+  --portal-shadow-glow: 0 0 0 4px color-mix(in oklab, #0B8585 18%, transparent);
+
+  /* Motion */
+  --portal-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --portal-dur-fast: 120ms;
+  --portal-dur-base: 220ms;
+  --portal-dur-slow: 360ms;
+
+  /* Spacing scale (used by @utility below and in JS via var()) */
+  --portal-space-1: 4px;
+  --portal-space-2: 8px;
+  --portal-space-3: 12px;
+  --portal-space-4: 16px;
+  --portal-space-6: 24px;
+  --portal-space-8: 32px;
+
+  /* Gradients */
   --portal-gradient: linear-gradient(135deg, #075E63 0%, #0B8585 100%);
   --portal-gradient-soft: linear-gradient(135deg, rgba(7,94,99,0.08) 0%, rgba(11,133,133,0.08) 100%);
+  --portal-gradient-warm: linear-gradient(135deg, rgba(199, 164, 107, 0.14), rgba(184, 92, 60, 0.08));
+
   background: var(--portal-bg);
   color: var(--portal-ink);
   min-height: 100vh;
 }
 .portal-root ::selection { background: rgba(11,133,133,0.20); color: var(--portal-ink); }
+
 
 @utility glass-card {
   background: color-mix(in oklab, white 82%, transparent);
@@ -364,6 +415,61 @@ html.reduce-motion *::after {
     radial-gradient(900px 500px at -10% 110%, rgba(199, 164, 107, 0.10), transparent 55%),
     #FCFDFB;
 }
+
+/* v2 — portal ui utilities */
+@utility portal-card-elevated {
+  background: var(--portal-surface-elevated);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-lg);
+  box-shadow: var(--portal-shadow-elevated);
+  backdrop-filter: blur(18px) saturate(160%);
+}
+@utility portal-card-sunken {
+  background: var(--portal-surface-sunken);
+  border: 1px solid var(--portal-border);
+  border-radius: var(--portal-radius-lg);
+}
+@utility portal-focus-ring {
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--portal-shadow-glow);
+  }
+}
+@utility portal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  background: var(--portal-primary-50);
+  color: var(--portal-primary);
+  border: 1px solid color-mix(in oklab, var(--portal-primary) 18%, transparent);
+}
+@utility portal-badge-success {
+  background: var(--portal-success-50);
+  color: var(--portal-success);
+  border-color: color-mix(in oklab, var(--portal-success) 22%, transparent);
+}
+@utility portal-badge-warning {
+  background: var(--portal-warning-50);
+  color: var(--portal-warning);
+  border-color: color-mix(in oklab, var(--portal-warning) 22%, transparent);
+}
+@utility portal-badge-error {
+  background: var(--portal-error-50);
+  color: var(--portal-error);
+  border-color: color-mix(in oklab, var(--portal-error) 22%, transparent);
+}
+@utility portal-badge-muted {
+  background: var(--portal-surface-3);
+  color: var(--portal-ink-2);
+  border-color: var(--portal-border);
+}
+
 
 
 @keyframes portal-shimmer {
