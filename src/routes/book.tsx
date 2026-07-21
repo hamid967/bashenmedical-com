@@ -622,28 +622,48 @@ function BookPage() {
             {state.step === 5 && <StepDate lang={lang} value={state.date} onPick={(v) => { dispatch({ t: "set", p: { date: v, time: null } }); goto(6); }} doctorId={state.doctorId} specialtyId={state.specialtyId} branchId={state.branchId} onChangeDoctor={() => goto(4)} onChangeBranch={() => goto(2)}/>}
             {state.step === 6 && (
               <>
-                {(findingAlt || suggestion) && (
-                  <div className="mb-4 rounded-xl border border-primary/30 bg-primary/5 p-3 md:p-4 text-sm">
-                    {findingAlt && !suggestion && (
-                      <span className="text-muted-foreground">{t("page.lookingAlt")}</span>
+                {(errorKind === "conflict" || findingAlt || suggestion || sameDoctorTimes.length > 0) && (
+                  <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-3 md:p-4 text-sm space-y-3">
+                    {errorKind === "conflict" && (
+                      <div className="flex items-start gap-2">
+                        <Clock className="h-5 w-5 text-destructive shrink-0 mt-0.5" aria-hidden />
+                        <div>
+                          <div className="font-bold text-destructive">{t("page.slotTaken")}</div>
+                          <p className="mt-0.5 text-xs text-destructive/90 leading-5">{t("page.conflictReason")}</p>
+                        </div>
+                      </div>
+                    )}
+                    {findingAlt && !suggestion && sameDoctorTimes.length === 0 && (
+                      <div className="text-muted-foreground">{t("page.lookingAlt")}</div>
+                    )}
+                    {sameDoctorTimes.length > 0 && (
+                      <div>
+                        <div className="font-medium mb-1.5">{t("page.nearestSlotsSameDoctor")}</div>
+                        <div className="flex flex-wrap gap-2">
+                          {sameDoctorTimes.map((tm) => (
+                            <Button key={tm} size="sm" variant="secondary" onClick={() => pickSameDoctorTime(tm)}>
+                              {tm}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
                     )}
                     {suggestion && (
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between border-t border-destructive/20 pt-3">
                         <div>
-                          <div className="font-medium">
-                            {t("page.altAvailable")} {suggestion.doctorName}
-                          </div>
-                          <div className="text-muted-foreground">
-                            {t("page.earliestSlot")}: {suggestion.time}
-                          </div>
+                          <div className="font-medium">{t("page.altAvailable")} {suggestion.doctorName}</div>
+                          <div className="text-muted-foreground">{t("page.earliestSlot")}: {suggestion.time}</div>
                         </div>
                         <div className="flex gap-2">
                           <Button size="sm" onClick={acceptSuggestion}>{t("page.bookAlt")}</Button>
-                          <Button size="sm" variant="ghost" onClick={() => setSuggestion(null)}>
+                          <Button size="sm" variant="ghost" onClick={() => { setSuggestion(null); setSameDoctorTimes([]); setErrorKind("unknown"); setErrorMsg(null); }}>
                             {t("page.dismiss")}
                           </Button>
                         </div>
                       </div>
+                    )}
+                    {!findingAlt && !suggestion && sameDoctorTimes.length === 0 && errorKind === "conflict" && (
+                      <div className="text-xs text-muted-foreground">{t("page.noAlternatives")}</div>
                     )}
                   </div>
                 )}
