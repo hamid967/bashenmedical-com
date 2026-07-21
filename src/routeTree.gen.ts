@@ -161,6 +161,7 @@ import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as ApiPublicReservationsOtpVerifyRouteImport } from './routes/api/public/reservations/otp.verify'
 import { Route as ApiPublicReservationsOtpSendRouteImport } from './routes/api/public/reservations/otp.send'
+import { Route as ApiPublicReservationsCancelUndoRouteImport } from './routes/api/public/reservations/cancel.undo'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
 
@@ -998,6 +999,12 @@ const ApiPublicReservationsOtpSendRoute =
     path: '/api/public/reservations/otp/send',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicReservationsCancelUndoRoute =
+  ApiPublicReservationsCancelUndoRouteImport.update({
+    id: '/undo',
+    path: '/undo',
+    getParentRoute: () => ApiPublicReservationsCancelRoute,
+  } as any)
 const AuthenticatedPortalOrdersKindIdRoute =
   AuthenticatedPortalOrdersKindIdRouteImport.update({
     id: '/$kind/$id',
@@ -1158,11 +1165,12 @@ export interface FileRoutesByFullPath {
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
-  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
+  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
+  '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
   '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
   '/api/public/reservations/otp/verify': typeof ApiPublicReservationsOtpVerifyRoute
 }
@@ -1311,11 +1319,12 @@ export interface FileRoutesByTo {
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
-  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
+  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
+  '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
   '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
   '/api/public/reservations/otp/verify': typeof ApiPublicReservationsOtpVerifyRoute
 }
@@ -1468,11 +1477,12 @@ export interface FileRoutesById {
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
-  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRoute
+  '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
+  '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
   '/api/public/reservations/otp/send': typeof ApiPublicReservationsOtpSendRoute
   '/api/public/reservations/otp/verify': typeof ApiPublicReservationsOtpVerifyRoute
 }
@@ -1630,6 +1640,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/reschedule'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
+    | '/api/public/reservations/cancel/undo'
     | '/api/public/reservations/otp/send'
     | '/api/public/reservations/otp/verify'
   fileRoutesByTo: FileRoutesByTo
@@ -1783,6 +1794,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/reschedule'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
+    | '/api/public/reservations/cancel/undo'
     | '/api/public/reservations/otp/send'
     | '/api/public/reservations/otp/verify'
   id:
@@ -1939,6 +1951,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/reschedule'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
+    | '/api/public/reservations/cancel/undo'
     | '/api/public/reservations/otp/send'
     | '/api/public/reservations/otp/verify'
   fileRoutesById: FileRoutesById
@@ -2008,7 +2021,7 @@ export interface RootRouteChildren {
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
   ApiPublicInvoicesLookupRoute: typeof ApiPublicInvoicesLookupRoute
-  ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRoute
+  ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRouteWithChildren
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
   ApiPublicReservationsOtpSendRoute: typeof ApiPublicReservationsOtpSendRoute
@@ -3081,6 +3094,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReservationsOtpSendRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/reservations/cancel/undo': {
+      id: '/api/public/reservations/cancel/undo'
+      path: '/undo'
+      fullPath: '/api/public/reservations/cancel/undo'
+      preLoaderRoute: typeof ApiPublicReservationsCancelUndoRouteImport
+      parentRoute: typeof ApiPublicReservationsCancelRoute
+    }
     '/_authenticated/portal/orders/$kind/$id': {
       id: '/_authenticated/portal/orders/$kind/$id'
       path: '/$kind/$id'
@@ -3404,6 +3424,20 @@ const MediaStoriesRouteWithChildren = MediaStoriesRoute._addFileChildren(
   MediaStoriesRouteChildren,
 )
 
+interface ApiPublicReservationsCancelRouteChildren {
+  ApiPublicReservationsCancelUndoRoute: typeof ApiPublicReservationsCancelUndoRoute
+}
+
+const ApiPublicReservationsCancelRouteChildren: ApiPublicReservationsCancelRouteChildren =
+  {
+    ApiPublicReservationsCancelUndoRoute: ApiPublicReservationsCancelUndoRoute,
+  }
+
+const ApiPublicReservationsCancelRouteWithChildren =
+  ApiPublicReservationsCancelRoute._addFileChildren(
+    ApiPublicReservationsCancelRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -3471,7 +3505,8 @@ const rootRouteChildren: RootRouteChildren = {
     ApiPublicInquiriesMarkWhatsappOpenedRoute,
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
   ApiPublicInvoicesLookupRoute: ApiPublicInvoicesLookupRoute,
-  ApiPublicReservationsCancelRoute: ApiPublicReservationsCancelRoute,
+  ApiPublicReservationsCancelRoute:
+    ApiPublicReservationsCancelRouteWithChildren,
   ApiPublicReservationsListRoute: ApiPublicReservationsListRoute,
   ApiPublicReservationsRescheduleRoute: ApiPublicReservationsRescheduleRoute,
   ApiPublicReservationsOtpSendRoute: ApiPublicReservationsOtpSendRoute,
