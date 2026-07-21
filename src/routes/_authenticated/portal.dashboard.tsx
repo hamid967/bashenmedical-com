@@ -198,18 +198,21 @@ function PortalDashboardPage() {
         actions={
           <button
             onClick={() => {
+              snapshotQ.refetch();
               ordersQ.refetch();
               inquiriesQ.refetch();
             }}
             className="inline-flex items-center gap-2 px-3 h-9 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] hover:bg-[color:var(--portal-surface-2)] text-sm portal-focus-ring"
             aria-label="تحديث البيانات"
           >
-            <RefreshCw className={`h-4 w-4 ${refetching ? "animate-spin" : ""}`} />
+            <RefreshCw className={`h-4 w-4 ${refetching || snapshotQ.isFetching ? "animate-spin" : ""}`} />
             تحديث
           </button>
         }
       />
 
+      {/* لقطة سريعة — 4 بطاقات مباشرة من قاعدة البيانات */}
+      <QuickSnapshotGrid data={snap} loading={snapshotQ.isLoading} />
 
       {loading ? (
         <div className="flex items-center justify-center py-16 text-muted-foreground">
