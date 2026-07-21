@@ -8,6 +8,7 @@ import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/site";
 import { classifyUserMessage } from "@/lib/ai/safety";
+import { AssistantActionCard, extractActions } from "./AssistantActionCard";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -231,28 +232,41 @@ export function BaeshenAssistant() {
             )}
 
             <div className="space-y-3">
-              {messages.map((m, i) => (
-                <div
-                  key={i}
-                  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
-                >
+              {messages.map((m, i) => {
+                const { body, actions } = m.role === "assistant" ? extractActions(m.content) : { body: m.content, actions: [] };
+                return (
                   <div
-                    className={cn(
-                      "max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm",
-                      m.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground",
-                    )}
+                    key={i}
+                    className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
                   >
-                    {m.content || (busy && i === messages.length - 1 ? (
-                      <span className="inline-flex items-center gap-2 text-muted-foreground">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                        {t("يكتب...", "Thinking...")}
-                      </span>
-                    ) : null)}
+                    <div
+                      className={cn(
+                        "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
+                        m.role === "user"
+                          ? "bg-primary text-primary-foreground whitespace-pre-wrap"
+                          : "bg-muted text-foreground",
+                      )}
+                    >
+                      {body ? (
+                        <div className="whitespace-pre-wrap">{body}</div>
+                      ) : (busy && i === messages.length - 1 && !actions.length) ? (
+                        <span className="inline-flex items-center gap-2 text-muted-foreground">
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          {t("يكتب...", "Thinking...")}
+                        </span>
+                      ) : null}
+                      {actions.map((a, ai) => (
+                        <AssistantActionCard
+                          key={ai}
+                          action={a}
+                          conversationId={conversationId.current}
+                          isAr={isAr}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {error && (
