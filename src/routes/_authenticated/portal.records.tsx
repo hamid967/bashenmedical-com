@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { ar as arLocale } from "date-fns/locale";
+import { PortalPageHeader, PortalEmptyState } from "@/components/portal/ui";
 
 const recordsQuery = queryOptions({
   queryKey: ["portal", "records"],
@@ -162,44 +163,47 @@ function RecordsPage() {
   });
 
   if (!data.patient) {
-    return (
-      <div className="glass-card max-w-lg mx-auto p-8 text-center">
-        <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-amber-50 text-amber-600 mb-4">
-          <FileText className="h-7 w-7" />
-        </div>
-        <h3 className="text-lg font-bold">لا يوجد ملف طبي مرتبط بعد</h3>
-        <p className="text-sm text-[color:var(--portal-ink-2)] mt-2">
-          سيتم إنشاء ملفك عند زيارتك الأولى للمجمع أو ربطه من قِبل الاستقبال.
-        </p>
-        <Link
-          to="/portal/book"
-          className="mt-5 inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
-          style={{ background: "var(--portal-gradient)" }}
-        >
-          احجز أول موعد
-        </Link>
-      </div>
+      <PortalEmptyState
+        icon={<FileText className="h-7 w-7" />}
+        title="لا يوجد ملف طبي مرتبط بعد"
+        description="سيتم إنشاء ملفك عند زيارتك الأولى للمجمع أو ربطه من قِبل الاستقبال."
+        action={
+          <Link
+            to="/portal/book"
+            className="inline-flex items-center gap-2 rounded-full px-5 h-10 text-sm font-semibold text-white"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            احجز أول موعد
+          </Link>
+        }
+      />
     );
   }
 
   return (
     <div className="space-y-6 pb-24 md:pb-6">
-      <header className="flex items-start justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold">السجل الطبي</h1>
-          <p className="text-sm text-[color:var(--portal-ink-2)] mt-1">
-            رقم الملف الطبي: <span className="font-semibold">{data.patient.mrn ?? "—"}</span>
+      <PortalPageHeader
+        title="السجل الطبي"
+        description={
+          <>
+            رقم الملف الطبي:{" "}
+            <span className="font-semibold text-[color:var(--portal-ink)]">
+              {data.patient.mrn ?? "—"}
+            </span>
             {" • "}
             {data.patient.full_name_ar ?? data.patient.full_name_en ?? ""}
-          </p>
-        </div>
-        <Link
-          to="/portal"
-          className="inline-flex items-center gap-2 text-sm text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-primary)]"
-        >
-          <ArrowLeft className="h-4 w-4" /> العودة
-        </Link>
-      </header>
+          </>
+        }
+        breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "السجل الطبي" }]}
+        actions={
+          <Link
+            to="/portal"
+            className="inline-flex items-center gap-2 text-sm text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-primary)]"
+          >
+            <ArrowLeft className="h-4 w-4" /> العودة
+          </Link>
+        }
+      />
 
       {/* AI summary card */}
       <section

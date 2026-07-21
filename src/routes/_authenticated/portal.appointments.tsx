@@ -414,23 +414,6 @@ function TabBtn({
   );
 }
 
-function StatCard({
-  label, value, tone,
-}: { label: string; value: number; tone: "sky" | "emerald" | "slate" | "red" | "amber" }) {
-  const map = {
-    sky: "from-teal-50 to-teal-100/60 text-teal-700",
-    emerald: "from-emerald-50 to-emerald-100/60 text-emerald-700",
-    slate: "from-slate-50 to-slate-100/60 text-slate-700",
-    red: "from-red-50 to-red-100/60 text-red-700",
-    amber: "from-amber-50 to-amber-100/60 text-amber-700",
-  }[tone];
-  return (
-    <div className={`rounded-2xl border border-white/60 bg-gradient-to-br ${map} p-3`}>
-      <div className="text-2xl font-bold tabular-nums">{value}</div>
-      <div className="text-xs font-medium opacity-80">{label}</div>
-    </div>
-  );
-}
 
 type ApptRow = ReturnType<typeof mapItemType>;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
