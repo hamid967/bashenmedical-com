@@ -413,9 +413,46 @@ function BookPage() {
     return { doctorId: best.doctor.id as string, doctorName: name as string, time: best.time, date };
   }
 
+  // Find nearest same-doctor free times on the same date (up to 3, prefer >= preferredTime).
+  async function findAlternativeSameDoctorTimes(date: string, preferredTime: string | null): Promise<string[]> {
+    if (!state.doctorId) return [];
+    try {
+      const a = await fetchAvailability(date, state.doctorId, state.specialtyId, state.branchId);
+      if (!a.ok || !a.times?.length) return [];
+      const booked = new Set(a.booked ?? []);
+      const free = a.times.filter((t) => !booked.has(t) && t !== preferredTime);
+      if (!free.length) return [];
+      const after = preferredTime ? free.filter((t) => t >= preferredTime) : free;
+      const before = preferredTime ? free.filter((t) => t < preferredTime).reverse() : [];
+      return [...after, ...before].slice(0, 3);
+    } catch { return []; }
+  }
+
+  async function runAlternativesSearch(date: string, preferredTime: string | null) {
+    setFindingAlt(true);
+    try {
+      const [sameTimes, altDoc] = await Promise.all([
+        findAlternativeSameDoctorTimes(date, preferredTime),
+        findAlternativeDoctor(date, preferredTime),
+      ]);
+      setSameDoctorTimes(sameTimes);
+      if (altDoc) setSuggestion(altDoc);
+    } finally { setFindingAlt(false); }
+  }
+
   function acceptSuggestion() {
     if (!suggestion) return;
     dispatch({ t: "set", p: { doctorId: suggestion.doctorId, date: suggestion.date, time: suggestion.time } });
+    setSuggestion(null);
+    setSameDoctorTimes([]);
+    setErrorMsg(null);
+    setErrorKind("unknown");
+    goto(7);
+  }
+
+  function pickSameDoctorTime(time: string) {
+    dispatch({ t: "set", p: { time } });
+    setSameDoctorTimes([]);
     setSuggestion(null);
     setErrorMsg(null);
     setErrorKind("unknown");
