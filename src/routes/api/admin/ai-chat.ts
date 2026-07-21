@@ -58,6 +58,7 @@ export const Route = createFileRoute("/api/admin/ai-chat")({
         const messages = Array.isArray(body.messages) ? body.messages.slice(-20) : [];
         if (messages.length === 0) return new Response("No messages", { status: 400 });
 
+        const MODEL = "google/gemini-2.5-flash";
         const upstream = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
           method: "POST",
           headers: {
@@ -65,8 +66,9 @@ export const Route = createFileRoute("/api/admin/ai-chat")({
             "Lovable-API-Key": apiKey,
           },
           body: JSON.stringify({
-            model: "google/gemini-2.5-flash",
+            model: MODEL,
             stream: true,
+            stream_options: { include_usage: true },
             messages: [{ role: "system", content: SYSTEM_PROMPT }, ...messages],
           }),
         });
@@ -84,6 +86,8 @@ export const Route = createFileRoute("/api/admin/ai-chat")({
             "Cache-Control": "no-cache, no-transform",
             Connection: "keep-alive",
             "X-Accel-Buffering": "no",
+            "X-Model": MODEL,
+            "Access-Control-Expose-Headers": "X-Model",
           },
         });
       },
