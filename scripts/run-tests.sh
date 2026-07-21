@@ -55,6 +55,7 @@ if [ ${#CUSTOM_CMD[@]} -eq 0 ]; then
 bun install --frozen-lockfile && \
 bun run format:check && \
 bun run lint:inserts && \
+bun run lint:portal-tokens && \
 bash tests/lint/book-docs-examples.sh && \
 bun tests/unit/book-docs-keys.test.ts && \
 for f in tests/unit/*.test.ts; do echo "── $f ──"; bun "$f"; done && \
