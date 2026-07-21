@@ -11,16 +11,12 @@ const RangeInput = z.object({
   surface: z.enum(["public", "portal", "admin", "all"]).default("all"),
 });
 
-async function ensureStaff(supabase: {
-  rpc: (name: "has_role", args: { _user_id: string; _role: "admin" | "super_admin" }) => {
-    single: () => Promise<{ data: boolean | null }>;
-  };
-}, userId: string) {
-  const [a, s] = await Promise.all([
-    supabase.rpc("has_role", { _user_id: userId, _role: "admin" }).single(),
-    supabase.rpc("has_role", { _user_id: userId, _role: "super_admin" }).single(),
-  ]);
-  if (!a.data && !s.data) throw new Error("Forbidden");
+async function ensureStaff(supabase: any, userId: string): Promise<void> {
+  for (const role of ["admin", "super_admin"] as const) {
+    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: role });
+    if (data) return;
+  }
+  throw new Error("Forbidden");
 }
 
 export type StreamEventRow = {
