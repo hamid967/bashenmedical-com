@@ -12,6 +12,8 @@
     "lint": "eslint .",
     "lint:book": "eslint src/routes/book.tsx 'src/routes/api/public/book/**/*.{ts,tsx}' --max-warnings=0",
     "lint:inserts": "eslint src/routes/book.tsx 'src/routes/api/public/book/**/*.{ts,tsx}' src/routes/pharmacy.tsx --max-warnings=0",
+    "lint:portal-tokens": "node scripts/lint-portal-tokens.mjs",
+    "lint:portal-tokens:update": "node scripts/lint-portal-tokens.mjs --update-baseline",
     "typecheck": "tsgo --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
