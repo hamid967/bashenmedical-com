@@ -309,12 +309,38 @@ export function AIAssistantPanel({
           )}
 
           {messages.map((m, i) => (
-            <MessageBubble key={i} role={m.role} content={m.content} />
+            <div key={i}>
+              <MessageBubble role={m.role} content={m.content} />
+              {m.role === "assistant" && m.meta && (
+                <div className="mt-1 pr-2">
+                  <MessageCostBadge meta={{ ...m.meta, outputText: m.content }} lang="ar" />
+                </div>
+              )}
+            </div>
           ))}
-          {streaming && streamed && <MessageBubble role="assistant" content={streamed} streaming />}
+          {streaming && streamed && (
+            <div>
+              <MessageBubble role="assistant" content={streamed} streaming />
+              {streamMeta && (
+                <div className="mt-1 pr-2">
+                  <MessageCostBadge
+                    meta={{ ...streamMeta, outputText: streamed }}
+                    live
+                    now={nowTick}
+                    lang="ar"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           {streaming && !streamed && (
-            <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ac-ink-3)" }}>
-              <Loader2 className="h-4 w-4 animate-spin" /> يفكر…
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ac-ink-3)" }}>
+                <Loader2 className="h-4 w-4 animate-spin" /> يفكر…
+              </div>
+              {streamMeta && (
+                <MessageCostBadge meta={streamMeta} live now={nowTick} lang="ar" />
+              )}
             </div>
           )}
           {resumeNotice && (
