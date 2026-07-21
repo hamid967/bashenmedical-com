@@ -209,8 +209,16 @@ function BookPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [state.step]);
 
+  // Auto-recover expired hold: when the 5-minute reservation lapses while
+  // the user is past the time picker (steps 7–8), bounce back to step 6
+  // with a toast so they can pick a fresh time instead of hitting a wall
+  // at submit.
+
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<
+    "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
+  >("unknown");
   const [suggestion, setSuggestion] = useState<{ doctorId: string; doctorName: string; time: string; date: string } | null>(null);
   const [findingAlt, setFindingAlt] = useState(false);
   // Success result survives reload — booking reference lives in
@@ -299,6 +307,18 @@ function BookPage() {
     date: state.date,
     time: state.time,
   });
+
+  // Auto-recover expired hold: bounce back to step 6 when the 5-minute
+  // reservation lapses beyond the time picker so the user picks fresh.
+  useEffect(() => {
+    if (!slotHold.expired) return;
+    if (state.step < 7 || state.step > 8) return;
+    dispatch({ t: "set", p: { time: null } });
+    goto(6);
+    toast.info(t("hold.autoRecover", "انتهى وقت الحجز المؤقت — اختر وقتًا جديدًا."));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slotHold.expired, state.step]);
+
 
   // Warn before losing an unsent draft: any patient input on step ≥ 4 counts.
   useEffect(() => {
@@ -393,14 +413,17 @@ function BookPage() {
     dispatch({ t: "set", p: { doctorId: suggestion.doctorId, date: suggestion.date, time: suggestion.time } });
     setSuggestion(null);
     setErrorMsg(null);
+    setErrorKind("unknown");
     goto(7);
   }
 
   async function handleSubmit() {
     setErrorMsg(null);
+    setErrorKind("unknown");
     setSuggestion(null);
     if (!patientValidation.ok) {
       setErrorMsg(t("page.fixPatient"));
+      setErrorKind("validation");
       goto(7);
       return;
     }
@@ -413,6 +436,7 @@ function BookPage() {
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
         setErrorMsg(t("page.slotTaken"));
+        setErrorKind("conflict");
         // Refresh the availability query so StepTime shows the updated state.
         queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
         const prevTime = state.time;
@@ -452,6 +476,12 @@ function BookPage() {
       goto(9);
     } else {
       setErrorMsg(res.message);
+      setErrorKind(res.kind);
+      // On conflict, bounce back to step 6 so the user picks a fresh slot.
+      if (res.kind === "conflict") {
+        dispatch({ t: "set", p: { time: null } });
+        goto(6);
+      }
     }
   }
 
@@ -462,6 +492,7 @@ function BookPage() {
     }
     setResult(null);
     setErrorMsg(null);
+    setErrorKind("unknown");
     dispatch({ t: "reset" });
     try {
       sessionStorage.removeItem(STORAGE_KEY);
@@ -571,7 +602,7 @@ function BookPage() {
               </>
             )}
             {state.step === 7 && <StepPatient lang={lang} value={state.patient} errors={patientValidation.errors} onChange={(p) => dispatch({ t: "setPatient", p })}/>}
-            {state.step === 8 && <StepReview lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} errorMsg={errorMsg} submitting={submitting} onSubmit={handleSubmit} patientValid={patientValidation.ok} onEditPatient={() => goto(7)}/>}
+            {state.step === 8 && <StepReview lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} errorMsg={errorMsg} errorKind={errorKind} submitting={submitting} onSubmit={handleSubmit} patientValid={patientValidation.ok} onEditPatient={() => goto(7)}/>}
             {state.step === 9 && result && <StepSuccess lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} reference={result.reference} phone={result.phone} email={result.email ?? null} onNewBooking={handleReset}/>}
           </div>
 

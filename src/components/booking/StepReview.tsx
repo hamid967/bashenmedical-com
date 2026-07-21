@@ -2,14 +2,18 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SubmitErrorBanner } from "@/components/SubmitErrorBanner";
+import type { BookingSubmitKind } from "@/lib/booking-submit";
 import { StepShell } from "./StepShell";
 import { formatArDate, type State } from "./types";
 
 export function StepReview({
-  lang, state, branches, specialties, doctors, errorMsg, submitting, onSubmit, patientValid, onEditPatient,
+  lang, state, branches, specialties, doctors, errorMsg, errorKind = "unknown",
+  submitting, onSubmit, patientValid, onEditPatient,
 }: {
   lang: "ar" | "en"; state: State; branches: any[]; specialties: any[]; doctors: any[];
-  errorMsg: string | null; submitting: boolean; onSubmit: () => void;
+  errorMsg: string | null;
+  errorKind?: Exclude<BookingSubmitKind, "success">;
+  submitting: boolean; onSubmit: () => void;
   patientValid: boolean; onEditPatient: () => void;
 }) {
   const { t } = useTranslation("booking");
@@ -46,7 +50,7 @@ export function StepReview({
           </div>
         )}
 
-        {errorMsg && <div className="mt-4"><SubmitErrorBanner kind="unknown" message={errorMsg}/></div>}
+        {errorMsg && <div className="mt-4"><SubmitErrorBanner kind={errorKind} message={errorMsg}/></div>}
 
         <Button
           onClick={onSubmit}
