@@ -177,10 +177,12 @@ def run() -> int:
                     log(f"rec transitioned to status={ack['status']}")
 
                 print("→ Step 7: purge injected errors → re-run evaluator → severity drops")
+                cur.execute("RESET ROLE")
                 cur.execute(
                     "DELETE FROM api_permission_errors WHERE release_ref = %s",
                     (fake_ref,),
                 )
+
                 cur.execute(
                     "SELECT * FROM evaluate_permission_error_spike(3.0, %s, 5.0)",
                     (ROLLBACK_RATIO_THRESHOLD,),
