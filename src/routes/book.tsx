@@ -211,6 +211,9 @@ function BookPage() {
 
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [errorKind, setErrorKind] = useState<
+    "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
+  >("unknown");
   const [suggestion, setSuggestion] = useState<{ doctorId: string; doctorName: string; time: string; date: string } | null>(null);
   const [findingAlt, setFindingAlt] = useState(false);
   // Success result survives reload — booking reference lives in
