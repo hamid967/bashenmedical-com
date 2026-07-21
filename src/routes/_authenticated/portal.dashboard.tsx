@@ -135,6 +135,13 @@ export const Route = createFileRoute("/_authenticated/portal/dashboard")({
 function PortalDashboardPage() {
   const ordersFn = useServerFn(getMyRecentOrders);
   const inquiriesFn = useServerFn(listMyInquiries);
+  const snapshotFn = useServerFn(getPortalQuickSnapshot);
+
+  const snapshotQ = useQuery({
+    queryKey: ["portal", "quick-snapshot"],
+    queryFn: () => snapshotFn(),
+    staleTime: 15_000,
+  });
 
   const ordersQ = useQuery({
     queryKey: ["portal", "my-orders", "all"],
@@ -150,6 +157,7 @@ function PortalDashboardPage() {
 
   const orders = ordersQ.data ?? [];
   const inquiries = inquiriesQ.data ?? [];
+  const snap = snapshotQ.data;
 
   const orderCounts = useMemo(() => {
     const m: Record<string, number> = {};
