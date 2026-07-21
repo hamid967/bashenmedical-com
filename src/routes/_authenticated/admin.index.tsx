@@ -166,8 +166,12 @@ function AdminDashboard() {
         </div>
       )}
 
+      {/* Trends section — daily/weekly stats for developers */}
+      <TrendsSection />
+
       {/* Magazine grid: Featured Inbox + Primary shortcuts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+
         {/* Featured Unified Inbox */}
         <Link
           to="/admin/inbox"
