@@ -39,6 +39,7 @@ const WRITE = argv.includes("--write");
 const VERBOSE = argv.includes("--verbose");
 const LIST_RULES = argv.includes("--list-rules");
 const DRY_RUN_FLAG = argv.includes("--dry-run"); // معلوماتي؛ الوضع الافتراضي dry أصلًا
+const CHECK = argv.includes("--check") || argv.includes("--fail-if-uncodemed");
 function readOpt(name) {
   const i = argv.indexOf(name);
   return i >= 0 ? argv[i + 1] : undefined;
