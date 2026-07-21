@@ -111,7 +111,7 @@ async function loadPatientContext(
     }
     const unread = (notifRes.data ?? []).filter((n) => !n.read_at).length;
     const upcoming = (upcomingRes.data ?? []).map((a) =>
-      `${a.appointment_date} ${(a.appointment_time as string)?.slice(0, 5)} (${a.status})`,
+      `id=${a.id} | ${a.appointment_date} ${(a.appointment_time as string)?.slice(0, 5)} (${a.status})`,
     );
 
     return [
