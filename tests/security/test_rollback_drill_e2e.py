@@ -157,8 +157,10 @@ def run() -> int:
                 rec = cur.fetchone()
                 log(f"created rec id={rec['id']} status={rec['status']}")
 
-                print("→ Step 6: simulate ack → status='rolled_back'")
+                print("→ Step 6: simulate ack → status='rolled_back' (as service_role)")
+                cur.execute("SET LOCAL ROLE service_role")
                 cur.execute(
+
                     """
                     UPDATE rollback_recommendations
                     SET status = 'rolled_back',
