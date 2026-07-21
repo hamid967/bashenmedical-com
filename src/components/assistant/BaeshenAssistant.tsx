@@ -160,7 +160,7 @@ export function BaeshenAssistant() {
           save_history: !noSave,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (m) => { currentModel = m; updateLastMeta({ model: m }); },
+        onModel: (m) => { currentModel = m; setActiveModel(m); updateLastMeta({ model: m }); },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
