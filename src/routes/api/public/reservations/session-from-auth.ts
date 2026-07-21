@@ -75,6 +75,16 @@ export const Route = createFileRoute("/api/public/reservations/session-from-auth
           });
         }
 
+        // Record the verified phone against the user's profile so that
+        // RLS ownership checks (which require a verified phone, not a
+        // freely-editable profile.phone) recognise this user.
+        try {
+          await supabaseAdmin.rpc("set_verified_phone", {
+            _user_id: userId,
+            _phone: phone,
+          });
+        } catch { /* best-effort — session still works via server APIs */ }
+
         const session_token = generateSessionToken();
         const session_expires_at = new Date(Date.now() + SESSION_TTL_MS).toISOString();
 
@@ -95,6 +105,7 @@ export const Route = createFileRoute("/api/public/reservations/session-from-auth
         if (insErr) {
           return jsonResponse(500, { ok: false, message: "تعذّر إنشاء الجلسة." });
         }
+
 
         // Mask phone for display: +9665X****NNNN
         const masked = phone.replace(/^(\+9665\d)(\d{4})(\d{3})$/, "$1****$3");
