@@ -342,8 +342,15 @@ export function BaeshenAssistant() {
                 className="min-h-[44px] resize-none"
                 disabled={busy}
               />
-              <Button type="submit" size="icon" disabled={busy || !input.trim()}>
-                {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              <Button
+                type={busy ? "button" : "submit"}
+                size="icon"
+                onClick={busy ? stopGeneration : undefined}
+                disabled={!busy && !input.trim()}
+                aria-label={busy ? t("إيقاف التوليد", "Stop generating") : t("إرسال", "Send")}
+                variant={busy ? "destructive" : "default"}
+              >
+                {busy ? <Square className="h-4 w-4" /> : <Send className="h-4 w-4" />}
               </Button>
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
