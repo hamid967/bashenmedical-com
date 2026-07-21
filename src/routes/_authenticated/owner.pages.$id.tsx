@@ -50,14 +50,44 @@ function PageEditor() {
   const [loading, setLoading] = useState(!isNew);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (isNew) return;
-    (async () => {
-      try {
-        const row: any = await getFn({ data: { id } });
-        setForm({
-          slug: row.slug ?? "",
-          title_ar: row.title_ar ?? "",
+  // Media picker state
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerTarget, setPickerTarget] =
+    useState<"content_ar" | "content_en" | "og_image" | null>(null);
+  const arRef = useRef<HTMLTextAreaElement>(null);
+  const enRef = useRef<HTMLTextAreaElement>(null);
+
+  function openPicker(target: "content_ar" | "content_en" | "og_image") {
+    setPickerTarget(target);
+    setPickerOpen(true);
+  }
+
+  function handlePick(media: PickedMedia) {
+    if (pickerTarget === "og_image") {
+      up("og_image", media.url);
+      return;
+    }
+    if (!pickerTarget) return;
+    const key = pickerTarget;
+    const ref = key === "content_ar" ? arRef.current : enRef.current;
+    const snippet = `![${media.alt.replace(/[\[\]]/g, "")}](${media.url})`;
+    setForm((f) => {
+      const current = f[key];
+      const start = ref?.selectionStart ?? current.length;
+      const end = ref?.selectionEnd ?? current.length;
+      const next = current.slice(0, start) + snippet + current.slice(end);
+      // Restore caret after React updates.
+      requestAnimationFrame(() => {
+        if (ref) {
+          const pos = start + snippet.length;
+          ref.focus();
+          ref.setSelectionRange(pos, pos);
+        }
+      });
+      return { ...f, [key]: next };
+    });
+  }
+
           title_en: row.title_en ?? "",
           content_ar: row.content_ar ?? "",
           content_en: row.content_en ?? "",
