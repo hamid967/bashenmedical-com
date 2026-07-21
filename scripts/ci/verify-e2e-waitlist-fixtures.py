@@ -276,18 +276,19 @@ def _run(cli: ReportingClient, rep: Report) -> None:
         rep.fail("integrity check failed: " + " | ".join(integrity_errors))
         cli.fail("integrity check failed:\n  - " + "\n  - ".join(integrity_errors))
 
-    # 3c) integrity — لا صفوف 'notified' يتيمة لطبيب الاختبار قبل بدء الـE2E
-    rep.step("integrity.orphan_scan")
+    # 3c) integrity — كل صفوف 'notified' يجب أن تشير إلى slot_holds
+    # بنفس doctor_id و branch_id (لا يوجد FK يفرض ذلك على مستوى DB).
+    rep.step("integrity.notified_link_scan")
     stale = cli.rows(
         cli.get("/rest/v1/appointment_waitlist", {
-            "doctor_id": f"eq.{doctor['id']}",
             "status": "eq.notified",
-            "select": "id,offered_hold_id,offered_expires_at",
-            "limit": "50",
+            "select": "id,doctor_id,branch_id,offered_hold_id",
+            "limit": "500",
         }),
-        "scan pre-existing notified waitlist rows",
+        "scan notified waitlist rows",
     )
-    orphans: list[dict] = []
+    orphans: list[dict] = []      # حالات ليّنة (تاريخية): بلا hold أو hold مُحرَّر
+    mismatches: list[dict] = []   # انتهاكات صريحة: doctor/branch لا يتطابقان
     for r in stale:
         hid = r.get("offered_hold_id")
         if not hid:
@@ -296,25 +297,54 @@ def _run(cli: ReportingClient, rep: Report) -> None:
         hrow = cli.rows(
             cli.get("/rest/v1/slot_holds", {
                 "id": f"eq.{hid}",
-                "select": "id,released_at,expires_at",
+                "select": "id,doctor_id,branch_id,released_at",
             }),
             "lookup linked hold",
         )
         if not hrow:
-            orphans.append({"id": r["id"], "reason": "hold missing"})
-        elif hrow[0].get("released_at") is not None:
-            orphans.append({"id": r["id"], "reason": "hold released"})
-    # نُبلِّغ فقط — لا نُفشل الـpreflight بسبب حالة تاريخية،
-    # لكن نضع ok=False عند العثور على يتامى ليظهر في التقرير.
+            orphans.append({"id": r["id"], "hold_id": hid, "reason": "hold missing"})
+            continue
+        h = hrow[0]
+        if h["doctor_id"] != r["doctor_id"]:
+            mismatches.append({
+                "waitlist_id": r["id"], "hold_id": hid,
+                "field": "doctor_id",
+                "waitlist": r["doctor_id"], "hold": h["doctor_id"],
+            })
+        if h.get("branch_id") != r.get("branch_id"):
+            mismatches.append({
+                "waitlist_id": r["id"], "hold_id": hid,
+                "field": "branch_id",
+                "waitlist": r.get("branch_id"), "hold": h.get("branch_id"),
+            })
+        if h.get("released_at") is not None:
+            orphans.append({"id": r["id"], "hold_id": hid, "reason": "hold released"})
+
     rep.add_check(
-        "integrity.orphan_scan",
-        not orphans,
+        "integrity.notified_link_scan",
+        not mismatches and not orphans,
         scanned=len(stale),
+        mismatches=mismatches or None,
         orphans=orphans or None,
     )
     if orphans:
-        print(f"[{TAG}] WARN: {len(orphans)} orphan notified waitlist row(s) "
-              f"for doctor={doctor['id']}: {orphans}")
+        print(f"[{TAG}] WARN: {len(orphans)} orphan notified waitlist row(s): "
+              f"{orphans}")
+    if mismatches:
+        rep.fail(
+            f"waitlist↔slot_holds doctor/branch mismatch "
+            f"({len(mismatches)} صف): {mismatches}"
+        )
+        cli.fail(
+            "توجد صفوف waitlist بحالة 'notified' لا تتطابق مع slot_holds "
+            "في doctor_id/branch_id:\n  - "
+            + "\n  - ".join(
+                f"wl={m['waitlist_id']} hold={m['hold_id']} "
+                f"{m['field']}: wl={m['waitlist']} hold={m['hold']}"
+                for m in mismatches
+            )
+        )
+
 
     # 4) soft check — availability_slot
     rep.step("availability_slots.soft")
