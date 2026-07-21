@@ -26,5 +26,11 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
     if (data.action_like) q = q.ilike("action", `%${data.action_like}%`);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return { rows: rows ?? [] };
+    return {
+      rows: (rows ?? []).map((r: any) => ({
+        ...r,
+        ip_address: r.ip_address == null ? null : String(r.ip_address),
+      })),
+    };
+
   });
