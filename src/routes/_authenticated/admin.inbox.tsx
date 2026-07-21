@@ -99,8 +99,8 @@ function UnifiedInboxPage() {
     navigate({ search: (prev: z.infer<typeof SearchSchema>) => ({ ...prev, ...patch }) });
 
   return (
-    <AdminShell>
-      <div className="space-y-4">
+    <div className="space-y-4">
+
         <header className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Inbox className="h-5 w-5 text-primary" />
