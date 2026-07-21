@@ -24,6 +24,7 @@ import {
   CalendarClock,
   RotateCcw,
   Inbox,
+  ScrollText,
 } from "lucide-react";
 import { useState } from "react";
 import { JazanPattern } from "@/components/jazan";
@@ -96,6 +97,7 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
       { to: "/portal/assistant", icon: Sparkles, label_ar: "المساعد الذكي", label_en: "AI Assistant" },
       { to: "/portal/sessions", icon: ShieldCheck, label_ar: "الجلسات النشطة", label_en: "Sessions" },
+      { to: "/portal/audit-log", icon: ScrollText, label_ar: "سجل التدقيق", label_en: "Audit Log" },
       { to: "/portal/reminder-preferences", icon: Bell, label_ar: "تفضيلات الإشعار", label_en: "Reminder Prefs" },
       { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
     ],
