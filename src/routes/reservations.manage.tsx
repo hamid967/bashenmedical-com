@@ -337,14 +337,20 @@ function ManagePage() {
             a.id === id ? { ...a, status: res.restored_status ?? "confirmed" } : a,
           ),
         );
+        setUndoResult({
+          restored_status: res.restored_status ?? "confirmed",
+          slot_rebooked: res.slot_rebooked ?? false,
+          waitlist_reverted: res.waitlist_reverted ?? false,
+          prior_released: cancelResult?.released ?? false,
+          prior_waitlist_notified: cancelResult?.waitlist_notified ?? false,
+          restored_at: Date.now(),
+        });
         sonner.success("تم استرجاع الحجز.", {
           description: res.slot_rebooked
             ? "تم إعادة تثبيت الموعد بنجاح."
             : "أعيدت حالة الحجز — سيتواصل معك الفريق للتأكيد.",
         });
-        setActiveCancelId(null);
-        setCancelResult(null);
-        setCancelPhase("reason");
+        setCancelPhase("done");
         setUndoDeadline(null);
         setUndoMsLeft(0);
         if (sessionToken) listAppts.mutate(sessionToken);
