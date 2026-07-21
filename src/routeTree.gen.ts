@@ -142,6 +142,7 @@ import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
+import { Route as AuthenticatedAdminRolePermissionsMatrixRouteImport } from './routes/_authenticated/admin.role-permissions-matrix'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
 import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
@@ -912,6 +913,12 @@ const AuthenticatedAdminServiceCatalogRoute =
     path: '/service-catalog',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRolePermissionsMatrixRoute =
+  AuthenticatedAdminRolePermissionsMatrixRouteImport.update({
+    id: '/role-permissions-matrix',
+    path: '/role-permissions-matrix',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminReservationsUsageRoute =
   AuthenticatedAdminReservationsUsageRouteImport.update({
     id: '/reservations-usage',
@@ -1266,6 +1273,7 @@ export interface FileRoutesByFullPath {
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
+  '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -1440,6 +1448,7 @@ export interface FileRoutesByTo {
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
+  '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -1619,6 +1628,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
+  '/_authenticated/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -1798,6 +1808,7 @@ export interface FileRouteTypes {
     | '/admin/notification-logs'
     | '/admin/nphies-logs'
     | '/admin/reservations-usage'
+    | '/admin/role-permissions-matrix'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/visual-analytics'
@@ -1972,6 +1983,7 @@ export interface FileRouteTypes {
     | '/admin/notification-logs'
     | '/admin/nphies-logs'
     | '/admin/reservations-usage'
+    | '/admin/role-permissions-matrix'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/visual-analytics'
@@ -2150,6 +2162,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notification-logs'
     | '/_authenticated/admin/nphies-logs'
     | '/_authenticated/admin/reservations-usage'
+    | '/_authenticated/admin/role-permissions-matrix'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/admin/visual-analytics'
@@ -3232,6 +3245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServiceCatalogRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/role-permissions-matrix': {
+      id: '/_authenticated/admin/role-permissions-matrix'
+      path: '/role-permissions-matrix'
+      fullPath: '/admin/role-permissions-matrix'
+      preLoaderRoute: typeof AuthenticatedAdminRolePermissionsMatrixRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/reservations-usage': {
       id: '/_authenticated/admin/reservations-usage'
       path: '/reservations-usage'
@@ -3560,6 +3580,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
   AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
+  AuthenticatedAdminRolePermissionsMatrixRoute: typeof AuthenticatedAdminRolePermissionsMatrixRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -3581,6 +3602,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
   AuthenticatedAdminReservationsUsageRoute:
     AuthenticatedAdminReservationsUsageRoute,
+  AuthenticatedAdminRolePermissionsMatrixRoute:
+    AuthenticatedAdminRolePermissionsMatrixRoute,
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,

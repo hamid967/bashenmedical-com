@@ -81,6 +81,7 @@ const NAV: NavGroup[] = [
     title: "الحوكمة",
     items: [
       { to: "/rbac", label: "الأدوار والصلاحيات", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/role-permissions-matrix", label: "مصفوفة الصلاحيات (عرض)", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام (Super)", icon: Gauge, roles: ["admin"] },
       { to: "/admin/web-vitals", label: "Web Vitals", icon: Gauge, roles: ["admin"] },
       { to: "/admin/reservations-usage", label: "استخدام إدارة الحجوزات", icon: Gauge, roles: ["admin"] },
