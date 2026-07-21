@@ -50,6 +50,21 @@ PUBLIC_READ_ALLOWLIST = {
     "get_my_roles",
     "get_my_doctor_id",
     "is_inquiry_staff",
+    # Public listings/counters used by home & doctor pages
+    "list_public_doctors",
+    "list_public_doctors_for_rating",
+    "list_public_branches_for_rating",
+    "list_public_doctor_ratings",
+    "list_public_excellence_centers",
+    "specialty_doctor_counts",
+    # OTP-guarded lookups / mutations (safety enforced inside function body)
+    "lookup_appointment",
+    "lookup_complaint",
+    "track_appointment",
+    "reschedule_appointment_by_ref",
+    "update_reminders_by_ref",
+    "list_reminder_preferences_by_ref",
+    "submit_public_rating",
 }
 
 # Functions we expect to be REVOKED from anon (runtime probe list).
