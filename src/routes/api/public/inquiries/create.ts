@@ -14,6 +14,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createHash } from "node:crypto";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitedResponse,
+} from "@/lib/rate-limit.server";
 
 const NAME_MAX = 120;
 const PHONE_MAX = 32;
@@ -101,14 +106,35 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
           return json(400, { ok: false, kind: "validation", message: "رقم جوال غير صالح" });
         }
 
-        const ip =
-          request.headers.get("cf-connecting-ip") ??
-          request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-          "0.0.0.0";
+        const ip = getClientIp(request);
         const ipHash = hashIp(ip);
         const ua = request.headers.get("user-agent")?.slice(0, 500) ?? null;
 
+        // In-memory IP rate limit (defense-in-depth, before touching DB):
+        //   5 req / minute   AND   20 req / hour per IP
+        //   3 req / hour per (IP + mobile) — catches script iterating names on same phone
+        const ipCheck = checkRateLimit(`inq:ip:${ip}`, [
+          { windowMs: 60_000, max: 5 },
+          { windowMs: 3_600_000, max: 20 },
+        ]);
+        if (!ipCheck.ok) {
+          return rateLimitedResponse(
+            ipCheck.retryAfter,
+            "لقد أرسلت عدة طلبات مؤخرًا. الرجاء المحاولة بعد قليل.",
+          );
+        }
+        const ipMobCheck = checkRateLimit(`inq:ipmob:${ip}:${e164}`, [
+          { windowMs: 3_600_000, max: 3 },
+        ]);
+        if (!ipMobCheck.ok) {
+          return rateLimitedResponse(
+            ipMobCheck.retryAfter,
+            "لقد أرسلت عدة طلبات مؤخرًا. الرجاء المحاولة بعد قليل.",
+          );
+        }
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
 
         // Soft rate limit: max 3 inquiries per mobile per hour.
         try {
