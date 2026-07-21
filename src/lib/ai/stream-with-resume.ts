@@ -37,6 +37,12 @@ export interface StreamWithResumeOptions {
   maxRetries?: number;
   /** Surface tag for telemetry (public/portal/admin). */
   surface?: StreamSurface;
+  /**
+   * Live budget guard. Called after each delta with the running output text.
+   * Return an object `{ ok:false, message }` to abort the stream cleanly and
+   * surface the message to the user (treated like a completed stop, not an error).
+   */
+  budgetCheck?: (outputSoFar: string) => { ok: true } | { ok: false; message: string };
 }
 
 export interface StreamWithResumeResult {
@@ -45,6 +51,8 @@ export interface StreamWithResumeResult {
   completedNormally: boolean;
   /** Number of resume attempts that actually ran (0 = no resume needed). */
   resumeAttempts: number;
+  /** Set when a budget cap stopped the stream mid-flight. */
+  budgetStop?: { message: string };
 }
 
 const DEFAULT_MAX_RETRIES = 2;
@@ -176,6 +184,19 @@ export async function streamChatWithResume(
                 acc += delta;
                 deltaCount++;
                 opts.onDelta(delta, acc);
+                if (opts.budgetCheck) {
+                  const check = opts.budgetCheck(acc);
+                  if (!check.ok) {
+                    try { await reader.cancel(); } catch { /* ignore */ }
+                    emit("aborted", null, "budget_exceeded");
+                    return {
+                      text: acc,
+                      completedNormally: false,
+                      resumeAttempts,
+                      budgetStop: { message: check.message },
+                    };
+                  }
+                }
               }
               if (j?.usage) {
                 const u = j.usage as Record<string, unknown>;
