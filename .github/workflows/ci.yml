@@ -318,12 +318,48 @@ jobs:
           tail -n 200 preview.log || true
           exit 1
 
-      - name: Run booking E2E
+      - name: Run booking E2E (AR full journey)
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
           E2E_BASE_URL: http://127.0.0.1:8080
           E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
         run: python tests/e2e/booking-flow.py
+
+      - name: Run booking E2E (EN full journey)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+        run: python tests/e2e/book_full_journey_en.py
+
+      - name: Run booking E2E (slot-hold banner)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+        run: python tests/e2e/book_hold_banner_ar.py
+
+      - name: Run booking E2E (conflict → step 6)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+        run: python tests/e2e/book_conflict_returns_to_step6.py
+
+      - name: Run booking E2E (BranchBookingForm render)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+        run: python tests/e2e/book_branch_form_render.py
+
+      - name: Run booking E2E (CenterBookingForm render)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
+        run: python tests/e2e/book_center_form_render.py
+
 
       - name: Run public booking API edge cases E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
