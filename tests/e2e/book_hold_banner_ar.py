@@ -3,19 +3,34 @@ Slot-hold banner E2E — verifies that after reaching the time picker with
 a chosen slot, the SlotHoldBanner renders with role="status" and shows
 the "holding" text (Arabic default) plus a m:ss countdown.
 
+Uses deterministic E2E fixtures selected by name.
+
 Env:
-  E2E_BASE_URL   default http://localhost:8080
-  E2E_ARTIFACTS  default ./e2e-artifacts
+  E2E_BASE_URL       default http://localhost:8080
+  E2E_ARTIFACTS      default ./e2e-artifacts
+  E2E_BRANCH_NAME    default "فرع اختبار E2E"
+  E2E_SPECIALTY_NAME default "تخصص اختبار"
+  E2E_DOCTOR_NAME    default "د. اختبار E2E"
 """
 import asyncio, os, re, sys, traceback
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _helpers import make_recording_context, finalize_context, retry_async, retry_click, retry_goto
+from _helpers import (
+    make_recording_context,
+    finalize_context,
+    retry_async,
+    retry_click,
+    retry_goto,
+    pick_by_text,
+)
 
 from playwright.async_api import async_playwright
 
 BASE = os.environ.get("E2E_BASE_URL", "http://localhost:8080").rstrip("/")
+BRANCH_NAME = os.environ.get("E2E_BRANCH_NAME", "فرع اختبار E2E")
+SPECIALTY_NAME = os.environ.get("E2E_SPECIALTY_NAME", "تخصص اختبار")
+DOCTOR_NAME = os.environ.get("E2E_DOCTOR_NAME", "د. اختبار E2E")
 
 
 async def walk_to_time(page):
@@ -23,14 +38,11 @@ async def walk_to_time(page):
         page.locator("button", has_text=re.compile(r"عيادات تخصصية|Specialty Clinics")).first
     )
     await page.wait_for_timeout(600)
-    await retry_click(page.locator("button.text-start.rounded-xl.border-2").first)
+    await pick_by_text(page, "button.text-start.rounded-xl.border-2", BRANCH_NAME)
     await page.wait_for_timeout(400)
-    await retry_click(page.locator("button.rounded-xl.border-2.p-4.text-center").first)
+    await pick_by_text(page, "button.rounded-xl.border-2.p-4.text-center", SPECIALTY_NAME)
     await page.wait_for_timeout(600)
-    doc = page.locator("button.text-start.rounded-xl.border-2:not([disabled])").first
-    if await doc.count() == 0:
-        raise AssertionError("no available doctor")
-    await retry_click(doc)
+    await pick_by_text(page, "button.text-start.rounded-xl.border-2:not([disabled])", DOCTOR_NAME)
     await page.wait_for_timeout(1400)
     day_buttons = page.locator("div.grid.grid-cols-7 > button:not([disabled])")
     for i in range(min(await day_buttons.count(), 7)):
@@ -62,7 +74,7 @@ async def run():
             await retry_async(lambda: page.wait_for_selector("h1", timeout=15_000), label="wait h1")
             picked = await walk_to_time(page)
             if not picked:
-                raise AssertionError("could not pick a time slot")
+                raise AssertionError("could not pick a time slot for E2E doctor")
             await page.wait_for_timeout(1500)
             await page.screenshot(path=str(shots / "01_after_slot_pick.png"))
 

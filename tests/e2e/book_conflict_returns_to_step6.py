@@ -4,19 +4,35 @@ force a { ok:false, kind:"conflict" } response, then verify the wizard
 bounces the user back to step 6 (time picker) and surfaces the friendly
 Arabic conflict message.
 
+Uses deterministic E2E fixtures selected by name so the mocked conflict
+never races against real production data.
+
 Env:
-  E2E_BASE_URL   default http://localhost:8080
-  E2E_ARTIFACTS  default ./e2e-artifacts
+  E2E_BASE_URL       default http://localhost:8080
+  E2E_ARTIFACTS      default ./e2e-artifacts
+  E2E_BRANCH_NAME    default "فرع اختبار E2E"
+  E2E_SPECIALTY_NAME default "تخصص اختبار"
+  E2E_DOCTOR_NAME    default "د. اختبار E2E"
 """
 import asyncio, os, re, sys, traceback, json
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from _helpers import make_recording_context, finalize_context, retry_async, retry_click, retry_goto
+from _helpers import (
+    make_recording_context,
+    finalize_context,
+    retry_async,
+    retry_click,
+    retry_goto,
+    pick_by_text,
+)
 
 from playwright.async_api import async_playwright
 
 BASE = os.environ.get("E2E_BASE_URL", "http://localhost:8080").rstrip("/")
+BRANCH_NAME = os.environ.get("E2E_BRANCH_NAME", "فرع اختبار E2E")
+SPECIALTY_NAME = os.environ.get("E2E_SPECIALTY_NAME", "تخصص اختبار")
+DOCTOR_NAME = os.environ.get("E2E_DOCTOR_NAME", "د. اختبار E2E")
 
 
 async def run():
@@ -46,11 +62,13 @@ async def run():
                 page.locator("button", has_text=re.compile(r"عيادات تخصصية|Specialty Clinics")).first
             )
             await page.wait_for_timeout(600)
-            await retry_click(page.locator("button.text-start.rounded-xl.border-2").first)
+            await pick_by_text(page, "button.text-start.rounded-xl.border-2", BRANCH_NAME)
             await page.wait_for_timeout(400)
-            await retry_click(page.locator("button.rounded-xl.border-2.p-4.text-center").first)
+            await pick_by_text(page, "button.rounded-xl.border-2.p-4.text-center", SPECIALTY_NAME)
             await page.wait_for_timeout(600)
-            await retry_click(page.locator("button.text-start.rounded-xl.border-2:not([disabled])").first)
+            await pick_by_text(
+                page, "button.text-start.rounded-xl.border-2:not([disabled])", DOCTOR_NAME
+            )
             await page.wait_for_timeout(1500)
 
             day_buttons = page.locator("div.grid.grid-cols-7 > button:not([disabled])")
@@ -70,7 +88,7 @@ async def run():
                 await page.wait_for_timeout(400)
                 day_buttons = page.locator("div.grid.grid-cols-7 > button:not([disabled])")
             if not picked:
-                raise AssertionError("could not pick any time slot")
+                raise AssertionError("could not pick any time slot for E2E doctor")
 
             await page.get_by_placeholder(re.compile(r"الاسم كما في الهوية|Full name")).fill("اختبار تعارض")
             await page.get_by_placeholder("05XXXXXXXX").fill("0501234567")

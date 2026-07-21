@@ -1,76 +1,78 @@
-# خطة إغلاق ثغرات UX في /book — الحجز الذكي + QA
+# الدفعة 5 — بيانات حجز حقيقية على CI (Zero-Flake)
 
-منطقة الشغل ضخمة (~4,500 سطر عبر `book.tsx` + 20 مكوّن `booking/*` + `BranchBookingForm` + `CenterBookingForm` + `useSlotHold` + 3 endpoints في `api/public/book/*`). التنفيذ يتم على **4 دفعات صغيرة**، كل واحدة تُغلق تلقائيًا باختبار Playwright قبل الانتقال للدفعة التالية — بحيث تشوف الأثر خطوة‑بخطوة ولا نغرق في PR واحد.
+**الهدف:** كل اختبار E2E للحجز يشتغل على fixtures ثابتة معروفة الخصائص، مع seed قبل الاختبارات وcleanup بعدها، بدون أي أثر جانبي على البيانات الإنتاجية.
 
-## المبدأ الحاكم
+## 1. Fixtures ثابتة معروفة الـ slugs
 
-- لا تعديل على سكيمة قاعدة البيانات.
-- لا تعديل على منطق الحجز الأساسي (holds, waitlist, atomic guard). فقط تحسينات UX + رسائل + a11y + توازي AR/EN + تصلّب مسارات الخطأ.
-- كل دفعة تنتهي بـ typecheck نظيف + اختبار e2e يمر.
+جميع الصفوف مُميّزة بـ `slug` يبدأ بـ `e2e-` لضمان تنظيف آمن ومحدود.
 
----
+| الجدول | البيانات |
+|---|---|
+| `branches` | `slug='e2e-branch'`, `name_ar='فرع اختبار E2E'`, `name_en='E2E Test Branch'`, `is_active=true`, `city_ar='الرياض'` |
+| `specialties` | `slug='e2e-specialty'`, `name_ar='تخصص اختبار'`, `name_en='E2E Specialty'`, `is_active=true` |
+| `doctors` | `slug='e2e-doctor'`, `name_ar='د. اختبار E2E'`, `name_en='Dr. E2E Test'`, `specialty_id=<↑>`, `branch_id=<↑>`, `gender='male'`, `is_active=true` |
+| `doctor_branches` | ربط `(doctor, branch, is_primary=true)` |
+| `availability_slots` | 14 يوم قادمة × 6 سلوتس/يوم (09:00–12:00 كل 30د) بحالة `available` |
 
-## الدفعة 1 — UX الويزارد (رحلة `/book` الرئيسية)
+كل الـ INSERTs تستخدم `ON CONFLICT (slug) DO UPDATE`/`DO NOTHING` → **idempotent**.
 
-**الملفات:** `src/routes/book.tsx`, `src/components/booking/Stepper.tsx`, `SlotHoldBanner.tsx`, `StepDate.tsx`, `StepTime.tsx`, `StepReview.tsx`, `StepSuccess.tsx`, `SummarySidebar.tsx`.
+## 2. سكربتات
 
-- **رسائل الخطأ الموحّدة**: تحويل كل رسائل `/api/public/book/*` (validation / conflict / db / hold_expired / already_booked / held_by_other) إلى مفاتيح ترجمة موحّدة، وعرضها في `SubmitErrorBanner` مع CTA مناسب (إعادة اختيار وقت / تسجيل في قائمة الانتظار / تحديث الشاشة).
-- **حالات التحميل**: Skeletons موحّدة لخطوات التوفر (`StepDate`/`StepTime`) بدل Spinner فارغ + رسالة "لا توجد أوقات متاحة" مع CTA لقائمة الانتظار.
-- **العودة/التقدّم**: تأكيد سلوك back/forward يحفظ الخطوة والبيانات (اختبارات موجودة) + إضافة `useBlocker` عند وجود بيانات غير محفوظة في الخطوات 3–7.
-- **العدّاد**: تحسين `SlotHoldBanner` — تحذير مرئي عند تبقّي < 60 ثانية + انتقال سلس عند الانتهاء (إعادة إلى `StepTime` مع رسالة واضحة بدل صفحة خطأ).
-- **زر التالي**: تعطيل ذكي مع سبب مرئي (tooltip / نص أسفل الزر) بدل زر معطّل صامت.
+- `scripts/ci/ensure-e2e-booking-fixtures.py` — يزرع الـ fixtures عبر REST + service_role (مطابقة لنمط `ensure-e2e-admin.py`). يعيد `E2E_BRANCH_SLUG` و`E2E_DOCTOR_SLUG` لـ stdout كـ GitHub outputs.
+- `scripts/ci/cleanup-e2e-booking-fixtures.py` — يحذف بدقة:
+  1. `appointments` حيث `doctor_id = E2E_DOCTOR_ID`
+  2. `slot_holds` لنفس الـ doctor
+  3. `availability_slots` (تنحذف تلقائيًا مع الطبيب لكن نصرّح للسرعة)
+  4. `doctor_branches` → `doctors` → `specialties` → `branches` بترتيب الاعتماد
+  يعمل دائمًا حتى لو فشل الـ E2E (`if: always()`).
 
-**نهاية الدفعة:** `tests/e2e/book-ux-messages.py` يتحقق من عرض رسائل خطأ عربية واضحة لكل حالة.
+## 3. تعديل الاختبارات لاستهداف الـ fixtures
 
----
+بدل `.first` عشوائي على كل خطوة، الاختبارات ستقرأ من env vars:
+- `E2E_BRANCH_NAME` (default `فرع اختبار E2E`) — يُستخدم في selector Step 2
+- `E2E_SPECIALTY_NAME` (default `تخصص اختبار`) — Step 3
+- `E2E_DOCTOR_NAME` (default `د. اختبار E2E`) — Step 4
 
-## الدفعة 2 — A11y + لوحة المفاتيح + قارئ الشاشة
+هذا يضمن أن الاختبار لا يتأثر بترتيب البيانات الحقيقية ولا يحجز طبيبًا حقيقيًا بالخطأ.
 
-**الملفات:** `Stepper.tsx`, `StepShell.tsx`, `Field.tsx`, كل `Step*.tsx`, `SlotHoldBanner.tsx`, `SubmitErrorBanner.tsx`, `BranchBookingForm.tsx`, `CenterBookingForm.tsx`.
+تحديث:
+- `book_full_journey_en.py`
+- `book_hold_banner_ar.py`
+- `book_conflict_returns_to_step6.py`
+- `tests/e2e/_helpers.py` (يضيف `pick_by_text(locator, text)` مساعِد)
 
-- **Focus management**: عند الانتقال بين الخطوات، ينتقل التركيز تلقائيًا إلى عنوان الخطوة (`h2` مع `tabIndex={-1}` + `focus()` عند التغيير).
-- **aria-live**: منطقة `role="status"` لعدّاد الحجز، و`role="alert"` لرسائل الخطأ داخل الويزارد.
-- **Labels**: مراجعة كل حقول `Field.tsx` + `StepPatient` + `StepDate` للتأكد من `htmlFor` صريح، وليس فقط placeholder.
-- **زر التالي/السابق**: حجم لمس ≥ 44×44 (تصنيف `min-h-11 min-w-11` على الموبايل) + focus-visible واضح.
-- **RTL/LTR**: مراجعة `dir` على الأيقونات (Chevron) والحقول (`inputMode="tel"` للجوال) والأرقام (`ar-SA-u-nu-latn`).
-- **Contrast**: مراجعة أي `text-muted-foreground/50` أو ألوان أرقام العدّاد على الخلفيات الملوّنة.
+الاختبارات `book_branch_form_render.py` و`book_center_form_render.py` تعتمد على `/branches/{slug}` و`/excellence/{slug}` لبيانات حقيقية → تبقى كما هي (تُختبر عرض form فقط، لا حجز).
 
-**نهاية الدفعة:** `tests/a11y/book_axe_zero_violations.py` يجب أن يعطي 0 مخالفات على `/book` (AR + EN) للفئات: `label`, `button-name`, `color-contrast`, `aria-required-attr`, `focus-visible`.
+## 4. CI wiring
 
----
+في job `e2e-booking` بـ `.github/workflows/ci.yml`:
 
-## الدفعة 3 — توازي AR/EN في كامل الرحلة
+```text
+1. Verify secrets                     (existing)
+2. Setup Node/Python/Playwright       (existing)
+3. Build app                          (existing)
+4. ensure-e2e-admin.py                (existing)
+5. + ensure-e2e-booking-fixtures.py   ← NEW  (pre-tests)
+6. Start preview server               (existing)
+7. Run 6 booking E2E scripts          (existing, mildly updated)
+8. Upload artifacts (if failure)      (existing)
+9. + cleanup-e2e-booking-fixtures.py  ← NEW  (if: always())
+```
 
-**الملفات:** `src/locales/{ar,en}/booking.json`, كل ملفات `booking/*` + النموذجين المباشرين.
+env المُصدَّرة للاختبارات: `E2E_BRANCH_NAME`, `E2E_SPECIALTY_NAME`, `E2E_DOCTOR_NAME`.
 
-- **جرد**: سكربت `scripts/audit-book-i18n.mjs` يمشي على كل السلاسل النصية في `book.tsx` + `components/booking/*` + `BranchBookingForm` + `CenterBookingForm` ويرصد أي `hardcoded` عربي/إنجليزي غير مربوط بـ `t()`.
-- **إكمال المفاتيح المفقودة** في `booking.json` (AR + EN) — خصوصًا رسائل الخطأ الجديدة من الدفعة 1.
-- **التواريخ والأرقام**: توحيد `formatDate`/`formatTime` على `ar-SA-u-nu-latn` و`en-US` حسب اللغة الحالية، مع دعم AM/PM بالعربي.
-- **اتجاه الأرقام في العدّاد**: منع `flip` في `dir="rtl"` باستخدام `dir="ltr"` صريح على العدّاد والأرقام الطبية (MRN).
-- **رسائل السيرفر**: تعديل `/api/public/book/{hold,availability,create}` لإرجاع `kind` كودي فقط (بدون رسائل)، ويتم ترجمة الـ `kind` على العميل.
+## 5. تفاصيل تقنية
 
-**نهاية الدفعة:** `tests/e2e/book_bilingual_parity.py` يفتح `/book?lang=ar` و`/book?lang=en` ويقارن أن كل خطوة عندها نص بنفس اللغة (لا تسرّب لغة معاكسة).
+- **الأمان:** الـ slug prefix `e2e-` يمنع cleanup من لمس بيانات حقيقية. الفحص الأول في cleanup: `SELECT id FROM doctors WHERE slug LIKE 'e2e-%'` ثم يعمل على الـ IDs فقط.
+- **الـ RLS:** service_role يتخطى RLS، لذلك السكربتات تكتب مباشرة عبر PostgREST/REST مع `apikey + Bearer` كما في `ensure-e2e-admin.py`.
+- **التصادم مع الحجز الحقيقي:** الاختبار الوحيد الذي يُنشئ `appointment` هو `book_full_journey_en.py`. الـ cleanup يحذف كل `appointments` للطبيب E2E → لا تراكم.
+- **التوقيت:** slots تُحسب من `today()` بتوقيت الرياض إلى `today() + 14 days`، ما يضمن دائمًا وجود يوم متاح بغضّ النظر عن يوم التشغيل.
+- **الاختبار المحلي:** السكربتات تعمل محليًا بنفس env vars؛ يمكن للمطور تشغيل `python scripts/ci/ensure-e2e-booking-fixtures.py` ثم `E2E_BRANCH_NAME=... python tests/e2e/book_full_journey_en.py`.
 
----
+## معايير القبول (DoD)
 
-## الدفعة 4 — E2E شامل (تغطية مسارات النجاح والفشل)
-
-**الملفات:** `tests/e2e/book-*.py` (جديدة + توسيع الموجود).
-
-اختبارات جديدة (Playwright + Python):
-
-1. `book_full_journey_ar.py` — رحلة كاملة عربي من `/doctors` → `/book` → نجاح → QR + PDF.
-2. `book_full_journey_en.py` — نفس الرحلة بالإنجليزي.
-3. `book_hold_expired_recovery.py` — انتظار انتهاء الـ hold ثم التحقق من الرسالة والعودة السلسة.
-4. `book_slot_taken_during_review.py` — محاكاة `already_booked` عند step 8 والتحقق من عرض قائمة الانتظار كخيار.
-5. `book_branch_form_full.py` — رحلة كاملة عبر `BranchBookingForm`.
-6. `book_center_form_full.py` — رحلة كاملة عبر `CenterBookingForm`.
-7. `book_keyboard_only.py` — إتمام الحجز بلوحة المفاتيح فقط (Tab/Enter/Escape).
-
-كل الاختبارات تُضاف إلى `.github/workflows/ci.yml` ضمن مصفوفة الحجز.
-
----
-
-## سؤال للمهندس حامد قبل البدء
-
-أبدأ فورًا بـ **الدفعة 1 (UX الويزارد)**، أم تفضّل ترتيب مختلف (مثلًا A11y أولًا لأنها أعلى قيمة لبعض المستخدمين)؟
+- [ ] `ensure-e2e-booking-fixtures.py` idempotent (تشغيلين متتاليين → نفس النتيجة، لا صفوف مكرّرة)
+- [ ] `cleanup-e2e-booking-fixtures.py` لا يمس أي صف لا يبدأ slug بـ `e2e-`
+- [ ] الـ 3 اختبارات المُعدّلة تختار الـ fixture بالاسم لا بـ `.first` عشوائي
+- [ ] Cleanup يعمل حتى لو فشلت الاختبارات (`if: always()`)
+- [ ] Job الـ E2E يخضر بشكل ثابت 3 مرات متتالية على PR
