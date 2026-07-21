@@ -1,72 +1,106 @@
-# خطة تنفيذ اختبارات E2E حرجة بعد تغيير A2
 
-الهدف: التحقق من أن REVOKE على G2/G3/G4 لم يكسر أي مسار حرج للمستخدم النهائي أو الطاقم الطبي، وتقرير النتائج تلقائيًا بعد الدمج.
+# Hamed AI Command Center — خطة التنفيذ
 
-## النطاق (Scope)
+**الإطار التقني:** سنبقى على **TanStack Start** الحالي (بدلاً من Next.js 15 المذكور في المواصفات). السبب: الهجرة إلى Next.js تعني إعادة بناء كل شيء من الصفر (المسارات، Supabase، MCP، RBAC، اختبارات RLS/E2E، Batch A2/A3 hardening). TanStack Start يوفر نفس القدرات (persistent layouts, prefetching, SPA-like transitions, streaming SSR) بدون كسر ما بُني.
 
-| المسار | نوع الاختبار | لماذا حرج بعد A2 |
-|---|---|---|
-| `/doctors` + `/doctors/$slug` | Public read | يعتمد على `has_role` وسياسات RLS للكتالوج |
-| `/book` (رحلة كاملة) | Guest flow | يستدعي `_assert_slot_free`, `try_fill_waitlist_slot`, `slot_holds` |
-| `/reservations/manage` (OTP) | Guest auth | يستخدم `_appointment_belongs_to_me` |
-| `/portal/appointments` + `/portal/records` | Authenticated user | يعتمد على `requireSupabaseAuth` + قراءات RLS |
-| `/admin/inbox` + `/admin/audit-logs` + `/admin/role-permissions-matrix` | Staff | يستدعي 21 دالة G3 |
-| `/api/public/book/hold` + `/api/public/inquiries/create` | Rate-limited APIs | تأكد أن REVOKE لم يمنع الاستدعاء المشروع |
+## الموجات (Waves)
 
-## بنية الاختبارات
+### Wave 1 — الأساس (هذا التسليم)
+**البنية الأساسية للوحة الإدارة الجديدة `/admin/*` v3:**
 
-```text
-tests/e2e/critical-post-a2/
-  __init__.py
-  _shared.py                       # helpers: login, artifacts, retries
-  test_public_doctors.py           # /doctors listing + detail + i18n
-  test_booking_guest_flow.py       # slot pick → hold → OTP → confirm
-  test_reservation_manage_otp.py   # find → OTP → cancel/reschedule + undo
-  test_portal_authenticated.py     # login as patient → appointments + records
-  test_admin_console_staff.py      # login as admin → inbox + audit + matrix
-  test_public_apis_rate_limit.py   # POST /api/public/* happy + 429
-```
+1. **App Shell جديد `AdminShellV2`:**
+   - Sidebar قابل للطي مع حفظ الحالة (localStorage)
+   - Mobile drawer (sheet)
+   - Sticky top command bar
+   - Breadcrumbs تلقائية من route tree
+   - Branch/workspace switcher (من `branches` table)
+   - Language switcher (AR/EN — يعتمد i18n الحالي)
+   - Theme switcher (Light/Dark مع Glassmorphism محدود في dark)
+   - User menu مع الأدوار
+   - Quick Actions dropdown
 
-## المهام التنفيذية
+2. **Command Palette (`Ctrl+K` / `⌘K`):**
+   - بحث عالمي عبر: routes, patients, doctors, appointments
+   - fuzzy search محلي + server-side lookup
+   - keyboard navigation كامل
+   - permission-aware results
 
-1. **إعداد بيانات ثابتة**
-   - تشغيل `scripts/ci/ensure-e2e-admin.py` (موجود) لمستخدم admin.
-   - تشغيل `scripts/ci/ensure-e2e-patient.py` (موجود) لمستخدم مريض.
-   - إضافة `scripts/ci/ensure-e2e-doctor-slot.py` جديد: يضمن وجود طبيب واحد + branch + slot متاح في نافذة `now + 24h..48h` لتفادي هشاشة التوقيت.
+3. **AI Assistant Panel (هيكل + محادثة):**
+   - لوحة قابلة للفتح/الطي (drawer يمين)
+   - streaming responses عبر Lovable AI Gateway (`openai/gpt-5.6-terra`)
+   - محادثة داخل الجلسة (localStorage) — بدون تخزين DB في Wave 1
+   - Tool activity display (UI جاهز، tools تُضاف في Wave 2)
+   - Confirmation dialog قبل أي mutation
+   - permission-aware context (يمرر أدوار المستخدم)
+   - Sensitive data masking (أرقام جوال، هويات)
 
-2. **الملفات الجديدة** (تحت `tests/e2e/critical-post-a2/`) — تعتمد على `_helpers.py` القائم (`retry_async`, artifact capture).
+4. **Design tokens v3:**
+   - Light mode: ocean (navy/teal) — يمتد من `admin.index.tsx` الحالي
+   - Dark mode: glass + navy
+   - Typography: Sora (headings) + Manrope (body) + Cairo (AR)
+   - CSS variables موحّدة `--ac-*`
 
-3. **CI job جديد** `.github/workflows/ci.yml`:
-   - Job اسمه `e2e-critical-post-a2` يعمل بعد `build` و`migrations`.
-   - يشغّل السكربتات الثلاثة أولاً، ثم `pytest tests/e2e/critical-post-a2/ -n 2 --maxfail=3`.
-   - يرفع `screenshots/` + `traces/` كـ artifact عند الفشل.
-   - ينشر تعليقًا لاصقًا (sticky) على PR يلخّص النتائج (Pass/Fail لكل ملف + رابط الـ artifact).
+### Wave 2 — Overview + Analytics + Tables
+- KPI cards موسعة (12 مؤشر) مع previous-period comparison
+- Analytics module مع Recharts (appointment trends, no-show, revenue, insurance)
+- `DataTableV2` reusable مع: sorting, filters, saved views, bulk actions, column visibility, responsive card mode
+- استبدال الجداول الحالية في `/admin/inbox`, `/admin/audit-logs`, `/admin/service-inquiries`
 
-4. **معايير القبول (DoD)**
-   - كل مسار حرج يمرّ في AR وEN.
-   - لا استعلام يعود بـ `permission denied for function ...` (rg على logs).
-   - زمن الإجابة لكل خطوة < 3s p95.
-   - عند الفشل: HAR + screenshot + trace متاحة خلال دقيقتين من انتهاء الـ job.
+### Wave 3 — AI Assistant Tools + MCP
+- Typed tool registry (server-side): `search_appointments`, `search_requests`, `summarize_kpi`, `draft_message`, `navigate_to`
+- Tool execution مع confirmation و audit logging
+- Permission-aware tool filtering (RBAC)
+- Prompt-injection protection (system prompt hardening)
+- تكامل مع MCP server الحالي (`src/lib/mcp/`)
 
-## تقرير النتائج بعد الدمج
+### Wave 4 — Dashboard Builder + Activity Timeline + File Manager
+- Dashboard Builder مع dnd-kit (widgets قابلة للسحب)
+- حفظ layouts (personal + role-based) في `user_dashboard_layouts` جدول جديد
+- Activity Timeline real-time (Supabase Realtime على `audit_logs`)
+- File Manager للتقارير الطبية (private bucket + signed URLs)
 
-- بعد أول merge لهذه الخطة، ينشر CI تعليقًا على PR وملخصًا في `admin.visual-analytics` (قسم جديد "Post-A2 E2E status").
-- تقرير Markdown مختصر يُلحق تلقائياً في `.workspace/reports/post-a2-e2e-<date>.md` يحتوي:
-  - Pass/Fail لكل من المسارات الستة.
-  - أي دالة G2/G3/G4 ظهرت في logs الفشل (candidates للـ rollback الجزئي).
-  - توصية: **Keep hardened** أو **Rollback via prepared migration**.
+### Wave 5 — RBAC UI + Settings + System Health
+- محرر أدوار وصلاحيات كامل (بناءً على `user_roles` + `role_permissions` الموجودة)
+- Settings hub (branding, booking rules, templates, feature flags)
+- System Health page (DB, functions, AI gateway status)
 
-## تفاصيل تقنية
+## القيود الفنية
+- **لن أنشئ:** Supabase Edge Functions جديدة (نستخدم `createServerFn`)
+- **لن أنشئ:** جداول جديدة إلا للـ dashboard layouts في Wave 4
+- **سأحافظ على:** كل RLS policies، Batch A2/A3 hardening، اختبارات CI الحالية
+- **أدوار الوصول:** `admin`, `super_admin` (والأدوار الفرعية للـ RBAC page في Wave 5)
 
-- استخدام `retry_async(attempts=3, backoff=[0.5,1,2])` على كل خطوة شبكة.
-- تسجيل الدخول عبر Supabase مباشرة (session injection) بدل الـ UI لسرعة وثبات — راجع `browser-use.Authenticating` القائم.
-- Playwright viewport ثابت `1280×1800`, headless=True.
-- Artifacts فقط تحت `/tmp/browser/critical-post-a2/`، لا تُلوّث المستودع.
-- عدم استخدام `pg_dump`؛ اختبارات القراءة عبر Data API فقط.
+## Wave 1 — قائمة الملفات
 
-## المخرجات
+**ملفات جديدة:**
+- `src/components/admin/v2/AdminShellV2.tsx` — Shell الرئيسي
+- `src/components/admin/v2/AdminSidebar.tsx` — قابل للطي
+- `src/components/admin/v2/AdminTopBar.tsx` — command bar
+- `src/components/admin/v2/CommandPalette.tsx` — Cmd+K
+- `src/components/admin/v2/AIAssistantPanel.tsx` — لوحة AI
+- `src/components/admin/v2/BranchSwitcher.tsx`
+- `src/components/admin/v2/ThemeSwitcher.tsx` — light/dark فعلي
+- `src/components/admin/v2/Breadcrumbs.tsx`
+- `src/components/admin/v2/QuickActions.tsx`
+- `src/lib/admin/ai-assistant.functions.ts` — server fn للـ AI streaming
+- `src/routes/api/admin/ai-chat.ts` — streaming route لـ AI SDK
+- `src/styles/admin-v2.css` — design tokens v3
 
-- 6 ملفات اختبار جديدة + 1 سكربت seed + تحديث `ci.yml`.
-- تعليق PR تلقائي بالنتائج.
-- تقرير Markdown في `.workspace/reports/`.
-- قرار موثّق: الإبقاء على A2 أو تشغيل rollback migration المُجهّز مسبقًا.
+**ملفات مُحدَّثة:**
+- `src/routes/_authenticated/admin.tsx` — استخدام `AdminShellV2` بدلاً من `AdminShell`
+- `src/styles.css` — استيراد `admin-v2.css`
+
+## Definition of Done (Wave 1)
+- [ ] `/admin` يعمل بـ shell جديد كامل بدون كسر أي route فرعي
+- [ ] Cmd+K يفتح palette ويبحث في routes + top 20 patients
+- [ ] AI panel يرد بـ streaming على أسئلة عامة
+- [ ] Theme toggle يعمل ويحفظ التفضيل
+- [ ] Mobile drawer يعمل بسلاسة
+- [ ] لا كسر في اختبارات E2E الحالية للـ admin
+- [ ] RTL/LTR صحيح 100%
+- [ ] Accessibility: keyboard nav كامل، focus visible، ARIA labels
+
+## الوقت المتوقع
+Wave 1: تسليم واحد كبير الآن. Waves 2-5: كل واحدة تسليم منفصل بعد مراجعتك للسابق.
+
+هل أبدأ بـ Wave 1؟
