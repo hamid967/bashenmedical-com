@@ -33,6 +33,8 @@ import { join, relative, dirname } from "node:path";
 
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
+import { pathToFileURL } from "node:url";
+const IS_MAIN = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
 const WRITE = argv.includes("--write");
 const VERBOSE = argv.includes("--verbose");
 const LIST_RULES = argv.includes("--list-rules");
@@ -237,21 +239,7 @@ function walk(dir, out = []) {
   }
   return out;
 }
-const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d)))
-  .filter((p) => {
-    const rel = relative(ROOT, p).replaceAll("\\", "/");
-    if (FILE_EXCEPTIONS.has(rel)) return false;
-    if (!(rel.startsWith("src/components/portal/") || rel.startsWith("src/routes/_authenticated/portal"))) return false;
-    if (FILE_FILTER && !rel.includes(FILE_FILTER)) return false;
-    if (GLOB_RES.length && !GLOB_RES.some((re) => re.test(rel))) return false;
-    return true;
-  });
-
-if (VERBOSE) {
-  console.log(`نطاق المطابقة: ${files.length} ملف بعد التصفية` +
-    (GLOB_PATTERNS.length ? ` (globs: ${GLOB_PATTERNS.length})` : "") +
-    (FILE_FILTER ? ` (--file="${FILE_FILTER}")` : ""));
-}
+// (تنفيذ CLI في نهاية الملف بعد تعريف الدوال)
 
 // ─────────────────────────────────────────────────────────────────────
 // تحويل نطاق className
@@ -328,8 +316,26 @@ function transformSource(src, ctx) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// تنفيذ
+// تنفيذ CLI
 // ─────────────────────────────────────────────────────────────────────
+if (IS_MAIN) runCli();
+function runCli() {
+const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d)))
+  .filter((p) => {
+    const rel = relative(ROOT, p).replaceAll("\\", "/");
+    if (FILE_EXCEPTIONS.has(rel)) return false;
+    if (!(rel.startsWith("src/components/portal/") || rel.startsWith("src/routes/_authenticated/portal"))) return false;
+    if (FILE_FILTER && !rel.includes(FILE_FILTER)) return false;
+    if (GLOB_RES.length && !GLOB_RES.some((re) => re.test(rel))) return false;
+    return true;
+  });
+
+if (VERBOSE) {
+  console.log(`نطاق المطابقة: ${files.length} ملف بعد التصفية` +
+    (GLOB_PATTERNS.length ? ` (globs: ${GLOB_PATTERNS.length})` : "") +
+    (FILE_FILTER ? ` (--file="${FILE_FILTER}")` : ""));
+}
+
 let totalFiles = 0;
 let totalReplacements = 0;
 const perFile = [];
@@ -398,4 +404,8 @@ if (!WRITE) {
   console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
   console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
 }
+} // /runCli
+
+export { transformSource, transformClassLiteral, mapUtility, DIRECT, SEMANTIC_FAMILIES, INK_FAMILIES };
+
 
