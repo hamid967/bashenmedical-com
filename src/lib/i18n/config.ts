@@ -8,17 +8,23 @@ import urCommon from "@/locales/ur/common.json";
 import arBooking from "@/locales/ar/booking.json";
 import enBooking from "@/locales/en/booking.json";
 
-export const SUPPORTED_LANGS = ["ar", "en", "ur"] as const;
+// Primary UI languages — surfaced in the language switcher and used across
+// the app to key layout/direction. Adding a code here forces every
+// `Record<Lang, ...>` in the codebase to add a branch, so we keep this narrow
+// and register extended locales (see EXTRA_LOCALES) in i18next only.
+export const SUPPORTED_LANGS = ["ar", "en"] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 export const DEFAULT_LANG: Lang = "ar";
-// RTL languages — used by the i18n layout hook to set `dir="rtl"`.
-export const RTL_LANGS: readonly Lang[] = ["ar", "ur"] as const;
+
+// Extended locales registered with i18next but not part of the `Lang` union.
+// Users who call `i18n.changeLanguage("ur")` get these translations; any
+// missing key falls back to DEFAULT_LANG (ar) via i18next's fallbackLng.
+export const EXTRA_LOCALES = ["ur"] as const;
+export const RTL_LOCALES: readonly string[] = ["ar", "ur"] as const;
 
 export const resources = {
   ar: { common: arCommon, booking: arBooking },
   en: { common: enCommon, booking: enBooking },
-  // Urdu currently ships only the `manage.undo.*` copy; all other keys
-  // fall back to `DEFAULT_LANG` (ar) via i18next's fallbackLng.
   ur: { common: urCommon },
 } as const;
 
