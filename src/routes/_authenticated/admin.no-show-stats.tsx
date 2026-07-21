@@ -274,6 +274,19 @@ function NoShowStatsPage() {
               مسح
             </button>
           </div>
+        <div className="flex items-center gap-2 flex-wrap mt-3">
+          <span className="text-[11px] text-muted-foreground">نطاقات سريعة:</span>
+          {QUICK_RANGES.map((r) => {
+            const active = activeQuickKey === r.key;
+            return (
+              <button key={r.key} onClick={() => applyQuickRange(r)}
+                className={`rounded-full border px-3 py-1 text-xs ${active
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border hover:bg-muted"}`}>
+                {r.label}
+              </button>
+            );
+          })}
         </div>
         <p className="mt-3 text-[11px] text-muted-foreground">
           النطاق النشط: {applied.from} → {applied.to} · {activeDoctorName}
