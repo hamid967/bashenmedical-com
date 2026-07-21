@@ -133,6 +133,5 @@ export const sendTestNotification = createServerFn({ method: "POST" })
       note: externalPending
         ? `تم إنشاء رسالة اختبار داخل التطبيق. الإرسال الفعلي عبر ${label} يتم فقط بعد حفظ التفضيلات وتفعيل مزود القناة لدى المركز.`
         : `تم إرسال رسالة اختبار داخل التطبيق. افتح صفحة الإشعارات لعرضها.`,
-      contact: prof ?? null,
     };
   });
