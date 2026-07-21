@@ -14,6 +14,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createHash } from "node:crypto";
+import {
+  checkRateLimit,
+  getClientIp,
+  rateLimitedResponse,
+} from "@/lib/rate-limit.server";
 
 const NAME_MAX = 120;
 const PHONE_MAX = 32;
