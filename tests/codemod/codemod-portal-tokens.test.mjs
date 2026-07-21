@@ -5,7 +5,7 @@
 
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
@@ -16,6 +16,26 @@ import {
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(HERE, "fixtures");
+const TMP = join(HERE, ".tmp");
+
+// نظّف artifacts السابقة قبل التشغيل حتى لا تبقى ملفات diff قديمة تربك المراجعة.
+if (existsSync(TMP)) rmSync(TMP, { recursive: true, force: true });
+mkdirSync(TMP, { recursive: true });
+
+/** diff سطري بسيط — يبرز الأسطر المختلفة فقط دون إخراج نصوص طويلة كاملة. */
+function unifiedDiff(expected, actual, base) {
+  const eLines = expected.split("\n");
+  const aLines = actual.split("\n");
+  const max = Math.max(eLines.length, aLines.length);
+  const out = [`--- expected/${base}.expected.tsx`, `+++ actual/${base}.actual.tsx`];
+  for (let i = 0; i < max; i++) {
+    if (eLines[i] !== aLines[i]) {
+      if (eLines[i] !== undefined) out.push(`- ${i + 1}: ${eLines[i]}`);
+      if (aLines[i] !== undefined) out.push(`+ ${i + 1}: ${aLines[i]}`);
+    }
+  }
+  return out.join("\n") + "\n";
+}
 
 function run(src) {
   const ctx = { skipped: [] };
@@ -34,12 +54,14 @@ describe("codemod-portal-tokens — fixtures", () => {
       const { src: actual, changed } = run(input);
 
       if (actual !== expected) {
-        // إخراج تشخيصي مفيد
-        console.error(`\n─── DIFF (${base}) ───`);
-        console.error("--- expected ---\n" + expected);
-        console.error("--- actual   ---\n" + actual);
+        // احفظ diff + الملفات الفعلية/المتوقّعة في tests/codemod/.tmp لرفعها كـ CI artifact.
+        const diff = unifiedDiff(expected, actual, base);
+        writeFileSync(join(TMP, `${base}.diff.txt`), diff);
+        writeFileSync(join(TMP, `${base}.actual.tsx`), actual);
+        writeFileSync(join(TMP, `${base}.expected.tsx`), expected);
+        console.error(`\n─── DIFF (${base}) — saved to tests/codemod/.tmp/${base}.diff.txt ───\n${diff}`);
       }
-      assert.equal(actual, expected, `مخرجات codemod تختلف عن expected لـ ${base}`);
+      assert.equal(actual, expected, `مخرجات codemod تختلف عن expected لـ ${base} (راجع tests/codemod/.tmp/${base}.diff.txt)`);
       assert.ok(changed > 0 || input === expected, "إحصاء changed يجب أن يعكس التغييرات");
     });
   }
