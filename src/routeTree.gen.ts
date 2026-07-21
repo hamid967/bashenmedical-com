@@ -109,6 +109,7 @@ import { Route as AuthenticatedOwnerIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
+import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiAdminAiChatRouteImport } from './routes/api/admin/ai-chat'
 import { Route as AuthenticatedPortalSettingsRouteImport } from './routes/_authenticated/portal.settings'
 import { Route as AuthenticatedPortalSessionsRouteImport } from './routes/_authenticated/portal.sessions'
@@ -189,6 +190,7 @@ import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
+import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
 import { Route as ApiPublicReservationsOtpVerifyRouteImport } from './routes/api/public/reservations/otp.verify'
 import { Route as ApiPublicReservationsOtpSendRouteImport } from './routes/api/public/reservations/otp.send'
 import { Route as ApiPublicReservationsCancelUndoRouteImport } from './routes/api/public/reservations/cancel.undo'
@@ -724,6 +726,11 @@ const ApiPortalAiChatRoute = ApiPortalAiChatRouteImport.update({
   path: '/api/portal/ai-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiChatRoute = ApiAiChatRouteImport.update({
+  id: '/api/ai/chat',
+  path: '/api/ai/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAdminAiChatRoute = ApiAdminAiChatRouteImport.update({
   id: '/api/admin/ai-chat',
   path: '/api/admin/ai-chat',
@@ -1191,6 +1198,12 @@ const AuthenticatedAdminSuperJazanVisualRoute =
     path: '/super/jazan-visual',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAiOverviewRoute =
+  AuthenticatedAdminAiOverviewRouteImport.update({
+    id: '/ai/overview',
+    path: '/ai/overview',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const ApiPublicReservationsOtpVerifyRoute =
   ApiPublicReservationsOtpVerifyRouteImport.update({
     id: '/api/public/reservations/otp/verify',
@@ -1366,12 +1379,14 @@ export interface FileRoutesByFullPath {
   '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/owner/': typeof AuthenticatedOwnerIndexRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
+  '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1549,12 +1564,14 @@ export interface FileRoutesByTo {
   '/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/owner': typeof AuthenticatedOwnerIndexRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
+  '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1737,12 +1754,14 @@ export interface FileRoutesById {
   '/_authenticated/portal/sessions': typeof AuthenticatedPortalSessionsRoute
   '/_authenticated/portal/settings': typeof AuthenticatedPortalSettingsRoute
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
+  '/api/ai/chat': typeof ApiAiChatRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/owner/': typeof AuthenticatedOwnerIndexRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
+  '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1925,12 +1944,14 @@ export interface FileRouteTypes {
     | '/portal/sessions'
     | '/portal/settings'
     | '/api/admin/ai-chat'
+    | '/api/ai/chat'
     | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/admin/'
     | '/owner/'
     | '/patients/'
     | '/portal/'
+    | '/admin/ai/overview'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2108,12 +2129,14 @@ export interface FileRouteTypes {
     | '/portal/sessions'
     | '/portal/settings'
     | '/api/admin/ai-chat'
+    | '/api/ai/chat'
     | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/admin'
     | '/owner'
     | '/patients'
     | '/portal'
+    | '/admin/ai/overview'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2295,12 +2318,14 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/sessions'
     | '/_authenticated/portal/settings'
     | '/api/admin/ai-chat'
+    | '/api/ai/chat'
     | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/owner/'
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
+    | '/_authenticated/admin/ai/overview'
     | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
@@ -2391,6 +2416,7 @@ export interface RootRouteChildren {
   DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiAdminAiChatRoute: typeof ApiAdminAiChatRoute
+  ApiAiChatRoute: typeof ApiAiChatRoute
   ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
   ApiPublicBookCancelRoute: typeof ApiPublicBookCancelRoute
@@ -3119,6 +3145,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPortalAiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/chat': {
+      id: '/api/ai/chat'
+      path: '/api/ai/chat'
+      fullPath: '/api/ai/chat'
+      preLoaderRoute: typeof ApiAiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/admin/ai-chat': {
       id: '/api/admin/ai-chat'
       path: '/api/admin/ai-chat'
@@ -3679,6 +3712,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuperJazanVisualRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ai/overview': {
+      id: '/_authenticated/admin/ai/overview'
+      path: '/ai/overview'
+      fullPath: '/admin/ai/overview'
+      preLoaderRoute: typeof AuthenticatedAdminAiOverviewRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/api/public/reservations/otp/verify': {
       id: '/api/public/reservations/otp/verify'
       path: '/api/public/reservations/otp/verify'
@@ -3749,6 +3789,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
   AuthenticatedAdminWebVitalsRoute: typeof AuthenticatedAdminWebVitalsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+  AuthenticatedAdminAiOverviewRoute: typeof AuthenticatedAdminAiOverviewRoute
   AuthenticatedAdminSuperJazanVisualRoute: typeof AuthenticatedAdminSuperJazanVisualRoute
   AuthenticatedAdminSuperMonitoringRoute: typeof AuthenticatedAdminSuperMonitoringRoute
   AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -3776,6 +3817,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminVisualAnalyticsRoute,
   AuthenticatedAdminWebVitalsRoute: AuthenticatedAdminWebVitalsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+  AuthenticatedAdminAiOverviewRoute: AuthenticatedAdminAiOverviewRoute,
   AuthenticatedAdminSuperJazanVisualRoute:
     AuthenticatedAdminSuperJazanVisualRoute,
   AuthenticatedAdminSuperMonitoringRoute:
@@ -4149,6 +4191,7 @@ const rootRouteChildren: RootRouteChildren = {
   DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiAdminAiChatRoute: ApiAdminAiChatRoute,
+  ApiAiChatRoute: ApiAiChatRoute,
   ApiPortalAiChatRoute: ApiPortalAiChatRoute,
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
   ApiPublicBookCancelRoute: ApiPublicBookCancelRoute,

@@ -20,7 +20,7 @@ import { Toaster } from "sonner";
 const JazanIntro = lazy(() =>
   import("@/components/JazanIntro").then((m) => ({ default: m.JazanIntro })),
 );
-import { ChatbotBubble } from "@/components/ChatbotBubble";
+import { BaeshenAssistant } from "@/components/assistant/BaeshenAssistant";
 import { FloatingWhatsAppButton } from "@/components/inquiry/FloatingWhatsAppButton";
 import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
 
@@ -225,7 +225,7 @@ function RootComponent() {
             </main>
             <Footer />
             <Toaster position="top-center" richColors closeButton />
-            <ChatbotBubble />
+            <BaeshenAssistant />
             <FloatingWhatsAppButton />
             <PwaUpdatePrompt />
           </div>

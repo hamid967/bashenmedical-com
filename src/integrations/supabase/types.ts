@@ -95,6 +95,294 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_conversations: {
+        Row: {
+          anon_session_id: string | null
+          consent_history: boolean
+          ended_at: string | null
+          id: string
+          lang: string
+          last_activity_at: string
+          metadata: Json
+          scope: Database["public"]["Enums"]["ai_scope"]
+          started_at: string
+          title: string | null
+          user_id: string | null
+        }
+        Insert: {
+          anon_session_id?: string | null
+          consent_history?: boolean
+          ended_at?: string | null
+          id?: string
+          lang?: string
+          last_activity_at?: string
+          metadata?: Json
+          scope?: Database["public"]["Enums"]["ai_scope"]
+          started_at?: string
+          title?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          anon_session_id?: string | null
+          consent_history?: boolean
+          ended_at?: string | null
+          id?: string
+          lang?: string
+          last_activity_at?: string
+          metadata?: Json
+          scope?: Database["public"]["Enums"]["ai_scope"]
+          started_at?: string
+          title?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      ai_feature_flags: {
+        Row: {
+          enabled: boolean
+          key: string
+          notes: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          key: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          key?: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          model: string | null
+          role: string
+          tokens_in: number | null
+          tokens_out: number | null
+          tool_name: string | null
+        }
+        Insert: {
+          content: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          role: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          tool_name?: string | null
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          model?: string | null
+          role?: string
+          tokens_in?: number | null
+          tokens_out?: number | null
+          tool_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_model_routes: {
+        Row: {
+          enabled: boolean
+          fallback_id: string | null
+          model_id: string
+          notes: string | null
+          route_name: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          enabled?: boolean
+          fallback_id?: string | null
+          model_id: string
+          notes?: string | null
+          route_name: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          enabled?: boolean
+          fallback_id?: string | null
+          model_id?: string
+          notes?: string | null
+          route_name?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      ai_prompt_versions: {
+        Row: {
+          agent: string
+          content: string
+          created_at: string
+          created_by: string | null
+          id: string
+          published: boolean
+          version: number
+        }
+        Insert: {
+          agent: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published?: boolean
+          version: number
+        }
+        Update: {
+          agent?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          published?: boolean
+          version?: number
+        }
+        Relationships: []
+      }
+      ai_safety_incidents: {
+        Row: {
+          action_taken: string | null
+          actor: string | null
+          conversation_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          kind: string
+          severity: string
+        }
+        Insert: {
+          action_taken?: string | null
+          actor?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          kind: string
+          severity?: string
+        }
+        Update: {
+          action_taken?: string | null
+          actor?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          kind?: string
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_safety_incidents_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_tool_invocations: {
+        Row: {
+          actor: string | null
+          conversation_id: string
+          cost_usd: number | null
+          created_at: string
+          id: string
+          input: Json
+          latency_ms: number | null
+          output: Json | null
+          status: string
+          tool: string
+        }
+        Insert: {
+          actor?: string | null
+          conversation_id: string
+          cost_usd?: number | null
+          created_at?: string
+          id?: string
+          input?: Json
+          latency_ms?: number | null
+          output?: Json | null
+          status?: string
+          tool: string
+        }
+        Update: {
+          actor?: string | null
+          conversation_id?: string
+          cost_usd?: number | null
+          created_at?: string
+          id?: string
+          input?: Json
+          latency_ms?: number | null
+          output?: Json | null
+          status?: string
+          tool?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_tool_invocations_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_usage_costs: {
+        Row: {
+          cost_usd: number
+          day: string
+          model: string
+          requests: number
+          tokens_in: number
+          tokens_out: number
+        }
+        Insert: {
+          cost_usd?: number
+          day: string
+          model: string
+          requests?: number
+          tokens_in?: number
+          tokens_out?: number
+        }
+        Update: {
+          cost_usd?: number
+          day?: string
+          model?: string
+          requests?: number
+          tokens_in?: number
+          tokens_out?: number
+        }
+        Relationships: []
+      }
       api_permission_errors: {
         Row: {
           id: number
@@ -6127,6 +6415,7 @@ export type Database = {
       }
     }
     Enums: {
+      ai_scope: "guest" | "patient" | "admin" | "super_admin"
       allergy_severity: "mild" | "moderate" | "severe" | "life_threatening"
       app_role:
         | "admin"
@@ -6355,6 +6644,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      ai_scope: ["guest", "patient", "admin", "super_admin"],
       allergy_severity: ["mild", "moderate", "severe", "life_threatening"],
       app_role: [
         "admin",
