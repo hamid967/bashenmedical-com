@@ -131,6 +131,7 @@ import { Route as AuthenticatedPortalBookRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPortalAppointmentsRouteImport } from './routes/_authenticated/portal.appointments'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
+import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
@@ -833,6 +834,12 @@ const AuthenticatedAdminWebVitalsRoute =
     path: '/web-vitals',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminVisualAnalyticsRoute =
+  AuthenticatedAdminVisualAnalyticsRouteImport.update({
+    id: '/visual-analytics',
+    path: '/visual-analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminServiceInquiriesRoute =
   AuthenticatedAdminServiceInquiriesRouteImport.update({
     id: '/service-inquiries',
@@ -1162,6 +1169,7 @@ export interface FileRoutesByFullPath {
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
+  '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
@@ -1322,6 +1330,7 @@ export interface FileRoutesByTo {
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
+  '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
@@ -1486,6 +1495,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
+  '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
@@ -1650,6 +1660,7 @@ export interface FileRouteTypes {
     | '/admin/reservations-usage'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
+    | '/admin/visual-analytics'
     | '/admin/web-vitals'
     | '/patients/$patientId'
     | '/portal/appointments'
@@ -1810,6 +1821,7 @@ export interface FileRouteTypes {
     | '/admin/reservations-usage'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
+    | '/admin/visual-analytics'
     | '/admin/web-vitals'
     | '/patients/$patientId'
     | '/portal/appointments'
@@ -1973,6 +1985,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/reservations-usage'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
+    | '/_authenticated/admin/visual-analytics'
     | '/_authenticated/admin/web-vitals'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/portal/appointments'
@@ -2963,6 +2976,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminWebVitalsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/visual-analytics': {
+      id: '/_authenticated/admin/visual-analytics'
+      path: '/visual-analytics'
+      fullPath: '/admin/visual-analytics'
+      preLoaderRoute: typeof AuthenticatedAdminVisualAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/service-inquiries': {
       id: '/_authenticated/admin/service-inquiries'
       path: '/service-inquiries'
@@ -3264,6 +3284,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
+  AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
   AuthenticatedAdminWebVitalsRoute: typeof AuthenticatedAdminWebVitalsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminSuperJazanVisualRoute: typeof AuthenticatedAdminSuperJazanVisualRoute
@@ -3284,6 +3305,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
+  AuthenticatedAdminVisualAnalyticsRoute:
+    AuthenticatedAdminVisualAnalyticsRoute,
   AuthenticatedAdminWebVitalsRoute: AuthenticatedAdminWebVitalsRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminSuperJazanVisualRoute:
