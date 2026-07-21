@@ -44,5 +44,8 @@ export const clinicSettingsQuery = () => ({
       opening_hours: (data.opening_hours as unknown as OpeningHours[]) ?? [],
     } as ClinicSettings;
   },
-  staleTime: 5 * 60_000,
+  // Clinic settings change rarely (address, hours, phone). Cache aggressively
+  // to cut database load — the row is a PK lookup but is hit on every page.
+  staleTime: 30 * 60_000,
+  gcTime: 60 * 60_000,
 });
