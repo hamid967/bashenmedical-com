@@ -144,9 +144,12 @@ function actionFor(n: PatientNotification): NotificationAction | null {
   if (k.includes("lab")) return { to: "/portal/laboratory", label: "نتائج المختبر" };
   if (k.includes("radiology")) return { to: "/portal/radiology", label: "نتائج الأشعة" };
   if (k.includes("prescription")) return { to: "/portal/prescriptions", label: "الوصفات الطبية" };
+  if (k.includes("insurance") || k.includes("approval"))
+    return { to: "/portal/insurance", label: "التأمين والاعتمادات" };
   if (k.includes("invoice") || k.includes("payment"))
     return { to: "/portal/invoices", label: "الفواتير" };
   if (k.includes("refund")) return { to: "/portal/refunds", label: "طلبات الاسترداد" };
+
   const ref = meta["ref"] ?? meta["reference"];
   if (typeof ref === "string" && ref) return { to: "/portal/orders", label: "طلباتي" };
   return null;
