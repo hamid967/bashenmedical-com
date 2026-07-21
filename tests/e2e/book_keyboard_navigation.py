@@ -79,8 +79,13 @@ def assert_true(cond: bool, msg: str) -> None:
         raise AssertionError(msg)
 
 
-async def activate_first_radio(page: Page, step_label: str) -> None:
-    """Tab to the first enabled radio in the current radiogroup and press Space."""
+async def activate_first_radio(page: Page, step_label: str, current_n: int) -> None:
+    """Tab to the first enabled radio in the current radiogroup and press Space.
+
+    Selecting a choice may auto-advance the wizard (the step is unmounted and
+    focus returns to <body>), so we assert on step change rather than on
+    aria-checked, which would be racing the re-render.
+    """
     info = await tab_until(
         page,
         lambda i: i["role"] == "radio" and not i["disabled"],
@@ -90,15 +95,26 @@ async def activate_first_radio(page: Page, step_label: str) -> None:
         info["hasFocusStyle"],
         f"[{step_label}] focused radio has no visible focus indicator: {info!r}",
     )
-    # Space activates a role=radio button consistently across browsers
     await page.keyboard.press("Space")
-    await page.wait_for_timeout(150)
-    info2 = await focused(page)
-    # aria-checked should flip to "true" on the same element
-    assert_true(
-        info2.get("ariaChecked") == "true",
-        f"[{step_label}] Space did not check the focused radio: {info2!r}",
-    )
+    # Either the step advances (auto-next) or aria-checked flips in place.
+    try:
+        await page.wait_for_function(
+            """(n) => {
+                const el = document.querySelector('[aria-current="step"]');
+                if (!el) return false;
+                const label = (el.getAttribute('aria-label') || el.textContent || '');
+                return !label.includes(String(n));
+            }""",
+            arg=current_n,
+            timeout=3000,
+        )
+    except Exception:
+        info2 = await focused(page)
+        assert_true(
+            info2.get("ariaChecked") == "true",
+            f"[{step_label}] Space did not check radio nor advance step: {info2!r}",
+        )
+
 
 
 async def wait_step(page: Page, n: int) -> None:
