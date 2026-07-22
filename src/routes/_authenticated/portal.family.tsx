@@ -450,7 +450,7 @@ function DependentCard({
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
     },
     onError: (e: any) =>
-      toast.error(e?.message ?? isAr ? "تعذّر التحديث" : "Update failed")),
+      toast.error(e?.message ?? (isAr ? "تعذّر التحديث" : "Update failed")),
   });
   const badgeCls = verified
     ? "bg-emerald-50 text-emerald-700"
@@ -460,7 +460,7 @@ function DependentCard({
   const badgeLabel = verified
     ? t("verified", lang)
     : rejected
-      ? isAr ? "مرفوض" : "Rejected")
+      ? (isAr ? "مرفوض" : "Rejected")
       : t("pending", lang);
   return (
     <div className="glass-card p-4 flex flex-col gap-3">

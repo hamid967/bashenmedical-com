@@ -234,7 +234,7 @@ function OrderDetailCard({
         not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled"),
         invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone"),
       };
-      toast.error(map[err.message] ?? isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
+      toast.error(map[err.message] ?? (isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
     },
   });
 
@@ -268,9 +268,9 @@ function OrderDetailCard({
         </div>
 
         <div className="mt-6 grid gap-3 text-sm">
-          <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "تاريخ الإنشاء" : "Created")} value={fmt(order.created_at,isAr ? "ar" : "en")} />
+          <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "تاريخ الإنشاء" : "Created")} value={fmt(order.created_at,(isAr ? "ar" : "en")} />
           {order.scheduled_at && (
-            <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "الموعد المفضّل" : "Scheduled")} value={fmt(order.scheduled_at,isAr ? "ar" : "en")} />
+            <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "الموعد المفضّل" : "Scheduled")} value={fmt(order.scheduled_at,(isAr ? "ar" : "en")} />
           )}
           <Row icon={<Phone className="h-4 w-4" />} label={(isAr ? "الجوال" : "Phone")} value={phone} />
         </div>
@@ -373,7 +373,7 @@ function ServiceDetailsSection({
     return (
       <DetailsShell title={(isAr ? "تفاصيل طلب الصيدلية" : "Pharmacy details")} icon={<Package className="h-4 w-4" />}>
         <DetailGrid>
-          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={(isAr ? "طريقة الاستلام" : "Delivery")} value={delivery === "delivery" ? isAr ? "توصيل للمنزل" : "Home delivery") : isAr ? "استلام من الفرع" : "Pickup")} />}
+          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={(isAr ? "طريقة الاستلام" : "Delivery")} value={delivery === "delivery" ? (isAr ? "توصيل للمنزل" : "Home delivery") : (isAr ? "استلام من الفرع" : "Pickup")} />}
           {address && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "عنوان التوصيل" : "Address")} value={address} />}
           {district && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "الحي" : "District")} value={district} />}
         </DetailGrid>

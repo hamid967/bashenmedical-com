@@ -169,7 +169,7 @@ function PortalOverview() {
   const dir =(isAr ? "rtl" : "ltr");
 
   const firstName =
-    data.profile?.full_name?.trim().split(/\s+/)[0] ?? isAr ? "بك" : "there");
+    data.profile?.full_name?.trim().split(/\s+/)[0] ?? (isAr ? "بك" : "there");
 
   const hour = new Date().getHours();
   const greetKey: "hello_am" | "hello_pm" | "hello_night" =
@@ -321,7 +321,7 @@ function PortalOverview() {
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-[color:var(--mag-ink)] truncate">{l.title}</div>
                         <div className="text-xs text-[color:var(--mag-ink-3)] truncate mt-0.5">
-                          {l.test_type ?? isAr ? "تقرير عام" : "Report")} ·{" "}
+                          {l.test_type ?? (isAr ? "تقرير عام" : "Report")} ·{" "}
                           {l.report_date
                             ? new Date(l.report_date).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"),
                                 { day: "2-digit", month: "short", year: "numeric" },
@@ -484,7 +484,7 @@ function PortalOverview() {
                       </div>
                       <div className="text-[11px] text-[color:var(--mag-ink-3)] truncate mt-0.5">
                         {a.appointment_time?.slice(0, 5)} ·{" "}
-                        {a.reason ?? isAr ? "استشارة عامة" : "Consultation")}
+                        {a.reason ?? (isAr ? "استشارة عامة" : "Consultation")}
                       </div>
                     </div>
                     <ApptStatusChip status={a.status} lang={lang} />
@@ -644,7 +644,7 @@ function FeatureNextVisit({
                 :(isAr ? "طبيب مجمع باعشن" : "Baeshen doctor")}
             </h2>
             <p className="text-sm text-white/80 mt-1 line-clamp-2">
-              {appt.reason ?? isAr ? "استشارة طبية عامة" : "General consultation")}
+              {appt.reason ?? (isAr ? "استشارة طبية عامة" : "General consultation")}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/85">
               <span className="inline-flex items-center gap-1.5">
