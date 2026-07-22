@@ -29,7 +29,6 @@ import {
   Inbox,
   ArrowLeft,
   Sparkles,
-  Command as CommandIcon,
   Palette,
 } from "lucide-react";
 

@@ -33,7 +33,6 @@ import {
   ChevronsRight,
   ChevronsLeft,
   Bell,
-  Command as CommandIcon,
   FileText,
   Palette,
   Image as ImageIcon,
