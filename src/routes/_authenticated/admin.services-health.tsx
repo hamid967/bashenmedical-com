@@ -140,7 +140,7 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
 }
 
 function StatusBadge({ status }: { status: ServiceHealthStatus }) {
-  const map: Record<ServiceHealthStatus, { label: string; icon: JSX.Element; cls: string }> = {
+  const map: Record<ServiceHealthStatus, { label: string; icon: React.ReactNode; cls: string }> = {
     ok: { label: "سليم", icon: <CheckCircle2 className="h-3.5 w-3.5" />, cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" },
     degraded: { label: "متدهور", icon: <AlertTriangle className="h-3.5 w-3.5" />, cls: "bg-amber-500/10 text-amber-600 border-amber-500/30" },
     down: { label: "متعطّل", icon: <XCircle className="h-3.5 w-3.5" />, cls: "bg-destructive/10 text-destructive border-destructive/30" },
