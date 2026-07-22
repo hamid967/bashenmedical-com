@@ -8,7 +8,7 @@
  *
  * Config lives in `INTRO_CONFIG` below — swap to a DB-driven read if needed.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { X } from "lucide-react";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
@@ -84,6 +84,18 @@ export function JazanIntro() {
   const reduced = useReducedMotion();
   const [lang, setLang] = useState<"ar" | "en">("ar");
 
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const skipBtnRef = useRef<HTMLButtonElement | null>(null);
+  const prevFocusRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
+  const descId = useId();
+
+  const dismiss = () => {
+    markSeen();
+    setVisible(false);
+    window.setTimeout(() => setMounted(false), 500);
+  };
+
   useEffect(() => {
     setLang(readLang());
     if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) return;
@@ -113,11 +125,64 @@ export function JazanIntro() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, reduced, introCfg.durationMs]);
 
-  const dismiss = () => {
-    markSeen();
-    setVisible(false);
-    window.setTimeout(() => setMounted(false), 500);
-  };
+  // Focus management: save previous focus, focus skip button, restore on unmount.
+  // Escape closes; Tab is trapped inside the dialog.
+  useEffect(() => {
+    if (!mounted) return;
+    prevFocusRef.current = (document.activeElement as HTMLElement | null) ?? null;
+    const raf = requestAnimationFrame(() => skipBtnRef.current?.focus());
+
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    const getFocusable = (): HTMLElement[] => {
+      const root = dialogRef.current;
+      if (!root) return [];
+      return Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((el) => !el.hasAttribute("aria-hidden") && el.offsetParent !== null);
+    };
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        dismiss();
+        return;
+      }
+      if (e.key === "Tab") {
+        const focusables = getFocusable();
+        if (focusables.length === 0) {
+          e.preventDefault();
+          skipBtnRef.current?.focus();
+          return;
+        }
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement as HTMLElement | null;
+        if (e.shiftKey && (active === first || !dialogRef.current?.contains(active))) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && active === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", onKey);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+      const prev = prevFocusRef.current;
+      if (prev && typeof prev.focus === "function") {
+        try { prev.focus(); } catch { /* noop */ }
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
 
   if (!mounted) return null;
   const isAr = lang === "ar";
@@ -128,9 +193,11 @@ export function JazanIntro() {
 
   return (
     <div
+      ref={dialogRef}
       role="dialog"
       aria-modal="true"
-      aria-label={isAr ? "مقدمة مجمع باعشن الطبي" : "Baeshen Medical intro"}
+      aria-labelledby={titleId}
+      aria-describedby={descId}
       dir={isAr ? "rtl" : "ltr"}
       className="fixed inset-0 z-[100] transition-opacity duration-500"
       style={{
@@ -140,23 +207,30 @@ export function JazanIntro() {
         pointerEvents: visible ? "auto" : "none",
       }}
     >
+      <p id={descId} className="sr-only">
+        {isAr
+          ? "شاشة مقدمة قصيرة. اضغط زر تخطي أو مفتاح Escape للانتقال إلى المحتوى."
+          : "Short intro screen. Press the skip button or Escape to continue."}
+      </p>
+
       {/* faint Jazan pattern edges */}
-      <div className="absolute inset-x-0 top-0 h-16 opacity-40">
+      <div className="absolute inset-x-0 top-0 h-16 opacity-40" aria-hidden="true">
         <JazanPattern variant="standard" />
       </div>
-      <div className="absolute inset-x-0 bottom-0 h-16 opacity-40 rotate-180">
+      <div className="absolute inset-x-0 bottom-0 h-16 opacity-40 rotate-180" aria-hidden="true">
         <JazanPattern variant="standard" />
       </div>
 
-      {/* Skip button */}
+      {/* Skip button — 44×44 min target */}
       <button
+        ref={skipBtnRef}
         type="button"
         onClick={dismiss}
-        className="absolute top-4 end-4 inline-flex items-center gap-1.5 rounded-full border border-[var(--jazan-gold)]/60 bg-white/80 backdrop-blur px-3 py-1.5 text-xs font-semibold text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--jazan-teal)]"
+        className="absolute top-4 end-4 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[var(--jazan-gold)]/60 bg-white/80 backdrop-blur px-4 py-2 text-sm font-semibold text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
         aria-label={isAr ? "تخطي المقدمة" : "Skip intro"}
       >
-        {isAr ? "تخطي المقدمة" : "Skip intro"}
-        <X className="h-3.5 w-3.5" />
+        <span>{isAr ? "تخطي" : "Skip"}</span>
+        <X className="h-4 w-4" aria-hidden="true" />
       </button>
 
       {/* Reduced-motion static poster */}
@@ -166,11 +240,12 @@ export function JazanIntro() {
             <img
               src={logoSrc}
               alt=""
+              aria-hidden="true"
               width={96}
               height={96}
               className="mx-auto h-24 w-24 object-contain"
             />
-            <h2 className="mt-4 text-2xl md:text-3xl font-extrabold text-[var(--jazan-teal)]">
+            <h2 id={titleId} className="mt-4 text-2xl md:text-3xl font-extrabold text-[var(--jazan-teal)]">
               {text.brand}
             </h2>
             <p className="mt-2 text-sm md:text-base text-[var(--jazan-terracotta)] font-semibold">
@@ -179,7 +254,7 @@ export function JazanIntro() {
           </div>
         </div>
       ) : (
-        <CinematicStage phase={phase} text={text} logoSrc={logoSrc} />
+        <CinematicStage phase={phase} text={text} logoSrc={logoSrc} titleId={titleId} />
       )}
     </div>
   );
