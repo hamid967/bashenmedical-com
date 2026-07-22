@@ -140,6 +140,8 @@ function V3RolloutPage() {
 
         <PhaseRow data={data} />
 
+        {health ? <HealthPanel health={health} busy={busy} onRollback={doRollback} /> : null}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {(Object.keys(PILLAR_LABEL) as V3Pillar[]).map((p) => (
             <PillarCard
