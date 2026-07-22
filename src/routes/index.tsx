@@ -33,6 +33,7 @@ import { JazanDivider } from "@/components/jazan/JazanDivider";
 import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 import { DoctorAutocomplete } from "@/components/home/DoctorAutocomplete";
 import { NewDoctorsSection } from "@/components/home/NewDoctorsSection";
+import i18n from "i18next";
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE = "مجمع باعشن الطبي بصبيا جازان | Baeshen Medical";
@@ -209,7 +210,7 @@ function HomePage() {
   };
 
   return (
-    <div className="futuristic" dir={(isAr ? "rtl" : "ltr")}>
+    <div className="futuristic" dir={i18n.t("home:ltr")}>
       {/* ===== HERO ===== */}
       <section className="aurora-bg grid-overlay relative overflow-hidden">
         {/* Jazan heritage decorative layer — mountain terraces, coastal reflection, palm fronds */}
@@ -303,7 +304,7 @@ function HomePage() {
                 aria-hidden="true"
                 className="inline-block h-2 w-2 rotate-45 bg-[var(--jazan-terracotta)]"
               />
-              {(isAr ? "من قلب جازان · مجمع باعشن الطبي" : "From the heart of Jazan · Baeshen Medical")}
+              {i18n.t("home:from_the_heart_of_jazan_baeshen_medical")}
               <span
                 aria-hidden="true"
                 className="inline-block h-2 w-2 rotate-45 bg-[var(--jazan-gold)]"
@@ -311,38 +312,38 @@ function HomePage() {
             </div>
             <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-[1.1]">
               <span className="block text-[color:var(--fut-ink)]">
-                {(isAr ? "مجمع باعشن الطبي — رعاية استشارية" : "Baeshen Medical Complex — Specialist Care")}
+                {i18n.t("home:baeshen_medical_complex_specialist_care")}
               </span>
               <span className="block text-neon">
-                {(isAr ? "في صبيا، جازان" : "in Sabya, Jazan")}
+                {i18n.t("home:in_sabya_jazan")}
               </span>
             </h1>
             <p className="mt-5 text-base md:text-lg text-[color:var(--fut-ink-muted)] leading-8">
-              {(isAr ? "احجز مع استشاريين معتمدين، تابع تقاريرك، واطلب دواءك من صيدلياتنا — كلها من مكان واحد." : "Book certified consultants, track reports, and order medication — all in one place.")}
+              {i18n.t("home:book_certified_consultants_track_reports")}
             </p>
             {/* Jazan supporting phrase */}
             <p className="mt-3 text-sm md:text-base font-medium text-[var(--jazan-terracotta)]">
-              {(isAr ? "خبرة طبية حديثة بروح جازان الأصيلة" : "Modern medical expertise with the authentic spirit of Jazan")}
+              {i18n.t("home:modern_medical_expertise_with_the_authen")}
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link to="/book" className="btn-magnetic pulse-soft">
                 <CalendarCheck2 className="h-4 w-4" />
-                {(isAr ? "احجز موعدك الآن" : "Book an appointment")}
+                {i18n.t("home:book_an_appointment")}
               </Link>
               <Link
                 to="/doctors"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/70 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] backdrop-blur-md hover:bg-[var(--jazan-ivory)] transition"
               >
                 <Search className="h-4 w-4" />
-                {(isAr ? "تصفّح الأطباء" : "Browse doctors")}
+                {i18n.t("home:browse_doctors")}
               </Link>
               <Link
                 to="/portal/dashboard"
                 className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-teal)]/40 bg-[var(--jazan-teal)]/10 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] hover:bg-[var(--jazan-teal)]/15 transition"
               >
                 <ShieldCheck className="h-4 w-4" />
-                {(isAr ? "بوابة المراجعين" : "Patient portal")}
+                {i18n.t("home:patient_portal")}
               </Link>
             </div>
 
@@ -375,32 +376,32 @@ function HomePage() {
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
                 <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-                  {(isAr ? "حجز سريع" : "Quick booking")}
+                  {i18n.t("home:quick_booking")}
                 </div>
                 <h2 className="mt-2 text-2xl md:text-3xl font-bold text-[color:var(--fut-ink)]">
-                  {(isAr ? "ابدأ موعدك في 30 ثانية" : "Start your appointment in 30 seconds")}
+                  {i18n.t("home:start_your_appointment_in_30_seconds")}
                 </h2>
               </div>
               <Link
                 to="/book"
                 className="inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--neon-teal)] hover:opacity-80"
               >
-                {(isAr ? "نموذج الحجز الكامل" : "Full booking form")}
-                <ArrowLeft className={`h-4 w-4 ${(isAr ? "" : "rotate-180")}`} />
+                {i18n.t("home:full_booking_form")}
+                <ArrowLeft className={`h-4 w-4 ${i18n.t("home:rotate_180")}`} />
               </Link>
             </div>
 
             <form onSubmit={onQuickBook} className="grid gap-3 md:grid-cols-[1.2fr_1fr_1fr_auto]">
               <label className="block">
                 <span className="mb-1 block text-xs text-[color:var(--fut-ink-muted)]">
-                  {(isAr ? "التخصص" : "Specialty")}
+                  {i18n.t("home:specialty")}
                 </span>
                 <select
                   value={quickSpecialty}
                   onChange={(e) => setQuickSpecialty(e.target.value)}
                   className="input-glow w-full appearance-none"
                 >
-                  <option value="">{(isAr ? "اختر تخصصًا" : "Select a specialty")}</option>
+                  <option value="">{i18n.t("home:select_a_specialty")}</option>
                   {specialties?.map((s) => (
                     <option key={s.id} value={s.slug}>
                       {isAr ? s.name_ar : s.name_en}
@@ -410,19 +411,19 @@ function HomePage() {
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs text-[color:var(--fut-ink-muted)]">
-                  {(isAr ? "الاسم" : "Full name")}
+                  {i18n.t("home:full_name")}
                 </span>
                 <input
                   type="text"
                   value={quickName}
                   onChange={(e) => setQuickName(e.target.value)}
-                  placeholder={(isAr ? "الاسم الكامل" : "Your name")}
+                  placeholder={i18n.t("home:your_name")}
                   className="input-glow w-full"
                 />
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs text-[color:var(--fut-ink-muted)]">
-                  {(isAr ? "الجوال" : "Mobile")}
+                  {i18n.t("home:mobile")}
                 </span>
                 <input
                   type="tel"
@@ -436,13 +437,13 @@ function HomePage() {
               <div className="flex md:items-end">
                 <button type="submit" className="btn-magnetic w-full md:w-auto">
                   <CalendarCheck2 className="h-4 w-4" />
-                  {(isAr ? "متابعة" : "Continue")}
+                  {i18n.t("home:continue")}
                 </button>
               </div>
             </form>
 
             <p className="mt-3 text-[11px] text-[color:var(--fut-ink-dim)]">
-              {(isAr ? "بمتابعتك توافق على سياسة الخصوصية. لن يتم تأكيد الحجز حتى إكمال الخطوات في صفحة الحجز." : "By continuing you accept our privacy policy. Your slot is confirmed after the full booking flow.")}
+              {i18n.t("home:by_continuing_you_accept_our_privacy_pol")}
             </p>
           </div>
         </div>
@@ -453,20 +454,20 @@ function HomePage() {
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
-              <JazanSectionLabel>{(isAr ? "التخصصات" : "Specialties")}</JazanSectionLabel>
+              <JazanSectionLabel>{i18n.t("home:specialties")}</JazanSectionLabel>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-                {t("specialties_title")}
+                {i18n.t("home:specialties_title")}
               </h2>
               <p className="mt-2 max-w-2xl text-[color:var(--fut-ink-muted)]">
-                {t("specialties_sub")}
+                {i18n.t("home:specialties_sub")}
               </p>
             </div>
             <Link
               to="/specialties"
               className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--neon-teal)] hover:opacity-80"
             >
-              {t("all_specialties")}
-              <ArrowLeft className={`h-4 w-4 ${(isAr ? "" : "rotate-180")}`} />
+              {i18n.t("home:all_specialties")}
+              <ArrowLeft className={`h-4 w-4 ${i18n.t("home:rotate_180")}`} />
             </Link>
           </div>
 
@@ -476,10 +477,10 @@ function HomePage() {
             skeleton={<SpecialtiesSkeleton count={8} />}
             errorFallback={
               <SectionError
-                title={(isAr ? "تعذّر تحميل التخصصات" : "Could not load specialties")}
-                hint={(isAr ? "حدث خطأ أثناء الاتصال بالخادم. تحقق من اتصالك ثم أعد المحاولة." : "A network error occurred. Check your connection and try again.")
+                title={i18n.t("home:could_not_load_specialties")}
+                hint={i18n.t("home:a_network_error_occurred_check_your_conn")
                 }
-                retryLabel={(isAr ? "إعادة المحاولة" : "Try again")}
+                retryLabel={i18n.t("home:try_again")}
                 onRetry={() => refetchSpecialties()}
               />
             }
@@ -518,9 +519,9 @@ function HomePage() {
 
         <div className="container-app">
           <div className="mb-10 max-w-2xl">
-            <JazanSectionLabel>{(isAr ? "لماذا باعشن؟" : "Why Baeshen")}</JazanSectionLabel>
+            <JazanSectionLabel>{i18n.t("home:why_baeshen")}</JazanSectionLabel>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-              {(isAr ? "رعاية موثوقة · تجربة كونسيرج" : "Trusted care · concierge experience")}
+              {i18n.t("home:trusted_care_concierge_experience")}
             </h2>
           </div>
           <StaggerReveal className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -547,20 +548,20 @@ function HomePage() {
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
-              <JazanSectionLabel>{(isAr ? "الفريق الطبي" : "Medical team")}</JazanSectionLabel>
+              <JazanSectionLabel>{i18n.t("home:medical_team")}</JazanSectionLabel>
               <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-                {t("doctors_title")}
+                {i18n.t("home:doctors_title")}
               </h2>
               <p className="mt-2 max-w-2xl text-[color:var(--fut-ink-muted)]">
-                {t("doctors_sub")}
+                {i18n.t("home:doctors_sub")}
               </p>
             </div>
             <Link
               to="/doctors"
               className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--neon-teal)] hover:opacity-80"
             >
-              {t("nav_doctors")}
-              <ArrowLeft className={`h-4 w-4 ${(isAr ? "" : "rotate-180")}`} />
+              {i18n.t("home:nav_doctors")}
+              <ArrowLeft className={`h-4 w-4 ${i18n.t("home:rotate_180")}`} />
             </Link>
           </div>
 
@@ -570,10 +571,10 @@ function HomePage() {
             skeleton={<DoctorsSkeleton count={4} />}
             errorFallback={
               <SectionError
-                title={(isAr ? "تعذّر تحميل الأطباء" : "Could not load doctors")}
-                hint={(isAr ? "حدث خطأ أثناء الاتصال بالخادم. تحقق من اتصالك ثم أعد المحاولة." : "A network error occurred. Check your connection and try again.")
+                title={i18n.t("home:could_not_load_doctors")}
+                hint={i18n.t("home:a_network_error_occurred_check_your_conn")
                 }
-                retryLabel={(isAr ? "إعادة المحاولة" : "Try again")}
+                retryLabel={i18n.t("home:try_again")}
                 onRetry={() => refetchDoctors()}
               />
             }
@@ -601,7 +602,7 @@ function HomePage() {
                     search={{ doctor: d.id }}
                     className="btn-magnetic mt-4 w-full !py-2 text-xs"
                   >
-                    {t("book_with_doctor")}
+                    {i18n.t("home:book_with_doctor")}
                   </Link>
                 </RevealItem>
               ))}
@@ -618,9 +619,9 @@ function HomePage() {
         <div className="container-app"><JazanDivider variant="subtle" className="mb-12" /></div>
         <div className="container-app grid items-center gap-8 md:grid-cols-2">
           <div>
-            <JazanSectionLabel>{(isAr ? "زُرنا" : "Visit us")}</JazanSectionLabel>
+            <JazanSectionLabel>{i18n.t("home:visit_us")}</JazanSectionLabel>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-              {(isAr ? "في قلب صبيا" : "In the heart of Sabya")}
+              {i18n.t("home:in_the_heart_of_sabya")}
             </h2>
             <p className="mt-3 text-[color:var(--fut-ink-muted)]">
               {isAr ? SITE.addressAr : SITE.addressEn}
@@ -636,14 +637,14 @@ function HomePage() {
                 className="btn-magnetic"
               >
                 <MapPin className="h-4 w-4" />
-                {(isAr ? "افتح في الخرائط" : "Open in Maps")}
+                {i18n.t("home:open_in_maps")}
               </a>
               <Link
                 to="/contact"
                 className="neon-glow-hover inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[color:var(--fut-ink)]"
               >
                 <Phone className="h-4 w-4" />
-                {(isAr ? "تواصل معنا" : "Contact us")}
+                {i18n.t("home:contact_us")}
               </Link>
             </div>
           </div>
@@ -668,22 +669,22 @@ function HomePage() {
             />
             <div className="relative">
               <h2 className="text-2xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-                {(isAr ? "جاهز لتجربة أفضل لرعايتك؟" : "Ready for a better care experience?")}
+                {i18n.t("home:ready_for_a_better_care_experience")}
               </h2>
               <p className="mx-auto mt-3 max-w-xl text-[color:var(--fut-ink-muted)]">
-                {(isAr ? "احجز الآن أو اترك رقمك ونتصل بك خلال دقائق." : "Book now or leave your number — we'll call you within minutes.")}
+                {i18n.t("home:book_now_or_leave_your_number_we_ll_call")}
               </p>
               <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
                 <Link to="/book" className="btn-magnetic">
                   <CalendarCheck2 className="h-4 w-4" />
-                  {(isAr ? "احجز الآن" : "Book now")}
+                  {i18n.t("home:book_now")}
                 </Link>
                 <Link
                   to="/contact"
                   className="neon-glow-purple inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[color:var(--fut-ink)]"
                 >
                   <Phone className="h-4 w-4" />
-                  {(isAr ? "اتصل بنا" : "Call us")}
+                  {i18n.t("home:call_us")}
                 </Link>
               </div>
             </div>

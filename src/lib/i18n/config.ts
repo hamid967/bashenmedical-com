@@ -17,6 +17,18 @@ import arHeader from "@/locales/ar/header.json";
 import enHeader from "@/locales/en/header.json";
 import arDoctorAutocomplete from "@/locales/ar/doctorAutocomplete.json";
 import enDoctorAutocomplete from "@/locales/en/doctorAutocomplete.json";
+import arHome from "@/locales/ar/home.json";
+import enHome from "@/locales/en/home.json";
+import arMyOrders from "@/locales/ar/myOrders.json";
+import enMyOrders from "@/locales/en/myOrders.json";
+import arOrdersDetail from "@/locales/ar/ordersDetail.json";
+import enOrdersDetail from "@/locales/en/ordersDetail.json";
+import arPortalHome from "@/locales/ar/portalHome.json";
+import enPortalHome from "@/locales/en/portalHome.json";
+import arPortalFamily from "@/locales/ar/portalFamily.json";
+import enPortalFamily from "@/locales/en/portalFamily.json";
+import arPortalUsage from "@/locales/ar/portalUsage.json";
+import enPortalUsage from "@/locales/en/portalUsage.json";
 
 // Primary UI languages — surfaced in the language switcher and used across
 // the app to key layout/direction. Adding a code here forces every
@@ -40,6 +52,12 @@ export const resources = {
     footer: arFooter,
     header: arHeader,
     doctorAutocomplete: arDoctorAutocomplete,
+    home: arHome,
+    myOrders: arMyOrders,
+    ordersDetail: arOrdersDetail,
+    portalHome: arPortalHome,
+    portalFamily: arPortalFamily,
+    portalUsage: arPortalUsage,
   },
   en: {
     common: enCommon,
@@ -48,6 +66,12 @@ export const resources = {
     footer: enFooter,
     header: enHeader,
     doctorAutocomplete: enDoctorAutocomplete,
+    home: enHome,
+    myOrders: enMyOrders,
+    ordersDetail: enOrdersDetail,
+    portalHome: enPortalHome,
+    portalFamily: enPortalFamily,
+    portalUsage: enPortalUsage,
   },
   ur: { common: urCommon, booking: urBooking, programs: urPrograms },
 } as const;
