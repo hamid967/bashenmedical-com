@@ -59,7 +59,7 @@ function InventoryPage() {
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <Link to="/command-center" className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs hover:bg-accent">
+            <Link to="/admin" className="inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs hover:bg-accent">
               <ArrowRight className="h-3.5 w-3.5" /> مركز التحكم
             </Link>
             <div>

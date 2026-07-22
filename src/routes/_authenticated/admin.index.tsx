@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { getAdminStats, getMyRoles, getAdminTrends } from "@/lib/admin.functions";
 import { KpiGrid } from "@/components/admin/v2/KpiGrid";
-import type { AdminRole } from "@/components/admin/AdminShell";
+import type { AdminRole } from "@/components/admin/types";
 import {
   CalendarCheck,
   Clock,
@@ -29,7 +29,6 @@ import {
   Inbox,
   ArrowLeft,
   Sparkles,
-  Command as CommandIcon,
   Palette,
 } from "lucide-react";
 
@@ -69,8 +68,8 @@ type QuickLink = {
 };
 
 const PRIMARY_LINKS: QuickLink[] = [
-  { to: "/command-center", label: "مركز التحكم الذكي", icon: CommandIcon, roles: ["admin", "super_admin"] },
   { to: "/appointments-queue", label: "طابور المواعيد", icon: CalendarCheck, roles: ["admin", "reception", "doctor"] },
+
   { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
   { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
   { to: "/availability-management", label: "التوفر", icon: ClipboardList, roles: ["admin", "hr"] },

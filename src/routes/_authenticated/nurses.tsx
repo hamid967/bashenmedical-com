@@ -118,7 +118,7 @@ function NursesPage() {
               ))}
             </select>
             <Link
-              to="/command-center"
+              to="/admin"
               className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
             >
               <ArrowRight className="h-4 w-4" /> لوحة التحكم

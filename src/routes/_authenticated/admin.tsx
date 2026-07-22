@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { queryOptions } from "@tanstack/react-query";
-import type { AdminRole } from "@/components/admin/AdminShell";
+import type { AdminRole } from "@/components/admin/types";
 import { getMyRoles, assertAdminAccess } from "@/lib/admin.functions";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 
