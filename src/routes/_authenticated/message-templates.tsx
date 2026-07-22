@@ -29,10 +29,7 @@ import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 export const Route = createFileRoute("/_authenticated/message-templates")({
   head: () => ({
-    meta: [
-      { title: "قوالب الرسائل | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "قوالب الرسائل | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <RequirePermission anyOf="notifications.manage">
@@ -48,11 +45,41 @@ const CHANNELS: Array<{
   color: string;
   hint: string;
 }> = [
-  { value: "in_app", label: "داخل التطبيق", Icon: Bell, color: "bg-slate-100 text-slate-800", hint: "إشعار داخل جرس التطبيق." },
-  { value: "web_push", label: "Push", Icon: Smartphone, color: "bg-teal-100 text-teal-900", hint: "إشعار متصفح/جوال. حافظ على نص قصير." },
-  { value: "sms", label: "SMS", Icon: MessageSquare, color: "bg-teal-100 text-teal-900", hint: "رسالة نصية ≤ 160 حرف موصى بها." },
-  { value: "whatsapp", label: "WhatsApp", Icon: MessageCircle, color: "bg-emerald-100 text-emerald-900", hint: "يدعم أسطر متعددة ورموز." },
-  { value: "email", label: "Email", Icon: Mail, color: "bg-teal-100 text-teal-900", hint: "استخدم عنوانًا واضحًا." },
+  {
+    value: "in_app",
+    label: "داخل التطبيق",
+    Icon: Bell,
+    color: "bg-slate-100 text-slate-800",
+    hint: "إشعار داخل جرس التطبيق.",
+  },
+  {
+    value: "web_push",
+    label: "Push",
+    Icon: Smartphone,
+    color: "bg-teal-100 text-teal-900",
+    hint: "إشعار متصفح/جوال. حافظ على نص قصير.",
+  },
+  {
+    value: "sms",
+    label: "SMS",
+    Icon: MessageSquare,
+    color: "bg-teal-100 text-teal-900",
+    hint: "رسالة نصية ≤ 160 حرف موصى بها.",
+  },
+  {
+    value: "whatsapp",
+    label: "WhatsApp",
+    Icon: MessageCircle,
+    color: "bg-emerald-100 text-emerald-900",
+    hint: "يدعم أسطر متعددة ورموز.",
+  },
+  {
+    value: "email",
+    label: "Email",
+    Icon: Mail,
+    color: "bg-teal-100 text-teal-900",
+    hint: "استخدم عنوانًا واضحًا.",
+  },
 ];
 
 const CHANNEL_META: Record<
@@ -146,8 +173,7 @@ function MessageTemplatesPage() {
       e.template_key = "مفتاح غير صالح (a-z, 0-9, _)";
     if (v.body.trim().length < 1) e.body = "النص مطلوب";
     if (v.body.length > 4000) e.body = "النص طويل جدًا (الحد 4000)";
-    if (v.channel === "sms" && v.body.length > 320)
-      e.body = "رسائل SMS يفضل ألا تتجاوز 320 حرفًا";
+    if (v.channel === "sms" && v.body.length > 320) e.body = "رسائل SMS يفضل ألا تتجاوز 320 حرفًا";
     return e;
   }
 
@@ -229,7 +255,9 @@ function MessageTemplatesPage() {
                 <button
                   onClick={() => setFilterChannel(null)}
                   className={`rounded-full px-3 py-1 text-xs ${
-                    filterChannel === null ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+                    filterChannel === null
+                      ? "bg-slate-900 text-white"
+                      : "bg-slate-100 text-slate-700"
                   }`}
                 >
                   الكل
@@ -239,7 +267,9 @@ function MessageTemplatesPage() {
                     key={c.value}
                     onClick={() => setFilterChannel(c.value)}
                     className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs ${
-                      filterChannel === c.value ? "bg-slate-900 text-white" : "bg-slate-100 text-slate-700"
+                      filterChannel === c.value
+                        ? "bg-slate-900 text-white"
+                        : "bg-slate-100 text-slate-700"
                     }`}
                   >
                     <c.Icon className="h-3.5 w-3.5" /> {c.label}
@@ -328,7 +358,10 @@ function MessageTemplatesPage() {
                   <input
                     value={form.template_key}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, template_key: e.target.value.replace(/[^a-z0-9_]/gi, "_") }))
+                      setForm((f) => ({
+                        ...f,
+                        template_key: e.target.value.replace(/[^a-z0-9_]/gi, "_"),
+                      }))
                     }
                     placeholder="reminder_24h"
                     className="w-full rounded-md border px-3 py-2 font-mono text-sm ltr:text-left"
@@ -405,7 +438,9 @@ function MessageTemplatesPage() {
                   value={form.body}
                   onChange={(e) => setForm((f) => ({ ...f, body: e.target.value }))}
                   rows={7}
-                  placeholder={"مرحبًا {{patient_name}}، تذكير بموعدك مع {{doctor_name}} في {{branch_name}} يوم {{appointment_date}} الساعة {{appointment_time}}."}
+                  placeholder={
+                    "مرحبًا {{patient_name}}، تذكير بموعدك مع {{doctor_name}} في {{branch_name}} يوم {{appointment_date}} الساعة {{appointment_time}}."
+                  }
                   className="w-full rounded-md border p-3 text-sm leading-6"
                   maxLength={4000}
                 />
@@ -502,12 +537,19 @@ function MessageTemplatesPage() {
               <PreviewCard channel={form.channel} title={previewTitle} body={previewBody} />
 
               <details className="mt-3 rounded-md border bg-slate-50 p-2 text-xs">
-                <summary className="cursor-pointer text-slate-700">القيم التجريبية المستخدمة في المعاينة</summary>
+                <summary className="cursor-pointer text-slate-700">
+                  القيم التجريبية المستخدمة في المعاينة
+                </summary>
                 <div className="mt-2 grid grid-cols-1 gap-1 md:grid-cols-2">
                   {TEMPLATE_VARIABLES.map((v) => (
-                    <div key={v.key} className="flex items-center justify-between rounded border bg-white px-2 py-1">
+                    <div
+                      key={v.key}
+                      className="flex items-center justify-between rounded border bg-white px-2 py-1"
+                    >
                       <span className="text-slate-700">{v.label}</span>
-                      <code className="text-slate-500" dir="ltr">{v.sample}</code>
+                      <code className="text-slate-500" dir="ltr">
+                        {v.sample}
+                      </code>
                     </div>
                   ))}
                 </div>
@@ -532,12 +574,12 @@ function PreviewCard({
   const displayBody = body || "…";
   if (channel === "sms" || channel === "whatsapp") {
     const bubble =
-      channel === "whatsapp"
-        ? "bg-emerald-50 border-emerald-200"
-        : "bg-teal-50 border-teal-200";
+      channel === "whatsapp" ? "bg-emerald-50 border-emerald-200" : "bg-teal-50 border-teal-200";
     return (
       <div className="rounded-2xl border bg-slate-50 p-4">
-        <div className={`max-w-md whitespace-pre-wrap rounded-2xl border p-3 text-sm shadow-sm ${bubble}`}>
+        <div
+          className={`max-w-md whitespace-pre-wrap rounded-2xl border p-3 text-sm shadow-sm ${bubble}`}
+        >
           {displayBody}
         </div>
         <div className="mt-2 text-[11px] text-muted-foreground">

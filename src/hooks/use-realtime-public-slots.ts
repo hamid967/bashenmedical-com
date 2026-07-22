@@ -29,9 +29,7 @@ export function useRealtimePublicSlots(opts?: { doctorId?: string; branchId?: st
       });
     };
 
-    const channelName = doctorId
-      ? `public-slots:doctor:${doctorId}`
-      : "public-slots:global";
+    const channelName = doctorId ? `public-slots:doctor:${doctorId}` : "public-slots:global";
 
     // Server-side filter when we know the doctor to reduce noise.
     const doctorFilter = doctorId ? { filter: `doctor_id=eq.${doctorId}` } : {};

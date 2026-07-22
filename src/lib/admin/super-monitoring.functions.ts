@@ -169,16 +169,48 @@ export const getSystemHealth = createServerFn({ method: "GET" })
       { count: inq24 },
       { count: appt24 },
     ] = await Promise.all([
-      supabase.from("notifications").select("id", { count: "exact", head: true }).gte("created_at", since24),
-      supabase.from("notifications").select("id", { count: "exact", head: true }).gte("created_at", since24).eq("send_status", "sent"),
-      supabase.from("notifications").select("id", { count: "exact", head: true }).gte("created_at", since24).eq("send_status", "skipped"),
-      supabase.from("service_inquiry_attachments").select("id", { count: "exact", head: true }).eq("scan_status", "pending"),
-      supabase.from("service_inquiry_attachments").select("id", { count: "exact", head: true }).eq("scan_status", "infected"),
-      supabase.from("service_inquiry_attachments").select("id", { count: "exact", head: true }).eq("scan_status", "error"),
-      supabase.from("audit_logs").select("id", { count: "exact", head: true }).gte("created_at", since24),
-      supabase.from("security_audit_log").select("id", { count: "exact", head: true }).gte("created_at", since24),
-      supabase.from("service_inquiries").select("id", { count: "exact", head: true }).gte("created_at", since24),
-      supabase.from("appointments").select("id", { count: "exact", head: true }).gte("created_at", since24),
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24),
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24)
+        .eq("send_status", "sent"),
+      supabase
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24)
+        .eq("send_status", "skipped"),
+      supabase
+        .from("service_inquiry_attachments")
+        .select("id", { count: "exact", head: true })
+        .eq("scan_status", "pending"),
+      supabase
+        .from("service_inquiry_attachments")
+        .select("id", { count: "exact", head: true })
+        .eq("scan_status", "infected"),
+      supabase
+        .from("service_inquiry_attachments")
+        .select("id", { count: "exact", head: true })
+        .eq("scan_status", "error"),
+      supabase
+        .from("audit_logs")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24),
+      supabase
+        .from("security_audit_log")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24),
+      supabase
+        .from("service_inquiries")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24),
+      supabase
+        .from("appointments")
+        .select("id", { count: "exact", head: true })
+        .gte("created_at", since24),
     ]);
 
     const total = notif24 ?? 0;
@@ -233,7 +265,7 @@ export const listFeatureFlags = createServerFn({ method: "GET" })
       .maybeSingle();
     if (error) throw new Error(error.message);
 
-    const payload = ((data?.value ?? {}) as FlagsPayload);
+    const payload = (data?.value ?? {}) as FlagsPayload;
     return Object.entries(payload)
       .map(([key, v]) => ({
         key,
@@ -246,7 +278,12 @@ export const listFeatureFlags = createServerFn({ method: "GET" })
   });
 
 const SetFlagSchema = z.object({
-  key: z.string().trim().min(2).max(64).regex(/^[a-z0-9_.]+$/i, "المفتاح يقبل أحرفًا وأرقامًا و _ . فقط"),
+  key: z
+    .string()
+    .trim()
+    .min(2)
+    .max(64)
+    .regex(/^[a-z0-9_.]+$/i, "المفتاح يقبل أحرفًا وأرقامًا و _ . فقط"),
   enabled: z.boolean(),
   description: z.string().trim().max(240).optional().nullable(),
 });
@@ -265,7 +302,7 @@ export const setFeatureFlag = createServerFn({ method: "POST" })
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
 
-    const current = ((existing?.value ?? {}) as FlagsPayload);
+    const current = (existing?.value ?? {}) as FlagsPayload;
     const next: FlagsPayload = {
       ...current,
       [data.key]: {
@@ -304,7 +341,7 @@ export const deleteFeatureFlag = createServerFn({ method: "POST" })
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
 
-    const current = ((existing?.value ?? {}) as FlagsPayload);
+    const current = (existing?.value ?? {}) as FlagsPayload;
     if (!(data.key in current)) return { ok: true as const };
     delete current[data.key];
 

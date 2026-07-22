@@ -47,9 +47,7 @@ export function formatSignedUrlValidity(
 ): string {
   if (!Number.isFinite(ttlSeconds) || ttlSeconds <= 0) return "";
   if (ttlSeconds < 60) {
-    return lang === "en"
-      ? `Valid for ${ttlSeconds} seconds`
-      : `صالح لمدة ${ttlSeconds} ثانية`;
+    return lang === "en" ? `Valid for ${ttlSeconds} seconds` : `صالح لمدة ${ttlSeconds} ثانية`;
   }
   const minutes = Math.round(ttlSeconds / 60);
   return lang === "en"
@@ -71,10 +69,7 @@ export function formatCountdown(secondsRemaining: number): string {
 /**
  * Bilingual countdown label: "متبقّي MM:SS" / "MM:SS remaining".
  */
-export function formatCountdownLabel(
-  secondsRemaining: number,
-  lang: DownloadLang = "ar",
-): string {
+export function formatCountdownLabel(secondsRemaining: number, lang: DownloadLang = "ar"): string {
   const mmss = formatCountdown(secondsRemaining);
   return lang === "en" ? `${mmss} remaining` : `متبقّي ${mmss}`;
 }
@@ -130,11 +125,7 @@ export interface HeadCheckState {
 
 export interface HeadCheckDecision {
   shouldCheck: boolean;
-  reason:
-    | "first-attempt"
-    | "recent-failure"
-    | "below-success-threshold"
-    | "trusted-bucket";
+  reason: "first-attempt" | "recent-failure" | "below-success-threshold" | "trusted-bucket";
 }
 
 export function shouldPerformHeadCheck(

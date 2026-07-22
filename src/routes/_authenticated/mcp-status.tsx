@@ -8,10 +8,7 @@ import { runMcpTool, type RunToolResult } from "@/lib/mcp-run.functions";
 
 export const Route = createFileRoute("/_authenticated/mcp-status")({
   head: () => ({
-    meta: [
-      { title: "حالة MCP | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "حالة MCP | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: McpStatusPage,
 });
@@ -296,7 +293,8 @@ function TryToolSection({ tools }: { tools: any[] }) {
       <div className="mb-3">
         <h2 className="text-lg font-semibold">تجربة أداة يدويًا</h2>
         <p className="mt-0.5 text-xs text-muted-foreground">
-          يستدعي الأداة تحت هويّتك (RLS مُطبَّق) كما لو كانت من ChatGPT. يُسجَّل الاستدعاء في سجل الأدوات أعلاه.
+          يستدعي الأداة تحت هويّتك (RLS مُطبَّق) كما لو كانت من ChatGPT. يُسجَّل الاستدعاء في سجل
+          الأدوات أعلاه.
         </p>
       </div>
 

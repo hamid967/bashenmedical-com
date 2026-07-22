@@ -5,7 +5,16 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { listAuditLog, listAuditActions } from "@/lib/rbac.functions";
 import { getMyRoles } from "@/lib/admin.functions";
-import { ShieldAlert, ArrowRight, RefreshCw, Download, X, Copy, ChevronDown, ChevronLeft } from "lucide-react";
+import {
+  ShieldAlert,
+  ArrowRight,
+  RefreshCw,
+  Download,
+  X,
+  Copy,
+  ChevronDown,
+  ChevronLeft,
+} from "lucide-react";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 // Fields we never expose in exports even if a legacy row still has them.
@@ -133,10 +142,7 @@ type AuditSearch = {
 
 export const Route = createFileRoute("/_authenticated/audit-log")({
   head: () => ({
-    meta: [
-      { title: "سجل التدقيق | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "سجل التدقيق | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   validateSearch: (raw: Record<string, unknown>): AuditSearch => ({
     action: typeof raw.action === "string" ? raw.action : undefined,
@@ -195,8 +201,6 @@ function AuditLogPage() {
     const found = (log.data as any[]).find((r) => r.id === highlightId);
     if (found) setSelected(found);
   }, [highlightId, log.data]);
-
-
 
   if (myRoles.isLoading) {
     return (
@@ -358,7 +362,10 @@ function AuditLogPage() {
                 <td className="max-w-md px-3 py-2 text-xs">
                   {r.reason && <div className="mb-1">{r.reason}</div>}
                   {r.metadata && (
-                    <pre dir="ltr" className="max-h-24 overflow-auto rounded bg-muted/50 p-1.5 text-[10px] leading-tight">
+                    <pre
+                      dir="ltr"
+                      className="max-h-24 overflow-auto rounded bg-muted/50 p-1.5 text-[10px] leading-tight"
+                    >
                       {JSON.stringify(r.metadata, null, 2)}
                     </pre>
                   )}
@@ -366,7 +373,11 @@ function AuditLogPage() {
                 <td className="whitespace-nowrap px-3 py-2 font-mono text-xs" dir="ltr">
                   {r.ip_address || "—"}
                 </td>
-                <td className="max-w-xs truncate px-3 py-2 text-xs" dir="ltr" title={r.user_agent ?? ""}>
+                <td
+                  className="max-w-xs truncate px-3 py-2 text-xs"
+                  dir="ltr"
+                  title={r.user_agent ?? ""}
+                >
                   {r.user_agent || "—"}
                 </td>
               </tr>
@@ -508,11 +519,7 @@ function JsonBlock({
           onClick={() => setOpen((v) => !v)}
           className="flex flex-1 items-center gap-2 text-right text-sm font-semibold"
         >
-          {open ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronLeft className="h-4 w-4" />
-          )}
+          {open ? <ChevronDown className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           <span>{title}</span>
         </button>
         <button
@@ -561,24 +568,12 @@ function MetadataBlocks({ metadata }: { metadata: any }) {
   return (
     <>
       <div className="text-xs font-medium text-muted-foreground">التفاصيل (Metadata)</div>
-      {changes && (
-        <JsonBlock title="الحقول المتغيّرة (Diff)" value={changes} tone="diff" />
-      )}
+      {changes && <JsonBlock title="الحقول المتغيّرة (Diff)" value={changes} tone="diff" />}
       {beforeVal && (
-        <JsonBlock
-          title="قبل (Before)"
-          value={beforeVal}
-          tone="before"
-          defaultOpen={!changes}
-        />
+        <JsonBlock title="قبل (Before)" value={beforeVal} tone="before" defaultOpen={!changes} />
       )}
       {afterVal && (
-        <JsonBlock
-          title="بعد (After)"
-          value={afterVal}
-          tone="after"
-          defaultOpen={!changes}
-        />
+        <JsonBlock title="بعد (After)" value={afterVal} tone="after" defaultOpen={!changes} />
       )}
       {hasRest && <JsonBlock title="بيانات إضافية" value={rest} defaultOpen={false} />}
       {!changes && !beforeVal && !afterVal && !hasRest && (

@@ -226,10 +226,18 @@ function LookupPage() {
     }
   }
 
-  const st = invoice ? STATUS[invoice.status] ?? { label: invoice.status, color: "bg-gray-100 text-gray-700 border-gray-200" } : null;
+  const st = invoice
+    ? (STATUS[invoice.status] ?? {
+        label: invoice.status,
+        color: "bg-gray-100 text-gray-700 border-gray-200",
+      })
+    : null;
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gradient-to-b from-background via-background to-muted/40">
+    <div
+      dir="rtl"
+      className="min-h-screen bg-gradient-to-b from-background via-background to-muted/40"
+    >
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         <header className="mb-8">
           <Link

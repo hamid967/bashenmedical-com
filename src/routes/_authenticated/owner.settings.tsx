@@ -27,8 +27,14 @@ type Form = {
 };
 
 const empty: Form = {
-  name_ar: "", name_en: "", phone: "", mobile: "", whatsapp: "",
-  email: "", address_ar: "", address_en: "",
+  name_ar: "",
+  name_en: "",
+  phone: "",
+  mobile: "",
+  whatsapp: "",
+  email: "",
+  address_ar: "",
+  address_en: "",
 };
 
 function SettingsPage() {
@@ -85,12 +91,23 @@ function SettingsPage() {
         <p className="text-sm text-slate-600 mt-1">اسم المجمع وأرقام التواصل والعنوان.</p>
       </div>
 
-      {q.isLoading && <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>}
-      {q.error && <div className="p-4 text-sm text-red-600 bg-red-50 rounded">{(q.error as Error).message}</div>}
+      {q.isLoading && (
+        <div className="p-8 flex justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        </div>
+      )}
+      {q.error && (
+        <div className="p-4 text-sm text-red-600 bg-red-50 rounded">
+          {(q.error as Error).message}
+        </div>
+      )}
 
       {q.data && (
         <form
-          onSubmit={(e) => { e.preventDefault(); m.mutate(); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            m.mutate();
+          }}
           className="bg-white rounded-xl border border-slate-200 p-6 space-y-4"
         >
           <div className="grid gap-4 md:grid-cols-2">
@@ -110,7 +127,11 @@ function SettingsPage() {
               disabled={m.isPending}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold disabled:opacity-50"
             >
-              {m.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {m.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
               حفظ التغييرات
             </button>
           </div>

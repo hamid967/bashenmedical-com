@@ -54,7 +54,9 @@ export const listHighRiskAppointments = createServerFn({ method: "GET" })
 
     let q = context.supabase
       .from("appointments")
-      .select("id, appointment_date, appointment_time, status, no_show_risk, doctor_id, branch_id, patient_name, patient_phone")
+      .select(
+        "id, appointment_date, appointment_time, status, no_show_risk, doctor_id, branch_id, patient_name, patient_phone",
+      )
       .gte("appointment_date", data.from)
       .lte("appointment_date", data.to)
       .gte("no_show_risk", data.minRisk)
@@ -77,7 +79,9 @@ export const listHighRiskAppointments = createServerFn({ method: "GET" })
     const docMap = new Map<string, string>();
     if (docIds.length) {
       const { data: docs } = await context.supabase
-        .from("doctors").select("id, name_ar").in("id", docIds);
+        .from("doctors")
+        .select("id, name_ar")
+        .in("id", docIds);
       for (const d of docs ?? []) docMap.set(d.id, d.name_ar);
     }
 
@@ -103,7 +107,7 @@ export const listHighRiskAppointments = createServerFn({ method: "GET" })
 
     return list.map((r) => ({
       ...r,
-      doctor_name_ar: r.doctor_id ? docMap.get(r.doctor_id) ?? null : null,
+      doctor_name_ar: r.doctor_id ? (docMap.get(r.doctor_id) ?? null) : null,
       audit: auditMap.get(r.id) ?? [],
     }));
   });

@@ -4,9 +4,18 @@ import { PortalCard } from "./PortalCard";
 type Tone = "primary" | "success" | "warning" | "error" | "muted";
 
 const toneStyle: Record<Tone, { icon: string; ring: string }> = {
-  primary: { icon: "text-[color:var(--portal-primary)]", ring: "bg-[color:var(--portal-primary-50)]" },
-  success: { icon: "text-[color:var(--portal-success)]", ring: "bg-[color:var(--portal-success-50)]" },
-  warning: { icon: "text-[color:var(--portal-warning)]", ring: "bg-[color:var(--portal-warning-50)]" },
+  primary: {
+    icon: "text-[color:var(--portal-primary)]",
+    ring: "bg-[color:var(--portal-primary-50)]",
+  },
+  success: {
+    icon: "text-[color:var(--portal-success)]",
+    ring: "bg-[color:var(--portal-success-50)]",
+  },
+  warning: {
+    icon: "text-[color:var(--portal-warning)]",
+    ring: "bg-[color:var(--portal-warning-50)]",
+  },
   error: { icon: "text-[color:var(--portal-error)]", ring: "bg-[color:var(--portal-error-50)]" },
   muted: { icon: "text-[color:var(--portal-ink-2)]", ring: "bg-[color:var(--portal-surface-3)]" },
 };
@@ -59,7 +68,9 @@ export function PortalStatCard({
           )}
         </div>
         {icon && (
-          <div className={`shrink-0 h-11 w-11 rounded-2xl grid place-items-center ${s.ring} ${s.icon}`}>
+          <div
+            className={`shrink-0 h-11 w-11 rounded-2xl grid place-items-center ${s.ring} ${s.icon}`}
+          >
             {icon}
           </div>
         )}

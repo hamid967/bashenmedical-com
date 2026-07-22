@@ -42,9 +42,7 @@ const SYSTEM_PROMPT = `أنت "مساعد باعشن" لمريض مسجّل ال
 - الوصفات: /portal/prescriptions — الفواتير: /portal/invoices — التأمين: /portal/insurance
 - الطلبات: /portal/orders — الإشعارات: /portal/notifications — العائلة: /portal/family — الملف الشخصي: /portal/profile`;
 
-async function readBearer(
-  req: Request,
-): Promise<{ userId: string; token: string } | null> {
+async function readBearer(req: Request): Promise<{ userId: string; token: string } | null> {
   const auth = req.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
   if (!token) return null;
@@ -70,29 +68,25 @@ type SnapshotShape = {
   activeMedsCount: number;
 };
 
-async function loadPatientContext(
-  userId: string,
-  token: string,
-): Promise<string> {
+async function loadPatientContext(userId: string, token: string): Promise<string> {
   try {
-    const sb = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      {
-        auth: { persistSession: false, autoRefreshToken: false },
-        global: { headers: { Authorization: `Bearer ${token}` } },
-      },
-    );
+    const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
     // Reuse the dashboard summary shape via a direct call
     const today = new Date().toISOString().slice(0, 10);
     const [profileRes, patientRes, upcomingRes, notifRes] = await Promise.all([
       sb.from("profiles").select("full_name, preferred_language").eq("id", userId).maybeSingle(),
       sb.from("patients").select("id").eq("profile_id", userId).maybeSingle(),
-      sb.from("appointments")
+      sb
+        .from("appointments")
         .select("id, appointment_date, appointment_time, status")
         .gte("appointment_date", today)
         .in("status", ["new", "confirmed"])
-        .order("appointment_date").order("appointment_time").limit(3),
+        .order("appointment_date")
+        .order("appointment_time")
+        .limit(3),
       sb.from("notifications").select("id, read_at").eq("user_id", userId),
     ]);
     const patientId = patientRes.data?.id;
@@ -101,17 +95,30 @@ async function loadPatientContext(
     let labs = 0;
     if (patientId) {
       const [inv, ins, lab] = await Promise.all([
-        sb.from("invoices").select("total").eq("patient_id", patientId).in("status", ["unpaid", "partially_paid", "pending"]),
-        sb.from("insurance_approvals").select("id", { count: "exact", head: true }).eq("patient_id", patientId).in("status", ["submitted", "under_review", "additional_info_required"]),
-        sb.from("lab_reports").select("id", { count: "exact", head: true }).eq("patient_id", patientId).gte("report_date", new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)),
+        sb
+          .from("invoices")
+          .select("total")
+          .eq("patient_id", patientId)
+          .in("status", ["unpaid", "partially_paid", "pending"]),
+        sb
+          .from("insurance_approvals")
+          .select("id", { count: "exact", head: true })
+          .eq("patient_id", patientId)
+          .in("status", ["submitted", "under_review", "additional_info_required"]),
+        sb
+          .from("lab_reports")
+          .select("id", { count: "exact", head: true })
+          .eq("patient_id", patientId)
+          .gte("report_date", new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)),
       ]);
       outstandingTotal = (inv.data ?? []).reduce((s, r) => s + Number(r.total ?? 0), 0);
       pendingInsurance = ins.count ?? 0;
       labs = lab.count ?? 0;
     }
     const unread = (notifRes.data ?? []).filter((n) => !n.read_at).length;
-    const upcoming = (upcomingRes.data ?? []).map((a) =>
-      `id=${a.id} | ${a.appointment_date} ${(a.appointment_time as string)?.slice(0, 5)} (${a.status})`,
+    const upcoming = (upcomingRes.data ?? []).map(
+      (a) =>
+        `id=${a.id} | ${a.appointment_date} ${(a.appointment_time as string)?.slice(0, 5)} (${a.status})`,
     );
 
     return [
@@ -123,7 +130,9 @@ async function loadPatientContext(
       `- إجمالي الفواتير المستحقة (SAR): ${outstandingTotal.toFixed(2)}`,
       `- طلبات تأمين معلّقة: ${pendingInsurance}`,
       `- تقارير مختبر آخر 30 يومًا: ${labs}`,
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
   } catch {
     return "بيانات المستخدم: تعذّر جلب السياق حاليًا.";
   }
@@ -140,7 +149,11 @@ export const Route = createFileRoute("/api/portal/ai-chat")({
         if (!apiKey) return new Response("AI not configured", { status: 500 });
 
         let body: { messages?: { role: string; content: string }[]; resume_partial?: string } = {};
-        try { body = await request.json(); } catch { return new Response("Bad request", { status: 400 }); }
+        try {
+          body = await request.json();
+        } catch {
+          return new Response("Bad request", { status: 400 });
+        }
         const messages = Array.isArray(body.messages) ? body.messages.slice(-16) : [];
         if (messages.length === 0) return new Response("No messages", { status: 400 });
 
@@ -150,12 +163,12 @@ export const Route = createFileRoute("/api/portal/ai-chat")({
           { role: "system", content: SYSTEM_PROMPT },
           { role: "system", content: context },
         ];
-        const resumePartial = typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
+        const resumePartial =
+          typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
         if (resumePartial) {
           systemMessages.push({
             role: "system",
-            content:
-              `الرد السابق انقطع بسبب مشكلة اتصال. أكمل من حيث توقف تمامًا بدون تكرار أي كلمة أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
+            content: `الرد السابق انقطع بسبب مشكلة اتصال. أكمل من حيث توقف تمامًا بدون تكرار أي كلمة أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
           });
         }
 

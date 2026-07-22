@@ -10,7 +10,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Stethoscope, User, MapPin, ArrowRight, LogIn, LayoutDashboard } from "lucide-react";
+import {
+  Search,
+  Stethoscope,
+  User,
+  MapPin,
+  ArrowRight,
+  LogIn,
+  LayoutDashboard,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,7 +88,11 @@ async function fetchSpecialties(): Promise<SpecialtyRow[]> {
 }
 
 function initials(name: string): string {
-  const parts = name.replace(/^د\.?\s*/, "").trim().split(/\s+/).slice(0, 2);
+  const parts = name
+    .replace(/^د\.?\s*/, "")
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2);
   return parts.map((p) => p[0] ?? "").join("");
 }
 
@@ -89,7 +101,6 @@ function ReservationsPage() {
   const [q, setQ] = useState("");
   const [activeSpecialty, setActiveSpecialty] = useState<string | null>(null);
   const { profile } = useSessionProfile();
-
 
   const { data: doctors = [], isLoading: docsLoading } = useQuery({
     queryKey: ["reservations", "doctors"],
@@ -123,7 +134,7 @@ function ReservationsPage() {
   }, [specialties, q]);
 
   const activeSpecialtyRow = activeSpecialty
-    ? specialties.find((s) => s.id === activeSpecialty) ?? null
+    ? (specialties.find((s) => s.id === activeSpecialty) ?? null)
     : null;
 
   return (
@@ -135,9 +146,7 @@ function ReservationsPage() {
             <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold mb-3">
               بوابة الخدمات الإلكترونية
             </div>
-            <h1 className="text-3xl md:text-4xl font-extrabold mb-3">
-              احجز موعدك ودعنا نخدمك
-            </h1>
+            <h1 className="text-3xl md:text-4xl font-extrabold mb-3">احجز موعدك ودعنا نخدمك</h1>
             <p className="text-muted-foreground">
               اختر العيادة أو ابحث باسم الطبيب واحجز موعدك بضغطة زر.
             </p>
@@ -171,7 +180,6 @@ function ReservationsPage() {
               </div>
             )}
           </div>
-
 
           {/* Tabs */}
           <div className="mt-8 flex justify-center">
@@ -218,11 +226,7 @@ function ReservationsPage() {
               <Input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder={
-                  tab === "specialty"
-                    ? "ابحث باسم العيادة…"
-                    : "ابحث باسم الطبيب…"
-                }
+                placeholder={tab === "specialty" ? "ابحث باسم العيادة…" : "ابحث باسم الطبيب…"}
                 className="pr-10 h-12 text-base bg-card"
               />
             </div>
@@ -273,15 +277,11 @@ function ReservationsPage() {
       <section className="container-modern mx-auto max-w-6xl px-4 pb-14">
         <div className="rounded-2xl bg-gradient-to-l from-primary/15 to-primary/5 border p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
           <div className="flex-1 text-center md:text-right">
-            <div className="text-xs font-semibold text-primary mb-1">
-              رعايتك أولويتنا
-            </div>
-            <h3 className="text-xl md:text-2xl font-bold mb-2">
-              رعاية طبية إلى باب منزلك
-            </h3>
+            <div className="text-xs font-semibold text-primary mb-1">رعايتك أولويتنا</div>
+            <h3 className="text-xl md:text-2xl font-bold mb-2">رعاية طبية إلى باب منزلك</h3>
             <p className="text-sm text-muted-foreground max-w-xl">
-              احصل على زيارة طبيب أو ممرّض إلى منزلك بسهولة وموثوقية مع
-              خدمات الرعاية الطبية المنزلية من مجمع باعشن.
+              احصل على زيارة طبيب أو ممرّض إلى منزلك بسهولة وموثوقية مع خدمات الرعاية الطبية
+              المنزلية من مجمع باعشن.
             </p>
           </div>
           <Link
@@ -310,8 +310,7 @@ function SpecialtyGrid({
   doctorCount: (id: string) => number;
 }) {
   if (loading) return <GridSkeleton />;
-  if (specialties.length === 0)
-    return <EmptyState text="لا توجد عيادات مطابقة لبحثك." />;
+  if (specialties.length === 0) return <EmptyState text="لا توجد عيادات مطابقة لبحثك." />;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -340,16 +339,9 @@ function SpecialtyGrid({
 
 /* ---------------- Doctor grid ---------------- */
 
-function DoctorGrid({
-  doctors,
-  loading,
-}: {
-  doctors: DoctorRow[];
-  loading: boolean;
-}) {
+function DoctorGrid({ doctors, loading }: { doctors: DoctorRow[]; loading: boolean }) {
   if (loading) return <GridSkeleton />;
-  if (doctors.length === 0)
-    return <EmptyState text="لا يوجد أطباء مطابقون لبحثك." />;
+  if (doctors.length === 0) return <EmptyState text="لا يوجد أطباء مطابقون لبحثك." />;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -372,13 +364,9 @@ function DoctorGrid({
               )}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="font-bold text-base leading-tight mb-0.5 truncate">
-                {d.name_ar}
-              </div>
+              <div className="font-bold text-base leading-tight mb-0.5 truncate">{d.name_ar}</div>
               {d.title_ar && (
-                <div className="text-xs text-muted-foreground truncate">
-                  {d.title_ar}
-                </div>
+                <div className="text-xs text-muted-foreground truncate">{d.title_ar}</div>
               )}
               {d.specialty_name_ar && (
                 <div className="text-xs font-semibold text-primary mt-1 truncate">
@@ -414,10 +402,7 @@ function GridSkeleton() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {Array.from({ length: 8 }).map((_, i) => (
-        <div
-          key={i}
-          className="rounded-2xl border bg-card p-5 h-40 animate-pulse"
-        />
+        <div key={i} className="rounded-2xl border bg-card p-5 h-40 animate-pulse" />
       ))}
     </div>
   );

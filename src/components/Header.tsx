@@ -90,7 +90,15 @@ export function Header() {
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur border-b border-border/60">
       {/* Top bar */}
       <div className="hidden md:block bg-[color:var(--primary)] text-primary-foreground text-xs relative">
-        <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 30%, var(--jazan-terracotta,#B85C3C) 50%, var(--jazan-gold,#C7A46B) 70%, transparent)", opacity: 0.6 }} />
+        <span
+          aria-hidden="true"
+          className="absolute inset-x-0 bottom-0 h-px"
+          style={{
+            background:
+              "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 30%, var(--jazan-terracotta,#B85C3C) 50%, var(--jazan-gold,#C7A46B) 70%, transparent)",
+            opacity: 0.6,
+          }}
+        />
         <div className="container-app flex h-9 items-center justify-between gap-4">
           <div className="flex items-center gap-4 opacity-95">
             <span className="inline-flex items-center gap-1">
@@ -110,7 +118,10 @@ export function Header() {
               <Siren className="h-3.5 w-3.5" />
               {th("emergency")}
             </a>
-            <a href={`tel:${SITE.phone}`} className="inline-flex items-center gap-1 hover:underline">
+            <a
+              href={`tel:${SITE.phone}`}
+              className="inline-flex items-center gap-1 hover:underline"
+            >
               <Phone className="h-3.5 w-3.5" /> {SITE.phoneDisplay}
             </a>
             <button
@@ -163,11 +174,7 @@ export function Header() {
                   <div className="absolute top-full start-0 mt-1 w-72 rounded-xl border border-[var(--jazan-gold,#C7A46B)]/40 bg-popover shadow-lg p-3 grid gap-1 ring-1 ring-[var(--jazan-teal,#075E63)]/10">
                     <JazanSectionLabel className="px-2 pb-1">{n.label}</JazanSectionLabel>
                     {n.children.map((c) => (
-                      <Link
-                        key={c.to}
-                        to={c.to}
-                        className="rounded-lg px-3 py-2 hover:bg-muted"
-                      >
+                      <Link key={c.to} to={c.to} className="rounded-lg px-3 py-2 hover:bg-muted">
                         <div className="text-sm font-semibold text-foreground">{c.label}</div>
                         {c.desc && <div className="text-xs text-muted-foreground">{c.desc}</div>}
                       </Link>
@@ -195,7 +202,10 @@ export function Header() {
             to="/book"
             className="inline-flex items-center gap-1.5 rounded-md bg-[var(--jazan-teal,#075E63)] px-4 py-2 text-sm font-semibold text-white shadow-sm ring-1 ring-[var(--jazan-gold,#C7A46B)]/60 hover:bg-[var(--jazan-palm,#24745E)] transition"
           >
-            <span aria-hidden="true" className="inline-block h-1.5 w-1.5 rotate-45 bg-[var(--jazan-gold,#C7A46B)]" />
+            <span
+              aria-hidden="true"
+              className="inline-block h-1.5 w-1.5 rotate-45 bg-[var(--jazan-gold,#C7A46B)]"
+            />
             {t("cta_book")}
           </Link>
           {signedIn ? (
@@ -248,10 +258,7 @@ export function Header() {
         aria-hidden="true"
         className="relative h-1.5 w-full bg-[var(--jazan-ivory,#FCF9F2)] border-t border-[var(--jazan-gold,#C7A46B)]/25"
       >
-        <JazanPattern
-          variant="subtle"
-          className="absolute inset-0 h-full w-full"
-        />
+        <JazanPattern variant="subtle" className="absolute inset-0 h-full w-full" />
       </div>
 
       {open && (

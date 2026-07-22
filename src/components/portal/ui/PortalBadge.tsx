@@ -1,11 +1,6 @@
 import { type ReactNode } from "react";
 
-export type PortalBadgeTone =
-  | "default"
-  | "success"
-  | "warning"
-  | "error"
-  | "muted";
+export type PortalBadgeTone = "default" | "success" | "warning" | "error" | "muted";
 
 const toneClass: Record<PortalBadgeTone, string> = {
   default: "portal-badge",
@@ -28,7 +23,11 @@ export function PortalBadge({
 }) {
   return (
     <span className={`${toneClass[tone]} ${className}`.trim()}>
-      {icon && <span aria-hidden className="inline-flex">{icon}</span>}
+      {icon && (
+        <span aria-hidden className="inline-flex">
+          {icon}
+        </span>
+      )}
       {children}
     </span>
   );

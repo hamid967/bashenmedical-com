@@ -5,7 +5,13 @@ import type { ReactNode } from "react";
  * Smooth fade+lift transition wrapper for page-level content.
  * Respects prefers-reduced-motion and the .reduce-motion toggle.
  */
-export function PageTransition({ children, className }: { children: ReactNode; className?: string }) {
+export function PageTransition({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const reduce = useReducedMotion();
   return (
     <motion.div

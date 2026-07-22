@@ -141,10 +141,7 @@ function AppointmentsQueuePage() {
 
   // Rows filtered by the current scope only — used both for the visible list
   // (after status + query) and for the scope counters.
-  const scopedRows = useMemo(
-    () => rows.filter((r) => scopePredicate(scope, r)),
-    [rows, scope],
-  );
+  const scopedRows = useMemo(() => rows.filter((r) => scopePredicate(scope, r)), [rows, scope]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
@@ -185,10 +182,24 @@ function AppointmentsQueuePage() {
 
   function exportVisibleCsv() {
     const quote = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
-    const header = ["رقم الحجز", "المراجع", "الجوال", "التاريخ", "الوقت", "التخصص", "الطبيب", "الحالة"];
+    const header = [
+      "رقم الحجز",
+      "المراجع",
+      "الجوال",
+      "التاريخ",
+      "الوقت",
+      "التخصص",
+      "الطبيب",
+      "الحالة",
+    ];
     const lines = filtered.map((r) => [
-      shortRef(r.id), r.patient_name, r.patient_phone, r.appointment_date,
-      r.appointment_time?.slice(0, 5), r.specialties?.name_ar, r.doctors?.name_ar,
+      shortRef(r.id),
+      r.patient_name,
+      r.patient_phone,
+      r.appointment_date,
+      r.appointment_time?.slice(0, 5),
+      r.specialties?.name_ar,
+      r.doctors?.name_ar,
       STATUS_META[r.status].label,
     ]);
     const csv = "\uFEFF" + [header, ...lines].map((line) => line.map(quote).join(",")).join("\n");
@@ -239,7 +250,11 @@ function AppointmentsQueuePage() {
         <QueueMetric label="مواعيد اليوم" value={scopeCounts.today} tone="text-primary" />
         <QueueMetric label="بانتظار التأكيد" value={scopeCounts.pending} tone="text-teal-600" />
         <QueueMetric label="القادمة" value={scopeCounts.upcoming} tone="text-emerald-600" />
-        <QueueMetric label="لم يحضر" value={rows.filter((r) => r.status === "no_show").length} tone="text-amber-600" />
+        <QueueMetric
+          label="لم يحضر"
+          value={rows.filter((r) => r.status === "no_show").length}
+          tone="text-amber-600"
+        />
       </div>
 
       {/* Scope tabs — the primary lens for the queue. */}
@@ -250,18 +265,12 @@ function AppointmentsQueuePage() {
             type="button"
             onClick={() => setScope(s)}
             className={`rounded-xl px-3 py-2 text-sm font-semibold transition text-start ${
-              scope === s
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "hover:bg-muted"
+              scope === s ? "bg-primary text-primary-foreground shadow-sm" : "hover:bg-muted"
             }`}
           >
             <div className="flex items-center justify-between gap-2">
               <span>{SCOPE_META[s].label}</span>
-              <span
-                className={`text-xs font-mono ${
-                  scope === s ? "opacity-90" : "opacity-60"
-                }`}
-              >
+              <span className={`text-xs font-mono ${scope === s ? "opacity-90" : "opacity-60"}`}>
                 {scopeCounts[s]}
               </span>
             </div>

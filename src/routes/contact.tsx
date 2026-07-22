@@ -2,11 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useI18n } from "@/lib/i18n";
 import { SITE, whatsappUrl } from "@/lib/site";
 import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
-import {
-  buildLocalBusinessSchema,
-  buildBreadcrumbs,
-  SITE_URL,
-} from "@/lib/localBusinessSchema";
+import { buildLocalBusinessSchema, buildBreadcrumbs, SITE_URL } from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
 import { PageHero } from "@/components/PageShell";
 import { bmcOgImageMeta } from "@/lib/og-meta";

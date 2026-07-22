@@ -99,11 +99,7 @@ function ProgramsPage() {
 
   return (
     <div>
-      <PageHero
-        eyebrow={t("hero.eyebrow")}
-        title={t("hero.title")}
-        subtitle={t("hero.subtitle")}
-      />
+      <PageHero eyebrow={t("hero.eyebrow")} title={t("hero.title")} subtitle={t("hero.subtitle")} />
 
       {/* Quick nav */}
       <section className="container-app -mt-6 mb-10">
@@ -140,7 +136,9 @@ function ProgramsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
-                    <span>{t("labels.programNumber", { n: String(idx + 1).padStart(2, "0") })}</span>
+                    <span>
+                      {t("labels.programNumber", { n: String(idx + 1).padStart(2, "0") })}
+                    </span>
                     <span>•</span>
                     <span className="inline-flex items-center gap-1">
                       <Users className="h-3 w-3" /> {t(`items.${p.id}.audience`)}
@@ -208,9 +206,7 @@ function ProgramsPage() {
       <section className="container-app pb-16">
         <div className="rounded-3xl bg-gradient-to-br from-primary to-accent p-8 md:p-10 text-primary-foreground text-center">
           <h2 className="text-2xl md:text-3xl font-bold">{t("cta.title")}</h2>
-          <p className="mt-2 text-primary-foreground/90 max-w-2xl mx-auto">
-            {t("cta.subtitle")}
-          </p>
+          <p className="mt-2 text-primary-foreground/90 max-w-2xl mx-auto">{t("cta.subtitle")}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <Link
               to="/contact"

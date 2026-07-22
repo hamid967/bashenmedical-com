@@ -66,9 +66,7 @@ export const getReservationsUsageSummary = createServerFn({ method: "GET" })
   .validator((d: unknown) => Input.parse(d ?? {}))
   .handler(async ({ data, context }): Promise<ReservationsUsageSummary> => {
     await assertAdmin(context);
-    const since = new Date(
-      Date.now() - data.windowDays * 24 * 3600_000,
-    ).toISOString();
+    const since = new Date(Date.now() - data.windowDays * 24 * 3600_000).toISOString();
 
     const { data: rows, error } = await context.supabase
       .from("reservation_manage_events")
@@ -155,8 +153,7 @@ export const getReservationsUsageSummary = createServerFn({ method: "GET" })
       }
     }
 
-    const undo_attempted =
-      totals.cancel_undo_success + totals.cancel_undo_failed;
+    const undo_attempted = totals.cancel_undo_success + totals.cancel_undo_failed;
 
     return {
       windowDays: data.windowDays,
@@ -177,14 +174,8 @@ export const getReservationsUsageSummary = createServerFn({ method: "GET" })
         otp_verify_rate: safeRate(totals.otp_verified, totals.otp_sent),
         undo_success_rate: safeRate(totals.cancel_undo_success, undo_attempted),
         undo_usage_rate: safeRate(undo_attempted, totals.cancel),
-        slot_rebook_rate: safeRate(
-          totals.slot_rebooked,
-          totals.cancel_undo_success,
-        ),
-        waitlist_revert_rate: safeRate(
-          totals.waitlist_reverted,
-          totals.waitlist_notified,
-        ),
+        slot_rebook_rate: safeRate(totals.slot_rebooked, totals.cancel_undo_success),
+        waitlist_revert_rate: safeRate(totals.waitlist_reverted, totals.waitlist_notified),
       },
       daily: Array.from(buckets.values()),
     };

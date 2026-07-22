@@ -100,7 +100,9 @@ export const updateMyProfile = createServerFn({ method: "POST" })
           record_id: userId,
           metadata: { fields: changedSensitive },
         } as never);
-      } catch { /* audit failures must not block the update */ }
+      } catch {
+        /* audit failures must not block the update */
+      }
     }
 
     const { data: updated, error } = await supabase
@@ -112,7 +114,6 @@ export const updateMyProfile = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return updated;
   });
-
 
 /* -------------------------- getDashboardSummary -------------------------- */
 
@@ -162,7 +163,7 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
     const doctorIds = [
       ...new Set((upcomingRes.data ?? []).map((a) => a.doctor_id).filter(Boolean) as string[]),
     ];
-    let doctorsById: Record<
+    const doctorsById: Record<
       string,
       { id: string; name_ar: string; name_en: string | null; photo_url: string | null }
     > = {};
@@ -181,7 +182,6 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
       .eq("is_active", true)
       .order("sort_order", { ascending: true })
       .limit(6);
-
 
     // Notifications for the current user
     const notifRes = await supabase
@@ -223,7 +223,6 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
       activeMedsCount = medsRes.count ?? 0;
     }
 
-
     // Outstanding invoices (unpaid / partially paid) for the linked patient
     let outstandingInvoices: Array<{
       id: string;
@@ -242,10 +241,7 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
         .order("issued_at", { ascending: false })
         .limit(5);
       outstandingInvoices = (invRes.data ?? []) as typeof outstandingInvoices;
-      outstandingTotal = outstandingInvoices.reduce(
-        (sum, i) => sum + Number(i.total ?? 0),
-        0,
-      );
+      outstandingTotal = outstandingInvoices.reduce((sum, i) => sum + Number(i.total ?? 0), 0);
     }
 
     // Pending insurance approvals
@@ -279,7 +275,7 @@ export const getDashboardSummary = createServerFn({ method: "GET" })
       patient: patientRes.data,
       upcoming: (upcomingRes.data ?? []).map((a) => ({
         ...a,
-        doctor: a.doctor_id ? doctorsById[a.doctor_id] ?? null : null,
+        doctor: a.doctor_id ? (doctorsById[a.doctor_id] ?? null) : null,
       })),
       upcomingCount: (upcomingRes.data ?? []).length,
       doctorsRail: doctorsRail.data ?? [],

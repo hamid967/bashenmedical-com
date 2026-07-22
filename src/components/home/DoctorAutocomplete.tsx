@@ -234,13 +234,9 @@ export function DoctorAutocomplete() {
           className="mt-3 max-h-96 overflow-auto rounded-xl border border-[color:var(--jazan-gold)]/30 bg-[var(--jazan-ivory)]/95 shadow-lg backdrop-blur"
         >
           {isFetching && list.length === 0 ? (
-            <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">
-              {t("searching")}
-            </div>
+            <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">{t("searching")}</div>
           ) : list.length === 0 ? (
-            <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">
-              {t("noResults")}
-            </div>
+            <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">{t("noResults")}</div>
           ) : (
             <ul className="divide-y divide-[color:var(--jazan-gold)]/20">
               {list.map((d, i) => {
@@ -311,9 +307,7 @@ export function DoctorAutocomplete() {
       )}
 
       {debounced.length > 0 && debounced.length < 2 && (
-        <p className="mt-2 text-xs text-[color:var(--fut-ink-muted)]">
-          {t("typeAtLeastTwo")}
-        </p>
+        <p className="mt-2 text-xs text-[color:var(--fut-ink-muted)]">{t("typeAtLeastTwo")}</p>
       )}
     </div>
   );

@@ -147,12 +147,15 @@ function SecurityPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">الأمان والتحقق متعدد العوامل</h1>
         <p className="text-sm text-slate-600 mt-1">
-          حسابات <code>super_admin</code> و<code>owner</code> تتطلب تفعيل TOTP لإتمام أي عملية إدارية.
+          حسابات <code>super_admin</code> و<code>owner</code> تتطلب تفعيل TOTP لإتمام أي عملية
+          إدارية.
         </p>
       </div>
 
       {loading ? (
-        <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>
+        <div className="p-8 flex justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        </div>
       ) : (
         <>
           <div
@@ -244,7 +247,9 @@ function SecurityPage() {
 
             {enrolling && enroll && (
               <div className="mt-4 p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-3">
-                <div className="text-sm font-semibold text-slate-800">امسح QR في تطبيق المصادقة</div>
+                <div className="text-sm font-semibold text-slate-800">
+                  امسح QR في تطبيق المصادقة
+                </div>
                 <div className="flex flex-col md:flex-row gap-4 items-center">
                   <img
                     src={enroll.qr}

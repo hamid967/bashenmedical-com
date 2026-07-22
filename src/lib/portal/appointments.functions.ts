@@ -36,10 +36,7 @@ const ListSchema = z
     scope: z.enum(["upcoming", "past", "all"]).default("upcoming"),
     doctorId: z.string().uuid().optional().nullable(),
     branchId: z.string().uuid().optional().nullable(),
-    status: z
-      .enum(["new", "confirmed", "completed", "cancelled", "no_show"])
-      .optional()
-      .nullable(),
+    status: z.enum(["new", "confirmed", "completed", "cancelled", "no_show"]).optional().nullable(),
     fromDate: z.string().date().optional().nullable(),
     toDate: z.string().date().optional().nullable(),
     search: z.string().trim().max(120).optional().nullable(),
@@ -71,9 +68,7 @@ export const listMyAppointments = createServerFn({ method: "POST" })
         .order("appointment_time", { ascending: true });
     } else if (data.scope === "past") {
       q = q
-        .or(
-          `appointment_date.lt.${today},status.in.(completed,cancelled,no_show)`,
-        )
+        .or(`appointment_date.lt.${today},status.in.(completed,cancelled,no_show)`)
         .order("appointment_date", { ascending: false })
         .order("appointment_time", { ascending: false });
     } else {
@@ -106,9 +101,7 @@ export const listMyAppointments = createServerFn({ method: "POST" })
     ] as string[];
     const specialtyIds = [
       ...new Set(
-        (rows ?? [])
-          .map((r: { specialty_id: string | null }) => r.specialty_id)
-          .filter(Boolean),
+        (rows ?? []).map((r: { specialty_id: string | null }) => r.specialty_id).filter(Boolean),
       ),
     ] as string[];
 
@@ -126,10 +119,7 @@ export const listMyAppointments = createServerFn({ method: "POST" })
             .in("id", branchIds)
         : Promise.resolve({ data: [] }),
       specialtyIds.length
-        ? supabase
-            .from("specialties")
-            .select("id, name_ar, name_en")
-            .in("id", specialtyIds)
+        ? supabase.from("specialties").select("id, name_ar, name_en").in("id", specialtyIds)
         : Promise.resolve({ data: [] }),
     ]);
 
@@ -144,9 +134,9 @@ export const listMyAppointments = createServerFn({ method: "POST" })
       scope,
       items: (rows ?? []).map((a) => ({
         ...a,
-        doctor: a.doctor_id ? docMap.get(a.doctor_id) ?? null : null,
-        branch: a.branch_id ? brMap.get(a.branch_id) ?? null : null,
-        specialty: a.specialty_id ? spMap.get(a.specialty_id) ?? null : null,
+        doctor: a.doctor_id ? (docMap.get(a.doctor_id) ?? null) : null,
+        branch: a.branch_id ? (brMap.get(a.branch_id) ?? null) : null,
+        specialty: a.specialty_id ? (spMap.get(a.specialty_id) ?? null) : null,
       })),
     };
   });
@@ -287,11 +277,7 @@ export const requestFollowUp = createServerFn({ method: "POST" })
   .validator((i: unknown) => FollowUpSchema.parse(i))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
-    const { appt, scope } = await loadOwnedAppointment(
-      supabase,
-      userId,
-      data.fromAppointmentId,
-    );
+    const { appt, scope } = await loadOwnedAppointment(supabase, userId, data.fromAppointmentId);
 
     // Patient details snapshot from the previous visit or profile
     const [{ data: profile }, { data: patient }] = await Promise.all([
@@ -302,11 +288,12 @@ export const requestFollowUp = createServerFn({ method: "POST" })
             .select("full_name_ar, phone, email")
             .eq("id", scope.patientId)
             .maybeSingle()
-        : Promise.resolve({ data: null as { full_name_ar: string; phone: string; email: string | null } | null }),
+        : Promise.resolve({
+            data: null as { full_name_ar: string; phone: string; email: string | null } | null,
+          }),
     ]);
 
-    const patient_name =
-      patient?.full_name_ar || profile?.full_name || "مريض";
+    const patient_name = patient?.full_name_ar || profile?.full_name || "مريض";
     const patient_phone = patient?.phone || profile?.phone || appt.patient_phone;
 
     const insertRes = await supabase
@@ -394,11 +381,8 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
       const untilOpen = Math.ceil(-diffMin - 60);
       const h = Math.floor(untilOpen / 60);
       const m = untilOpen % 60;
-      const pretty =
-        h > 0 ? `${h} ساعة${m ? ` و${m} دقيقة` : ""}` : `${m} دقيقة`;
-      throw new Error(
-        `تسجيل الحضور يفتح قبل الموعد بـ 60 دقيقة. تبقّى ${pretty}.`,
-      );
+      const pretty = h > 0 ? `${h} ساعة${m ? ` و${m} دقيقة` : ""}` : `${m} دقيقة`;
+      throw new Error(`تسجيل الحضور يفتح قبل الموعد بـ 60 دقيقة. تبقّى ${pretty}.`);
     }
     if (diffMin > 30) {
       throw new Error(
@@ -406,11 +390,12 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
       );
     }
 
-
     // Compute next queue number for the doctor/branch today
     const { data: existingToday } = await supabase
       .from("patient_check_ins")
-      .select("queue_number, appointment_id, appointments!inner(appointment_date, doctor_id, branch_id)")
+      .select(
+        "queue_number, appointment_id, appointments!inner(appointment_date, doctor_id, branch_id)",
+      )
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .eq("appointments.appointment_date" as any, appt.appointment_date)
       .eq("appointments.doctor_id" as any, appt.doctor_id ?? "")
@@ -584,7 +569,8 @@ export const getAppointmentTimeline = createServerFn({ method: "POST" })
       } else {
         // Attach queue number to the checked_in event.
         const idx = rows.findIndex((r) => r.status === "checked_in");
-        if (idx >= 0) rows[idx].queue_number = (checkInRes.data.queue_number as number | null) ?? null;
+        if (idx >= 0)
+          rows[idx].queue_number = (checkInRes.data.queue_number as number | null) ?? null;
       }
     }
 
@@ -597,4 +583,3 @@ export const getAppointmentTimeline = createServerFn({ method: "POST" })
       events: rows,
     };
   });
-

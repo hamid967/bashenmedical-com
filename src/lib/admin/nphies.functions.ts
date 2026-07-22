@@ -48,7 +48,12 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
   .validator((input: { windowHours?: number; limit?: number }) =>
     z
       .object({
-        windowHours: z.number().int().min(1).max(24 * 90).default(24),
+        windowHours: z
+          .number()
+          .int()
+          .min(1)
+          .max(24 * 90)
+          .default(24),
         limit: z.number().int().min(1).max(500).default(100),
       })
       .parse(input),
@@ -76,10 +81,7 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
 
     const [providersRes, doctorsRes] = await Promise.all([
       providerIds.length
-        ? context.supabase
-            .from("insurance_providers")
-            .select("id, name_ar")
-            .in("id", providerIds)
+        ? context.supabase.from("insurance_providers").select("id, name_ar").in("id", providerIds)
         : Promise.resolve({ data: [] as any[] }),
       doctorIds.length
         ? context.supabase.from("doctors").select("id, name_ar").in("id", doctorIds)
@@ -94,15 +96,13 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
 
     const enriched: NphiesLogRow[] = (rows ?? []).map((r: any) => ({
       ...r,
-      provider_name_ar: r.provider_id ? providerMap.get(r.provider_id) ?? null : null,
-      doctor_name_ar: r.doctor_id ? doctorMap.get(r.doctor_id) ?? null : null,
+      provider_name_ar: r.provider_id ? (providerMap.get(r.provider_id) ?? null) : null,
+      doctor_name_ar: r.doctor_id ? (doctorMap.get(r.doctor_id) ?? null) : null,
     }));
 
     const eligibleCount = enriched.filter((r) => r.eligible === true).length;
     const ineligibleCount = enriched.filter((r) => r.eligible === false).length;
-    const errorCount = enriched.filter(
-      (r) => r.http_status != null && r.http_status >= 500,
-    ).length;
+    const errorCount = enriched.filter((r) => r.http_status != null && r.http_status >= 500).length;
     const latencies = enriched
       .map((r) => r.latency_ms)
       .filter((n): n is number => typeof n === "number");

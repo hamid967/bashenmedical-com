@@ -9,7 +9,9 @@ import { Plus, Pencil, Trash2, ExternalLink, FileText } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/owner/pages/")({
-  head: () => ({ meta: [{ title: "الصفحات · Site Builder" }, { name: "robots", content: "noindex,nofollow" }] }),
+  head: () => ({
+    meta: [{ title: "الصفحات · Site Builder" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: OwnerPagesList,
 });
 
@@ -42,10 +44,14 @@ function OwnerPagesList() {
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             <FileText className="h-6 w-6" /> إدارة الصفحات
           </h1>
-          <p className="text-sm text-slate-500 mt-1">أنشئ صفحات مخصصة (عنّا، الرسالة، إلخ) وانشرها للجمهور.</p>
+          <p className="text-sm text-slate-500 mt-1">
+            أنشئ صفحات مخصصة (عنّا، الرسالة، إلخ) وانشرها للجمهور.
+          </p>
         </div>
         <Button asChild>
-          <Link to="/owner/pages/$id" params={{ id: "new" }}><Plus className="h-4 w-4 ml-1" /> صفحة جديدة</Link>
+          <Link to="/owner/pages/$id" params={{ id: "new" }}>
+            <Plus className="h-4 w-4 ml-1" /> صفحة جديدة
+          </Link>
         </Button>
       </div>
 
@@ -79,25 +85,35 @@ function OwnerPagesList() {
                   <td className="px-4 py-3 text-slate-500 font-mono text-xs">/p/{p.slug}</td>
                   <td className="px-4 py-3">
                     {p.status === "published" ? (
-                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">منشورة</Badge>
+                      <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+                        منشورة
+                      </Badge>
                     ) : (
                       <Badge variant="secondary">مسودة</Badge>
                     )}
                   </td>
                   <td className="px-4 py-3 text-slate-600">{p.show_in_nav ? "نعم" : "—"}</td>
-                  <td className="px-4 py-3 text-slate-500 text-xs">{new Date(p.updated_at).toLocaleString("ar-SA")}</td>
+                  <td className="px-4 py-3 text-slate-500 text-xs">
+                    {new Date(p.updated_at).toLocaleString("ar-SA")}
+                  </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end">
                       {p.status === "published" && (
                         <Button asChild size="icon" variant="ghost" title="عرض">
-                          <a href={`/p/${p.slug}`} target="_blank" rel="noreferrer"><ExternalLink className="h-4 w-4" /></a>
+                          <a href={`/p/${p.slug}`} target="_blank" rel="noreferrer">
+                            <ExternalLink className="h-4 w-4" />
+                          </a>
                         </Button>
                       )}
                       <Button asChild size="icon" variant="ghost" title="تعديل">
-                        <Link to="/owner/pages/$id" params={{ id: p.id }}><Pencil className="h-4 w-4" /></Link>
+                        <Link to="/owner/pages/$id" params={{ id: p.id }}>
+                          <Pencil className="h-4 w-4" />
+                        </Link>
                       </Button>
                       <Button
-                        size="icon" variant="ghost" title="حذف"
+                        size="icon"
+                        variant="ghost"
+                        title="حذف"
                         disabled={busy === p.id}
                         onClick={() => handleDelete(p.id, p.title_ar)}
                       >

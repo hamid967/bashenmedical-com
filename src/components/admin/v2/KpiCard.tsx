@@ -59,11 +59,12 @@ export function KpiCard({
   const isFlat = (deltaPct ?? 0) === 0;
   const good = isFlat ? null : positiveIsGood ? isUp : !isUp;
 
-  const deltaBg = good === null
-    ? "rgba(148,163,184,0.15)"
-    : good
-      ? "rgba(34,197,94,0.15)"
-      : "rgba(239,68,68,0.15)";
+  const deltaBg =
+    good === null
+      ? "rgba(148,163,184,0.15)"
+      : good
+        ? "rgba(34,197,94,0.15)"
+        : "rgba(239,68,68,0.15)";
   const deltaColor = good === null ? "#94a3b8" : good ? "#4ade80" : "#f87171";
 
   const Wrapper: any = drillTo ? Link : "div";
@@ -149,8 +150,16 @@ export function KpiCard({
             <AreaChart data={sparkline} margin={{ top: 2, right: 2, left: 2, bottom: 0 }}>
               <defs>
                 <linearGradient id={`kpi-spark-${label}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={highlight ? colors.panel : colors.glow} stopOpacity={0.6} />
-                  <stop offset="100%" stopColor={highlight ? colors.panel : colors.glow} stopOpacity={0} />
+                  <stop
+                    offset="0%"
+                    stopColor={highlight ? colors.panel : colors.glow}
+                    stopOpacity={0.6}
+                  />
+                  <stop
+                    offset="100%"
+                    stopColor={highlight ? colors.panel : colors.glow}
+                    stopOpacity={0}
+                  />
                 </linearGradient>
               </defs>
               <Tooltip
@@ -194,17 +203,24 @@ export function KpiCard({
 
 /* ─── State variants ─── */
 
-export function KpiCardSkeleton({
-  colors = DEFAULT_COLORS,
-}: { colors?: typeof DEFAULT_COLORS }) {
+export function KpiCardSkeleton({ colors = DEFAULT_COLORS }: { colors?: typeof DEFAULT_COLORS }) {
   return (
     <div
       className="relative overflow-hidden rounded-2xl p-4 sm:p-5"
       style={{ background: colors.panel, border: `1px solid ${colors.panel2}` }}
     >
-      <div className="h-3 w-24 rounded-full mb-4 animate-pulse" style={{ background: `${colors.panel2}` }} />
-      <div className="h-8 w-20 rounded-md mb-3 animate-pulse" style={{ background: `${colors.panel2}` }} />
-      <div className="h-10 w-full rounded-lg animate-pulse" style={{ background: `${colors.panel2}80` }} />
+      <div
+        className="h-3 w-24 rounded-full mb-4 animate-pulse"
+        style={{ background: `${colors.panel2}` }}
+      />
+      <div
+        className="h-8 w-20 rounded-md mb-3 animate-pulse"
+        style={{ background: `${colors.panel2}` }}
+      />
+      <div
+        className="h-10 w-full rounded-lg animate-pulse"
+        style={{ background: `${colors.panel2}80` }}
+      />
     </div>
   );
 }
@@ -225,7 +241,10 @@ export function KpiCardError({
         color: "#e0e7ff",
       }}
     >
-      <span className="inline-flex items-center gap-1.5 text-xs font-bold" style={{ color: "#f87171" }}>
+      <span
+        className="inline-flex items-center gap-1.5 text-xs font-bold"
+        style={{ color: "#f87171" }}
+      >
         <AlertTriangle className="h-4 w-4" />
         تعذّر تحميل البيانات
       </span>

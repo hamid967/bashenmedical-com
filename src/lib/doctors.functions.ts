@@ -195,7 +195,10 @@ export const deleteDoctorLeave = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureAdmin(roles);
-    const { error } = await context.supabase.from("doctor_leaves" as never).delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("doctor_leaves" as never)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

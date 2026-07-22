@@ -31,10 +31,7 @@ import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 export const Route = createFileRoute("/_authenticated/doctors-management")({
   head: () => ({
-    meta: [
-      { title: "إدارة الأطباء | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "إدارة الأطباء | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <RequirePermission anyOf="doctors.manage">
@@ -43,15 +40,7 @@ export const Route = createFileRoute("/_authenticated/doctors-management")({
   ),
 });
 
-const WEEKDAYS = [
-  "الأحد",
-  "الاثنين",
-  "الثلاثاء",
-  "الأربعاء",
-  "الخميس",
-  "الجمعة",
-  "السبت",
-];
+const WEEKDAYS = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
 
 function pad(n: number) {
   return String(n).padStart(2, "0");
@@ -94,7 +83,10 @@ function DoctorsManagementPage() {
     <div className="container-app py-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Link to="/admin" className="rounded-md border border-input px-2.5 py-1.5 text-sm hover:bg-muted">
+          <Link
+            to="/admin"
+            className="rounded-md border border-input px-2.5 py-1.5 text-sm hover:bg-muted"
+          >
             ← الإدارة
           </Link>
           <h1 className="flex items-center gap-2 text-2xl font-bold">
@@ -118,7 +110,10 @@ function DoctorsManagementPage() {
             onChange={setSpecialtyId}
             options={[
               { value: "", label: "كل التخصصات" },
-              ...((specialtiesQ.data ?? []) as any[]).map((s) => ({ value: s.id, label: s.name_ar })),
+              ...((specialtiesQ.data ?? []) as any[]).map((s) => ({
+                value: s.id,
+                label: s.name_ar,
+              })),
             ]}
           />
           <div className="inline-flex items-center gap-1.5 rounded-md border border-input px-2 py-1.5 text-sm">
@@ -241,7 +236,10 @@ function DoctorsManagementPage() {
               <div className="p-4">
                 {tab === "overview" && <OverviewPanel doc={selectedDoc} days={days} />}
                 {tab === "schedule" && (
-                  <SchedulePanel doctorId={selectedDoc.doctor_id} branchId={selectedDoc.branch_id} />
+                  <SchedulePanel
+                    doctorId={selectedDoc.doctor_id}
+                    branchId={selectedDoc.branch_id}
+                  />
                 )}
                 {tab === "leaves" && (
                   <LeavesPanel
@@ -356,13 +354,7 @@ function StatBox({ title, value }: { title: string; value: number | string }) {
 }
 
 /* ---------- Schedule panel ---------- */
-function SchedulePanel({
-  doctorId,
-  branchId,
-}: {
-  doctorId: string;
-  branchId: string | null;
-}) {
+function SchedulePanel({ doctorId, branchId }: { doctorId: string; branchId: string | null }) {
   const qc = useQueryClient();
   const listFn = useServerFn(listDoctorAvailability);
   const createFn = useServerFn(createDoctorAvailability);
@@ -467,7 +459,9 @@ function SchedulePanel({
             max={240}
             step={5}
             value={form.slotMinutes}
-            onChange={(e) => setForm({ ...form, slotMinutes: parseInt(e.target.value || "30", 10) })}
+            onChange={(e) =>
+              setForm({ ...form, slotMinutes: parseInt(e.target.value || "30", 10) })
+            }
             className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm"
           />
         </label>
@@ -494,9 +488,7 @@ function SchedulePanel({
                 <span className="font-semibold">{w}</span>
                 <span className="text-xs text-muted-foreground">{list.length} فترة</span>
               </div>
-              {list.length === 0 && (
-                <div className="text-xs text-muted-foreground">لا يوجد</div>
-              )}
+              {list.length === 0 && <div className="text-xs text-muted-foreground">لا يوجد</div>}
               <ul className="space-y-1">
                 {list.map((s: any) => (
                   <li
@@ -656,8 +648,7 @@ function LeavesPanel({
             {(q.data ?? []).map((l: DoctorLeave) => {
               const start = new Date(l.start_date);
               const end = new Date(l.end_date);
-              const days =
-                Math.round((+end - +start) / (1000 * 60 * 60 * 24)) + 1;
+              const days = Math.round((+end - +start) / (1000 * 60 * 60 * 24)) + 1;
               return (
                 <tr key={l.id} className="border-t border-border/60">
                   <td className="px-3 py-2 tabular-nums">

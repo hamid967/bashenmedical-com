@@ -15,7 +15,12 @@ export type QuickSnapshot = {
     time: string | null;
     status: string;
     reason: string | null;
-    doctor: { id: string; name_ar: string; name_en: string | null; photo_url: string | null } | null;
+    doctor: {
+      id: string;
+      name_ar: string;
+      name_en: string | null;
+      photo_url: string | null;
+    } | null;
     branch: { id: string; name_ar: string; name_en: string | null } | null;
   } | null;
   newReports: {
@@ -147,7 +152,7 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
     // الدفعات المستحقة — احسب المتبقي بعد الدفعات
     const invRows = (invoicesRes.data ?? []) as any[];
     const invIds = invRows.map((r) => r.id);
-    let paidMap = new Map<string, number>();
+    const paidMap = new Map<string, number>();
     if (invIds.length) {
       const payRes = await supabase
         .from("payments")

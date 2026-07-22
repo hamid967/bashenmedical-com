@@ -34,13 +34,15 @@ export const Route = createFileRoute("/pharmacy")({
           "@type": ["Pharmacy", "MedicalWebPage"],
           "@id": "https://bashenmedical.com/pharmacy",
           name: "صيدليات باعشن — طلب وتوصيل الأدوية",
-          description:
-            "خدمة توصيل الأدوية من صيدليات باعشن داخل صبيا وجازان مع رفع الوصفة الطبية.",
+          description: "خدمة توصيل الأدوية من صيدليات باعشن داخل صبيا وجازان مع رفع الوصفة الطبية.",
           url: "https://bashenmedical.com/pharmacy",
           inLanguage: "ar-SA",
           isPartOf: { "@id": "https://bashenmedical.com/#website" },
           parentOrganization: { "@id": "https://bashenmedical.com/#organization" },
-          areaServed: [{ "@type": "City", name: "Sabya" }, { "@type": "AdministrativeArea", name: "Jazan Region" }],
+          areaServed: [
+            { "@type": "City", name: "Sabya" },
+            { "@type": "AdministrativeArea", name: "Jazan Region" },
+          ],
           potentialAction: {
             "@type": "OrderAction",
             target: "https://bashenmedical.com/pharmacy",
@@ -102,9 +104,7 @@ function PharmacyPage() {
     if (file) {
       const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : "";
       const path = `orders/${inserted.id}/prescription${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("prescriptions")
-        .upload(path, file);
+      const { error: upErr } = await supabase.storage.from("prescriptions").upload(path, file);
       if (upErr) {
         setSubmitting(false);
         toast.error(friendlyInsertError(upErr));

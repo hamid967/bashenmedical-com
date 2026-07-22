@@ -94,14 +94,42 @@ const adminSearchSchema = z.object({
 
 export const Route = createFileRoute("/_authenticated/admin/classic")({
   head: () => ({
-    meta: [{ title: "لوحة التحكم (الكلاسيكية) | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
+    meta: [
+      { title: "لوحة التحكم (الكلاسيكية) | مجمع باعشن الطبي" },
+      { name: "robots", content: "noindex" },
+    ],
   }),
   validateSearch: zodValidator(adminSearchSchema),
   component: AdminDashboard,
 });
 
-type Tab = "overview" | "appointments" | "orders" | "doctors" | "specialties" | "availability" | "reminders-log" | "reminders-delivery-stats" | "reminders-audit" | "reminders-stats" | "security-audit" | "content";
-const ALL_TABS: Tab[] = ["overview","appointments","orders","doctors","specialties","availability","reminders-log","reminders-delivery-stats","reminders-audit","reminders-stats","security-audit","content"];
+type Tab =
+  | "overview"
+  | "appointments"
+  | "orders"
+  | "doctors"
+  | "specialties"
+  | "availability"
+  | "reminders-log"
+  | "reminders-delivery-stats"
+  | "reminders-audit"
+  | "reminders-stats"
+  | "security-audit"
+  | "content";
+const ALL_TABS: Tab[] = [
+  "overview",
+  "appointments",
+  "orders",
+  "doctors",
+  "specialties",
+  "availability",
+  "reminders-log",
+  "reminders-delivery-stats",
+  "reminders-audit",
+  "reminders-stats",
+  "security-audit",
+  "content",
+];
 
 const APPT_STATUS: {
   value: "new" | "confirmed" | "completed" | "cancelled" | "no_show";
@@ -333,7 +361,9 @@ function AdminDashboard() {
               قوالب الرسائل
             </Link>
           )}
-          {(roles.includes("admin") || roles.includes("reception") || roles.includes("doctor" as any)) && (
+          {(roles.includes("admin") ||
+            roles.includes("reception") ||
+            roles.includes("doctor" as any)) && (
             <Link
               to="/patients"
               className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
@@ -357,7 +387,9 @@ function AdminDashboard() {
               تحليلات المرضى
             </Link>
           )}
-          {(roles.includes("admin") || roles.includes("reception") || roles.includes("doctor" as never)) && (
+          {(roles.includes("admin") ||
+            roles.includes("reception") ||
+            roles.includes("doctor" as never)) && (
             <Link
               to="/ratings"
               className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
@@ -1982,12 +2014,12 @@ function RemindersDeliveryTab({
   const [retryingId, setRetryingId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkRetrying, setBulkRetrying] = useState(false);
-  const safeCh: LogChannel = (LOG_CHANNELS.includes(initialChannel as LogChannel)
+  const safeCh: LogChannel = LOG_CHANNELS.includes(initialChannel as LogChannel)
     ? (initialChannel as LogChannel)
-    : "");
-  const safeSt: LogStatus = (LOG_STATUSES.includes(initialStatus as LogStatus)
+    : "";
+  const safeSt: LogStatus = LOG_STATUSES.includes(initialStatus as LogStatus)
     ? (initialStatus as LogStatus)
-    : "");
+    : "";
   const safeFrom = isDateStr(initialDateFrom) ? initialDateFrom : "";
   const safeTo = isDateStr(initialDateTo) ? initialDateTo : "";
   const [appointmentIdInput, setAppointmentIdInput] = useState("");
@@ -2176,7 +2208,9 @@ function RemindersDeliveryTab({
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">إلى تاريخ</label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
+              إلى تاريخ
+            </label>
             <input
               type="date"
               value={dateTo}
@@ -2308,7 +2342,6 @@ function RemindersDeliveryTab({
           </button>
         </div>
       </div>
-
 
       {retriableIds.length > 0 && (
         <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-border bg-card px-4 py-2">
@@ -2478,7 +2511,8 @@ function RemindersDeliveryTab({
         )}
       </div>
       <p className="text-xs text-muted-foreground">
-        يعرض آخر 300 تذكير عبر جميع القنوات (داخل التطبيق، إشعارات المتصفح، SMS، إلخ) مع تحديث تلقائي كل دقيقة.
+        يعرض آخر 300 تذكير عبر جميع القنوات (داخل التطبيق، إشعارات المتصفح، SMS، إلخ) مع تحديث
+        تلقائي كل دقيقة.
       </p>
     </div>
   );
@@ -2533,9 +2567,9 @@ function RemindersDeliveryStatsTab() {
   const [customTo, setCustomTo] = useState<string>(() => toLocalInputValue(now));
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const [applied, setApplied] = useState<
-    { hours: number } | { from: string; to: string }
-  >({ hours: PRESET_HOURS["30d"] });
+  const [applied, setApplied] = useState<{ hours: number } | { from: string; to: string }>({
+    hours: PRESET_HOURS["30d"],
+  });
 
   function applyPreset(k: Exclude<PresetKey, "custom">) {
     setPreset(k);
@@ -2596,12 +2630,15 @@ function RemindersDeliveryStatsTab() {
     );
 
   const totalAll = data
-    ? data.totals.sent + data.totals.failed + data.totals.pending + data.totals.skipped + data.totals.queued
+    ? data.totals.sent +
+      data.totals.failed +
+      data.totals.pending +
+      data.totals.skipped +
+      data.totals.queued
     : 0;
   const attempted = data ? data.totals.sent + data.totals.failed : 0;
   const successRate = attempted > 0 ? Math.round((data!.totals.sent / attempted) * 1000) / 10 : 0;
   const failureRate = attempted > 0 ? Math.round((data!.totals.failed / attempted) * 1000) / 10 : 0;
-  
 
   const rangeLabelAr =
     preset === "custom" && data
@@ -2612,12 +2649,7 @@ function RemindersDeliveryStatsTab() {
     ? { from: toYmd(new Date(data.from)), to: toYmd(new Date(data.to)) }
     : { from: "", to: "" };
 
-  function openLog(params: {
-    channel?: string;
-    status?: string;
-    from?: string;
-    to?: string;
-  }) {
+  function openLog(params: { channel?: string; status?: string; from?: string; to?: string }) {
     navigate({
       search: (prev: Record<string, unknown>) => ({
         ...prev,
@@ -2711,9 +2743,7 @@ function RemindersDeliveryStatsTab() {
               </button>
             </div>
           </div>
-          {validationError && (
-            <p className="mt-2 text-xs text-destructive">{validationError}</p>
-          )}
+          {validationError && <p className="mt-2 text-xs text-destructive">{validationError}</p>}
           <p className="mt-2 text-xs text-muted-foreground">
             حدود الفترة: ٥ دقائق كحد أدنى، سنة واحدة كحد أقصى. لا يمكن اختيار تواريخ مستقبلية.
           </p>
@@ -2730,9 +2760,27 @@ function RemindersDeliveryStatsTab() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <ClickableStatCard label="إجمالي التذكيرات" value={totalAll} icon={Bell} onClick={() => openLog({})} hint="عرض كل التذكيرات في هذه الفترة" />
-            <ClickableStatCard label="مُرسلة بنجاح" value={data.totals.sent} icon={CalendarDays} onClick={() => openLog({ status: "sent" })} hint="عرض التذكيرات المُرسلة" />
-            <ClickableStatCard label="فشلت" value={data.totals.failed} icon={ShieldAlert} onClick={() => openLog({ status: "failed" })} hint="عرض التذكيرات الفاشلة" />
+            <ClickableStatCard
+              label="إجمالي التذكيرات"
+              value={totalAll}
+              icon={Bell}
+              onClick={() => openLog({})}
+              hint="عرض كل التذكيرات في هذه الفترة"
+            />
+            <ClickableStatCard
+              label="مُرسلة بنجاح"
+              value={data.totals.sent}
+              icon={CalendarDays}
+              onClick={() => openLog({ status: "sent" })}
+              hint="عرض التذكيرات المُرسلة"
+            />
+            <ClickableStatCard
+              label="فشلت"
+              value={data.totals.failed}
+              icon={ShieldAlert}
+              onClick={() => openLog({ status: "failed" })}
+              hint="عرض التذكيرات الفاشلة"
+            />
             <ClickableStatCard
               label="قيد الانتظار"
               value={data.totals.pending + data.totals.queued}
@@ -2769,13 +2817,38 @@ function RemindersDeliveryStatsTab() {
             <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="mb-4 text-base font-semibold">توزيع الحالات</h3>
               <div className="space-y-3">
-                <button type="button" onClick={() => openLog({ status: "sent" })} className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="عرض المُرسلة في السجل">
-                  <StatBar label="مُرسلة" value={data.totals.sent} total={totalAll} tone="emerald" />
+                <button
+                  type="button"
+                  onClick={() => openLog({ status: "sent" })}
+                  className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  aria-label="عرض المُرسلة في السجل"
+                >
+                  <StatBar
+                    label="مُرسلة"
+                    value={data.totals.sent}
+                    total={totalAll}
+                    tone="emerald"
+                  />
                 </button>
-                <button type="button" onClick={() => openLog({ status: "failed" })} className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="عرض الفاشلة في السجل">
-                  <StatBar label="فشلت" value={data.totals.failed} total={totalAll} tone="destructive" />
+                <button
+                  type="button"
+                  onClick={() => openLog({ status: "failed" })}
+                  className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  aria-label="عرض الفاشلة في السجل"
+                >
+                  <StatBar
+                    label="فشلت"
+                    value={data.totals.failed}
+                    total={totalAll}
+                    tone="destructive"
+                  />
                 </button>
-                <button type="button" onClick={() => openLog({ status: "pending" })} className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="عرض المعلّقة في السجل">
+                <button
+                  type="button"
+                  onClick={() => openLog({ status: "pending" })}
+                  className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  aria-label="عرض المعلّقة في السجل"
+                >
                   <StatBar
                     label="قيد الانتظار"
                     value={data.totals.pending + data.totals.queued}
@@ -2783,11 +2856,23 @@ function RemindersDeliveryStatsTab() {
                     tone="sky"
                   />
                 </button>
-                <button type="button" onClick={() => openLog({ status: "skipped" })} className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40" aria-label="عرض المتجاوزة في السجل">
-                  <StatBar label="متجاوزة" value={data.totals.skipped} total={totalAll} tone="amber" />
+                <button
+                  type="button"
+                  onClick={() => openLog({ status: "skipped" })}
+                  className="block w-full rounded text-start hover:bg-muted/50 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                  aria-label="عرض المتجاوزة في السجل"
+                >
+                  <StatBar
+                    label="متجاوزة"
+                    value={data.totals.skipped}
+                    total={totalAll}
+                    tone="amber"
+                  />
                 </button>
               </div>
-              <p className="mt-3 text-xs text-muted-foreground">اضغط على أي شريط للانتقال إلى السجل بنفس الفلاتر.</p>
+              <p className="mt-3 text-xs text-muted-foreground">
+                اضغط على أي شريط للانتقال إلى السجل بنفس الفلاتر.
+              </p>
             </div>
           </div>
 
@@ -2867,7 +2952,9 @@ function RemindersDeliveryStatsTab() {
                 </tbody>
               </table>
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">اضغط على أي صف قناة للانتقال إلى السجل مع الفلاتر المطابقة.</p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              اضغط على أي صف قناة للانتقال إلى السجل مع الفلاتر المطابقة.
+            </p>
           </div>
 
           <DeliveryTrendChart
@@ -3074,9 +3161,7 @@ function DeliveryTrendChart({
                       {b.sent > 0 && (
                         <div className="w-full bg-emerald-500" style={{ height: sentH }} />
                       )}
-                      {totalH === 0 && (
-                        <div className="w-full bg-muted/40" style={{ height: 1 }} />
-                      )}
+                      {totalH === 0 && <div className="w-full bg-muted/40" style={{ height: 1 }} />}
                     </div>
                     {isHover && (
                       <div
@@ -3123,15 +3208,10 @@ function DeliveryTrendChart({
               <span>{formatBucketLabel(buckets[0]?.label ?? "", bucket)}</span>
               {buckets.length > 4 && (
                 <span>
-                  {formatBucketLabel(
-                    buckets[Math.floor(buckets.length / 2)]?.label ?? "",
-                    bucket,
-                  )}
+                  {formatBucketLabel(buckets[Math.floor(buckets.length / 2)]?.label ?? "", bucket)}
                 </span>
               )}
-              <span>
-                {formatBucketLabel(buckets[buckets.length - 1]?.label ?? "", bucket)}
-              </span>
+              <span>{formatBucketLabel(buckets[buckets.length - 1]?.label ?? "", bucket)}</span>
             </div>
           </div>
         </div>
@@ -3147,16 +3227,22 @@ function DeliveryTrendChart({
             <div className="mt-1 flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-sm bg-emerald-500" />
               <span>مُرسلة:</span>
-              <span className="tabular-nums font-medium">{hovered.sent.toLocaleString("ar-EG")}</span>
+              <span className="tabular-nums font-medium">
+                {hovered.sent.toLocaleString("ar-EG")}
+              </span>
             </div>
             <div className="mt-0.5 flex items-center gap-2">
               <span className="inline-block h-2 w-2 rounded-sm bg-destructive" />
               <span>فشلت:</span>
-              <span className="tabular-nums font-medium">{hovered.failed.toLocaleString("ar-EG")}</span>
+              <span className="tabular-nums font-medium">
+                {hovered.failed.toLocaleString("ar-EG")}
+              </span>
             </div>
             <div className="mt-1 border-t border-border pt-1">
               <span>الإجمالي: </span>
-              <span className="tabular-nums font-medium">{hoveredTotal.toLocaleString("ar-EG")}</span>
+              <span className="tabular-nums font-medium">
+                {hoveredTotal.toLocaleString("ar-EG")}
+              </span>
               {hoveredTotal > 0 && (
                 <>
                   <span className="mx-1">·</span>
@@ -3170,21 +3256,18 @@ function DeliveryTrendChart({
       </div>
 
       <p className="mt-3 text-xs text-muted-foreground">
-        مرّر أفقيًا لعرض جميع الفترات، ومرّر الفأرة (أو المس) على أي عمود لعرض القيم التفصيلية.{onBucketClick ? " اضغط على أي عمود للانتقال إلى السجل بنفس اليوم." : ""}
+        مرّر أفقيًا لعرض جميع الفترات، ومرّر الفأرة (أو المس) على أي عمود لعرض القيم التفصيلية.
+        {onBucketClick ? " اضغط على أي عمود للانتقال إلى السجل بنفس اليوم." : ""}
       </p>
     </div>
   );
 }
 
-
-
 // ============================================================================
 // Reminders Audit Tab
 // ============================================================================
 
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const REMINDER_KIND_LABEL: Record<string, string> = {
   reminder_24h: "قبل 24 ساعة",
@@ -3252,9 +3335,7 @@ function RemindersAuditTab() {
   function applyFilters() {
     const trimmed = appointmentIdInput.trim();
     if (trimmed && !UUID_RE.test(trimmed)) {
-      setUuidError(
-        "الرجاء استخدام معرّف الموعد الكامل (UUID) من صفحة تفاصيل الموعد.",
-      );
+      setUuidError("الرجاء استخدام معرّف الموعد الكامل (UUID) من صفحة تفاصيل الموعد.");
       return;
     }
     setUuidError(null);
@@ -3293,9 +3374,7 @@ function RemindersAuditTab() {
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm font-mono"
               dir="ltr"
             />
-            {uuidError && (
-              <p className="mt-1 text-xs text-destructive">{uuidError}</p>
-            )}
+            {uuidError && <p className="mt-1 text-xs text-destructive">{uuidError}</p>}
           </div>
           <div>
             <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -3312,9 +3391,7 @@ function RemindersAuditTab() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-muted-foreground">
-              المصدر
-            </label>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">المصدر</label>
             <select
               value={source}
               onChange={(e) => setSource(e.target.value as any)}
@@ -3395,23 +3472,11 @@ function RemindersAuditTab() {
                       {REMINDER_KIND_LABEL[r.reminder_kind] ?? r.reminder_kind}
                     </td>
                     <td className="px-3 py-2">
-                      <span
-                        className={
-                          r.old_value
-                            ? "text-green-600"
-                            : "text-muted-foreground"
-                        }
-                      >
+                      <span className={r.old_value ? "text-green-600" : "text-muted-foreground"}>
                         {r.old_value ? "✓" : "✗"}
                       </span>
                       <span className="mx-2 text-muted-foreground">←</span>
-                      <span
-                        className={
-                          r.new_value
-                            ? "text-green-600"
-                            : "text-muted-foreground"
-                        }
-                      >
+                      <span className={r.new_value ? "text-green-600" : "text-muted-foreground"}>
                         {r.new_value ? "✓" : "✗"}
                       </span>
                     </td>
@@ -3424,9 +3489,7 @@ function RemindersAuditTab() {
                         {SOURCE_LABEL[r.source] ?? r.source}
                       </span>
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
-                      {r.changed_by_name || "—"}
-                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">{r.changed_by_name || "—"}</td>
                     <td className="max-w-xs px-3 py-2 text-muted-foreground">
                       <span className="line-clamp-2" title={r.reason ?? ""}>
                         {r.reason || "—"}
@@ -3470,7 +3533,17 @@ function RemindersAuditTab() {
 
 /* ---------------- Reminders Stats Tab ---------------- */
 
-function StatBar({ label, value, total, tone = "primary" }: { label: string; value: number; total: number; tone?: "primary" | "emerald" | "amber" | "destructive" | "sky" }) {
+function StatBar({
+  label,
+  value,
+  total,
+  tone = "primary",
+}: {
+  label: string;
+  value: number;
+  total: number;
+  tone?: "primary" | "emerald" | "amber" | "destructive" | "sky";
+}) {
   const pct = total > 0 ? Math.min(100, Math.round((value / total) * 1000) / 10) : 0;
   const bar = {
     primary: "bg-primary",
@@ -3484,7 +3557,8 @@ function StatBar({ label, value, total, tone = "primary" }: { label: string; val
       <div className="mb-1 flex items-center justify-between text-sm">
         <span className="text-muted-foreground">{label}</span>
         <span className="font-medium tabular-nums text-foreground">
-          {value.toLocaleString("ar-EG")} <span className="text-xs text-muted-foreground">({pct}%)</span>
+          {value.toLocaleString("ar-EG")}{" "}
+          <span className="text-xs text-muted-foreground">({pct}%)</span>
         </span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-muted">
@@ -3502,7 +3576,12 @@ function RemindersStatsTab() {
   });
 
   if (isLoading) return <div className="text-muted-foreground">جارٍ تحميل الإحصائيات…</div>;
-  if (error) return <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">تعذّر تحميل الإحصائيات.</div>;
+  if (error)
+    return (
+      <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        تعذّر تحميل الإحصائيات.
+      </div>
+    );
   if (!data) return null;
 
   const total = data.appointmentsTotal;
@@ -3513,7 +3592,9 @@ function RemindersStatsTab() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-semibold">إحصائيات تفضيلات التذكير</h2>
-          <p className="mt-1 text-sm text-muted-foreground">توزيع الحجوزات حسب نوع التذكير المُفعّل، ومطابقتها مع سجل التدقيق.</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            توزيع الحجوزات حسب نوع التذكير المُفعّل، ومطابقتها مع سجل التدقيق.
+          </p>
         </div>
         <button
           onClick={() => refetch()}
@@ -3535,21 +3616,56 @@ function RemindersStatsTab() {
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 text-base font-semibold">توزيع الحجوزات حسب التفضيل</h3>
           <div className="space-y-4">
-            <StatBar label="تذكير قبل 24 ساعة مُفعّل" value={data.reminder24Enabled} total={total} tone="primary" />
-            <StatBar label="تذكير قبل ساعتين مُفعّل" value={data.reminder2Enabled} total={total} tone="sky" />
-            <StatBar label="الاثنان مُفعّلان" value={data.bothEnabled} total={total} tone="emerald" />
-            <StatBar label="الاثنان مُعطّلان" value={data.bothDisabled} total={total} tone="destructive" />
+            <StatBar
+              label="تذكير قبل 24 ساعة مُفعّل"
+              value={data.reminder24Enabled}
+              total={total}
+              tone="primary"
+            />
+            <StatBar
+              label="تذكير قبل ساعتين مُفعّل"
+              value={data.reminder2Enabled}
+              total={total}
+              tone="sky"
+            />
+            <StatBar
+              label="الاثنان مُفعّلان"
+              value={data.bothEnabled}
+              total={total}
+              tone="emerald"
+            />
+            <StatBar
+              label="الاثنان مُعطّلان"
+              value={data.bothDisabled}
+              total={total}
+              tone="destructive"
+            />
           </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5">
           <h3 className="mb-4 text-base font-semibold">توزيع سجل التدقيق</h3>
           <div className="space-y-4">
-            <StatBar label="حسب النوع: 24 ساعة" value={data.audit24} total={auditTotal} tone="primary" />
+            <StatBar
+              label="حسب النوع: 24 ساعة"
+              value={data.audit24}
+              total={auditTotal}
+              tone="primary"
+            />
             <StatBar label="حسب النوع: ساعتان" value={data.audit2} total={auditTotal} tone="sky" />
-            <StatBar label="من المراجع (خدمة ذاتية)" value={data.auditSelfService} total={auditTotal} tone="emerald" />
+            <StatBar
+              label="من المراجع (خدمة ذاتية)"
+              value={data.auditSelfService}
+              total={auditTotal}
+              tone="emerald"
+            />
             <StatBar label="من الموظفين" value={data.auditStaff} total={auditTotal} tone="amber" />
-            <StatBar label="من النظام" value={data.auditSystem} total={auditTotal} tone="destructive" />
+            <StatBar
+              label="من النظام"
+              value={data.auditSystem}
+              total={auditTotal}
+              tone="destructive"
+            />
           </div>
         </div>
       </div>
@@ -3563,7 +3679,10 @@ function RemindersStatsTab() {
           نسبة الحجوزات التي لديها تغيير واحد على الأقل في تفضيلات التذكير مقارنةً بإجمالي الحجوزات.
         </p>
         <div className="mt-4 h-3 overflow-hidden rounded-full bg-muted">
-          <div className="h-full bg-primary transition-all" style={{ width: `${Math.min(100, data.coveragePct)}%` }} />
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${Math.min(100, data.coveragePct)}%` }}
+          />
         </div>
         <div className="mt-3 flex justify-between text-xs text-muted-foreground">
           <span>{data.appointmentsWithAudit.toLocaleString("ar-EG")} حجز بتغييرات</span>
@@ -3644,9 +3763,7 @@ function ExportRemindersCsvPanel() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            رقم الهاتف
-          </label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">رقم الهاتف</label>
           <input
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
@@ -3656,9 +3773,7 @@ function ExportRemindersCsvPanel() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            من تاريخ
-          </label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">من تاريخ</label>
           <input
             type="date"
             value={fromDate}
@@ -3667,9 +3782,7 @@ function ExportRemindersCsvPanel() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-xs font-medium text-muted-foreground">
-            إلى تاريخ
-          </label>
+          <label className="mb-1 block text-xs font-medium text-muted-foreground">إلى تاريخ</label>
           <input
             type="date"
             value={toDate}
@@ -3972,7 +4085,9 @@ function SecurityAuditTab() {
                         <span className="text-muted-foreground">—</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-xs">{it.actor_name ?? (it.actor ? String(it.actor).slice(0, 8) : "—")}</td>
+                    <td className="px-3 py-2 text-xs">
+                      {it.actor_name ?? (it.actor ? String(it.actor).slice(0, 8) : "—")}
+                    </td>
                     <td className="px-3 py-2 text-xs max-w-[240px]">
                       <div className="truncate" title={it.reason ?? ""}>
                         {it.reason ?? "—"}
@@ -4057,7 +4172,10 @@ function FaqsTab() {
 
   const deleteM = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => { toast.success("تم الحذف"); q.refetch(); },
+    onSuccess: () => {
+      toast.success("تم الحذف");
+      q.refetch();
+    },
     onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
   const saveM = useMutation({
@@ -4073,7 +4191,11 @@ function FaqsTab() {
       if (f.id) return updateFn({ data: { id: f.id, ...payload } });
       return createFn({ data: payload });
     },
-    onSuccess: () => { toast.success("تم الحفظ"); setEditing(null); q.refetch(); },
+    onSuccess: () => {
+      toast.success("تم الحفظ");
+      setEditing(null);
+      q.refetch();
+    },
     onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
@@ -4104,7 +4226,9 @@ function FaqsTab() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">لا توجد أسئلة</td>
+                <td colSpan={4} className="px-4 py-10 text-center text-muted-foreground">
+                  لا توجد أسئلة
+                </td>
               </tr>
             )}
             {rows.map((r: any) => (
@@ -4112,33 +4236,43 @@ function FaqsTab() {
                 <td className="px-4 py-3">
                   <div className="font-medium">{r.question_ar}</div>
                   {r.question_en && (
-                    <div className="text-xs text-muted-foreground" dir="ltr">{r.question_en}</div>
+                    <div className="text-xs text-muted-foreground" dir="ltr">
+                      {r.question_en}
+                    </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-xs" dir="ltr">{r.sort_order}</td>
+                <td className="px-4 py-3 text-xs" dir="ltr">
+                  {r.sort_order}
+                </td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${r.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${r.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                  >
                     {r.is_active ? "نشط" : "متوقف"}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setEditing({
-                        id: r.id,
-                        question_ar: r.question_ar ?? "",
-                        answer_ar: r.answer_ar ?? "",
-                        question_en: r.question_en ?? "",
-                        answer_en: r.answer_en ?? "",
-                        is_active: !!r.is_active,
-                        sort_order: r.sort_order ?? 0,
-                      })}
+                      onClick={() =>
+                        setEditing({
+                          id: r.id,
+                          question_ar: r.question_ar ?? "",
+                          answer_ar: r.answer_ar ?? "",
+                          question_en: r.question_en ?? "",
+                          answer_en: r.answer_en ?? "",
+                          is_active: !!r.is_active,
+                          sort_order: r.sort_order ?? 0,
+                        })
+                      }
                       className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-muted"
                     >
                       <Pencil className="h-3.5 w-3.5" /> تعديل
                     </button>
                     <button
-                      onClick={() => { if (confirm(`حذف السؤال "${r.question_ar}"؟`)) deleteM.mutate(r.id); }}
+                      onClick={() => {
+                        if (confirm(`حذف السؤال "${r.question_ar}"؟`)) deleteM.mutate(r.id);
+                      }}
                       className="inline-flex items-center gap-1 rounded-md border border-destructive/40 px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> حذف
@@ -4164,7 +4298,10 @@ function FaqsTab() {
 }
 
 function FaqFormModal({
-  value, saving, onCancel, onSave,
+  value,
+  saving,
+  onCancel,
+  onSave,
 }: {
   value: FaqForm;
   saving: boolean;
@@ -4174,11 +4311,19 @@ function FaqFormModal({
   const [form, setForm] = useState<FaqForm>(value);
   const set = <K extends keyof FaqForm>(k: K, v: FaqForm[K]) => setForm((p) => ({ ...p, [k]: v }));
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onCancel}>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-xl" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="text-lg font-bold">{form.id ? "تعديل سؤال" : "إضافة سؤال"}</h2>
-          <button onClick={onCancel} className="rounded-md p-1 hover:bg-muted"><XIcon className="h-4 w-4" /></button>
+          <button onClick={onCancel} className="rounded-md p-1 hover:bg-muted">
+            <XIcon className="h-4 w-4" />
+          </button>
         </div>
         <form
           onSubmit={(e) => {
@@ -4196,29 +4341,74 @@ function FaqFormModal({
           className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2"
         >
           <Field label="السؤال (عربي) *" full>
-            <input required value={form.question_ar} onChange={(e) => set("question_ar", e.target.value)} className={inputCls} maxLength={500} />
+            <input
+              required
+              value={form.question_ar}
+              onChange={(e) => set("question_ar", e.target.value)}
+              className={inputCls}
+              maxLength={500}
+            />
           </Field>
           <Field label="الجواب (عربي) *" full>
-            <textarea required value={form.answer_ar} onChange={(e) => set("answer_ar", e.target.value)} className={inputCls} rows={4} maxLength={4000} />
+            <textarea
+              required
+              value={form.answer_ar}
+              onChange={(e) => set("answer_ar", e.target.value)}
+              className={inputCls}
+              rows={4}
+              maxLength={4000}
+            />
           </Field>
           <Field label="Question (English)" full>
-            <input dir="ltr" value={form.question_en} onChange={(e) => set("question_en", e.target.value)} className={inputCls} maxLength={500} />
+            <input
+              dir="ltr"
+              value={form.question_en}
+              onChange={(e) => set("question_en", e.target.value)}
+              className={inputCls}
+              maxLength={500}
+            />
           </Field>
           <Field label="Answer (English)" full>
-            <textarea dir="ltr" value={form.answer_en} onChange={(e) => set("answer_en", e.target.value)} className={inputCls} rows={4} maxLength={4000} />
+            <textarea
+              dir="ltr"
+              value={form.answer_en}
+              onChange={(e) => set("answer_en", e.target.value)}
+              className={inputCls}
+              rows={4}
+              maxLength={4000}
+            />
           </Field>
           <Field label="الترتيب">
-            <input type="number" value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} className={inputCls} />
+            <input
+              type="number"
+              value={form.sort_order}
+              onChange={(e) => set("sort_order", Number(e.target.value))}
+              className={inputCls}
+            />
           </Field>
           <Field label="الحالة">
             <label className="mt-2 flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={form.is_active} onChange={(e) => set("is_active", e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={form.is_active}
+                onChange={(e) => set("is_active", e.target.checked)}
+              />
               نشط
             </label>
           </Field>
           <div className="sm:col-span-2 flex justify-end gap-2 border-t border-border pt-4">
-            <button type="button" onClick={onCancel} className="rounded-md border border-input px-4 py-2 text-sm hover:bg-muted">إلغاء</button>
-            <button type="submit" disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-md border border-input px-4 py-2 text-sm hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
               {saving ? "جارٍ الحفظ…" : "حفظ"}
             </button>
           </div>
@@ -4262,7 +4452,10 @@ function AboutSectionsTab() {
 
   const deleteM = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
-    onSuccess: () => { toast.success("تم الحذف"); q.refetch(); },
+    onSuccess: () => {
+      toast.success("تم الحذف");
+      q.refetch();
+    },
     onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
   const saveM = useMutation({
@@ -4279,7 +4472,11 @@ function AboutSectionsTab() {
       if (f.id) return updateFn({ data: { id: f.id, ...payload } });
       return createFn({ data: payload });
     },
-    onSuccess: () => { toast.success("تم الحفظ"); setEditing(null); q.refetch(); },
+    onSuccess: () => {
+      toast.success("تم الحفظ");
+      setEditing(null);
+      q.refetch();
+    },
     onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
@@ -4311,7 +4508,9 @@ function AboutSectionsTab() {
           <tbody>
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">لا توجد أقسام</td>
+                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">
+                  لا توجد أقسام
+                </td>
               </tr>
             )}
             {rows.map((r: any) => (
@@ -4319,35 +4518,48 @@ function AboutSectionsTab() {
                 <td className="px-4 py-3">
                   <div className="font-medium">{r.title_ar ?? r.section_key}</div>
                   {r.title_en && (
-                    <div className="text-xs text-muted-foreground" dir="ltr">{r.title_en}</div>
+                    <div className="text-xs text-muted-foreground" dir="ltr">
+                      {r.title_en}
+                    </div>
                   )}
                 </td>
-                <td className="px-4 py-3 text-xs" dir="ltr">{r.section_key}</td>
-                <td className="px-4 py-3 text-xs" dir="ltr">{r.sort_order}</td>
+                <td className="px-4 py-3 text-xs" dir="ltr">
+                  {r.section_key}
+                </td>
+                <td className="px-4 py-3 text-xs" dir="ltr">
+                  {r.sort_order}
+                </td>
                 <td className="px-4 py-3">
-                  <span className={`rounded-full px-3 py-1 text-xs font-medium ${r.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${r.is_active ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground"}`}
+                  >
                     {r.is_active ? "نشط" : "متوقف"}
                   </span>
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
                     <button
-                      onClick={() => setEditing({
-                        id: r.id,
-                        section_key: r.section_key ?? "",
-                        title_ar: r.title_ar ?? "",
-                        title_en: r.title_en ?? "",
-                        body_ar: r.body_ar ?? "",
-                        body_en: r.body_en ?? "",
-                        is_active: !!r.is_active,
-                        sort_order: r.sort_order ?? 0,
-                      })}
+                      onClick={() =>
+                        setEditing({
+                          id: r.id,
+                          section_key: r.section_key ?? "",
+                          title_ar: r.title_ar ?? "",
+                          title_en: r.title_en ?? "",
+                          body_ar: r.body_ar ?? "",
+                          body_en: r.body_en ?? "",
+                          is_active: !!r.is_active,
+                          sort_order: r.sort_order ?? 0,
+                        })
+                      }
                       className="inline-flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs hover:bg-muted"
                     >
                       <Pencil className="h-3.5 w-3.5" /> تعديل
                     </button>
                     <button
-                      onClick={() => { if (confirm(`حذف قسم "${r.title_ar ?? r.section_key}"؟`)) deleteM.mutate(r.id); }}
+                      onClick={() => {
+                        if (confirm(`حذف قسم "${r.title_ar ?? r.section_key}"؟`))
+                          deleteM.mutate(r.id);
+                      }}
                       className="inline-flex items-center gap-1 rounded-md border border-destructive/40 px-2 py-1 text-xs text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-3.5 w-3.5" /> حذف
@@ -4373,7 +4585,10 @@ function AboutSectionsTab() {
 }
 
 function AboutFormModal({
-  value, saving, onCancel, onSave,
+  value,
+  saving,
+  onCancel,
+  onSave,
 }: {
   value: AboutForm;
   saving: boolean;
@@ -4381,13 +4596,22 @@ function AboutFormModal({
   onSave: (v: AboutForm) => void;
 }) {
   const [form, setForm] = useState<AboutForm>(value);
-  const set = <K extends keyof AboutForm>(k: K, v: AboutForm[K]) => setForm((p) => ({ ...p, [k]: v }));
+  const set = <K extends keyof AboutForm>(k: K, v: AboutForm[K]) =>
+    setForm((p) => ({ ...p, [k]: v }));
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onCancel}>
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-xl" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      onClick={onCancel}
+    >
+      <div
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h2 className="text-lg font-bold">{form.id ? "تعديل قسم" : "إضافة قسم"}</h2>
-          <button onClick={onCancel} className="rounded-md p-1 hover:bg-muted"><XIcon className="h-4 w-4" /></button>
+          <button onClick={onCancel} className="rounded-md p-1 hover:bg-muted">
+            <XIcon className="h-4 w-4" />
+          </button>
         </div>
         <form
           onSubmit={(e) => {
@@ -4405,32 +4629,83 @@ function AboutFormModal({
           className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2"
         >
           <Field label="مفتاح القسم *">
-            <input required dir="ltr" value={form.section_key} onChange={(e) => set("section_key", e.target.value)} className={inputCls} placeholder="mission" maxLength={100} />
+            <input
+              required
+              dir="ltr"
+              value={form.section_key}
+              onChange={(e) => set("section_key", e.target.value)}
+              className={inputCls}
+              placeholder="mission"
+              maxLength={100}
+            />
           </Field>
           <Field label="الترتيب">
-            <input type="number" value={form.sort_order} onChange={(e) => set("sort_order", Number(e.target.value))} className={inputCls} />
+            <input
+              type="number"
+              value={form.sort_order}
+              onChange={(e) => set("sort_order", Number(e.target.value))}
+              className={inputCls}
+            />
           </Field>
           <Field label="العنوان (عربي)">
-            <input value={form.title_ar} onChange={(e) => set("title_ar", e.target.value)} className={inputCls} maxLength={300} />
+            <input
+              value={form.title_ar}
+              onChange={(e) => set("title_ar", e.target.value)}
+              className={inputCls}
+              maxLength={300}
+            />
           </Field>
           <Field label="Title (English)">
-            <input dir="ltr" value={form.title_en} onChange={(e) => set("title_en", e.target.value)} className={inputCls} maxLength={300} />
+            <input
+              dir="ltr"
+              value={form.title_en}
+              onChange={(e) => set("title_en", e.target.value)}
+              className={inputCls}
+              maxLength={300}
+            />
           </Field>
           <Field label="النص (عربي)" full>
-            <textarea value={form.body_ar} onChange={(e) => set("body_ar", e.target.value)} className={inputCls} rows={6} maxLength={8000} />
+            <textarea
+              value={form.body_ar}
+              onChange={(e) => set("body_ar", e.target.value)}
+              className={inputCls}
+              rows={6}
+              maxLength={8000}
+            />
           </Field>
           <Field label="Body (English)" full>
-            <textarea dir="ltr" value={form.body_en} onChange={(e) => set("body_en", e.target.value)} className={inputCls} rows={6} maxLength={8000} />
+            <textarea
+              dir="ltr"
+              value={form.body_en}
+              onChange={(e) => set("body_en", e.target.value)}
+              className={inputCls}
+              rows={6}
+              maxLength={8000}
+            />
           </Field>
           <Field label="الحالة" full>
             <label className="mt-2 flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={form.is_active} onChange={(e) => set("is_active", e.target.checked)} />
+              <input
+                type="checkbox"
+                checked={form.is_active}
+                onChange={(e) => set("is_active", e.target.checked)}
+              />
               نشط
             </label>
           </Field>
           <div className="sm:col-span-2 flex justify-end gap-2 border-t border-border pt-4">
-            <button type="button" onClick={onCancel} className="rounded-md border border-input px-4 py-2 text-sm hover:bg-muted">إلغاء</button>
-            <button type="submit" disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="rounded-md border border-input px-4 py-2 text-sm hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            >
               {saving ? "جارٍ الحفظ…" : "حفظ"}
             </button>
           </div>

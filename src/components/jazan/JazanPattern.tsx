@@ -28,11 +28,7 @@ const VARIANT_OPACITY: Record<JazanVariant, number> = {
   featured: 1,
 };
 
-export function JazanPattern({
-  variant = "subtle",
-  className,
-  orientation = "horizontal",
-}: Props) {
+export function JazanPattern({ variant = "subtle", className, orientation = "horizontal" }: Props) {
   const opacity = VARIANT_OPACITY[variant];
   const viewBox = orientation === "horizontal" ? "0 0 96 24" : "0 0 24 96";
   return (
@@ -45,12 +41,7 @@ export function JazanPattern({
       style={{ opacity }}
     >
       <defs>
-        <pattern
-          id="jazan-diamonds-motif"
-          width="24"
-          height="24"
-          patternUnits="userSpaceOnUse"
-        >
+        <pattern id="jazan-diamonds-motif" width="24" height="24" patternUnits="userSpaceOnUse">
           {/* outer diamond — deep teal */}
           <path
             d="M12 2 L22 12 L12 22 L2 12 Z"
@@ -59,18 +50,9 @@ export function JazanPattern({
             strokeWidth="1"
           />
           {/* inner diamond — muted gold */}
-          <path
-            d="M12 6 L18 12 L12 18 L6 12 Z"
-            fill="var(--jazan-gold, #C7A46B)"
-            opacity="0.6"
-          />
+          <path d="M12 6 L18 12 L12 18 L6 12 Z" fill="var(--jazan-gold, #C7A46B)" opacity="0.6" />
           {/* core dot — terracotta */}
-          <circle
-            cx="12"
-            cy="12"
-            r="1.6"
-            fill="var(--jazan-terracotta, #B85C3C)"
-          />
+          <circle cx="12" cy="12" r="1.6" fill="var(--jazan-terracotta, #B85C3C)" />
           {/* palm-frond hint at corners */}
           <path
             d="M0 12 L4 10 M0 12 L4 14"
@@ -86,13 +68,7 @@ export function JazanPattern({
           />
         </pattern>
       </defs>
-      <rect
-        x="0"
-        y="0"
-        width="100%"
-        height="100%"
-        fill="url(#jazan-diamonds-motif)"
-      />
+      <rect x="0" y="0" width="100%" height="100%" fill="url(#jazan-diamonds-motif)" />
     </svg>
   );
 }

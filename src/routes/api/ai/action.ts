@@ -45,7 +45,11 @@ export const Route = createFileRoute("/api/ai/action")({
         if (!enabled) return json({ error: "mutations_disabled" }, 503);
 
         let body: Body = {};
-        try { body = await request.json(); } catch { return json({ error: "bad_request" }, 400); }
+        try {
+          body = await request.json();
+        } catch {
+          return json({ error: "bad_request" }, 400);
+        }
         const tool = body.tool as ToolName | undefined;
         if (!tool || !(tool in ToolSchemas)) return json({ error: "unknown_tool" }, 400);
 
@@ -54,14 +58,10 @@ export const Route = createFileRoute("/api/ai/action")({
           return json({ error: "invalid_params", details: parsed.error.flatten() }, 400);
         }
 
-        const sb = createClient(
-          process.env.SUPABASE_URL!,
-          process.env.SUPABASE_PUBLISHABLE_KEY!,
-          {
-            auth: { persistSession: false, autoRefreshToken: false },
-            global: { headers: { Authorization: `Bearer ${auth.token}` } },
-          },
-        );
+        const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+          auth: { persistSession: false, autoRefreshToken: false },
+          global: { headers: { Authorization: `Bearer ${auth.token}` } },
+        });
 
         const start = Date.now();
         let outcome: "ok" | "error" = "ok";
@@ -71,12 +71,14 @@ export const Route = createFileRoute("/api/ai/action")({
         try {
           if (tool === "cancel_appointment") {
             output = await cancelAppointment(
-              sb, auth.userId,
+              sb,
+              auth.userId,
               parsed.data as z.infer<(typeof ToolSchemas)["cancel_appointment"]>,
             );
           } else if (tool === "reschedule_appointment") {
             output = await rescheduleAppointment(
-              sb, auth.userId,
+              sb,
+              auth.userId,
               parsed.data as z.infer<(typeof ToolSchemas)["reschedule_appointment"]>,
             );
           }
@@ -230,7 +232,9 @@ async function recordAudit(p: {
         source: "ai_assistant",
       },
     });
-  } catch { /* best-effort */ }
+  } catch {
+    /* best-effort */
+  }
 }
 
 function json(body: unknown, status = 200) {

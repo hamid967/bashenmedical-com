@@ -20,7 +20,6 @@ import {
   BarChart3,
 } from "lucide-react";
 
-
 export const Route = createFileRoute("/_authenticated/patients/")({
   head: () => ({
     meta: [{ title: "السجلات الطبية | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
@@ -86,8 +85,7 @@ function PatientsList() {
     },
   });
 
-  const branchName = (id: string) =>
-    branchesQ.data?.find((b) => b.id === id)?.name_ar ?? "—";
+  const branchName = (id: string) => branchesQ.data?.find((b) => b.id === id)?.name_ar ?? "—";
 
   return (
     <div className="container-app py-8">
@@ -218,13 +216,9 @@ function PatientsList() {
         </TabsContent>
 
         <TabsContent value="stats" className="space-y-4">
-          <QuickStats
-            patients={patientsQ.data ?? []}
-            branches={branchesQ.data ?? []}
-          />
+          <QuickStats patients={patientsQ.data ?? []} branches={branchesQ.data ?? []} />
         </TabsContent>
       </Tabs>
-
 
       {showCreate && (
         <CreatePatientDialog
@@ -308,7 +302,6 @@ function StatRow({ label, value, total }: { label: string; value: number; total:
     </div>
   );
 }
-
 
 function CreatePatientDialog({
   branches,

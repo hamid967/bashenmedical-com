@@ -7,10 +7,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/owner/audit")({
   head: () => ({
-    meta: [
-      { title: "سجل النشاط | Site Builder" },
-      { name: "robots", content: "noindex,nofollow" },
-    ],
+    meta: [{ title: "سجل النشاط | Site Builder" }, { name: "robots", content: "noindex,nofollow" }],
   }),
   component: AuditPage,
 });
@@ -97,7 +94,9 @@ function AuditPage() {
 
   const reset = () => {
     setFilters(DEFAULT_FILTERS);
-    try { window.localStorage.removeItem(STORAGE_KEY); } catch {}
+    try {
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {}
   };
 
   function exportCsv() {
@@ -197,7 +196,9 @@ function AuditPage() {
             className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
           >
             {ACTION_PREFIXES.map((p) => (
-              <option key={p.value} value={p.value}>{p.label}</option>
+              <option key={p.value} value={p.value}>
+                {p.label}
+              </option>
             ))}
           </select>
         </div>
@@ -211,7 +212,9 @@ function AuditPage() {
           />
         </div>
         <div className="md:col-span-2">
-          <label className="text-[11px] text-slate-500 block mb-1">المستخدم (اسم/بريد/جوال/معرف)</label>
+          <label className="text-[11px] text-slate-500 block mb-1">
+            المستخدم (اسم/بريد/جوال/معرف)
+          </label>
           <input
             value={filters.actorQuery}
             onChange={(e) => patch({ actorQuery: e.target.value })}
@@ -222,7 +225,11 @@ function AuditPage() {
       </div>
 
       <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
-        {q.isLoading && <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>}
+        {q.isLoading && (
+          <div className="p-8 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          </div>
+        )}
         {q.error && <div className="p-4 text-sm text-red-600">{(q.error as Error).message}</div>}
         {q.data && (
           <table className="w-full text-xs">
@@ -240,12 +247,16 @@ function AuditPage() {
                 const a = (q.data.actors as any)?.[r.actor ?? ""] ?? {};
                 return (
                   <tr key={r.id} className="hover:bg-slate-50">
-                    <td className="px-3 py-2 text-slate-500 whitespace-nowrap">{new Date(r.created_at).toLocaleString("ar")}</td>
+                    <td className="px-3 py-2 text-slate-500 whitespace-nowrap">
+                      {new Date(r.created_at).toLocaleString("ar")}
+                    </td>
                     <td className="px-3 py-2 font-mono text-slate-800">{r.action}</td>
                     <td className="px-3 py-2">
                       {r.actor ? (
                         <div>
-                          <div className="text-slate-800">{a.full_name || a.email || r.actor.slice(0, 8)}</div>
+                          <div className="text-slate-800">
+                            {a.full_name || a.email || r.actor.slice(0, 8)}
+                          </div>
                           {a.email && a.full_name && (
                             <div className="text-[10px] text-slate-400 font-mono">{a.email}</div>
                           )}
@@ -254,13 +265,19 @@ function AuditPage() {
                         <span className="text-slate-400">—</span>
                       )}
                     </td>
-                    <td className="px-3 py-2 font-mono text-slate-500">{r.record_id?.slice(0, 8) ?? "—"}</td>
+                    <td className="px-3 py-2 font-mono text-slate-500">
+                      {r.record_id?.slice(0, 8) ?? "—"}
+                    </td>
                     <td className="px-3 py-2 font-mono text-slate-400">{r.ip_address ?? "—"}</td>
                   </tr>
                 );
               })}
               {q.data.rows.length === 0 && (
-                <tr><td colSpan={5} className="p-8 text-center text-slate-400">لا توجد أحداث مطابقة</td></tr>
+                <tr>
+                  <td colSpan={5} className="p-8 text-center text-slate-400">
+                    لا توجد أحداث مطابقة
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>

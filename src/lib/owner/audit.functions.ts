@@ -38,7 +38,8 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
           u.email?.toLowerCase().includes(q) ||
           u.phone?.toLowerCase().includes(q) ||
           u.id.toLowerCase().includes(q)
-        ) ids.add(u.id);
+        )
+          ids.add(u.id);
       });
 
       // Match by profile full_name
@@ -51,7 +52,10 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
 
       actorIds = Array.from(ids);
       if (actorIds.length === 0) {
-        return { rows: [], actors: {} as Record<string, { email: string | null; full_name: string | null }> };
+        return {
+          rows: [],
+          actors: {} as Record<string, { email: string | null; full_name: string | null }>,
+        };
       }
     }
 

@@ -47,13 +47,7 @@ export const Route = createFileRoute("/services")({
   component: ServicesPortal,
 });
 
-type Category =
-  | "appointments"
-  | "records"
-  | "pharmacy"
-  | "care"
-  | "billing"
-  | "support";
+type Category = "appointments" | "records" | "pharmacy" | "care" | "billing" | "support";
 
 type Svc = {
   key: string;
@@ -69,33 +63,237 @@ type Svc = {
 };
 
 const SERVICES: Svc[] = [
-  { key: "book", ar: "احجز موعدك", en: "Book Appointment", descAr: "احجز مع استشاري في 12 تخصصًا.", descEn: "Book with a consultant in 12 specialties.", to: "/book", icon: CalendarCheck, cat: "appointments", keywords: "موعد حجز appointment" },
-  { key: "lookup", ar: "تعديل / إلغاء موعد", en: "Manage Appointment", descAr: "ابحث عن حجزك برقم الجوال.", descEn: "Look up your booking by phone.", to: "/lookup", icon: Search, cat: "appointments" },
-  { key: "telemed", ar: "الاستشارة عن بُعد", en: "Telemedicine", descAr: "استشارة فيديو مع الطبيب.", descEn: "Video consultation with doctor.", to: "/telemedicine", icon: Video, cat: "appointments" },
-  { key: "second", ar: "رأي طبي ثانٍ", en: "Second Opinion", descAr: "مراجعة استشاري مختص لحالتك.", descEn: "Specialist review of your case.", to: "/second-opinion", icon: Stethoscope, cat: "appointments" },
+  {
+    key: "book",
+    ar: "احجز موعدك",
+    en: "Book Appointment",
+    descAr: "احجز مع استشاري في 12 تخصصًا.",
+    descEn: "Book with a consultant in 12 specialties.",
+    to: "/book",
+    icon: CalendarCheck,
+    cat: "appointments",
+    keywords: "موعد حجز appointment",
+  },
+  {
+    key: "lookup",
+    ar: "تعديل / إلغاء موعد",
+    en: "Manage Appointment",
+    descAr: "ابحث عن حجزك برقم الجوال.",
+    descEn: "Look up your booking by phone.",
+    to: "/lookup",
+    icon: Search,
+    cat: "appointments",
+  },
+  {
+    key: "telemed",
+    ar: "الاستشارة عن بُعد",
+    en: "Telemedicine",
+    descAr: "استشارة فيديو مع الطبيب.",
+    descEn: "Video consultation with doctor.",
+    to: "/telemedicine",
+    icon: Video,
+    cat: "appointments",
+  },
+  {
+    key: "second",
+    ar: "رأي طبي ثانٍ",
+    en: "Second Opinion",
+    descAr: "مراجعة استشاري مختص لحالتك.",
+    descEn: "Specialist review of your case.",
+    to: "/second-opinion",
+    icon: Stethoscope,
+    cat: "appointments",
+  },
 
-  { key: "lab", ar: "التقارير المخبرية", en: "Lab Reports", descAr: "تحميل نتائج التحاليل.", descEn: "Download lab results.", to: "/my", icon: FlaskConical, cat: "records", auth: true },
-  { key: "rad", ar: "تقارير الأشعة", en: "Radiology Reports", descAr: "صور وتقارير الأشعة.", descEn: "Images and reports.", to: "/my", icon: Scan, cat: "records", auth: true },
-  { key: "prescriptions", ar: "الوصفات الطبية", en: "Prescriptions", descAr: "استعراض وصفاتك السابقة.", descEn: "View your prescriptions.", to: "/my", icon: ClipboardList, cat: "records", auth: true },
-  { key: "records", ar: "الملف الطبي", en: "Medical Record", descAr: "زياراتك وتشخيصاتك.", descEn: "Visits and diagnoses.", to: "/my", icon: FileText, cat: "records", auth: true },
+  {
+    key: "lab",
+    ar: "التقارير المخبرية",
+    en: "Lab Reports",
+    descAr: "تحميل نتائج التحاليل.",
+    descEn: "Download lab results.",
+    to: "/my",
+    icon: FlaskConical,
+    cat: "records",
+    auth: true,
+  },
+  {
+    key: "rad",
+    ar: "تقارير الأشعة",
+    en: "Radiology Reports",
+    descAr: "صور وتقارير الأشعة.",
+    descEn: "Images and reports.",
+    to: "/my",
+    icon: Scan,
+    cat: "records",
+    auth: true,
+  },
+  {
+    key: "prescriptions",
+    ar: "الوصفات الطبية",
+    en: "Prescriptions",
+    descAr: "استعراض وصفاتك السابقة.",
+    descEn: "View your prescriptions.",
+    to: "/my",
+    icon: ClipboardList,
+    cat: "records",
+    auth: true,
+  },
+  {
+    key: "records",
+    ar: "الملف الطبي",
+    en: "Medical Record",
+    descAr: "زياراتك وتشخيصاتك.",
+    descEn: "Visits and diagnoses.",
+    to: "/my",
+    icon: FileText,
+    cat: "records",
+    auth: true,
+  },
 
-  { key: "pharmacy", ar: "الصيدلية", en: "Pharmacy", descAr: "اطلب دواءك مع توصيل.", descEn: "Order medicines with delivery.", to: "/pharmacy", icon: Pill, cat: "pharmacy" },
-  { key: "delivery", ar: "توصيل الأدوية", en: "Medicine Delivery", descAr: "توصيل داخل جازان.", descEn: "Delivery within Jazan.", to: "/pharmacy", icon: Truck, cat: "pharmacy" },
-  { key: "track", ar: "تتبع الطلب", en: "Track Order", descAr: "حالة طلب الصيدلية.", descEn: "Pharmacy order status.", to: "/track", icon: MapPin, cat: "pharmacy" },
+  {
+    key: "pharmacy",
+    ar: "الصيدلية",
+    en: "Pharmacy",
+    descAr: "اطلب دواءك مع توصيل.",
+    descEn: "Order medicines with delivery.",
+    to: "/pharmacy",
+    icon: Pill,
+    cat: "pharmacy",
+  },
+  {
+    key: "delivery",
+    ar: "توصيل الأدوية",
+    en: "Medicine Delivery",
+    descAr: "توصيل داخل جازان.",
+    descEn: "Delivery within Jazan.",
+    to: "/pharmacy",
+    icon: Truck,
+    cat: "pharmacy",
+  },
+  {
+    key: "track",
+    ar: "تتبع الطلب",
+    en: "Track Order",
+    descAr: "حالة طلب الصيدلية.",
+    descEn: "Pharmacy order status.",
+    to: "/track",
+    icon: MapPin,
+    cat: "pharmacy",
+  },
 
-  { key: "home-care", ar: "الرعاية المنزلية", en: "Home Care", descAr: "زيارات طبية للمنزل.", descEn: "In-home medical visits.", to: "/home-care", icon: HomeIcon, cat: "care" },
-  { key: "emergency", ar: "الطوارئ", en: "Emergency", descAr: "خدمات الطوارئ على مدار الساعة.", descEn: "24/7 emergency services.", to: "/emergency", icon: HeartPulse, cat: "care" },
-  { key: "intl", ar: "المرضى الدوليون", en: "International Patients", descAr: "خدمات المرضى من خارج المملكة.", descEn: "Services for international patients.", to: "/international-patients", icon: Plane, cat: "care" },
-  { key: "corp", ar: "خدمات الشركات", en: "Corporate", descAr: "عقود واتفاقيات الشركات.", descEn: "Corporate contracts.", to: "/corporate", icon: Building2, cat: "care" },
+  {
+    key: "home-care",
+    ar: "الرعاية المنزلية",
+    en: "Home Care",
+    descAr: "زيارات طبية للمنزل.",
+    descEn: "In-home medical visits.",
+    to: "/home-care",
+    icon: HomeIcon,
+    cat: "care",
+  },
+  {
+    key: "emergency",
+    ar: "الطوارئ",
+    en: "Emergency",
+    descAr: "خدمات الطوارئ على مدار الساعة.",
+    descEn: "24/7 emergency services.",
+    to: "/emergency",
+    icon: HeartPulse,
+    cat: "care",
+  },
+  {
+    key: "intl",
+    ar: "المرضى الدوليون",
+    en: "International Patients",
+    descAr: "خدمات المرضى من خارج المملكة.",
+    descEn: "Services for international patients.",
+    to: "/international-patients",
+    icon: Plane,
+    cat: "care",
+  },
+  {
+    key: "corp",
+    ar: "خدمات الشركات",
+    en: "Corporate",
+    descAr: "عقود واتفاقيات الشركات.",
+    descEn: "Corporate contracts.",
+    to: "/corporate",
+    icon: Building2,
+    cat: "care",
+  },
 
-  { key: "insurance", ar: "التأمين الطبي", en: "Insurance", descAr: "شركات التأمين المعتمدة.", descEn: "Approved insurance providers.", to: "/insurance", icon: ShieldCheck, cat: "billing" },
-  { key: "packages", ar: "الباقات الطبية", en: "Medical Packages", descAr: "فحوصات وباقات بأسعار مميزة.", descEn: "Screening packages.", to: "/packages", icon: CreditCard, cat: "billing" },
-  { key: "invoices", ar: "الفواتير", en: "Invoices", descAr: "استعراض فواتيرك.", descEn: "View your invoices.", to: "/my", icon: FileText, cat: "billing", auth: true },
+  {
+    key: "insurance",
+    ar: "التأمين الطبي",
+    en: "Insurance",
+    descAr: "شركات التأمين المعتمدة.",
+    descEn: "Approved insurance providers.",
+    to: "/insurance",
+    icon: ShieldCheck,
+    cat: "billing",
+  },
+  {
+    key: "packages",
+    ar: "الباقات الطبية",
+    en: "Medical Packages",
+    descAr: "فحوصات وباقات بأسعار مميزة.",
+    descEn: "Screening packages.",
+    to: "/packages",
+    icon: CreditCard,
+    cat: "billing",
+  },
+  {
+    key: "invoices",
+    ar: "الفواتير",
+    en: "Invoices",
+    descAr: "استعراض فواتيرك.",
+    descEn: "View your invoices.",
+    to: "/my",
+    icon: FileText,
+    cat: "billing",
+    auth: true,
+  },
 
-  { key: "rate", ar: "قيّم تجربتك", en: "Rate Us", descAr: "شاركنا رأيك في الخدمة.", descEn: "Share your experience.", to: "/rate", icon: Star, cat: "support" },
-  { key: "complaints", ar: "الشكاوى والاقتراحات", en: "Feedback", descAr: "صوتك يهمّنا.", descEn: "Your voice matters.", to: "/complaints", icon: MessageSquareWarning, cat: "support" },
-  { key: "contact", ar: "تواصل معنا", en: "Contact", descAr: "أرقام وقنوات التواصل.", descEn: "Phones & channels.", to: "/contact", icon: Phone, cat: "support" },
-  { key: "doctors", ar: "دليل الأطباء", en: "Doctor Directory", descAr: "تصفح الأطباء بالتخصص.", descEn: "Browse doctors by specialty.", to: "/doctors", icon: Users, cat: "support" },
+  {
+    key: "rate",
+    ar: "قيّم تجربتك",
+    en: "Rate Us",
+    descAr: "شاركنا رأيك في الخدمة.",
+    descEn: "Share your experience.",
+    to: "/rate",
+    icon: Star,
+    cat: "support",
+  },
+  {
+    key: "complaints",
+    ar: "الشكاوى والاقتراحات",
+    en: "Feedback",
+    descAr: "صوتك يهمّنا.",
+    descEn: "Your voice matters.",
+    to: "/complaints",
+    icon: MessageSquareWarning,
+    cat: "support",
+  },
+  {
+    key: "contact",
+    ar: "تواصل معنا",
+    en: "Contact",
+    descAr: "أرقام وقنوات التواصل.",
+    descEn: "Phones & channels.",
+    to: "/contact",
+    icon: Phone,
+    cat: "support",
+  },
+  {
+    key: "doctors",
+    ar: "دليل الأطباء",
+    en: "Doctor Directory",
+    descAr: "تصفح الأطباء بالتخصص.",
+    descEn: "Browse doctors by specialty.",
+    to: "/doctors",
+    icon: Users,
+    cat: "support",
+  },
 ];
 
 const CATS: { key: Category | "all"; ar: string; en: string }[] = [
@@ -143,7 +341,11 @@ function ServicesPortal() {
         <div className="container-app relative py-14 md:py-20">
           <div className="max-w-3xl">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color:var(--brand-gold-soft)] bg-white/15 px-3.5 py-1 text-xs font-semibold text-white">
-              <span className="h-1.5 w-1.5 rounded-full" style={{ background: "var(--brand-gold)" }} aria-hidden />
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ background: "var(--brand-gold)" }}
+                aria-hidden
+              />
               {lang === "ar" ? "بوابة الخدمات الإلكترونية" : "E-Services Portal"}
             </div>
             <h1 className="text-4xl md:text-5xl leading-tight text-white">
@@ -201,7 +403,9 @@ function ServicesPortal() {
                   }`}
                 >
                   {lang === "ar" ? c.ar : c.en}
-                  <span className={`ms-2 text-[11px] ${active ? "text-white/80" : "text-muted-foreground"}`}>
+                  <span
+                    className={`ms-2 text-[11px] ${active ? "text-white/80" : "text-muted-foreground"}`}
+                  >
                     {counts[c.key] ?? 0}
                   </span>
                 </button>
@@ -244,9 +448,7 @@ function ServicesPortal() {
                     </div>
                     <div className="mt-4 flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-base">
-                          {lang === "ar" ? s.ar : s.en}
-                        </h3>
+                        <h3 className="font-bold text-base">{lang === "ar" ? s.ar : s.en}</h3>
                         {s.auth && (
                           <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
                             {lang === "ar" ? "دخول" : "Sign-in"}

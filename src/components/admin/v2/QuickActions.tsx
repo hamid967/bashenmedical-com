@@ -7,7 +7,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Plus, CalendarCheck, UserPlus, Stethoscope, MessageSquare, ClipboardList } from "lucide-react";
+import {
+  Plus,
+  CalendarCheck,
+  UserPlus,
+  Stethoscope,
+  MessageSquare,
+  ClipboardList,
+} from "lucide-react";
 
 export function QuickActions() {
   const navigate = useNavigate();

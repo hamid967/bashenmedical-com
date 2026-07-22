@@ -37,16 +37,15 @@ export type PatientNotification = {
   deliveries: DeliveryStatus[];
 };
 
-const CONFIRMED: readonly ConfirmedDeliveryStatus[] = [
-  "delivered",
-  "bounced",
-  "failed",
-];
+const CONFIRMED: readonly ConfirmedDeliveryStatus[] = ["delivered", "bounced", "failed"];
 
 export const listMyNotifications = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({ limit: z.number().int().min(1).max(200).optional() }).default({}).parse(d),
+    z
+      .object({ limit: z.number().int().min(1).max(200).optional() })
+      .default({})
+      .parse(d),
   )
   .handler(async ({ data, context }): Promise<PatientNotification[]> => {
     const { data: rows, error } = await context.supabase.rpc("my_notifications", {
@@ -58,7 +57,7 @@ export const listMyNotifications = createServerFn({ method: "POST" })
 
     // Fetch only provider-confirmed delivery statuses. RLS on
     // notification_delivery_logs already limits rows to the current user.
-    let byNotif = new Map<string, DeliveryStatus[]>();
+    const byNotif = new Map<string, DeliveryStatus[]>();
     if (ids.length > 0) {
       const { data: logs, error: dErr } = await context.supabase
         .from("notification_delivery_logs")

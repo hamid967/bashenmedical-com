@@ -15,8 +15,14 @@ const STEPS = [
   },
   {
     icon: HeartPulse,
-    ar: { title: "زُر المجمّع واستلم تقاريرك", desc: "تجربة رعاية سلسة من الاستقبال حتى المتابعة." },
-    en: { title: "Visit us & get your reports", desc: "A smooth experience from arrival to follow-up." },
+    ar: {
+      title: "زُر المجمّع واستلم تقاريرك",
+      desc: "تجربة رعاية سلسة من الاستقبال حتى المتابعة.",
+    },
+    en: {
+      title: "Visit us & get your reports",
+      desc: "A smooth experience from arrival to follow-up.",
+    },
   },
 ];
 
@@ -49,10 +55,7 @@ export function PatientJourney() {
             const Icon = s.icon;
             const copy = isAr ? s.ar : s.en;
             return (
-              <div
-                key={i}
-                className="relative bento-card p-6 text-center bg-card"
-              >
+              <div key={i} className="relative bento-card p-6 text-center bg-card">
                 <div className="mx-auto grid h-16 w-16 place-items-center rounded-2xl bg-gradient-to-br from-primary to-accent text-primary-foreground shadow-lg shadow-primary/25 relative">
                   <Icon className="h-7 w-7" />
                   <span className="absolute -top-2 -end-2 grid h-7 w-7 place-items-center rounded-full bg-white text-primary text-xs font-bold border-2 border-primary">

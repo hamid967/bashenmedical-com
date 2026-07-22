@@ -20,9 +20,9 @@ type Flow = {
 const FLOWS: Record<OrderKind, Flow> = {
   appointment: {
     steps: [
-      { key: "received",  reachedAt: ["new", "confirmed", "completed", "no_show"] },
+      { key: "received", reachedAt: ["new", "confirmed", "completed", "no_show"] },
       { key: "confirmed", reachedAt: ["confirmed", "completed", "no_show"] },
-      { key: "visit",     reachedAt: ["completed", "no_show"] },
+      { key: "visit", reachedAt: ["completed", "no_show"] },
       { key: "completed", reachedAt: ["completed"] },
     ],
     terminalStates: ["completed"],
@@ -31,30 +31,30 @@ const FLOWS: Record<OrderKind, Flow> = {
   },
   pharmacy: {
     steps: [
-      { key: "received",   reachedAt: ["new", "processing", "ready", "delivered", "completed"] },
+      { key: "received", reachedAt: ["new", "processing", "ready", "delivered", "completed"] },
       { key: "processing", reachedAt: ["processing", "ready", "delivered", "completed"] },
-      { key: "ready",      reachedAt: ["ready", "delivered", "completed"] },
-      { key: "delivered",  reachedAt: ["delivered", "completed"] },
+      { key: "ready", reachedAt: ["ready", "delivered", "completed"] },
+      { key: "delivered", reachedAt: ["delivered", "completed"] },
     ],
     terminalStates: ["delivered", "completed"],
     cancelledStates: ["cancelled", "canceled", "rejected"],
   },
   second_opinion: {
     steps: [
-      { key: "received",  reachedAt: ["new", "in_review", "answered", "closed", "completed"] },
+      { key: "received", reachedAt: ["new", "in_review", "answered", "closed", "completed"] },
       { key: "in_review", reachedAt: ["in_review", "answered", "closed", "completed"] },
-      { key: "answered",  reachedAt: ["answered", "closed", "completed"] },
-      { key: "closed",    reachedAt: ["closed", "completed"] },
+      { key: "answered", reachedAt: ["answered", "closed", "completed"] },
+      { key: "closed", reachedAt: ["closed", "completed"] },
     ],
     terminalStates: ["closed", "completed", "answered"],
     cancelledStates: ["cancelled", "canceled", "rejected"],
   },
   home_care: {
     steps: [
-      { key: "received",    reachedAt: ["new", "confirmed", "in_progress", "completed"] },
-      { key: "confirmed",   reachedAt: ["confirmed", "in_progress", "completed"] },
+      { key: "received", reachedAt: ["new", "confirmed", "in_progress", "completed"] },
+      { key: "confirmed", reachedAt: ["confirmed", "in_progress", "completed"] },
       { key: "in_progress", reachedAt: ["in_progress", "completed"] },
-      { key: "completed",   reachedAt: ["completed"] },
+      { key: "completed", reachedAt: ["completed"] },
     ],
     terminalStates: ["completed"],
     cancelledStates: ["cancelled", "canceled", "rejected"],
@@ -97,7 +97,12 @@ export function OrderTimeline({
   const steps: Step[] = (() => {
     if (flow.cancelledStates.includes(status)) {
       return [
-        { key: "received",  label: t("timeline.received"),  date: fmt(createdAt, lang), state: "done" },
+        {
+          key: "received",
+          label: t("timeline.received"),
+          date: fmt(createdAt, lang),
+          state: "done",
+        },
         { key: "cancelled", label: t("timeline.cancelled"), date: null, state: "cancelled" },
       ];
     }
@@ -133,12 +138,16 @@ export function OrderTimeline({
             s.state === "done"
               ? "bg-green-500 border-green-500 text-white"
               : s.state === "current"
-              ? "bg-primary border-primary text-primary-foreground ring-4 ring-primary/20"
-              : s.state === "cancelled"
-              ? "bg-destructive border-destructive text-destructive-foreground"
-              : "bg-background border-border text-muted-foreground";
+                ? "bg-primary border-primary text-primary-foreground ring-4 ring-primary/20"
+                : s.state === "cancelled"
+                  ? "bg-destructive border-destructive text-destructive-foreground"
+                  : "bg-background border-border text-muted-foreground";
           const line =
-            s.state === "done" ? "bg-green-500" : s.state === "cancelled" ? "bg-destructive" : "bg-border";
+            s.state === "done"
+              ? "bg-green-500"
+              : s.state === "cancelled"
+                ? "bg-destructive"
+                : "bg-border";
           return (
             <li key={s.key} className="relative flex gap-4 pb-6 last:pb-0">
               {!isLast && (
@@ -148,11 +157,15 @@ export function OrderTimeline({
                   aria-hidden
                 />
               )}
-              <div className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${dot}`}>
+              <div
+                className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-bold ${dot}`}
+              >
                 {s.state === "done" ? "✓" : s.state === "cancelled" ? "✕" : i + 1}
               </div>
               <div className="flex-1 min-w-0 pt-1">
-                <div className={`text-sm font-semibold ${s.state === "pending" ? "text-muted-foreground" : ""}`}>
+                <div
+                  className={`text-sm font-semibold ${s.state === "pending" ? "text-muted-foreground" : ""}`}
+                >
                   {s.label}
                 </div>
                 {s.date && <div className="mt-0.5 text-xs text-muted-foreground">{s.date}</div>}

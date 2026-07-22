@@ -52,8 +52,7 @@ function json(
       // cached body for 30s, and keep serving it (up to 60s more) while a
       // background request refreshes it. The client also caches per-key
       // (see React Query staleTime in /book).
-      "Cache-Control":
-        "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
+      "Cache-Control": "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
       ...extraHeaders,
     },
   });
@@ -105,7 +104,6 @@ function weekdayOf(iso: string): number {
   return new Date(Date.UTC(y, m - 1, d)).getUTCDay();
 }
 
-
 export const Route = createFileRoute("/api/public/book/availability")({
   server: {
     handlers: {
@@ -148,8 +146,7 @@ export const Route = createFileRoute("/api/public/book/availability")({
               status: 304,
               headers: {
                 ETag: etag,
-                "Cache-Control":
-                  "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
+                "Cache-Control": "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
               },
             });
           }
@@ -159,9 +156,7 @@ export const Route = createFileRoute("/api/public/book/availability")({
         const empty = { ok: true, times: [], booked: [], doctors_considered: 0 };
 
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           // 1) Resolve candidate doctors. A specific doctor short-circuits;
           //    otherwise pull all active doctors in the specialty (+ branch).
@@ -203,9 +198,7 @@ export const Route = createFileRoute("/api/public/book/availability")({
             .lte("start_date", date)
             .gte("end_date", date);
           const doctorsOnLeave = new Set(
-            (leaves ?? [])
-              .filter((l) => l.all_day)
-              .map((l) => l.doctor_id as string),
+            (leaves ?? []).filter((l) => l.all_day).map((l) => l.doctor_id as string),
           );
 
           // 4) Existing appointments for those doctors on this date (any
@@ -246,7 +239,6 @@ export const Route = createFileRoute("/api/public/book/availability")({
             busyByDoctor.get(key)!.add(t);
           }
 
-
           // 5) Expand availability into per-doctor slot sets and aggregate.
           //    We track two things per slot: how many doctors CAN work it,
           //    and how many of those are free right now. A slot is offered
@@ -273,8 +265,7 @@ export const Route = createFileRoute("/api/public/book/availability")({
           for (const [slot, doctorSet] of Array.from(generatedBy.entries()).sort()) {
             if (parseHHMM(slot) < cutoff) continue;
             const freeDoctors = Array.from(doctorSet).filter(
-              (id) =>
-                !doctorsOnLeave.has(id) && !busyByDoctor.get(id)?.has(slot),
+              (id) => !doctorsOnLeave.has(id) && !busyByDoctor.get(id)?.has(slot),
             );
             if (freeDoctors.length > 0) {
               times.push(slot);
@@ -301,8 +292,7 @@ export const Route = createFileRoute("/api/public/book/availability")({
               status: 304,
               headers: {
                 ETag: etag,
-                "Cache-Control":
-                  "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
+                "Cache-Control": "public, max-age=0, s-maxage=30, stale-while-revalidate=60",
               },
             });
           }

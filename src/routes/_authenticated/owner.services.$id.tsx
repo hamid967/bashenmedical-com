@@ -1,7 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getOwnerService, createOwnerService, updateOwnerService } from "@/lib/owner/services.functions";
+import {
+  getOwnerService,
+  createOwnerService,
+  updateOwnerService,
+} from "@/lib/owner/services.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +15,9 @@ import { ArrowRight, Save } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/owner/services/$id")({
-  head: () => ({ meta: [{ title: "تحرير خدمة · Site Builder" }, { name: "robots", content: "noindex,nofollow" }] }),
+  head: () => ({
+    meta: [{ title: "تحرير خدمة · Site Builder" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: ServiceEditor,
 });
 
@@ -29,10 +35,17 @@ type Form = {
   is_active: boolean;
 };
 const EMPTY: Form = {
-  slug: "", name_ar: "", name_en: "",
-  description_ar: "", description_en: "",
-  icon: "", price_from: "", duration_min: "", image_url: "",
-  display_order: 0, is_active: true,
+  slug: "",
+  name_ar: "",
+  name_en: "",
+  description_ar: "",
+  description_en: "",
+  icon: "",
+  price_from: "",
+  duration_min: "",
+  image_url: "",
+  display_order: 0,
+  is_active: true,
 };
 
 function ServiceEditor() {
@@ -67,7 +80,9 @@ function ServiceEditor() {
         });
       } catch (e: any) {
         toast.error(e?.message ?? "تعذّر التحميل");
-      } finally { setLoading(false); }
+      } finally {
+        setLoading(false);
+      }
     })();
   }, [id, isNew, getFn]);
 
@@ -102,19 +117,30 @@ function ServiceEditor() {
       }
     } catch (e: any) {
       toast.error(e?.message ?? "تعذّر الحفظ");
-    } finally { setSaving(false); }
+    } finally {
+      setSaving(false);
+    }
   }
 
-  if (loading) return <div className="p-8 text-center text-slate-500" dir="rtl">جاري التحميل…</div>;
+  if (loading)
+    return (
+      <div className="p-8 text-center text-slate-500" dir="rtl">
+        جاري التحميل…
+      </div>
+    );
 
   return (
     <div className="p-6 md:p-8 max-w-4xl" dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="icon">
-            <Link to="/owner/services"><ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/owner/services">
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
-          <h1 className="text-2xl font-bold text-slate-900">{isNew ? "خدمة جديدة" : form.name_ar || "تحرير الخدمة"}</h1>
+          <h1 className="text-2xl font-bold text-slate-900">
+            {isNew ? "خدمة جديدة" : form.name_ar || "تحرير الخدمة"}
+          </h1>
         </div>
         <Button onClick={submit} disabled={saving}>
           <Save className="h-4 w-4 ml-1" /> {saving ? "…" : "حفظ"}
@@ -124,7 +150,12 @@ function ServiceEditor() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white rounded-xl border shadow-sm p-5">
         <div className="md:col-span-2">
           <Label>Slug</Label>
-          <Input dir="ltr" value={form.slug} onChange={(e) => up("slug", e.target.value.toLowerCase())} placeholder="dental-cleaning" />
+          <Input
+            dir="ltr"
+            value={form.slug}
+            onChange={(e) => up("slug", e.target.value.toLowerCase())}
+            placeholder="dental-cleaning"
+          />
         </div>
         <div>
           <Label>الاسم (عربي)</Label>
@@ -136,32 +167,66 @@ function ServiceEditor() {
         </div>
         <div className="md:col-span-2">
           <Label>الوصف (عربي)</Label>
-          <Textarea rows={4} value={form.description_ar} onChange={(e) => up("description_ar", e.target.value)} />
+          <Textarea
+            rows={4}
+            value={form.description_ar}
+            onChange={(e) => up("description_ar", e.target.value)}
+          />
         </div>
         <div className="md:col-span-2">
           <Label>Description (EN)</Label>
-          <Textarea dir="ltr" rows={4} value={form.description_en} onChange={(e) => up("description_en", e.target.value)} />
+          <Textarea
+            dir="ltr"
+            rows={4}
+            value={form.description_en}
+            onChange={(e) => up("description_en", e.target.value)}
+          />
         </div>
         <div>
           <Label>السعر من (ر.س)</Label>
-          <Input type="number" min={0} step="0.01" value={form.price_from} onChange={(e) => up("price_from", e.target.value)} />
+          <Input
+            type="number"
+            min={0}
+            step="0.01"
+            value={form.price_from}
+            onChange={(e) => up("price_from", e.target.value)}
+          />
         </div>
         <div>
           <Label>المدة (دقيقة)</Label>
-          <Input type="number" min={0} value={form.duration_min} onChange={(e) => up("duration_min", e.target.value)} />
+          <Input
+            type="number"
+            min={0}
+            value={form.duration_min}
+            onChange={(e) => up("duration_min", e.target.value)}
+          />
         </div>
         <div>
           <Label>الأيقونة (اسم من lucide)</Label>
-          <Input dir="ltr" value={form.icon} onChange={(e) => up("icon", e.target.value)} placeholder="Stethoscope" />
+          <Input
+            dir="ltr"
+            value={form.icon}
+            onChange={(e) => up("icon", e.target.value)}
+            placeholder="Stethoscope"
+          />
         </div>
         <div>
           <Label>الترتيب</Label>
-          <Input type="number" min={0} value={form.display_order}
-            onChange={(e) => up("display_order", Number(e.target.value) || 0)} />
+          <Input
+            type="number"
+            min={0}
+            value={form.display_order}
+            onChange={(e) => up("display_order", Number(e.target.value) || 0)}
+          />
         </div>
         <div className="md:col-span-2">
           <Label>رابط الصورة</Label>
-          <Input dir="ltr" value={form.image_url} onChange={(e) => up("image_url", e.target.value)} placeholder="https://…" />
+          <Input
+            dir="ltr"
+            value={form.image_url}
+            onChange={(e) => up("image_url", e.target.value)}
+            placeholder="https://…"
+          />
         </div>
         <div className="md:col-span-2 flex items-center justify-between pt-2 border-t">
           <Label>مفعّلة (تظهر في الموقع)</Label>

@@ -332,7 +332,11 @@ const groups: StoryGroup[] = [
                   { key: "patient", label: "المريض", value: "أحمد الغامدي" },
                   { key: "date", label: "التاريخ", value: "22 يوليو 2026" },
                   { key: "branch", label: "الفرع", value: "صبيا الرئيسي" },
-                  { key: "status", label: "الحالة", value: <PortalBadge tone="success">مؤكّد</PortalBadge> },
+                  {
+                    key: "status",
+                    label: "الحالة",
+                    value: <PortalBadge tone="success">مؤكّد</PortalBadge>,
+                  },
                 ]}
               />
             </PortalCardBody>
@@ -460,8 +464,7 @@ type AuditFinding = {
   snippet: string;
 };
 
-const RAW_COLOR_RE =
-  /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|rgba?\(|hsla?\(/;
+const RAW_COLOR_RE = /#(?:[0-9a-fA-F]{3,4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\b|rgba?\(|hsla?\(/;
 
 // Tailwind color utilities we treat as forbidden inside portal previews.
 const FORBIDDEN_CLASS_RE =
@@ -562,10 +565,7 @@ function StorybookPage() {
   };
 
   return (
-    <div
-      className="portal-root min-h-screen"
-      style={{ background: "var(--ds-brand-50)" }}
-    >
+    <div className="portal-root min-h-screen" style={{ background: "var(--ds-brand-50)" }}>
       <div className="container-app py-8 md:py-12 space-y-6">
         <PortalPageHeader
           eyebrow="Design System"
@@ -599,12 +599,8 @@ function StorybookPage() {
                       onClick={() => selectGroup(g.id)}
                       className="w-full text-start rounded-[var(--ds-radius-md)] px-3 py-2 text-sm font-semibold transition-colors"
                       style={{
-                        background:
-                          g.id === groupId ? "var(--ds-brand-50)" : "transparent",
-                        color:
-                          g.id === groupId
-                            ? "var(--ds-brand-700)"
-                            : "var(--ds-ink-900)",
+                        background: g.id === groupId ? "var(--ds-brand-50)" : "transparent",
+                        color: g.id === groupId ? "var(--ds-brand-700)" : "var(--ds-ink-900)",
                         border:
                           g.id === groupId
                             ? "1px solid color-mix(in oklab, var(--ds-brand-500) 25%, transparent)"
@@ -627,9 +623,7 @@ function StorybookPage() {
                                     ? "color-mix(in oklab, var(--ds-brand-500) 12%, transparent)"
                                     : "transparent",
                                 color:
-                                  s.id === storyId
-                                    ? "var(--ds-brand-700)"
-                                    : "var(--ds-ink-600)",
+                                  s.id === storyId ? "var(--ds-brand-700)" : "var(--ds-ink-600)",
                               }}
                             >
                               {s.name}
@@ -657,10 +651,7 @@ function StorybookPage() {
                     >
                       {group.name}
                     </div>
-                    <div
-                      className="text-base font-semibold"
-                      style={{ color: "var(--ds-ink-900)" }}
-                    >
+                    <div className="text-base font-semibold" style={{ color: "var(--ds-ink-900)" }}>
                       {story.name}
                     </div>
                     <div className="text-[12.5px]" style={{ color: "var(--ds-ink-600)" }}>
@@ -746,18 +737,13 @@ function StorybookPage() {
                 description="يمسح subtree المعروض بحثًا عن ألوان خام أو أصناف Tailwind ممنوعة."
                 action={
                   <PortalBadge tone={findings.length === 0 ? "success" : "error"}>
-                    {findings.length === 0
-                      ? "متوافق"
-                      : `${findings.length} انتهاك`}
+                    {findings.length === 0 ? "متوافق" : `${findings.length} انتهاك`}
                   </PortalBadge>
                 }
               />
               <PortalCardBody>
                 {findings.length === 0 ? (
-                  <div
-                    className="text-sm"
-                    style={{ color: "var(--ds-ink-600)" }}
-                  >
+                  <div className="text-sm" style={{ color: "var(--ds-ink-600)" }}>
                     لا توجد ألوان خام أو أصناف ممنوعة داخل هذه القصة — الطبقة نظيفة ✅
                   </div>
                 ) : (
@@ -794,12 +780,9 @@ function StorybookPage() {
                 )}
               </PortalCardBody>
               <PortalCardFooter>
-                <span
-                  className="text-[12px] me-auto"
-                  style={{ color: "var(--ds-ink-400)" }}
-                >
-                  الفحص يعمل على DOM المعروض فقط — للمراجعة الشاملة استخدم
-                  {" "}<code>bun run lint:portal-tokens</code>.
+                <span className="text-[12px] me-auto" style={{ color: "var(--ds-ink-400)" }}>
+                  الفحص يعمل على DOM المعروض فقط — للمراجعة الشاملة استخدم{" "}
+                  <code>bun run lint:portal-tokens</code>.
                 </span>
                 <PortalButton
                   size="sm"

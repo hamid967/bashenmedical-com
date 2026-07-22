@@ -83,9 +83,7 @@ export const getPatientAnalytics = createServerFn({ method: "POST" })
     // ---- Patients query with filters (age handled in JS) ----
     let pq = sb
       .from("patients")
-      .select(
-        "id, status, gender, date_of_birth, branch_id, tags, created_at, branches(name_ar)",
-      );
+      .select("id, status, gender, date_of_birth, branch_id, tags, created_at, branches(name_ar)");
     if (data.branchId) pq = pq.eq("branch_id", data.branchId);
     if (data.gender) pq = pq.eq("gender", data.gender);
     const { data: rows, error } = await pq.limit(10000);
@@ -152,7 +150,9 @@ export const getPatientAnalytics = createServerFn({ method: "POST" })
         changeTo.set(t, (changeTo.get(t) ?? 0) + 1);
       } else {
         const ids: string[] = Array.isArray(meta.ids) ? meta.ids : [];
-        const relevant = data.branchId ? ids.filter((id) => patientIds.has(id)).length : (meta.count ?? ids.length);
+        const relevant = data.branchId
+          ? ids.filter((id) => patientIds.has(id)).length
+          : (meta.count ?? ids.length);
         if (!relevant) continue;
         const day = (row.created_at ?? "").slice(0, 10);
         changeDaily.set(day, (changeDaily.get(day) ?? 0) + relevant);
@@ -205,7 +205,10 @@ export const listBranchesForAnalytics = createServerFn({ method: "GET" })
       .select("id, name_ar")
       .order("name_ar", { ascending: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ((data ?? []) as any[]).map((b) => ({ id: b.id as string, name_ar: b.name_ar as string }));
+    return ((data ?? []) as any[]).map((b) => ({
+      id: b.id as string,
+      name_ar: b.name_ar as string,
+    }));
   });
 
 export const listDoctorsForAnalytics = createServerFn({ method: "GET" })
@@ -288,7 +291,9 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
         .eq("doctor_id", data.doctorId)
         .limit(20000);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const withDoctor = new Set<string>(((vRows ?? []) as any[]).map((r) => r.patient_id as string));
+      const withDoctor = new Set<string>(
+        ((vRows ?? []) as any[]).map((r) => r.patient_id as string),
+      );
       eligibleIds = new Set([...eligibleIds].filter((id) => withDoctor.has(id)));
     }
 
@@ -574,7 +579,6 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
     return events;
   });
 
-
 // ============ KPI drill-down: patients list backing a KPI card ============
 
 const KpiPatientsInput = z.object({
@@ -649,11 +653,24 @@ const TransitionRowsInput = z.object({
   pageSize: z.number().int().min(1).max(200).optional(),
   search: z.string().max(200).nullable().optional(),
   statusTo: z.enum(["active", "inactive", "archived", "deceased"]).nullable().optional(),
-  statusFrom: z.enum(["active", "inactive", "archived", "deceased", "__none__"]).nullable().optional(),
-  txFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-  txTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  statusFrom: z
+    .enum(["active", "inactive", "archived", "deceased", "__none__"])
+    .nullable()
+    .optional(),
+  txFrom: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
+  txTo: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
   bulkOnly: z.boolean().nullable().optional(),
-  sortKey: z.enum(["created_at", "patient_name", "patient_mrn", "branch_name", "from", "to", "actor_name"]).optional(),
+  sortKey: z
+    .enum(["created_at", "patient_name", "patient_mrn", "branch_name", "from", "to", "actor_name"])
+    .optional(),
   sortDir: z.enum(["asc", "desc"]).optional(),
 });
 
@@ -738,7 +755,7 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
     const actorIds = new Set<string>();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const ev of ((audit ?? []) as any[])) {
+    for (const ev of (audit ?? []) as any[]) {
       if (rows.length >= limit) break;
       const meta = ev.metadata ?? {};
       const reason = (ev.reason as string) ?? (meta.reason as string) ?? null;
@@ -791,11 +808,11 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
         .in("id", [...actorIds]);
       const nameMap = new Map<string, string>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const p of ((profs ?? []) as any[])) nameMap.set(p.id, p.full_name ?? "");
+      for (const p of (profs ?? []) as any[]) nameMap.set(p.id, p.full_name ?? "");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const actorByAudit = new Map<string, string | null>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const ev of ((audit ?? []) as any[])) actorByAudit.set(ev.id, ev.actor ?? null);
+      for (const ev of (audit ?? []) as any[]) actorByAudit.set(ev.id, ev.actor ?? null);
       for (const r of rows) {
         const a = actorByAudit.get(r.audit_id);
         if (a) r.actor_name = nameMap.get(a) ?? null;
@@ -820,12 +837,13 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
     }
     if (data.search && data.search.trim()) {
       const s = data.search.trim().toLowerCase();
-      filtered = filtered.filter((r) =>
-        (r.patient_name ?? "").toLowerCase().includes(s) ||
-        (r.patient_mrn ?? "").toLowerCase().includes(s) ||
-        (r.branch_name ?? "").toLowerCase().includes(s) ||
-        (r.actor_name ?? "").toLowerCase().includes(s) ||
-        (r.reason ?? "").toLowerCase().includes(s),
+      filtered = filtered.filter(
+        (r) =>
+          (r.patient_name ?? "").toLowerCase().includes(s) ||
+          (r.patient_mrn ?? "").toLowerCase().includes(s) ||
+          (r.branch_name ?? "").toLowerCase().includes(s) ||
+          (r.actor_name ?? "").toLowerCase().includes(s) ||
+          (r.reason ?? "").toLowerCase().includes(s),
       );
     }
 
@@ -846,7 +864,6 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
     return { rows: filtered.slice(start, start + pageSize), total, page, pageSize };
   });
 
-
 // ============ Transitions stats dashboard (branch × staff × time) ============
 
 const TransitionsStatsInput = z.object({
@@ -864,13 +881,31 @@ export type TransitionsStats = {
   byActor: { actor_id: string; actor_name: string; count: number }[];
   byBranchStatus: { branch_id: string; branch_name: string; status: string; count: number }[];
   byActorStatus: { actor_id: string; actor_name: string; status: string; count: number }[];
-  daily: { day: string; total: number; active: number; inactive: number; archived: number; deceased: number }[];
-  dailyByBranchStatus: { day: string; branch_id: string; branch_name: string; status: string; count: number }[];
-  dailyByActorStatus: { day: string; actor_id: string; actor_name: string; status: string; count: number }[];
+  daily: {
+    day: string;
+    total: number;
+    active: number;
+    inactive: number;
+    archived: number;
+    deceased: number;
+  }[];
+  dailyByBranchStatus: {
+    day: string;
+    branch_id: string;
+    branch_name: string;
+    status: string;
+    count: number;
+  }[];
+  dailyByActorStatus: {
+    day: string;
+    actor_id: string;
+    actor_name: string;
+    status: string;
+    count: number;
+  }[];
   hourly: { hour: number; count: number }[];
   weekday: { weekday: number; label: string; count: number }[];
 };
-
 
 export const getTransitionsStats = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -888,7 +923,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const patientToBranch = new Map<string, string | null>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const p of ((pRows ?? []) as any[])) patientToBranch.set(p.id, p.branch_id ?? null);
+    for (const p of (pRows ?? []) as any[]) patientToBranch.set(p.id, p.branch_id ?? null);
 
     // Load transition events
     const { data: rows } = await sb
@@ -904,10 +939,13 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     const byBranch = new Map<string, number>();
     const byActor = new Map<string, number>();
     const byBranchStatus = new Map<string, number>(); // key: `${branchId}||${to}`
-    const byActorStatus = new Map<string, number>();  // key: `${actorId}||${to}`
+    const byActorStatus = new Map<string, number>(); // key: `${actorId}||${to}`
     const dailyBranchStatus = new Map<string, number>(); // key: `${day}||${branchId}||${to}`
-    const dailyActorStatus = new Map<string, number>();  // key: `${day}||${actorId}||${to}`
-    const dailyMap = new Map<string, { total: number; active: number; inactive: number; archived: number; deceased: number }>();
+    const dailyActorStatus = new Map<string, number>(); // key: `${day}||${actorId}||${to}`
+    const dailyMap = new Map<
+      string,
+      { total: number; active: number; inactive: number; archived: number; deceased: number }
+    >();
     const hourly = new Array<number>(24).fill(0);
     const weekday = new Array<number>(7).fill(0);
 
@@ -915,7 +953,10 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
 
     const bumpDaily = (day: string, to: string, n: number) => {
       let cur = dailyMap.get(day);
-      if (!cur) { cur = { total: 0, active: 0, inactive: 0, archived: 0, deceased: 0 }; dailyMap.set(day, cur); }
+      if (!cur) {
+        cur = { total: 0, active: 0, inactive: 0, archived: 0, deceased: 0 };
+        dailyMap.set(day, cur);
+      }
       cur.total += n;
       if (to === "active" || to === "inactive" || to === "archived" || to === "deceased") {
         (cur as unknown as Record<string, number>)[to] += n;
@@ -923,7 +964,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const row of ((rows ?? []) as any[])) {
+    for (const row of (rows ?? []) as any[]) {
       const meta = row.metadata ?? {};
       const created = row.created_at as string;
       const day = created.slice(0, 10);
@@ -942,12 +983,24 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
         perTarget[to] = (perTarget[to] ?? 0) + 1;
         perTransition.set(`${from}→${to}`, (perTransition.get(`${from}→${to}`) ?? 0) + 1);
         byBranch.set(branchId, (byBranch.get(branchId) ?? 0) + 1);
-        byBranchStatus.set(`${branchId}||${to}`, (byBranchStatus.get(`${branchId}||${to}`) ?? 0) + 1);
-        dailyBranchStatus.set(`${day}||${branchId}||${to}`, (dailyBranchStatus.get(`${day}||${branchId}||${to}`) ?? 0) + 1);
+        byBranchStatus.set(
+          `${branchId}||${to}`,
+          (byBranchStatus.get(`${branchId}||${to}`) ?? 0) + 1,
+        );
+        dailyBranchStatus.set(
+          `${day}||${branchId}||${to}`,
+          (dailyBranchStatus.get(`${day}||${branchId}||${to}`) ?? 0) + 1,
+        );
         if (row.actor) {
           byActor.set(row.actor, (byActor.get(row.actor) ?? 0) + 1);
-          byActorStatus.set(`${row.actor}||${to}`, (byActorStatus.get(`${row.actor}||${to}`) ?? 0) + 1);
-          dailyActorStatus.set(`${day}||${row.actor}||${to}`, (dailyActorStatus.get(`${day}||${row.actor}||${to}`) ?? 0) + 1);
+          byActorStatus.set(
+            `${row.actor}||${to}`,
+            (byActorStatus.get(`${row.actor}||${to}`) ?? 0) + 1,
+          );
+          dailyActorStatus.set(
+            `${day}||${row.actor}||${to}`,
+            (dailyActorStatus.get(`${day}||${row.actor}||${to}`) ?? 0) + 1,
+          );
         }
         bumpDaily(day, to, 1);
         hourly[hour]++;
@@ -963,20 +1016,31 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
         for (const pid of rel) {
           const branchId = patientToBranch.get(pid) ?? "unknown";
           byBranch.set(branchId, (byBranch.get(branchId) ?? 0) + 1);
-          byBranchStatus.set(`${branchId}||${to}`, (byBranchStatus.get(`${branchId}||${to}`) ?? 0) + 1);
-          dailyBranchStatus.set(`${day}||${branchId}||${to}`, (dailyBranchStatus.get(`${day}||${branchId}||${to}`) ?? 0) + 1);
+          byBranchStatus.set(
+            `${branchId}||${to}`,
+            (byBranchStatus.get(`${branchId}||${to}`) ?? 0) + 1,
+          );
+          dailyBranchStatus.set(
+            `${day}||${branchId}||${to}`,
+            (dailyBranchStatus.get(`${day}||${branchId}||${to}`) ?? 0) + 1,
+          );
         }
         if (row.actor) {
           byActor.set(row.actor, (byActor.get(row.actor) ?? 0) + n);
-          byActorStatus.set(`${row.actor}||${to}`, (byActorStatus.get(`${row.actor}||${to}`) ?? 0) + n);
-          dailyActorStatus.set(`${day}||${row.actor}||${to}`, (dailyActorStatus.get(`${day}||${row.actor}||${to}`) ?? 0) + n);
+          byActorStatus.set(
+            `${row.actor}||${to}`,
+            (byActorStatus.get(`${row.actor}||${to}`) ?? 0) + n,
+          );
+          dailyActorStatus.set(
+            `${day}||${row.actor}||${to}`,
+            (dailyActorStatus.get(`${day}||${row.actor}||${to}`) ?? 0) + n,
+          );
         }
         bumpDaily(day, to, n);
         hourly[hour] += n;
         weekday[wd] += n;
         total += n;
       }
-
     }
 
     // Enrich branch names
@@ -985,7 +1049,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     if (branchIds.length) {
       const { data: bRows } = await sb.from("branches").select("id, name_ar").in("id", branchIds);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const b of ((bRows ?? []) as any[])) branchNameMap.set(b.id, b.name_ar ?? "—");
+      for (const b of (bRows ?? []) as any[]) branchNameMap.set(b.id, b.name_ar ?? "—");
     }
 
     // Enrich actor names
@@ -994,7 +1058,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     if (actorIds.length) {
       const { data: aRows } = await sb.from("profiles").select("id, full_name").in("id", actorIds);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const p of ((aRows ?? []) as any[])) actorNameMap.set(p.id, p.full_name ?? "—");
+      for (const p of (aRows ?? []) as any[]) actorNameMap.set(p.id, p.full_name ?? "—");
     }
 
     // Fill daily series
@@ -1003,7 +1067,13 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     const daily: TransitionsStats["daily"] = [];
     for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
       const iso = d.toISOString().slice(0, 10);
-      const cur = dailyMap.get(iso) ?? { total: 0, active: 0, inactive: 0, archived: 0, deceased: 0 };
+      const cur = dailyMap.get(iso) ?? {
+        total: 0,
+        active: 0,
+        inactive: 0,
+        archived: 0,
+        deceased: 0,
+      };
       daily.push({ day: iso, ...cur });
     }
     const days = Math.max(1, Math.round((end.getTime() - start.getTime()) / 86400000) + 1);
@@ -1015,13 +1085,24 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
       total,
       perTarget: Object.entries(perTarget).map(([status, count]) => ({ status, count })),
       perTransition: [...perTransition.entries()]
-        .map(([k, count]) => { const [f, t] = k.split("→"); return { from: f, to: t, count }; })
+        .map(([k, count]) => {
+          const [f, t] = k.split("→");
+          return { from: f, to: t, count };
+        })
         .sort((a, b) => b.count - a.count),
       byBranch: [...byBranch.entries()]
-        .map(([id, count]) => ({ branch_id: id, branch_name: branchNameMap.get(id) ?? "غير محدد", count }))
+        .map(([id, count]) => ({
+          branch_id: id,
+          branch_name: branchNameMap.get(id) ?? "غير محدد",
+          count,
+        }))
         .sort((a, b) => b.count - a.count),
       byActor: [...byActor.entries()]
-        .map(([id, count]) => ({ actor_id: id, actor_name: actorNameMap.get(id) ?? "غير معروف", count }))
+        .map(([id, count]) => ({
+          actor_id: id,
+          actor_name: actorNameMap.get(id) ?? "غير معروف",
+          count,
+        }))
         .sort((a, b) => b.count - a.count),
       byBranchStatus: [...byBranchStatus.entries()]
         .map(([k, count]) => {
@@ -1039,13 +1120,25 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
       dailyByBranchStatus: [...dailyBranchStatus.entries()]
         .map(([k, count]) => {
           const [day, id, status] = k.split("||");
-          return { day, branch_id: id, branch_name: branchNameMap.get(id) ?? "غير محدد", status, count };
+          return {
+            day,
+            branch_id: id,
+            branch_name: branchNameMap.get(id) ?? "غير محدد",
+            status,
+            count,
+          };
         })
         .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0)),
       dailyByActorStatus: [...dailyActorStatus.entries()]
         .map(([k, count]) => {
           const [day, id, status] = k.split("||");
-          return { day, actor_id: id, actor_name: actorNameMap.get(id) ?? "غير معروف", status, count };
+          return {
+            day,
+            actor_id: id,
+            actor_name: actorNameMap.get(id) ?? "غير معروف",
+            status,
+            count,
+          };
         })
         .sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0)),
 

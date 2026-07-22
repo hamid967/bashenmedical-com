@@ -27,8 +27,8 @@ export type State = {
   branchId: string | null;
   specialtyId: string | null;
   doctorId: string | null;
-  date: string | null;      // YYYY-MM-DD
-  time: string | null;      // HH:MM
+  date: string | null; // YYYY-MM-DD
+  time: string | null; // HH:MM
   patient: {
     name: string;
     phone: string;
@@ -79,10 +79,14 @@ export type Action =
 
 export function reducer(s: State, a: Action): State {
   switch (a.t) {
-    case "set":         return { ...s, ...a.p };
-    case "setPatient":  return { ...s, patient: { ...s.patient, ...a.p } };
-    case "goto":        return { ...s, step: Math.max(1, Math.min(9, a.step)) };
-    case "reset":       return { ...INITIAL };
+    case "set":
+      return { ...s, ...a.p };
+    case "setPatient":
+      return { ...s, patient: { ...s.patient, ...a.p } };
+    case "goto":
+      return { ...s, step: Math.max(1, Math.min(9, a.step)) };
+    case "reset":
+      return { ...INITIAL };
   }
 }
 
@@ -100,7 +104,9 @@ export function loadDraft(initial: Partial<State>): State {
       if (parsed.step === 9) return { ...INITIAL, ...parsed };
       return { ...INITIAL, ...parsed, ...initial };
     }
-  } catch {/* ignore */}
+  } catch {
+    /* ignore */
+  }
   return { ...INITIAL, ...initial };
 }
 
@@ -116,12 +122,12 @@ export type AvailResp = { ok: boolean; times: string[]; booked: string[] };
 export function maxReachableStep(s: State, patientOk: boolean): number {
   let r = 1;
   if (s.serviceType || s.branchId || s.specialtyId || s.doctorId) r = 2;
-  if (s.branchId    || s.specialtyId || s.doctorId)               r = 3;
-  if (s.specialtyId || s.doctorId)                                r = 4;
-  if (s.doctorId)                                                 r = 5;
-  if (s.doctorId && s.date)                                       r = 6;
-  if (s.doctorId && s.date && s.time)                             r = 7;
-  if (s.doctorId && s.date && s.time && patientOk)                r = 8;
+  if (s.branchId || s.specialtyId || s.doctorId) r = 3;
+  if (s.specialtyId || s.doctorId) r = 4;
+  if (s.doctorId) r = 5;
+  if (s.doctorId && s.date) r = 6;
+  if (s.doctorId && s.date && s.time) r = 7;
+  if (s.doctorId && s.date && s.time && patientOk) r = 8;
   return r;
 }
 
@@ -131,17 +137,24 @@ export function formatArDate(iso: string | null, lang: "ar" | "en"): string {
   try {
     const d = new Date(iso + "T00:00:00");
     return d.toLocaleDateString(lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US", {
-      weekday: "long", year: "numeric", month: "long", day: "numeric",
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
-  } catch { return iso; }
+  } catch {
+    return iso;
+  }
 }
 
 /* ---------------- Patient validation ---------------- */
 // Limits/regex are the single source of truth in src/lib/booking-limits.ts
 // so the client and the /api/public/book/create endpoint stay in sync.
 export {
-  NAME_MIN, NAME_MAX,
-  PHONE_MIN, PHONE_MAX,
+  NAME_MIN,
+  NAME_MAX,
+  PHONE_MIN,
+  PHONE_MAX,
   NID_MAX,
   REASON_MAX,
   PHONE_RE,
@@ -150,8 +163,14 @@ export {
   NAME_RE,
 } from "@/lib/booking-limits";
 import {
-  NAME_MIN, NAME_MAX, PHONE_MIN, PHONE_MAX,
-  REASON_MAX, SA_PHONE_RE, SA_NID_RE, NAME_RE,
+  NAME_MIN,
+  NAME_MAX,
+  PHONE_MIN,
+  PHONE_MAX,
+  REASON_MAX,
+  SA_PHONE_RE,
+  SA_NID_RE,
+  NAME_RE,
 } from "@/lib/booking-limits";
 
 export const patientSchema = z.object({
@@ -161,21 +180,24 @@ export const patientSchema = z.object({
     .min(NAME_MIN, "الاسم قصير جدًا (٢ أحرف على الأقل)")
     .max(NAME_MAX, "الاسم طويل جدًا")
     .regex(NAME_RE, "الاسم يحتوي على أحرف غير مسموحة")
-    .refine((v) => v.split(/\s+/).filter(Boolean).length >= 2, "أدخل الاسم كاملاً (اسمان على الأقل)"),
+    .refine(
+      (v) => v.split(/\s+/).filter(Boolean).length >= 2,
+      "أدخل الاسم كاملاً (اسمان على الأقل)",
+    ),
   phone: z
     .string()
     .trim()
     .min(PHONE_MIN, "رقم الجوال قصير جدًا")
     .max(PHONE_MAX, "رقم الجوال طويل جدًا")
-    .refine((v) => SA_PHONE_RE.test(v.replace(/[\s\-()]/g, "")), "رقم جوال سعودي غير صالح (مثال: 05XXXXXXXX)"),
+    .refine(
+      (v) => SA_PHONE_RE.test(v.replace(/[\s\-()]/g, "")),
+      "رقم جوال سعودي غير صالح (مثال: 05XXXXXXXX)",
+    ),
   email: z
     .string()
     .trim()
     .max(255, "البريد الإلكتروني طويل جدًا")
-    .refine(
-      (v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-      "بريد إلكتروني غير صالح",
-    ),
+    .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "بريد إلكتروني غير صالح"),
   nationalId: z
     .string()
     .trim()
@@ -184,7 +206,9 @@ export const patientSchema = z.object({
   reason: z.string().trim().max(REASON_MAX, `السبب طويل جدًا (الحد ${REASON_MAX} حرفًا)`),
 });
 
-export type PatientErrors = Partial<Record<"name" | "phone" | "email" | "nationalId" | "gender" | "reason", string>>;
+export type PatientErrors = Partial<
+  Record<"name" | "phone" | "email" | "nationalId" | "gender" | "reason", string>
+>;
 
 export function validatePatient(p: State["patient"]): { ok: boolean; errors: PatientErrors } {
   const r = patientSchema.safeParse({

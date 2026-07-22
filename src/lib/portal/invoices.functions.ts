@@ -40,11 +40,14 @@ export const listMyInvoices = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const patientId = await resolvePatientId(supabase, userId);
-    if (!patientId) return { invoices: [], summary: { total: 0, paid: 0, outstanding: 0, count: 0 } };
+    if (!patientId)
+      return { invoices: [], summary: { total: 0, paid: 0, outstanding: 0, count: 0 } };
 
     let q = supabase
       .from("invoices")
-      .select("id, invoice_number, total, currency, status, issued_at, paid_at, appointment_id, pdf_path, notes")
+      .select(
+        "id, invoice_number, total, currency, status, issued_at, paid_at, appointment_id, pdf_path, notes",
+      )
       .eq("patient_id", patientId)
       .order("issued_at", { ascending: false })
       .limit(data.limit);
@@ -115,7 +118,9 @@ export const getMyInvoice = createServerFn({ method: "GET" })
 
     const { data: inv, error } = await supabase
       .from("invoices")
-      .select("id, invoice_number, total, currency, status, issued_at, paid_at, appointment_id, pdf_path, notes, patient_id")
+      .select(
+        "id, invoice_number, total, currency, status, issued_at, paid_at, appointment_id, pdf_path, notes, patient_id",
+      )
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -123,7 +128,9 @@ export const getMyInvoice = createServerFn({ method: "GET" })
 
     const { data: pays } = await supabase
       .from("payments")
-      .select("id, amount, currency, method, status, gateway, gateway_ref, paid_at, created_at, is_mock")
+      .select(
+        "id, amount, currency, method, status, gateway, gateway_ref, paid_at, created_at, is_mock",
+      )
       .eq("invoice_id", data.id)
       .order("created_at", { ascending: false });
 
@@ -183,7 +190,9 @@ export const listMyPayments = createServerFn({ method: "GET" })
 
     const { data: pays, error } = await supabase
       .from("payments")
-      .select("id, invoice_id, amount, currency, method, status, gateway, gateway_ref, paid_at, created_at, is_mock")
+      .select(
+        "id, invoice_id, amount, currency, method, status, gateway, gateway_ref, paid_at, created_at, is_mock",
+      )
       .in("invoice_id", invIds)
       .order("created_at", { ascending: false })
       .limit(100);
@@ -269,8 +278,7 @@ export const createDemoInvoicePayment = createServerFn({ method: "POST" })
 
     // Update invoice status via admin (billing.manage required otherwise)
     const newPaid = paid + amount;
-    const invoiceStatus =
-      newPaid + 0.01 >= Number(inv.total ?? 0) ? "paid" : "partially_paid";
+    const invoiceStatus = newPaid + 0.01 >= Number(inv.total ?? 0) ? "paid" : "partially_paid";
     try {
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin

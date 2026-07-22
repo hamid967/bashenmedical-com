@@ -19,7 +19,7 @@ export function DemoBadge({ show = true, className, size = "sm" }: DemoBadgeProp
       className={cn(
         "border-amber-400/60 bg-amber-100/70 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 font-semibold tracking-wider",
         size === "sm" ? "text-[10px] px-1.5 py-0" : "text-xs px-2 py-0.5",
-        className
+        className,
       )}
       title="بيانات تجريبية — Demo data"
     >

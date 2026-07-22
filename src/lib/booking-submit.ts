@@ -30,14 +30,7 @@ export type BookingSubmitPayload = {
 };
 
 export type BookingSubmitKind =
-  | "success"
-  | "validation"
-  | "db"
-  | "conflict"
-  | "network"
-  | "timeout"
-  | "server"
-  | "unknown";
+  "success" | "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown";
 
 export type BookingSubmitResult =
   | { ok: true; kind: "success"; reference: string | null }
@@ -72,20 +65,29 @@ function getOrCreateIdempotencyKey(): string {
   try {
     const existing = sessionStorage.getItem(IDEMPOTENCY_KEY_STORAGE);
     if (existing && /^[A-Za-z0-9_-]{8,128}$/.test(existing)) return existing;
-  } catch {/* ignore */}
+  } catch {
+    /* ignore */
+  }
   const fresh =
     typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
       ? crypto.randomUUID()
       : `k-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
-  try { sessionStorage.setItem(IDEMPOTENCY_KEY_STORAGE, fresh); } catch {/* ignore */}
+  try {
+    sessionStorage.setItem(IDEMPOTENCY_KEY_STORAGE, fresh);
+  } catch {
+    /* ignore */
+  }
   return fresh;
 }
 
 export function clearBookingIdempotencyKey(): void {
   if (typeof window === "undefined") return;
-  try { sessionStorage.removeItem(IDEMPOTENCY_KEY_STORAGE); } catch {/* ignore */}
+  try {
+    sessionStorage.removeItem(IDEMPOTENCY_KEY_STORAGE);
+  } catch {
+    /* ignore */
+  }
 }
-
 
 export async function submitBooking(payload: BookingSubmitPayload): Promise<BookingSubmitResult> {
   const controller = new AbortController();
@@ -132,8 +134,7 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
   } catch {
     // Non-JSON response (e.g. a bare 502 from an edge proxy). Fall back
     // based on status code.
-    const kind: Exclude<BookingSubmitKind, "success"> =
-      res.status >= 500 ? "server" : "unknown";
+    const kind: Exclude<BookingSubmitKind, "success"> = res.status >= 500 ? "server" : "unknown";
     return { ok: false, kind, message: FALLBACK_MESSAGES[kind] };
   }
 
@@ -152,11 +153,8 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
     clearBookingIdempotencyKey();
   }
 
-
   const kind: Exclude<BookingSubmitKind, "success"> =
-    body.kind === "validation" ||
-    body.kind === "db" ||
-    body.kind === "conflict"
+    body.kind === "validation" || body.kind === "db" || body.kind === "conflict"
       ? body.kind
       : res.status >= 500
         ? "server"

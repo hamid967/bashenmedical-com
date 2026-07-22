@@ -78,8 +78,7 @@ function UsagePage() {
     <div className="space-y-6" dir={i18n.t("portalUsage:ltr")}>
       <PortalPageHeader
         title={i18n.t("portalUsage:ai_usage_history")}
-        description={i18n.t("portalUsage:cost_latency_tokens_and_model_for_each_m")
-        }
+        description={i18n.t("portalUsage:cost_latency_tokens_and_model_for_each_m")}
         isAr={isAr}
       />
 
@@ -139,17 +138,13 @@ function UsagePage() {
             <StatCard
               icon={Clock}
               label={i18n.t("portalUsage:avg_latency")}
-              value={
-                data.summary.avgLatencyMs != null ? `${data.summary.avgLatencyMs} ms` : "—"
-              }
+              value={data.summary.avgLatencyMs != null ? `${data.summary.avgLatencyMs} ms` : "—"}
             />
           </div>
 
           {data.summary.byModel.length > 0 && (
             <PortalCard>
-              <h3 className="text-sm font-semibold mb-3">
-                {i18n.t("portalUsage:by_model")}
-              </h3>
+              <h3 className="text-sm font-semibold mb-3">{i18n.t("portalUsage:by_model")}</h3>
               <div className="space-y-1 text-sm">
                 {data.summary.byModel.map((m) => (
                   <div
@@ -167,9 +162,7 @@ function UsagePage() {
           )}
 
           <PortalCard className="overflow-x-auto">
-            <h3 className="text-sm font-semibold mb-3">
-              {i18n.t("portalUsage:recent_messages")}
-            </h3>
+            <h3 className="text-sm font-semibold mb-3">{i18n.t("portalUsage:recent_messages")}</h3>
             <table className="w-full text-sm min-w-[720px]">
               <thead className="text-xs text-muted-foreground text-start">
                 <tr className="border-b border-border/60">

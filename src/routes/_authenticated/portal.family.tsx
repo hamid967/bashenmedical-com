@@ -22,8 +22,6 @@ import {
   type DependentAppointment,
 } from "@/lib/portal/dependents.functions";
 
-
-
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,8 +97,7 @@ export const Route = createFileRoute("/_authenticated/portal/family")({
       { title: "أفراد العائلة | بوابة المريض" },
       {
         name: "description",
-        content:
-          "إدارة أفراد العائلة والمعالين وحجز مواعيدهم من خلال بوابة المريض.",
+        content: "إدارة أفراد العائلة والمعالين وحجز مواعيدهم من خلال بوابة المريض.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -114,50 +111,50 @@ export const Route = createFileRoute("/_authenticated/portal/family")({
 
 type Lang = "ar" | "en";
 const T = {
-  title:            { ar: "أفراد العائلة", en: "Family Members" },
+  title: { ar: "أفراد العائلة", en: "Family Members" },
   subtitle: {
     ar: "أضف أفراد عائلتك لإدارة سجلاتهم وحجز مواعيدهم من حسابك.",
     en: "Add family members to manage their records and book appointments from your account.",
   },
-  add:              { ar: "إضافة فرد جديد", en: "Add Member" },
-  empty_title:      { ar: "لم تُضف أي أفراد بعد", en: "No members added yet" },
+  add: { ar: "إضافة فرد جديد", en: "Add Member" },
+  empty_title: { ar: "لم تُضف أي أفراد بعد", en: "No members added yet" },
   empty_body: {
     ar: "ابدأ بإضافة طفلك أو زوجك/زوجتك أو أحد والديك لإدارة سجلاتهم وحجز المواعيد نيابةً عنهم.",
     en: "Start by adding a child, spouse, or parent to manage their records and book on their behalf.",
   },
-  edit:             { ar: "تعديل", en: "Edit" },
-  delete:           { ar: "حذف", en: "Delete" },
-  book_for:         { ar: "احجز موعدًا لهذا الفرد", en: "Book an appointment" },
-  verified:         { ar: "موثّق", en: "Verified" },
-  pending:          { ar: "قيد التوثيق", en: "Pending verification" },
+  edit: { ar: "تعديل", en: "Edit" },
+  delete: { ar: "حذف", en: "Delete" },
+  book_for: { ar: "احجز موعدًا لهذا الفرد", en: "Book an appointment" },
+  verified: { ar: "موثّق", en: "Verified" },
+  pending: { ar: "قيد التوثيق", en: "Pending verification" },
   // form
-  form_add_title:   { ar: "إضافة فرد إلى العائلة", en: "Add family member" },
-  form_edit_title:  { ar: "تعديل بيانات فرد", en: "Edit family member" },
+  form_add_title: { ar: "إضافة فرد إلى العائلة", en: "Add family member" },
+  form_edit_title: { ar: "تعديل بيانات فرد", en: "Edit family member" },
   form_desc: {
     ar: "املأ البيانات المطلوبة. تُطبَّق قواعد تحقق مطابقة لنظام الهوية والجوال السعودي.",
     en: "Fill in the required fields. Saudi ID and mobile validation are applied.",
   },
-  f_name:           { ar: "الاسم الرباعي",     en: "Full name" },
-  f_relationship:   { ar: "صلة القرابة",       en: "Relationship" },
-  f_gender:         { ar: "الجنس",             en: "Gender" },
-  f_dob:            { ar: "تاريخ الميلاد",     en: "Date of birth" },
-  f_nid:            { ar: "رقم الهوية",         en: "National ID" },
-  f_phone:          { ar: "رقم الجوال",        en: "Mobile number" },
-  optional:         { ar: "اختياري",           en: "optional" },
-  save:             { ar: "حفظ",              en: "Save" },
-  cancel:           { ar: "إلغاء",            en: "Cancel" },
-  saving:           { ar: "جارٍ الحفظ…",      en: "Saving…" },
+  f_name: { ar: "الاسم الرباعي", en: "Full name" },
+  f_relationship: { ar: "صلة القرابة", en: "Relationship" },
+  f_gender: { ar: "الجنس", en: "Gender" },
+  f_dob: { ar: "تاريخ الميلاد", en: "Date of birth" },
+  f_nid: { ar: "رقم الهوية", en: "National ID" },
+  f_phone: { ar: "رقم الجوال", en: "Mobile number" },
+  optional: { ar: "اختياري", en: "optional" },
+  save: { ar: "حفظ", en: "Save" },
+  cancel: { ar: "إلغاء", en: "Cancel" },
+  saving: { ar: "جارٍ الحفظ…", en: "Saving…" },
   // relationships
-  r_child:          { ar: "ابن/ابنة",         en: "Child" },
-  r_spouse:         { ar: "زوج/زوجة",         en: "Spouse" },
-  r_parent:         { ar: "والد/والدة",       en: "Parent" },
-  r_sibling:        { ar: "أخ/أخت",           en: "Sibling" },
-  r_other:          { ar: "أخرى",             en: "Other" },
-  g_male:           { ar: "ذكر", en: "Male" },
-  g_female:         { ar: "أنثى", en: "Female" },
-  choose:           { ar: "اختر…", en: "Choose…" },
+  r_child: { ar: "ابن/ابنة", en: "Child" },
+  r_spouse: { ar: "زوج/زوجة", en: "Spouse" },
+  r_parent: { ar: "والد/والدة", en: "Parent" },
+  r_sibling: { ar: "أخ/أخت", en: "Sibling" },
+  r_other: { ar: "أخرى", en: "Other" },
+  g_male: { ar: "ذكر", en: "Male" },
+  g_female: { ar: "أنثى", en: "Female" },
+  choose: { ar: "اختر…", en: "Choose…" },
   // delete confirm
-  del_title:        { ar: "حذف فرد من العائلة؟", en: "Delete family member?" },
+  del_title: { ar: "حذف فرد من العائلة؟", en: "Delete family member?" },
   del_body: {
     ar: "لن يتم حذف السجلات الطبية المرتبطة بهذا الفرد إن وُجدت. يمكنك إعادة إضافته لاحقًا.",
     en: "Existing linked medical records won't be deleted. You can add them again later.",
@@ -166,13 +163,19 @@ const T = {
     ar: "هذا الإجراء لا يمكن التراجع عنه. سيتم إزالة الفرد من قائمة عائلتك فورًا.",
     en: "This action cannot be undone. The member will be removed from your family list immediately.",
   },
-  del_ok:           { ar: "نعم، احذف", en: "Yes, delete" },
-  del_keep:         { ar: "لا، احتفظ به", en: "No, keep it" },
-  del_counting:     { ar: "جارٍ التحقق من المواعيد المرتبطة…", en: "Checking linked appointments…" },
-  del_count_error:  { ar: "تعذّر التحقق من المواعيد المرتبطة.", en: "Could not check linked appointments." },
-  del_total_label:  { ar: "إجمالي المواعيد المرتبطة", en: "Total linked appointments" },
-  del_active_label: { ar: "مواعيد نشطة (قادمة/قيد التأكيد)", en: "Active appointments (upcoming/pending)" },
-  del_blocked_title:{ ar: "لا يمكن الحذف حاليًا", en: "Deletion currently blocked" },
+  del_ok: { ar: "نعم، احذف", en: "Yes, delete" },
+  del_keep: { ar: "لا، احتفظ به", en: "No, keep it" },
+  del_counting: { ar: "جارٍ التحقق من المواعيد المرتبطة…", en: "Checking linked appointments…" },
+  del_count_error: {
+    ar: "تعذّر التحقق من المواعيد المرتبطة.",
+    en: "Could not check linked appointments.",
+  },
+  del_total_label: { ar: "إجمالي المواعيد المرتبطة", en: "Total linked appointments" },
+  del_active_label: {
+    ar: "مواعيد نشطة (قادمة/قيد التأكيد)",
+    en: "Active appointments (upcoming/pending)",
+  },
+  del_blocked_title: { ar: "لا يمكن الحذف حاليًا", en: "Deletion currently blocked" },
   del_blocked_body: {
     ar: "يوجد لدى هذا الفرد مواعيد نشطة. الرجاء إلغاؤها أو إتمامها أولًا قبل حذفه.",
     en: "This member has active appointments. Please cancel or complete them before deleting.",
@@ -220,54 +223,59 @@ const T = {
   },
   del_cancelling: { ar: "جارٍ الإلغاء…", en: "Cancelling…" },
 
-
   // errors
   e_name_too_short: { ar: "الاسم قصير جدًا.", en: "Name is too short." },
-  e_name_too_long:  { ar: "الاسم طويل جدًا.", en: "Name is too long." },
-  e_nid:            { ar: "رقم الهوية يجب أن يتكوّن من 10 أرقام.", en: "National ID must be 10 digits." },
-  e_phone:          { ar: "رقم الجوال غير صالح (مثال: 05XXXXXXXX).", en: "Invalid mobile number (e.g. 05XXXXXXXX)." },
-  e_date:           { ar: "التاريخ غير صالح.", en: "Invalid date." },
-  e_relationship:   { ar: "اختر صلة القرابة.", en: "Choose a relationship." },
-  e_generic:        { ar: "تعذّر حفظ البيانات.", en: "Could not save." },
+  e_name_too_long: { ar: "الاسم طويل جدًا.", en: "Name is too long." },
+  e_nid: { ar: "رقم الهوية يجب أن يتكوّن من 10 أرقام.", en: "National ID must be 10 digits." },
+  e_phone: {
+    ar: "رقم الجوال غير صالح (مثال: 05XXXXXXXX).",
+    en: "Invalid mobile number (e.g. 05XXXXXXXX).",
+  },
+  e_date: { ar: "التاريخ غير صالح.", en: "Invalid date." },
+  e_relationship: { ar: "اختر صلة القرابة.", en: "Choose a relationship." },
+  e_generic: { ar: "تعذّر حفظ البيانات.", en: "Could not save." },
   // history
-  history_toggle:   { ar: "سجل المواعيد", en: "Appointments history" },
-  history_show:     { ar: "عرض", en: "Show" },
-  history_hide:     { ar: "إخفاء", en: "Hide" },
-  history_empty:    { ar: "لا توجد مواعيد مسجلة لهذا الفرد بعد.", en: "No appointments recorded yet." },
-  history_loading:  { ar: "جارٍ التحميل…", en: "Loading…" },
-  history_error:    { ar: "تعذّر تحميل السجل.", en: "Could not load history." },
-  history_retry:    { ar: "إعادة", en: "Retry" },
-  st_scheduled:     { ar: "مجدول", en: "Scheduled" },
-  st_confirmed:     { ar: "مؤكد", en: "Confirmed" },
-  st_completed:     { ar: "منتهي", en: "Completed" },
-  st_cancelled:     { ar: "ملغى", en: "Cancelled" },
-  st_no_show:       { ar: "لم يحضر", en: "No-show" },
-  st_pending:       { ar: "بانتظار المعالجة", en: "Pending" },
-  st_in_progress:   { ar: "جارٍ", en: "In progress" },
-  st_unknown:       { ar: "غير معروف", en: "Unknown" },
+  history_toggle: { ar: "سجل المواعيد", en: "Appointments history" },
+  history_show: { ar: "عرض", en: "Show" },
+  history_hide: { ar: "إخفاء", en: "Hide" },
+  history_empty: {
+    ar: "لا توجد مواعيد مسجلة لهذا الفرد بعد.",
+    en: "No appointments recorded yet.",
+  },
+  history_loading: { ar: "جارٍ التحميل…", en: "Loading…" },
+  history_error: { ar: "تعذّر تحميل السجل.", en: "Could not load history." },
+  history_retry: { ar: "إعادة", en: "Retry" },
+  st_scheduled: { ar: "مجدول", en: "Scheduled" },
+  st_confirmed: { ar: "مؤكد", en: "Confirmed" },
+  st_completed: { ar: "منتهي", en: "Completed" },
+  st_cancelled: { ar: "ملغى", en: "Cancelled" },
+  st_no_show: { ar: "لم يحضر", en: "No-show" },
+  st_pending: { ar: "بانتظار المعالجة", en: "Pending" },
+  st_in_progress: { ar: "جارٍ", en: "In progress" },
+  st_unknown: { ar: "غير معروف", en: "Unknown" },
   // completeness
   incomplete_title: { ar: "بيانات ناقصة قبل الحجز", en: "Missing details before booking" },
   incomplete_body: {
     ar: "لإتمام الحجز نيابةً عن هذا الفرد، الرجاء استكمال الحقول التالية:",
     en: "To book on behalf of this member, please complete the following fields:",
   },
-  complete_now:     { ar: "استكمل البيانات", en: "Complete details" },
+  complete_now: { ar: "استكمل البيانات", en: "Complete details" },
   // language
   lang_toggle_to_en: { ar: "English", en: "English" },
   lang_toggle_to_ar: { ar: "العربية", en: "العربية" },
-  lang_switch_aria:  { ar: "التبديل إلى العربية", en: "Switch to English" },
-  lang_saved:        { ar: "تم حفظ لغة الحساب.", en: "Account language saved." },
-  lang_error:        { ar: "تعذّر حفظ اللغة.", en: "Could not save language." },
+  lang_switch_aria: { ar: "التبديل إلى العربية", en: "Switch to English" },
+  lang_saved: { ar: "تم حفظ لغة الحساب.", en: "Account language saved." },
+  lang_error: { ar: "تعذّر حفظ اللغة.", en: "Could not save language." },
   // page-level
-  page_error_title:   { ar: "تعذّر تحميل الصفحة", en: "Could not load the page" },
+  page_error_title: { ar: "تعذّر تحميل الصفحة", en: "Could not load the page" },
   page_error_generic: { ar: "خطأ غير متوقع.", en: "Unexpected error." },
-  page_error_retry:   { ar: "إعادة المحاولة", en: "Retry" },
-  member_label:       { ar: "الفرد:", en: "Member:" },
+  page_error_retry: { ar: "إعادة المحاولة", en: "Retry" },
+  member_label: { ar: "الفرد:", en: "Member:" },
   // save toasts
-  saved_created:      { ar: "تم إضافة الفرد بنجاح.", en: "Family member added." },
-  saved_updated:      { ar: "تم تحديث بيانات الفرد.", en: "Family member updated." },
+  saved_created: { ar: "تم إضافة الفرد بنجاح.", en: "Family member added." },
+  saved_updated: { ar: "تم تحديث بيانات الفرد.", en: "Family member updated." },
   // list join separator (locale-appropriate punctuation)
-  list_separator:     { ar: "، ", en: ", " },
+  list_separator: { ar: "، ", en: ", " },
 } as const;
 
 function t(k: keyof typeof T, lang: Lang) {
@@ -306,7 +314,7 @@ function FamilyPage() {
     null,
   );
   const [toDelete, setToDelete] = useState<Dependent | null>(null);
-  const dir =i18n.t("portalFamily:ltr");
+  const dir = i18n.t("portalFamily:ltr");
 
   const langMutation = useMutation({
     mutationFn: (next: Lang) => updateMyProfile({ data: { preferred_language: next } }),
@@ -324,7 +332,7 @@ function FamilyPage() {
     onError: () => toast.error(t("lang_error", lang)),
   });
 
-  const nextLang: Lang =isAr ? "ar" : "en";
+  const nextLang: Lang = isAr ? "ar" : "en";
 
   return (
     <div className="space-y-6 pb-24 md:pb-6" dir={dir}>
@@ -337,7 +345,7 @@ function FamilyPage() {
         }
         description={t("subtitle", lang)}
         breadcrumbs={[
-          { label:i18n.t("portalFamily:home"), to: "/portal" },
+          { label: i18n.t("portalFamily:home"), to: "/portal" },
           { label: t("title", lang) },
         ]}
         isAr={lang === "ar"}
@@ -369,7 +377,6 @@ function FamilyPage() {
           </div>
         }
       />
-
 
       {rows.length === 0 ? (
         <PortalEmptyState
@@ -410,11 +417,7 @@ function FamilyPage() {
         />
       )}
 
-      <DeleteDialog
-        lang={lang}
-        row={toDelete}
-        onClose={() => setToDelete(null)}
-      />
+      <DeleteDialog lang={lang} row={toDelete} onClose={() => setToDelete(null)} />
     </div>
   );
 }
@@ -452,8 +455,7 @@ function DependentCard({
       toast.success(i18n.t("portalFamily:access_updated"));
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
     },
-    onError: (e: any) =>
-      toast.error(e?.message ?? i18n.t("portalFamily:update_failed")),
+    onError: (e: any) => toast.error(e?.message ?? i18n.t("portalFamily:update_failed")),
   });
   const badgeCls = verified
     ? "bg-emerald-50 text-emerald-700"
@@ -481,33 +483,34 @@ function DependentCard({
         <span
           className={`inline-flex items-center gap-1 text-[11px] font-semibold rounded-full px-2 h-6 whitespace-nowrap ${badgeCls}`}
         >
-          {verified ? (
-            <BadgeCheck className="h-3 w-3" />
-          ) : (
-            <ShieldAlert className="h-3 w-3" />
-          )}
+          {verified ? <BadgeCheck className="h-3 w-3" /> : <ShieldAlert className="h-3 w-3" />}
           {badgeLabel}
         </span>
       </div>
-
 
       <dl className="text-xs grid gap-1.5 text-[color:var(--portal-ink-2)]">
         {row.date_of_birth && (
           <div className="flex justify-between gap-2">
             <dt>{t("f_dob", lang)}</dt>
-            <dd className="font-mono" dir="ltr">{row.date_of_birth}</dd>
+            <dd className="font-mono" dir="ltr">
+              {row.date_of_birth}
+            </dd>
           </div>
         )}
         {row.national_id && (
           <div className="flex justify-between gap-2">
             <dt>{t("f_nid", lang)}</dt>
-            <dd className="font-mono" dir="ltr">{row.national_id}</dd>
+            <dd className="font-mono" dir="ltr">
+              {row.national_id}
+            </dd>
           </div>
         )}
         {row.phone && (
           <div className="flex justify-between gap-2">
             <dt>{t("f_phone", lang)}</dt>
-            <dd className="font-mono" dir="ltr">{row.phone}</dd>
+            <dd className="font-mono" dir="ltr">
+              {row.phone}
+            </dd>
           </div>
         )}
       </dl>
@@ -522,10 +525,10 @@ function DependentCard({
         <div className="grid grid-cols-2 gap-1.5">
           {(
             [
-              ["booking",i18n.t("portalFamily:booking")],
-              ["reports",i18n.t("portalFamily:reports")],
-              ["prescriptions",i18n.t("portalFamily:prescriptions")],
-              ["billing",i18n.t("portalFamily:billing")],
+              ["booking", i18n.t("portalFamily:booking")],
+              ["reports", i18n.t("portalFamily:reports")],
+              ["prescriptions", i18n.t("portalFamily:prescriptions")],
+              ["billing", i18n.t("portalFamily:billing")],
             ] as const
           ).map(([key, label]) => {
             const active = row.access_scopes?.[key] === true;
@@ -539,7 +542,9 @@ function DependentCard({
                   className="accent-[color:var(--portal-primary)]"
                   checked={active}
                   onChange={(e) =>
-                    scopesMut.mutate({ [key]: e.currentTarget.checked } as Partial<DependentAccessScopes>)
+                    scopesMut.mutate({
+                      [key]: e.currentTarget.checked,
+                    } as Partial<DependentAccessScopes>)
                   }
                 />
                 <span>{label}</span>
@@ -553,8 +558,6 @@ function DependentCard({
           </div>
         )}
       </fieldset>
-
-
 
       {!canBook && (
         <div
@@ -571,17 +574,12 @@ function DependentCard({
                   <li key={k}>{t(k, lang)}</li>
                 ))}
                 {!verified && (
-                  <li>
-                    {i18n.t("portalFamily:relationship_verification_by_reception")}
-                  </li>
+                  <li>{i18n.t("portalFamily:relationship_verification_by_reception")}</li>
                 )}
                 {verified && !bookingAllowed && (
-                  <li>
-                    {i18n.t("portalFamily:enable_the_booking_scope_above")}
-                  </li>
+                  <li>{i18n.t("portalFamily:enable_the_booking_scope_above")}</li>
                 )}
               </ul>
-
             </div>
           </div>
         </div>
@@ -636,7 +634,6 @@ function DependentCard({
       </div>
 
       <DependentAppointmentsSection dependentId={row.id} lang={lang} />
-
     </div>
   );
 }
@@ -667,18 +664,11 @@ function statusVisual(status: string): {
   return { cls: "bg-amber-50 text-amber-700", Icon: Clock3 };
 }
 
-function DependentAppointmentsSection({
-  dependentId,
-  lang,
-}: {
-  dependentId: string;
-  lang: Lang;
-}) {
+function DependentAppointmentsSection({ dependentId, lang }: { dependentId: string; lang: Lang }) {
   const [open, setOpen] = useState(false);
   const q = useQuery({
     queryKey: ["portal", "dependent-appointments", dependentId],
-    queryFn: () =>
-      listDependentAppointments({ data: { dependent_id: dependentId, limit: 20 } }),
+    queryFn: () => listDependentAppointments({ data: { dependent_id: dependentId, limit: 20 } }),
     enabled: open,
     staleTime: 30_000,
   });
@@ -737,12 +727,15 @@ function DependentAppointmentsSection({
 
 function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }) {
   const isAr = lang === "ar";
-  const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
+  const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ??
+    "st_unknown") as keyof typeof T;
   const { cls, Icon } = statusVisual(row.status);
-  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA" : "en-GB",
+  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(
+    isAr ? "ar-SA" : "en-GB",
     { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" },
   );
-  const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;
+  const doctorName =
+    lang === "ar" ? row.doctor_name_ar : (row.doctor_name_en ?? row.doctor_name_ar);
 
   return (
     <li className="rounded-lg border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-2.5 text-[11px] space-y-1">
@@ -771,17 +764,12 @@ function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }
             {row.branch_name_ar}
           </span>
         )}
-        {row.specialty_name_ar && lang === "ar" && (
-          <span>· {row.specialty_name_ar}</span>
-        )}
+        {row.specialty_name_ar && lang === "ar" && <span>· {row.specialty_name_ar}</span>}
       </div>
-      {row.reason && (
-        <p className="text-[color:var(--portal-ink-2)] line-clamp-2">{row.reason}</p>
-      )}
+      {row.reason && <p className="text-[color:var(--portal-ink-2)] line-clamp-2">{row.reason}</p>}
     </li>
   );
 }
-
 
 /* ---------------- form dialog ---------------- */
 
@@ -865,10 +853,13 @@ function DependentDialog({
       if (found) {
         // best-effort field mapping
         const field: keyof FormState =
-          found === "national_id_invalid" ? "national_id"
-          : found === "phone_invalid" ? "phone"
-          : found === "date_invalid" ? "date_of_birth"
-          : "full_name";
+          found === "national_id_invalid"
+            ? "national_id"
+            : found === "phone_invalid"
+              ? "phone"
+              : found === "date_invalid"
+                ? "date_of_birth"
+                : "full_name";
         setErrors((e) => ({ ...e, [field]: T[ERROR_KEY[found]][lang] }));
       } else {
         toast.error(T.e_generic[lang]);
@@ -934,15 +925,10 @@ function DependentDialog({
               </Select>
             </Field>
 
-            <Field
-              label={`${t("f_gender", lang)} — ${t("optional", lang)}`}
-              error={undefined}
-            >
+            <Field label={`${t("f_gender", lang)} — ${t("optional", lang)}`} error={undefined}>
               <Select
                 value={form.gender || undefined}
-                onValueChange={(v) =>
-                  setForm({ ...form, gender: v as FormState["gender"] })
-                }
+                onValueChange={(v) => setForm({ ...form, gender: v as FormState["gender"] })}
               >
                 <SelectTrigger className="bg-[color:var(--portal-surface)]">
                   <SelectValue placeholder={t("choose", lang)} />
@@ -982,10 +968,7 @@ function DependentDialog({
             </Field>
           </div>
 
-          <Field
-            label={`${t("f_phone", lang)} — ${t("optional", lang)}`}
-            error={errors.phone}
-          >
+          <Field label={`${t("f_phone", lang)} — ${t("optional", lang)}`} error={errors.phone}>
             <Input
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -997,12 +980,7 @@ function DependentDialog({
           </Field>
 
           <DialogFooter className="gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={onClose}
-              disabled={mut.isPending}
-            >
+            <Button type="button" variant="ghost" onClick={onClose} disabled={mut.isPending}>
               {t("cancel", lang)}
             </Button>
             <Button
@@ -1062,8 +1040,7 @@ function DeleteDialog({
 
   const countQ = useQuery({
     queryKey: ["portal", "dependent-appt-count", row?.id],
-    queryFn: () =>
-      countDependentAppointments({ data: { dependent_id: row!.id } }),
+    queryFn: () => countDependentAppointments({ data: { dependent_id: row!.id } }),
     enabled: !!row,
     staleTime: 15_000,
   });
@@ -1104,16 +1081,14 @@ function DeleteDialog({
       const detail =
         err instanceof Error && err.message
           ? err.message
-          :i18n.t("portalFamily:unexpected_server_error");
+          : i18n.t("portalFamily:unexpected_server_error");
       toast.error(T.del_cancel_error[lang], {
         description: detail,
         duration: 8000,
       });
       setConfirmCancel(false);
     },
-
   });
-
 
   const activeCount = countQ.data?.active ?? 0;
   const totalCount = countQ.data?.total ?? 0;
@@ -1121,7 +1096,6 @@ function DeleteDialog({
   const hasHistory = !blocked && totalCount > 0;
   const busy = mut.isPending || cancelMut.isPending;
   const canDelete = countQ.isSuccess && !blocked && !busy;
-
 
   return (
     <AlertDialog
@@ -1143,30 +1117,20 @@ function DeleteDialog({
         onOpenAutoFocus={(e) => {
           // Move initial focus to the safe (Cancel/keep) button
           e.preventDefault();
-          const el = document.querySelector<HTMLButtonElement>(
-            '[data-dep-del-cancel="true"]',
-          );
+          const el = document.querySelector<HTMLButtonElement>('[data-dep-del-cancel="true"]');
           el?.focus();
         }}
       >
-
-
         <AlertDialogHeader>
-          <AlertDialogTitle
-            id="dep-del-title"
-            className="flex items-center gap-2 text-red-700"
-          >
+          <AlertDialogTitle id="dep-del-title" className="flex items-center gap-2 text-red-700">
             <AlertTriangle className="h-5 w-5" aria-hidden />
             {T.del_title[lang]}
           </AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div id="dep-del-desc" className="space-y-3 text-sm">
-
               <div className="rounded-lg border border-red-200 bg-red-50 p-3 flex items-start gap-2">
                 <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 shrink-0" aria-hidden />
-                <div className="text-red-800 font-medium">
-                  {T.del_warning[lang]}
-                </div>
+                <div className="text-red-800 font-medium">{T.del_warning[lang]}</div>
               </div>
               <div className="text-foreground">
                 <span className="text-muted-foreground">{T.member_label[lang]} </span>
@@ -1237,9 +1201,7 @@ function DeleteDialog({
               )}
 
               {hasHistory && (
-                <div className="text-xs text-muted-foreground">
-                  {T.del_history_note[lang]}
-                </div>
+                <div className="text-xs text-muted-foreground">{T.del_history_note[lang]}</div>
               )}
 
               <div className="text-muted-foreground">{T.del_body[lang]}</div>
@@ -1294,9 +1256,7 @@ function DeleteDialog({
           }}
           onOpenAutoFocus={(e) => {
             e.preventDefault();
-            const el = document.querySelector<HTMLButtonElement>(
-              '[data-dep-cancel-back="true"]',
-            );
+            const el = document.querySelector<HTMLButtonElement>('[data-dep-cancel-back="true"]');
             el?.focus();
           }}
         >
@@ -1310,7 +1270,6 @@ function DeleteDialog({
             </AlertDialogTitle>
             <AlertDialogDescription asChild>
               <div id="dep-cancel-desc" className="space-y-3 text-sm">
-
                 <div className="rounded-lg border border-red-200 bg-red-50 p-3 flex items-start gap-2">
                   <ShieldAlert className="h-4 w-4 mt-0.5 text-red-600 shrink-0" aria-hidden />
                   <div className="text-red-800 font-medium">
@@ -1319,12 +1278,8 @@ function DeleteDialog({
                 </div>
                 <div className="text-foreground">{T.del_cancel_confirm[lang]}</div>
                 <div className="rounded-lg border border-border bg-muted/40 p-3 flex items-center justify-between gap-3">
-                  <span className="text-muted-foreground">
-                    {T.del_active_label[lang]}
-                  </span>
-                  <span className="font-semibold tabular-nums text-red-600">
-                    {activeCount}
-                  </span>
+                  <span className="text-muted-foreground">{T.del_active_label[lang]}</span>
+                  <span className="font-semibold tabular-nums text-red-600">{activeCount}</span>
                 </div>
                 <div className="text-foreground">
                   <span className="text-muted-foreground">{T.member_label[lang]} </span>
@@ -1351,7 +1306,6 @@ function DeleteDialog({
               aria-disabled={cancelMut.isPending}
               className="font-semibold border-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-
               {T.del_cancel_confirm_keep[lang]}
             </AlertDialogCancel>
             <AlertDialogAction
@@ -1375,13 +1329,10 @@ function DeleteDialog({
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-
       </AlertDialog>
     </AlertDialog>
   );
 }
-
-
 
 /* ---------------- error boundary ---------------- */
 
@@ -1389,10 +1340,8 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   const qc = useQueryClient();
   const cached = qc.getQueryData(profileQuery.queryKey) as
-    | { preferred_language?: string | null }
-    | undefined;
-  const docLang =
-    typeof document !== "undefined" ? document.documentElement.lang : "ar";
+    { preferred_language?: string | null } | undefined;
+  const docLang = typeof document !== "undefined" ? document.documentElement.lang : "ar";
   const lang: Lang = ((cached?.preferred_language as Lang | undefined) ??
     (docLang === "en" ? "en" : "ar")) as Lang;
   const isAr = lang === "ar";

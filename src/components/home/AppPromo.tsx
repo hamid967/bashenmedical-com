@@ -20,9 +20,7 @@ export function AppPromo() {
                 {isAr ? "بوابة المرضى" : "Patient Portal"}
               </div>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight">
-                {isAr
-                  ? "بوابة باعشن الرقمية — كل تقاريرك بين يديك"
-                  : "Your health, in your pocket"}
+                {isAr ? "بوابة باعشن الرقمية — كل تقاريرك بين يديك" : "Your health, in your pocket"}
               </h2>
               <p className="mt-3 text-white/80 max-w-lg">
                 {isAr
@@ -32,8 +30,16 @@ export function AppPromo() {
 
               <ul className="mt-6 space-y-2 text-sm">
                 {[
-                  { ic: Bell, ar: "تذكيرات المواعيد قبل الزيارة", en: "Appointment reminders before your visit" },
-                  { ic: QrCode, ar: "بطاقة QR للوصول السريع في الاستقبال", en: "QR card for fast reception check-in" },
+                  {
+                    ic: Bell,
+                    ar: "تذكيرات المواعيد قبل الزيارة",
+                    en: "Appointment reminders before your visit",
+                  },
+                  {
+                    ic: QrCode,
+                    ar: "بطاقة QR للوصول السريع في الاستقبال",
+                    en: "QR card for fast reception check-in",
+                  },
                   { ic: Smartphone, ar: "متوفّر على جميع الأجهزة", en: "Works on any device" },
                 ].map((f) => {
                   const Ic = f.ic;

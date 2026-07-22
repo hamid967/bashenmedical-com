@@ -126,10 +126,15 @@ export const getVisualAnalytics = createServerFn({ method: "GET" })
     });
 
     // Funnel
-    let booked = 0, confirmed = 0, completed = 0, no_show = 0, cancelled = 0;
+    let booked = 0,
+      confirmed = 0,
+      completed = 0,
+      no_show = 0,
+      cancelled = 0;
     for (const r of list) {
       booked++;
-      if (r.status === "confirmed" || r.status === "completed" || r.status === "no_show") confirmed++;
+      if (r.status === "confirmed" || r.status === "completed" || r.status === "no_show")
+        confirmed++;
       if (r.status === "completed") completed++;
       else if (r.status === "no_show") no_show++;
       else if (r.status === "cancelled") cancelled++;
@@ -154,10 +159,14 @@ export const getVisualAnalytics = createServerFn({ method: "GET" })
         .in("id", doctorIds);
       for (const d of docs ?? []) doctorMap.set(d.id, d.name_ar);
     }
-    const perDoctor = new Map<string, { total: number; no_show: number; series: Array<{ ns: number; dec: number }> }>();
+    const perDoctor = new Map<
+      string,
+      { total: number; no_show: number; series: Array<{ ns: number; dec: number }> }
+    >();
     for (const id of doctorIds) {
       perDoctor.set(id, {
-        total: 0, no_show: 0,
+        total: 0,
+        no_show: 0,
         series: days.map(() => ({ ns: 0, dec: 0 })),
       });
     }
@@ -167,8 +176,13 @@ export const getVisualAnalytics = createServerFn({ method: "GET" })
       const idx = dayIdx.get(r.appointment_date);
       if (!b || idx === undefined) continue;
       b.total++;
-      if (r.status === "no_show") { b.no_show++; b.series[idx].ns++; b.series[idx].dec++; }
-      else if (r.status === "completed") { b.series[idx].dec++; }
+      if (r.status === "no_show") {
+        b.no_show++;
+        b.series[idx].ns++;
+        b.series[idx].dec++;
+      } else if (r.status === "completed") {
+        b.series[idx].dec++;
+      }
     }
     const doctors: DoctorSparkline[] = Array.from(perDoctor.entries())
       .map(([id, b]) => ({
@@ -186,10 +200,18 @@ export const getVisualAnalytics = createServerFn({ method: "GET" })
     const splitIdx = Math.floor(days.length * 0.75);
     const anomalies: Anomaly[] = [];
     for (const [id, b] of perDoctor.entries()) {
-      let rNs = 0, rDec = 0, bNs = 0, bDec = 0;
+      let rNs = 0,
+        rDec = 0,
+        bNs = 0,
+        bDec = 0;
       b.series.forEach((s, i) => {
-        if (i >= splitIdx) { rNs += s.ns; rDec += s.dec; }
-        else { bNs += s.ns; bDec += s.dec; }
+        if (i >= splitIdx) {
+          rNs += s.ns;
+          rDec += s.dec;
+        } else {
+          bNs += s.ns;
+          bDec += s.dec;
+        }
       });
       if (rDec < 3 || bDec < 3) continue;
       const recent = Math.round((rNs / rDec) * 1000) / 10;

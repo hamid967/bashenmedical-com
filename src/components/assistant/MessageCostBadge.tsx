@@ -5,17 +5,17 @@
  * All values are display-only estimates when server usage is missing.
  */
 import { useState } from "react";
-import { ArrowDownToLine, ArrowUpFromLine, Clock, Coins, Cpu, Info, ExternalLink } from "lucide-react";
 import {
-  estimateCredits,
-  formatCredits,
-  formatTokens,
-  getRate,
-} from "@/lib/ai/pricing";
-import {
-  estimateTokensCalibrated,
-  isHighConfidence,
-} from "@/lib/ai/token-calibration";
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Clock,
+  Coins,
+  Cpu,
+  Info,
+  ExternalLink,
+} from "lucide-react";
+import { estimateCredits, formatCredits, formatTokens, getRate } from "@/lib/ai/pricing";
+import { estimateTokensCalibrated, isHighConfidence } from "@/lib/ai/token-calibration";
 import {
   Dialog,
   DialogContent,
@@ -85,8 +85,14 @@ export function MessageCostBadge({
   const t = (ar: string, en: string) => (lang === "ar" ? ar : en);
   const dir = lang === "ar" ? "rtl" : "ltr";
 
-  const inEst = estimateTokensCalibrated(meta.promptText ?? "", { model: meta.model, kind: "input" });
-  const outEst = estimateTokensCalibrated(meta.outputText ?? "", { model: meta.model, kind: "output" });
+  const inEst = estimateTokensCalibrated(meta.promptText ?? "", {
+    model: meta.model,
+    kind: "input",
+  });
+  const outEst = estimateTokensCalibrated(meta.outputText ?? "", {
+    model: meta.model,
+    kind: "output",
+  });
   const inTok = meta.usage?.prompt ?? inEst.tokens;
   const outTok = meta.usage?.completion ?? outEst.tokens;
   const totalTok = meta.usage?.total ?? inTok + outTok;
@@ -105,8 +111,7 @@ export function MessageCostBadge({
       ? t("تقدير معاير", "calibrated estimate")
       : t("تقدير محلي", "local estimate");
 
-  const modelShort =
-    (meta.model ?? "").split("/").pop() || (lang === "ar" ? "افتراضي" : "default");
+  const modelShort = (meta.model ?? "").split("/").pop() || (lang === "ar" ? "افتراضي" : "default");
 
   return (
     <div className="mt-1.5" dir={dir}>
@@ -229,8 +234,7 @@ export function MessageCostBadge({
               {t("النموذج", "Model")}: <span className="font-mono">{modelShort}</span>
             </span>
             <span>
-              {t("المصدر", "Source")}:{" "}
-              {sourceLabel}
+              {t("المصدر", "Source")}: {sourceLabel}
             </span>
             {live ? (
               <span className="text-amber-600">{t("قيد التوليد…", "generating…")}</span>
@@ -238,11 +242,12 @@ export function MessageCostBadge({
           </div>
 
           <div className="rounded-md border bg-muted/30 p-3 space-y-2 text-[11px] leading-relaxed">
-            <div className="font-medium">
-              {t("طريقة الحساب", "How it's calculated")}
-            </div>
-            <pre className="rounded bg-background/60 p-2 font-mono text-[10.5px] overflow-x-auto text-left" dir="ltr">
-{`credits =
+            <div className="font-medium">{t("طريقة الحساب", "How it's calculated")}</div>
+            <pre
+              className="rounded bg-background/60 p-2 font-mono text-[10.5px] overflow-x-auto text-left"
+              dir="ltr"
+            >
+              {`credits =
   (input_tokens  × ${rate.inPer1M}  / 1,000,000)
 + (output_tokens × ${rate.outPer1M} / 1,000,000)`}
             </pre>

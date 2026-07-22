@@ -44,7 +44,6 @@ export const getBookingOptions = createServerFn({ method: "GET" })
     };
   });
 
-
 /* --------------------------- getDoctorAvailability ------------------------ */
 
 const SlotsSchema = z.object({

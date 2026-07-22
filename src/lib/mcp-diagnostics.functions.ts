@@ -35,7 +35,11 @@ export const getLastMcpInvocations = createServerFn({ method: "GET" })
             order: (
               col: string,
               opts: { ascending: boolean },
-            ) => { limit: (n: number) => Promise<{ data: Row[] | null; error: { message: string } | null }> };
+            ) => {
+              limit: (
+                n: number,
+              ) => Promise<{ data: Row[] | null; error: { message: string } | null }>;
+            };
           };
         };
       }

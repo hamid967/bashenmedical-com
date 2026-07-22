@@ -24,9 +24,21 @@ type PathRow = { path: string; count: number };
 const METRIC_COLS: Column<MetricRow>[] = [
   { header: "المقياس", accessor: (r) => r.metric },
   { header: "عدد العينات", accessor: (r) => r.count },
-  { header: "p50", accessor: (r) => (r.p50 === null ? "" : r.metric === "CLS" ? r.p50.toFixed(3) : Math.round(r.p50)) },
-  { header: "p75", accessor: (r) => (r.p75 === null ? "" : r.metric === "CLS" ? r.p75.toFixed(3) : Math.round(r.p75)) },
-  { header: "p95", accessor: (r) => (r.p95 === null ? "" : r.metric === "CLS" ? r.p95.toFixed(3) : Math.round(r.p95)) },
+  {
+    header: "p50",
+    accessor: (r) =>
+      r.p50 === null ? "" : r.metric === "CLS" ? r.p50.toFixed(3) : Math.round(r.p50),
+  },
+  {
+    header: "p75",
+    accessor: (r) =>
+      r.p75 === null ? "" : r.metric === "CLS" ? r.p75.toFixed(3) : Math.round(r.p75),
+  },
+  {
+    header: "p95",
+    accessor: (r) =>
+      r.p95 === null ? "" : r.metric === "CLS" ? r.p95.toFixed(3) : Math.round(r.p95),
+  },
   { header: "جيد", accessor: (r) => r.good },
   { header: "بحاجة تحسين", accessor: (r) => r.needs },
   { header: "ضعيف", accessor: (r) => r.poor },
@@ -41,7 +53,11 @@ const PATH_COLS: Column<PathRow>[] = [
 const RAW_COLS: Column<WebVitalRawRow>[] = [
   { header: "الوقت", accessor: (r) => (r.ts ? new Date(r.ts).toLocaleString("ar-SA") : "") },
   { header: "المقياس", accessor: (r) => r.metric },
-  { header: "القيمة", accessor: (r) => (r.metric === "CLS" ? Number(r.value).toFixed(3) : Math.round(Number(r.value))) },
+  {
+    header: "القيمة",
+    accessor: (r) =>
+      r.metric === "CLS" ? Number(r.value).toFixed(3) : Math.round(Number(r.value)),
+  },
   { header: "المسار/URL", accessor: (r) => r.url, width: 60 },
   { header: "User-Agent", accessor: (r) => r.user_agent ?? "", width: 60 },
   { header: "metric_id", accessor: (r) => r.metric_id ?? "" },
@@ -52,7 +68,11 @@ type Preset = { id: string; label: string; path: string | null };
 const PRESETS: Preset[] = [
   { id: "all", label: "الكل", path: null },
   { id: "booking", label: "الحجز /book", path: "/book" },
-  { id: "portal-appts", label: "المواعيد (إعادة/إلغاء) /portal/appointments", path: "/portal/appointments" },
+  {
+    id: "portal-appts",
+    label: "المواعيد (إعادة/إلغاء) /portal/appointments",
+    path: "/portal/appointments",
+  },
   { id: "waitlist", label: "قائمة الانتظار /waitlist", path: "/waitlist" },
   { id: "portal", label: "بوابة المريض /portal", path: "/portal" },
 ];
@@ -73,10 +93,7 @@ const summaryQuery = (f: Filters) =>
 
 export const Route = createFileRoute("/_authenticated/admin/web-vitals")({
   head: () => ({
-    meta: [
-      { title: "Web Vitals | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "Web Vitals | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(summaryQuery({ windowHours: 24, pathContains: null })),
@@ -101,7 +118,7 @@ function WebVitalsPage() {
     const trimmed = customPath.trim();
     return {
       windowHours,
-      pathContains: trimmed ? trimmed : preset?.path ?? null,
+      pathContains: trimmed ? trimmed : (preset?.path ?? null),
     };
   }, [presetId, customPath, windowHours]);
 
@@ -114,7 +131,7 @@ function WebVitalsPage() {
     "النافذة الزمنية": windowLabel,
     "فلتر المسار": activePath,
     "إجمالي العينات": String(data.totalSamples),
-    "مقتطعة": data.truncated ? "نعم" : "لا",
+    مقتطعة: data.truncated ? "نعم" : "لا",
   };
   const metricRows: MetricRow[] = data.stats.map((s) => ({
     ...s,
@@ -231,7 +248,9 @@ function WebVitalsPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-xs">
-              <span className="font-medium text-[color:var(--ac-ink-2)]">مسار مخصص (ILIKE contains)</span>
+              <span className="font-medium text-[color:var(--ac-ink-2)]">
+                مسار مخصص (ILIKE contains)
+              </span>
               <input
                 type="text"
                 value={customPath}
@@ -316,7 +335,13 @@ function formatMetric(metric: WebVitalMetric, v: number | null): string {
 
 function ratingOf(metric: WebVitalMetric, v: number | null): "good" | "needs" | "poor" | "none" {
   if (v === null) return "none";
-  const t = { LCP: [2500, 4000], INP: [200, 500], CLS: [0.1, 0.25], FCP: [1800, 3000], TTFB: [800, 1800] }[metric];
+  const t = {
+    LCP: [2500, 4000],
+    INP: [200, 500],
+    CLS: [0.1, 0.25],
+    FCP: [1800, 3000],
+    TTFB: [800, 1800],
+  }[metric];
   if (v <= t[0]) return "good";
   if (v <= t[1]) return "needs";
   return "poor";
@@ -352,15 +377,39 @@ function MetricCard({ stats }: { stats: MetricStats }) {
           className={`text-[10px] rounded-full border px-2 py-0.5 ${RATING_STYLES[rating]}`}
           aria-label={`تقييم ${rating}`}
         >
-          {rating === "good" ? "جيد" : rating === "needs" ? "بحاجة تحسين" : rating === "poor" ? "ضعيف" : "لا بيانات"}
+          {rating === "good"
+            ? "جيد"
+            : rating === "needs"
+              ? "بحاجة تحسين"
+              : rating === "poor"
+                ? "ضعيف"
+                : "لا بيانات"}
         </span>
       </div>
       <div className="grid grid-cols-3 gap-2 mt-3 text-[11px] text-[color:var(--ac-ink-3)]">
-        <div>p50: <span className="font-semibold text-[color:var(--ac-ink-1)]">{formatMetric(stats.metric, stats.p50)}</span></div>
-        <div>p75: <span className="font-semibold text-[color:var(--ac-ink-1)]">{formatMetric(stats.metric, stats.p75)}</span></div>
-        <div>p95: <span className="font-semibold text-[color:var(--ac-ink-1)]">{formatMetric(stats.metric, stats.p95)}</span></div>
+        <div>
+          p50:{" "}
+          <span className="font-semibold text-[color:var(--ac-ink-1)]">
+            {formatMetric(stats.metric, stats.p50)}
+          </span>
+        </div>
+        <div>
+          p75:{" "}
+          <span className="font-semibold text-[color:var(--ac-ink-1)]">
+            {formatMetric(stats.metric, stats.p75)}
+          </span>
+        </div>
+        <div>
+          p95:{" "}
+          <span className="font-semibold text-[color:var(--ac-ink-1)]">
+            {formatMetric(stats.metric, stats.p95)}
+          </span>
+        </div>
       </div>
-      <div className="mt-3 h-2 w-full rounded-full overflow-hidden flex bg-slate-100" aria-hidden="true">
+      <div
+        className="mt-3 h-2 w-full rounded-full overflow-hidden flex bg-slate-100"
+        aria-hidden="true"
+      >
         <div className="bg-emerald-400" style={{ width: `${(stats.good / total) * 100}%` }} />
         <div className="bg-amber-400" style={{ width: `${(stats.needs / total) * 100}%` }} />
         <div className="bg-red-400" style={{ width: `${(stats.poor / total) * 100}%` }} />

@@ -58,12 +58,8 @@ export function InquiryAttachments({
     staleTime: 60_000,
     // Poll every 3s while any attachment is still being scanned.
     refetchInterval: (query) => {
-      const rows = query.state.data as
-        | Array<{ scan_status: string }>
-        | undefined;
-      const busy = rows?.some(
-        (r) => r.scan_status === "pending" || r.scan_status === "scanning",
-      );
+      const rows = query.state.data as Array<{ scan_status: string }> | undefined;
+      const busy = rows?.some((r) => r.scan_status === "pending" || r.scan_status === "scanning");
       return busy ? 3000 : false;
     },
   });
@@ -190,7 +186,6 @@ export function InquiryAttachments({
     );
   }
 
-
   return (
     <div className={compact ? "space-y-2" : "space-y-3"}>
       <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -219,7 +214,11 @@ export function InquiryAttachments({
           disabled={disabled || uploading || remaining === 0}
           className="inline-flex items-center gap-2 px-3 h-9 rounded-lg border border-border text-sm hover:bg-muted disabled:opacity-50"
         >
-          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Upload className="h-4 w-4" />
+          )}
           رفع ملف
         </button>
         {disabled && disabledReason && (

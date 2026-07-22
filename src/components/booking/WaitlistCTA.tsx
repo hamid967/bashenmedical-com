@@ -12,7 +12,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 export function WaitlistCTA({
-  lang: _lang, doctorId, specialtyId, branchId, defaultName, defaultPhone, emphasized,
+  lang: _lang,
+  doctorId,
+  specialtyId,
+  branchId,
+  defaultName,
+  defaultPhone,
+  emphasized,
 }: {
   lang: "ar" | "en";
   doctorId: string | null;
@@ -38,7 +44,8 @@ export function WaitlistCTA({
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!doctorId) return;
-    setError(null); setSubmitting(true);
+    setError(null);
+    setSubmitting(true);
     try {
       const res = await fetch("/api/public/book/waitlist", {
         method: "POST",
@@ -73,7 +80,9 @@ export function WaitlistCTA({
   if (result) {
     const phone4 = (phone.match(/\d/g) ?? []).slice(-4).join("");
     return (
-      <div className={`rounded-xl border p-4 md:p-5 ${emphasized ? "border-primary bg-primary/5" : "border-border bg-card"}`}>
+      <div
+        className={`rounded-xl border p-4 md:p-5 ${emphasized ? "border-primary bg-primary/5" : "border-border bg-card"}`}
+      >
         <div className="flex items-center gap-2 text-emerald-700 font-semibold">
           <Bell className="h-4 w-4" />
           {t("waitlist.on")}
@@ -93,7 +102,9 @@ export function WaitlistCTA({
   }
 
   return (
-    <div className={`rounded-xl border p-4 md:p-5 ${emphasized ? "border-primary bg-primary/5" : "border-dashed border-border bg-muted/30"}`}>
+    <div
+      className={`rounded-xl border p-4 md:p-5 ${emphasized ? "border-primary bg-primary/5" : "border-dashed border-border bg-muted/30"}`}
+    >
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
@@ -112,23 +123,39 @@ export function WaitlistCTA({
           <div className="grid gap-3 sm:grid-cols-2">
             <div>
               <Label htmlFor="wl-name">{t("waitlist.name")}</Label>
-              <Input id="wl-name" required minLength={2} value={name}
-                onChange={(e) => setName(e.target.value)} className="mt-1" />
+              <Input
+                id="wl-name"
+                required
+                minLength={2}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="mt-1"
+              />
             </div>
             <div>
               <Label htmlFor="wl-phone">{t("waitlist.phone")}</Label>
-              <Input id="wl-phone" required inputMode="tel" value={phone}
-                onChange={(e) => setPhone(e.target.value)} className="mt-1" />
+              <Input
+                id="wl-phone"
+                required
+                inputMode="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="mt-1"
+              />
             </div>
           </div>
           <div>
             <Label htmlFor="wl-notes">{t("waitlist.notes")}</Label>
-            <Textarea id="wl-notes" rows={2} value={notes} maxLength={500}
-              onChange={(e) => setNotes(e.target.value)} className="mt-1" />
+            <Textarea
+              id="wl-notes"
+              rows={2}
+              value={notes}
+              maxLength={500}
+              onChange={(e) => setNotes(e.target.value)}
+              className="mt-1"
+            />
           </div>
-          <p className="text-xs text-muted-foreground">
-            {t("waitlist.range", { from, to })}
-          </p>
+          <p className="text-xs text-muted-foreground">{t("waitlist.range", { from, to })}</p>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={submitting} className="gap-2">
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}

@@ -52,10 +52,7 @@ export const Route = createFileRoute("/_authenticated/admin/")({
     return null;
   },
   head: () => ({
-    meta: [
-      { title: "لوحة القيادة | مركز باعشن" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "لوحة القيادة | مركز باعشن" }, { name: "robots", content: "noindex" }],
   }),
   component: AdminDashboard,
 });
@@ -68,20 +65,40 @@ type QuickLink = {
 };
 
 const PRIMARY_LINKS: QuickLink[] = [
-  { to: "/appointments-queue", label: "طابور المواعيد", icon: CalendarCheck, roles: ["admin", "reception", "doctor"] },
+  {
+    to: "/appointments-queue",
+    label: "طابور المواعيد",
+    icon: CalendarCheck,
+    roles: ["admin", "reception", "doctor"],
+  },
 
-  { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
+  {
+    to: "/patients-management",
+    label: "المرضى",
+    icon: Users,
+    roles: ["admin", "reception", "doctor", "nurse"],
+  },
   { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
   { to: "/availability-management", label: "التوفر", icon: ClipboardList, roles: ["admin", "hr"] },
   { to: "/hr-management", label: "الموارد البشرية", icon: Users, roles: ["admin", "hr"] },
-  { to: "/orders-unified", label: "الطلبات الموحدة", icon: Package, roles: ["admin", "reception", "pharmacy"] },
+  {
+    to: "/orders-unified",
+    label: "الطلبات الموحدة",
+    icon: Package,
+    roles: ["admin", "reception", "pharmacy"],
+  },
 ];
 
 const SECONDARY_LINKS: QuickLink[] = [
   { to: "/owner", label: "منشئ الموقع", icon: Palette, roles: ["super_admin"] },
   { to: "/corporate-admin", label: "الشركات", icon: Building2, roles: ["admin"] },
   { to: "/complaints-admin", label: "الشكاوى", icon: MessageSquare, roles: ["admin", "reception"] },
-  { to: "/inventory-management", label: "المخزون", icon: ArchiveRestore, roles: ["admin", "pharmacy"] },
+  {
+    to: "/inventory-management",
+    label: "المخزون",
+    icon: ArchiveRestore,
+    roles: ["admin", "pharmacy"],
+  },
   { to: "/reports", label: "التقارير", icon: FileBarChart, roles: ["admin"] },
   { to: "/rbac", label: "الصلاحيات", icon: ShieldCheck, roles: ["admin"] },
 ];
@@ -104,7 +121,9 @@ function AdminDashboard() {
   const roles = (rolesData?.roles ?? []) as AdminRole[];
 
   const primary = PRIMARY_LINKS.filter((l) => !l.roles || l.roles.some((r) => roles.includes(r)));
-  const secondary = SECONDARY_LINKS.filter((l) => !l.roles || l.roles.some((r) => roles.includes(r)));
+  const secondary = SECONDARY_LINKS.filter(
+    (l) => !l.roles || l.roles.some((r) => roles.includes(r)),
+  );
 
   return (
     <div
@@ -125,7 +144,10 @@ function AdminDashboard() {
           >
             لوحة القيادة
           </div>
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 leading-tight" style={{ fontFamily: SORA }}>
+          <h1
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-1 leading-tight"
+            style={{ fontFamily: SORA }}
+          >
             أهلاً بك في مركز باعشن
           </h1>
           <p style={{ color: OCEAN.glow, opacity: 0.8 }} className="text-xs sm:text-sm">
@@ -145,7 +167,11 @@ function AdminDashboard() {
             <span
               key={r}
               className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap"
-              style={{ background: `${OCEAN.accent}33`, color: OCEAN.glow, border: `1px solid ${OCEAN.accent}55` }}
+              style={{
+                background: `${OCEAN.accent}33`,
+                color: OCEAN.glow,
+                border: `1px solid ${OCEAN.accent}55`,
+              }}
             >
               {r}
             </span>
@@ -156,14 +182,11 @@ function AdminDashboard() {
       {/* KPIs — expanded with period-over-period + sparklines + drill-down */}
       <KpiGrid />
 
-
-
       {/* Trends section — daily/weekly stats for developers */}
       <TrendsSection />
 
       {/* Magazine grid: Featured Inbox + Primary shortcuts */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-6 sm:mb-8">
-
         {/* Featured Unified Inbox */}
         <Link
           to="/admin/inbox"
@@ -186,7 +209,10 @@ function AdminDashboard() {
                 >
                   <Sparkles className="h-3 w-3" /> البريد الموحّد
                 </span>
-                <h2 className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2 text-white leading-tight" style={{ fontFamily: SORA }}>
+                <h2
+                  className="text-lg sm:text-2xl lg:text-3xl font-bold mb-1 sm:mb-2 text-white leading-tight"
+                  style={{ fontFamily: SORA }}
+                >
                   صندوق الوارد الموحّد اليوم
                 </h2>
                 <p style={{ color: OCEAN.glow, opacity: 0.8 }} className="text-xs sm:text-sm">
@@ -204,8 +230,17 @@ function AdminDashboard() {
             </div>
 
             <div className="space-y-2.5 sm:space-y-3">
-              <InboxRow accent color={OCEAN.glow} label="طلبات مرضى جديدة" hint={`${stats?.appointmentsPending ?? 0} بانتظار التأكيد`} />
-              <InboxRow color={OCEAN.accent} label="طلبات صيدلية ومختبر" hint={`${stats?.ordersPending ?? 0} قيد المعالجة`} />
+              <InboxRow
+                accent
+                color={OCEAN.glow}
+                label="طلبات مرضى جديدة"
+                hint={`${stats?.appointmentsPending ?? 0} بانتظار التأكيد`}
+              />
+              <InboxRow
+                color={OCEAN.accent}
+                label="طلبات صيدلية ومختبر"
+                hint={`${stats?.ordersPending ?? 0} قيد المعالجة`}
+              />
               <InboxRow color={OCEAN.accent} label="شكاوى وطلبات دعم" hint="راجع صفحة الشكاوى" />
             </div>
           </div>
@@ -242,7 +277,9 @@ function AdminDashboard() {
                     color: "#e0e7ff",
                   }}
                 >
-                  <span style={{ color: OCEAN.glow, display: "inline-flex" }}><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
+                  <span style={{ color: OCEAN.glow, display: "inline-flex" }}>
+                    <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+                  </span>
                   <span className="truncate max-w-full">{l.label}</span>
                 </Link>
               );
@@ -250,7 +287,6 @@ function AdminDashboard() {
           </div>
         </>
       )}
-
     </div>
   );
 }
@@ -294,19 +330,26 @@ function KpiCard({
         >
           {label}
         </div>
-        <span style={{ color: labelColor, opacity: 0.7, display: "inline-flex" }} className="shrink-0"><Icon className="h-4 w-4 sm:h-5 sm:w-5" /></span>
+        <span
+          style={{ color: labelColor, opacity: 0.7, display: "inline-flex" }}
+          className="shrink-0"
+        >
+          <Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+        </span>
       </div>
       <div className="text-2xl sm:text-3xl lg:text-4xl font-bold" style={{ fontFamily: SORA }}>
         {value}
       </div>
       {hint && (
-        <div className="text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate" style={{ color: labelColor, opacity: 0.7 }}>
+        <div
+          className="text-[11px] sm:text-xs mt-1.5 sm:mt-2 truncate"
+          style={{ color: labelColor, opacity: 0.7 }}
+        >
           {hint}
         </div>
       )}
     </div>
   );
-
 
   return to ? (
     <Link to={to} className="block">
@@ -365,13 +408,15 @@ function InboxRow({
         }
       />
       <div className="flex-1 min-w-0 font-bold text-white text-xs sm:text-sm truncate">{label}</div>
-      <div className="text-[11px] sm:text-xs shrink-0 text-end" style={{ color: OCEAN.glow, opacity: 0.7 }}>
+      <div
+        className="text-[11px] sm:text-xs shrink-0 text-end"
+        style={{ color: OCEAN.glow, opacity: 0.7 }}
+      >
         {hint}
       </div>
     </div>
   );
 }
-
 
 // ============================================================
 // Trends section — real data, developer-focused daily/weekly
@@ -419,7 +464,10 @@ function TrendsSection() {
           >
             إحصائيات المطوّرين
           </div>
-          <h2 className="text-base sm:text-xl lg:text-2xl font-bold text-white leading-tight" style={{ fontFamily: SORA }}>
+          <h2
+            className="text-base sm:text-xl lg:text-2xl font-bold text-white leading-tight"
+            style={{ fontFamily: SORA }}
+          >
             الاتجاهات {range === "week" ? "اليومية (٧ أيام)" : "الأسبوعية (٣٠ يومًا)"}
           </h2>
         </div>
@@ -448,9 +496,15 @@ function TrendsSection() {
       {isError && (
         <div
           className="p-3 sm:p-4 rounded-2xl text-xs sm:text-sm mb-4 flex justify-between items-center gap-3"
-          style={{ background: "rgba(248,113,113,0.1)", color: "#fca5a5", border: "1px solid rgba(248,113,113,0.3)" }}
+          style={{
+            background: "rgba(248,113,113,0.1)",
+            color: "#fca5a5",
+            border: "1px solid rgba(248,113,113,0.3)",
+          }}
         >
-          <span className="min-w-0 truncate">تعذّر تحميل الإحصائيات: {(error as Error)?.message ?? "خطأ غير معروف"}</span>
+          <span className="min-w-0 truncate">
+            تعذّر تحميل الإحصائيات: {(error as Error)?.message ?? "خطأ غير معروف"}
+          </span>
           <button onClick={() => refetch()} className="underline text-xs font-bold shrink-0">
             إعادة المحاولة
           </button>
@@ -475,11 +529,17 @@ function TrendsSection() {
               >
                 <div className="flex items-center gap-2 mb-1.5 sm:mb-2 min-w-0">
                   <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />
-                  <span className="text-[11px] sm:text-xs font-bold truncate" style={{ color: OCEAN.glow, opacity: 0.85 }}>
+                  <span
+                    className="text-[11px] sm:text-xs font-bold truncate"
+                    style={{ color: OCEAN.glow, opacity: 0.85 }}
+                  >
                     {s.label}
                   </span>
                 </div>
-                <div className="text-xl sm:text-2xl font-bold text-white" style={{ fontFamily: SORA }}>
+                <div
+                  className="text-xl sm:text-2xl font-bold text-white"
+                  style={{ fontFamily: SORA }}
+                >
                   {total.toLocaleString("ar-EG")}
                 </div>
                 <div
@@ -499,7 +559,6 @@ function TrendsSection() {
         className="rounded-2xl p-3 sm:p-4 h-[240px] sm:h-[320px]"
         style={{ background: `${OCEAN.bg}80`, border: `1px solid ${OCEAN.panel2}` }}
       >
-
         {isLoading || isFetching ? (
           <div className="h-full grid place-items-center text-sm" style={{ color: OCEAN.glow }}>
             جارٍ التحميل…
@@ -546,4 +605,3 @@ function TrendsSection() {
     </section>
   );
 }
-

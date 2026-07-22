@@ -252,8 +252,6 @@ export function buildLocalBusinessSchema({
     },
   };
 
-
-
   if (amenities && amenities.length > 0) {
     base.amenityFeature = amenities.map((a) => ({
       "@type": "LocationFeatureSpecification",
@@ -265,9 +263,7 @@ export function buildLocalBusinessSchema({
   return base;
 }
 
-export function buildBreadcrumbs(
-  items: { name: string; path: string }[],
-): Record<string, unknown> {
+export function buildBreadcrumbs(items: { name: string; path: string }[]): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

@@ -37,7 +37,10 @@ export function DoctorResults({
   const { paged, totalPages, page } = useFilteredDoctors(doctors, { ar });
 
   // Notify parent about visible ids (memoised in the child via sort+join).
-  const visibleKey = paged.map((d) => d.id).sort().join(",");
+  const visibleKey = paged
+    .map((d) => d.id)
+    .sort()
+    .join(",");
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useVisibleIdsEffect(visibleKey, onVisibleIdsChange);
 
@@ -66,9 +69,7 @@ export function DoctorResults({
             <div className="skeleton-neon mt-6 h-10 w-full rounded-xl" />
           </div>
         ))}
-        <span className="sr-only">
-          {ar ? "جارٍ تحميل قائمة الأطباء…" : "Loading doctors…"}
-        </span>
+        <span className="sr-only">{ar ? "جارٍ تحميل قائمة الأطباء…" : "Loading doctors…"}</span>
       </div>
     );
   }
@@ -143,10 +144,7 @@ export function DoctorResults({
 
 // Small helper: fire onVisibleIdsChange whenever the id set actually changes.
 import { useEffect } from "react";
-function useVisibleIdsEffect(
-  key: string,
-  cb: ((ids: string[]) => void) | undefined,
-) {
+function useVisibleIdsEffect(key: string, cb: ((ids: string[]) => void) | undefined) {
   useEffect(() => {
     if (!cb) return;
     cb(key ? key.split(",") : []);

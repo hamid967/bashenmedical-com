@@ -482,10 +482,7 @@ function AuditModal({
           )}
           <ul className="space-y-3">
             {(q.data ?? []).map((row: any, i: number) => (
-              <li
-                key={i}
-                className="rounded-xl border border-border p-3 bg-background/50 text-sm"
-              >
+              <li key={i} className="rounded-xl border border-border p-3 bg-background/50 text-sm">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-muted-foreground">{fmtDate(row.changed_at)}</span>
                   {row.actor_kind && (

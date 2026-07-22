@@ -14,8 +14,16 @@ import { useState, useEffect, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  CalendarCheck, Pill, Stethoscope, Home as HomeIcon,
-  Search, Phone, ArrowLeft, Loader2, ExternalLink, Clock,
+  CalendarCheck,
+  Pill,
+  Stethoscope,
+  Home as HomeIcon,
+  Search,
+  Phone,
+  ArrowLeft,
+  Loader2,
+  ExternalLink,
+  Clock,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -28,7 +36,10 @@ export const Route = createFileRoute("/my-orders")({
       ...bmcOgImageMeta(),
       { title: "طلباتي | مجمع باعشن الطبي" },
       { name: "robots", content: "noindex, nofollow" },
-      { name: "description", content: "تتبع جميع طلباتك (مواعيد، صيدلية، رأي طبي ثاني، رعاية منزلية) برقم جوالك." },
+      {
+        name: "description",
+        content: "تتبع جميع طلباتك (مواعيد، صيدلية، رأي طبي ثاني، رعاية منزلية) برقم جوالك.",
+      },
       { property: "og:title", content: "طلباتي — مجمع باعشن الطبي" },
     ],
   }),
@@ -42,12 +53,34 @@ import i18n from "i18next";
 
 type Order = OrderSummary;
 
-
-const KIND_META: Record<Order["kind"], { ar: string; en: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
-  appointment:    { ar: "موعد طبي",        en: "Appointment",     icon: CalendarCheck, color: "bg-blue-500/10 text-blue-700 border-blue-500/30" },
-  pharmacy:       { ar: "طلب صيدلية",       en: "Pharmacy",        icon: Pill,          color: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30" },
-  second_opinion: { ar: "رأي طبي ثاني",     en: "Second opinion",  icon: Stethoscope,   color: "bg-purple-500/10 text-purple-700 border-purple-500/30" },
-  home_care:      { ar: "رعاية منزلية",     en: "Home care",       icon: HomeIcon,      color: "bg-amber-500/10 text-amber-700 border-amber-500/30" },
+const KIND_META: Record<
+  Order["kind"],
+  { ar: string; en: string; icon: React.ComponentType<{ className?: string }>; color: string }
+> = {
+  appointment: {
+    ar: "موعد طبي",
+    en: "Appointment",
+    icon: CalendarCheck,
+    color: "bg-blue-500/10 text-blue-700 border-blue-500/30",
+  },
+  pharmacy: {
+    ar: "طلب صيدلية",
+    en: "Pharmacy",
+    icon: Pill,
+    color: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+  },
+  second_opinion: {
+    ar: "رأي طبي ثاني",
+    en: "Second opinion",
+    icon: Stethoscope,
+    color: "bg-purple-500/10 text-purple-700 border-purple-500/30",
+  },
+  home_care: {
+    ar: "رعاية منزلية",
+    en: "Home care",
+    icon: HomeIcon,
+    color: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+  },
 };
 
 const STATUS_AR: Record<string, string> = {
@@ -111,7 +144,12 @@ function MyOrdersPage() {
     } catch {}
   }, []);
 
-  const { data: orders, isLoading, isFetching, error } = useQuery({
+  const {
+    data: orders,
+    isLoading,
+    isFetching,
+    error,
+  } = useQuery({
     queryKey: ["my-orders", queryPhone, queryRef],
     queryFn: async (): Promise<Order[]> => {
       if (!queryPhone || !queryRef) return [];
@@ -135,7 +173,6 @@ function MyOrdersPage() {
     staleTime: 15_000,
     retry: (count, err) => !(err instanceof OrderParseError) && count < 2,
   });
-
 
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -165,7 +202,6 @@ function MyOrdersPage() {
     } catch {}
   };
 
-
   return (
     <div className="min-h-screen bg-muted/30">
       {/* Hero */}
@@ -175,9 +211,7 @@ function MyOrdersPage() {
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
               {i18n.t("myOrders:track_orders")}
             </div>
-            <h1 className="text-3xl md:text-5xl font-bold">
-              {i18n.t("myOrders:my_orders")}
-            </h1>
+            <h1 className="text-3xl md:text-5xl font-bold">{i18n.t("myOrders:my_orders")}</h1>
             <p className="mt-3 text-primary-foreground/85">
               {i18n.t("myOrders:enter_your_phone_and_the_order_reference")}
             </p>
@@ -187,7 +221,9 @@ function MyOrdersPage() {
           <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-2xl flex-col gap-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label htmlFor="phone" className="sr-only">{i18n.t("myOrders:phone")}</Label>
+                <Label htmlFor="phone" className="sr-only">
+                  {i18n.t("myOrders:phone")}
+                </Label>
                 <div className="relative">
                   <Phone className="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted-foreground" />
                   <Input
@@ -204,7 +240,9 @@ function MyOrdersPage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="ref" className="sr-only">{i18n.t("myOrders:order_reference")}</Label>
+                <Label htmlFor="ref" className="sr-only">
+                  {i18n.t("myOrders:order_reference")}
+                </Label>
                 <Input
                   id="ref"
                   type="text"
@@ -220,8 +258,18 @@ function MyOrdersPage() {
                 />
               </div>
             </div>
-            <Button type="submit" variant="premium" size="xl" disabled={isFetching} className="w-full sm:w-auto sm:self-end">
-              {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            <Button
+              type="submit"
+              variant="premium"
+              size="xl"
+              disabled={isFetching}
+              className="w-full sm:w-auto sm:self-end"
+            >
+              {isFetching ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
               {i18n.t("myOrders:show_my_order")}
             </Button>
           </form>
@@ -236,18 +284,22 @@ function MyOrdersPage() {
             <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
               <div className="text-sm text-muted-foreground">
                 {i18n.t("myOrders:results_for")}
-                <span className="font-semibold text-foreground" dir="ltr">{queryPhone}</span>
+                <span className="font-semibold text-foreground" dir="ltr">
+                  {queryPhone}
+                </span>
               </div>
               <Button variant="outline" size="sm" onClick={clear}>
                 {i18n.t("myOrders:new_search")}
               </Button>
             </div>
 
-
             {isLoading ? (
               <div className="grid gap-3 md:grid-cols-2">
                 {[0, 1, 2, 3].map((i) => (
-                  <div key={i} className="h-32 rounded-2xl bg-card border border-border animate-pulse" />
+                  <div
+                    key={i}
+                    className="h-32 rounded-2xl bg-card border border-border animate-pulse"
+                  />
                 ))}
               </div>
             ) : error ? (
@@ -265,15 +317,38 @@ function MyOrdersPage() {
                   </h3>
                   <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                     {isAr ? (
-                      <>لم نعثر على أي طلب مرتبط بالرقم <span className="font-semibold text-foreground" dir="ltr">{queryPhone}</span>. تأكّد من صحة الرقم، أو ابدأ حجزًا جديدًا الآن.</>
+                      <>
+                        لم نعثر على أي طلب مرتبط بالرقم{" "}
+                        <span className="font-semibold text-foreground" dir="ltr">
+                          {queryPhone}
+                        </span>
+                        . تأكّد من صحة الرقم، أو ابدأ حجزًا جديدًا الآن.
+                      </>
                     ) : (
-                      <>We couldn't find any request linked to <span className="font-semibold text-foreground" dir="ltr">{queryPhone}</span>. Double-check the number or start a new request below.</>
+                      <>
+                        We couldn't find any request linked to{" "}
+                        <span className="font-semibold text-foreground" dir="ltr">
+                          {queryPhone}
+                        </span>
+                        . Double-check the number or start a new request below.
+                      </>
                     )}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-                    <Link to="/book"><Button variant="premium" size="lg"><CalendarCheck className="h-4 w-4" />{i18n.t("myOrders:book_an_appointment")}</Button></Link>
-                    <Link to="/services"><Button variant="outline" size="lg">{i18n.t("myOrders:browse_all_services")}</Button></Link>
-                    <Button variant="ghost" size="lg" onClick={clear}>{i18n.t("myOrders:change_number")}</Button>
+                    <Link to="/book">
+                      <Button variant="premium" size="lg">
+                        <CalendarCheck className="h-4 w-4" />
+                        {i18n.t("myOrders:book_an_appointment")}
+                      </Button>
+                    </Link>
+                    <Link to="/services">
+                      <Button variant="outline" size="lg">
+                        {i18n.t("myOrders:browse_all_services")}
+                      </Button>
+                    </Link>
+                    <Button variant="ghost" size="lg" onClick={clear}>
+                      {i18n.t("myOrders:change_number")}
+                    </Button>
                   </div>
                 </div>
                 <div className="mt-8 border-t border-border pt-6">
@@ -283,7 +358,12 @@ function MyOrdersPage() {
             ) : (
               <ul className="grid gap-3 md:grid-cols-2">
                 {orders!.map((o) => (
-                  <OrderCard key={`${o.kind}-${o.reference}`} order={o} phone={queryPhone} isAr={isAr} />
+                  <OrderCard
+                    key={`${o.kind}-${o.reference}`}
+                    order={o}
+                    phone={queryPhone}
+                    isAr={isAr}
+                  />
                 ))}
               </ul>
             )}
@@ -300,15 +380,18 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
   const statusLabel = STATUS_AR[order.status] ?? order.status;
   const statusCls = STATUS_COLOR[order.status] ?? "bg-muted text-muted-foreground";
 
-  const detailHref = order.kind === "appointment"
-    ? `/lookup?ref=${order.reference}&phone=${encodeURIComponent(phone)}`
-    : `/orders/${order.reference}?phone=${encodeURIComponent(phone)}&kind=${order.kind}`;
+  const detailHref =
+    order.kind === "appointment"
+      ? `/lookup?ref=${order.reference}&phone=${encodeURIComponent(phone)}`
+      : `/orders/${order.reference}?phone=${encodeURIComponent(phone)}&kind=${order.kind}`;
 
   return (
     <li className="card-panel group flex flex-col gap-3 hover:border-primary/40 transition">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className={`h-11 w-11 rounded-xl flex items-center justify-center border ${meta.color}`}>
+          <div
+            className={`h-11 w-11 rounded-xl flex items-center justify-center border ${meta.color}`}
+          >
             <Icon className="h-5 w-5" />
           </div>
           <div>
@@ -318,7 +401,9 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
             <div className="font-bold leading-tight">{order.title}</div>
           </div>
         </div>
-        <span className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusCls}`}>
+        <span
+          className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold ${statusCls}`}
+        >
           {statusLabel}
         </span>
       </div>
@@ -329,19 +414,28 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
       <div className="text-xs text-muted-foreground space-y-1">
         <div className="flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5" />
-          <span>{i18n.t("myOrders:created")}{fmt(order.created_at,isAr ? "ar" : "en")}</span>
+          <span>
+            {i18n.t("myOrders:created")}
+            {fmt(order.created_at, isAr ? "ar" : "en")}
+          </span>
         </div>
         {order.scheduled_at && (
           <div className="flex items-center gap-1.5">
             <CalendarCheck className="h-3.5 w-3.5" />
-            <span>{i18n.t("myOrders:scheduled")}{fmt(order.scheduled_at,isAr ? "ar" : "en")}</span>
+            <span>
+              {i18n.t("myOrders:scheduled")}
+              {fmt(order.scheduled_at, isAr ? "ar" : "en")}
+            </span>
           </div>
         )}
       </div>
 
       <div className="mt-auto flex items-center justify-between pt-2 border-t border-border">
         <span className="font-mono text-[11px] text-muted-foreground">#{order.reference}</span>
-        <Link to={detailHref} className="text-primary text-sm font-semibold inline-flex items-center gap-1 hover:underline">
+        <Link
+          to={detailHref}
+          className="text-primary text-sm font-semibold inline-flex items-center gap-1 hover:underline"
+        >
           {i18n.t("myOrders:details")}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
@@ -352,19 +446,21 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
 
 function QuickLinks({ isAr }: { isAr: boolean }) {
   const links = [
-    { to: "/book",           ar: "احجز موعدًا",         en: "Book appointment", icon: CalendarCheck },
-    { to: "/pharmacy",       ar: "طلب صيدلية",           en: "Pharmacy order",   icon: Pill },
-    { to: "/second-opinion", ar: "رأي طبي ثاني",         en: "Second opinion",   icon: Stethoscope },
-    { to: "/home-care",      ar: "رعاية منزلية",         en: "Home care",        icon: HomeIcon },
+    { to: "/book", ar: "احجز موعدًا", en: "Book appointment", icon: CalendarCheck },
+    { to: "/pharmacy", ar: "طلب صيدلية", en: "Pharmacy order", icon: Pill },
+    { to: "/second-opinion", ar: "رأي طبي ثاني", en: "Second opinion", icon: Stethoscope },
+    { to: "/home-care", ar: "رعاية منزلية", en: "Home care", icon: HomeIcon },
   ];
   return (
     <div>
-      <h2 className="mb-4 text-xl font-bold">
-        {i18n.t("myOrders:or_start_a_new_request")}
-      </h2>
+      <h2 className="mb-4 text-xl font-bold">{i18n.t("myOrders:or_start_a_new_request")}</h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {links.map((l) => (
-          <Link key={l.to} to={l.to} className="card-panel group hover:border-primary/40 transition">
+          <Link
+            key={l.to}
+            to={l.to}
+            className="card-panel group hover:border-primary/40 transition"
+          >
             <l.icon className="h-6 w-6 text-primary" />
             <div className="mt-2 font-bold">{isAr ? l.ar : l.en}</div>
             <ArrowLeft className="mt-3 h-4 w-4 text-primary group-hover:-translate-x-1 rtl:group-hover:translate-x-1 transition" />

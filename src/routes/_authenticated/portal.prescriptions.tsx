@@ -1,5 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -67,7 +73,10 @@ export const Route = createFileRoute("/_authenticated/portal/prescriptions")({
   head: () => ({
     meta: [
       { title: "الوصفات الطبية | بوابة المريض" },
-      { name: "description", content: "الوصفات الطبية النشطة مع مساعد ذكي لتذكيرات الأدوية والمواعيد." },
+      {
+        name: "description",
+        content: "الوصفات الطبية النشطة مع مساعد ذكي لتذكيرات الأدوية والمواعيد.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -88,7 +97,10 @@ function RxError({ error, reset }: { error: Error; reset: () => void }) {
         {error.message || "خطأ غير متوقع."}
       </p>
       <button
-        onClick={() => { router.invalidate(); reset(); }}
+        onClick={() => {
+          router.invalidate();
+          reset();
+        }}
         className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
@@ -140,7 +152,9 @@ function PrescriptionsPage() {
       <div className="glass-card p-6 md:p-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">PRESCRIPTIONS</div>
+            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">
+              PRESCRIPTIONS
+            </div>
             <h1 className="text-2xl md:text-3xl font-bold mt-1">الوصفات الطبية</h1>
             <p className="text-sm text-[color:var(--portal-ink-2)] mt-1">
               أدويتك النشطة مع مساعد ذكي يقترح تذكيرات مواعيد الجرعات ومواعيدك القادمة.
@@ -180,8 +194,6 @@ function PrescriptionsPage() {
       {/* Reminder preferences */}
       <PreferencesCard />
 
-
-
       {/* Upcoming appointments strip */}
       {data.upcoming.length > 0 && (
         <div className="glass-card p-5">
@@ -209,13 +221,17 @@ function PrescriptionsPage() {
                     {format(parseISO(a.date), "PPP", { locale: arLocale })}
                     {a.time ? ` • ${a.time.slice(0, 5)}` : ""}
                   </div>
-                  <Badge className="bg-white/80 text-[color:var(--portal-ink)] border-0">{a.status}</Badge>
+                  <Badge className="bg-white/80 text-[color:var(--portal-ink)] border-0">
+                    {a.status}
+                  </Badge>
                 </div>
                 <div className="font-semibold">
                   {a.doctor_name ? `د. ${a.doctor_name}` : "طبيب"}
                 </div>
                 {a.specialty && (
-                  <div className="text-xs text-[color:var(--portal-ink-2)] mt-0.5">{a.specialty}</div>
+                  <div className="text-xs text-[color:var(--portal-ink-2)] mt-0.5">
+                    {a.specialty}
+                  </div>
                 )}
               </div>
             ))}
@@ -228,7 +244,6 @@ function PrescriptionsPage() {
 
       {/* Reminder log */}
       <ReminderLogSection />
-
 
       {/* Prescription list */}
       {filtered.length === 0 ? (
@@ -251,12 +266,23 @@ function PrescriptionsPage() {
 
 /* --------------------------- subcomponents --------------------------- */
 
-function KpiPill({ label, value, tone }: { label: string; value: number; tone: "ok" | "warn" | "neutral" | "accent" }) {
+function KpiPill({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "ok" | "warn" | "neutral" | "accent";
+}) {
   const cls =
-    tone === "ok" ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-    : tone === "warn" ? "bg-rose-50 text-rose-700 ring-rose-200"
-    : tone === "accent" ? "bg-teal-50 text-teal-700 ring-teal-200"
-    : "bg-slate-50 text-slate-700 ring-slate-200";
+    tone === "ok"
+      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+      : tone === "warn"
+        ? "bg-rose-50 text-rose-700 ring-rose-200"
+        : tone === "accent"
+          ? "bg-teal-50 text-teal-700 ring-teal-200"
+          : "bg-slate-50 text-slate-700 ring-slate-200";
   return (
     <div className={`rounded-2xl px-4 py-2 ring-1 ${cls}`}>
       <div className="text-xs">{label}</div>
@@ -265,7 +291,15 @@ function KpiPill({ label, value, tone }: { label: string; value: number; tone: "
   );
 }
 
-function TabBtn({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabBtn({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
@@ -306,7 +340,10 @@ function RxCard({ r }: { r: PrescriptionItem }) {
 
       <dl className="grid grid-cols-2 gap-2 text-xs">
         {r.start_date && (
-          <Field label="البداية" value={format(parseISO(r.start_date), "PPP", { locale: arLocale })} />
+          <Field
+            label="البداية"
+            value={format(parseISO(r.start_date), "PPP", { locale: arLocale })}
+          />
         )}
         {r.end_date && (
           <Field
@@ -351,7 +388,13 @@ function Field({ label, value }: { label: string; value: string }) {
 
 /* --------------------------- AI assistant --------------------------- */
 
-function AiReminderCard({ upcoming, activeCount }: { upcoming: UpcomingAppointment[]; activeCount: number }) {
+function AiReminderCard({
+  upcoming,
+  activeCount,
+}: {
+  upcoming: UpcomingAppointment[];
+  activeCount: number;
+}) {
   const qc = useQueryClient();
   const { data: prefs = DEFAULT_REMINDER_PREFS } = useQuery(prefsQuery);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -419,7 +462,11 @@ function AiReminderCard({ upcoming, activeCount }: { upcoming: UpcomingAppointme
             disabled={mut.isPending || activeCount === 0}
             className="inline-flex items-center gap-2 rounded-full h-10 px-4 text-sm font-semibold bg-white/20 hover:bg-white/30 backdrop-blur disabled:opacity-60"
           >
-            {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {mut.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             {plan ? "تحديث الخطة" : "توليد الخطة"}
           </button>
         </div>
@@ -478,7 +525,11 @@ function AiReminderCard({ upcoming, activeCount }: { upcoming: UpcomingAppointme
                       <div className="flex items-center gap-2">
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
-                            a.priority === "high" ? "bg-rose-300" : a.priority === "medium" ? "bg-amber-300" : "bg-emerald-300"
+                            a.priority === "high"
+                              ? "bg-rose-300"
+                              : a.priority === "medium"
+                                ? "bg-amber-300"
+                                : "bg-emerald-300"
                           }`}
                         />
                         <span className="font-semibold">{a.when}</span>
@@ -572,7 +623,11 @@ function ReminderLogSection() {
             disabled={isFetching}
             className="h-9 rounded-full px-3 text-xs font-semibold bg-white/70 ring-1 ring-white/60 inline-flex items-center gap-1.5 hover:bg-[color:var(--portal-surface)] disabled:opacity-60"
           >
-            {isFetching ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            {isFetching ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <RefreshCw className="h-3.5 w-3.5" />
+            )}
             تحديث
           </button>
         </div>
@@ -614,19 +669,25 @@ function ReminderLogRow({ r }: { r: ReminderLogEntry }) {
   const taken = !!r.read_at;
   return (
     <li className="p-3.5 flex items-start gap-3 hover:bg-white/70 transition-colors">
-      <div className={`shrink-0 h-10 w-10 rounded-xl grid place-items-center ${taken ? "bg-emerald-50 text-emerald-600" : "bg-gradient-to-br from-teal-100 to-teal-100 text-teal-600"}`}>
+      <div
+        className={`shrink-0 h-10 w-10 rounded-xl grid place-items-center ${taken ? "bg-emerald-50 text-emerald-600" : "bg-gradient-to-br from-teal-100 to-teal-100 text-teal-600"}`}
+      >
         <Pill className="h-4 w-4" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`font-semibold truncate ${taken ? "line-through opacity-70" : ""}`}>{r.medication || "تذكير دواء"}</span>
+          <span className={`font-semibold truncate ${taken ? "line-through opacity-70" : ""}`}>
+            {r.medication || "تذكير دواء"}
+          </span>
           {r.time && (
             <span className="text-xs bg-slate-100 text-slate-700 rounded-md px-1.5 py-0.5 tabular-nums inline-flex items-center gap-1">
               <Clock className="h-3 w-3" /> {r.time}
             </span>
           )}
           {r.label && (
-            <span className="text-xs bg-amber-50 text-amber-700 rounded-md px-1.5 py-0.5">{r.label}</span>
+            <span className="text-xs bg-amber-50 text-amber-700 rounded-md px-1.5 py-0.5">
+              {r.label}
+            </span>
           )}
         </div>
         {r.detail && (
@@ -647,7 +708,8 @@ function ReminderLogRow({ r }: { r: ReminderLogEntry }) {
           </span>
           {taken && r.read_at && (
             <span className="inline-flex items-center gap-1 text-emerald-600">
-              <CheckCheck className="h-3 w-3" /> تم التناول {formatDistanceToNow(parseISO(r.read_at), { addSuffix: true, locale: arLocale })}
+              <CheckCheck className="h-3 w-3" /> تم التناول{" "}
+              {formatDistanceToNow(parseISO(r.read_at), { addSuffix: true, locale: arLocale })}
             </span>
           )}
         </div>
@@ -667,9 +729,13 @@ function ReminderLogRow({ r }: { r: ReminderLogEntry }) {
           {confirm.isPending ? (
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : taken ? (
-            <><XCircle className="h-3 w-3" /> إلغاء</>
+            <>
+              <XCircle className="h-3 w-3" /> إلغاء
+            </>
           ) : (
-            <><Check className="h-3 w-3" /> تناولتها</>
+            <>
+              <Check className="h-3 w-3" /> تناولتها
+            </>
           )}
         </button>
       </div>
@@ -699,28 +765,43 @@ function StatusBadge({ status }: { status: string }) {
     status === "sent"
       ? { cls: "bg-emerald-100 text-emerald-700", icon: Check, label: "تم الإرسال" }
       : status === "failed"
-      ? { cls: "bg-rose-100 text-rose-700", icon: XCircle, label: "فشل" }
-      : status === "queued"
-      ? { cls: "bg-teal-100 text-teal-700", icon: Send, label: "في الطابور" }
-      : status === "skipped"
-      ? { cls: "bg-slate-100 text-slate-600", icon: XCircle, label: "متجاوز" }
-      : { cls: "bg-amber-100 text-amber-700", icon: Clock, label: "قيد الإرسال" };
+        ? { cls: "bg-rose-100 text-rose-700", icon: XCircle, label: "فشل" }
+        : status === "queued"
+          ? { cls: "bg-teal-100 text-teal-700", icon: Send, label: "في الطابور" }
+          : status === "skipped"
+            ? { cls: "bg-slate-100 text-slate-600", icon: XCircle, label: "متجاوز" }
+            : { cls: "bg-amber-100 text-amber-700", icon: Clock, label: "قيد الإرسال" };
   const Icon = cfg.icon;
   return (
-    <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${cfg.cls}`}>
+    <span
+      className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${cfg.cls}`}
+    >
       <Icon className="h-3 w-3" /> {cfg.label}
     </span>
   );
 }
 
-function LogKpi({ label, value, tone }: { label: string; value: number; tone: "ok" | "warn" | "danger" | "neutral" }) {
+function LogKpi({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "ok" | "warn" | "danger" | "neutral";
+}) {
   const cls =
-    tone === "ok" ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-    : tone === "warn" ? "bg-amber-50 text-amber-700 ring-amber-200"
-    : tone === "danger" ? "bg-rose-50 text-rose-700 ring-rose-200"
-    : "bg-slate-50 text-slate-700 ring-slate-200";
+    tone === "ok"
+      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+      : tone === "warn"
+        ? "bg-amber-50 text-amber-700 ring-amber-200"
+        : tone === "danger"
+          ? "bg-rose-50 text-rose-700 ring-rose-200"
+          : "bg-slate-50 text-slate-700 ring-slate-200";
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ${cls}`}
+    >
       {label} <span className="tabular-nums">{value}</span>
     </span>
   );
@@ -728,7 +809,9 @@ function LogKpi({ label, value, tone }: { label: string; value: number; tone: "o
 
 /* --------------------------- iCal / .ics export --------------------------- */
 
-function pad(n: number) { return n.toString().padStart(2, "0"); }
+function pad(n: number) {
+  return n.toString().padStart(2, "0");
+}
 function icsEscape(s: string) {
   return s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
 }
@@ -772,7 +855,11 @@ function getUserTimezone(): { tzid: string; offsetMinutes: number; offsetIcs: st
   return { tzid, offsetMinutes, offsetIcs };
 }
 
-function exportPlanToIcs(plan: ReminderPlan, upcoming: UpcomingAppointment[], prefs: ReminderPreferences) {
+function exportPlanToIcs(
+  plan: ReminderPlan,
+  upcoming: UpcomingAppointment[],
+  prefs: ReminderPreferences,
+) {
   const tz = getUserTimezone();
 
   const lines: string[] = [
@@ -917,14 +1004,18 @@ function AdherenceCard() {
         {stats && (
           <div className="flex items-center gap-3">
             <div className="text-right">
-              <div className={`text-3xl font-bold tabular-nums ${ring(stats.weekPct)}`}>{stats.weekPct}%</div>
+              <div className={`text-3xl font-bold tabular-nums ${ring(stats.weekPct)}`}>
+                {stats.weekPct}%
+              </div>
               <div className="text-[11px] text-[color:var(--portal-ink-2)]">
                 {stats.weekTaken} / {stats.weekTotal} جرعة
               </div>
             </div>
             <div className="rounded-2xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 px-3 py-2 text-center">
               <div className="text-xs">🔥 سلسلة</div>
-              <div className="text-lg font-bold leading-none">{stats.streak} <span className="text-xs font-normal">يوم</span></div>
+              <div className="text-lg font-bold leading-none">
+                {stats.streak} <span className="text-xs font-normal">يوم</span>
+              </div>
             </div>
           </div>
         )}
@@ -952,7 +1043,9 @@ function AdherenceCard() {
                   />
                 </div>
                 <div className="text-[11px] font-semibold">{d.weekday}</div>
-                <div className={`text-[11px] tabular-nums ${d.total === 0 ? "text-slate-400" : ring(d.pct)}`}>
+                <div
+                  className={`text-[11px] tabular-nums ${d.total === 0 ? "text-slate-400" : ring(d.pct)}`}
+                >
                   {d.total === 0 ? "—" : `${d.pct}%`}
                 </div>
               </div>
@@ -963,7 +1056,11 @@ function AdherenceCard() {
 
       {stats && stats.bestDay && stats.bestDay.total > 0 && (
         <p className="mt-4 text-xs text-[color:var(--portal-ink-2)]">
-          أفضل يوم: <span className="font-semibold text-[color:var(--portal-ink)]">{stats.bestDay.weekday}</span> بنسبة {stats.bestDay.pct}%.
+          أفضل يوم:{" "}
+          <span className="font-semibold text-[color:var(--portal-ink)]">
+            {stats.bestDay.weekday}
+          </span>{" "}
+          بنسبة {stats.bestDay.pct}%.
         </p>
       )}
     </div>
@@ -1038,7 +1135,9 @@ function PreferencesCard() {
             <Settings2 className="h-5 w-5" />
           </div>
           <div>
-            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">REMINDER SETTINGS</div>
+            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">
+              REMINDER SETTINGS
+            </div>
             <h3 className="text-lg md:text-xl font-bold mt-0.5">إعدادات التذكيرات</h3>
             <p className="text-sm text-[color:var(--portal-ink-2)] mt-1">
               خصّص وقت التنبيه قبل الجرعة وقبل الموعد ومدة تكرار التذكيرات في التقويم.
@@ -1059,7 +1158,11 @@ function PreferencesCard() {
             className="inline-flex items-center gap-1.5 rounded-full h-9 px-4 text-xs font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
             style={{ background: "var(--portal-gradient)" }}
           >
-            {mut.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+            {mut.isPending ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Save className="h-3.5 w-3.5" />
+            )}
             حفظ
           </button>
         </div>
@@ -1082,7 +1185,10 @@ function PreferencesCard() {
           />
         </PrefField>
 
-        <PrefField label="مدة تكرار التذكيرات في التقويم" icon={<CalendarPlus className="h-4 w-4" />}>
+        <PrefField
+          label="مدة تكرار التذكيرات في التقويم"
+          icon={<CalendarPlus className="h-4 w-4" />}
+        >
           <PrefSelect
             value={form.daily_repeat_days}
             options={REPEAT_OPTIONS}
@@ -1119,7 +1225,15 @@ function PreferencesCard() {
   );
 }
 
-function PrefField({ label, icon, children }: { label: string; icon: React.ReactNode; children: React.ReactNode }) {
+function PrefField({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <label className="block">
       <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] mb-1.5 inline-flex items-center gap-1.5">
@@ -1181,7 +1295,9 @@ function PrefNumber({
         }}
         className="w-full h-11 rounded-2xl bg-white/70 px-3 text-sm border border-white/60 outline-none focus:ring-2 focus:ring-[color:var(--portal-accent)] tabular-nums"
       />
-      {suffix && <span className="text-xs text-[color:var(--portal-ink-2)] whitespace-nowrap">{suffix}</span>}
+      {suffix && (
+        <span className="text-xs text-[color:var(--portal-ink-2)] whitespace-nowrap">{suffix}</span>
+      )}
     </div>
   );
 }
@@ -1200,27 +1316,29 @@ function ExportPreviewModal({
   onClose: () => void;
 }) {
   const tzid = useMemo(() => {
-    try { return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC"; } catch { return "UTC"; }
+    try {
+      return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+    } catch {
+      return "UTC";
+    }
   }, []);
 
-  const [slotSel, setSlotSel] = useState<Set<number>>(
-    () => new Set(plan.slots.map((_, i) => i)),
-  );
-  const [aptSel, setAptSel] = useState<Set<string>>(
-    () => new Set(upcoming.map((a) => a.id)),
-  );
+  const [slotSel, setSlotSel] = useState<Set<number>>(() => new Set(plan.slots.map((_, i) => i)));
+  const [aptSel, setAptSel] = useState<Set<string>>(() => new Set(upcoming.map((a) => a.id)));
 
   const toggleSlot = (i: number) => {
     setSlotSel((s) => {
       const n = new Set(s);
-      if (n.has(i)) n.delete(i); else n.add(i);
+      if (n.has(i)) n.delete(i);
+      else n.add(i);
       return n;
     });
   };
   const toggleApt = (id: string) => {
     setAptSel((s) => {
       const n = new Set(s);
-      if (n.has(id)) n.delete(id); else n.add(id);
+      if (n.has(id)) n.delete(id);
+      else n.add(id);
       return n;
     });
   };
@@ -1265,7 +1383,9 @@ function ExportPreviewModal({
       >
         <header className="p-5 border-b border-slate-100 flex items-start justify-between gap-3">
           <div>
-            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">EXPORT PREVIEW</div>
+            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">
+              EXPORT PREVIEW
+            </div>
             <h3 className="text-lg font-bold mt-0.5">معاينة الأحداث قبل التصدير</h3>
             <p className="text-xs text-[color:var(--portal-ink-2)] mt-1">
               راجع الأدوية والمواعيد المحددة، ثم أكّد لتنزيل ملف .ics.
@@ -1282,9 +1402,18 @@ function ExportPreviewModal({
 
         <div className="px-5 py-3 bg-slate-50/70 border-b border-slate-100 flex flex-wrap gap-2 text-[11px]">
           <FilterPill icon={<Clock className="h-3 w-3" />} label={`المنطقة: ${tzid}`} />
-          <FilterPill icon={<Pill className="h-3 w-3" />} label={`تنبيه الدواء: ${prefs.medication_lead_minutes} د`} />
-          <FilterPill icon={<CalendarClock className="h-3 w-3" />} label={`تنبيه الموعد: ${prefs.appointment_lead_minutes} د`} />
-          <FilterPill icon={<CalendarPlus className="h-3 w-3" />} label={`تكرار: ${prefs.daily_repeat_days} يوم`} />
+          <FilterPill
+            icon={<Pill className="h-3 w-3" />}
+            label={`تنبيه الدواء: ${prefs.medication_lead_minutes} د`}
+          />
+          <FilterPill
+            icon={<CalendarClock className="h-3 w-3" />}
+            label={`تنبيه الموعد: ${prefs.appointment_lead_minutes} د`}
+          />
+          <FilterPill
+            icon={<CalendarPlus className="h-3 w-3" />}
+            label={`تكرار: ${prefs.daily_repeat_days} يوم`}
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -1299,17 +1428,25 @@ function ExportPreviewModal({
                 </span>
               </div>
               <div className="flex items-center gap-2 text-[11px]">
-                <button onClick={allSlots} className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold">
+                <button
+                  onClick={allSlots}
+                  className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold"
+                >
                   تحديد الكل
                 </button>
-                <button onClick={noSlots} className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold">
+                <button
+                  onClick={noSlots}
+                  className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold"
+                >
                   إلغاء الكل
                 </button>
               </div>
             </div>
 
             {plan.slots.length === 0 ? (
-              <p className="text-xs text-[color:var(--portal-ink-2)] py-4">لا توجد جرعات في هذه الخطة.</p>
+              <p className="text-xs text-[color:var(--portal-ink-2)] py-4">
+                لا توجد جرعات في هذه الخطة.
+              </p>
             ) : (
               <ul className="space-y-2">
                 {groupedSlots.map(([time, items]) => (
@@ -1332,7 +1469,12 @@ function ExportPreviewModal({
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-semibold truncate">
                               {slot.medication}
-                              {slot.dosage && <span className="text-xs font-normal text-[color:var(--portal-ink-2)]"> — {slot.dosage}</span>}
+                              {slot.dosage && (
+                                <span className="text-xs font-normal text-[color:var(--portal-ink-2)]">
+                                  {" "}
+                                  — {slot.dosage}
+                                </span>
+                              )}
                             </div>
                             <div className="text-[11px] text-[color:var(--portal-ink-2)] mt-0.5">
                               {[slot.label, slot.note].filter(Boolean).join(" • ")}
@@ -1358,10 +1500,16 @@ function ExportPreviewModal({
                 </span>
               </div>
               <div className="flex items-center gap-2 text-[11px]">
-                <button onClick={allApts} className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold">
+                <button
+                  onClick={allApts}
+                  className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold"
+                >
                   تحديد الكل
                 </button>
-                <button onClick={noApts} className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold">
+                <button
+                  onClick={noApts}
+                  className="rounded-full px-2.5 h-7 bg-slate-100 hover:bg-slate-200 font-semibold"
+                >
                   إلغاء الكل
                 </button>
               </div>
@@ -1389,7 +1537,8 @@ function ExportPreviewModal({
                       </div>
                       <div className="text-[11px] text-[color:var(--portal-ink-2)] mt-0.5">
                         {[a.doctor_name ? `د. ${a.doctor_name}` : null, a.specialty, a.reason]
-                          .filter(Boolean).join(" • ")}
+                          .filter(Boolean)
+                          .join(" • ")}
                       </div>
                     </div>
                   </li>
@@ -1401,7 +1550,8 @@ function ExportPreviewModal({
 
         <footer className="p-4 border-t border-slate-100 flex items-center justify-between gap-3 bg-slate-50/60">
           <div className="text-xs text-[color:var(--portal-ink-2)]">
-            سيُصدَّر <span className="font-bold text-[color:var(--portal-ink)]">{totalEvents}</span> حدثاً
+            سيُصدَّر <span className="font-bold text-[color:var(--portal-ink)]">{totalEvents}</span>{" "}
+            حدثاً
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -1433,5 +1583,3 @@ function FilterPill({ icon, label }: { icon: React.ReactNode; label: string }) {
     </span>
   );
 }
-
-

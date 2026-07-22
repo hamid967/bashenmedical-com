@@ -69,7 +69,6 @@ export const Route = createFileRoute("/api/public/reservations/reschedule")({
           });
         }
 
-
         const today = riyadhTodayIso();
         if (parsed.data.date < today) {
           return jsonResponse(400, {
@@ -77,13 +76,10 @@ export const Route = createFileRoute("/api/public/reservations/reschedule")({
             message: "اختر تاريخًا لاحقًا لليوم.",
           });
         }
-        const time =
-          parsed.data.time.length === 5 ? `${parsed.data.time}:00` : parsed.data.time;
+        const time = parsed.data.time.length === 5 ? `${parsed.data.time}:00` : parsed.data.time;
 
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const { data: appt, error: readErr } = await supabaseAdmin
             .from("appointments")
@@ -142,16 +138,16 @@ export const Route = createFileRoute("/api/public/reservations/reschedule")({
             return jsonResponse(409, { ok: false, message: msg });
           }
           try {
-            const { logReservationEvent } = await import(
-              "@/lib/reservation-events.server"
-            );
+            const { logReservationEvent } = await import("@/lib/reservation-events.server");
             await logReservationEvent({
               event_type: "reschedule",
               phone: sess.phone,
               appointment_id: parsed.data.appointment_id,
               ip,
             });
-          } catch { /* telemetry best-effort */ }
+          } catch {
+            /* telemetry best-effort */
+          }
           return jsonResponse(200, { ok: true });
         } catch {
           return jsonResponse(500, {

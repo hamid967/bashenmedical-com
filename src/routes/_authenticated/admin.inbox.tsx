@@ -103,7 +103,10 @@ function UnifiedInboxPage() {
   const totalOpen = useMemo(
     () =>
       items.filter(
-        (i) => !["completed", "closed", "cancelled", "resolved", "signed", "declined"].includes(i.status),
+        (i) =>
+          !["completed", "closed", "cancelled", "resolved", "signed", "declined"].includes(
+            i.status,
+          ),
       ).length,
     [items],
   );
@@ -113,133 +116,149 @@ function UnifiedInboxPage() {
 
   return (
     <div className="space-y-4">
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Inbox className="h-5 w-5 text-primary" />
+          <h1 className="text-xl font-semibold">الصندوق الموحد</h1>
+          <Badge variant="secondary">إجمالي: {items.length}</Badge>
+          <Badge>مفتوح: {totalOpen}</Badge>
+        </div>
+        <div className="flex items-center gap-2">
+          <ExportMenu<InboxItem>
+            filename={`inbox-${date}`}
+            title="الصندوق الموحد"
+            subtitle={`تاريخ: ${date}${channel ? ` • قناة: ${CHANNEL_LABELS[channel] ?? channel}` : ""}${source ? ` • مصدر: ${SOURCE_LABELS[source] ?? source}` : ""}${q ? ` • بحث: ${q}` : ""}`}
+            meta={{ المجموع: String(items.length), المفتوح: String(totalOpen) }}
+            columns={INBOX_EXPORT_COLS}
+            rows={items}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "unified-inbox"] })}
+          >
+            <RefreshCw className="ml-2 h-4 w-4" /> تحديث
+          </Button>
+        </div>
+      </header>
 
-        <header className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2">
-            <Inbox className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-semibold">الصندوق الموحد</h1>
-            <Badge variant="secondary">إجمالي: {items.length}</Badge>
-            <Badge>مفتوح: {totalOpen}</Badge>
-          </div>
-          <div className="flex items-center gap-2">
-            <ExportMenu<InboxItem>
-              filename={`inbox-${date}`}
-              title="الصندوق الموحد"
-              subtitle={`تاريخ: ${date}${channel ? ` • قناة: ${CHANNEL_LABELS[channel] ?? channel}` : ""}${source ? ` • مصدر: ${SOURCE_LABELS[source] ?? source}` : ""}${q ? ` • بحث: ${q}` : ""}`}
-              meta={{ "المجموع": String(items.length), "المفتوح": String(totalOpen) }}
-              columns={INBOX_EXPORT_COLS}
-              rows={items}
+      <Card className="p-4">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">التاريخ</label>
+            <Input
+              type="date"
+              value={date}
+              onChange={(e) => setSearch({ date: e.target.value || undefined })}
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => qc.invalidateQueries({ queryKey: ["admin", "unified-inbox"] })}
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">القناة</label>
+            <Select
+              value={search.channel ?? "all"}
+              onValueChange={(v) => setSearch({ channel: v as any })}
             >
-              <RefreshCw className="ml-2 h-4 w-4" /> تحديث
-            </Button>
-          </div>
-        </header>
-
-        <Card className="p-4">
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">التاريخ</label>
-              <Input
-                type="date"
-                value={date}
-                onChange={(e) => setSearch({ date: e.target.value || undefined })}
-              />
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">القناة</label>
-              <Select
-                value={search.channel ?? "all"}
-                onValueChange={(v) => setSearch({ channel: v as any })}
-              >
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل القنوات</SelectItem>
-                  {Object.entries(CHANNEL_LABELS).map(([k, l]) => (
-                    <SelectItem key={k} value={k}>{l}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">المصدر</label>
-              <Select value={search.source ?? "all"} onValueChange={(v) => setSearch({ source: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل المصادر</SelectItem>
-                  {Object.entries(SOURCE_LABELS).map(([k, l]) => (
-                    <SelectItem key={k} value={k}>{l}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="mb-1 block text-xs text-muted-foreground">بحث</label>
-              <Input
-                placeholder="اسم / جوال / مرجع"
-                value={q}
-                onChange={(e) => setSearch({ q: e.target.value || undefined })}
-              />
-            </div>
-          </div>
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
-            {Object.entries(SOURCE_LABELS).map(([k, l]) => (
-              <Badge key={k} variant="outline">
-                {l}: {counts[k] ?? 0}
-              </Badge>
-            ))}
-          </div>
-        </Card>
-
-        <Card className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-sm">
-              <thead className="bg-muted/50 text-right text-xs text-muted-foreground">
-                <tr>
-                  <th className="p-3">المصدر</th>
-                  <th className="p-3">القناة</th>
-                  <th className="p-3">المرجع</th>
-                  <th className="p-3">المريض</th>
-                  <th className="p-3">الجوال</th>
-                  <th className="p-3">الموضوع</th>
-                  <th className="p-3">الحالة</th>
-                  <th className="p-3">الوقت</th>
-                  <th className="p-3">إجراء</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.length === 0 && (
-                  <tr>
-                    <td colSpan={9} className="p-8 text-center text-muted-foreground">
-                      لا توجد طلبات لهذا التاريخ.
-                    </td>
-                  </tr>
-                )}
-                {items.map((it: InboxItem) => (
-                  <tr key={`${it.source}:${it.id}`} className="border-t hover:bg-muted/30">
-                    <td className="p-3"><Badge variant="secondary">{SOURCE_LABELS[it.source] ?? it.source}</Badge></td>
-                    <td className="p-3">{CHANNEL_LABELS[it.channel] ?? it.channel}</td>
-                    <td className="p-3 font-mono text-xs">{it.reference ?? "—"}</td>
-                    <td className="p-3">{it.patient_name}</td>
-                    <td className="p-3 font-mono text-xs">{it.patient_phone ?? "—"}</td>
-                    <td className="p-3">{it.subject}</td>
-                    <td className="p-3"><Badge>{it.status}</Badge></td>
-                    <td className="p-3 text-xs text-muted-foreground">
-                      {new Date(it.created_at).toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}
-                    </td>
-                    <td className="p-3">
-                      <Link to={it.href} className="text-primary underline underline-offset-2">فتح</Link>
-                    </td>
-                  </tr>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل القنوات</SelectItem>
+                {Object.entries(CHANNEL_LABELS).map(([k, l]) => (
+                  <SelectItem key={k} value={k}>
+                    {l}
+                  </SelectItem>
                 ))}
-              </tbody>
-            </table>
+              </SelectContent>
+            </Select>
           </div>
-        </Card>
-      </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">المصدر</label>
+            <Select value={search.source ?? "all"} onValueChange={(v) => setSearch({ source: v })}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل المصادر</SelectItem>
+                {Object.entries(SOURCE_LABELS).map(([k, l]) => (
+                  <SelectItem key={k} value={k}>
+                    {l}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-muted-foreground">بحث</label>
+            <Input
+              placeholder="اسم / جوال / مرجع"
+              value={q}
+              onChange={(e) => setSearch({ q: e.target.value || undefined })}
+            />
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          {Object.entries(SOURCE_LABELS).map(([k, l]) => (
+            <Badge key={k} variant="outline">
+              {l}: {counts[k] ?? 0}
+            </Badge>
+          ))}
+        </div>
+      </Card>
+
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px] text-sm">
+            <thead className="bg-muted/50 text-right text-xs text-muted-foreground">
+              <tr>
+                <th className="p-3">المصدر</th>
+                <th className="p-3">القناة</th>
+                <th className="p-3">المرجع</th>
+                <th className="p-3">المريض</th>
+                <th className="p-3">الجوال</th>
+                <th className="p-3">الموضوع</th>
+                <th className="p-3">الحالة</th>
+                <th className="p-3">الوقت</th>
+                <th className="p-3">إجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.length === 0 && (
+                <tr>
+                  <td colSpan={9} className="p-8 text-center text-muted-foreground">
+                    لا توجد طلبات لهذا التاريخ.
+                  </td>
+                </tr>
+              )}
+              {items.map((it: InboxItem) => (
+                <tr key={`${it.source}:${it.id}`} className="border-t hover:bg-muted/30">
+                  <td className="p-3">
+                    <Badge variant="secondary">{SOURCE_LABELS[it.source] ?? it.source}</Badge>
+                  </td>
+                  <td className="p-3">{CHANNEL_LABELS[it.channel] ?? it.channel}</td>
+                  <td className="p-3 font-mono text-xs">{it.reference ?? "—"}</td>
+                  <td className="p-3">{it.patient_name}</td>
+                  <td className="p-3 font-mono text-xs">{it.patient_phone ?? "—"}</td>
+                  <td className="p-3">{it.subject}</td>
+                  <td className="p-3">
+                    <Badge>{it.status}</Badge>
+                  </td>
+                  <td className="p-3 text-xs text-muted-foreground">
+                    {new Date(it.created_at).toLocaleTimeString("ar-SA", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </td>
+                  <td className="p-3">
+                    <Link to={it.href} className="text-primary underline underline-offset-2">
+                      فتح
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
+    </div>
   );
 }

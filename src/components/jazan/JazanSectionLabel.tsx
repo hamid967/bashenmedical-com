@@ -11,24 +11,12 @@ type Props = {
   align?: "start" | "center" | "end";
 };
 
-export function JazanSectionLabel({
-  children,
-  className,
-  align = "start",
-}: Props) {
+export function JazanSectionLabel({ children, className, align = "start" }: Props) {
   const alignCls =
-    align === "center"
-      ? "justify-center"
-      : align === "end"
-        ? "justify-end"
-        : "justify-start";
+    align === "center" ? "justify-center" : align === "end" ? "justify-end" : "justify-start";
   return (
     <div
-      className={cn(
-        "flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-full",
-        alignCls,
-        className,
-      )}
+      className={cn("flex items-center gap-1.5 sm:gap-2 min-w-0 max-w-full", alignCls, className)}
     >
       <svg
         viewBox="0 0 16 16"
@@ -41,11 +29,7 @@ export function JazanSectionLabel({
           stroke="var(--jazan-teal,#075E63)"
           strokeWidth="1"
         />
-        <path
-          d="M8 4 L12 8 L8 12 L4 8 Z"
-          fill="var(--jazan-gold,#C7A46B)"
-          opacity="0.7"
-        />
+        <path d="M8 4 L12 8 L8 12 L4 8 Z" fill="var(--jazan-gold,#C7A46B)" opacity="0.7" />
         <circle cx="8" cy="8" r="1.1" fill="currentColor" />
       </svg>
       <span className="min-w-0 truncate text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-[var(--jazan-teal,#075E63)]">

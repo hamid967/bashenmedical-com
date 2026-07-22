@@ -15,15 +15,22 @@ export type Accreditation = {
 export const accreditationsQuery = () => ({
   queryKey: ["accreditations"],
   queryFn: async (): Promise<Accreditation[]> => {
-    const { data, error } = await (supabase as unknown as {
-      from: (t: string) => {
-        select: (c: string) => {
-          order: (c: string, o?: { ascending: boolean }) => Promise<{ data: Accreditation[] | null; error: Error | null }>;
+    const { data, error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (c: string) => {
+            order: (
+              c: string,
+              o?: { ascending: boolean },
+            ) => Promise<{ data: Accreditation[] | null; error: Error | null }>;
+          };
         };
-      };
-    })
+      }
+    )
       .from("accreditations")
-      .select("id, title_ar, title_en, description_ar, description_en, image_url, year, category, sort_order")
+      .select(
+        "id, title_ar, title_en, description_ar, description_en, image_url, year, category, sort_order",
+      )
       .order("sort_order", { ascending: true });
     if (error) throw error;
     return data ?? [];
@@ -34,17 +41,24 @@ export const accreditationsQuery = () => ({
 export const accreditationQuery = (id: string) => ({
   queryKey: ["accreditation", id],
   queryFn: async (): Promise<Accreditation | null> => {
-    const { data, error } = await (supabase as unknown as {
-      from: (t: string) => {
-        select: (c: string) => {
-          eq: (c: string, v: string) => {
-            maybeSingle: () => Promise<{ data: Accreditation | null; error: Error | null }>;
+    const { data, error } = await (
+      supabase as unknown as {
+        from: (t: string) => {
+          select: (c: string) => {
+            eq: (
+              c: string,
+              v: string,
+            ) => {
+              maybeSingle: () => Promise<{ data: Accreditation | null; error: Error | null }>;
+            };
           };
         };
-      };
-    })
+      }
+    )
       .from("accreditations")
-      .select("id, title_ar, title_en, description_ar, description_en, image_url, year, category, sort_order")
+      .select(
+        "id, title_ar, title_en, description_ar, description_en, image_url, year, category, sort_order",
+      )
       .eq("id", id)
       .maybeSingle();
     if (error) throw error;
@@ -56,12 +70,14 @@ export const accreditationQuery = (id: string) => ({
 export const specialtyDoctorCountsQuery = () => ({
   queryKey: ["specialty-doctor-counts"],
   queryFn: async (): Promise<Record<string, number>> => {
-    const { data, error } = await (supabase as unknown as {
-      rpc: (name: string) => Promise<{
-        data: Array<{ specialty_id: string; doctor_count: number }> | null;
-        error: Error | null;
-      }>;
-    }).rpc("specialty_doctor_counts");
+    const { data, error } = await (
+      supabase as unknown as {
+        rpc: (name: string) => Promise<{
+          data: Array<{ specialty_id: string; doctor_count: number }> | null;
+          error: Error | null;
+        }>;
+      }
+    ).rpc("specialty_doctor_counts");
     if (error) throw error;
     const map: Record<string, number> = {};
     for (const row of data ?? []) map[row.specialty_id] = Number(row.doctor_count);

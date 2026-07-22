@@ -16,7 +16,10 @@ export const Route = createFileRoute("/international-patients")({
           "خدمات متكاملة للمرضى الدوليين في مجمع باعشن: تأشيرة علاجية، حجز فندق، مترجم طبي، رأي طبي ثانٍ ومتابعة ما بعد العلاج.",
       },
       { property: "og:title", content: "International Patients — Baeshen Medical" },
-      { property: "og:description", content: "End-to-end support for international patients in Jazan, Saudi Arabia." },
+      {
+        property: "og:description",
+        content: "End-to-end support for international patients in Jazan, Saudi Arabia.",
+      },
       { property: "og:url", content: "https://bashenmedical.com/international-patients" },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/international-patients" }],
@@ -55,7 +58,10 @@ const services = [
 const steps = [
   { title: "أرسل استفسارك", desc: "املأ النموذج أو راسلنا على واتساب مع ملخّص الحالة." },
   { title: "خطة علاج مبدئية", desc: "يراجع فريقنا الطبي حالتك ويرسل خطة وميزانية خلال 48 ساعة." },
-  { title: "التأشيرة والوصول", desc: "نُصدر خطاب الدعم ونساعد في حجز الفندق والاستقبال من المطار." },
+  {
+    title: "التأشيرة والوصول",
+    desc: "نُصدر خطاب الدعم ونساعد في حجز الفندق والاستقبال من المطار.",
+  },
   { title: "العلاج والمتابعة", desc: "علاج بإشراف استشاريين + متابعة عن بُعد بعد عودتك." },
 ];
 
@@ -75,7 +81,9 @@ function IntlPage() {
             ابدأ طلبك — Start your request
           </a>
           <a
-            href={whatsappUrl("Hello Baeshen Medical, I need help with international patient services. — مرحبًا، أحتاج مساعدة في خدمات المرضى الدوليين.")}
+            href={whatsappUrl(
+              "Hello Baeshen Medical, I need help with international patient services. — مرحبًا، أحتاج مساعدة في خدمات المرضى الدوليين.",
+            )}
             target="_blank"
             rel="noreferrer noopener"
             className="rounded-md border border-primary text-primary px-5 py-2.5 font-semibold hover:bg-primary/5"
@@ -86,12 +94,36 @@ function IntlPage() {
       </PageHero>
 
       <section className="container-app py-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        <SectionCard icon={<Plane className="h-5 w-5" />} title="التأشيرة الطبية" desc="نقدم خطاباً معتمداً لدعم طلب التأشيرة العلاجية للمريض ومرافقيه." />
-        <SectionCard icon={<Hotel className="h-5 w-5" />} title="الإقامة والفندق" desc="أسعار خاصة مع فنادق شريكة قريبة من المجمع، مع خدمة النقل." />
-        <SectionCard icon={<Languages className="h-5 w-5" />} title="مترجم طبي" desc="عربية · إنجليزية · أوردو · سواحيلية · فرنسية — طوال فترة إقامتك." />
-        <SectionCard icon={<FileText className="h-5 w-5" />} title="ملف طبي مُترجم" desc="جميع تقاريرك الطبية باللغة التي تختارها، معتمدة رسمياً." />
-        <SectionCard icon={<ShieldCheck className="h-5 w-5" />} title="تنسيق التأمين الدولي" desc="نتعامل مع شبكات تأمين إقليمية ودولية — نساعدك في المطالبات." />
-        <SectionCard icon={<HeartPulse className="h-5 w-5" />} title="رأي طبي ثانٍ" desc="مراجعة تقاريرك من قِبل استشاريينا قبل السفر — عن بُعد." />
+        <SectionCard
+          icon={<Plane className="h-5 w-5" />}
+          title="التأشيرة الطبية"
+          desc="نقدم خطاباً معتمداً لدعم طلب التأشيرة العلاجية للمريض ومرافقيه."
+        />
+        <SectionCard
+          icon={<Hotel className="h-5 w-5" />}
+          title="الإقامة والفندق"
+          desc="أسعار خاصة مع فنادق شريكة قريبة من المجمع، مع خدمة النقل."
+        />
+        <SectionCard
+          icon={<Languages className="h-5 w-5" />}
+          title="مترجم طبي"
+          desc="عربية · إنجليزية · أوردو · سواحيلية · فرنسية — طوال فترة إقامتك."
+        />
+        <SectionCard
+          icon={<FileText className="h-5 w-5" />}
+          title="ملف طبي مُترجم"
+          desc="جميع تقاريرك الطبية باللغة التي تختارها، معتمدة رسمياً."
+        />
+        <SectionCard
+          icon={<ShieldCheck className="h-5 w-5" />}
+          title="تنسيق التأمين الدولي"
+          desc="نتعامل مع شبكات تأمين إقليمية ودولية — نساعدك في المطالبات."
+        />
+        <SectionCard
+          icon={<HeartPulse className="h-5 w-5" />}
+          title="رأي طبي ثانٍ"
+          desc="مراجعة تقاريرك من قِبل استشاريينا قبل السفر — عن بُعد."
+        />
       </section>
 
       <section className="container-app pb-4">
@@ -117,8 +149,8 @@ function IntlPage() {
               <h3 className="font-bold">لماذا جازان؟</h3>
             </div>
             <p className="text-sm text-muted-foreground leading-7">
-              منطقة جازان بوابة الجنوب: قريبة من الحدود اليمنية وشرق أفريقيا، بمطار دولي وشبكة فنادق حديثة،
-              ومناخ جبلي معتدل في فيفاء وجبل الحشر يوفّر فرصة نقاهة مثالية بعد العلاج.
+              منطقة جازان بوابة الجنوب: قريبة من الحدود اليمنية وشرق أفريقيا، بمطار دولي وشبكة فنادق
+              حديثة، ومناخ جبلي معتدل في فيفاء وجبل الحشر يوفّر فرصة نقاهة مثالية بعد العلاج.
             </p>
           </div>
 
@@ -136,8 +168,18 @@ function IntlPage() {
           <div className="rounded-2xl border border-border bg-card p-6">
             <h3 className="font-bold mb-2">مكتب المرضى الدوليين</h3>
             <ul className="text-sm space-y-1.5 text-muted-foreground">
-              <li>البريد: <span dir="ltr" className="text-foreground">intl@baeshen.med</span></li>
-              <li>واتساب: <span dir="ltr" className="text-foreground">+966 55 508 8623</span></li>
+              <li>
+                البريد:{" "}
+                <span dir="ltr" className="text-foreground">
+                  intl@baeshen.med
+                </span>
+              </li>
+              <li>
+                واتساب:{" "}
+                <span dir="ltr" className="text-foreground">
+                  +966 55 508 8623
+                </span>
+              </li>
               <li>ساعات العمل: 8:00ص – 8:00م بتوقيت مكة المكرمة</li>
             </ul>
           </div>

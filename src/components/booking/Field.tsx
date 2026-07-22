@@ -11,7 +11,11 @@ import { cloneElement, isValidElement, useId, type ReactElement, type ReactNode 
  * non-focusable wrapping div has no clickable target for the label text.
  */
 export function Field({
-  label, required, error, hint, children,
+  label,
+  required,
+  error,
+  hint,
+  children,
 }: {
   label: string;
   required?: boolean;
@@ -22,7 +26,8 @@ export function Field({
   const id = useId();
   const errorId = `${id}-err`;
   const hintId = `${id}-hint`;
-  const describedBy = [error ? errorId : null, hint ? hintId : null].filter(Boolean).join(" ") || undefined;
+  const describedBy =
+    [error ? errorId : null, hint ? hintId : null].filter(Boolean).join(" ") || undefined;
 
   const enhanced = isValidElement(children)
     ? cloneElement(children as ReactElement<any>, {
@@ -37,11 +42,20 @@ export function Field({
     <div className="block">
       <label htmlFor={id} className="block text-xs font-semibold mb-1.5">
         {label}
-        {required && <span className="text-destructive" aria-hidden="true"> *</span>}
+        {required && (
+          <span className="text-destructive" aria-hidden="true">
+            {" "}
+            *
+          </span>
+        )}
         {required && <span className="sr-only"> (required)</span>}
       </label>
       {enhanced}
-      {hint && <div id={hintId} className="text-[11px] text-muted-foreground mt-1">{hint}</div>}
+      {hint && (
+        <div id={hintId} className="text-[11px] text-muted-foreground mt-1">
+          {hint}
+        </div>
+      )}
       {error && (
         <div id={errorId} role="alert" className="mt-1 text-xs text-destructive">
           {error}

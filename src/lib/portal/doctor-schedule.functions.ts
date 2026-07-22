@@ -16,9 +16,7 @@ async function requireMyDoctorId(sb: any): Promise<string> {
   if (error) throw new Error(error.message);
   const id = data as string | null;
   if (!id) {
-    throw new Error(
-      "حسابك غير مرتبط بسجل طبيب. يرجى التواصل مع الإدارة لربط حسابك.",
-    );
+    throw new Error("حسابك غير مرتبط بسجل طبيب. يرجى التواصل مع الإدارة لربط حسابك.");
   }
   return id;
 }
@@ -35,7 +33,9 @@ export const getMyDoctorSummary = createServerFn({ method: "GET" })
     const [doctorRes, availRes, slotsRes, apptRes, leavesRes] = await Promise.all([
       supabase
         .from("doctors")
-        .select("id, name_ar, name_en, title_ar, title_en, photo_url, branch_id, specialty_id, booking_enabled, is_active")
+        .select(
+          "id, name_ar, name_en, title_ar, title_en, photo_url, branch_id, specialty_id, booking_enabled, is_active",
+        )
         .eq("id", doctorId as string)
         .maybeSingle(),
       supabase
@@ -106,8 +106,7 @@ export const createMyAvailability = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const doctorId = await requireMyDoctorId(context.supabase);
-    if (data.endTime <= data.startTime)
-      throw new Error("نهاية الفترة يجب أن تكون بعد بدايتها.");
+    if (data.endTime <= data.startTime) throw new Error("نهاية الفترة يجب أن تكون بعد بدايتها.");
 
     const { data: existing, error: fetchErr } = await context.supabase
       .from("availability")
@@ -142,10 +141,7 @@ export const deleteMyAvailability = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireMyDoctorId(context.supabase);
-    const { error } = await context.supabase
-      .from("availability")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("availability").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -180,8 +176,7 @@ export const createMyLeave = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const doctorId = await requireMyDoctorId(context.supabase);
-    if (data.endDate < data.startDate)
-      throw new Error("تاريخ الانتهاء قبل تاريخ البداية.");
+    if (data.endDate < data.startDate) throw new Error("تاريخ الانتهاء قبل تاريخ البداية.");
 
     // Fetch doctor's branch (leaves may be linked to a branch)
     const { data: doc } = await context.supabase
@@ -208,10 +203,7 @@ export const deleteMyLeave = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await requireMyDoctorId(context.supabase);
-    const { error } = await context.supabase
-      .from("doctor_leaves")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("doctor_leaves").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -264,17 +256,27 @@ export const generateMySlots = createServerFn({ method: "POST" })
       return a * 60 + b;
     };
     const toHMS = (m: number) =>
-      `${Math.floor(m / 60).toString().padStart(2, "0")}:${(m % 60).toString().padStart(2, "0")}:00`;
+      `${Math.floor(m / 60)
+        .toString()
+        .padStart(2, "0")}:${(m % 60).toString().padStart(2, "0")}:00`;
 
     const start = toMin(data.startTime);
     const end = toMin(data.endTime);
     if (end <= start) throw new Error("وقت النهاية يجب أن يكون بعد البداية.");
 
     const step = data.durationMinutes + data.breakMinutes;
-    const candidates: Array<{ start_min: number; end_min: number; row: {
-      doctor_id: string; branch_id: string | null; slot_date: string;
-      start_time: string; end_time: string; status: "available";
-    } }> = [];
+    const candidates: Array<{
+      start_min: number;
+      end_min: number;
+      row: {
+        doctor_id: string;
+        branch_id: string | null;
+        slot_date: string;
+        start_time: string;
+        end_time: string;
+        status: "available";
+      };
+    }> = [];
 
     // Read doctor's branch to tag the slots consistently
     const { data: doc } = await context.supabase
@@ -311,7 +313,7 @@ export const generateMySlots = createServerFn({ method: "POST" })
       end: toMin(String(r.end_time).slice(0, 5)),
     }));
 
-    const rows: typeof candidates[number]["row"][] = [];
+    const rows: (typeof candidates)[number]["row"][] = [];
     let skipped = 0;
     for (const c of candidates) {
       const clash = ranges.some((r) => c.start_min < r.end && c.end_min > r.start);
@@ -345,12 +347,8 @@ export const deleteMySlot = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (rowErr) throw new Error(rowErr.message);
-    if (row?.status === "booked")
-      throw new Error("لا يمكن حذف فترة محجوزة. ألغِ الحجز أولاً.");
-    const { error } = await context.supabase
-      .from("availability_slots")
-      .delete()
-      .eq("id", data.id);
+    if (row?.status === "booked") throw new Error("لا يمكن حذف فترة محجوزة. ألغِ الحجز أولاً.");
+    const { error } = await context.supabase.from("availability_slots").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -389,7 +387,9 @@ export const listMyCalendar = createServerFn({ method: "POST" })
     const [apptRes, slotRes, leaveRes] = await Promise.all([
       context.supabase
         .from("appointments")
-        .select("id, appointment_date, appointment_time, status, reason, patient_name, patient_phone, notes")
+        .select(
+          "id, appointment_date, appointment_time, status, reason, patient_name, patient_phone, notes",
+        )
         .eq("doctor_id", doctorId)
         .gte("appointment_date", data.fromDate)
         .lte("appointment_date", data.toDate)
@@ -426,14 +426,18 @@ export const listMyCalendar = createServerFn({ method: "POST" })
 export const updateMyAppointmentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      status: z.enum(["new", "confirmed", "completed", "cancelled", "no_show"]),
-    }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["new", "confirmed", "completed", "cancelled", "no_show"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const doctorId = await requireMyDoctorId(context.supabase);
-    const patch: { status: typeof data.status; cancelled_at?: string | null } = { status: data.status };
+    const patch: { status: typeof data.status; cancelled_at?: string | null } = {
+      status: data.status,
+    };
     if (data.status === "cancelled") patch.cancelled_at = new Date().toISOString();
     const { error } = await context.supabase
       .from("appointments")
@@ -455,11 +459,13 @@ export const updateMyAppointmentStatus = createServerFn({ method: "POST" })
 export const rescheduleMyAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      date: z.string().regex(DATE_RE),
-      time: z.string().regex(HHMM),
-    }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        date: z.string().regex(DATE_RE),
+        time: z.string().regex(HHMM),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const doctorId = await requireMyDoctorId(context.supabase);
@@ -502,10 +508,12 @@ export const rescheduleMyAppointment = createServerFn({ method: "POST" })
 export const setMySlotStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      id: z.string().uuid(),
-      status: z.enum(["available", "blocked"]),
-    }).parse(d),
+    z
+      .object({
+        id: z.string().uuid(),
+        status: z.enum(["available", "blocked"]),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     const doctorId = await requireMyDoctorId(context.supabase);

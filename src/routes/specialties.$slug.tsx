@@ -3,7 +3,12 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
-import { buildLocalBusinessSchema, buildBreadcrumbs, CLINIC_ID, SITE_URL } from "@/lib/localBusinessSchema";
+import {
+  buildLocalBusinessSchema,
+  buildBreadcrumbs,
+  CLINIC_ID,
+  SITE_URL,
+} from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
 import { Stethoscope, ArrowLeft, MapPin, Phone } from "lucide-react";
 import { bmcOgImageMeta } from "@/lib/og-meta";
@@ -57,12 +62,10 @@ export const Route = createFileRoute("/specialties/$slug")({
   },
   head: ({ params, loaderData }) => {
     const ld = loaderData as
-      | { specialty: Specialty; doctors: DoctorLite[]; settings: ClinicSettings }
-      | undefined;
+      { specialty: Specialty; doctors: DoctorLite[]; settings: ClinicSettings } | undefined;
     if (!ld) {
       return {
-        meta: [
-      ...bmcOgImageMeta(),{ title: "غير متوفر" }, { name: "robots", content: "noindex" }],
+        meta: [...bmcOgImageMeta(), { title: "غير متوفر" }, { name: "robots", content: "noindex" }],
       };
     }
     const { specialty, doctors, settings } = ld;
@@ -138,7 +141,10 @@ function SpecialtyError({ reset }: { reset: () => void }) {
   return (
     <div className="container-app py-20 text-center">
       <h1 className="text-3xl font-bold">حدث خطأ</h1>
-      <button onClick={reset} className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground">
+      <button
+        onClick={reset}
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground"
+      >
         إعادة المحاولة
       </button>
     </div>
@@ -158,9 +164,13 @@ function SpecialtyDetail() {
       <section className="hero-gradient-deep text-white py-14">
         <div className="container-app">
           <nav className="text-xs text-white/80 mb-3">
-            <Link to="/" className="hover:underline">الرئيسية</Link>
+            <Link to="/" className="hover:underline">
+              الرئيسية
+            </Link>
             <span className="mx-2">/</span>
-            <Link to="/specialties" className="hover:underline">التخصصات</Link>
+            <Link to="/specialties" className="hover:underline">
+              التخصصات
+            </Link>
             <span className="mx-2">/</span>
             <span className="text-white">{name}</span>
           </nav>

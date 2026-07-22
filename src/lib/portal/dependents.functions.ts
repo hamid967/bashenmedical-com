@@ -38,7 +38,6 @@ export type Dependent = {
 const DEPENDENT_COLS =
   "id, guardian_user_id, patient_id, full_name, relationship, national_id, phone, gender, date_of_birth, verified, verification_status, verification_method, verified_at, access_scopes, created_at, updated_at";
 
-
 const RELATIONSHIPS = ["child", "spouse", "parent", "sibling", "other"] as const;
 
 const RelationshipEnum = z.enum(RELATIONSHIPS);
@@ -83,7 +82,10 @@ const DEFAULT_SCOPES: DependentAccessScopes = {
 };
 
 function normalizeScopes(raw: unknown): DependentAccessScopes {
-  const o = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Record<string, unknown>;
+  const o = (raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {}) as Record<
+    string,
+    unknown
+  >;
   return {
     booking: o.booking !== false,
     reports: o.reports === true,
@@ -157,9 +159,7 @@ export const createDependent = createServerFn({ method: "POST" })
 
 export const updateDependent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((raw: unknown) =>
-    BaseSchema.extend({ id: z.string().uuid() }).parse(raw),
-  )
+  .validator((raw: unknown) => BaseSchema.extend({ id: z.string().uuid() }).parse(raw))
   .handler(async ({ context, data }) => {
     const { supabase, userId } = context;
     const { id, ...patch } = data;
@@ -185,12 +185,14 @@ export const updateDependent = createServerFn({ method: "POST" })
 
 const ScopesSchema = z.object({
   id: z.string().uuid(),
-  scopes: z.object({
-    booking: z.boolean(),
-    reports: z.boolean(),
-    prescriptions: z.boolean(),
-    billing: z.boolean(),
-  }).partial(),
+  scopes: z
+    .object({
+      booking: z.boolean(),
+      reports: z.boolean(),
+      prescriptions: z.boolean(),
+      billing: z.boolean(),
+    })
+    .partial(),
 });
 
 export const setDependentAccessScopes = createServerFn({ method: "POST" })
@@ -221,7 +223,6 @@ export const setDependentAccessScopes = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return normalizeDependent(row);
   });
-
 
 /* ------------------------------ delete ------------------------------ */
 
@@ -324,56 +325,43 @@ export const listDependentAppointments = createServerFn({ method: "POST" })
  */
 export const countDependentAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((raw: unknown) =>
-    z.object({ dependent_id: z.string().uuid() }).parse(raw),
-  )
-  .handler(
-    async ({
-      context,
-      data,
-    }): Promise<{ total: number; active: number }> => {
-      const { supabase, userId } = context;
+  .validator((raw: unknown) => z.object({ dependent_id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }): Promise<{ total: number; active: number }> => {
+    const { supabase, userId } = context;
 
-      const { data: dep, error: depErr } = await supabase
-        .from("dependents")
-        .select("id, patient_id")
-        .eq("id", data.dependent_id)
-        .eq("guardian_user_id", userId)
-        .maybeSingle();
-      if (depErr) throw new Error(depErr.message);
-      if (!dep) throw new Error("Not found");
+    const { data: dep, error: depErr } = await supabase
+      .from("dependents")
+      .select("id, patient_id")
+      .eq("id", data.dependent_id)
+      .eq("guardian_user_id", userId)
+      .maybeSingle();
+    if (depErr) throw new Error(depErr.message);
+    if (!dep) throw new Error("Not found");
 
-      const { supabaseAdmin } = await import(
-        "@/integrations/supabase/client.server"
-      );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-      const marker = `dependent:${dep.id}`;
-      const filter = dep.patient_id
-        ? `notes.ilike.${marker}%,patient_id.eq.${dep.patient_id}`
-        : null;
+    const marker = `dependent:${dep.id}`;
+    const filter = dep.patient_id ? `notes.ilike.${marker}%,patient_id.eq.${dep.patient_id}` : null;
 
-      const buildQuery = () => {
-        let q = supabaseAdmin
-          .from("appointments")
-          .select("id", { count: "exact", head: true });
-        if (filter) q = q.or(filter);
-        else q = q.ilike("notes", `${marker}%`);
-        return q;
-      };
+    const buildQuery = () => {
+      let q = supabaseAdmin.from("appointments").select("id", { count: "exact", head: true });
+      if (filter) q = q.or(filter);
+      else q = q.ilike("notes", `${marker}%`);
+      return q;
+    };
 
-      const totalRes = await buildQuery();
-      if (totalRes.error) throw new Error(totalRes.error.message);
+    const totalRes = await buildQuery();
+    if (totalRes.error) throw new Error(totalRes.error.message);
 
-      const activeRes = await buildQuery().in("status", ["new", "confirmed"]);
+    const activeRes = await buildQuery().in("status", ["new", "confirmed"]);
 
-      if (activeRes.error) throw new Error(activeRes.error.message);
+    if (activeRes.error) throw new Error(activeRes.error.message);
 
-      return {
-        total: totalRes.count ?? 0,
-        active: activeRes.count ?? 0,
-      };
-    },
-  );
+    return {
+      total: totalRes.count ?? 0,
+      active: activeRes.count ?? 0,
+    };
+  });
 
 /* -------------------- cancelDependentActiveAppointments -------------------- */
 
@@ -384,9 +372,7 @@ export const countDependentAppointments = createServerFn({ method: "POST" })
  */
 export const cancelDependentActiveAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((raw: unknown) =>
-    z.object({ dependent_id: z.string().uuid() }).parse(raw),
-  )
+  .validator((raw: unknown) => z.object({ dependent_id: z.string().uuid() }).parse(raw))
   .handler(async ({ context, data }): Promise<{ cancelled: number }> => {
     const { supabase, userId } = context;
 
@@ -399,9 +385,7 @@ export const cancelDependentActiveAppointments = createServerFn({ method: "POST"
     if (depErr) throw new Error(depErr.message);
     if (!dep) throw new Error("Not found");
 
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const marker = `dependent:${dep.id}`;
     let selectQ = supabaseAdmin
@@ -464,7 +448,3 @@ export const cancelDependentActiveAppointments = createServerFn({ method: "POST"
 
     return { cancelled: ids.length };
   });
-
-
-
-

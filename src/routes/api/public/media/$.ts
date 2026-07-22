@@ -29,8 +29,7 @@ export const Route = createFileRoute("/api/public/media/$")({
           .maybeSingle();
         if (!row) return new Response("Not found", { status: 404 });
 
-        const { data: file, error } = await supabaseAdmin
-          .storage.from("site-media").download(path);
+        const { data: file, error } = await supabaseAdmin.storage.from("site-media").download(path);
         if (error || !file) return new Response("Not found", { status: 404 });
 
         const buf = await file.arrayBuffer();

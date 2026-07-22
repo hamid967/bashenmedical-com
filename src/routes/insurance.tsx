@@ -27,8 +27,7 @@ export const Route = createFileRoute("/insurance")({
           "@type": "MedicalWebPage",
           "@id": "https://bashenmedical.com/insurance",
           name: "شركات التأمين المعتمدة — مجمع باعشن الطبي",
-          description:
-            "قائمة شركات التأمين الصحي المعتمدة لدى مجمع باعشن الطبي في صبيا، جازان.",
+          description: "قائمة شركات التأمين الصحي المعتمدة لدى مجمع باعشن الطبي في صبيا، جازان.",
           url: "https://bashenmedical.com/insurance",
           inLanguage: "ar-SA",
           isPartOf: { "@id": "https://bashenmedical.com/#website" },
@@ -157,13 +156,16 @@ function InsurancePage() {
               <h3 className="font-bold mb-2">ملاحظات مهمّة حول التغطية</h3>
               <ul className="text-sm space-y-1.5 text-muted-foreground">
                 <li>
-                  <span className="font-semibold text-foreground">تغطية شامل:</span> تشمل الكشف، التحاليل، الأشعة، الأدوية، والعمليات الاختيارية حسب حدود الوثيقة.
+                  <span className="font-semibold text-foreground">تغطية شامل:</span> تشمل الكشف،
+                  التحاليل، الأشعة، الأدوية، والعمليات الاختيارية حسب حدود الوثيقة.
                 </li>
                 <li>
-                  <span className="font-semibold text-foreground">تغطية أساسي:</span> الكشف والحالات الطارئة فقط — بعض الخدمات تحتاج موافقة مسبقة.
+                  <span className="font-semibold text-foreground">تغطية أساسي:</span> الكشف والحالات
+                  الطارئة فقط — بعض الخدمات تحتاج موافقة مسبقة.
                 </li>
                 <li>
-                  <span className="font-semibold text-foreground">تغطية محدود:</span> الطوارئ فقط أو باقة محدّدة — يرجى التأكد قبل الحجز.
+                  <span className="font-semibold text-foreground">تغطية محدود:</span> الطوارئ فقط أو
+                  باقة محدّدة — يرجى التأكد قبل الحجز.
                 </li>
                 <li>يُشترط إحضار بطاقة التأمين وبطاقة الهوية عند كل زيارة.</li>
               </ul>

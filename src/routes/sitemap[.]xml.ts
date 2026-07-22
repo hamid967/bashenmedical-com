@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 
-
 const BASE_URL = "https://bashenmedical.com";
 
 interface SitemapEntry {
@@ -81,14 +80,12 @@ export const Route = createFileRoute("/sitemap.xml")({
                 `${url}/rest/v1/branches?select=slug,updated_at,created_at&is_active=eq.true&order=sort_order`,
                 { headers },
               ),
-              fetch(
-                `${url}/rest/v1/accreditations?select=id,created_at&order=sort_order`,
-                { headers },
-              ),
-              fetch(
-                `${url}/rest/v1/excellence_centers?select=slug,created_at&order=sort_order`,
-                { headers },
-              ),
+              fetch(`${url}/rest/v1/accreditations?select=id,created_at&order=sort_order`, {
+                headers,
+              }),
+              fetch(`${url}/rest/v1/excellence_centers?select=slug,created_at&order=sort_order`, {
+                headers,
+              }),
               fetch(
                 `${url}/rest/v1/patient_stories?select=slug,updated_at,created_at&is_published=eq.true&order=created_at.desc`,
                 { headers },
@@ -118,7 +115,11 @@ export const Route = createFileRoute("/sitemap.xml")({
                 priority: "0.7",
               });
             }
-            for (const a of (articlesRes as Array<{ slug: string; updated_at: string; published_at: string | null }>) ?? []) {
+            for (const a of (articlesRes as Array<{
+              slug: string;
+              updated_at: string;
+              published_at: string | null;
+            }>) ?? []) {
               entries.push({
                 path: `/health/${encodeURIComponent(a.slug)}`,
                 lastmod: (a.updated_at || a.published_at || "").slice(0, 10) || undefined,
@@ -126,7 +127,11 @@ export const Route = createFileRoute("/sitemap.xml")({
                 priority: "0.7",
               });
             }
-            for (const b of (branchesRes as Array<{ slug: string; updated_at: string | null; created_at: string }>) ?? []) {
+            for (const b of (branchesRes as Array<{
+              slug: string;
+              updated_at: string | null;
+              created_at: string;
+            }>) ?? []) {
               entries.push({
                 path: `/branches/${encodeURIComponent(b.slug)}`,
                 lastmod: (b.updated_at || b.created_at || "").slice(0, 10) || undefined,
@@ -134,7 +139,8 @@ export const Route = createFileRoute("/sitemap.xml")({
                 priority: "0.8",
               });
             }
-            for (const a of (accreditationsRes as Array<{ id: string; created_at: string }>) ?? []) {
+            for (const a of (accreditationsRes as Array<{ id: string; created_at: string }>) ??
+              []) {
               entries.push({
                 path: `/accreditations/${encodeURIComponent(a.id)}`,
                 lastmod: a.created_at?.slice(0, 10),
@@ -150,7 +156,11 @@ export const Route = createFileRoute("/sitemap.xml")({
                 priority: "0.7",
               });
             }
-            for (const s of (storiesRes as Array<{ slug: string; updated_at: string | null; created_at: string }>) ?? []) {
+            for (const s of (storiesRes as Array<{
+              slug: string;
+              updated_at: string | null;
+              created_at: string;
+            }>) ?? []) {
               entries.push({
                 path: `/media/stories/${encodeURIComponent(s.slug)}`,
                 lastmod: (s.updated_at || s.created_at || "").slice(0, 10) || undefined,

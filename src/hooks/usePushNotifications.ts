@@ -1,15 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
-import {
-  VAPID_PUBLIC_KEY,
-  urlBase64ToUint8Array,
-  arrayBufferToBase64,
-} from "@/lib/push-config";
-import {
-  savePushSubscription,
-  deletePushSubscription,
-} from "@/lib/push-subscriptions.functions";
+import { VAPID_PUBLIC_KEY, urlBase64ToUint8Array, arrayBufferToBase64 } from "@/lib/push-config";
+import { savePushSubscription, deletePushSubscription } from "@/lib/push-subscriptions.functions";
 
 type PushState = "unsupported" | "denied" | "granted" | "default" | "unknown";
 
@@ -82,7 +75,11 @@ export function usePushNotifications(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     if (typeof window === "undefined") return;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+    if (
+      !("serviceWorker" in navigator) ||
+      !("PushManager" in window) ||
+      !("Notification" in window)
+    ) {
       setState("unsupported");
       return;
     }

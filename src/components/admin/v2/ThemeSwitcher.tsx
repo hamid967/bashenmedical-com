@@ -10,19 +10,31 @@ export function useAdminTheme() {
     try {
       const saved = (localStorage.getItem(KEY) as Theme | null) ?? "light";
       setTheme(saved);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
   function toggle() {
     setTheme((t) => {
       const next: Theme = t === "light" ? "dark" : "light";
-      try { localStorage.setItem(KEY, next); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(KEY, next);
+      } catch {
+        /* ignore */
+      }
       return next;
     });
   }
   return { theme, toggle };
 }
 
-export function ThemeSwitcher({ theme, onToggle }: { theme: "light" | "dark"; onToggle: () => void }) {
+export function ThemeSwitcher({
+  theme,
+  onToggle,
+}: {
+  theme: "light" | "dark";
+  onToggle: () => void;
+}) {
   return (
     <button
       onClick={onToggle}

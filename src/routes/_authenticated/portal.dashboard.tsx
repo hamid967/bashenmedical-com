@@ -40,14 +40,8 @@ import {
   CreditCard,
   CalendarClock,
 } from "lucide-react";
-import {
-  getMyRecentOrders,
-  type MyRecentOrder,
-} from "@/lib/portal/my-orders.functions";
-import {
-  listMyInquiries,
-  type MyInquiry,
-} from "@/lib/portal/inquiries.functions";
+import { getMyRecentOrders, type MyRecentOrder } from "@/lib/portal/my-orders.functions";
+import { listMyInquiries, type MyInquiry } from "@/lib/portal/inquiries.functions";
 import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
 import type { OrderTableKind } from "@/lib/unified-status";
 
@@ -85,12 +79,16 @@ const INQUIRY_STATUS_LABELS: Record<string, string> = {
 
 const INQUIRY_STATUS_STYLES: Record<string, string> = {
   new: "bg-[color:var(--portal-info-50)] text-[color:var(--portal-info)] border-[color:var(--portal-info)]/25",
-  in_progress: "bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] border-[color:var(--portal-warning)]/25",
+  in_progress:
+    "bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] border-[color:var(--portal-warning)]/25",
   contacted: "bg-indigo-50 text-indigo-700 border-indigo-200", // tokens-allow — semantic hue not in portal palette
   scheduled: "bg-violet-50 text-violet-700 border-violet-200", // tokens-allow — semantic hue not in portal palette
-  completed: "bg-[color:var(--portal-success-50)] text-[color:var(--portal-success)] border-[color:var(--portal-success)]/25",
-  closed: "bg-[color:var(--portal-surface-3)] text-[color:var(--portal-ink-2)] border-[color:var(--portal-border)]",
-  cancelled: "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] border-[color:var(--portal-error)]/25",
+  completed:
+    "bg-[color:var(--portal-success-50)] text-[color:var(--portal-success)] border-[color:var(--portal-success)]/25",
+  closed:
+    "bg-[color:var(--portal-surface-3)] text-[color:var(--portal-ink-2)] border-[color:var(--portal-border)]",
+  cancelled:
+    "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] border-[color:var(--portal-error)]/25",
 };
 
 function formatDate(iso: string): string {
@@ -107,8 +105,7 @@ function formatDate(iso: string): string {
 
 function InquiryStatusBadge({ status }: { status: string }) {
   const label = INQUIRY_STATUS_LABELS[status] ?? status;
-  const style =
-    INQUIRY_STATUS_STYLES[status] ?? "bg-slate-100 text-slate-700 border-slate-200";
+  const style = INQUIRY_STATUS_STYLES[status] ?? "bg-slate-100 text-slate-700 border-slate-200";
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium whitespace-nowrap ${style}`}
@@ -253,8 +250,6 @@ function QuickSnapshotGrid({ data, loading }: { data: Snapshot | undefined; load
   );
 }
 
-
-
 export const Route = createFileRoute("/_authenticated/portal/dashboard")({
   head: () => ({
     meta: [
@@ -328,7 +323,6 @@ function PortalDashboardPage() {
   return (
     <>
       <PortalPageHeader
-
         title="لوحة التحكم"
         description="نظرة سريعة على طلباتك واستفساراتك وحالتها"
         breadcrumbs={[{ label: "الرئيسية", to: "/portal" }, { label: "لوحة التحكم" }]}
@@ -342,7 +336,9 @@ function PortalDashboardPage() {
             className="inline-flex items-center gap-2 px-3 h-9 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] hover:bg-[color:var(--portal-surface-2)] text-sm portal-focus-ring"
             aria-label="تحديث البيانات"
           >
-            <RefreshCw className={`h-4 w-4 ${refetching || snapshotQ.isFetching ? "animate-spin" : ""}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${refetching || snapshotQ.isFetching ? "animate-spin" : ""}`}
+            />
             تحديث
           </button>
         }
@@ -359,7 +355,10 @@ function PortalDashboardPage() {
         <>
           {/* KPIs */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-            <Link to="/portal/orders" className="block portal-focus-ring rounded-[var(--portal-radius-lg)]">
+            <Link
+              to="/portal/orders"
+              className="block portal-focus-ring rounded-[var(--portal-radius-lg)]"
+            >
               <PortalStatCard
                 icon={<Inbox className="h-5 w-5" />}
                 label="إجمالي طلباتي"
@@ -454,10 +453,7 @@ function PortalDashboardPage() {
             />
             {orders.length === 0 ? (
               <div className="px-5 pb-5">
-                <PortalEmptyState
-                  icon={<Inbox className="h-6 w-6" />}
-                  title="لم تقم بأي طلب بعد"
-                />
+                <PortalEmptyState icon={<Inbox className="h-6 w-6" />} title="لم تقم بأي طلب بعد" />
               </div>
             ) : (
               <ul className="divide-y divide-[color:var(--portal-border)]">
@@ -574,5 +570,3 @@ function PortalDashboardPage() {
     </>
   );
 }
-
-

@@ -19,7 +19,6 @@ type Faq = {
   answer_ar: string;
 };
 
-
 export function ChatbotBubble() {
   const [open, setOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -57,16 +56,14 @@ export function ChatbotBubble() {
     if (!q) return faqs.slice(0, 6);
     return faqs
       .filter(
-        (f) =>
-          f.question_ar.toLowerCase().includes(q) || f.answer_ar.toLowerCase().includes(q),
+        (f) => f.question_ar.toLowerCase().includes(q) || f.answer_ar.toLowerCase().includes(q),
       )
       .slice(0, 8);
   }, [faqs, query]);
 
   const active = selected ? faqs?.find((f) => f.id === selected) : null;
 
-  const pagePath =
-    typeof window !== "undefined" ? window.location.pathname || "/" : "/";
+  const pagePath = typeof window !== "undefined" ? window.location.pathname || "/" : "/";
   const waMessage = query.trim()
     ? `مرحبًا ${SITE.nameAr} 👋\nلدي سؤال: ${query.trim()}\n(صفحة: ${pagePath})`
     : `مرحبًا ${SITE.nameAr} 👋\nأحتاج مساعدة.\n(صفحة: ${pagePath})`;
@@ -79,7 +76,6 @@ export function ChatbotBubble() {
       has_query: query.trim().length > 0,
     });
   };
-
 
   if (!hydrated) return null;
 
@@ -197,9 +193,7 @@ export function ChatbotBubble() {
             >
               أو اتصل مباشرة: {SITE.phoneDisplay}
             </a>
-
           </footer>
-
         </div>
       )}
     </>

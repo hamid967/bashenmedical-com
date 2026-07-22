@@ -48,7 +48,10 @@ export const SEVERITY_LABEL: Record<Severity, string> = {
 };
 
 // Tailwind classes for badges/backgrounds per severity.
-export const SEVERITY_STYLES: Record<Severity, { badge: string; ring: string; text: string; dot: string }> = {
+export const SEVERITY_STYLES: Record<
+  Severity,
+  { badge: string; ring: string; text: string; dot: string }
+> = {
   low: {
     badge: "bg-amber-500/15 text-amber-700 border-amber-500/30",
     ring: "border-amber-500/40 bg-amber-500/5",
@@ -71,7 +74,10 @@ export const SEVERITY_STYLES: Record<Severity, { badge: string; ring: string; te
 
 // Severity is derived from how far the count exceeds the threshold.
 // < 1.5x → منخفض, 1.5x–2.5x → متوسط, ≥ 2.5x → مرتفع
-export function computeSeverity(count: number, threshold: number): { severity: Severity; ratio: number } {
+export function computeSeverity(
+  count: number,
+  threshold: number,
+): { severity: Severity; ratio: number } {
   const ratio = threshold > 0 ? count / threshold : 1;
   const severity: Severity = ratio >= 2.5 ? "high" : ratio >= 1.5 ? "medium" : "low";
   return { severity, ratio };
@@ -88,7 +94,16 @@ type EvalStats = {
 
 function push(out: TriggeredAlert[], r: AlertRule, subjectName: string, count: number) {
   const { severity, ratio } = computeSeverity(count, r.threshold);
-  out.push({ ruleId: r.id, scope: r.scope, status: r.status, threshold: r.threshold, subjectName, count, severity, ratio });
+  out.push({
+    ruleId: r.id,
+    scope: r.scope,
+    status: r.status,
+    threshold: r.threshold,
+    subjectName,
+    count,
+    severity,
+    ratio,
+  });
 }
 
 export function evaluateRules(rules: AlertRule[], stats: EvalStats): TriggeredAlert[] {
@@ -96,21 +111,26 @@ export function evaluateRules(rules: AlertRule[], stats: EvalStats): TriggeredAl
   for (const r of rules) {
     if (!r.enabled) continue;
     if (r.scope === "any") {
-      const count = r.status === "any"
-        ? stats.total
-        : (stats.perTarget.find((p) => p.status === r.status)?.count ?? 0);
+      const count =
+        r.status === "any"
+          ? stats.total
+          : (stats.perTarget.find((p) => p.status === r.status)?.count ?? 0);
       if (count >= r.threshold) push(out, r, "الإجمالي", count);
     } else if (r.scope === "branch") {
       if (r.status === "any") {
-        for (const b of stats.byBranch) if (b.count >= r.threshold) push(out, r, b.branch_name, b.count);
+        for (const b of stats.byBranch)
+          if (b.count >= r.threshold) push(out, r, b.branch_name, b.count);
       } else {
-        for (const b of stats.byBranchStatus) if (b.status === r.status && b.count >= r.threshold) push(out, r, b.branch_name, b.count);
+        for (const b of stats.byBranchStatus)
+          if (b.status === r.status && b.count >= r.threshold) push(out, r, b.branch_name, b.count);
       }
     } else {
       if (r.status === "any") {
-        for (const a of stats.byActor) if (a.count >= r.threshold) push(out, r, a.actor_name, a.count);
+        for (const a of stats.byActor)
+          if (a.count >= r.threshold) push(out, r, a.actor_name, a.count);
       } else {
-        for (const a of stats.byActorStatus) if (a.status === r.status && a.count >= r.threshold) push(out, r, a.actor_name, a.count);
+        for (const a of stats.byActorStatus)
+          if (a.status === r.status && a.count >= r.threshold) push(out, r, a.actor_name, a.count);
       }
     }
   }
@@ -140,9 +160,28 @@ export type AlertTimelineEntry = {
 };
 
 type TimelineStats = {
-  daily: { day: string; total: number; active: number; inactive: number; archived: number; deceased: number }[];
-  dailyByBranchStatus: { day: string; branch_id: string; branch_name: string; status: string; count: number }[];
-  dailyByActorStatus: { day: string; actor_id: string; actor_name: string; status: string; count: number }[];
+  daily: {
+    day: string;
+    total: number;
+    active: number;
+    inactive: number;
+    archived: number;
+    deceased: number;
+  }[];
+  dailyByBranchStatus: {
+    day: string;
+    branch_id: string;
+    branch_name: string;
+    status: string;
+    count: number;
+  }[];
+  dailyByActorStatus: {
+    day: string;
+    actor_id: string;
+    actor_name: string;
+    status: string;
+    count: number;
+  }[];
 };
 
 const SEV_LEVEL: Record<Severity, number> = { low: 1, medium: 2, high: 3 };
@@ -171,15 +210,17 @@ export function buildAlertTimeline(rules: AlertRule[], stats: TimelineStats): Al
       if (n <= 0) return;
       subjects.set(id, name);
       let m = dayDeltas.get(day);
-      if (!m) { m = new Map(); dayDeltas.set(day, m); }
+      if (!m) {
+        m = new Map();
+        dayDeltas.set(day, m);
+      }
       m.set(id, (m.get(id) ?? 0) + n);
     };
 
     if (r.scope === "any") {
       for (const d of stats.daily) {
-        const n = r.status === "any"
-          ? d.total
-          : ((d as unknown as Record<string, number>)[r.status] ?? 0);
+        const n =
+          r.status === "any" ? d.total : ((d as unknown as Record<string, number>)[r.status] ?? 0);
         addDelta(d.day, "__all__", "الإجمالي", n);
       }
     } else if (r.scope === "branch") {
@@ -232,7 +273,9 @@ export function buildAlertTimeline(rules: AlertRule[], stats: TimelineStats): Al
   }
 
   // Newest first.
-  return out.sort((a, b) => (a.day < b.day ? 1 : a.day > b.day ? -1 : SEV_LEVEL[b.severity] - SEV_LEVEL[a.severity]));
+  return out.sort((a, b) =>
+    a.day < b.day ? 1 : a.day > b.day ? -1 : SEV_LEVEL[b.severity] - SEV_LEVEL[a.severity],
+  );
 }
 
 export const TIMELINE_KIND_LABEL: Record<TimelineEventKind, string> = {
@@ -240,4 +283,3 @@ export const TIMELINE_KIND_LABEL: Record<TimelineEventKind, string> = {
   escalation: "تصعيد",
   increment: "زيادة",
 };
-

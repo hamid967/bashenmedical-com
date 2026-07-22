@@ -96,12 +96,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "مجمع باعشن الطبي  Baeshen Medical" },
       {
         property: "og:description",
-        content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية.",
+        content:
+          "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "مجمع باعشن الطبي  Baeshen Medical" },
-      { name: "twitter:description", content: "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية." },
+      {
+        name: "twitter:description",
+        content:
+          "مجمع طبي معتمد من CBAHI في صبيا بمنطقة جازان. خدمات طبية عامة وتخصصية، صيدلية داخلية، حجز إلكتروني وتوصيل أدوية.",
+      },
       { name: "theme-color", content: "#0f766e" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
@@ -206,9 +211,7 @@ function RootComponent() {
   useEffect(() => {
     // Client-only web-vitals sampler (LCP/CLS/INP/FCP/TTFB).
     // Fails silently if the collector endpoint isn't live yet — safe to ship.
-    import("@/lib/observability/web-vitals")
-      .then((m) => m.startWebVitals())
-      .catch(() => void 0);
+    import("@/lib/observability/web-vitals").then((m) => m.startWebVitals()).catch(() => void 0);
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
@@ -234,4 +237,3 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
-

@@ -38,9 +38,7 @@ export const Route = createFileRoute("/second-opinion")({
         content: "https://bashenmedical.com/second-opinion",
       },
     ],
-    links: [
-      { rel: "canonical", href: "https://bashenmedical.com/second-opinion" },
-    ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/second-opinion" }],
   }),
   component: SecondOpinionPage,
 });
@@ -145,17 +143,15 @@ function SecondOpinionPage() {
       // still-pending second_opinion_requests row.
       const requestId = crypto.randomUUID();
 
-      const { error: insErr } = await supabase
-        .from("second_opinion_requests")
-        .insert({
-          id: requestId,
-          patient_name: parsed.data.patient_name,
-          phone: parsed.data.phone,
-          email: parsed.data.email || null,
-          specialty: parsed.data.specialty,
-          summary: parsed.data.summary,
-          upload_paths: [],
-        });
+      const { error: insErr } = await supabase.from("second_opinion_requests").insert({
+        id: requestId,
+        patient_name: parsed.data.patient_name,
+        phone: parsed.data.phone,
+        email: parsed.data.email || null,
+        specialty: parsed.data.specialty,
+        summary: parsed.data.summary,
+        upload_paths: [],
+      });
       if (insErr) {
         toast.error(insErr.message, { id: toastId });
         return;
@@ -274,17 +270,14 @@ function SecondOpinionPage() {
               متى تحتاجه؟
             </div>
             <ul className="mt-2 space-y-1.5 text-sm text-muted-foreground">
-              {[
-                "قبل جراحة كبرى",
-                "تشخيص غير قاطع",
-                "خطة علاجية طويلة",
-                "حالة أورام أو مزمنة",
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
-                  {item}
-                </li>
-              ))}
+              {["قبل جراحة كبرى", "تشخيص غير قاطع", "خطة علاجية طويلة", "حالة أورام أو مزمنة"].map(
+                (item) => (
+                  <li key={item} className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-primary/60" />
+                    {item}
+                  </li>
+                ),
+              )}
             </ul>
           </div>
         </aside>
@@ -296,7 +289,10 @@ function SecondOpinionPage() {
           className="rounded-2xl border border-border bg-card p-6 shadow-sm sm:p-7"
           aria-label="نموذج طلب رأي طبي ثانٍ"
         >
-          <fieldset disabled={submitting} className="m-0 space-y-5 border-0 p-0 disabled:opacity-70">
+          <fieldset
+            disabled={submitting}
+            className="m-0 space-y-5 border-0 p-0 disabled:opacity-70"
+          >
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField label="الاسم الكامل" error={errors.patient_name} id="so-name">
                 <input
@@ -359,8 +355,8 @@ function SecondOpinionPage() {
                     summaryLen > SUMMARY_MAX
                       ? "text-destructive"
                       : summaryLen >= 30
-                      ? "text-muted-foreground"
-                      : "text-muted-foreground/70"
+                        ? "text-muted-foreground"
+                        : "text-muted-foreground/70"
                   }`}
                 >
                   {summaryLen}/{SUMMARY_MAX}
@@ -380,8 +376,7 @@ function SecondOpinionPage() {
             <div>
               <div className="mb-1.5 flex items-center justify-between">
                 <label htmlFor="so-files" className="text-xs font-semibold">
-                  تقارير سابقة{" "}
-                  <span className="font-normal text-muted-foreground">(اختياري)</span>
+                  تقارير سابقة <span className="font-normal text-muted-foreground">(اختياري)</span>
                 </label>
                 <span className="text-[11px] text-muted-foreground">
                   {files.length}/{MAX_FILES} · {MAX_FILE_MB}MB لكل ملف

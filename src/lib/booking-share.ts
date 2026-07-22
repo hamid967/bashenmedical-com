@@ -157,7 +157,6 @@ export function googleCalendarUrl(b: ShareBooking, minutes = 30): string {
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
 
-
 /**
  * Build a wa.me deep-link that opens WhatsApp with a bilingual (AR + EN)
  * booking-confirmation message pre-filled.

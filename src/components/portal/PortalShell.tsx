@@ -39,7 +39,12 @@ const NAV_GROUPS: NavGroup[] = [
     label_en: "Home",
     items: [
       { to: "/portal", icon: LayoutDashboard, label_ar: "الرئيسية", label_en: "Dashboard" },
-      { to: "/portal/dashboard", icon: LayoutDashboard, label_ar: "لوحة التحكم", label_en: "Overview" },
+      {
+        to: "/portal/dashboard",
+        icon: LayoutDashboard,
+        label_ar: "لوحة التحكم",
+        label_en: "Overview",
+      },
     ],
   },
   {
@@ -47,9 +52,24 @@ const NAV_GROUPS: NavGroup[] = [
     label_ar: "الحجوزات",
     label_en: "Appointments",
     items: [
-      { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "My Appointments" },
-      { to: "/portal/book", icon: CalendarPlus, label_ar: "حجز موعد", label_en: "Book Appointment" },
-      { to: "/portal/schedule", icon: CalendarClock, label_ar: "جدولي وتقويمي", label_en: "Schedule & Calendar" },
+      {
+        to: "/portal/appointments",
+        icon: CalendarClock,
+        label_ar: "مواعيدي",
+        label_en: "My Appointments",
+      },
+      {
+        to: "/portal/book",
+        icon: CalendarPlus,
+        label_ar: "حجز موعد",
+        label_en: "Book Appointment",
+      },
+      {
+        to: "/portal/schedule",
+        icon: CalendarClock,
+        label_ar: "جدولي وتقويمي",
+        label_en: "Schedule & Calendar",
+      },
       { to: "/portal/family", icon: Users, label_ar: "أفراد العائلة", label_en: "Family" },
     ],
   },
@@ -62,7 +82,12 @@ const NAV_GROUPS: NavGroup[] = [
       { to: "/portal/prescriptions", icon: Pill, label_ar: "الوصفات", label_en: "Prescriptions" },
       { to: "/portal/laboratory", icon: FlaskConical, label_ar: "المختبر", label_en: "Laboratory" },
       { to: "/portal/radiology", icon: ScanLine, label_ar: "الأشعة", label_en: "Radiology" },
-      { to: "/portal/consents", icon: ShieldCheck, label_ar: "الموافقات والخصوصية", label_en: "Consents" },
+      {
+        to: "/portal/consents",
+        icon: ShieldCheck,
+        label_ar: "الموافقات والخصوصية",
+        label_en: "Consents",
+      },
     ],
   },
   {
@@ -84,8 +109,18 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/portal/doctors", icon: Users, label_ar: "أطبائي", label_en: "My Doctors" },
       { to: "/portal/notifications", icon: Bell, label_ar: "الإشعارات", label_en: "Notifications" },
-      { to: "/portal/inquiries", icon: MessageSquareWarning, label_ar: "استفساراتي", label_en: "Inquiries" },
-      { to: "/portal/complaints", icon: MessageSquareWarning, label_ar: "الشكاوى", label_en: "Complaints" },
+      {
+        to: "/portal/inquiries",
+        icon: MessageSquareWarning,
+        label_ar: "استفساراتي",
+        label_en: "Inquiries",
+      },
+      {
+        to: "/portal/complaints",
+        icon: MessageSquareWarning,
+        label_ar: "الشكاوى",
+        label_en: "Complaints",
+      },
     ],
   },
   {
@@ -94,10 +129,25 @@ const NAV_GROUPS: NavGroup[] = [
     label_en: "Account",
     items: [
       { to: "/portal/profile", icon: User, label_ar: "الملف الشخصي", label_en: "Profile" },
-      { to: "/portal/assistant", icon: Sparkles, label_ar: "المساعد الذكي", label_en: "AI Assistant" },
-      { to: "/portal/sessions", icon: ShieldCheck, label_ar: "الجلسات النشطة", label_en: "Sessions" },
+      {
+        to: "/portal/assistant",
+        icon: Sparkles,
+        label_ar: "المساعد الذكي",
+        label_en: "AI Assistant",
+      },
+      {
+        to: "/portal/sessions",
+        icon: ShieldCheck,
+        label_ar: "الجلسات النشطة",
+        label_en: "Sessions",
+      },
       { to: "/portal/audit-log", icon: ScrollText, label_ar: "سجل التدقيق", label_en: "Audit Log" },
-      { to: "/portal/reminder-preferences", icon: Bell, label_ar: "تفضيلات الإشعار", label_en: "Reminder Prefs" },
+      {
+        to: "/portal/reminder-preferences",
+        icon: Bell,
+        label_ar: "تفضيلات الإشعار",
+        label_en: "Reminder Prefs",
+      },
       { to: "/portal/settings", icon: Settings, label_ar: "الإعدادات", label_en: "Settings" },
     ],
   },
@@ -110,7 +160,6 @@ const BOTTOM_NAV: NavItem[] = [
   { to: "/portal/records", icon: FileText, label_ar: "سجلي", label_en: "Records" },
   { to: "/portal/profile", icon: User, label_ar: "حسابي", label_en: "Me" },
 ];
-
 
 export function PortalShell({
   children,
@@ -145,21 +194,34 @@ export function PortalShell({
       <div className="min-h-dvh grid lg:grid-cols-[280px_1fr]">
         {/* Sidebar (desktop) */}
         <aside className="hidden lg:flex flex-col border-e border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)]/80 backdrop-blur-xl sticky top-0 h-dvh relative overflow-hidden">
-          <JazanPattern variant="subtle" orientation="vertical" className="absolute inset-y-0 end-0 w-6 opacity-40 pointer-events-none" />
-          <SidebarBrand isAr={isAr} />
-          <SidebarNav
-            isAr={isAr}
-            pathname={pathname}
-            onNavigate={() => setMobileOpen(false)}
+          <JazanPattern
+            variant="subtle"
+            orientation="vertical"
+            className="absolute inset-y-0 end-0 w-6 opacity-40 pointer-events-none"
           />
-          <SidebarFooter isAr={isAr} onSignOut={handleSignOut} userName={userName} avatarUrl={avatarUrl} />
+          <SidebarBrand isAr={isAr} />
+          <SidebarNav isAr={isAr} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+          <SidebarFooter
+            isAr={isAr}
+            onSignOut={handleSignOut}
+            userName={userName}
+            avatarUrl={avatarUrl}
+          />
         </aside>
 
         {/* Main column */}
         <div className="flex flex-col min-w-0">
           {/* Topbar */}
           <header className="sticky top-0 z-20 h-16 flex items-center gap-3 px-4 md:px-6 border-b border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)]/70 backdrop-blur-xl relative">
-            <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 40%, var(--jazan-terracotta,#B85C3C) 60%, transparent)", opacity: 0.35 }} />
+            <span
+              aria-hidden="true"
+              className="absolute inset-x-0 bottom-0 h-px"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B) 40%, var(--jazan-terracotta,#B85C3C) 60%, transparent)",
+                opacity: 0.35,
+              }}
+            />
             <button
               onClick={() => setMobileOpen(true)}
               className="lg:hidden inline-grid place-items-center h-10 w-10 rounded-full hover:bg-[color:var(--portal-gradient-soft)]"
@@ -172,7 +234,9 @@ export function PortalShell({
               <Search className="h-4 w-4 text-[color:var(--portal-ink-3)]" />
               <input
                 dir={dir}
-                placeholder={isAr ? "ابحث عن طبيب، خدمة، تقرير..." : "Search doctors, services, reports..."}
+                placeholder={
+                  isAr ? "ابحث عن طبيب، خدمة، تقرير..." : "Search doctors, services, reports..."
+                }
                 className="bg-transparent outline-none text-sm flex-1 placeholder:text-[color:var(--portal-ink-3)]"
               />
               <kbd className="hidden lg:inline text-[10px] text-[color:var(--portal-ink-3)] border border-[color:var(--portal-border)] rounded px-1.5 py-0.5">
@@ -223,8 +287,7 @@ export function PortalShell({
         <ul className="grid grid-cols-5">
           {BOTTOM_NAV.map((item) => {
             const active =
-              pathname === item.to ||
-              (item.to !== "/portal" && pathname.startsWith(item.to));
+              pathname === item.to || (item.to !== "/portal" && pathname.startsWith(item.to));
             const Icon = item.icon;
             return (
               <li key={item.to}>
@@ -245,7 +308,9 @@ export function PortalShell({
                   >
                     <Icon className="h-[18px] w-[18px]" />
                   </span>
-                  <span className="truncate max-w-[64px]">{isAr ? item.label_ar : item.label_en}</span>
+                  <span className="truncate max-w-[64px]">
+                    {isAr ? item.label_ar : item.label_en}
+                  </span>
                 </Link>
               </li>
             );
@@ -267,12 +332,13 @@ export function PortalShell({
               ltr:left-0 rtl:right-0"
           >
             <SidebarBrand isAr={isAr} onClose={() => setMobileOpen(false)} />
-            <SidebarNav
+            <SidebarNav isAr={isAr} pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+            <SidebarFooter
               isAr={isAr}
-              pathname={pathname}
-              onNavigate={() => setMobileOpen(false)}
+              onSignOut={handleSignOut}
+              userName={userName}
+              avatarUrl={avatarUrl}
             />
-            <SidebarFooter isAr={isAr} onSignOut={handleSignOut} userName={userName} avatarUrl={avatarUrl} />
           </aside>
         </div>
       )}
@@ -370,7 +436,6 @@ function SidebarNav({
     </nav>
   );
 }
-
 
 function SidebarFooter({
   isAr,

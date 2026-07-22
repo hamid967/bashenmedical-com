@@ -2,7 +2,15 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Bell, History, Settings, ChevronDown, ChevronUp, Download } from "lucide-react";
+import {
+  AlertTriangle,
+  Bell,
+  History,
+  Settings,
+  ChevronDown,
+  ChevronUp,
+  Download,
+} from "lucide-react";
 import type { TransitionsStats } from "@/lib/patients-analytics.functions";
 import {
   evaluateRules,
@@ -14,7 +22,6 @@ import {
   TIMELINE_KIND_LABEL,
 } from "@/lib/transition-alerts";
 import { listAlertRules } from "@/lib/transition-alerts.functions";
-
 
 export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
   const listFn = useServerFn(listAlertRules);
@@ -43,13 +50,18 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
           تنبيهات العتبات
           {triggered.length > 0 && (
             <>
-              {(["high", "medium", "low"] as const).map((sev) => counts[sev] > 0 && (
-                <span key={sev}
-                  className={`inline-flex items-center gap-1 rounded-full text-[11px] px-2 py-0.5 font-semibold border ${SEVERITY_STYLES[sev].badge}`}>
-                  <span className={`h-1.5 w-1.5 rounded-full ${SEVERITY_STYLES[sev].dot}`} />
-                  {SEVERITY_LABEL[sev]}: {counts[sev]}
-                </span>
-              ))}
+              {(["high", "medium", "low"] as const).map(
+                (sev) =>
+                  counts[sev] > 0 && (
+                    <span
+                      key={sev}
+                      className={`inline-flex items-center gap-1 rounded-full text-[11px] px-2 py-0.5 font-semibold border ${SEVERITY_STYLES[sev].badge}`}
+                    >
+                      <span className={`h-1.5 w-1.5 rounded-full ${SEVERITY_STYLES[sev].dot}`} />
+                      {SEVERITY_LABEL[sev]}: {counts[sev]}
+                    </span>
+                  ),
+              )}
             </>
           )}
           <span className="text-xs text-muted-foreground font-normal">
@@ -68,7 +80,10 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
       {rules.length === 0 ? (
         <div className="text-sm text-muted-foreground py-3">
           لا توجد قواعد بعد. أنشئ قواعد التنبيه من صفحة{" "}
-          <Link to="/transition-alerts" className="text-primary underline">إدارة قواعد التنبيهات</Link>.
+          <Link to="/transition-alerts" className="text-primary underline">
+            إدارة قواعد التنبيهات
+          </Link>
+          .
         </div>
       ) : triggered.length === 0 ? (
         <div className="text-sm text-emerald-600 py-2">جميع القواعد ضمن الحدود.</div>
@@ -77,10 +92,15 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
           {triggered.map((t, i) => {
             const s = SEVERITY_STYLES[t.severity];
             return (
-              <div key={i} className={`flex items-center justify-between gap-2 rounded-lg border p-2.5 ${s.ring}`}>
+              <div
+                key={i}
+                className={`flex items-center justify-between gap-2 rounded-lg border p-2.5 ${s.ring}`}
+              >
                 <div className="flex items-center gap-2 min-w-0">
                   <AlertTriangle className={`h-4 w-4 shrink-0 ${s.text}`} />
-                  <span className={`inline-flex items-center gap-1 rounded-full text-[10px] px-1.5 py-0.5 font-semibold border ${s.badge}`}>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full text-[10px] px-1.5 py-0.5 font-semibold border ${s.badge}`}
+                  >
                     <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
                     {SEVERITY_LABEL[t.severity]}
                   </span>
@@ -91,7 +111,10 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
                 </div>
                 <span className={`font-mono font-semibold text-sm ${s.text}`}>
                   {t.count}
-                  <span className="text-xs text-muted-foreground"> / {t.threshold} (×{t.ratio.toFixed(1)})</span>
+                  <span className="text-xs text-muted-foreground">
+                    {" "}
+                    / {t.threshold} (×{t.ratio.toFixed(1)})
+                  </span>
                 </span>
               </div>
             );
@@ -115,7 +138,11 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
                   ({timeline.length} حدث خلال {stats.period.from} → {stats.period.to})
                 </span>
               </span>
-              {showTimeline ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              {showTimeline ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
             </button>
             <button
               type="button"
@@ -129,9 +156,8 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
             </button>
           </div>
 
-
-          {showTimeline && (
-            timeline.length === 0 ? (
+          {showTimeline &&
+            (timeline.length === 0 ? (
               <div className="text-sm text-muted-foreground py-3">
                 لا توجد أحداث تنبيه ضمن هذه الفترة.
               </div>
@@ -147,25 +173,37 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
                         : "bg-muted text-muted-foreground border-border";
                   return (
                     <li key={i} className={`relative rounded-lg border p-2.5 ${s.ring}`}>
-                      <span className={`absolute -right-[22px] top-3 h-3 w-3 rounded-full ring-2 ring-background ${s.dot}`} />
+                      <span
+                        className={`absolute -right-[22px] top-3 h-3 w-3 rounded-full ring-2 ring-background ${s.dot}`}
+                      />
                       <div className="flex items-center justify-between gap-2 flex-wrap">
                         <div className="flex items-center gap-2 min-w-0 flex-wrap">
                           <span className="text-xs font-mono text-muted-foreground">{e.day}</span>
-                          <span className={`inline-flex items-center gap-1 rounded-full text-[10px] px-1.5 py-0.5 font-semibold border ${kindClass}`}>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full text-[10px] px-1.5 py-0.5 font-semibold border ${kindClass}`}
+                          >
                             {TIMELINE_KIND_LABEL[e.kind]}
                           </span>
-                          <span className={`inline-flex items-center gap-1 rounded-full text-[10px] px-1.5 py-0.5 font-semibold border ${s.badge}`}>
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full text-[10px] px-1.5 py-0.5 font-semibold border ${s.badge}`}
+                          >
                             <span className={`h-1.5 w-1.5 rounded-full ${s.dot}`} />
                             {SEVERITY_LABEL[e.severity]}
                           </span>
                           <span className="text-sm truncate">
                             <span className="font-medium">{e.subjectName}</span>
-                            <span className="text-muted-foreground"> — {SCOPE_LABEL[e.scope]} · {STATUS_LABEL[e.status]}</span>
+                            <span className="text-muted-foreground">
+                              {" "}
+                              — {SCOPE_LABEL[e.scope]} · {STATUS_LABEL[e.status]}
+                            </span>
                           </span>
                         </div>
                         <span className={`font-mono text-xs ${s.text}`}>
                           +{e.delta}
-                          <span className="text-muted-foreground"> · تراكمي {e.cumulative}/{e.threshold} (×{e.ratio.toFixed(1)})</span>
+                          <span className="text-muted-foreground">
+                            {" "}
+                            · تراكمي {e.cumulative}/{e.threshold} (×{e.ratio.toFixed(1)})
+                          </span>
                         </span>
                       </div>
                       {e.ruleLabel && (
@@ -177,8 +215,7 @@ export function TransitionAlerts({ stats }: { stats: TransitionsStats }) {
                   );
                 })}
               </ol>
-            )
-          )}
+            ))}
         </div>
       )}
     </section>
@@ -207,19 +244,23 @@ function exportTimelineCsv(
     const s = String(v ?? "");
     return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
   };
-  const rows = timeline.map((e) => [
-    e.day,
-    TIMELINE_KIND_LABEL[e.kind],
-    SEVERITY_LABEL[e.severity],
-    SCOPE_LABEL[e.scope],
-    STATUS_LABEL[e.status],
-    e.subjectName,
-    e.delta,
-    e.cumulative,
-    e.threshold,
-    e.ratio.toFixed(2),
-    e.ruleLabel ?? "",
-  ].map(escape).join(","));
+  const rows = timeline.map((e) =>
+    [
+      e.day,
+      TIMELINE_KIND_LABEL[e.kind],
+      SEVERITY_LABEL[e.severity],
+      SCOPE_LABEL[e.scope],
+      STATUS_LABEL[e.status],
+      e.subjectName,
+      e.delta,
+      e.cumulative,
+      e.threshold,
+      e.ratio.toFixed(2),
+      e.ruleLabel ?? "",
+    ]
+      .map(escape)
+      .join(","),
+  );
   const csv = "\uFEFF" + [headers.map(escape).join(","), ...rows].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
@@ -231,5 +272,3 @@ function exportTimelineCsv(
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-
-

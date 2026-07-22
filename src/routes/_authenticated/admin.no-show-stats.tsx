@@ -5,7 +5,20 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Download, Filter, TrendingDown, XCircle, CheckCircle2, Calendar, ArrowUp, ArrowDown, ArrowUpDown, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Download,
+  Filter,
+  TrendingDown,
+  XCircle,
+  CheckCircle2,
+  Calendar,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import {
   getNoShowStats,
   listDoctorsLite,
@@ -53,10 +66,7 @@ const branchesQuery = queryOptions({
 
 export const Route = createFileRoute("/_authenticated/admin/no-show-stats")({
   head: () => ({
-    meta: [
-      { title: "إحصاءات عدم الحضور | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "إحصاءات عدم الحضور | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(statsQuery(defaultFrom, defaultTo, "", "")),
@@ -99,14 +109,25 @@ async function downloadXlsx(
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName.slice(0, 31) || "Sheet1");
   const buf = XLSX.write(wb, { bookType: "xlsx", type: "array" }) as ArrayBuffer;
-  triggerDownload(filename, new Blob([buf], {
-    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-  }));
+  triggerDownload(
+    filename,
+    new Blob([buf], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }),
+  );
 }
 
 function KpiCard({
-  label, value, tone = "neutral", icon: Icon,
-}: { label: string; value: string; tone?: "neutral" | "ok" | "bad" | "warn"; icon: React.ComponentType<{ className?: string }> }) {
+  label,
+  value,
+  tone = "neutral",
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "ok" | "bad" | "warn";
+  icon: React.ComponentType<{ className?: string }>;
+}) {
   const tones: Record<string, string> = {
     neutral: "border-border bg-card text-foreground",
     ok: "border-green-500/30 bg-green-500/5 text-green-800",
@@ -129,9 +150,16 @@ function NoShowStatsPage() {
   const [to, setTo] = useState(defaultTo);
   const [doctorId, setDoctorId] = useState("");
   const [branchId, setBranchId] = useState("");
-  const [applied, setApplied] = useState({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "" });
+  const [applied, setApplied] = useState({
+    from: defaultFrom,
+    to: defaultTo,
+    doctorId: "",
+    branchId: "",
+  });
 
-  const { data } = useSuspenseQuery(statsQuery(applied.from, applied.to, applied.doctorId, applied.branchId));
+  const { data } = useSuspenseQuery(
+    statsQuery(applied.from, applied.to, applied.doctorId, applied.branchId),
+  );
   const { data: doctors = [] } = useQuery(doctorsQuery);
   const { data: branches = [] } = useQuery(branchesQuery);
 
@@ -147,7 +175,10 @@ function NoShowStatsPage() {
   }
 
   function reset() {
-    setFrom(defaultFrom); setTo(defaultTo); setDoctorId(""); setBranchId("");
+    setFrom(defaultFrom);
+    setTo(defaultTo);
+    setDoctorId("");
+    setBranchId("");
     setApplied({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "" });
   }
 
@@ -173,7 +204,8 @@ function NoShowStatsPage() {
       start.setDate(start.getDate() + 1);
     }
     const startStr = start.toISOString().slice(0, 10);
-    setFrom(startStr); setTo(end);
+    setFrom(startStr);
+    setTo(end);
     setApplied({ from: startStr, to: end, doctorId, branchId });
   }
 
@@ -184,17 +216,33 @@ function NoShowStatsPage() {
       const s = new Date();
       if (r.key === "ytd") s.setMonth(0, 1);
       else if (r.days) s.setDate(s.getDate() - (r.days - 1));
-      else if (r.months) { s.setMonth(s.getMonth() - r.months); s.setDate(s.getDate() + 1); }
+      else if (r.months) {
+        s.setMonth(s.getMonth() - r.months);
+        s.setDate(s.getDate() + 1);
+      }
       if (s.toISOString().slice(0, 10) === applied.from) return r.key;
     }
     return null;
   }, [applied.from, applied.to]);
 
   function doctorsData(): (string | number | null)[][] {
-    const header = ["الطبيب", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "مؤكد", "متوسط المخاطرة", "نسبة عدم الحضور %"];
+    const header = [
+      "الطبيب",
+      "الإجمالي",
+      "مكتمل",
+      "لم يحضر",
+      "ملغى",
+      "مؤكد",
+      "متوسط المخاطرة",
+      "نسبة عدم الحضور %",
+    ];
     const rows = stats.byDoctor.map((r) => [
       r.doctor_name_ar ?? "بدون تخصيص",
-      r.total, r.completed, r.no_show, r.cancelled, r.confirmed,
+      r.total,
+      r.completed,
+      r.no_show,
+      r.cancelled,
+      r.confirmed,
       r.avg_risk ?? "",
       r.no_show_rate,
     ]);
@@ -203,7 +251,12 @@ function NoShowStatsPage() {
   function daysData(): (string | number | null)[][] {
     const header = ["التاريخ", "الإجمالي", "مكتمل", "لم يحضر", "ملغى", "نسبة عدم الحضور %"];
     const rows = stats.byDay.map((r) => [
-      r.appointment_date, r.total, r.completed, r.no_show, r.cancelled, r.no_show_rate,
+      r.appointment_date,
+      r.total,
+      r.completed,
+      r.no_show,
+      r.cancelled,
+      r.no_show_rate,
     ]);
     return [header, ...rows];
   }
@@ -215,11 +268,13 @@ function NoShowStatsPage() {
 
   const stamp = `${applied.from}_${applied.to}`;
   const exportDoctorsCsv = () => downloadCsv(`no-show_by-doctor_${stamp}.csv`, doctorsData());
-  const exportDoctorsXlsx = () => downloadXlsx(`no-show_by-doctor_${stamp}.xlsx`, "الأطباء", doctorsData());
+  const exportDoctorsXlsx = () =>
+    downloadXlsx(`no-show_by-doctor_${stamp}.xlsx`, "الأطباء", doctorsData());
   const exportDaysCsv = () => downloadCsv(`no-show_by-day_${stamp}.csv`, daysData());
   const exportDaysXlsx = () => downloadXlsx(`no-show_by-day_${stamp}.xlsx`, "الأيام", daysData());
   const exportReasonsCsv = () => downloadCsv(`cancel-reasons_${stamp}.csv`, reasonsData());
-  const exportReasonsXlsx = () => downloadXlsx(`cancel-reasons_${stamp}.xlsx`, "الأسباب", reasonsData());
+  const exportReasonsXlsx = () =>
+    downloadXlsx(`cancel-reasons_${stamp}.xlsx`, "الأسباب", reasonsData());
 
   return (
     <div className="p-6 space-y-6">
@@ -227,7 +282,8 @@ function NoShowStatsPage() {
         <div>
           <h1 className="text-2xl font-bold">إحصاءات عدم الحضور</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            توزيع الحالات وأسباب الإلغاء ومعدل عدم الحضور حسب الطبيب واليوم — قابل للتصدير CSV و XLSX.
+            توزيع الحالات وأسباب الإلغاء ومعدل عدم الحضور حسب الطبيب واليوم — قابل للتصدير CSV و
+            XLSX.
           </p>
         </div>
       </header>
@@ -240,37 +296,63 @@ function NoShowStatsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">من</span>
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm" />
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            />
           </label>
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">إلى</span>
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm" />
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            />
           </label>
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">الطبيب</span>
-            <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm">
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            >
               <option value="">كل الأطباء</option>
-              {doctors.map((d) => <option key={d.id} value={d.id}>{d.name_ar}</option>)}
+              {doctors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name_ar}
+                </option>
+              ))}
             </select>
           </label>
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">الفرع</span>
-            <select value={branchId} onChange={(e) => setBranchId(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm">
+            <select
+              value={branchId}
+              onChange={(e) => setBranchId(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            >
               <option value="">كل الفروع</option>
-              {branches.map((b) => <option key={b.id} value={b.id}>{b.name_ar}</option>)}
+              {branches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name_ar}
+                </option>
+              ))}
             </select>
           </label>
           <div className="flex items-end gap-2">
-            <button onClick={apply}
-              className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90">
+            <button
+              onClick={apply}
+              className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
               تطبيق
             </button>
-            <button onClick={reset}
-              className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted">
+            <button
+              onClick={reset}
+              className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+            >
               مسح
             </button>
           </div>
@@ -280,10 +362,15 @@ function NoShowStatsPage() {
           {QUICK_RANGES.map((r) => {
             const active = activeQuickKey === r.key;
             return (
-              <button key={r.key} onClick={() => applyQuickRange(r)}
-                className={`rounded-full border px-3 py-1 text-xs ${active
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border hover:bg-muted"}`}>
+              <button
+                key={r.key}
+                onClick={() => applyQuickRange(r)}
+                className={`rounded-full border px-3 py-1 text-xs ${
+                  active
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border hover:bg-muted"
+                }`}
+              >
                 {r.label}
               </button>
             );
@@ -297,11 +384,27 @@ function NoShowStatsPage() {
       {/* KPIs */}
       <section className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         <KpiCard label="إجمالي المواعيد" value={String(stats.totals.total)} icon={Calendar} />
-        <KpiCard label="مكتمل" value={String(stats.totals.completed)} tone="ok" icon={CheckCircle2} />
+        <KpiCard
+          label="مكتمل"
+          value={String(stats.totals.completed)}
+          tone="ok"
+          icon={CheckCircle2}
+        />
         <KpiCard label="لم يحضر" value={String(stats.totals.no_show)} tone="bad" icon={XCircle} />
         <KpiCard label="ملغى" value={String(stats.totals.cancelled)} tone="warn" icon={XCircle} />
-        <KpiCard label="نسبة عدم الحضور" value={`${stats.totals.no_show_rate}%`} tone={stats.totals.no_show_rate >= 15 ? "bad" : stats.totals.no_show_rate >= 8 ? "warn" : "ok"} icon={TrendingDown} />
-        <KpiCard label="متوسط درجة المخاطرة" value={stats.totals.avg_risk == null ? "—" : `${stats.totals.avg_risk}/100`} icon={TrendingDown} />
+        <KpiCard
+          label="نسبة عدم الحضور"
+          value={`${stats.totals.no_show_rate}%`}
+          tone={
+            stats.totals.no_show_rate >= 15 ? "bad" : stats.totals.no_show_rate >= 8 ? "warn" : "ok"
+          }
+          icon={TrendingDown}
+        />
+        <KpiCard
+          label="متوسط درجة المخاطرة"
+          value={stats.totals.avg_risk == null ? "—" : `${stats.totals.avg_risk}/100`}
+          icon={TrendingDown}
+        />
       </section>
 
       {/* By doctor */}
@@ -315,29 +418,67 @@ function NoShowStatsPage() {
         onExportXlsx={exportDoctorsXlsx}
         defaultSort={{ key: "no_show_rate", dir: "desc" }}
         columns={[
-          { key: "doctor_name_ar", label: "الطبيب", align: "start",
+          {
+            key: "doctor_name_ar",
+            label: "الطبيب",
+            align: "start",
             accessor: (r) => r.doctor_name_ar ?? "بدون تخصيص",
-            cell: (r) => <span className="font-medium">{r.doctor_name_ar ?? "بدون تخصيص"}</span> },
-          { key: "total", label: "الإجمالي", align: "center", accessor: (r) => r.total,
-            cell: (r) => <span className="tabular-nums">{r.total}</span> },
-          { key: "completed", label: "مكتمل", align: "center", accessor: (r) => r.completed,
-            cell: (r) => <span className="tabular-nums text-green-700">{r.completed}</span> },
-          { key: "no_show", label: "لم يحضر", align: "center", accessor: (r) => r.no_show,
-            cell: (r) => <span className="tabular-nums text-red-700">{r.no_show}</span> },
-          { key: "cancelled", label: "ملغى", align: "center", accessor: (r) => r.cancelled,
-            cell: (r) => <span className="tabular-nums text-amber-700">{r.cancelled}</span> },
-          { key: "avg_risk", label: "متوسط المخاطرة", align: "center",
+            cell: (r) => <span className="font-medium">{r.doctor_name_ar ?? "بدون تخصيص"}</span>,
+          },
+          {
+            key: "total",
+            label: "الإجمالي",
+            align: "center",
+            accessor: (r) => r.total,
+            cell: (r) => <span className="tabular-nums">{r.total}</span>,
+          },
+          {
+            key: "completed",
+            label: "مكتمل",
+            align: "center",
+            accessor: (r) => r.completed,
+            cell: (r) => <span className="tabular-nums text-green-700">{r.completed}</span>,
+          },
+          {
+            key: "no_show",
+            label: "لم يحضر",
+            align: "center",
+            accessor: (r) => r.no_show,
+            cell: (r) => <span className="tabular-nums text-red-700">{r.no_show}</span>,
+          },
+          {
+            key: "cancelled",
+            label: "ملغى",
+            align: "center",
+            accessor: (r) => r.cancelled,
+            cell: (r) => <span className="tabular-nums text-amber-700">{r.cancelled}</span>,
+          },
+          {
+            key: "avg_risk",
+            label: "متوسط المخاطرة",
+            align: "center",
             accessor: (r) => r.avg_risk ?? -1,
-            cell: (r) => <span className="tabular-nums">{r.avg_risk ?? "—"}</span> },
-          { key: "no_show_rate", label: "نسبة عدم الحضور", align: "center",
+            cell: (r) => <span className="tabular-nums">{r.avg_risk ?? "—"}</span>,
+          },
+          {
+            key: "no_show_rate",
+            label: "نسبة عدم الحضور",
+            align: "center",
             accessor: (r) => r.no_show_rate,
             cell: (r) => (
-              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                r.no_show_rate >= 15 ? "bg-red-500/10 text-red-700" :
-                r.no_show_rate >= 8 ? "bg-amber-500/10 text-amber-800" :
-                "bg-green-500/10 text-green-700"
-              }`}>{r.no_show_rate}%</span>
-            ) },
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  r.no_show_rate >= 15
+                    ? "bg-red-500/10 text-red-700"
+                    : r.no_show_rate >= 8
+                      ? "bg-amber-500/10 text-amber-800"
+                      : "bg-green-500/10 text-green-700"
+                }`}
+              >
+                {r.no_show_rate}%
+              </span>
+            ),
+          },
         ]}
       />
 
@@ -352,26 +493,60 @@ function NoShowStatsPage() {
         onExportXlsx={exportDaysXlsx}
         defaultSort={{ key: "appointment_date", dir: "asc" }}
         columns={[
-          { key: "appointment_date", label: "التاريخ", align: "start",
+          {
+            key: "appointment_date",
+            label: "التاريخ",
+            align: "start",
             accessor: (r) => r.appointment_date,
-            cell: (r) => <span className="font-mono text-xs">{r.appointment_date}</span> },
-          { key: "total", label: "الإجمالي", align: "center", accessor: (r) => r.total,
-            cell: (r) => <span className="tabular-nums">{r.total}</span> },
-          { key: "completed", label: "مكتمل", align: "center", accessor: (r) => r.completed,
-            cell: (r) => <span className="tabular-nums text-green-700">{r.completed}</span> },
-          { key: "no_show", label: "لم يحضر", align: "center", accessor: (r) => r.no_show,
-            cell: (r) => <span className="tabular-nums text-red-700">{r.no_show}</span> },
-          { key: "cancelled", label: "ملغى", align: "center", accessor: (r) => r.cancelled,
-            cell: (r) => <span className="tabular-nums text-amber-700">{r.cancelled}</span> },
-          { key: "no_show_rate", label: "نسبة عدم الحضور", align: "center",
+            cell: (r) => <span className="font-mono text-xs">{r.appointment_date}</span>,
+          },
+          {
+            key: "total",
+            label: "الإجمالي",
+            align: "center",
+            accessor: (r) => r.total,
+            cell: (r) => <span className="tabular-nums">{r.total}</span>,
+          },
+          {
+            key: "completed",
+            label: "مكتمل",
+            align: "center",
+            accessor: (r) => r.completed,
+            cell: (r) => <span className="tabular-nums text-green-700">{r.completed}</span>,
+          },
+          {
+            key: "no_show",
+            label: "لم يحضر",
+            align: "center",
+            accessor: (r) => r.no_show,
+            cell: (r) => <span className="tabular-nums text-red-700">{r.no_show}</span>,
+          },
+          {
+            key: "cancelled",
+            label: "ملغى",
+            align: "center",
+            accessor: (r) => r.cancelled,
+            cell: (r) => <span className="tabular-nums text-amber-700">{r.cancelled}</span>,
+          },
+          {
+            key: "no_show_rate",
+            label: "نسبة عدم الحضور",
+            align: "center",
             accessor: (r) => r.no_show_rate,
             cell: (r) => (
-              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                r.no_show_rate >= 15 ? "bg-red-500/10 text-red-700" :
-                r.no_show_rate >= 8 ? "bg-amber-500/10 text-amber-800" :
-                "bg-green-500/10 text-green-700"
-              }`}>{r.no_show_rate}%</span>
-            ) },
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  r.no_show_rate >= 15
+                    ? "bg-red-500/10 text-red-700"
+                    : r.no_show_rate >= 8
+                      ? "bg-amber-500/10 text-amber-800"
+                      : "bg-green-500/10 text-green-700"
+                }`}
+              >
+                {r.no_show_rate}%
+              </span>
+            ),
+          },
         ]}
       />
 
@@ -380,26 +555,36 @@ function NoShowStatsPage() {
         <div className="flex items-center justify-between p-4 border-b border-border">
           <h2 className="text-sm font-bold">توزيع أسباب الإلغاء</h2>
           <div className="flex items-center gap-2">
-            <button onClick={exportReasonsCsv} disabled={!stats.cancelReasons.length}
-              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+            <button
+              onClick={exportReasonsCsv}
+              disabled={!stats.cancelReasons.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
               <Download className="h-3.5 w-3.5" /> تصدير CSV
             </button>
-            <button onClick={exportReasonsXlsx} disabled={!stats.cancelReasons.length}
-              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+            <button
+              onClick={exportReasonsXlsx}
+              disabled={!stats.cancelReasons.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
               <Download className="h-3.5 w-3.5" /> تصدير XLSX
             </button>
           </div>
         </div>
         <div className="p-4 space-y-2">
           {stats.cancelReasons.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-4">لا توجد أسباب إلغاء مسجّلة في هذا النطاق.</p>
+            <p className="text-sm text-muted-foreground text-center py-4">
+              لا توجد أسباب إلغاء مسجّلة في هذا النطاق.
+            </p>
           )}
           {stats.cancelReasons.map((r) => {
             const max = stats.cancelReasons[0]?.count || 1;
             const pct = Math.round((r.count / max) * 100);
             return (
               <div key={r.reason} className="flex items-center gap-3">
-                <div className="w-64 shrink-0 text-sm truncate" title={r.reason}>{r.reason}</div>
+                <div className="w-64 shrink-0 text-sm truncate" title={r.reason}>
+                  {r.reason}
+                </div>
                 <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
                   <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
                 </div>
@@ -439,7 +624,15 @@ type SortableTableProps<T> = {
 const PAGE_SIZES = [10, 25, 50, 100];
 
 function SortableTable<T>({
-  title, rows, columns, rowKey, onExport, onExportXlsx, defaultSort, searchPlaceholder, searchFilter,
+  title,
+  rows,
+  columns,
+  rowKey,
+  onExport,
+  onExportXlsx,
+  defaultSort,
+  searchPlaceholder,
+  searchFilter,
 }: SortableTableProps<T>) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortState<T>>(defaultSort);
@@ -470,9 +663,9 @@ function SortableTable<T>({
   const pageRows = sorted.slice(start, start + pageSize);
 
   function toggleSort(key: keyof T & string) {
-    setSort((prev) => prev.key === key
-      ? { key, dir: prev.dir === "asc" ? "desc" : "asc" }
-      : { key, dir: "desc" });
+    setSort((prev) =>
+      prev.key === key ? { key, dir: prev.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" },
+    );
     setPage(1);
   }
 
@@ -485,24 +678,43 @@ function SortableTable<T>({
             <Search className="h-3.5 w-3.5 absolute start-2 top-1/2 -translate-y-1/2 text-muted-foreground" />
             <input
               value={query}
-              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setQuery(e.target.value);
+                setPage(1);
+              }}
               placeholder={searchPlaceholder}
               aria-label={searchPlaceholder}
               className="ps-7 pe-2 py-1.5 text-xs rounded-md border border-border bg-background w-56"
             />
           </div>
-          <select value={pageSize} onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
+          <select
+            value={pageSize}
+            onChange={(e) => {
+              setPageSize(Number(e.target.value));
+              setPage(1);
+            }}
             aria-label="عدد الصفوف لكل صفحة"
-            className="rounded-md border border-border bg-background px-2 py-1.5 text-xs">
-            {PAGE_SIZES.map((n) => <option key={n} value={n}>{n}/صفحة</option>)}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-xs"
+          >
+            {PAGE_SIZES.map((n) => (
+              <option key={n} value={n}>
+                {n}/صفحة
+              </option>
+            ))}
           </select>
-          <button onClick={onExport} disabled={!rows.length}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+          <button
+            onClick={onExport}
+            disabled={!rows.length}
+            className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+          >
             <Download className="h-3.5 w-3.5" /> تصدير CSV
           </button>
           {onExportXlsx && (
-            <button onClick={onExportXlsx} disabled={!rows.length}
-              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50">
+            <button
+              onClick={onExportXlsx}
+              disabled={!rows.length}
+              className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted disabled:opacity-50"
+            >
               <Download className="h-3.5 w-3.5" /> تصدير XLSX
             </button>
           )}
@@ -515,8 +727,18 @@ function SortableTable<T>({
               {columns.map((c) => {
                 const active = sort.key === c.key;
                 const Icon = !active ? ArrowUpDown : sort.dir === "asc" ? ArrowUp : ArrowDown;
-                const alignClass = c.align === "center" ? "text-center" : c.align === "end" ? "text-end" : "text-start";
-                const flexClass = c.align === "center" ? "justify-center" : c.align === "end" ? "justify-end" : "justify-start";
+                const alignClass =
+                  c.align === "center"
+                    ? "text-center"
+                    : c.align === "end"
+                      ? "text-end"
+                      : "text-start";
+                const flexClass =
+                  c.align === "center"
+                    ? "justify-center"
+                    : c.align === "end"
+                      ? "justify-end"
+                      : "justify-start";
                 return (
                   <th key={c.key} className={`${alignClass} p-3`}>
                     <button
@@ -535,40 +757,60 @@ function SortableTable<T>({
           </thead>
           <tbody>
             {pageRows.length === 0 ? (
-              <tr><td colSpan={columns.length} className="p-6 text-center text-sm text-muted-foreground">
-                {query ? "لا نتائج تطابق البحث." : "لا توجد بيانات في هذا النطاق."}
-              </td></tr>
-            ) : pageRows.map((r) => (
-              <tr key={rowKey(r)} className="border-t border-border/60">
-                {columns.map((c) => (
-                  <td key={c.key}
-                    className={`p-3 ${c.align === "center" ? "text-center" : c.align === "end" ? "text-end" : ""}`}>
-                    {c.cell(r)}
-                  </td>
-                ))}
+              <tr>
+                <td
+                  colSpan={columns.length}
+                  className="p-6 text-center text-sm text-muted-foreground"
+                >
+                  {query ? "لا نتائج تطابق البحث." : "لا توجد بيانات في هذا النطاق."}
+                </td>
               </tr>
-            ))}
+            ) : (
+              pageRows.map((r) => (
+                <tr key={rowKey(r)} className="border-t border-border/60">
+                  {columns.map((c) => (
+                    <td
+                      key={c.key}
+                      className={`p-3 ${c.align === "center" ? "text-center" : c.align === "end" ? "text-end" : ""}`}
+                    >
+                      {c.cell(r)}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
       <div className="flex items-center justify-between gap-2 p-3 border-t border-border text-xs text-muted-foreground flex-wrap">
         <span>
-          {sorted.length === 0 ? "٠" : `${start + 1}–${Math.min(start + pageSize, sorted.length)}`} من {sorted.length}
+          {sorted.length === 0 ? "٠" : `${start + 1}–${Math.min(start + pageSize, sorted.length)}`}{" "}
+          من {sorted.length}
           {query && rows.length !== sorted.length && ` (مفلتر من ${rows.length})`}
         </span>
         <div className="flex items-center gap-1">
-          <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={safePage <= 1}
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={safePage <= 1}
             className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 hover:bg-muted disabled:opacity-40"
-            aria-label="السابق">
-            <ChevronRight className="h-3.5 w-3.5 rtl:hidden" /><ChevronLeft className="h-3.5 w-3.5 hidden rtl:inline" />
+            aria-label="السابق"
+          >
+            <ChevronRight className="h-3.5 w-3.5 rtl:hidden" />
+            <ChevronLeft className="h-3.5 w-3.5 hidden rtl:inline" />
             <span>السابق</span>
           </button>
-          <span className="px-2 tabular-nums">{safePage} / {totalPages}</span>
-          <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={safePage >= totalPages}
+          <span className="px-2 tabular-nums">
+            {safePage} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={safePage >= totalPages}
             className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 hover:bg-muted disabled:opacity-40"
-            aria-label="التالي">
+            aria-label="التالي"
+          >
             <span>التالي</span>
-            <ChevronLeft className="h-3.5 w-3.5 rtl:hidden" /><ChevronRight className="h-3.5 w-3.5 hidden rtl:inline" />
+            <ChevronLeft className="h-3.5 w-3.5 rtl:hidden" />
+            <ChevronRight className="h-3.5 w-3.5 hidden rtl:inline" />
           </button>
         </div>
       </div>

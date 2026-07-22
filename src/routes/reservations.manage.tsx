@@ -46,8 +46,7 @@ export const Route = createFileRoute("/reservations/manage")({
       { title: "إدارة حجوزاتي | مجمع باعشن الطبي" },
       {
         name: "description",
-        content:
-          "أدر حجوزاتك (تعديل، إلغاء، إعادة جدولة) عبر رقم جوالك ورمز تحقق سريع.",
+        content: "أدر حجوزاتك (تعديل، إلغاء، إعادة جدولة) عبر رقم جوالك ورمز تحقق سريع.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -116,9 +115,7 @@ function ManagePage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeCancelId, setActiveCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
-  const [cancelPhase, setCancelPhase] = useState<
-    "reason" | "processing" | "done"
-  >("reason");
+  const [cancelPhase, setCancelPhase] = useState<"reason" | "processing" | "done">("reason");
   const [cancelResult, setCancelResult] = useState<{
     released: boolean;
     waitlist_notified: boolean;
@@ -174,16 +171,13 @@ function ManagePage() {
         const { data: sess } = await supabase.auth.getSession();
         const accessToken = sess?.session?.access_token;
         if (!accessToken) return;
-        const res = await fetch(
-          "/api/public/reservations/session-from-auth",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${accessToken}`,
-            },
+        const res = await fetch("/api/public/reservations/session-from-auth", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
           },
-        );
+        });
         const body = (await res.json().catch(() => null)) as {
           ok?: boolean;
           session_token?: string;
@@ -306,9 +300,7 @@ function ManagePage() {
       setCancelPhase("processing");
       // Optimistic UI: mark the appointment cancelled immediately.
       setAppointments((prev) =>
-        prev.map((a) =>
-          a.id === input.id ? { ...a, status: "cancelled" } : a,
-        ),
+        prev.map((a) => (a.id === input.id ? { ...a, status: "cancelled" } : a)),
       );
       return apiPost<{
         ok: boolean;
@@ -348,9 +340,7 @@ function ManagePage() {
         // Rollback optimistic change
         setAppointments((prev) =>
           prev.map((a) =>
-            a.id === input.id && a.status === "cancelled"
-              ? { ...a, status: "confirmed" }
-              : a,
+            a.id === input.id && a.status === "cancelled" ? { ...a, status: "confirmed" } : a,
           ),
         );
         setCancelPhase("reason");
@@ -361,9 +351,7 @@ function ManagePage() {
     onError: (_err, input) => {
       setAppointments((prev) =>
         prev.map((a) =>
-          a.id === input.id && a.status === "cancelled"
-            ? { ...a, status: "confirmed" }
-            : a,
+          a.id === input.id && a.status === "cancelled" ? { ...a, status: "confirmed" } : a,
         ),
       );
       setCancelPhase("reason");
@@ -389,9 +377,7 @@ function ManagePage() {
     onSuccess: (res, id) => {
       if (res.ok) {
         setAppointments((prev) =>
-          prev.map((a) =>
-            a.id === id ? { ...a, status: res.restored_status ?? "confirmed" } : a,
-          ),
+          prev.map((a) => (a.id === id ? { ...a, status: res.restored_status ?? "confirmed" } : a)),
         );
         setUndoResult({
           restored_status: res.restored_status ?? "confirmed",
@@ -444,15 +430,12 @@ function ManagePage() {
   const rescheduleAppt = useMutation({
     mutationFn: async (input: { id: string; date: string; time: string }) => {
       if (!sessionToken) throw new Error("no session");
-      return apiPost<{ ok: boolean; message?: string }>(
-        "/api/public/reservations/reschedule",
-        {
-          session_token: sessionToken,
-          appointment_id: input.id,
-          date: input.date,
-          time: input.time,
-        },
-      );
+      return apiPost<{ ok: boolean; message?: string }>("/api/public/reservations/reschedule", {
+        session_token: sessionToken,
+        appointment_id: input.id,
+        date: input.date,
+        time: input.time,
+      });
     },
     onSuccess: (res) => {
       if (res.ok) {
@@ -721,7 +704,11 @@ function ManagePage() {
 
                   <div className="grid gap-2 sm:grid-cols-2 border-t pt-4 text-sm">
                     {a.patient_name && (
-                      <Row icon={<User2 className="h-4 w-4" />} label="المريض" value={a.patient_name} />
+                      <Row
+                        icon={<User2 className="h-4 w-4" />}
+                        label="المريض"
+                        value={a.patient_name}
+                      />
                     )}
                     {a.doctor_name_ar && (
                       <Row
@@ -730,9 +717,7 @@ function ManagePage() {
                         value={a.doctor_name_ar}
                       />
                     )}
-                    {a.specialty_name_ar && (
-                      <Row label="التخصص" value={a.specialty_name_ar} />
-                    )}
+                    {a.specialty_name_ar && <Row label="التخصص" value={a.specialty_name_ar} />}
                     {a.branch_name_ar && (
                       <Row
                         icon={<Building2 className="h-4 w-4" />}
@@ -805,9 +790,7 @@ function ManagePage() {
                               >
                                 {s.label}
                               </span>
-                              {i < arr.length - 1 && (
-                                <span className="h-px w-6 bg-border" />
-                              )}
+                              {i < arr.length - 1 && <span className="h-px w-6 bg-border" />}
                             </li>
                           );
                         })}
@@ -816,29 +799,24 @@ function ManagePage() {
                       {cancelPhase === "reason" && (
                         <>
                           <div>
-                            <Label htmlFor={`reason-${a.id}`}>
-                              سبب الإلغاء (اختياري)
-                            </Label>
+                            <Label htmlFor={`reason-${a.id}`}>سبب الإلغاء (اختياري)</Label>
                             <div className="mt-2 flex flex-wrap gap-1.5">
-                              {[
-                                "ظرف طارئ",
-                                "تغيير الخطط",
-                                "تحسّنت الحالة",
-                                "سأحجز وقتًا آخر",
-                              ].map((r) => (
-                                <button
-                                  key={r}
-                                  type="button"
-                                  onClick={() => setCancelReason(r)}
-                                  className={`rounded-full border px-3 py-1 text-xs transition ${
-                                    cancelReason === r
-                                      ? "border-destructive/40 bg-destructive/10 text-destructive"
-                                      : "border-border bg-background hover:bg-muted"
-                                  }`}
-                                >
-                                  {r}
-                                </button>
-                              ))}
+                              {["ظرف طارئ", "تغيير الخطط", "تحسّنت الحالة", "سأحجز وقتًا آخر"].map(
+                                (r) => (
+                                  <button
+                                    key={r}
+                                    type="button"
+                                    onClick={() => setCancelReason(r)}
+                                    className={`rounded-full border px-3 py-1 text-xs transition ${
+                                      cancelReason === r
+                                        ? "border-destructive/40 bg-destructive/10 text-destructive"
+                                        : "border-border bg-background hover:bg-muted"
+                                    }`}
+                                  >
+                                    {r}
+                                  </button>
+                                ),
+                              )}
                             </div>
                             <Textarea
                               id={`reason-${a.id}`}
@@ -854,8 +832,8 @@ function ManagePage() {
                             role="note"
                           >
                             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-                            سيتم تحرير الموعد فورًا وإتاحته لآخرين، وقد يتم
-                            إشعار مريض على قائمة الانتظار إن وُجد.
+                            سيتم تحرير الموعد فورًا وإتاحته لآخرين، وقد يتم إشعار مريض على قائمة
+                            الانتظار إن وُجد.
                           </div>
                           <div className="flex gap-2">
                             <Button
@@ -889,9 +867,7 @@ function ManagePage() {
                         <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 p-4 text-sm">
                           <Loader2 className="h-5 w-5 animate-spin text-destructive" />
                           <div>
-                            <div className="font-medium">
-                              جاري إلغاء الحجز…
-                            </div>
+                            <div className="font-medium">جاري إلغاء الحجز…</div>
                             <div className="text-xs text-muted-foreground">
                               تحرير الموعد وإشعار قائمة الانتظار.
                             </div>
@@ -984,7 +960,9 @@ function ManagePage() {
                                   variant="outline"
                                   size="sm"
                                   onClick={() => undoCancel.mutate(a.id)}
-                                  disabled={undoExpired || undoDeadline === null || undoCancel.isPending}
+                                  disabled={
+                                    undoExpired || undoDeadline === null || undoCancel.isPending
+                                  }
                                   className="border-amber-300 text-amber-900 hover:bg-amber-50 disabled:opacity-60"
                                   aria-live="polite"
                                   aria-label={
@@ -1029,10 +1007,7 @@ function ManagePage() {
                               </Button>
                             </div>
                             {undoExpired && !undoResult && (
-                              <p
-                                className="text-xs text-amber-800/80"
-                                role="status"
-                              >
+                              <p className="text-xs text-amber-800/80" role="status">
                                 {t("manage.undo.expired_note")}
                               </p>
                             )}
@@ -1071,8 +1046,8 @@ function ManagePage() {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        سيتم تحديث حالة الحجز إلى "جديد — بانتظار التأكيد" بعد
-                        إعادة الجدولة، وقد يتواصل معك المجمّع لتأكيد الوقت.
+                        سيتم تحديث حالة الحجز إلى "جديد — بانتظار التأكيد" بعد إعادة الجدولة، وقد
+                        يتواصل معك المجمّع لتأكيد الوقت.
                       </p>
                       <div className="flex gap-2">
                         <Button
@@ -1090,11 +1065,7 @@ function ManagePage() {
                         <Button
                           size="sm"
                           className="flex-1"
-                          disabled={
-                            rescheduleAppt.isPending ||
-                            !rescheduleDate ||
-                            !rescheduleTime
-                          }
+                          disabled={rescheduleAppt.isPending || !rescheduleDate || !rescheduleTime}
                           onClick={() =>
                             rescheduleAppt.mutate({
                               id: a.id,
@@ -1130,15 +1101,7 @@ function ManagePage() {
   );
 }
 
-function Row({
-  icon,
-  label,
-  value,
-}: {
-  icon?: React.ReactNode;
-  label: string;
-  value: string;
-}) {
+function Row({ icon, label, value }: { icon?: React.ReactNode; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2">
       {icon && <span className="text-muted-foreground mt-0.5">{icon}</span>}

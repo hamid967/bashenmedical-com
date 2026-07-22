@@ -11,13 +11,7 @@ import { linkGuestAppointments } from "@/lib/patient-link.functions";
 
 type Phase = "idle" | "sending" | "code_sent" | "verifying" | "linking" | "linked" | "error";
 
-export function EmailOtpLinker({
-  email,
-  lang,
-}: {
-  email: string | null;
-  lang: "ar" | "en";
-}) {
+export function EmailOtpLinker({ email, lang }: { email: string | null; lang: "ar" | "en" }) {
   void lang;
   const { t } = useTranslation("booking");
   const [sessionEmail, setSessionEmail] = useState<string | null>(null);
@@ -65,10 +59,7 @@ export function EmailOtpLinker({
     return () => clearInterval(timer);
   }, [cooldown]);
 
-  const emailValid = useMemo(
-    () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(otpEmail.trim()),
-    [otpEmail],
-  );
+  const emailValid = useMemo(() => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(otpEmail.trim()), [otpEmail]);
 
   async function sendCode() {
     if (!emailValid) {
@@ -220,7 +211,7 @@ export function EmailOtpLinker({
                   onClick={verifyCode}
                   disabled={code.length !== 6 || phase === "verifying" || phase === "linking"}
                 >
-                  {(phase === "verifying" || phase === "linking") ? (
+                  {phase === "verifying" || phase === "linking" ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : null}
                   {t("otp.verifyLink")}
@@ -233,9 +224,7 @@ export function EmailOtpLinker({
                   onClick={sendCode}
                   disabled={cooldown > 0 || phase === "verifying" || phase === "linking"}
                 >
-                  {cooldown > 0
-                    ? t("otp.resendIn", { seconds: cooldown })
-                    : t("otp.resend")}
+                  {cooldown > 0 ? t("otp.resendIn", { seconds: cooldown }) : t("otp.resend")}
                 </button>
                 <button
                   type="button"

@@ -45,10 +45,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
-    meta: [
-      { title: "لوحة الإحصائيات | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "لوحة الإحصائيات | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: DashboardPage,
 });
@@ -119,25 +116,17 @@ function DashboardPage() {
     refetchInterval: visibilityAwareInterval(60_000, 5 * 60_000),
   });
 
-
-
   // Realtime: invalidate live cards when appointments/notifications change
   useEffect(() => {
     const channel = supabase
       .channel("dashboard-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "appointments" },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["dashboard", "kpis"] });
-          queryClient.invalidateQueries({ queryKey: ["dashboard", "upcoming"] });
-          queryClient.invalidateQueries({ queryKey: ["dashboard", "recent"] });
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "notifications" },
-        () => queryClient.invalidateQueries({ queryKey: ["dashboard", "kpis"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "appointments" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["dashboard", "kpis"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard", "upcoming"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboard", "recent"] });
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () =>
+        queryClient.invalidateQueries({ queryKey: ["dashboard", "kpis"] }),
       )
       .subscribe();
     return () => {
@@ -239,12 +228,48 @@ function DashboardPage() {
         {/* Overview: KPIs + Occupancy */}
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 xl:grid-cols-6">
-            <KpiCard icon={CalendarDays} label="مواعيد اليوم" value={kpis?.today_total ?? 0} tone="primary" loading={kpisQ.isLoading} />
-            <KpiCard icon={CalendarCheck2} label="مؤكدة اليوم" value={kpis?.today_confirmed ?? 0} tone="success" loading={kpisQ.isLoading} />
-            <KpiCard icon={Users} label="مرضى فريدون" value={kpis?.today_unique_patients ?? 0} tone="info" loading={kpisQ.isLoading} />
-            <KpiCard icon={Pill} label="طلبات صيدلية" value={kpis?.pharmacy_today_new ?? 0} tone="warning" loading={kpisQ.isLoading} />
-            <KpiCard icon={Stethoscope} label="أطباء نشطون" value={kpis?.active_doctors ?? 0} tone="info" loading={kpisQ.isLoading} />
-            <KpiCard icon={Bell} label="إشعارات جديدة" value={kpis?.notifications_unread ?? 0} tone="danger" loading={kpisQ.isLoading} />
+            <KpiCard
+              icon={CalendarDays}
+              label="مواعيد اليوم"
+              value={kpis?.today_total ?? 0}
+              tone="primary"
+              loading={kpisQ.isLoading}
+            />
+            <KpiCard
+              icon={CalendarCheck2}
+              label="مؤكدة اليوم"
+              value={kpis?.today_confirmed ?? 0}
+              tone="success"
+              loading={kpisQ.isLoading}
+            />
+            <KpiCard
+              icon={Users}
+              label="مرضى فريدون"
+              value={kpis?.today_unique_patients ?? 0}
+              tone="info"
+              loading={kpisQ.isLoading}
+            />
+            <KpiCard
+              icon={Pill}
+              label="طلبات صيدلية"
+              value={kpis?.pharmacy_today_new ?? 0}
+              tone="warning"
+              loading={kpisQ.isLoading}
+            />
+            <KpiCard
+              icon={Stethoscope}
+              label="أطباء نشطون"
+              value={kpis?.active_doctors ?? 0}
+              tone="info"
+              loading={kpisQ.isLoading}
+            />
+            <KpiCard
+              icon={Bell}
+              label="إشعارات جديدة"
+              value={kpis?.notifications_unread ?? 0}
+              tone="danger"
+              loading={kpisQ.isLoading}
+            />
           </div>
 
           <div className="rounded-xl border border-border bg-card p-5">
@@ -260,7 +285,9 @@ function DashboardPage() {
             <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className="h-full rounded-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, Math.max(0, Number(kpis?.occupancy_pct ?? 0)))}%` }}
+                style={{
+                  width: `${Math.min(100, Math.max(0, Number(kpis?.occupancy_pct ?? 0)))}%`,
+                }}
               />
             </div>
             <div className="mt-2 flex justify-between text-xs text-muted-foreground">
@@ -283,10 +310,35 @@ function DashboardPage() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
-                  <Area type="monotone" dataKey="المجموع" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#fillTotal)" />
+                  <XAxis
+                    dataKey="day"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="المجموع"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    fill="url(#fillTotal)"
+                  />
                 </AreaChart>
               </ResponsiveContainer>
             </ChartCard>
@@ -294,18 +346,40 @@ function DashboardPage() {
             <ChartCard title="توزيع الحالات (30 يومًا)">
               <ResponsiveContainer width="100%" height={260}>
                 <PieChart>
-                  <Pie data={statusChart} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+                  <Pie
+                    data={statusChart}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={2}
+                  >
                     {statusChart.map((entry) => (
-                      <Cell key={entry.key} fill={STATUS_COLOR[entry.key] ?? "hsl(var(--muted-foreground))"} />
+                      <Cell
+                        key={entry.key}
+                        fill={STATUS_COLOR[entry.key] ?? "hsl(var(--muted-foreground))"}
+                      />
                     ))}
                   </Pie>
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
               <div className="mt-1 flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
                 {statusChart.map((s) => (
                   <span key={s.key} className="inline-flex items-center gap-1.5">
-                    <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STATUS_COLOR[s.key] ?? "hsl(var(--muted-foreground))" }} />
+                    <span
+                      className="inline-block h-2.5 w-2.5 rounded-full"
+                      style={{
+                        backgroundColor: STATUS_COLOR[s.key] ?? "hsl(var(--muted-foreground))",
+                      }}
+                    />
                     {s.name} ({s.value})
                   </span>
                 ))}
@@ -318,9 +392,32 @@ function DashboardPage() {
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={specialtyChart} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} interval={0} angle={-20} textAnchor="end" height={60} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <XAxis
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    interval={0}
+                    angle={-20}
+                    textAnchor="end"
+                    height={60}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
                   <Bar dataKey="عدد" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -330,9 +427,29 @@ function DashboardPage() {
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={peakChart} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                  <XAxis dataKey="hour" stroke="hsl(var(--muted-foreground))" fontSize={10} tickLine={false} axisLine={false} interval={1} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 8, fontSize: 12 }} />
+                  <XAxis
+                    dataKey="hour"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    interval={1}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    allowDecimals={false}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      background: "hsl(var(--card))",
+                      border: "1px solid hsl(var(--border))",
+                      borderRadius: 8,
+                      fontSize: 12,
+                    }}
+                  />
                   <Bar dataKey="عدد" fill="hsl(217 91% 60%)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
@@ -352,7 +469,9 @@ function DashboardPage() {
             </div>
             <div className="max-h-[600px] overflow-auto">
               {upcoming.length === 0 ? (
-                <p className="p-8 text-center text-sm text-muted-foreground">لا حجوزات قادمة حاليًا.</p>
+                <p className="p-8 text-center text-sm text-muted-foreground">
+                  لا حجوزات قادمة حاليًا.
+                </p>
               ) : (
                 <ul className="divide-y divide-border">
                   {upcoming.map((a) => (
@@ -398,13 +517,16 @@ function DashboardPage() {
                       <div className="flex items-center justify-between gap-3">
                         <p className="truncate text-sm font-medium">{r.patient_name}</p>
                         <span className="shrink-0 text-xs text-muted-foreground" dir="ltr">
-                          {new Date(r.changed_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                          {new Date(r.changed_at).toLocaleString("ar-SA", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
                         </span>
                       </div>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        {r.old_status ? STATUS_LABEL_AR[r.old_status] ?? r.old_status : "—"} →{" "}
+                        {r.old_status ? (STATUS_LABEL_AR[r.old_status] ?? r.old_status) : "—"} →{" "}
                         <span className="font-medium text-foreground">
-                          {r.new_status ? STATUS_LABEL_AR[r.new_status] ?? r.new_status : "—"}
+                          {r.new_status ? (STATUS_LABEL_AR[r.new_status] ?? r.new_status) : "—"}
                         </span>
                         {r.reason ? ` • ${r.reason}` : ""}
                       </p>
@@ -419,7 +541,6 @@ function DashboardPage() {
     </div>
   );
 }
-
 
 function KpiCard({
   icon: Icon,
@@ -444,7 +565,9 @@ function KpiCard({
   return (
     <div className="rounded-xl border border-border bg-card p-4 transition hover:shadow-sm">
       <div className="flex items-center justify-between">
-        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${toneClass[tone]}`}>
+        <span
+          className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${toneClass[tone]}`}
+        >
           <Icon className="h-5 w-5" />
         </span>
       </div>

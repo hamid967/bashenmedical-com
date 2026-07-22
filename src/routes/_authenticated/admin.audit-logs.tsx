@@ -38,7 +38,10 @@ export const Route = createFileRoute("/_authenticated/admin/audit-logs")({
 const PAGE_SIZE = 50;
 
 const AUDIT_EXPORT_COLS: Column<any>[] = [
-  { header: "الوقت", accessor: (r) => (r.created_at ? new Date(r.created_at).toLocaleString("ar-SA") : "") },
+  {
+    header: "الوقت",
+    accessor: (r) => (r.created_at ? new Date(r.created_at).toLocaleString("ar-SA") : ""),
+  },
   { header: "الكيان", accessor: (r) => r.entity_type ?? "" },
   { header: "العملية", accessor: (r) => r.action ?? "" },
   { header: "معرّف السجل", accessor: (r) => r.entity_id ?? "" },
@@ -92,7 +95,9 @@ function AuditLogsPage() {
   });
 
   if (rolesQ.isLoading) {
-    return <div className="container-app py-16 text-center text-muted-foreground">جارٍ التحميل…</div>;
+    return (
+      <div className="container-app py-16 text-center text-muted-foreground">جارٍ التحميل…</div>
+    );
   }
   if (!isStaff) {
     return (
@@ -228,7 +233,7 @@ function AuditLogsPage() {
             filename="audit-logs"
             title="سجل التدقيق (Audit Logs)"
             subtitle={`فلاتر: ${entityType || "الكل"} / ${action || "الكل"}${from ? ` — من ${from}` : ""}${to ? ` — إلى ${to}` : ""}${q ? ` — بحث: ${q}` : ""}`}
-            meta={{ "الإجمالي": String(total) }}
+            meta={{ الإجمالي: String(total) }}
             columns={AUDIT_EXPORT_COLS}
             rows={rows}
             fetchAll={async () => {
@@ -308,7 +313,11 @@ function AuditLogsPage() {
                   <div className="font-mono">{r.actor_id ? r.actor_id.slice(0, 8) : "—"}</div>
                   <div className="text-muted-foreground">{r.actor_role || ""}</div>
                 </td>
-                <td className="max-w-[220px] truncate px-3 py-2 font-mono text-xs" dir="ltr" title={r.entity_id ?? ""}>
+                <td
+                  className="max-w-[220px] truncate px-3 py-2 font-mono text-xs"
+                  dir="ltr"
+                  title={r.entity_id ?? ""}
+                >
                   {r.entity_id || "—"}
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 font-mono text-xs" dir="ltr">
@@ -403,7 +412,10 @@ function Info({ label, value, mono }: { label: string; value: any; mono?: boolea
   return (
     <div>
       <div className="text-xs font-medium text-muted-foreground">{label}</div>
-      <div className={`mt-0.5 break-words text-sm ${mono ? "font-mono" : ""}`} dir={mono ? "ltr" : undefined}>
+      <div
+        className={`mt-0.5 break-words text-sm ${mono ? "font-mono" : ""}`}
+        dir={mono ? "ltr" : undefined}
+      >
         {value ? String(value) : <span className="text-muted-foreground">—</span>}
       </div>
     </div>

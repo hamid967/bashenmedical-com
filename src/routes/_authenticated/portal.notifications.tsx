@@ -1,10 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import {
-  queryOptions,
-  useSuspenseQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -25,7 +20,6 @@ import {
   Sparkles,
   Stethoscope,
   MessageSquareWarning,
-
 } from "lucide-react";
 import {
   listMyNotifications,
@@ -33,18 +27,11 @@ import {
   type PatientNotification,
   type DeliveryStatus,
 } from "@/lib/portal/notifications.functions";
-import {
-  Mail,
-  MessageCircle,
-  Smartphone,
-  BellRing,
-  XCircle,
-} from "lucide-react";
+import { Mail, MessageCircle, Smartphone, BellRing, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
 import { useHasConsent } from "@/hooks/useHasConsent";
 import { ShieldOff } from "lucide-react";
-
 
 /* ----------------------------- query --------------------------------- */
 
@@ -81,7 +68,8 @@ function iconForKind(kind: string) {
     return { Icon: CalendarDays, cls: "bg-teal-50 text-teal-600 border-teal-100" };
   if (k.includes("report") || k.includes("record"))
     return { Icon: FileText, cls: "bg-teal-50 text-teal-600 border-teal-100" };
-  if (k.includes("lab")) return { Icon: FlaskConical, cls: "bg-teal-50 text-teal-600 border-teal-100" };
+  if (k.includes("lab"))
+    return { Icon: FlaskConical, cls: "bg-teal-50 text-teal-600 border-teal-100" };
   if (k.includes("prescription") || k.includes("pharmacy"))
     return { Icon: Pill, cls: "bg-emerald-50 text-emerald-600 border-emerald-100" };
   if (k.includes("invoice") || k.includes("payment") || k.includes("refund"))
@@ -177,10 +165,7 @@ function NotificationsPage() {
   const hiddenMarketingCount = q.data.length - visibleItems.length;
 
   const items = visibleItems;
-  const unreadIds = useMemo(
-    () => items.filter((n) => !n.read_at).map((n) => n.id),
-    [items],
-  );
+  const unreadIds = useMemo(() => items.filter((n) => !n.read_at).map((n) => n.id), [items]);
   const filtered = useMemo(
     () => (filter === "unread" ? items.filter((n) => !n.read_at) : items),
     [items, filter],
@@ -232,126 +217,124 @@ function NotificationsPage() {
 
   return (
     <div className="mx-auto max-w-3xl" dir="rtl">
-        {/* Header */}
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]"
-              style={{ background: "var(--portal-gradient)" }}
-              aria-hidden
-            >
-              <Bell className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">
-                الإشعارات
-              </h1>
-              <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">
-                تنبيهاتك حول المواعيد والتقارير والفواتير
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => invalidate()}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
-              aria-label="تحديث القائمة"
-            >
-              <RefreshCw className="h-4 w-4" />
-              تحديث
-            </button>
-            <button
-              type="button"
-              disabled={unreadIds.length === 0 || markMut.isPending}
-              onClick={() => markMut.mutate(undefined)}
-              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
-              style={{ background: "var(--portal-gradient)" }}
-            >
-              <CheckCheck className="h-4 w-4" />
-              تعليم الكل كمقروء
-            </button>
-          </div>
-        </header>
-
-        {/* Web Push subscription management + /sw-push.js diagnostics */}
-        <div className="mb-6">
-          <PushSubscriptionCard />
-        </div>
-
-        {/* Tabs */}
-        <div
-          role="tablist"
-          aria-label="تصنيف الإشعارات"
-          className="mb-4 inline-flex rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-1 text-sm"
-        >
-          {(
-            [
-              { k: "all" as const, label: `الكل (${items.length})` },
-              { k: "unread" as const, label: `غير مقروءة (${unreadIds.length})` },
-            ]
-          ).map((t) => {
-            const active = filter === t.k;
-            return (
-              <button
-                key={t.k}
-                role="tab"
-                aria-selected={active}
-                onClick={() => setFilter(t.k)}
-                className={`px-4 h-8 rounded-full transition ${
-                  active
-                    ? "text-[color:var(--portal-on-primary)] shadow-sm"
-                    : "text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-ink)]"
-                }`}
-                style={active ? { background: "var(--portal-gradient)" } : undefined}
-              >
-                {t.label}
-              </button>
-            );
-          })}
-        </div>
-
-        {hiddenMarketingCount > 0 && (
+      {/* Header */}
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <div
-            role="status"
-            className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 p-3 text-xs flex items-start gap-2"
+            className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]"
+            style={{ background: "var(--portal-gradient)" }}
+            aria-hidden
           >
-            <ShieldOff className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
-            <span className="flex-1">
-              تم إخفاء {hiddenMarketingCount} من الإشعارات التسويقية لأن موافقة
-              «الرسائل التسويقية» غير مفعّلة.{" "}
-              <Link
-                to="/portal/consents"
-                className="font-semibold text-[color:var(--portal-primary)] hover:underline"
-              >
-                إدارة الموافقات
-              </Link>
-            </span>
+            <Bell className="h-5 w-5" />
           </div>
-        )}
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">
+              الإشعارات
+            </h1>
+            <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">
+              تنبيهاتك حول المواعيد والتقارير والفواتير
+            </p>
+          </div>
+        </div>
 
-        {/* List */}
-        {filtered.length === 0 ? (
-          <EmptyState filter={filter} />
-        ) : (
-          <ul className="space-y-3">
-            {filtered.map((n) => (
-              <NotificationRow
-                key={n.id}
-                n={n}
-                onMarkRead={() => markMut.mutate([n.id])}
-                markingDisabled={markMut.isPending}
-              />
-            ))}
-          </ul>
-        )}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => invalidate()}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
+            aria-label="تحديث القائمة"
+          >
+            <RefreshCw className="h-4 w-4" />
+            تحديث
+          </button>
+          <button
+            type="button"
+            disabled={unreadIds.length === 0 || markMut.isPending}
+            onClick={() => markMut.mutate(undefined)}
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
+            style={{ background: "var(--portal-gradient)" }}
+          >
+            <CheckCheck className="h-4 w-4" />
+            تعليم الكل كمقروء
+          </button>
+        </div>
+      </header>
 
-        {/* Legend */}
-        <p className="mt-8 text-center text-[11px] text-[color:var(--portal-ink-2)]">
-          يتم تحديث الإشعارات لحظيًا عند وصول تنبيه جديد.
-        </p>
+      {/* Web Push subscription management + /sw-push.js diagnostics */}
+      <div className="mb-6">
+        <PushSubscriptionCard />
       </div>
+
+      {/* Tabs */}
+      <div
+        role="tablist"
+        aria-label="تصنيف الإشعارات"
+        className="mb-4 inline-flex rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-1 text-sm"
+      >
+        {[
+          { k: "all" as const, label: `الكل (${items.length})` },
+          { k: "unread" as const, label: `غير مقروءة (${unreadIds.length})` },
+        ].map((t) => {
+          const active = filter === t.k;
+          return (
+            <button
+              key={t.k}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setFilter(t.k)}
+              className={`px-4 h-8 rounded-full transition ${
+                active
+                  ? "text-[color:var(--portal-on-primary)] shadow-sm"
+                  : "text-[color:var(--portal-ink-2)] hover:text-[color:var(--portal-ink)]"
+              }`}
+              style={active ? { background: "var(--portal-gradient)" } : undefined}
+            >
+              {t.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {hiddenMarketingCount > 0 && (
+        <div
+          role="status"
+          className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 p-3 text-xs flex items-start gap-2"
+        >
+          <ShieldOff className="h-4 w-4 mt-0.5 shrink-0" aria-hidden />
+          <span className="flex-1">
+            تم إخفاء {hiddenMarketingCount} من الإشعارات التسويقية لأن موافقة «الرسائل التسويقية»
+            غير مفعّلة.{" "}
+            <Link
+              to="/portal/consents"
+              className="font-semibold text-[color:var(--portal-primary)] hover:underline"
+            >
+              إدارة الموافقات
+            </Link>
+          </span>
+        </div>
+      )}
+
+      {/* List */}
+      {filtered.length === 0 ? (
+        <EmptyState filter={filter} />
+      ) : (
+        <ul className="space-y-3">
+          {filtered.map((n) => (
+            <NotificationRow
+              key={n.id}
+              n={n}
+              onMarkRead={() => markMut.mutate([n.id])}
+              markingDisabled={markMut.isPending}
+            />
+          ))}
+        </ul>
+      )}
+
+      {/* Legend */}
+      <p className="mt-8 text-center text-[11px] text-[color:var(--portal-ink-2)]">
+        يتم تحديث الإشعارات لحظيًا عند وصول تنبيه جديد.
+      </p>
+    </div>
   );
 }
 
@@ -376,7 +359,10 @@ function NotificationRow({
         unread ? "ring-1 ring-[color:var(--portal-primary)]/25" : ""
       }`}
     >
-      <div className={`h-10 w-10 shrink-0 rounded-xl grid place-items-center border ${cls}`} aria-hidden>
+      <div
+        className={`h-10 w-10 shrink-0 rounded-xl grid place-items-center border ${cls}`}
+        aria-hidden
+      >
         <Icon className="h-5 w-5" />
       </div>
 
@@ -408,8 +394,6 @@ function NotificationRow({
         ) : null}
 
         <DeliveryStrip deliveries={n.deliveries} />
-
-
 
         <div className="mt-3 flex flex-wrap items-center gap-2">
           {action ? (
@@ -446,10 +430,7 @@ function NotificationRow({
 
 /* -------------------- provider-confirmed delivery -------------------- */
 
-const CHANNEL_META: Record<
-  DeliveryStatus["channel"],
-  { Icon: typeof Mail; label: string }
-> = {
+const CHANNEL_META: Record<DeliveryStatus["channel"], { Icon: typeof Mail; label: string }> = {
   email: { Icon: Mail, label: "البريد" },
   sms: { Icon: Smartphone, label: "SMS" },
   whatsapp: { Icon: MessageCircle, label: "واتساب" },
@@ -473,11 +454,7 @@ function DeliveryStrip({ deliveries }: { deliveries: DeliveryStatus[] }) {
           : "bg-red-50 text-red-700 border-red-100";
         const StatusIcon = delivered ? CheckCircle2 : XCircle;
         const stateLabel =
-          d.status === "delivered"
-            ? "تم التسليم"
-            : d.status === "bounced"
-              ? "ارتد"
-              : "فشل";
+          d.status === "delivered" ? "تم التسليم" : d.status === "bounced" ? "ارتد" : "فشل";
         const at = new Date(d.at);
         const title = `${meta.label} · ${stateLabel}${
           d.provider ? ` · ${d.provider}` : ""
@@ -504,7 +481,6 @@ function DeliveryStrip({ deliveries }: { deliveries: DeliveryStatus[] }) {
 }
 
 /* --------------------------- ux states ------------------------------- */
-
 
 function EmptyState({ filter }: { filter: Filter }) {
   const isUnread = filter === "unread";
@@ -538,21 +514,21 @@ function EmptyState({ filter }: { filter: Filter }) {
 function SkeletonState() {
   return (
     <div className="mx-auto max-w-3xl" dir="rtl">
-        <div className="mb-6 h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse" />
-        <div className="mb-4 h-10 w-56 rounded-full bg-slate-200/60 animate-pulse" />
-        <ul className="space-y-3">
-          {[0, 1, 2, 3, 4].map((i) => (
-            <li key={i} className="glass-card p-4 sm:p-5 flex gap-4 items-start">
-              <div className="h-10 w-10 rounded-xl bg-slate-200/60 animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-2/3 rounded bg-slate-200/60 animate-pulse" />
-                <div className="h-3 w-full rounded bg-slate-200/50 animate-pulse" />
-                <div className="h-3 w-4/5 rounded bg-slate-200/50 animate-pulse" />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+      <div className="mb-6 h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse" />
+      <div className="mb-4 h-10 w-56 rounded-full bg-slate-200/60 animate-pulse" />
+      <ul className="space-y-3">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <li key={i} className="glass-card p-4 sm:p-5 flex gap-4 items-start">
+            <div className="h-10 w-10 rounded-xl bg-slate-200/60 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-2/3 rounded bg-slate-200/60 animate-pulse" />
+              <div className="h-3 w-full rounded bg-slate-200/50 animate-pulse" />
+              <div className="h-3 w-4/5 rounded bg-slate-200/50 animate-pulse" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -561,7 +537,10 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6" dir="rtl">
       <div className="glass-card max-w-md w-full p-8 text-center">
-        <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4" aria-hidden>
+        <div
+          className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4"
+          aria-hidden
+        >
           <AlertTriangle className="h-7 w-7" />
         </div>
         <h2 className="text-xl font-bold text-[color:var(--portal-ink)]">تعذّر تحميل الإشعارات</h2>

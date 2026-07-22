@@ -6,7 +6,6 @@ import { useI18n } from "@/lib/i18n";
 import { StaggerReveal, RevealItem } from "@/components/motion/StaggerReveal";
 import { SkeletonSwap, AnnouncementsSkeleton } from "@/components/home/HomeSkeletons";
 
-
 type Kind = "offer" | "news" | "event";
 
 type Item = {
@@ -123,10 +122,7 @@ export function AnnouncementsSection() {
           </Link>
         </div>
 
-        <SkeletonSwap
-          loading={isPending}
-          skeleton={<AnnouncementsSkeleton count={3} />}
-        >
+        <SkeletonSwap loading={isPending} skeleton={<AnnouncementsSkeleton count={3} />}>
           <StaggerReveal className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {items.map((it) => {
               const meta = KIND_META[it.kind];
@@ -181,7 +177,9 @@ export function AnnouncementsSection() {
                   {/* Accent hairline */}
                   <span
                     className="pointer-events-none absolute inset-x-6 bottom-0 h-px opacity-40"
-                    style={{ background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)` }}
+                    style={{
+                      background: `linear-gradient(90deg, transparent, ${meta.color}, transparent)`,
+                    }}
                   />
                 </RevealItem>
               );

@@ -290,10 +290,7 @@ export function getProgressSteps(kind: OrderTableKind): ProgressStep[] {
  * يُرجع فهرس الخطوة الحالية (0-based) على مسار التقدّم للنوع المعطى.
  * الحالات النهائية غير-completed (rejected/cancelled) تُرجع -1 (مسار مقطوع).
  */
-export function getCurrentStepIndex(
-  kind: OrderTableKind,
-  status: UnifiedStatus,
-): number {
+export function getCurrentStepIndex(kind: OrderTableKind, status: UnifiedStatus): number {
   if (status === "rejected" || status === "cancelled") return -1;
   const steps = STEPS_BY_KIND[kind];
   const idx = steps.findIndex((s) => s.key === status);

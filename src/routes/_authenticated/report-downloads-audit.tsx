@@ -2,19 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import {
-  Download,
-  RefreshCw,
-  ChevronLeft,
-  Filter,
-  X,
-  FileText,
-  Scan,
-} from "lucide-react";
-import {
-  listReportDownloadAudit,
-  listReportDownloadActors,
-} from "@/lib/report-audit.functions";
+import { Download, RefreshCw, ChevronLeft, Filter, X, FileText, Scan } from "lucide-react";
+import { listReportDownloadAudit, listReportDownloadActors } from "@/lib/report-audit.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 const BUCKET_LABELS: Record<string, string> = {
@@ -59,9 +48,9 @@ function Page() {
   const [userId, setUserId] = useState("");
   const [reportId, setReportId] = useState("");
   const [bucket, setBucket] = useState<"all" | "lab-reports" | "radiology-reports">("all");
-  const [action, setAction] = useState<
-    "all" | "lab_report_download" | "radiology_report_download"
-  >("all");
+  const [action, setAction] = useState<"all" | "lab_report_download" | "radiology_report_download">(
+    "all",
+  );
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [limit, setLimit] = useState(200);
@@ -320,8 +309,7 @@ function Page() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-sm">
-              النتائج{" "}
-              <span className="text-muted-foreground font-normal">({rows.length})</span>
+              النتائج <span className="text-muted-foreground font-normal">({rows.length})</span>
             </h2>
           </div>
 
@@ -365,10 +353,7 @@ function Page() {
                       };
                       const Icon = ac.icon;
                       return (
-                        <tr
-                          key={r.id}
-                          className="border-t border-border/40 hover:bg-muted/20"
-                        >
+                        <tr key={r.id} className="border-t border-border/40 hover:bg-muted/20">
                           <td className="p-3 whitespace-nowrap text-xs text-muted-foreground">
                             {fmtDate(r.created_at)}
                           </td>
@@ -397,7 +382,7 @@ function Page() {
                             {r.patient_id ? r.patient_id.slice(0, 8) : "—"}
                           </td>
                           <td className="p-3 text-xs">
-                            {r.bucket ? BUCKET_LABELS[r.bucket] ?? r.bucket : "—"}
+                            {r.bucket ? (BUCKET_LABELS[r.bucket] ?? r.bucket) : "—"}
                           </td>
                           <td className="p-3 font-mono text-[11px] text-muted-foreground">
                             {r.ip_address ?? "—"}

@@ -4,9 +4,34 @@ import { useEffect, useId, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
-import { buildLocalBusinessSchema, buildBreadcrumbs, CLINIC_ID, SITE_URL } from "@/lib/localBusinessSchema";
+import {
+  buildLocalBusinessSchema,
+  buildBreadcrumbs,
+  CLINIC_ID,
+  SITE_URL,
+} from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
-import { ArrowLeft, Phone, MapPin, Languages, GraduationCap, Briefcase, Award, Calendar, Clock, User, ClipboardCheck, XCircle, Info, Star, MessageSquare, Loader2, Building2, FileText, Stethoscope } from "lucide-react";
+import {
+  ArrowLeft,
+  Phone,
+  MapPin,
+  Languages,
+  GraduationCap,
+  Briefcase,
+  Award,
+  Calendar,
+  Clock,
+  User,
+  ClipboardCheck,
+  XCircle,
+  Info,
+  Star,
+  MessageSquare,
+  Loader2,
+  Building2,
+  FileText,
+  Stethoscope,
+} from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { submitBooking } from "@/lib/booking-submit";
@@ -273,9 +298,14 @@ function InlineBookingWidget({
 
   if (!bookingEnabled) {
     return (
-      <div id="book" ref={widgetRef} className={`rounded-2xl border border-border bg-card p-6 scroll-mt-24 transition-shadow ${highlight ? "ring-2 ring-primary ring-offset-2" : ""}`}>
+      <div
+        id="book"
+        ref={widgetRef}
+        className={`rounded-2xl border border-border bg-card p-6 scroll-mt-24 transition-shadow ${highlight ? "ring-2 ring-primary ring-offset-2" : ""}`}
+      >
         <h3 className="font-bold mb-2 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" /> {ar ? "الحجز غير متاح" : "Booking unavailable"}
+          <Calendar className="h-5 w-5 text-primary" />{" "}
+          {ar ? "الحجز غير متاح" : "Booking unavailable"}
         </h3>
         <p className="text-sm text-muted-foreground">
           {ar
@@ -295,7 +325,11 @@ function InlineBookingWidget({
   // Success state.
   if (step === 5) {
     return (
-      <div id="book" ref={widgetRef} className="rounded-2xl border border-border bg-card p-6 text-center scroll-mt-24">
+      <div
+        id="book"
+        ref={widgetRef}
+        className="rounded-2xl border border-border bg-card p-6 text-center scroll-mt-24"
+      >
         <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-emerald-100 text-emerald-600">
           <ClipboardCheck className="h-6 w-6" />
         </div>
@@ -310,7 +344,9 @@ function InlineBookingWidget({
           </div>
         )}
         <div className="mt-3 text-sm">
-          <div>{formatDateLabel(selectedDate, lang)} — {selectedTime}</div>
+          <div>
+            {formatDateLabel(selectedDate, lang)} — {selectedTime}
+          </div>
         </div>
         <div className="mt-4 flex flex-col gap-2">
           <Link
@@ -359,7 +395,11 @@ function InlineBookingWidget({
   async function handleSubmit() {
     setErrorMsg(null);
     const err = validatePatient();
-    if (err) { setErrorMsg(err); setStep(3); return; }
+    if (err) {
+      setErrorMsg(err);
+      setStep(3);
+      return;
+    }
     if (!selectedDate || !selectedTime) return;
     setSubmitting(true);
     const res = await submitBooking({
@@ -384,7 +424,11 @@ function InlineBookingWidget({
   }
 
   return (
-    <div id="book" ref={widgetRef} className={`rounded-2xl border border-border bg-card p-5 scroll-mt-24 transition-shadow ${highlight ? "ring-2 ring-primary ring-offset-2" : ""}`}>
+    <div
+      id="book"
+      ref={widgetRef}
+      className={`rounded-2xl border border-border bg-card p-5 scroll-mt-24 transition-shadow ${highlight ? "ring-2 ring-primary ring-offset-2" : ""}`}
+    >
       <h3 className="font-bold mb-3 flex items-center gap-2">
         <Calendar className="h-5 w-5 text-primary" />
         {ar ? "احجز الآن" : "Book now"}
@@ -406,8 +450,8 @@ function InlineBookingWidget({
                   active
                     ? "bg-primary text-primary-foreground"
                     : done
-                    ? "bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer"
-                    : "bg-muted text-muted-foreground"
+                      ? "bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer"
+                      : "bg-muted text-muted-foreground"
                 }`}
               >
                 <span className="grid h-4 w-4 place-items-center rounded-full bg-white/20 text-[10px]">
@@ -478,7 +522,9 @@ function InlineBookingWidget({
             </div>
           ) : times.length === 0 ? (
             <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4 text-center text-xs text-muted-foreground mb-3">
-              {ar ? "لا توجد مواعيد في هذا اليوم — جرّب يومًا آخر." : "No available times — try another day."}
+              {ar
+                ? "لا توجد مواعيد في هذا اليوم — جرّب يومًا آخر."
+                : "No available times — try another day."}
             </div>
           ) : (
             <div className="grid grid-cols-3 gap-2 mb-3">
@@ -488,7 +534,10 @@ function InlineBookingWidget({
                   <button
                     key={t}
                     type="button"
-                    onClick={() => { setSelectedTime(t); setStep(3); }}
+                    onClick={() => {
+                      setSelectedTime(t);
+                      setStep(3);
+                    }}
                     className={`rounded-lg border px-2 py-2 text-center text-xs font-medium transition flex items-center justify-center gap-1 ${
                       active
                         ? "border-primary bg-primary text-primary-foreground"
@@ -512,7 +561,9 @@ function InlineBookingWidget({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1">{ar ? "الاسم الكامل" : "Full name"} *</label>
+            <label className="block text-xs font-medium mb-1">
+              {ar ? "الاسم الكامل" : "Full name"} *
+            </label>
             <input
               type="text"
               value={name}
@@ -523,7 +574,9 @@ function InlineBookingWidget({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1">{ar ? "رقم الجوال" : "Mobile"} *</label>
+            <label className="block text-xs font-medium mb-1">
+              {ar ? "رقم الجوال" : "Mobile"} *
+            </label>
             <input
               type="tel"
               inputMode="tel"
@@ -536,7 +589,9 @@ function InlineBookingWidget({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1">{ar ? "رقم الهوية / الإقامة (اختياري)" : "National ID (optional)"}</label>
+            <label className="block text-xs font-medium mb-1">
+              {ar ? "رقم الهوية / الإقامة (اختياري)" : "National ID (optional)"}
+            </label>
             <input
               type="text"
               inputMode="numeric"
@@ -570,7 +625,9 @@ function InlineBookingWidget({
           </div>
 
           <div>
-            <label className="block text-xs font-medium mb-1">{ar ? "سبب الزيارة (اختياري)" : "Reason (optional)"}</label>
+            <label className="block text-xs font-medium mb-1">
+              {ar ? "سبب الزيارة (اختياري)" : "Reason (optional)"}
+            </label>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -590,13 +647,17 @@ function InlineBookingWidget({
             type="button"
             onClick={() => {
               const err = validatePatient();
-              if (err) { setErrorMsg(err); return; }
+              if (err) {
+                setErrorMsg(err);
+                return;
+              }
               setErrorMsg(null);
               setStep(4);
             }}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-bold hover:opacity-90"
           >
-            {ar ? "مراجعة الحجز" : "Review booking"} <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+            {ar ? "مراجعة الحجز" : "Review booking"}{" "}
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
           </button>
         </div>
       )}
@@ -615,11 +676,21 @@ function InlineBookingWidget({
 
           <div className="space-y-1.5">
             <label className="flex items-center gap-2 text-xs cursor-pointer">
-              <input type="checkbox" checked={reminder24h} onChange={(e) => setReminder24h(e.target.checked)} className="rounded" />
+              <input
+                type="checkbox"
+                checked={reminder24h}
+                onChange={(e) => setReminder24h(e.target.checked)}
+                className="rounded"
+              />
               {ar ? "تذكيري قبل 24 ساعة" : "Remind me 24h before"}
             </label>
             <label className="flex items-center gap-2 text-xs cursor-pointer">
-              <input type="checkbox" checked={reminder2h} onChange={(e) => setReminder2h(e.target.checked)} className="rounded" />
+              <input
+                type="checkbox"
+                checked={reminder2h}
+                onChange={(e) => setReminder2h(e.target.checked)}
+                className="rounded"
+              />
               {ar ? "تذكيري قبل ساعتين" : "Remind me 2h before"}
             </label>
           </div>
@@ -637,9 +708,15 @@ function InlineBookingWidget({
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-2.5 text-sm font-bold hover:opacity-90 disabled:opacity-60"
           >
             {submitting ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> {ar ? "جارٍ التأكيد..." : "Confirming..."}</>
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />{" "}
+                {ar ? "جارٍ التأكيد..." : "Confirming..."}
+              </>
             ) : (
-              <>{ar ? "تأكيد الحجز" : "Confirm booking"} <ArrowLeft className="h-4 w-4 rtl:rotate-180" /></>
+              <>
+                {ar ? "تأكيد الحجز" : "Confirm booking"}{" "}
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+              </>
             )}
           </button>
 
@@ -676,7 +753,6 @@ function Row({ label, value }: { label: string; value: string }) {
   );
 }
 
-
 function DoctorDetail() {
   const { slug } = Route.useParams();
   const { lang } = useI18n();
@@ -696,8 +772,7 @@ function DoctorDetail() {
     : null;
   const bookingEnabled = d.booking_enabled !== false;
   const ar = lang === "ar";
-  const genderLabel =
-    d.gender === "male" ? "ذكر" : d.gender === "female" ? "أنثى" : null;
+  const genderLabel = d.gender === "male" ? "ذكر" : d.gender === "female" ? "أنثى" : null;
 
   // Merge primary photo + gallery photos, dedupe, keep order.
   const gallery = Array.from(
@@ -706,11 +781,7 @@ function DoctorDetail() {
   const hasPhoto = gallery.length > 0;
 
   // Descriptive alt text: doctor + title + specialty.
-  const photoAlt = [
-    lang === "ar" ? `صورة ${name}` : `Photo of ${name}`,
-    jobTitle,
-    specName,
-  ]
+  const photoAlt = [lang === "ar" ? `صورة ${name}` : `Photo of ${name}`, jobTitle, specName]
     .filter(Boolean)
     .join(" — ");
   const initials = name
@@ -722,15 +793,18 @@ function DoctorDetail() {
   const noPhotoLabel =
     lang === "ar" ? "لا تتوفر صورة لهذا الطبيب" : "No photo available for this doctor";
 
-
   return (
     <div>
       <section className="hero-gradient-deep text-white py-14">
         <div className="container-app">
           <nav className="text-xs text-white/80 mb-4">
-            <Link to="/" className="hover:underline">الرئيسية</Link>
+            <Link to="/" className="hover:underline">
+              الرئيسية
+            </Link>
             <span className="mx-2">/</span>
-            <Link to="/doctors" className="hover:underline">الأطباء</Link>
+            <Link to="/doctors" className="hover:underline">
+              الأطباء
+            </Link>
             <span className="mx-2">/</span>
             <span className="text-white">{name}</span>
           </nav>
@@ -756,7 +830,9 @@ function DoctorDetail() {
               ) : (
                 <div className="flex flex-col items-center gap-1 text-white/90">
                   <User className="h-10 w-10" aria-hidden />
-                  <span className="text-2xl font-bold leading-none">{initials || name.charAt(0)}</span>
+                  <span className="text-2xl font-bold leading-none">
+                    {initials || name.charAt(0)}
+                  </span>
                 </div>
               )}
             </div>
@@ -836,7 +912,11 @@ function DoctorDetail() {
                   ) : (
                     <EmptyState
                       icon={<FileText className="h-6 w-6" />}
-                      text={ar ? "لا توجد نبذة متاحة لهذا الطبيب حالياً." : "No biography available yet."}
+                      text={
+                        ar
+                          ? "لا توجد نبذة متاحة لهذا الطبيب حالياً."
+                          : "No biography available yet."
+                      }
                     />
                   )}
                 </div>
@@ -858,7 +938,12 @@ function DoctorDetail() {
               </TabsContent>
 
               <TabsContent value="branches" className="mt-6">
-                <DoctorBranchesTab doctorId={d.id} fallbackBranchId={d.branch_id} ar={ar} lang={lang} />
+                <DoctorBranchesTab
+                  doctorId={d.id}
+                  fallbackBranchId={d.branch_id}
+                  ar={ar}
+                  lang={lang}
+                />
               </TabsContent>
 
               <TabsContent value="ratings" className="mt-6">
@@ -872,7 +957,11 @@ function DoctorDetail() {
           </div>
 
           <aside className="space-y-6">
-            <InlineBookingWidget doctorId={d.id} bookingEnabled={bookingEnabled} doctorName={name} />
+            <InlineBookingWidget
+              doctorId={d.id}
+              bookingEnabled={bookingEnabled}
+              doctorName={name}
+            />
 
             <div className="rounded-2xl border border-border bg-card p-6">
               <h3 className="font-bold mb-3">معلومات</h3>
@@ -941,7 +1030,9 @@ function ExpertiseTab({
   experience: string | null;
 }) {
   const hasAny =
-    !!specName || !!education || !!experience ||
+    !!specName ||
+    !!education ||
+    !!experience ||
     (yearsExperience != null && yearsExperience > 0) ||
     (languages && languages.length > 0);
 
@@ -963,7 +1054,11 @@ function ExpertiseTab({
             label={ar ? "التخصص" : "Specialty"}
             value={
               specSlug ? (
-                <Link to="/specialties/$slug" params={{ slug: specSlug }} className="text-primary hover:underline">
+                <Link
+                  to="/specialties/$slug"
+                  params={{ slug: specSlug }}
+                  className="text-primary hover:underline"
+                >
                   {specName}
                 </Link>
               ) : (
@@ -991,7 +1086,8 @@ function ExpertiseTab({
       {education && (
         <div>
           <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-primary" /> {ar ? "المؤهلات العلمية" : "Education"}
+            <GraduationCap className="h-5 w-5 text-primary" />{" "}
+            {ar ? "المؤهلات العلمية" : "Education"}
           </h3>
           <p className="text-muted-foreground leading-8 whitespace-pre-line">{education}</p>
         </div>
@@ -1000,7 +1096,8 @@ function ExpertiseTab({
       {experience && (
         <div>
           <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-            <Briefcase className="h-5 w-5 text-primary" /> {ar ? "الخبرات المهنية" : "Professional experience"}
+            <Briefcase className="h-5 w-5 text-primary" />{" "}
+            {ar ? "الخبرات المهنية" : "Professional experience"}
           </h3>
           <p className="text-muted-foreground leading-8 whitespace-pre-line">{experience}</p>
         </div>
@@ -1009,7 +1106,15 @@ function ExpertiseTab({
   );
 }
 
-function InfoCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: React.ReactNode }) {
+function InfoCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: React.ReactNode;
+}) {
   return (
     <div className="rounded-xl border border-border bg-card p-4 flex items-start gap-3">
       <div className="h-9 w-9 shrink-0 rounded-lg bg-primary/10 text-primary grid place-items-center">
@@ -1087,7 +1192,11 @@ function DoctorBranchesTab({
       }
       // Primary first, then by name.
       rows.sort((a, b) =>
-        a.is_primary === b.is_primary ? a.name_ar.localeCompare(b.name_ar, "ar") : a.is_primary ? -1 : 1,
+        a.is_primary === b.is_primary
+          ? a.name_ar.localeCompare(b.name_ar, "ar")
+          : a.is_primary
+            ? -1
+            : 1,
       );
       return rows;
     },
@@ -1123,7 +1232,9 @@ function DoctorBranchesTab({
     return (
       <EmptyState
         icon={<Building2 className="h-6 w-6" />}
-        text={ar ? "لا توجد فروع مرتبطة بهذا الطبيب حالياً." : "No branches linked to this doctor yet."}
+        text={
+          ar ? "لا توجد فروع مرتبطة بهذا الطبيب حالياً." : "No branches linked to this doctor yet."
+        }
       />
     );
   }
@@ -1161,7 +1272,9 @@ function DoctorBranchesTab({
             {b.phone && (
               <div className="mt-1.5 text-sm text-muted-foreground flex items-center gap-2">
                 <Phone className="h-4 w-4 shrink-0" />
-                <a href={`tel:${b.phone}`} className="hover:text-primary">{b.phone}</a>
+                <a href={`tel:${b.phone}`} className="hover:text-primary">
+                  {b.phone}
+                </a>
               </div>
             )}
             <div className="mt-4 flex flex-wrap gap-2">
@@ -1187,7 +1300,6 @@ function DoctorBranchesTab({
     </div>
   );
 }
-
 
 function BookingPolicy({ lang }: { lang: string }) {
   const ar = lang === "ar";
@@ -1224,9 +1336,7 @@ function BookingPolicy({ lang }: { lang: string }) {
     <div className="rounded-2xl border border-border bg-card p-6">
       <div className="flex items-center gap-2 mb-4">
         <Info className="h-5 w-5 text-primary" />
-        <h3 className="font-bold">
-          {ar ? "قبل تأكيد الحجز" : "Before you confirm"}
-        </h3>
+        <h3 className="font-bold">{ar ? "قبل تأكيد الحجز" : "Before you confirm"}</h3>
       </div>
 
       <div className="mb-5">
@@ -1279,7 +1389,9 @@ function Stars({ value, size = 16 }: { value: number; size?: number }) {
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className={i <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}
+          className={
+            i <= Math.round(value) ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"
+          }
           style={{ width: size, height: size }}
         />
       ))}
@@ -1292,7 +1404,9 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
   const summary = useQuery({
     queryKey: ["doctor-rating-summary", doctorId],
     queryFn: async (): Promise<SummaryRow> => {
-      const { data, error } = await supabase.rpc("get_public_doctor_rating_summary", { _doctor_id: doctorId });
+      const { data, error } = await supabase.rpc("get_public_doctor_rating_summary", {
+        _doctor_id: doctorId,
+      });
       if (error) throw error;
       const row = (data as any[])?.[0];
       return { average: row?.average ?? null, count: Number(row?.count ?? 0) };
@@ -1302,7 +1416,10 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
   const list = useQuery({
     queryKey: ["doctor-ratings", doctorId],
     queryFn: async (): Promise<RatingRow[]> => {
-      const { data, error } = await supabase.rpc("list_public_doctor_ratings", { _doctor_id: doctorId, _limit: 20 });
+      const { data, error } = await supabase.rpc("list_public_doctor_ratings", {
+        _doctor_id: doctorId,
+        _limit: 20,
+      });
       if (error) throw error;
       return (data as RatingRow[]) ?? [];
     },
@@ -1325,7 +1442,9 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
 
       <div className="rounded-2xl border border-border bg-card p-6 mb-4">
         {summary.isLoading ? (
-          <div className="text-sm text-muted-foreground">{ar ? "جاري التحميل..." : "Loading..."}</div>
+          <div className="text-sm text-muted-foreground">
+            {ar ? "جاري التحميل..." : "Loading..."}
+          </div>
         ) : count === 0 ? (
           <div className="text-sm text-muted-foreground">
             {ar ? "لا توجد تقييمات لهذا الطبيب بعد." : "No reviews for this doctor yet."}
@@ -1334,7 +1453,10 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
           <div className="flex items-center gap-5">
             <div className="text-center">
               <div className="text-4xl font-extrabold text-primary leading-none">
-                {Number(avg).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                {Number(avg).toLocaleString(locale, {
+                  minimumFractionDigits: 1,
+                  maximumFractionDigits: 1,
+                })}
               </div>
               <div className="mt-1 text-xs text-muted-foreground">{ar ? "من ٥" : "out of 5"}</div>
             </div>
@@ -1364,21 +1486,29 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
                       {r.patient_name || (ar ? "مريض" : "Patient")}
                     </div>
                     <div className="text-[11px] text-muted-foreground">
-                      {new Date(r.created_at).toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" })}
+                      {new Date(r.created_at).toLocaleDateString(locale, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
                     </div>
                   </div>
                 </div>
                 <Stars value={r.rating} />
               </div>
               {r.comment && (
-                <p className="text-sm text-muted-foreground leading-7 whitespace-pre-line">{r.comment}</p>
+                <p className="text-sm text-muted-foreground leading-7 whitespace-pre-line">
+                  {r.comment}
+                </p>
               )}
               {r.staff_reply && (
                 <div className="mt-3 rounded-lg bg-muted/50 border border-border p-3">
                   <div className="text-xs font-semibold text-primary mb-1">
                     {ar ? "رد المجمع" : "Clinic reply"}
                   </div>
-                  <p className="text-sm text-muted-foreground leading-6 whitespace-pre-line">{r.staff_reply}</p>
+                  <p className="text-sm text-muted-foreground leading-6 whitespace-pre-line">
+                    {r.staff_reply}
+                  </p>
                 </div>
               )}
             </div>
@@ -1390,8 +1520,12 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
               className="text-sm font-medium text-primary hover:underline"
             >
               {showAll
-                ? (ar ? "عرض أقل" : "Show less")
-                : (ar ? `عرض جميع المراجعات (${items.length})` : `Show all reviews (${items.length})`)}
+                ? ar
+                  ? "عرض أقل"
+                  : "Show less"
+                : ar
+                  ? `عرض جميع المراجعات (${items.length})`
+                  : `Show all reviews (${items.length})`}
             </button>
           )}
         </div>
@@ -1418,8 +1552,17 @@ function markImageReady(src: string): void {
   IMAGE_READY_CACHE.add(src);
 }
 
-function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: string; alt: string; lang: string }) {
-
+function DoctorGallery({
+  photos,
+  name,
+  alt,
+  lang,
+}: {
+  photos: string[];
+  name: string;
+  alt: string;
+  lang: string;
+}) {
   const ar = lang === "ar";
   const [active, setActive] = useState(0);
   const [open, setOpen] = useState(false);
@@ -1427,7 +1570,10 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
   const [showSpinner, setShowSpinner] = useState(false);
   // Delay the spinner ~180ms so cached images never flash it.
   useEffect(() => {
-    if (!lightboxLoading) { setShowSpinner(false); return; }
+    if (!lightboxLoading) {
+      setShowSpinner(false);
+      return;
+    }
     const t = window.setTimeout(() => setShowSpinner(true), 180);
     return () => window.clearTimeout(t);
   }, [lightboxLoading, active]);
@@ -1450,8 +1596,6 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
     prefetchAbortRef.current?.abort();
     prefetchAbortRef.current = null;
   };
-
-
 
   const openerRef = useRef<HTMLButtonElement>(null);
   const caption = `${alt} — ${ar ? "صورة" : "Photo"} ${active + 1} ${ar ? "من" : "of"} ${total}`;
@@ -1476,7 +1620,11 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.preventDefault(); setOpen(false); return; }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        setOpen(false);
+        return;
+      }
       if (total <= 1) return;
       const prevKey = ar ? "ArrowRight" : "ArrowLeft";
       const nextKey = ar ? "ArrowLeft" : "ArrowRight";
@@ -1486,18 +1634,15 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
         // of the render. The main prefetch effect handles the immediate neighbor.
         warmPhoto(photos[(active - 2 + total * 2) % total]);
         go(-1);
-      }
-      else if (e.key === nextKey) {
+      } else if (e.key === nextKey) {
         e.preventDefault();
         warmPhoto(photos[(active + 2) % total]);
         go(1);
-      }
-      else if (e.key === "Home") {
+      } else if (e.key === "Home") {
         e.preventDefault();
         warmPhoto(photos[1 % total]);
         setActive(0);
-      }
-      else if (e.key === "End") {
+      } else if (e.key === "End") {
         e.preventDefault();
         warmPhoto(photos[(total - 2 + total) % total]);
         setActive(total - 1);
@@ -1516,7 +1661,6 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
     };
   }, [open, total, ar, active, photos]);
 
-
   // Prefetch neighboring images while the lightbox is open so navigation
   // between photos feels instant. Uses fetch() with an AbortController so
   // rapid navigation cancels in-flight warm-ups instead of piling up.
@@ -1526,14 +1670,8 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
     const controller = new AbortController();
     prefetchAbortRef.current = controller;
     const neighbors = Array.from(
-      new Set([
-        photos[(active + 1) % total],
-        photos[(active - 1 + total) % total],
-      ]),
-    ).filter(
-      (src): src is string =>
-        Boolean(src) && src !== photos[active] && !isImageReady(src),
-    );
+      new Set([photos[(active + 1) % total], photos[(active - 1 + total) % total]]),
+    ).filter((src): src is string => Boolean(src) && src !== photos[active] && !isImageReady(src));
 
     neighbors.forEach((src) => {
       // `force-cache` populates the HTTP cache so the subsequent <img>
@@ -1558,11 +1696,7 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
         prefetchAbortRef.current = null;
       }
     };
-
   }, [open, active, total, photos]);
-
-
-
 
   return (
     <div>
@@ -1585,7 +1719,6 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
           widths={[480, 768, 1024, 1440]}
           sizes="(min-width: 768px) 66vw, 100vw"
         />
-
       </button>
 
       <div
@@ -1636,7 +1769,10 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
           <button
             ref={closeBtnRef}
             type="button"
-            onClick={(e) => { e.stopPropagation(); setOpen(false); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(false);
+            }}
             className="absolute top-4 right-4 rounded-full bg-white/10 hover:bg-white/20 text-white p-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label={ar ? "إغلاق العارض (Esc)" : "Close viewer (Esc)"}
           >
@@ -1647,7 +1783,10 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
             <>
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); go(-1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(-1);
+                }}
                 className="absolute start-4 rounded-full bg-white/10 hover:bg-white/20 text-white p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label={ar ? "الصورة السابقة" : "Previous photo"}
                 aria-controls={descId}
@@ -1656,7 +1795,10 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
               </button>
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); go(1); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  go(1);
+                }}
                 className="absolute end-4 rounded-full bg-white/10 hover:bg-white/20 text-white p-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
                 aria-label={ar ? "الصورة التالية" : "Next photo"}
                 aria-controls={descId}
@@ -1726,8 +1868,7 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
             onWheel={(e) => {
               if (total <= 1) return;
               // Prefer horizontal wheel/trackpad motion; fall back to vertical.
-              const raw =
-                Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+              const raw = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
               if (raw === 0) return;
               const now = Date.now();
               // Reset accumulator if the user paused (new gesture).
@@ -1748,9 +1889,6 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
             aria-live="polite"
             aria-atomic="true"
           >
-
-
-
             <div className="relative">
               <ProgressiveImage
                 src={photos[active]}
@@ -1766,7 +1904,6 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
                   setLightboxLoading(loading);
                   if (!loading) markImageReady(photos[active]);
                 }}
-
               />
               {showSpinner && (
                 <div
@@ -1775,7 +1912,10 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
                   aria-live="polite"
                   aria-label={ar ? "جارٍ تحميل الصورة" : "Loading image"}
                 >
-                  <Loader2 className="h-10 w-10 animate-spin text-white/90 drop-shadow" aria-hidden />
+                  <Loader2
+                    className="h-10 w-10 animate-spin text-white/90 drop-shadow"
+                    aria-hidden
+                  />
                 </div>
               )}
             </div>
@@ -1806,9 +1946,15 @@ function DoctorGallery({ photos, name, alt, lang }: { photos: string[]; name: st
  */
 function withWidth(src: string, width: number): string {
   try {
-    const u = new URL(src, typeof window !== "undefined" ? window.location.href : "http://localhost");
+    const u = new URL(
+      src,
+      typeof window !== "undefined" ? window.location.href : "http://localhost",
+    );
     if (u.pathname.includes("/storage/v1/object/public/")) {
-      u.pathname = u.pathname.replace("/storage/v1/object/public/", "/storage/v1/render/image/public/");
+      u.pathname = u.pathname.replace(
+        "/storage/v1/object/public/",
+        "/storage/v1/render/image/public/",
+      );
     }
     if (u.pathname.includes("/storage/v1/render/image/public/")) {
       u.searchParams.set("width", String(width));
@@ -1871,10 +2017,7 @@ function ProgressiveImage({
     onLoadingChange?.(isLoading);
   }, [isLoading, onLoadingChange]);
 
-
   const srcSet = widths && widths.length ? buildSrcSet(src, widths) : undefined;
-
-
 
   return (
     <div
@@ -1909,5 +2052,4 @@ function ProgressiveImage({
       />
     </div>
   );
-
 }

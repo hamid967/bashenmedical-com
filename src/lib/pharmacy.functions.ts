@@ -60,7 +60,9 @@ export type PharmacyPrescription = {
 };
 
 const ONE_DAY = 86_400_000;
-function deriveInventory(row: Omit<InventoryItem, "expiry_status" | "stock_status">): InventoryItem {
+function deriveInventory(
+  row: Omit<InventoryItem, "expiry_status" | "stock_status">,
+): InventoryItem {
   let exp: InventoryItem["expiry_status"] = "none";
   if (row.expiry_date) {
     const days = Math.floor((new Date(row.expiry_date).getTime() - Date.now()) / ONE_DAY);
@@ -231,10 +233,13 @@ export const listPharmacyPrescriptions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => RxListInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { data: rows, error } = await context.supabase.rpc("list_pharmacy_prescriptions" as never, {
-      _branch_id: data.branchId ?? null,
-      _status: data.status,
-    } as never);
+    const { data: rows, error } = await context.supabase.rpc(
+      "list_pharmacy_prescriptions" as never,
+      {
+        _branch_id: data.branchId ?? null,
+        _status: data.status,
+      } as never,
+    );
     if (error) throw new Error(error.message);
     return (rows ?? []) as unknown as PharmacyPrescription[];
   });
@@ -251,13 +256,16 @@ export const reviewPrescription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => ReviewInput.parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("pharmacy_review_prescription" as never, {
-      _id: data.id,
-      _decision: data.decision,
-      _notes: data.notes ?? null,
-      _item_id: data.item_id ?? null,
-      _quantity: data.quantity ?? null,
-    } as never);
+    const { error } = await context.supabase.rpc(
+      "pharmacy_review_prescription" as never,
+      {
+        _id: data.id,
+        _decision: data.decision,
+        _notes: data.notes ?? null,
+        _item_id: data.item_id ?? null,
+        _quantity: data.quantity ?? null,
+      } as never,
+    );
     if (error) throw new Error(error.message);
     return { ok: true };
   });

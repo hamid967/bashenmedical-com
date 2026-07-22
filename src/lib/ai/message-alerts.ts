@@ -91,26 +91,20 @@ export function notifyMessageThresholds(input: {
   const t = input.thresholds ?? getMessageAlertThresholds();
 
   if (input.credits > t.creditsPerMessage && shouldFire(`credits:${input.surface ?? "x"}`)) {
-    toast.warning(
-      isAr ? "تكلفة رسالة مرتفعة" : "High message cost",
-      {
-        description: isAr
-          ? `استهلكت هذه الرسالة ${fmtCredits(input.credits)} اعتماد (الحد ${fmtCredits(t.creditsPerMessage)}). فكّر في اختصار السؤال أو استخدام طراز أخف.`
-          : `This message used ${fmtCredits(input.credits)} credits (limit ${fmtCredits(t.creditsPerMessage)}). Consider shortening the prompt or switching to a lighter model.`,
-        duration: 6000,
-      },
-    );
+    toast.warning(isAr ? "تكلفة رسالة مرتفعة" : "High message cost", {
+      description: isAr
+        ? `استهلكت هذه الرسالة ${fmtCredits(input.credits)} اعتماد (الحد ${fmtCredits(t.creditsPerMessage)}). فكّر في اختصار السؤال أو استخدام طراز أخف.`
+        : `This message used ${fmtCredits(input.credits)} credits (limit ${fmtCredits(t.creditsPerMessage)}). Consider shortening the prompt or switching to a lighter model.`,
+      duration: 6000,
+    });
   }
 
   if (input.elapsedMs > t.latencyMsPerMessage && shouldFire(`latency:${input.surface ?? "x"}`)) {
-    toast.warning(
-      isAr ? "زمن التوليد طويل" : "Slow generation",
-      {
-        description: isAr
-          ? `استغرقت هذه الرسالة ${fmtSeconds(input.elapsedMs)} ثانية (الحد ${fmtSeconds(t.latencyMsPerMessage)}). قد يكون الطراز مشغولًا — جرّب مرة أخرى أو استخدم طراز أسرع.`
-          : `This message took ${fmtSeconds(input.elapsedMs)}s (limit ${fmtSeconds(t.latencyMsPerMessage)}s). The model may be busy — retry or switch to a faster model.`,
-        duration: 6000,
-      },
-    );
+    toast.warning(isAr ? "زمن التوليد طويل" : "Slow generation", {
+      description: isAr
+        ? `استغرقت هذه الرسالة ${fmtSeconds(input.elapsedMs)} ثانية (الحد ${fmtSeconds(t.latencyMsPerMessage)}). قد يكون الطراز مشغولًا — جرّب مرة أخرى أو استخدم طراز أسرع.`
+        : `This message took ${fmtSeconds(input.elapsedMs)}s (limit ${fmtSeconds(t.latencyMsPerMessage)}s). The model may be busy — retry or switch to a faster model.`,
+      duration: 6000,
+    });
   }
 }

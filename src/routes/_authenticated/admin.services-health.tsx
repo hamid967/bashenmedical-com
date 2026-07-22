@@ -7,8 +7,19 @@ import { useServerFn } from "@tanstack/react-start";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import type React from "react";
 import { Suspense } from "react";
-import { AlertTriangle, CheckCircle2, CircleDashed, HelpCircle, RefreshCw, XCircle } from "lucide-react";
-import { getServicesHealth, type ServiceHealth, type ServiceHealthStatus } from "@/lib/admin/services-health.functions";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  CircleDashed,
+  HelpCircle,
+  RefreshCw,
+  XCircle,
+} from "lucide-react";
+import {
+  getServicesHealth,
+  type ServiceHealth,
+  type ServiceHealthStatus,
+} from "@/lib/admin/services-health.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -116,8 +127,12 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
       </CardHeader>
       <CardContent className="space-y-2 text-sm">
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span>نجاح/ساعة: <b className="text-foreground">{service.success_1h}</b></span>
-          <span>أخطاء/ساعة: <b className="text-foreground">{service.error_1h}</b></span>
+          <span>
+            نجاح/ساعة: <b className="text-foreground">{service.success_1h}</b>
+          </span>
+          <span>
+            أخطاء/ساعة: <b className="text-foreground">{service.error_1h}</b>
+          </span>
         </div>
         <div className="text-xs text-muted-foreground">
           آخر حدث: {service.last_event_at ? new Date(service.last_event_at).toLocaleString() : "—"}
@@ -147,11 +162,31 @@ function ServiceCard({ service }: { service: ServiceHealth }) {
 
 function StatusBadge({ status }: { status: ServiceHealthStatus }) {
   const map: Record<ServiceHealthStatus, { label: string; icon: React.ReactNode; cls: string }> = {
-    ok: { label: "سليم", icon: <CheckCircle2 className="h-3.5 w-3.5" />, cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30" },
-    degraded: { label: "متدهور", icon: <AlertTriangle className="h-3.5 w-3.5" />, cls: "bg-amber-500/10 text-amber-600 border-amber-500/30" },
-    down: { label: "متعطّل", icon: <XCircle className="h-3.5 w-3.5" />, cls: "bg-destructive/10 text-destructive border-destructive/30" },
-    idle: { label: "خامل", icon: <CircleDashed className="h-3.5 w-3.5" />, cls: "bg-muted text-muted-foreground border-border" },
-    unknown: { label: "غير معروف", icon: <HelpCircle className="h-3.5 w-3.5" />, cls: "bg-muted text-muted-foreground border-border" },
+    ok: {
+      label: "سليم",
+      icon: <CheckCircle2 className="h-3.5 w-3.5" />,
+      cls: "bg-emerald-500/10 text-emerald-600 border-emerald-500/30",
+    },
+    degraded: {
+      label: "متدهور",
+      icon: <AlertTriangle className="h-3.5 w-3.5" />,
+      cls: "bg-amber-500/10 text-amber-600 border-amber-500/30",
+    },
+    down: {
+      label: "متعطّل",
+      icon: <XCircle className="h-3.5 w-3.5" />,
+      cls: "bg-destructive/10 text-destructive border-destructive/30",
+    },
+    idle: {
+      label: "خامل",
+      icon: <CircleDashed className="h-3.5 w-3.5" />,
+      cls: "bg-muted text-muted-foreground border-border",
+    },
+    unknown: {
+      label: "غير معروف",
+      icon: <HelpCircle className="h-3.5 w-3.5" />,
+      cls: "bg-muted text-muted-foreground border-border",
+    },
   };
   const m = map[status];
   return (

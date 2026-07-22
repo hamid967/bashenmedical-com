@@ -8,10 +8,7 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import {
-  listOwnerMedia,
-  uploadOwnerMedia,
-} from "@/lib/owner/media.functions";
+import { listOwnerMedia, uploadOwnerMedia } from "@/lib/owner/media.functions";
 import {
   Dialog,
   DialogContent,
@@ -146,7 +143,11 @@ export function MediaPicker({
               disabled={uploading}
               size="sm"
             >
-              {uploading ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : <Upload className="h-4 w-4 ml-1" />}
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin ml-1" />
+              ) : (
+                <Upload className="h-4 w-4 ml-1" />
+              )}
               رفع صورة
             </Button>
           </div>
@@ -208,8 +209,12 @@ export function MediaPicker({
         )}
 
         <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>إلغاء</Button>
-          <Button onClick={confirm} disabled={!selected}>إدراج الصورة</Button>
+          <Button variant="ghost" onClick={() => onOpenChange(false)}>
+            إلغاء
+          </Button>
+          <Button onClick={confirm} disabled={!selected}>
+            إدراج الصورة
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

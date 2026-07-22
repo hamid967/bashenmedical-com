@@ -13,7 +13,9 @@ import { toast } from "sonner";
 import { MediaPicker, type PickedMedia } from "@/components/owner/MediaPicker";
 
 export const Route = createFileRoute("/_authenticated/owner/pages/$id")({
-  head: () => ({ meta: [{ title: "تحرير صفحة · Site Builder" }, { name: "robots", content: "noindex,nofollow" }] }),
+  head: () => ({
+    meta: [{ title: "تحرير صفحة · Site Builder" }, { name: "robots", content: "noindex,nofollow" }],
+  }),
   component: PageEditor,
 });
 
@@ -32,10 +34,17 @@ type Form = {
 };
 
 const EMPTY: Form = {
-  slug: "", title_ar: "", title_en: "",
-  content_ar: "", content_en: "",
-  seo_title: "", seo_description: "", og_image: "",
-  status: "draft", show_in_nav: false, nav_order: 0,
+  slug: "",
+  title_ar: "",
+  title_en: "",
+  content_ar: "",
+  content_en: "",
+  seo_title: "",
+  seo_description: "",
+  og_image: "",
+  status: "draft",
+  show_in_nav: false,
+  nav_order: 0,
 };
 
 function PageEditor() {
@@ -52,8 +61,9 @@ function PageEditor() {
 
   // Media picker state
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [pickerTarget, setPickerTarget] =
-    useState<"content_ar" | "content_en" | "og_image" | null>(null);
+  const [pickerTarget, setPickerTarget] = useState<"content_ar" | "content_en" | "og_image" | null>(
+    null,
+  );
   const arRef = useRef<HTMLTextAreaElement>(null);
   const enRef = useRef<HTMLTextAreaElement>(null);
 
@@ -138,22 +148,33 @@ function PageEditor() {
     }
   }
 
-  if (loading) return <div className="p-8 text-center text-slate-500" dir="rtl">جاري التحميل…</div>;
+  if (loading)
+    return (
+      <div className="p-8 text-center text-slate-500" dir="rtl">
+        جاري التحميل…
+      </div>
+    );
 
   return (
     <div className="p-6 md:p-8 max-w-5xl" dir="rtl">
       <div className="flex items-center justify-between mb-6 gap-3">
         <div className="flex items-center gap-3">
           <Button asChild variant="ghost" size="icon">
-            <Link to="/owner/pages"><ArrowRight className="h-4 w-4" /></Link>
+            <Link to="/owner/pages">
+              <ArrowRight className="h-4 w-4" />
+            </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">{isNew ? "صفحة جديدة" : form.title_ar || "تحرير الصفحة"}</h1>
+            <h1 className="text-2xl font-bold text-slate-900">
+              {isNew ? "صفحة جديدة" : form.title_ar || "تحرير الصفحة"}
+            </h1>
             {!isNew && <div className="text-xs text-slate-500 font-mono mt-1">/p/{form.slug}</div>}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => submit("draft")} disabled={saving}>حفظ كمسودّة</Button>
+          <Button variant="outline" onClick={() => submit("draft")} disabled={saving}>
+            حفظ كمسودّة
+          </Button>
           <Button onClick={() => submit("published")} disabled={saving}>
             <Save className="h-4 w-4 ml-1" /> {saving ? "…" : "نشر"}
           </Button>
@@ -164,8 +185,15 @@ function PageEditor() {
         <div className="lg:col-span-2 bg-white rounded-xl border shadow-sm p-5 space-y-4">
           <div>
             <Label>الرابط (Slug)</Label>
-            <Input dir="ltr" value={form.slug} onChange={(e) => up("slug", e.target.value.toLowerCase())} placeholder="about-us" />
-            <p className="text-xs text-slate-500 mt-1">يظهر في العنوان: <span className="font-mono">/p/{form.slug || "your-slug"}</span></p>
+            <Input
+              dir="ltr"
+              value={form.slug}
+              onChange={(e) => up("slug", e.target.value.toLowerCase())}
+              placeholder="about-us"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              يظهر في العنوان: <span className="font-mono">/p/{form.slug || "your-slug"}</span>
+            </p>
           </div>
 
           <Tabs defaultValue="ar">
@@ -181,28 +209,55 @@ function PageEditor() {
               <div>
                 <div className="flex items-center justify-between">
                   <Label>المحتوى (عربي)</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={() => openPicker("content_ar")}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openPicker("content_ar")}
+                  >
                     <ImagePlus className="h-4 w-4 ml-1" /> إدراج صورة
                   </Button>
                 </div>
-                <Textarea ref={arRef} value={form.content_ar} onChange={(e) => up("content_ar", e.target.value)}
-                  rows={18} className="font-mono text-sm mt-2" placeholder="يدعم Markdown أو HTML بسيط — استخدم ![alt](url) للصور" />
+                <Textarea
+                  ref={arRef}
+                  value={form.content_ar}
+                  onChange={(e) => up("content_ar", e.target.value)}
+                  rows={18}
+                  className="font-mono text-sm mt-2"
+                  placeholder="يدعم Markdown أو HTML بسيط — استخدم ![alt](url) للصور"
+                />
               </div>
             </TabsContent>
             <TabsContent value="en" className="space-y-3 pt-3">
               <div>
                 <Label>Title (EN)</Label>
-                <Input dir="ltr" value={form.title_en} onChange={(e) => up("title_en", e.target.value)} />
+                <Input
+                  dir="ltr"
+                  value={form.title_en}
+                  onChange={(e) => up("title_en", e.target.value)}
+                />
               </div>
               <div>
                 <div className="flex items-center justify-between">
                   <Label>Content (EN)</Label>
-                  <Button type="button" variant="outline" size="sm" onClick={() => openPicker("content_en")}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => openPicker("content_en")}
+                  >
                     <ImagePlus className="h-4 w-4 ml-1" /> Insert image
                   </Button>
                 </div>
-                <Textarea ref={enRef} dir="ltr" value={form.content_en} onChange={(e) => up("content_en", e.target.value)}
-                  rows={18} className="font-mono text-sm mt-2" placeholder="Markdown or simple HTML — use ![alt](url) for images" />
+                <Textarea
+                  ref={enRef}
+                  dir="ltr"
+                  value={form.content_en}
+                  onChange={(e) => up("content_en", e.target.value)}
+                  rows={18}
+                  className="font-mono text-sm mt-2"
+                  placeholder="Markdown or simple HTML — use ![alt](url) for images"
+                />
               </div>
             </TabsContent>
           </Tabs>
@@ -217,8 +272,12 @@ function PageEditor() {
             </div>
             <div>
               <Label>ترتيب في القائمة</Label>
-              <Input type="number" min={0} value={form.nav_order}
-                onChange={(e) => up("nav_order", Number(e.target.value) || 0)} />
+              <Input
+                type="number"
+                min={0}
+                value={form.nav_order}
+                onChange={(e) => up("nav_order", Number(e.target.value) || 0)}
+              />
             </div>
           </div>
 
@@ -226,22 +285,46 @@ function PageEditor() {
             <h3 className="font-semibold text-slate-900">SEO</h3>
             <div>
               <Label>عنوان SEO</Label>
-              <Input value={form.seo_title} onChange={(e) => up("seo_title", e.target.value)} maxLength={200} />
+              <Input
+                value={form.seo_title}
+                onChange={(e) => up("seo_title", e.target.value)}
+                maxLength={200}
+              />
             </div>
             <div>
               <Label>وصف SEO</Label>
-              <Textarea rows={3} value={form.seo_description} onChange={(e) => up("seo_description", e.target.value)} maxLength={500} />
+              <Textarea
+                rows={3}
+                value={form.seo_description}
+                onChange={(e) => up("seo_description", e.target.value)}
+                maxLength={500}
+              />
             </div>
             <div>
               <Label>صورة OG (رابط)</Label>
               <div className="flex gap-2 mt-1">
-                <Input dir="ltr" value={form.og_image} onChange={(e) => up("og_image", e.target.value)} placeholder="https://…" />
-                <Button type="button" variant="outline" size="icon" onClick={() => openPicker("og_image")} title="اختيار من مكتبة الوسائط">
+                <Input
+                  dir="ltr"
+                  value={form.og_image}
+                  onChange={(e) => up("og_image", e.target.value)}
+                  placeholder="https://…"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => openPicker("og_image")}
+                  title="اختيار من مكتبة الوسائط"
+                >
                   <ImagePlus className="h-4 w-4" />
                 </Button>
               </div>
               {form.og_image && (
-                <img src={form.og_image} alt="OG preview" className="mt-2 w-full h-32 object-cover rounded-md border" />
+                <img
+                  src={form.og_image}
+                  alt="OG preview"
+                  className="mt-2 w-full h-32 object-cover rounded-md border"
+                />
               )}
             </div>
           </div>

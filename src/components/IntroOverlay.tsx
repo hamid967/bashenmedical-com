@@ -2,8 +2,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "@tanstack/react-router";
 import {
-  ShieldCheck, Users, Activity, Award, Building2,
-  Clock, Star, ClipboardList, Info, Stethoscope, CalendarCheck,
+  ShieldCheck,
+  Users,
+  Activity,
+  Award,
+  Building2,
+  Clock,
+  Star,
+  ClipboardList,
+  Info,
+  Stethoscope,
+  CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -12,8 +21,10 @@ import { trackEvent } from "@/lib/analytics";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import introNarrationAsset from "@/assets/intro-narration-ar.mp3.asset.json";
 import {
-  DEFAULT_INTRO_SETTINGS, resolveIcon,
-  type IntroSettingsRow, type SceneKey,
+  DEFAULT_INTRO_SETTINGS,
+  resolveIcon,
+  type IntroSettingsRow,
+  type SceneKey,
 } from "@/lib/intro-config";
 import { LazyImage, LazyVideo } from "@/components/LazyMedia";
 import { prefetchMedia, prefetchCompletedBefore, getPrefetchStatus } from "@/lib/media-prefetch";
@@ -21,18 +32,12 @@ import { prefetchMedia, prefetchCompletedBefore, getPrefetchStatus } from "@/lib
 const bmcLogo = bmcLogoAsset.url;
 const introNarrationUrl = introNarrationAsset.url;
 
-
 const SESSION_KEY = "baeshen_intro_seen_v3";
 const DISABLE_KEY = "baeshen_intro_disabled";
 const ANALYTICS_STATE_KEY = "baeshen_intro_analytics_v1";
 
 type IntroOutcome =
-  | "skip"
-  | "complete"
-  | "cta_book"
-  | "cta_services"
-  | "disabled_forever"
-  | "reduced_motion_close";
+  "skip" | "complete" | "cta_book" | "cta_services" | "disabled_forever" | "reduced_motion_close";
 
 type IntroAnalyticsState = {
   shown_at: number;
@@ -83,8 +88,12 @@ const TOTAL_MS = 30_000;
 // Resolved service / stat shapes used by the scene components
 // ---------------------------------------------------------------------------
 type IntroService = {
-  id: string; titleAr: string; titleEn: string; Icon: LucideIcon;
-  image?: string; video?: string;
+  id: string;
+  titleAr: string;
+  titleEn: string;
+  Icon: LucideIcon;
+  image?: string;
+  video?: string;
 };
 type Stat = {
   id: string;
@@ -102,7 +111,11 @@ type Stat = {
 function useIntroPreferences() {
   const [disabled, setDisabled] = useState(false);
   useEffect(() => {
-    try { setDisabled(localStorage.getItem(DISABLE_KEY) === "1"); } catch { /* noop */ }
+    try {
+      setDisabled(localStorage.getItem(DISABLE_KEY) === "1");
+    } catch {
+      /* noop */
+    }
   }, []);
   return { disabled };
 }
@@ -126,12 +139,23 @@ function useIntroSettings(enabled: boolean): IntroSettingsRow {
       setSettings({
         ...DEFAULT_INTRO_SETTINGS,
         ...row,
-        services: Array.isArray(row.services) && row.services.length ? row.services : DEFAULT_INTRO_SETTINGS.services,
-        stat_metrics: Array.isArray(row.stat_metrics) && row.stat_metrics.length ? row.stat_metrics : DEFAULT_INTRO_SETTINGS.stat_metrics,
-        scene_order: Array.isArray(row.scene_order) && row.scene_order.length ? row.scene_order : DEFAULT_INTRO_SETTINGS.scene_order,
+        services:
+          Array.isArray(row.services) && row.services.length
+            ? row.services
+            : DEFAULT_INTRO_SETTINGS.services,
+        stat_metrics:
+          Array.isArray(row.stat_metrics) && row.stat_metrics.length
+            ? row.stat_metrics
+            : DEFAULT_INTRO_SETTINGS.stat_metrics,
+        scene_order:
+          Array.isArray(row.scene_order) && row.scene_order.length
+            ? row.scene_order
+            : DEFAULT_INTRO_SETTINGS.scene_order,
       });
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [enabled]);
   return settings;
 }
@@ -148,9 +172,14 @@ function usePublicClinicStatistics(enabled: boolean, settings: IntroSettingsRow)
       let doctorsCount: number | null = null;
       if (needsDoctors) {
         try {
-          const r = await supabase.from("doctors").select("id", { count: "exact", head: true }).eq("is_active", true);
-          doctorsCount = r.error ? null : r.count ?? null;
-        } catch { doctorsCount = null; }
+          const r = await supabase
+            .from("doctors")
+            .select("id", { count: "exact", head: true })
+            .eq("is_active", true);
+          doctorsCount = r.error ? null : (r.count ?? null);
+        } catch {
+          doctorsCount = null;
+        }
       }
       if (cancelled) return;
       const now = Date.now();
@@ -158,7 +187,10 @@ function usePublicClinicStatistics(enabled: boolean, settings: IntroSettingsRow)
       for (const m of settings.stat_metrics) {
         let value: number | null = m.value ?? null;
         let updated = updatedAtMs;
-        if (m.live && m.id === "doctors") { value = doctorsCount; updated = now; }
+        if (m.live && m.id === "doctors") {
+          value = doctorsCount;
+          updated = now;
+        }
         if (value == null || value <= 0) continue;
         out.push({
           id: m.id,
@@ -175,7 +207,9 @@ function usePublicClinicStatistics(enabled: boolean, settings: IntroSettingsRow)
       }
       setStats(out);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [enabled, settings, updatedAtMs]);
   return stats;
 }
@@ -183,14 +217,14 @@ function usePublicClinicStatistics(enabled: boolean, settings: IntroSettingsRow)
 function formatUpdatedAt(ms: number): string {
   try {
     return new Intl.DateTimeFormat("ar-SA", {
-      year: "numeric", month: "long", day: "numeric",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     }).format(new Date(ms));
   } catch {
     return new Date(ms).toLocaleDateString();
   }
 }
-
-
 
 // ---------------------------------------------------------------------------
 // Small helpers
@@ -211,7 +245,15 @@ function useTicker(active: boolean) {
   return ms;
 }
 
-function Counter({ value, prefix = "", suffix = "" }: { value: number; prefix?: string; suffix?: string }) {
+function Counter({
+  value,
+  prefix = "",
+  suffix = "",
+}: {
+  value: number;
+  prefix?: string;
+  suffix?: string;
+}) {
   const [n, setN] = useState(0);
   useEffect(() => {
     const start = performance.now();
@@ -225,7 +267,13 @@ function Counter({ value, prefix = "", suffix = "" }: { value: number; prefix?: 
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
   }, [value]);
-  return <span>{prefix}{n.toLocaleString("ar-EG")}{suffix}</span>;
+  return (
+    <span>
+      {prefix}
+      {n.toLocaleString("ar-EG")}
+      {suffix}
+    </span>
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -255,28 +303,45 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
   const navigate = useNavigate();
 
   const [announcedScene, setAnnouncedScene] = useState<string>("");
-  const sceneLabels: Record<string, string> = useMemo(() => ({
-    pulse: "المشهد الأول: نبض من قلب صبيا",
-    brand: "المشهد الثاني: هوية مجمع باعشن الطبي",
-    services: "المشهد الثالث: خدماتنا الطبية",
-    stats: "المشهد الرابع: أرقامنا",
-    booking: "المشهد الخامس: خطوات الحجز",
-    final: "المشهد الأخير: احجز موعدك الآن",
-    reduced: "مقدمة مختصرة لمجمع باعشن الطبي",
-  }), []);
+  const sceneLabels: Record<string, string> = useMemo(
+    () => ({
+      pulse: "المشهد الأول: نبض من قلب صبيا",
+      brand: "المشهد الثاني: هوية مجمع باعشن الطبي",
+      services: "المشهد الثالث: خدماتنا الطبية",
+      stats: "المشهد الرابع: أرقامنا",
+      booking: "المشهد الخامس: خطوات الحجز",
+      final: "المشهد الأخير: احجز موعدك الآن",
+      reduced: "مقدمة مختصرة لمجمع باعشن الطبي",
+    }),
+    [],
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (disabled) return;
-    try { if (sessionStorage.getItem(SESSION_KEY)) return; } catch { /* noop */ }
+    try {
+      if (sessionStorage.getItem(SESSION_KEY)) return;
+    } catch {
+      /* noop */
+    }
     setVisible(true);
   }, [disabled]);
 
   const ms = useTicker(visible && !prefersReducedMotion);
-  useEffect(() => { msRef.current = ms; }, [ms]);
+  useEffect(() => {
+    msRef.current = ms;
+  }, [ms]);
   const settings = useIntroSettings(visible);
   const services: IntroService[] = useMemo(
-    () => settings.services.map((s) => ({ id: s.id, titleAr: s.titleAr, titleEn: s.titleEn, Icon: resolveIcon(s.icon, Stethoscope), image: s.image, video: s.video })),
+    () =>
+      settings.services.map((s) => ({
+        id: s.id,
+        titleAr: s.titleAr,
+        titleEn: s.titleEn,
+        Icon: resolveIcon(s.icon, Stethoscope),
+        image: s.image,
+        video: s.video,
+      })),
     [settings],
   );
   const stats = usePublicClinicStatistics(visible, settings);
@@ -299,7 +364,6 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
     if (parts.length) setStatsAnnouncement(`تحديث الإحصائيات: ${parts.join("، ")}`);
   }, [visible, currentScene, stats]);
 
-
   // Fire `intro_shown` once per session when the overlay first appears
   useEffect(() => {
     if (!visible || shownFiredRef.current) return;
@@ -317,7 +381,11 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
   const finish = (reason: IntroOutcome = "complete", target?: string) => {
     if (fading) return;
     setFading(true);
-    try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* noop */ }
+    try {
+      sessionStorage.setItem(SESSION_KEY, "1");
+    } catch {
+      /* noop */
+    }
     stopHeartbeat();
 
     if (!outcomeFiredRef.current) {
@@ -363,34 +431,50 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
 
   const startHeartbeat = () => {
     try {
-      const Ctx = (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext);
+      const Ctx =
+        window.AudioContext ||
+        (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!Ctx) return;
       const ctx = audioCtxRef.current ?? new Ctx();
       audioCtxRef.current = ctx;
       const beat = (delay: number, freq = 60, gain = 0.22) => {
         const o = ctx.createOscillator();
         const g = ctx.createGain();
-        o.type = "sine"; o.frequency.value = freq;
+        o.type = "sine";
+        o.frequency.value = freq;
         const now = ctx.currentTime + delay;
         g.gain.setValueAtTime(0.0001, now);
         g.gain.exponentialRampToValueAtTime(gain, now + 0.02);
         g.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
         o.connect(g).connect(ctx.destination);
-        o.start(now); o.stop(now + 0.3);
+        o.start(now);
+        o.stop(now + 0.3);
       };
-      const cycle = () => { beat(0, 62, 0.24); beat(0.2, 55, 0.18); };
+      const cycle = () => {
+        beat(0, 62, 0.24);
+        beat(0.2, 55, 0.18);
+      };
       cycle();
       heartbeatTimerRef.current = window.setInterval(cycle, 1000);
       setAudioReady(true);
     } catch (err) {
       console.warn("[IntroOverlay] audio unavailable:", err);
-      setAudioFailed(true); setAudioReady(false); setMuted(true);
+      setAudioFailed(true);
+      setAudioReady(false);
+      setMuted(true);
     }
   };
 
   const stopHeartbeat = () => {
-    if (heartbeatTimerRef.current) { window.clearInterval(heartbeatTimerRef.current); heartbeatTimerRef.current = null; }
-    try { audioCtxRef.current?.close(); } catch { /* noop */ }
+    if (heartbeatTimerRef.current) {
+      window.clearInterval(heartbeatTimerRef.current);
+      heartbeatTimerRef.current = null;
+    }
+    try {
+      audioCtxRef.current?.close();
+    } catch {
+      /* noop */
+    }
     audioCtxRef.current = null;
     setAudioReady(false);
   };
@@ -402,23 +486,32 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
       el.currentTime = 0;
       el.volume = 0.9;
       void el.play().catch(() => {});
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   };
   const stopNarration = () => {
-    try { narrationRef.current?.pause(); } catch { /* noop */ }
+    try {
+      narrationRef.current?.pause();
+    } catch {
+      /* noop */
+    }
     setCaption("");
   };
 
   // Time-synced Arabic captions for the narration audio (total ≈ 21.4s).
-  const NARRATION_CUES: Array<{ t: number; text: string }> = useMemo(() => ([
-    { t: 0.0,  text: "من قلب صبيا… تبدأ رعايتنا" },
-    { t: 3.6,  text: "مجمع باعشن الطبي" },
-    { t: 6.2,  text: "صحتك… أولويتنا" },
-    { t: 8.8,  text: "رعاية متكاملة، فريق من الاستشاريين" },
-    { t: 13.4, text: "وخدمات تخصصية على مدار الأسبوع" },
-    { t: 17.6, text: "احجز موعدك الآن" },
-    { t: 21.4, text: "" },
-  ]), []);
+  const NARRATION_CUES: Array<{ t: number; text: string }> = useMemo(
+    () => [
+      { t: 0.0, text: "من قلب صبيا… تبدأ رعايتنا" },
+      { t: 3.6, text: "مجمع باعشن الطبي" },
+      { t: 6.2, text: "صحتك… أولويتنا" },
+      { t: 8.8, text: "رعاية متكاملة، فريق من الاستشاريين" },
+      { t: 13.4, text: "وخدمات تخصصية على مدار الأسبوع" },
+      { t: 17.6, text: "احجز موعدك الآن" },
+      { t: 21.4, text: "" },
+    ],
+    [],
+  );
 
   useEffect(() => {
     const el = narrationRef.current;
@@ -427,7 +520,8 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
       const now = el.currentTime;
       let active = "";
       for (const cue of NARRATION_CUES) {
-        if (now >= cue.t) active = cue.text; else break;
+        if (now >= cue.t) active = cue.text;
+        else break;
       }
       setCaption((prev) => (prev === active ? prev : active));
     };
@@ -441,11 +535,24 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
   }, [NARRATION_CUES]);
 
   const toggleMute = () => {
-    if (muted) { startHeartbeat(); playNarration(); setMuted(false); }
-    else { stopHeartbeat(); stopNarration(); setMuted(true); }
+    if (muted) {
+      startHeartbeat();
+      playNarration();
+      setMuted(false);
+    } else {
+      stopHeartbeat();
+      stopNarration();
+      setMuted(true);
+    }
   };
 
-  useEffect(() => () => { stopHeartbeat(); stopNarration(); }, []);
+  useEffect(
+    () => () => {
+      stopHeartbeat();
+      stopNarration();
+    },
+    [],
+  );
 
   // Focus management: capture previous focus on open, focus Skip button,
   // restore focus on close. Also close on Escape.
@@ -456,7 +563,10 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
     // Defer to next frame so the element is mounted and focusable
     const raf = requestAnimationFrame(() => target?.focus());
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { e.preventDefault(); finish("skip", undefined); }
+      if (e.key === "Escape") {
+        e.preventDefault();
+        finish("skip", undefined);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => {
@@ -464,26 +574,37 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
       window.removeEventListener("keydown", onKey);
       const prev = previousFocusRef.current;
       if (prev && typeof prev.focus === "function") {
-        try { prev.focus(); } catch { /* noop */ }
+        try {
+          prev.focus();
+        } catch {
+          /* noop */
+        }
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, prefersReducedMotion]);
 
   const disableForever = () => {
-    try { localStorage.setItem(DISABLE_KEY, "1"); } catch { /* noop */ }
+    try {
+      localStorage.setItem(DISABLE_KEY, "1");
+    } catch {
+      /* noop */
+    }
     finish("disabled_forever");
   };
 
   // Timeline windows (ms)
-  const T = useMemo<Record<SceneKey, number[]>>(() => ({
-    pulse:   [0,     4000],
-    brand:   [4000,  8000],
-    services:[8000,  16000],
-    stats:   [16000, 23000],
-    booking: [23000, 27000],
-    final:   [27000, 30000],
-  }), []);
+  const T = useMemo<Record<SceneKey, number[]>>(
+    () => ({
+      pulse: [0, 4000],
+      brand: [4000, 8000],
+      services: [8000, 16000],
+      stats: [16000, 23000],
+      booking: [23000, 27000],
+      final: [27000, 30000],
+    }),
+    [],
+  );
 
   const inWindow = (w: number[]) => ms >= w[0] && ms < w[1];
 
@@ -512,7 +633,9 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
       return out;
     }
     if (key === "stats") {
-      return stats.filter((s) => s.image).map((s) => ({ url: s.image as string, kind: "image" as const }));
+      return stats
+        .filter((s) => s.image)
+        .map((s) => ({ url: s.image as string, kind: "image" as const }));
     }
     return [];
   };
@@ -531,54 +654,64 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
     const container = scenesContainerRef.current;
     if (!container || typeof IntersectionObserver === "undefined") return;
     const order = settings.scene_order;
-    const io = new IntersectionObserver((entries) => {
-      for (const e of entries) {
-        if (!e.isIntersecting) continue;
-        const key = (e.target as HTMLElement).dataset.scene as SceneKey | undefined;
-        if (!key) continue;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (!e.isIntersecting) continue;
+          const key = (e.target as HTMLElement).dataset.scene as SceneKey | undefined;
+          if (!key) continue;
 
-        // Report how this scene's own media was prefetched vs mount time.
-        const mountAt = performance.now();
-        const urls = sceneMediaFor(key);
-        if (urls.length) {
-          let completed = 0;
-          let inFlight = 0;
-          let notStarted = 0;
-          let maxPrefetchMs = 0;
-          for (const u of urls) {
-            const st = getPrefetchStatus(u.url);
-            if (!st) { notStarted += 1; continue; }
-            if (prefetchCompletedBefore(u.url, mountAt)) {
-              completed += 1;
-              if (st.completedAt) maxPrefetchMs = Math.max(maxPrefetchMs, st.completedAt - st.startedAt);
-            } else {
-              inFlight += 1;
+          // Report how this scene's own media was prefetched vs mount time.
+          const mountAt = performance.now();
+          const urls = sceneMediaFor(key);
+          if (urls.length) {
+            let completed = 0;
+            let inFlight = 0;
+            let notStarted = 0;
+            let maxPrefetchMs = 0;
+            for (const u of urls) {
+              const st = getPrefetchStatus(u.url);
+              if (!st) {
+                notStarted += 1;
+                continue;
+              }
+              if (prefetchCompletedBefore(u.url, mountAt)) {
+                completed += 1;
+                if (st.completedAt)
+                  maxPrefetchMs = Math.max(maxPrefetchMs, st.completedAt - st.startedAt);
+              } else {
+                inFlight += 1;
+              }
             }
+            trackEvent("intro_scene_prefetch_report", {
+              scene: key,
+              total: urls.length,
+              completed,
+              in_flight: inFlight,
+              not_started: notStarted,
+              all_ready_before_mount: completed === urls.length,
+              max_prefetch_ms: Math.round(maxPrefetchMs),
+            });
           }
-          trackEvent("intro_scene_prefetch_report", {
-            scene: key,
-            total: urls.length,
-            completed,
-            in_flight: inFlight,
-            not_started: notStarted,
-            all_ready_before_mount: completed === urls.length,
-            max_prefetch_ms: Math.round(maxPrefetchMs),
-          });
-        }
 
-        const idx = order.indexOf(key);
-        const next = order[idx + 1];
-        if (next) runPrefetch(next);
-        io.unobserve(e.target);
-      }
-    }, { root: null, threshold: 0.1 });
+          const idx = order.indexOf(key);
+          const next = order[idx + 1];
+          if (next) runPrefetch(next);
+          io.unobserve(e.target);
+        }
+      },
+      { root: null, threshold: 0.1 },
+    );
     const observeAll = () => {
       container.querySelectorAll<HTMLElement>("[data-scene]").forEach((el) => io.observe(el));
     };
     observeAll();
     const mo = new MutationObserver(() => observeAll());
     mo.observe(container, { childList: true, subtree: true });
-    return () => { io.disconnect(); mo.disconnect(); };
+    return () => {
+      io.disconnect();
+      mo.disconnect();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, prefersReducedMotion, prefetchEnabled, settings.scene_order, services, stats]);
 
@@ -592,10 +725,16 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
       if (ms >= win[0] - LEAD_MS && ms < win[1]) runPrefetch(key);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [visible, prefersReducedMotion, prefetchEnabled, LEAD_MS, ms, settings.scene_order, services, stats]);
-
-
-
+  }, [
+    visible,
+    prefersReducedMotion,
+    prefetchEnabled,
+    LEAD_MS,
+    ms,
+    settings.scene_order,
+    services,
+    stats,
+  ]);
 
   if (!visible) return null;
 
@@ -610,10 +749,28 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
         className="fixed inset-0 z-[9999] flex flex-col items-center justify-center gap-6 px-6"
         style={{ background: CHARCOAL }}
       >
-        {logoFailed ? <LogoTextFallback /> : (
-          <img src={bmcLogo} alt="مجمع باعشن الطبي" onError={() => setLogoFailed(true)} className="w-44 h-44 object-contain" width={176} height={176} loading="eager" decoding="async" fetchPriority="high" />
+        {logoFailed ? (
+          <LogoTextFallback />
+        ) : (
+          <img
+            src={bmcLogo}
+            alt="مجمع باعشن الطبي"
+            onError={() => setLogoFailed(true)}
+            className="w-44 h-44 object-contain"
+            width={176}
+            height={176}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
         )}
-        <p id="intro-reduced-title" className="text-white/85 text-lg" style={{ fontFamily: "Cairo, sans-serif" }}>مجمع باعشن الطبي — صحتك أولويتنا</p>
+        <p
+          id="intro-reduced-title"
+          className="text-white/85 text-lg"
+          style={{ fontFamily: "Cairo, sans-serif" }}
+        >
+          مجمع باعشن الطبي — صحتك أولويتنا
+        </p>
         <button
           ref={reducedCloseBtnRef}
           onClick={() => finish("reduced_motion_close")}
@@ -621,7 +778,9 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
         >
           الدخول للموقع
         </button>
-        <span className="sr-only" aria-live="polite">{announcedScene}</span>
+        <span className="sr-only" aria-live="polite">
+          {announcedScene}
+        </span>
       </div>
     );
   }
@@ -641,17 +800,39 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
         fontFamily: "Cairo, sans-serif",
       }}
     >
-      <h2 id="intro-dialog-title" className="sr-only">مقدمة مجمع باعشن الطبي</h2>
+      <h2 id="intro-dialog-title" className="sr-only">
+        مقدمة مجمع باعشن الطبي
+      </h2>
       {/* Live regions: scene changes and stat counters */}
-      <div id="intro-scene-live" className="sr-only" aria-live="polite" aria-atomic="true">{announcedScene}</div>
-      <div className="sr-only" aria-live="polite" aria-atomic="true">{statsAnnouncement}</div>
+      <div id="intro-scene-live" className="sr-only" aria-live="polite" aria-atomic="true">
+        {announcedScene}
+      </div>
+      <div className="sr-only" aria-live="polite" aria-atomic="true">
+        {statsAnnouncement}
+      </div>
       {/* Ambient blue glow */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(circle at 50% 55%, rgba(30,58,95,0.35), transparent 60%)` }} />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `radial-gradient(circle at 50% 55%, rgba(30,58,95,0.35), transparent 60%)`,
+        }}
+      />
       {/* Subtle grid */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.06]"
-        style={{ backgroundImage: `linear-gradient(${SILVER}22 1px, transparent 1px), linear-gradient(90deg, ${SILVER}22 1px, transparent 1px)`, backgroundSize: "48px 48px" }} />
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.06]"
+        style={{
+          backgroundImage: `linear-gradient(${SILVER}22 1px, transparent 1px), linear-gradient(90deg, ${SILVER}22 1px, transparent 1px)`,
+          backgroundSize: "48px 48px",
+        }}
+      />
 
-      <audio ref={narrationRef} src={introNarrationUrl} preload="auto" playsInline aria-hidden="true" />
+      <audio
+        ref={narrationRef}
+        src={introNarrationUrl}
+        preload="auto"
+        playsInline
+        aria-hidden="true"
+      />
       {/* Top controls: skip always visible from second 1 */}
       <div className="absolute top-5 md:top-8 inset-x-5 md:inset-x-10 flex justify-between items-center z-30">
         <div className="flex items-center gap-2">
@@ -661,8 +842,12 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
             className="flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.05] hover:bg-white/[0.1] backdrop-blur-md px-4 py-2 transition disabled:opacity-40 disabled:cursor-not-allowed"
             aria-label={audioFailed ? "الصوت غير متاح" : muted ? "تشغيل الصوت" : "كتم الصوت"}
           >
-            <span className={`w-1.5 h-1.5 rounded-full ${audioFailed ? "bg-white/20" : audioReady ? "bg-emerald-400" : "bg-white/40"}`} />
-            <span className="text-[10px] tracking-[0.3em] uppercase text-white/80">{audioFailed ? "بدون صوت" : muted ? "الصوت" : "كتم"}</span>
+            <span
+              className={`w-1.5 h-1.5 rounded-full ${audioFailed ? "bg-white/20" : audioReady ? "bg-emerald-400" : "bg-white/40"}`}
+            />
+            <span className="text-[10px] tracking-[0.3em] uppercase text-white/80">
+              {audioFailed ? "بدون صوت" : muted ? "الصوت" : "كتم"}
+            </span>
           </button>
           <button
             onClick={disableForever}
@@ -680,7 +865,14 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
           aria-label="تخطي المقدمة والانتقال للصفحة الرئيسية (اضغط Escape)"
         >
           <span className="text-xs tracking-[0.3em] uppercase text-white/90">تخطي المقدمة</span>
-          <svg aria-hidden="true" className="w-3.5 h-3.5 text-white/80 rotate-180" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+          <svg
+            aria-hidden="true"
+            className="w-3.5 h-3.5 text-white/80 rotate-180"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
             <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
           </svg>
         </button>
@@ -689,12 +881,22 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
       {/* ============ SCENES ============ */}
       <div ref={scenesContainerRef} className="relative z-10 h-full w-full">
         <AnimatePresence>
-          {inWindow(T.pulse)     && <ScenePulse    key="pulse" />}
-          {inWindow(T.brand)     && <SceneBrand    key="brand" logoFailed={logoFailed} onError={() => setLogoFailed(true)} />}
-          {inWindow(T.services)  && <SceneServices key="services" services={services} />}
-          {inWindow(T.stats)     && <SceneStats    key="stats" stats={stats} />}
-          {inWindow(T.booking)   && <SceneBooking  key="booking" />}
-          {inWindow(T.final)     && <SceneFinal    key="final" logoFailed={logoFailed} onError={() => setLogoFailed(true)} onBook={() => finish("cta_book", "/book")} onServices={() => finish("cta_services", "/services")} />}
+          {inWindow(T.pulse) && <ScenePulse key="pulse" />}
+          {inWindow(T.brand) && (
+            <SceneBrand key="brand" logoFailed={logoFailed} onError={() => setLogoFailed(true)} />
+          )}
+          {inWindow(T.services) && <SceneServices key="services" services={services} />}
+          {inWindow(T.stats) && <SceneStats key="stats" stats={stats} />}
+          {inWindow(T.booking) && <SceneBooking key="booking" />}
+          {inWindow(T.final) && (
+            <SceneFinal
+              key="final"
+              logoFailed={logoFailed}
+              onError={() => setLogoFailed(true)}
+              onBook={() => finish("cta_book", "/book")}
+              onServices={() => finish("cta_services", "/services")}
+            />
+          )}
         </AnimatePresence>
       </div>
 
@@ -721,7 +923,14 @@ export function IntroOverlay({ theme = "dark" as "dark" | "light" }) {
 
       {/* Progress bar */}
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-64 h-[2px] bg-white/10 overflow-hidden rounded-full">
-        <div className="h-full" style={{ width: `${progress * 100}%`, background: `linear-gradient(90deg, ${GOLD}, ${SILVER})`, transition: "width 100ms linear" }} />
+        <div
+          className="h-full"
+          style={{
+            width: `${progress * 100}%`,
+            background: `linear-gradient(90deg, ${GOLD}, ${SILVER})`,
+            transition: "width 100ms linear",
+          }}
+        />
       </div>
     </div>
   );
@@ -734,19 +943,28 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 const fadeSwap = {
   initial: { opacity: 0, scale: 0.98 },
   animate: { opacity: 1, scale: 1, transition: { duration: 0.6, ease: EASE } },
-  exit:    { opacity: 0, scale: 1.02, transition: { duration: 0.5, ease: EASE } },
+  exit: { opacity: 0, scale: 1.02, transition: { duration: 0.5, ease: EASE } },
 } as const;
 
 function ScenePulse() {
   return (
-    <motion.div data-scene="pulse" className="absolute inset-0 flex flex-col items-center justify-center gap-8" {...fadeSwap}>
+    <motion.div
+      data-scene="pulse"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-8"
+      {...fadeSwap}
+    >
       <svg viewBox="0 0 600 200" className="w-[90%] max-w-3xl h-40">
         <defs>
-          <filter id="pulseGlow"><feGaussianBlur stdDeviation="3" /></filter>
+          <filter id="pulseGlow">
+            <feGaussianBlur stdDeviation="3" />
+          </filter>
         </defs>
         <motion.path
           d="M0 100 L120 100 L150 100 L170 60 L190 140 L210 40 L230 160 L250 100 L600 100"
-          fill="none" stroke={CRESCENT_RED} strokeWidth={3} strokeLinecap="round"
+          fill="none"
+          stroke={CRESCENT_RED}
+          strokeWidth={3}
+          strokeLinecap="round"
           filter="url(#pulseGlow)"
           initial={{ pathLength: 0, opacity: 0 }}
           animate={{ pathLength: 1, opacity: 1 }}
@@ -769,7 +987,9 @@ function ScenePulse() {
         transition={{ delay: 1.2, duration: 0.7 }}
       >
         <p className="text-white text-2xl md:text-4xl font-semibold">من قلب صبيا… تبدأ رعايتنا</p>
-        <p className="text-white/60 text-sm md:text-base tracking-wide">From the Heart of Sabya, Our Care Begins</p>
+        <p className="text-white/60 text-sm md:text-base tracking-wide">
+          From the Heart of Sabya, Our Care Begins
+        </p>
       </motion.div>
     </motion.div>
   );
@@ -777,16 +997,30 @@ function ScenePulse() {
 
 function SceneBrand({ logoFailed, onError }: { logoFailed: boolean; onError: () => void }) {
   return (
-    <motion.div data-scene="brand" className="absolute inset-0 flex flex-col items-center justify-center gap-6" {...fadeSwap}>
+    <motion.div
+      data-scene="brand"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-6"
+      {...fadeSwap}
+    >
       <div className="relative">
-        <div className="absolute -inset-10 rounded-full" style={{ boxShadow: `0 0 90px 10px ${BAESHEN_BLUE}66` }} />
+        <div
+          className="absolute -inset-10 rounded-full"
+          style={{ boxShadow: `0 0 90px 10px ${BAESHEN_BLUE}66` }}
+        />
         <motion.div
           aria-hidden="true"
           className="absolute -inset-6 rounded-full pointer-events-none"
-          style={{ border: `1px solid ${GOLD}66`, boxShadow: `inset 0 0 30px ${GOLD}22, 0 0 40px ${GOLD}33` }}
+          style={{
+            border: `1px solid ${GOLD}66`,
+            boxShadow: `inset 0 0 30px ${GOLD}22, 0 0 40px ${GOLD}33`,
+          }}
           initial={{ opacity: 0, scale: 0.9, rotate: 0 }}
           animate={{ opacity: 1, scale: 1, rotate: 360 }}
-          transition={{ opacity: { duration: 1.2 }, scale: { duration: 1.2 }, rotate: { duration: 40, repeat: Infinity, ease: "linear" } }}
+          transition={{
+            opacity: { duration: 1.2 },
+            scale: { duration: 1.2 },
+            rotate: { duration: 40, repeat: Infinity, ease: "linear" },
+          }}
         />
         <motion.div
           aria-hidden="true"
@@ -795,7 +1029,9 @@ function SceneBrand({ logoFailed, onError }: { logoFailed: boolean; onError: () 
           animate={{ rotate: -360 }}
           transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
         />
-        {logoFailed ? <LogoTextFallback size="w-48 h-48 md:w-56 md:h-56" /> : (
+        {logoFailed ? (
+          <LogoTextFallback size="w-48 h-48 md:w-56 md:h-56" />
+        ) : (
           <motion.img
             src={bmcLogo}
             alt="مجمع باعشن الطبي"
@@ -814,7 +1050,11 @@ function SceneBrand({ logoFailed, onError }: { logoFailed: boolean; onError: () 
         <div className="absolute inset-0 overflow-hidden rounded-full pointer-events-none">
           <motion.div
             className="absolute top-0 -left-1/2 w-1/2 h-full"
-            style={{ background: "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)", filter: "blur(6px)" }}
+            style={{
+              background:
+                "linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.5) 50%, transparent 70%)",
+              filter: "blur(6px)",
+            }}
             initial={{ x: "-100%" }}
             animate={{ x: "350%" }}
             transition={{ duration: 1.6, delay: 0.9, ease: "easeInOut" }}
@@ -829,7 +1069,9 @@ function SceneBrand({ logoFailed, onError }: { logoFailed: boolean; onError: () 
       >
         <p className="text-white text-2xl md:text-3xl font-bold">مجمع باعشن الطبي</p>
         <p className="text-white/80 text-sm md:text-base">خبرة طبية متكاملة لرعاية تستحق الثقة</p>
-        <p className="text-white/50 text-xs md:text-sm mt-1">Baeshen Medical Complex — Integrated Medical Expertise. Care You Can Trust.</p>
+        <p className="text-white/50 text-xs md:text-sm mt-1">
+          Baeshen Medical Complex — Integrated Medical Expertise. Care You Can Trust.
+        </p>
       </motion.div>
     </motion.div>
   );
@@ -840,7 +1082,11 @@ function SceneServices({ services }: { services: IntroService[] }) {
   const waves: IntroService[][] = [];
   for (let i = 0; i < services.length; i += 3) waves.push(services.slice(i, i + 3));
   return (
-    <motion.div data-scene="services" className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6" {...fadeSwap}>
+    <motion.div
+      data-scene="services"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6"
+      {...fadeSwap}
+    >
       <p className="text-white/90 text-lg md:text-xl tracking-wide">خدماتنا الطبية</p>
       <div className="flex flex-col gap-6 w-full max-w-4xl">
         {waves.map((wave, wi) => (
@@ -853,16 +1099,37 @@ function SceneServices({ services }: { services: IntroService[] }) {
             style={{ position: wi === 0 ? "relative" : "absolute", left: 0, right: 0 }}
           >
             {wave.map((s) => (
-              <div key={s.id} className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm px-3 py-5 md:px-6 md:py-6">
+              <div
+                key={s.id}
+                className="flex flex-col items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-sm px-3 py-5 md:px-6 md:py-6"
+              >
                 {s.video ? (
-                  <LazyVideo src={s.video} className="w-20 h-14 md:w-24 md:h-16 object-cover rounded-lg" width={96} height={64} />
+                  <LazyVideo
+                    src={s.video}
+                    className="w-20 h-14 md:w-24 md:h-16 object-cover rounded-lg"
+                    width={96}
+                    height={64}
+                  />
                 ) : s.image ? (
-                  <LazyImage src={s.image} alt={s.titleAr} className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg" width={80} height={80} />
+                  <LazyImage
+                    src={s.image}
+                    alt={s.titleAr}
+                    className="w-16 h-16 md:w-20 md:h-20 object-cover rounded-lg"
+                    width={80}
+                    height={80}
+                  />
                 ) : (
-                  <s.Icon className="w-8 h-8 md:w-10 md:h-10" style={{ color: BAESHEN_BLUE_SOFT }} />
+                  <s.Icon
+                    className="w-8 h-8 md:w-10 md:h-10"
+                    style={{ color: BAESHEN_BLUE_SOFT }}
+                  />
                 )}
-                <span className="text-white text-sm md:text-base font-medium text-center">{s.titleAr}</span>
-                <span className="text-white/40 text-[10px] md:text-xs tracking-wide">{s.titleEn}</span>
+                <span className="text-white text-sm md:text-base font-medium text-center">
+                  {s.titleAr}
+                </span>
+                <span className="text-white/40 text-[10px] md:text-xs tracking-wide">
+                  {s.titleEn}
+                </span>
               </div>
             ))}
           </motion.div>
@@ -875,20 +1142,29 @@ function SceneServices({ services }: { services: IntroService[] }) {
 function SceneStats({ stats }: { stats: Stat[] }) {
   const visible = stats.filter((s) => s.value > 0).slice(0, 4);
   return (
-    <motion.div data-scene="stats" className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6" {...fadeSwap}>
+    <motion.div
+      data-scene="stats"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6"
+      {...fadeSwap}
+    >
       <motion.p
         className="text-white/70 text-xs md:text-sm tracking-[0.35em] uppercase"
-        initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2, duration: 0.6 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, duration: 0.6 }}
       >
         أرقام تنمو بثقتكم · Numbers Made Possible by Your Trust
       </motion.p>
       <TooltipProvider delayDuration={150}>
-        <div className={`grid gap-4 md:gap-6 w-full max-w-5xl ${visible.length <= 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-2 md:grid-cols-4"}`}>
+        <div
+          className={`grid gap-4 md:gap-6 w-full max-w-5xl ${visible.length <= 2 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-2 md:grid-cols-4"}`}
+        >
           {visible.map((s, i) => (
             <motion.div
               key={s.id}
               className="relative rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-5 md:p-6 flex flex-col items-center text-center gap-2"
-              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + i * 0.15, duration: 0.6 }}
             >
               <Tooltip>
@@ -913,7 +1189,13 @@ function SceneStats({ stats }: { stats: Stat[] }) {
                 </TooltipContent>
               </Tooltip>
               {s.image ? (
-                <LazyImage src={s.image} alt={s.labelAr} className="w-12 h-12 object-cover rounded-full" width={48} height={48} />
+                <LazyImage
+                  src={s.image}
+                  alt={s.labelAr}
+                  className="w-12 h-12 object-cover rounded-full"
+                  width={48}
+                  height={48}
+                />
               ) : (
                 <s.Icon className="w-6 h-6" style={{ color: GOLD }} />
               )}
@@ -922,7 +1204,9 @@ function SceneStats({ stats }: { stats: Stat[] }) {
               </div>
               <div className="text-white/70 text-xs md:text-sm">{s.labelAr}</div>
               <div className="text-white/40 text-[10px] mt-1">
-                {s.live ? "مباشر من قاعدة بيانات المجمع" : `محدَّث: ${formatUpdatedAt(s.updatedAt)}`}
+                {s.live
+                  ? "مباشر من قاعدة بيانات المجمع"
+                  : `محدَّث: ${formatUpdatedAt(s.updatedAt)}`}
               </div>
             </motion.div>
           ))}
@@ -935,7 +1219,6 @@ function SceneStats({ stats }: { stats: Stat[] }) {
   );
 }
 
-
 function SceneBooking() {
   const steps = [
     { Icon: Building2, ar: "اختر الفرع" },
@@ -945,10 +1228,16 @@ function SceneBooking() {
     { Icon: ClipboardList, ar: "استلام التفاصيل" },
   ];
   return (
-    <motion.div data-scene="booking" className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6" {...fadeSwap}>
+    <motion.div
+      data-scene="booking"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-8 px-6"
+      {...fadeSwap}
+    >
       <motion.p
         className="text-white text-2xl md:text-3xl font-semibold text-center"
-        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
       >
         موعدك الطبي… بخطوات بسيطة
       </motion.p>
@@ -976,12 +1265,16 @@ function SceneBooking() {
         </div>
         <motion.div
           className="mt-6 h-[2px] bg-white/10 overflow-hidden rounded"
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
         >
           <motion.div
             className="h-full"
             style={{ background: `linear-gradient(90deg, ${BAESHEN_BLUE}, ${CRESCENT_RED})` }}
-            initial={{ width: "0%" }} animate={{ width: "100%" }} transition={{ duration: 3.4, ease: "easeInOut" }}
+            initial={{ width: "0%" }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 3.4, ease: "easeInOut" }}
           />
         </motion.div>
       </div>
@@ -990,10 +1283,22 @@ function SceneBooking() {
 }
 
 function SceneFinal({
-  logoFailed, onError, onBook, onServices,
-}: { logoFailed: boolean; onError: () => void; onBook: () => void; onServices: () => void }) {
+  logoFailed,
+  onError,
+  onBook,
+  onServices,
+}: {
+  logoFailed: boolean;
+  onError: () => void;
+  onBook: () => void;
+  onServices: () => void;
+}) {
   return (
-    <motion.div data-scene="final" className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6" {...fadeSwap}>
+    <motion.div
+      data-scene="final"
+      className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-6"
+      {...fadeSwap}
+    >
       <div className="relative">
         <motion.div
           className="absolute -inset-10 rounded-full"
@@ -1004,12 +1309,20 @@ function SceneFinal({
         <motion.div
           aria-hidden="true"
           className="absolute -inset-6 rounded-full pointer-events-none"
-          style={{ border: `1px solid ${GOLD}66`, boxShadow: `inset 0 0 30px ${GOLD}22, 0 0 40px ${GOLD}33` }}
+          style={{
+            border: `1px solid ${GOLD}66`,
+            boxShadow: `inset 0 0 30px ${GOLD}22, 0 0 40px ${GOLD}33`,
+          }}
           initial={{ opacity: 0, rotate: 0 }}
           animate={{ opacity: 1, rotate: 360 }}
-          transition={{ opacity: { duration: 1.2 }, rotate: { duration: 30, repeat: Infinity, ease: "linear" } }}
+          transition={{
+            opacity: { duration: 1.2 },
+            rotate: { duration: 30, repeat: Infinity, ease: "linear" },
+          }}
         />
-        {logoFailed ? <LogoTextFallback size="w-44 h-44 md:w-56 md:h-56" /> : (
+        {logoFailed ? (
+          <LogoTextFallback size="w-44 h-44 md:w-56 md:h-56" />
+        ) : (
           <img
             src={bmcLogo}
             alt="مجمع باعشن الطبي"
@@ -1030,7 +1343,10 @@ function SceneFinal({
         <button
           onClick={onBook}
           className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm md:text-base font-semibold text-white shadow-lg transition hover:scale-[1.03]"
-          style={{ background: `linear-gradient(135deg, ${BAESHEN_BLUE}, ${CRESCENT_RED})`, boxShadow: `0 10px 30px ${CRESCENT_RED}55` }}
+          style={{
+            background: `linear-gradient(135deg, ${BAESHEN_BLUE}, ${CRESCENT_RED})`,
+            boxShadow: `0 10px 30px ${CRESCENT_RED}55`,
+          }}
         >
           احجز موعدك الآن
         </button>
@@ -1062,7 +1378,9 @@ function LogoTextFallback({ size = "w-40 h-40" }: { size?: string }) {
     >
       <Activity className="w-8 h-8 mb-1" style={{ color: CRESCENT_RED }} />
       <span className="text-white text-xl md:text-2xl font-bold">B.M.C</span>
-      <span className="mt-0.5 text-[10px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>Baeshen Medical</span>
+      <span className="mt-0.5 text-[10px] tracking-[0.3em] uppercase" style={{ color: GOLD }}>
+        Baeshen Medical
+      </span>
     </div>
   );
 }

@@ -284,8 +284,8 @@ function AdminUsagePage() {
             </table>
             {data.hasMore && (
               <p className="mt-3 text-xs text-muted-foreground">
-                Showing the latest 300 rows. Narrow the window, surface, or filter by user for
-                more detail.
+                Showing the latest 300 rows. Narrow the window, surface, or filter by user for more
+                detail.
               </p>
             )}
           </div>

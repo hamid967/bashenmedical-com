@@ -14,10 +14,7 @@ export const Route = createFileRoute("/media/stories/$slug")({
     const s = (loaderData ?? null) as PatientStory | null;
     if (!s) {
       return {
-        meta: [
-          { title: "قصة غير موجودة — مجمع باعشن" },
-          { name: "robots", content: "noindex" },
-        ],
+        meta: [{ title: "قصة غير موجودة — مجمع باعشن" }, { name: "robots", content: "noindex" }],
       };
     }
     return {
@@ -29,9 +26,7 @@ export const Route = createFileRoute("/media/stories/$slug")({
         { property: "og:type", content: "article" },
         ...(s.hero_image_url ? [{ property: "og:image" as const, content: s.hero_image_url }] : []),
       ],
-      links: [
-        { rel: "canonical", href: `https://bashenmedical.com/media/stories/${s.slug}` },
-      ],
+      links: [{ rel: "canonical", href: `https://bashenmedical.com/media/stories/${s.slug}` }],
     };
   },
   loader: async ({ context, params }) => {
@@ -49,7 +44,10 @@ export const Route = createFileRoute("/media/stories/$slug")({
     <div className="container-app py-16 text-center">
       <h1 className="text-2xl font-bold mb-2">القصة غير موجودة</h1>
       <p className="text-muted-foreground mb-6">قد تكون أُخفيت أو حُذفت.</p>
-      <Link to="/media/stories" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+      <Link
+        to="/media/stories"
+        className="inline-flex items-center gap-1 text-primary font-semibold hover:underline"
+      >
         <ArrowRight className="h-4 w-4" /> الرجوع لقائمة القصص
       </Link>
     </div>
@@ -79,7 +77,12 @@ function StoryDetail() {
       <h1 className="text-3xl md:text-4xl font-black leading-tight">{s.title_ar}</h1>
       {s.published_at && (
         <p className="mt-2 text-xs text-muted-foreground">
-          نُشرت في {new Date(s.published_at).toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" })}
+          نُشرت في{" "}
+          {new Date(s.published_at).toLocaleDateString("ar-SA", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
         </p>
       )}
 

@@ -37,11 +37,7 @@ export function estimateTokens(text: string): number {
   return Math.max(1, Math.ceil(text.length / divisor));
 }
 
-export function estimateCredits(
-  inputTokens: number,
-  outputTokens: number,
-  model?: string,
-): number {
+export function estimateCredits(inputTokens: number, outputTokens: number, model?: string): number {
   const r = getRate(model);
   return (inputTokens * r.inPer1M + outputTokens * r.outPer1M) / 1_000_000;
 }

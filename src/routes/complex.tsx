@@ -28,11 +28,7 @@ import logoAsset from "@/assets/bmc-logo.jpg.asset.json";
 
 const logoImg = logoAsset.url;
 
-import {
-  buildLocalBusinessSchema,
-  buildBreadcrumbs,
-  SITE_URL,
-} from "@/lib/localBusinessSchema";
+import { buildLocalBusinessSchema, buildBreadcrumbs, SITE_URL } from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
 
 const COMPLEX_URL = `${SITE_URL}/complex`;
@@ -50,7 +46,8 @@ export const Route = createFileRoute("/complex")({
       { property: "og:title", content: "المجمع الطبي — مجمع باعشن" },
       {
         property: "og:description",
-        content: "رعاية متكاملة في قلب صبيا: تخصصات متعددة، أطباء استشاريون، وخدمة على مدار الأسبوع.",
+        content:
+          "رعاية متكاملة في قلب صبيا: تخصصات متعددة، أطباء استشاريون، وخدمة على مدار الأسبوع.",
       },
       { property: "og:image", content: heroImg },
       { property: "og:type", content: "website" },
@@ -157,12 +154,14 @@ function ComplexPage() {
   const { data: doctors } = useQuery({
     queryKey: ["doctors_active"],
     queryFn: async () =>
-      (await supabase
-        .from("doctors")
-        .select("*, specialties(*)")
-        .eq("is_active", true)
-        .order("sort_order")
-        .limit(8)).data ?? [],
+      (
+        await supabase
+          .from("doctors")
+          .select("*, specialties(*)")
+          .eq("is_active", true)
+          .order("sort_order")
+          .limit(8)
+      ).data ?? [],
   });
 
   return (
@@ -245,7 +244,11 @@ function ComplexPage() {
                     <Calendar className="h-4 w-4" /> {ar ? "احجز موعدك" : "Book an Appointment"}
                   </Link>
                   <a
-                    href={whatsappUrl(ar ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.` : `Hello ${SITE.nameEn}, I would like to inquire.`)}
+                    href={whatsappUrl(
+                      ar
+                        ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.`
+                        : `Hello ${SITE.nameEn}, I would like to inquire.`,
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-white/40 hover:bg-white/20"
@@ -277,7 +280,11 @@ function ComplexPage() {
           <InfoCard
             icon={<Clock className="h-5 w-5" />}
             title={ar ? "ساعات العمل" : "Working hours"}
-            value={ar ? "السبت – الأربعاء 9ص – 9م / الخميس 9ص – 1م" : "Sat – Wed 9am – 9pm / Thu 9am – 1pm"}
+            value={
+              ar
+                ? "السبت – الأربعاء 9ص – 9م / الخميس 9ص – 1م"
+                : "Sat – Wed 9am – 9pm / Thu 9am – 1pm"
+            }
           />
           <InfoCard
             icon={<Phone className="h-5 w-5" />}
@@ -289,7 +296,11 @@ function ComplexPage() {
             icon={<MessageCircle className="h-5 w-5" />}
             title={ar ? "واتساب" : "WhatsApp"}
             value={SITE.mobileDisplay}
-            href={whatsappUrl(ar ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.` : `Hello ${SITE.nameEn}, I would like to inquire.`)}
+            href={whatsappUrl(
+              ar
+                ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.`
+                : `Hello ${SITE.nameEn}, I would like to inquire.`,
+            )}
           />
         </div>
       </section>
@@ -434,10 +445,7 @@ function ComplexPage() {
                   {ar ? "خدمات طبية متكاملة" : "Comprehensive medical services"}
                 </h3>
               </div>
-              <Link
-                to="/specialties"
-                className="text-sm font-medium text-primary hover:underline"
-              >
+              <Link to="/specialties" className="text-sm font-medium text-primary hover:underline">
                 {ar ? "عرض الكل" : "View all"} →
               </Link>
             </div>
@@ -504,9 +512,7 @@ function ComplexPage() {
                   )}
                 </div>
                 <div className="p-4">
-                  <div className="font-bold text-sm line-clamp-1">
-                    {ar ? d.name_ar : d.name_en}
-                  </div>
+                  <div className="font-bold text-sm line-clamp-1">{ar ? d.name_ar : d.name_en}</div>
                   <div className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">
                     {ar ? d.title_ar : d.title_en}
                   </div>
@@ -549,7 +555,11 @@ function ComplexPage() {
                 <li className="flex items-start gap-3">
                   <MessageCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
                   <a
-                    href={whatsappUrl(ar ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.` : `Hello ${SITE.nameEn}, I would like to inquire.`)}
+                    href={whatsappUrl(
+                      ar
+                        ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.`
+                        : `Hello ${SITE.nameEn}, I would like to inquire.`,
+                    )}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-primary"
@@ -623,7 +633,11 @@ function InfoCard({
   );
   if (href) {
     return (
-      <a href={href} target={href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer">
+      <a
+        href={href}
+        target={href.startsWith("http") ? "_blank" : undefined}
+        rel="noopener noreferrer"
+      >
         {inner}
       </a>
     );

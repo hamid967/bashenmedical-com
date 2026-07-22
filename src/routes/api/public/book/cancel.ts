@@ -26,11 +26,7 @@ const cancelSchema = z.object({
     .string()
     .trim()
     .regex(/^BAA-[0-9A-F]{8}$/i, "المرجع غير صالح. الصيغة المتوقعة BAA-XXXXXXXX."),
-  phone: z
-    .string()
-    .trim()
-    .min(6, "رقم الهاتف قصير جدًا")
-    .max(32, "رقم الهاتف طويل جدًا"),
+  phone: z.string().trim().min(6, "رقم الهاتف قصير جدًا").max(32, "رقم الهاتف طويل جدًا"),
 });
 
 function json(status: number, body: Record<string, unknown>) {
@@ -39,7 +35,6 @@ function json(status: number, body: Record<string, unknown>) {
     headers: { "Content-Type": "application/json; charset=utf-8" },
   });
 }
-
 
 export const Route = createFileRoute("/api/public/book/cancel")({
   server: {
@@ -67,20 +62,15 @@ export const Route = createFileRoute("/api/public/book/cancel")({
 
         const refHex = parsed.data.reference.slice(4).toLowerCase();
 
-
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           // Look up by phone (narrow index) then match the reference prefix
           // in-memory. PostgREST cannot `ilike` a uuid column directly, and a
           // per-phone lookup is typically 1-few rows so this stays cheap.
           const { data: candidates, error: readErr } = await supabaseAdmin
             .from("appointments")
-            .select(
-              "id, status, appointment_date, appointment_time, patient_phone",
-            )
+            .select("id, status, appointment_date, appointment_time, patient_phone")
             .eq("patient_phone", parsed.data.phone)
             .order("created_at", { ascending: false })
             .limit(50);
@@ -92,16 +82,15 @@ export const Route = createFileRoute("/api/public/book/cancel")({
             });
           }
 
-          const match = (candidates ?? []).find(
-            (a) => String(a.id).replace(/-/g, "").toLowerCase().startsWith(refHex),
+          const match = (candidates ?? []).find((a) =>
+            String(a.id).replace(/-/g, "").toLowerCase().startsWith(refHex),
           );
 
           if (!match) {
             return json(404, {
               ok: false,
               kind: "not_found",
-              message:
-                "لم يتم العثور على حجز مطابق. تحقّق من المرجع ورقم الجوال.",
+              message: "لم يتم العثور على حجز مطابق. تحقّق من المرجع ورقم الجوال.",
             });
           }
 
@@ -135,12 +124,12 @@ export const Route = createFileRoute("/api/public/book/cancel")({
           // sees a non-blank reason (required for status='cancelled'). The
           // slot release is a separate SECURITY DEFINER RPC.
           const selfReason = "إلغاء ذاتي عبر رابط المتابعة العام";
-          const { error: updErr } = await supabaseAdmin.rpc(
-            "update_appointment_status",
-            { _id: match.id, _status: "cancelled", _reason: selfReason } as any,
-          );
+          const { error: updErr } = await supabaseAdmin.rpc("update_appointment_status", {
+            _id: match.id,
+            _status: "cancelled",
+            _reason: selfReason,
+          } as any);
           if (updErr) {
-
             return json(500, {
               ok: false,
               kind: "server",

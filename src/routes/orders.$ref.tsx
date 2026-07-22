@@ -17,13 +17,32 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import {
-  ArrowLeft, Loader2, Pill, Stethoscope, Home as HomeIcon, Clock, MapPin, Phone, User,
-  FileText, ClipboardList, Truck, MessageCircle, Package, Printer, XCircle,
+  ArrowLeft,
+  Loader2,
+  Pill,
+  Stethoscope,
+  Home as HomeIcon,
+  Clock,
+  MapPin,
+  Phone,
+  User,
+  FileText,
+  ClipboardList,
+  Truck,
+  MessageCircle,
+  Package,
+  Printer,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { bmcOgImageMeta } from "@/lib/og-meta";
@@ -65,10 +84,10 @@ type Order = {
 };
 
 const KIND_META = {
-  pharmacy:       { ar: "طلب صيدلية",   en: "Pharmacy",       icon: Pill },
+  pharmacy: { ar: "طلب صيدلية", en: "Pharmacy", icon: Pill },
   second_opinion: { ar: "رأي طبي ثاني", en: "Second opinion", icon: Stethoscope },
-  home_care:      { ar: "رعاية منزلية", en: "Home care",      icon: HomeIcon },
-  appointment:    { ar: "موعد",         en: "Appointment",    icon: Stethoscope },
+  home_care: { ar: "رعاية منزلية", en: "Home care", icon: HomeIcon },
+  appointment: { ar: "موعد", en: "Appointment", icon: Stethoscope },
 };
 
 const STATUS_AR: Record<string, string> = {
@@ -87,17 +106,22 @@ const STATUS_AR: Record<string, string> = {
 
 /** الحالات النهائية التي لا يمكن الإلغاء بعدها. تُطابق تحقّق RPC في الـ DB. */
 const NOT_CANCELLABLE: Record<Order["kind"], string[]> = {
-  pharmacy:       ["delivered", "cancelled", "completed"],
+  pharmacy: ["delivered", "cancelled", "completed"],
   second_opinion: ["closed", "answered", "cancelled"],
-  home_care:      ["completed", "cancelled", "in_progress"],
-  appointment:    [],
+  home_care: ["completed", "cancelled", "in_progress"],
+  appointment: [],
 };
 
 function fmt(iso: string | null, lang: "ar" | "en") {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(lang === "ar" ? "ar-SA" : "en-US", { dateStyle: "medium", timeStyle: "short" });
-  } catch { return iso; }
+    return new Date(iso).toLocaleString(lang === "ar" ? "ar-SA" : "en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return iso;
+  }
 }
 
 function OrderDetailPage() {
@@ -136,9 +160,9 @@ function OrderDetailPage() {
     if (!data) return;
     if (previousStatus.current && previousStatus.current !== data.status) {
       const label = STATUS_AR[data.status] ?? data.status;
-      toast.success(i18n.t("ordersDetail:status_updated"),
-        { description: isAr ? `طلبك أصبح: ${label}` : `Your order is now: ${data.status}` }
-      );
+      toast.success(i18n.t("ordersDetail:status_updated"), {
+        description: isAr ? `طلبك أصبح: ${label}` : `Your order is now: ${data.status}`,
+      });
     }
     previousStatus.current = data.status;
   }, [data, isAr]);
@@ -146,7 +170,10 @@ function OrderDetailPage() {
   return (
     <div className="min-h-screen bg-muted/30 print:bg-white">
       <div className="container-app py-8 md:py-12 max-w-3xl">
-        <Link to="/my-orders" className="mb-6 inline-flex items-center gap-2 text-sm text-primary hover:underline print:hidden">
+        <Link
+          to="/my-orders"
+          className="mb-6 inline-flex items-center gap-2 text-sm text-primary hover:underline print:hidden"
+        >
           <ArrowLeft className="h-4 w-4" />
           {i18n.t("ordersDetail:back_to_my_orders")}
         </Link>
@@ -186,8 +213,16 @@ function OrderDetailPage() {
 }
 
 function OrderDetailCard({
-  order, phone, kind, isAr,
-}: { order: Order; phone: string; kind?: Order["kind"]; isAr: boolean }) {
+  order,
+  phone,
+  kind,
+  isAr,
+}: {
+  order: Order;
+  phone: string;
+  kind?: Order["kind"];
+  isAr: boolean;
+}) {
   const meta = KIND_META[order.kind];
   const Icon = meta.icon;
   const meta2 = (order.metadata ?? {}) as Record<string, unknown>;
@@ -231,9 +266,9 @@ function OrderDetailCard({
     },
     onError: (err: Error) => {
       const map: Record<string, string> = {
-        not_found:i18n.t("ordersDetail:order_not_found_2"),
-        not_cancellable:i18n.t("ordersDetail:order_can_no_longer_be_cancelled"),
-        invalid_phone:i18n.t("ordersDetail:invalid_phone"),
+        not_found: i18n.t("ordersDetail:order_not_found_2"),
+        not_cancellable: i18n.t("ordersDetail:order_can_no_longer_be_cancelled"),
+        invalid_phone: i18n.t("ordersDetail:invalid_phone"),
       };
       toast.error(map[err.message] ?? i18n.t("ordersDetail:failed_to_cancel"));
     },
@@ -249,7 +284,9 @@ function OrderDetailCard({
               <Icon className="h-6 w-6" />
             </div>
             <div>
-              <div className="text-xs font-semibold uppercase text-muted-foreground">{isAr ? meta.ar : meta.en}</div>
+              <div className="text-xs font-semibold uppercase text-muted-foreground">
+                {isAr ? meta.ar : meta.en}
+              </div>
               <h1 className="text-xl md:text-2xl font-bold leading-tight">{order.title}</h1>
               <div className="mt-1 font-mono text-xs text-muted-foreground">#{order.reference}</div>
             </div>
@@ -269,11 +306,23 @@ function OrderDetailCard({
         </div>
 
         <div className="mt-6 grid gap-3 text-sm">
-          <Row icon={<Clock className="h-4 w-4" />} label={i18n.t("ordersDetail:created")} value={fmt(order.created_at,isAr ? "ar" : "en")} />
+          <Row
+            icon={<Clock className="h-4 w-4" />}
+            label={i18n.t("ordersDetail:created")}
+            value={fmt(order.created_at, isAr ? "ar" : "en")}
+          />
           {order.scheduled_at && (
-            <Row icon={<Clock className="h-4 w-4" />} label={i18n.t("ordersDetail:scheduled")} value={fmt(order.scheduled_at,isAr ? "ar" : "en")} />
+            <Row
+              icon={<Clock className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:scheduled")}
+              value={fmt(order.scheduled_at, isAr ? "ar" : "en")}
+            />
           )}
-          <Row icon={<Phone className="h-4 w-4" />} label={i18n.t("ordersDetail:phone")} value={phone} />
+          <Row
+            icon={<Phone className="h-4 w-4" />}
+            label={i18n.t("ordersDetail:phone")}
+            value={phone}
+          />
         </div>
       </div>
 
@@ -309,8 +358,12 @@ function OrderDetailCard({
               {i18n.t("ordersDetail:cannot_cancel_at_this_stage")}
             </span>
           ) : null}
-          <Link to="/contact"><Button variant="premium">{i18n.t("ordersDetail:contact_us")}</Button></Link>
-          <Link to="/my-orders"><Button variant="ghost">{i18n.t("ordersDetail:all_my_orders")}</Button></Link>
+          <Link to="/contact">
+            <Button variant="premium">{i18n.t("ordersDetail:contact_us")}</Button>
+          </Link>
+          <Link to="/my-orders">
+            <Button variant="ghost">{i18n.t("ordersDetail:all_my_orders")}</Button>
+          </Link>
         </div>
       </div>
 
@@ -337,7 +390,11 @@ function OrderDetailCard({
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelMutation.isPending}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelOpen(false)}
+              disabled={cancelMutation.isPending}
+            >
               {i18n.t("ordersDetail:keep_order")}
             </Button>
             <Button
@@ -362,8 +419,16 @@ function OrderDetailCard({
  *   - رعاية منزلية: العنوان، ملاحظات المريض
  */
 function ServiceDetailsSection({
-  kind, status, meta, isAr,
-}: { kind: Order["kind"]; status: string; meta: Record<string, unknown>; isAr: boolean }) {
+  kind,
+  status,
+  meta,
+  isAr,
+}: {
+  kind: Order["kind"];
+  status: string;
+  meta: Record<string, unknown>;
+  isAr: boolean;
+}) {
   const s = (k: string) => (typeof meta[k] === "string" ? (meta[k] as string) : "");
 
   if (kind === "pharmacy") {
@@ -372,11 +437,36 @@ function ServiceDetailsSection({
     const district = s("district");
     const notes = s("notes");
     return (
-      <DetailsShell title={i18n.t("ordersDetail:pharmacy_details")} icon={<Package className="h-4 w-4" />}>
+      <DetailsShell
+        title={i18n.t("ordersDetail:pharmacy_details")}
+        icon={<Package className="h-4 w-4" />}
+      >
         <DetailGrid>
-          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={i18n.t("ordersDetail:delivery")} value={delivery === "delivery" ? i18n.t("ordersDetail:home_delivery") : i18n.t("ordersDetail:pickup")} />}
-          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={i18n.t("ordersDetail:address")} value={address} />}
-          {district && <Cell icon={<MapPin className="h-4 w-4" />} label={i18n.t("ordersDetail:district")} value={district} />}
+          {delivery && (
+            <Cell
+              icon={<Truck className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:delivery")}
+              value={
+                delivery === "delivery"
+                  ? i18n.t("ordersDetail:home_delivery")
+                  : i18n.t("ordersDetail:pickup")
+              }
+            />
+          )}
+          {address && (
+            <Cell
+              icon={<MapPin className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:address")}
+              value={address}
+            />
+          )}
+          {district && (
+            <Cell
+              icon={<MapPin className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:district")}
+              value={district}
+            />
+          )}
         </DetailGrid>
         {notes && <Notes text={notes} isAr={isAr} />}
         <ResultBanner
@@ -394,10 +484,25 @@ function ServiceDetailsSection({
     const email = s("email");
     const answer = s("answer") || s("reply");
     return (
-      <DetailsShell title={i18n.t("ordersDetail:second_opinion_details")} icon={<ClipboardList className="h-4 w-4" />}>
+      <DetailsShell
+        title={i18n.t("ordersDetail:second_opinion_details")}
+        icon={<ClipboardList className="h-4 w-4" />}
+      >
         <DetailGrid>
-          {specialty && <Cell icon={<Stethoscope className="h-4 w-4" />} label={i18n.t("ordersDetail:specialty")} value={specialty} />}
-          {email && <Cell icon={<User className="h-4 w-4" />} label={i18n.t("ordersDetail:reply_email")} value={email} />}
+          {specialty && (
+            <Cell
+              icon={<Stethoscope className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:specialty")}
+              value={specialty}
+            />
+          )}
+          {email && (
+            <Cell
+              icon={<User className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:reply_email")}
+              value={email}
+            />
+          )}
         </DetailGrid>
         {answer ? (
           <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
@@ -423,9 +528,18 @@ function ServiceDetailsSection({
     const address = s("address");
     const notes = s("notes");
     return (
-      <DetailsShell title={i18n.t("ordersDetail:home_care_details")} icon={<HomeIcon className="h-4 w-4" />}>
+      <DetailsShell
+        title={i18n.t("ordersDetail:home_care_details")}
+        icon={<HomeIcon className="h-4 w-4" />}
+      >
         <DetailGrid>
-          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={i18n.t("ordersDetail:visit_address")} value={address} />}
+          {address && (
+            <Cell
+              icon={<MapPin className="h-4 w-4" />}
+              label={i18n.t("ordersDetail:visit_address")}
+              value={address}
+            />
+          )}
         </DetailGrid>
         {notes && <Notes text={notes} isAr={isAr} />}
         <ResultBanner
@@ -441,7 +555,15 @@ function ServiceDetailsSection({
   return null;
 }
 
-function DetailsShell({ title, icon, children }: { title: string; icon: React.ReactNode; children: React.ReactNode }) {
+function DetailsShell({
+  title,
+  icon,
+  children,
+}: {
+  title: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <div className="mb-4 flex items-center gap-2 text-sm font-semibold">
@@ -481,7 +603,17 @@ function Notes({ text, isAr }: { text: string; isAr: boolean }) {
   );
 }
 
-function ResultBanner({ show, isAr, okAr, okEn }: { show: boolean; isAr: boolean; okAr: string; okEn: string }) {
+function ResultBanner({
+  show,
+  isAr,
+  okAr,
+  okEn,
+}: {
+  show: boolean;
+  isAr: boolean;
+  okAr: string;
+  okEn: string;
+}) {
   if (!show) return null;
   return (
     <div className="mt-3 rounded-xl border border-green-500/30 bg-green-500/5 p-3 text-sm text-green-800 dark:text-green-300">

@@ -73,8 +73,7 @@ export const Route = createFileRoute("/api/public/insurance/verify")({
             ok: "التأمين مؤهل. تفاصيل التكلفة موضّحة أدناه.",
             fee_unknown: "التأمين مؤهل، وسيتم احتساب التكلفة النهائية عند الاستقبال.",
             no_provider: "لم يتم اختيار جهة تأمين.",
-            provider_inactive:
-              "جهة التأمين غير معتمدة حاليًا. تواصل مع الاستقبال للتأكيد.",
+            provider_inactive: "جهة التأمين غير معتمدة حاليًا. تواصل مع الاستقبال للتأكيد.",
           };
 
           return json(200, {
@@ -100,4 +99,3 @@ export const Route = createFileRoute("/api/public/insurance/verify")({
     },
   },
 });
-

@@ -82,10 +82,7 @@ export function jsonResponse(
   });
 }
 
-export function rateLimitedResponse(
-  retryAfter: number,
-  message = "too_many_requests",
-) {
+export function rateLimitedResponse(retryAfter: number, message = "too_many_requests") {
   return jsonResponse(
     429,
     { ok: false, kind: "rate_limited", message, retry_after: retryAfter },

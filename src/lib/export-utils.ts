@@ -33,7 +33,12 @@ export function exportCsv<T>(filename: string, cols: Column<T>[], rows: T[]) {
 }
 
 // ---------- XLSX ----------
-export function exportXlsx<T>(filename: string, cols: Column<T>[], rows: T[], sheetName = "Report") {
+export function exportXlsx<T>(
+  filename: string,
+  cols: Column<T>[],
+  rows: T[],
+  sheetName = "Report",
+) {
   const aoa: (string | number | null)[][] = [
     cols.map((c) => c.header),
     ...rows.map((r) =>
@@ -42,7 +47,7 @@ export function exportXlsx<T>(filename: string, cols: Column<T>[], rows: T[], sh
         if (v === null || v === undefined) return null;
         if (typeof v === "number") return v;
         return String(v);
-      })
+      }),
     ),
   ];
   const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -53,7 +58,9 @@ export function exportXlsx<T>(filename: string, cols: Column<T>[], rows: T[], sh
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, sheetName.substring(0, 31));
   const out = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  const blob = new Blob([out], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const blob = new Blob([out], {
+    type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  });
   triggerDownload(blob, ensureExt(filename, "xlsx"));
 }
 
@@ -73,7 +80,10 @@ export function exportPdf<T>(opts: {
     return;
   }
   const escapeHtml = (s: string) =>
-    s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+    s.replace(
+      /[&<>"']/g,
+      (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!,
+    );
 
   const metaHtml = meta
     ? `<div class="meta">${Object.entries(meta)
@@ -85,9 +95,7 @@ export function exportPdf<T>(opts: {
   const tbody = rows
     .map(
       (r) =>
-        `<tr>${cols
-          .map((c) => `<td>${escapeHtml(fmtCell(c.accessor(r)))}</td>`)
-          .join("")}</tr>`
+        `<tr>${cols.map((c) => `<td>${escapeHtml(fmtCell(c.accessor(r)))}</td>`).join("")}</tr>`,
     )
     .join("");
 

@@ -1,4 +1,12 @@
-import { useDeferredValue, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import {
+  useDeferredValue,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type KeyboardEvent,
+} from "react";
 import { Search, MapPin, Stethoscope, X, CalendarPlus, Loader2, SearchX } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import type { BranchSpecialty, ExcellenceCenter, PublicBranch } from "@/lib/branches.functions";
@@ -7,7 +15,11 @@ type Props = {
   branch: PublicBranch;
   specialties: BranchSpecialty[];
   centers: ExcellenceCenter[];
-  onBookService?: (payload: { specialtyId: string | null; label: string; kind: "specialty" | "center" }) => void;
+  onBookService?: (payload: {
+    specialtyId: string | null;
+    label: string;
+    kind: "specialty" | "center";
+  }) => void;
 };
 
 function baseMapEmbed(b: PublicBranch): string | null {
@@ -119,7 +131,12 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
     }
     const match = allItems.find((it) => it.id === paramId);
     if (match) {
-      setSelected({ id: match.id, label: match.label, kind: match.kind, specialtyId: match.specialtyId });
+      setSelected({
+        id: match.id,
+        label: match.label,
+        kind: match.kind,
+        specialtyId: match.specialtyId,
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search.service, allItems]);
@@ -161,7 +178,8 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
     let next = idx;
     // RTL: ArrowLeft goes forward, ArrowRight goes backward
     if (e.key === "ArrowLeft" || e.key === "ArrowDown") next = (idx + 1) % tabDefs.length;
-    else if (e.key === "ArrowRight" || e.key === "ArrowUp") next = (idx - 1 + tabDefs.length) % tabDefs.length;
+    else if (e.key === "ArrowRight" || e.key === "ArrowUp")
+      next = (idx - 1 + tabDefs.length) % tabDefs.length;
     else if (e.key === "Home") next = 0;
     else if (e.key === "End") next = tabDefs.length - 1;
     else return;
@@ -290,8 +308,8 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
                     isActive
                       ? "bg-background text-primary shadow-sm"
                       : isEmptyCat && hasQuery
-                      ? "text-muted-foreground/50"
-                      : "text-muted-foreground hover:text-foreground"
+                        ? "text-muted-foreground/50"
+                        : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
                   <span className="truncate">{t.label}</span>
@@ -301,8 +319,8 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
                       isActive
                         ? "bg-primary/10 text-primary"
                         : isEmptyCat
-                        ? "bg-muted-foreground/10 text-muted-foreground/60"
-                        : "bg-background text-muted-foreground"
+                          ? "bg-muted-foreground/10 text-muted-foreground/60"
+                          : "bg-background text-muted-foreground"
                     }`}
                   >
                     {hasQuery ? `${t.count}/${t.total}` : t.total}
@@ -343,10 +361,10 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
                         {hasQuery
                           ? `لا توجد نتائج لـ "${query.trim()}"`
                           : tab === "center"
-                          ? "لا توجد مراكز تميز في هذا الفرع"
-                          : tab === "specialty"
-                          ? "لا توجد تخصصات في هذا الفرع"
-                          : "لا توجد خدمات لعرضها"}
+                            ? "لا توجد مراكز تميز في هذا الفرع"
+                            : tab === "specialty"
+                              ? "لا توجد تخصصات في هذا الفرع"
+                              : "لا توجد خدمات لعرضها"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {hasQuery
@@ -393,7 +411,12 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
                           selectItem(
                             active
                               ? null
-                              : { id: it.id, label: it.label, kind: it.kind, specialtyId: it.specialtyId },
+                              : {
+                                  id: it.id,
+                                  label: it.label,
+                                  kind: it.kind,
+                                  specialtyId: it.specialtyId,
+                                },
                           )
                         }
                         className={`w-full text-start rounded-lg border px-3 py-2.5 text-sm transition-all flex items-center justify-between gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
@@ -416,7 +439,9 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
                           <span className="min-w-0">
                             <span className="block font-medium truncate">{it.label}</span>
                             {it.sub && (
-                              <span className="block text-xs text-muted-foreground truncate">{it.sub}</span>
+                              <span className="block text-xs text-muted-foreground truncate">
+                                {it.sub}
+                              </span>
                             )}
                           </span>
                         </span>
@@ -436,7 +461,11 @@ export function BranchServicesExplorer({ branch, specialties, centers, onBookSer
             <>
               <iframe
                 ref={iframeRef}
-                title={selected ? `خريطة ${selected.label} - ${branch.name_ar}` : `خريطة ${branch.name_ar}`}
+                title={
+                  selected
+                    ? `خريطة ${selected.label} - ${branch.name_ar}`
+                    : `خريطة ${branch.name_ar}`
+                }
                 src={embed}
                 onLoad={() => setMapLoading(false)}
                 className={`w-full h-full min-h-[360px] transition-opacity duration-300 ${

@@ -42,9 +42,7 @@ export function JazanIconFrame({ children, className, size = "md" }: Props) {
         <path d="M4 36 L8 36 L4 32 Z" fill="var(--jazan-gold,#C7A46B)" opacity="0.7" />
         <path d="M36 36 L32 36 L36 32 Z" fill="var(--jazan-gold,#C7A46B)" opacity="0.7" />
       </svg>
-      <span className="relative z-10 inline-flex items-center justify-center">
-        {children}
-      </span>
+      <span className="relative z-10 inline-flex items-center justify-center">{children}</span>
     </span>
   );
 }

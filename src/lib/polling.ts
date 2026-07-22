@@ -5,10 +5,7 @@
  *
  * SSR-safe: returns `activeMs` when `document` is undefined.
  */
-export function visibilityAwareInterval(
-  activeMs: number,
-  hiddenMs: number | false = false,
-) {
+export function visibilityAwareInterval(activeMs: number, hiddenMs: number | false = false) {
   return () => {
     if (typeof document === "undefined") return activeMs;
     return document.visibilityState === "visible" ? activeMs : hiddenMs;

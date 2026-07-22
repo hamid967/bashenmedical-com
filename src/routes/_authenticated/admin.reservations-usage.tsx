@@ -3,20 +3,9 @@
  * OTP sessions, cancel/reschedule volume, Undo success, slot-rebook rate.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  queryOptions,
-  useSuspenseQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  Activity,
-  CalendarClock,
-  MessageSquare,
-  RefreshCw,
-  Undo2,
-  XCircle,
-} from "lucide-react";
+import { Activity, CalendarClock, MessageSquare, RefreshCw, Undo2, XCircle } from "lucide-react";
 import {
   getReservationsUsageSummary,
   type DailyRow,
@@ -32,19 +21,16 @@ const summaryQuery = (windowDays: number) =>
     staleTime: 30_000,
   });
 
-export const Route = createFileRoute("/_authenticated/admin/reservations-usage")(
-  {
-    head: () => ({
-      meta: [
-        { title: "استخدام إدارة الحجوزات | لوحة الإدارة" },
-        { name: "robots", content: "noindex" },
-      ],
-    }),
-    loader: ({ context }) =>
-      context.queryClient.ensureQueryData(summaryQuery(14)),
-    component: ReservationsUsagePage,
-  },
-);
+export const Route = createFileRoute("/_authenticated/admin/reservations-usage")({
+  head: () => ({
+    meta: [
+      { title: "استخدام إدارة الحجوزات | لوحة الإدارة" },
+      { name: "robots", content: "noindex" },
+    ],
+  }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(summaryQuery(14)),
+  component: ReservationsUsagePage,
+});
 
 function ReservationsUsagePage() {
   const [windowDays, setWindowDays] = useState(14);
@@ -60,9 +46,7 @@ function ReservationsUsagePage() {
               <Activity className="h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-lg md:text-xl font-bold">
-                استخدام إدارة الحجوزات
-              </h1>
+              <h1 className="text-lg md:text-xl font-bold">استخدام إدارة الحجوزات</h1>
               <p className="text-xs text-[color:var(--ac-ink-3)]">
                 OTP، الإلغاء، إعادة الجدولة، ومعدلات نجاح التراجع (Undo)
               </p>
@@ -90,9 +74,7 @@ function ReservationsUsagePage() {
               }
               className="inline-flex items-center gap-2 rounded-full border border-[color:var(--ac-line)] px-3 h-9 text-sm hover:bg-[color:var(--ac-subtle)]"
             >
-              <RefreshCw
-                className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`}
-              />
+              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               تحديث
             </button>
           </div>
@@ -104,9 +86,7 @@ function ReservationsUsagePage() {
 
         <div className="text-[11px] text-[color:var(--ac-ink-3)]">
           العينات: {data.totalSamples.toLocaleString("ar-EG")}
-          {data.truncated
-            ? " (مقتطعة — قلّل النافذة الزمنية لرؤية الأحدث)"
-            : ""}
+          {data.truncated ? " (مقتطعة — قلّل النافذة الزمنية لرؤية الأحدث)" : ""}
         </div>
       </div>
     </div>
@@ -131,11 +111,7 @@ function StatCard({
         {label}
       </div>
       <div className="text-2xl font-bold tabular-nums mt-1">{value}</div>
-      {hint && (
-        <div className="text-[11px] text-[color:var(--ac-ink-3)] mt-0.5">
-          {hint}
-        </div>
-      )}
+      {hint && <div className="text-[11px] text-[color:var(--ac-ink-3)] mt-0.5">{hint}</div>}
     </div>
   );
 }
@@ -177,11 +153,35 @@ function RatesRow({ data }: { data: ReservationsUsageSummary }) {
   const pct = (v: number | null) => (v === null ? "—" : `${v.toFixed(1)}%`);
   return (
     <section className="grid grid-cols-2 md:grid-cols-5 gap-3">
-      <RateCard label="نسبة تحقّق OTP" value={pct(r.otp_verify_rate)} tone={r.otp_verify_rate} good={80} needs={50} />
+      <RateCard
+        label="نسبة تحقّق OTP"
+        value={pct(r.otp_verify_rate)}
+        tone={r.otp_verify_rate}
+        good={80}
+        needs={50}
+      />
       <RateCard label="استخدام التراجع" value={pct(r.undo_usage_rate)} tone={null} />
-      <RateCard label="نجاح التراجع" value={pct(r.undo_success_rate)} tone={r.undo_success_rate} good={90} needs={70} />
-      <RateCard label="إعادة تثبيت السلوت" value={pct(r.slot_rebook_rate)} tone={r.slot_rebook_rate} good={80} needs={50} />
-      <RateCard label="استرجاع قائمة الانتظار" value={pct(r.waitlist_revert_rate)} tone={r.waitlist_revert_rate} good={80} needs={50} />
+      <RateCard
+        label="نجاح التراجع"
+        value={pct(r.undo_success_rate)}
+        tone={r.undo_success_rate}
+        good={90}
+        needs={70}
+      />
+      <RateCard
+        label="إعادة تثبيت السلوت"
+        value={pct(r.slot_rebook_rate)}
+        tone={r.slot_rebook_rate}
+        good={80}
+        needs={50}
+      />
+      <RateCard
+        label="استرجاع قائمة الانتظار"
+        value={pct(r.waitlist_revert_rate)}
+        tone={r.waitlist_revert_rate}
+        good={80}
+        needs={50}
+      />
     </section>
   );
 }
@@ -216,9 +216,7 @@ function RateCard({
 function DailyChart({ daily }: { daily: DailyRow[] }) {
   const max = Math.max(
     1,
-    ...daily.map((d) =>
-      Math.max(d.otp_sent, d.cancel, d.reschedule, d.cancel_undo_success),
-    ),
+    ...daily.map((d) => Math.max(d.otp_sent, d.cancel, d.reschedule, d.cancel_undo_success)),
   );
   return (
     <section className="ac-card p-4">

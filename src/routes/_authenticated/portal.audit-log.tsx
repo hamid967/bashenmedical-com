@@ -44,24 +44,63 @@ const ACTION_META: Record<
   string,
   { icon: typeof ShieldAlert; ar: string; en: string; tone: "danger" | "warn" | "info" | "ok" }
 > = {
-  sensitive_profile_change: { icon: UserCog, ar: "تعديل بيانات حساسة", en: "Sensitive profile change", tone: "warn" },
+  sensitive_profile_change: {
+    icon: UserCog,
+    ar: "تعديل بيانات حساسة",
+    en: "Sensitive profile change",
+    tone: "warn",
+  },
   login_success: { icon: LogIn, ar: "تسجيل دخول ناجح", en: "Login success", tone: "ok" },
   login_failed: { icon: ShieldAlert, ar: "محاولة دخول فاشلة", en: "Failed login", tone: "danger" },
   "portal.session.revoked": { icon: LogOut, ar: "إنهاء جلسة", en: "Session revoked", tone: "info" },
-  "portal.sessions.revoke_others": { icon: LogOut, ar: "إنهاء الجلسات الأخرى", en: "Revoke other sessions", tone: "info" },
-  "portal.sessions.revoke_all": { icon: LogOut, ar: "إنهاء كل الجلسات", en: "Revoke all sessions", tone: "warn" },
-  lab_report_download: { icon: Download, ar: "تنزيل تقرير مختبر", en: "Lab report download", tone: "info" },
-  radiology_report_download: { icon: Download, ar: "تنزيل تقرير أشعة", en: "Radiology report download", tone: "info" },
-  "consent.updated": { icon: FileText, ar: "تحديث موافقة خصوصية", en: "Consent updated", tone: "info" },
-  "profile.password_changed": { icon: KeyRound, ar: "تغيير كلمة المرور", en: "Password changed", tone: "warn" },
+  "portal.sessions.revoke_others": {
+    icon: LogOut,
+    ar: "إنهاء الجلسات الأخرى",
+    en: "Revoke other sessions",
+    tone: "info",
+  },
+  "portal.sessions.revoke_all": {
+    icon: LogOut,
+    ar: "إنهاء كل الجلسات",
+    en: "Revoke all sessions",
+    tone: "warn",
+  },
+  lab_report_download: {
+    icon: Download,
+    ar: "تنزيل تقرير مختبر",
+    en: "Lab report download",
+    tone: "info",
+  },
+  radiology_report_download: {
+    icon: Download,
+    ar: "تنزيل تقرير أشعة",
+    en: "Radiology report download",
+    tone: "info",
+  },
+  "consent.updated": {
+    icon: FileText,
+    ar: "تحديث موافقة خصوصية",
+    en: "Consent updated",
+    tone: "info",
+  },
+  "profile.password_changed": {
+    icon: KeyRound,
+    ar: "تغيير كلمة المرور",
+    en: "Password changed",
+    tone: "warn",
+  },
 };
 
 function toneClasses(tone: "danger" | "warn" | "info" | "ok") {
   switch (tone) {
-    case "danger": return "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] border-[color:var(--portal-error)]/20";
-    case "warn": return "bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] border-[color:var(--portal-warning)]/20";
-    case "ok": return "bg-[color:var(--portal-success-50)] text-[color:var(--portal-success)] border-[color:var(--portal-success)]/20";
-    default: return "bg-[color:var(--portal-info-50)] text-[color:var(--portal-info)] border-[color:var(--portal-info)]/20";
+    case "danger":
+      return "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)] border-[color:var(--portal-error)]/20";
+    case "warn":
+      return "bg-[color:var(--portal-warning-50)] text-[color:var(--portal-warning)] border-[color:var(--portal-warning)]/20";
+    case "ok":
+      return "bg-[color:var(--portal-success-50)] text-[color:var(--portal-success)] border-[color:var(--portal-success)]/20";
+    default:
+      return "bg-[color:var(--portal-info-50)] text-[color:var(--portal-info)] border-[color:var(--portal-info)]/20";
   }
 }
 
@@ -111,7 +150,9 @@ function AuditLogPage() {
     const tone = meta?.tone ?? "info";
     return (
       <div className="flex items-center gap-2">
-        <span className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${toneClasses(tone)}`}>
+        <span
+          className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border ${toneClasses(tone)}`}
+        >
           <Icon className="h-4 w-4" />
         </span>
         <div className="flex flex-col">
@@ -163,8 +204,16 @@ function AuditLogPage() {
           <CardContent className="grid gap-4 md:grid-cols-4">
             <div className="space-y-1.5">
               <Label>{ar ? "النوع" : "Type"}</Label>
-              <Select value={action} onValueChange={(v) => { setAction(v); setPage(0); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+              <Select
+                value={action}
+                onValueChange={(v) => {
+                  setAction(v);
+                  setPage(0);
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{ar ? "الكل" : "All"}</SelectItem>
                   {Array.from(knownActions).map((a) => {
@@ -180,11 +229,25 @@ function AuditLogPage() {
             </div>
             <div className="space-y-1.5">
               <Label>{ar ? "من تاريخ" : "From"}</Label>
-              <Input type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(0); }} />
+              <Input
+                type="date"
+                value={from}
+                onChange={(e) => {
+                  setFrom(e.target.value);
+                  setPage(0);
+                }}
+              />
             </div>
             <div className="space-y-1.5">
               <Label>{ar ? "إلى تاريخ" : "To"}</Label>
-              <Input type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(0); }} />
+              <Input
+                type="date"
+                value={to}
+                onChange={(e) => {
+                  setTo(e.target.value);
+                  setPage(0);
+                }}
+              />
             </div>
             <div className="flex items-end">
               <Button variant="outline" onClick={reset} className="w-full">
@@ -198,7 +261,9 @@ function AuditLogPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-base">
               {ar ? "العمليات" : "Events"}
-              <Badge variant="secondary" className="ms-2">{total}</Badge>
+              <Badge variant="secondary" className="ms-2">
+                {total}
+              </Badge>
             </CardTitle>
             {q.isFetching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
           </CardHeader>
@@ -218,7 +283,10 @@ function AuditLogPage() {
             ) : (
               <div className="divide-y">
                 {rows.map((row) => (
-                  <div key={row.id} className="grid grid-cols-1 gap-2 p-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_minmax(0,1fr)]">
+                  <div
+                    key={row.id}
+                    className="grid grid-cols-1 gap-2 p-4 md:grid-cols-[minmax(0,1.4fr)_minmax(0,2fr)_minmax(0,1fr)]"
+                  >
                     {renderAction(row)}
                     <div className="text-xs text-muted-foreground md:text-sm">
                       <div className="truncate">{renderDetails(row)}</div>
@@ -242,13 +310,21 @@ function AuditLogPage() {
 
         {totalPages > 1 && (
           <div className="flex items-center justify-between">
-            <Button variant="outline" disabled={page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>
+            <Button
+              variant="outline"
+              disabled={page === 0}
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+            >
               {ar ? "السابق" : "Previous"}
             </Button>
             <span className="text-sm text-muted-foreground">
               {ar ? `صفحة ${page + 1} من ${totalPages}` : `Page ${page + 1} of ${totalPages}`}
             </span>
-            <Button variant="outline" disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>
+            <Button
+              variant="outline"
+              disabled={page + 1 >= totalPages}
+              onClick={() => setPage((p) => p + 1)}
+            >
               {ar ? "التالي" : "Next"}
             </Button>
           </div>

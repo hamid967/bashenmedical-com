@@ -30,9 +30,13 @@ const inputSchema = z.object({
 
 function classify(action: string, entity: string | null): AdminFeedSeverity {
   const a = action.toLowerCase();
-  if (/(fail|error|deny|denied|reject|revoke|delete|remove|breach|unauthorized|forbidden)/.test(a)) return "danger";
+  if (/(fail|error|deny|denied|reject|revoke|delete|remove|breach|unauthorized|forbidden)/.test(a))
+    return "danger";
   if (/(warn|expire|risk|suspend|block|hold|cancel)/.test(a)) return "warning";
-  if (/(create|insert|add|approve|confirm|success|complete|check_in|checkin|paid|grant|login)/.test(a)) return "success";
+  if (
+    /(create|insert|add|approve|confirm|success|complete|check_in|checkin|paid|grant|login)/.test(a)
+  )
+    return "success";
   return "info";
 }
 
@@ -71,15 +75,17 @@ export const listAdminFeed = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const items: AdminFeedItem[] = ((rows ?? []) as unknown as Array<{
-      id: string;
-      actor_id: string | null;
-      action: string;
-      entity_type: string | null;
-      entity_id: string | null;
-      metadata: Record<string, unknown> | null;
-      created_at: string;
-    }>).map((r) => {
+    const items: AdminFeedItem[] = (
+      (rows ?? []) as unknown as Array<{
+        id: string;
+        actor_id: string | null;
+        action: string;
+        entity_type: string | null;
+        entity_id: string | null;
+        metadata: Record<string, unknown> | null;
+        created_at: string;
+      }>
+    ).map((r) => {
       const severity = classify(r.action, r.entity_type);
       const meta = r.metadata ?? {};
       const desc =

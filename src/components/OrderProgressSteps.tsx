@@ -38,10 +38,7 @@ export function OrderProgressSteps({ kind, status, raw = true, className = "" }:
   }
 
   return (
-    <ol
-      className={`flex items-center gap-1 w-full ${className}`}
-      aria-label="خطوات تقدّم الطلب"
-    >
+    <ol className={`flex items-center gap-1 w-full ${className}`} aria-label="خطوات تقدّم الطلب">
       {steps.map((step, i) => {
         const done = i < currentIdx;
         const active = i === currentIdx;

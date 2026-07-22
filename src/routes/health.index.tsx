@@ -75,7 +75,7 @@ export const Route = createFileRoute("/health/")({
     };
     return {
       meta: [
-      ...bmcOgImageMeta(),
+        ...bmcOgImageMeta(),
         { title },
         { name: "description", content: desc },
         { property: "og:title", content: title },
@@ -132,9 +132,7 @@ function HealthIndex() {
 
       <section className="py-10">
         <div className="container-app">
-          <h2 className="text-lg font-bold mb-4">
-            {lang === "ar" ? "التصنيفات" : "Categories"}
-          </h2>
+          <h2 className="text-lg font-bold mb-4">{lang === "ar" ? "التصنيفات" : "Categories"}</h2>
           <div className="flex flex-wrap gap-2">
             {categories.map((c) => {
               const count = articles.filter((a) => a.category_id === c.id).length;

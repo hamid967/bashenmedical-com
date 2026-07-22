@@ -32,10 +32,7 @@ export type CheckInWhatsAppPayload = {
   locale?: "ar" | "en";
 };
 
-const APP_URL = (process.env.PUBLIC_APP_URL || "https://bashenmedical.com").replace(
-  /\/$/,
-  "",
-);
+const APP_URL = (process.env.PUBLIC_APP_URL || "https://bashenmedical.com").replace(/\/$/, "");
 
 function normalizeToE164(phone: string): string | null {
   const s = phone.replace(/[^\d+]/g, "");
@@ -63,10 +60,10 @@ export function composeCheckInMessage(p: CheckInWhatsAppPayload): string {
   const detailsUrl = `${APP_URL}/portal/appointments?a=${p.appointmentId}`;
   const rescheduleUrl = `${APP_URL}/portal/appointments?reschedule=${p.appointmentId}`;
   const mapsUrl = buildMapsLink(p);
-  const time = new Date(p.checkedInAt).toLocaleTimeString(
-    locale === "ar" ? "ar-SA" : "en-US",
-    { hour: "2-digit", minute: "2-digit" },
-  );
+  const time = new Date(p.checkedInAt).toLocaleTimeString(locale === "ar" ? "ar-SA" : "en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
   if (locale === "en") {
     const lines = [
@@ -103,12 +100,10 @@ type SendResult =
   | { ok: true; provider: string; id?: string }
   | { ok: false; provider: string; skipped?: boolean; error?: string };
 
-async function sendViaTwilio(
-  to: string,
-  body: string,
-): Promise<SendResult> {
+async function sendViaTwilio(to: string, body: string): Promise<SendResult> {
   const from = process.env.TWILIO_WHATSAPP_FROM;
-  if (!from) return { ok: false, provider: "twilio", skipped: true, error: "TWILIO_WHATSAPP_FROM not set" };
+  if (!from)
+    return { ok: false, provider: "twilio", skipped: true, error: "TWILIO_WHATSAPP_FROM not set" };
 
   const lovableKey = process.env.LOVABLE_API_KEY;
   const connKey = process.env.TWILIO_API_KEY;
@@ -143,17 +138,14 @@ async function sendViaTwilio(
       return { ok: false, provider: "twilio", skipped: true, error: "no Twilio credentials" };
     }
     const auth = Buffer.from(`${sid}:${token}`).toString("base64");
-    const res = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${auth}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params,
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${auth}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    );
+      body: params,
+    });
     const text = await res.text();
     if (!res.ok) return { ok: false, provider: "twilio", error: `[${res.status}] ${text}` };
     const parsed = JSON.parse(text) as { sid?: string };
@@ -168,9 +160,7 @@ async function sendViaTwilio(
  * result descriptor. Safe to `await` from a request handler that must
  * still respond even when the notifier is disabled or fails.
  */
-export async function sendCheckInWhatsApp(
-  payload: CheckInWhatsAppPayload,
-): Promise<SendResult> {
+export async function sendCheckInWhatsApp(payload: CheckInWhatsAppPayload): Promise<SendResult> {
   const provider = (process.env.WHATSAPP_PROVIDER || "").toLowerCase();
   const body = composeCheckInMessage(payload);
   const to = payload.toPhone ? normalizeToE164(payload.toPhone) : null;

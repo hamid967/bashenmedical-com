@@ -72,9 +72,7 @@ export const Route = createFileRoute("/api/public/invoices/lookup")({
         }
 
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const invoiceNumber = parsed.data.invoice_number.trim();
           const { data: rows, error } = await supabaseAdmin
@@ -135,8 +133,8 @@ export const Route = createFileRoute("/api/public/invoices/lookup")({
           let pdf_url: string | null = null;
           let pdf_expires_in: number | null = null;
           if (row.pdf_path) {
-            const { data: signed, error: signErr } = await supabaseAdmin
-              .storage.from("invoice-pdfs")
+            const { data: signed, error: signErr } = await supabaseAdmin.storage
+              .from("invoice-pdfs")
               .createSignedUrl(row.pdf_path, 300, {
                 download: `invoice-${row.invoice_number ?? row.id.slice(0, 8)}.pdf`,
               });
@@ -157,8 +155,7 @@ export const Route = createFileRoute("/api/public/invoices/lookup")({
               issued_at: row.issued_at,
               paid_at: row.paid_at,
               notes: row.notes,
-              patient_name:
-                row.patient.full_name_ar || row.patient.full_name_en || null,
+              patient_name: row.patient.full_name_ar || row.patient.full_name_en || null,
               pdf_url,
               pdf_expires_in,
             },

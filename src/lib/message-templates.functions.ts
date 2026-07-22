@@ -74,7 +74,9 @@ export const listMessageTemplates = createServerFn({ method: "POST" })
     ensureStaff(roles);
     let q = context.supabase
       .from("message_templates")
-      .select("id, template_key, channel, name, title, body, description, is_active, created_at, updated_at")
+      .select(
+        "id, template_key, channel, name, title, body, description, is_active, created_at, updated_at",
+      )
       .order("channel", { ascending: true })
       .order("template_key", { ascending: true });
     if (data.channel) q = q.eq("channel", data.channel);
@@ -122,7 +124,9 @@ export const upsertMessageTemplate = createServerFn({ method: "POST" })
         .from("message_templates")
         .update(payload)
         .eq("id", data.id)
-        .select("id, template_key, channel, name, title, body, description, is_active, created_at, updated_at")
+        .select(
+          "id, template_key, channel, name, title, body, description, is_active, created_at, updated_at",
+        )
         .single();
       if (error) throw new Error(error.message);
       return row as unknown as MessageTemplate;
@@ -130,7 +134,9 @@ export const upsertMessageTemplate = createServerFn({ method: "POST" })
     const { data: row, error } = await context.supabase
       .from("message_templates")
       .insert({ ...payload, created_by: context.userId })
-      .select("id, template_key, channel, name, title, body, description, is_active, created_at, updated_at")
+      .select(
+        "id, template_key, channel, name, title, body, description, is_active, created_at, updated_at",
+      )
       .single();
     if (error) throw new Error(error.message);
     return row as unknown as MessageTemplate;
@@ -143,10 +149,7 @@ export const deleteMessageTemplate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureAdmin(roles);
-    const { error } = await context.supabase
-      .from("message_templates")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("message_templates").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -6,11 +6,18 @@ import { Bell, CheckCircle2, AlertTriangle, XCircle, Info } from "lucide-react";
 import { toast } from "sonner";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { listAdminFeed, type AdminFeedItem, type AdminFeedSeverity } from "@/lib/admin/notifications-feed.functions";
+import {
+  listAdminFeed,
+  type AdminFeedItem,
+  type AdminFeedSeverity,
+} from "@/lib/admin/notifications-feed.functions";
 
 const READ_KEY = "admin_feed_last_read_at";
 
-const SEV_META: Record<AdminFeedSeverity, { icon: typeof CheckCircle2; color: string; bg: string; label: string }> = {
+const SEV_META: Record<
+  AdminFeedSeverity,
+  { icon: typeof CheckCircle2; color: string; bg: string; label: string }
+> = {
   success: { icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", label: "نجاح" },
   info: { icon: Info, color: "text-sky-600", bg: "bg-sky-50", label: "معلومة" },
   warning: { icon: AlertTriangle, color: "text-amber-600", bg: "bg-amber-50", label: "تحذير" },
@@ -60,9 +67,12 @@ export function AdminNotificationsBell() {
     const fresh = items.filter((i) => !seen.has(i.id));
     for (const item of fresh.slice(0, 3)) {
       const msg = item.title;
-      if (item.severity === "success") toast.success(msg, { description: item.description ?? undefined });
-      else if (item.severity === "danger") toast.error(msg, { description: item.description ?? undefined });
-      else if (item.severity === "warning") toast.warning(msg, { description: item.description ?? undefined });
+      if (item.severity === "success")
+        toast.success(msg, { description: item.description ?? undefined });
+      else if (item.severity === "danger")
+        toast.error(msg, { description: item.description ?? undefined });
+      else if (item.severity === "warning")
+        toast.warning(msg, { description: item.description ?? undefined });
       else toast.info(msg, { description: item.description ?? undefined });
       seen.add(item.id);
     }
@@ -114,23 +124,34 @@ export function AdminNotificationsBell() {
         </div>
         <ScrollArea className="max-h-[420px]">
           {items.length === 0 ? (
-            <div className="p-6 text-center text-sm text-[color:var(--ac-ink-3)]">لا توجد إشعارات حديثة.</div>
+            <div className="p-6 text-center text-sm text-[color:var(--ac-ink-3)]">
+              لا توجد إشعارات حديثة.
+            </div>
           ) : (
             <ul className="divide-y divide-[color:var(--ac-line)]">
               {items.map((it) => {
                 const meta = SEV_META[it.severity];
                 const Icon = meta.icon;
                 return (
-                  <li key={it.id} className="flex gap-3 px-3 py-2.5 hover:bg-[color:var(--ac-subtle)]">
-                    <div className={`h-8 w-8 rounded-full grid place-items-center ${meta.bg} ${meta.color} shrink-0`}>
+                  <li
+                    key={it.id}
+                    className="flex gap-3 px-3 py-2.5 hover:bg-[color:var(--ac-subtle)]"
+                  >
+                    <div
+                      className={`h-8 w-8 rounded-full grid place-items-center ${meta.bg} ${meta.color} shrink-0`}
+                    >
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium truncate">{it.title}</div>
                       {it.description ? (
-                        <div className="text-xs text-[color:var(--ac-ink-3)] truncate">{it.description}</div>
+                        <div className="text-xs text-[color:var(--ac-ink-3)] truncate">
+                          {it.description}
+                        </div>
                       ) : null}
-                      <div className="text-[11px] text-[color:var(--ac-ink-3)] mt-0.5">{timeAgo(it.at)}</div>
+                      <div className="text-[11px] text-[color:var(--ac-ink-3)] mt-0.5">
+                        {timeAgo(it.at)}
+                      </div>
                     </div>
                   </li>
                 );

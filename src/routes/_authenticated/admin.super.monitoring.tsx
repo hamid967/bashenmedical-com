@@ -93,7 +93,9 @@ function MonitoringPage() {
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <nav className="text-xs text-muted-foreground flex items-center gap-1">
-            <Link to="/admin" className="hover:text-foreground">لوحة الإدارة</Link>
+            <Link to="/admin" className="hover:text-foreground">
+              لوحة الإدارة
+            </Link>
             <ChevronRight className="h-3 w-3 rotate-180" />
             <span>Super Admin</span>
             <ChevronRight className="h-3 w-3 rotate-180" />
@@ -131,8 +133,18 @@ function MonitoringPage() {
 
       <VitalsGrid report={report} />
       <JobsCard report={report} />
-      <IntegrationsCard title="التكاملات" icon={Plug} rows={report.integrations} emptyMsg="لا توجد سجلات تكامل خلال آخر 24 ساعة." />
-      <IntegrationsCard title="Webhooks" icon={Webhook} rows={report.webhooks} emptyMsg="لم يتم استقبال أي webhook خلال آخر 24 ساعة." />
+      <IntegrationsCard
+        title="التكاملات"
+        icon={Plug}
+        rows={report.integrations}
+        emptyMsg="لا توجد سجلات تكامل خلال آخر 24 ساعة."
+      />
+      <IntegrationsCard
+        title="Webhooks"
+        icon={Webhook}
+        rows={report.webhooks}
+        emptyMsg="لم يتم استقبال أي webhook خلال آخر 24 ساعة."
+      />
       <FeatureFlagsCard flags={flags.data} />
     </div>
   );
@@ -201,7 +213,10 @@ function JobsCard({ report }: { report: SystemHealthReport }) {
             {report.jobs.notifications_24h.toLocaleString("ar")}
           </div>
           <div className="mt-2 text-xs text-muted-foreground">
-            الفاشلة: <span className="font-semibold text-foreground">{report.jobs.notifications_failed_24h}</span>
+            الفاشلة:{" "}
+            <span className="font-semibold text-foreground">
+              {report.jobs.notifications_failed_24h}
+            </span>
           </div>
         </div>
         <div className={`rounded-xl border border-${tone}-200 bg-${tone}-50/40 p-4`}>
@@ -217,7 +232,11 @@ function JobsCard({ report }: { report: SystemHealthReport }) {
         <div className="rounded-xl border border-border p-4">
           <div className="text-xs text-muted-foreground">فحص المرفقات</div>
           <div className="mt-1 grid grid-cols-3 gap-2 text-center">
-            <MiniStat label="قيد الفحص" value={report.jobs.inquiry_attachments_pending} tone="amber" />
+            <MiniStat
+              label="قيد الفحص"
+              value={report.jobs.inquiry_attachments_pending}
+              tone="amber"
+            />
             <MiniStat label="محجوب" value={report.jobs.inquiry_attachments_infected} tone="red" />
             <MiniStat label="خطأ فحص" value={report.jobs.inquiry_attachments_error} tone="red" />
           </div>
@@ -293,12 +312,7 @@ function IntegrationsCard({
 
 function IntegrationRow({ row }: { row: IntegrationHealth }) {
   const okPct = (row.success_rate * 100).toFixed(0);
-  const tone =
-    row.failure_24h === 0
-      ? "emerald"
-      : row.success_rate >= 0.95
-        ? "amber"
-        : "red";
+  const tone = row.failure_24h === 0 ? "emerald" : row.success_rate >= 0.95 ? "amber" : "red";
   return (
     <tr className="border-b border-border/50 last:border-0">
       <td className="py-3">
@@ -315,7 +329,9 @@ function IntegrationRow({ row }: { row: IntegrationHealth }) {
         <StatusPill status={row.last_status} tone={tone} />
       </td>
       <td className="py-3 text-emerald-600 font-semibold">{row.success_24h}</td>
-      <td className={`py-3 font-semibold ${row.failure_24h > 0 ? "text-red-600" : "text-muted-foreground"}`}>
+      <td
+        className={`py-3 font-semibold ${row.failure_24h > 0 ? "text-red-600" : "text-muted-foreground"}`}
+      >
         {row.failure_24h}
       </td>
       <td className="py-3">
@@ -349,10 +365,18 @@ function StatusPill({
   tone: "emerald" | "amber" | "red";
 }) {
   const label =
-    status === "success" ? "سليم" : status === "failure" ? "فشل" : status === "pending" ? "قيد التنفيذ" : "—";
+    status === "success"
+      ? "سليم"
+      : status === "failure"
+        ? "فشل"
+        : status === "pending"
+          ? "قيد التنفيذ"
+          : "—";
   const Icon = status === "failure" ? XCircle : status === "pending" ? Loader2 : CheckCircle2;
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full bg-${tone}-100 text-${tone}-700 px-2 py-0.5 text-[11px] font-medium`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full bg-${tone}-100 text-${tone}-700 px-2 py-0.5 text-[11px] font-medium`}
+    >
       <Icon className={`h-3 w-3 ${status === "pending" ? "animate-spin" : ""}`} />
       {label}
     </span>
@@ -461,9 +485,7 @@ function FeatureFlagsCard({ flags }: { flags: FeatureFlag[] }) {
                   </code>
                   <span
                     className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      f.enabled
-                        ? "bg-emerald-100 text-emerald-700"
-                        : "bg-slate-100 text-slate-600"
+                      f.enabled ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
                     }`}
                   >
                     {f.enabled ? "مفعّل" : "متوقف"}
@@ -518,7 +540,8 @@ function FeatureFlagsCard({ flags }: { flags: FeatureFlag[] }) {
       )}
 
       <p className="text-[11px] text-muted-foreground">
-        تُخزَّن الـ flags في <code>system_settings.feature_flags</code> — فقط <b>super_admin</b> يمكنه التعديل عبر RLS.
+        تُخزَّن الـ flags في <code>system_settings.feature_flags</code> — فقط <b>super_admin</b>{" "}
+        يمكنه التعديل عبر RLS.
       </p>
     </section>
   );

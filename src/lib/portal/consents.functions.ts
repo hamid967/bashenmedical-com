@@ -139,7 +139,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
     title_ar: "مشاركة السجل الطبي مع جهات أخرى",
     title_en: "Share Medical Records with Third Parties",
     summary_ar: "السماح بمشاركة السجل الطبي مع أطباء أو مستشفيات خارج المجمع بناءً على طلبك.",
-    summary_en: "Allow sharing your record with doctors or hospitals outside our center at your request.",
+    summary_en:
+      "Allow sharing your record with doctors or hospitals outside our center at your request.",
     body_ar:
       "عند سحب هذه الموافقة، سيتوقف المجمع عن مشاركة سجلك الطبي مع أي جهة خارجية إلا في حالات الطوارئ الطبية أو المتطلبات النظامية.",
     body_en:
@@ -209,7 +210,8 @@ export const CONSENT_CATALOG: ConsentCatalogItem[] = [
     body_en:
       "Does not include operational alerts (appointment reminders, report readiness, invoices) which always remain enabled.",
     impact_ar: "عند السحب: تُخفى بطاقات العروض والحملات من مركز الإشعارات فورًا.",
-    impact_en: "When withdrawn: promo/campaign cards are hidden from the notification center instantly.",
+    impact_en:
+      "When withdrawn: promo/campaign cards are hidden from the notification center instantly.",
   },
 ];
 

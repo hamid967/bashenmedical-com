@@ -180,7 +180,10 @@ function AuditExportPage() {
     <div className="mx-auto max-w-7xl p-4 space-y-4" dir="rtl">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Link to="/admin" className="text-muted-foreground hover:text-foreground text-sm inline-flex items-center gap-1">
+          <Link
+            to="/admin"
+            className="text-muted-foreground hover:text-foreground text-sm inline-flex items-center gap-1"
+          >
             <ArrowRight className="h-4 w-4" /> رجوع
           </Link>
           <h1 className="text-2xl font-bold">السجل الزمني — تصدير CSV</h1>
@@ -217,7 +220,13 @@ function AuditExportPage() {
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     value={branchId}
                     onChange={(e) => setBranchId(e.target.value)}
-                    disabled={k === "dashboard_recent_activity" ? false : k === "security_audit_log" ? false : false}
+                    disabled={
+                      k === "dashboard_recent_activity"
+                        ? false
+                        : k === "security_audit_log"
+                          ? false
+                          : false
+                    }
                   >
                     <option value="">كل الفروع</option>
                     {(branchesQ.data ?? []).map((b) => (
@@ -273,19 +282,26 @@ function AuditExportPage() {
               </CardHeader>
               <CardContent className="overflow-x-auto">
                 {rowsQ.isLoading ? (
-                  <div className="text-sm text-muted-foreground py-8 text-center">جارٍ التحميل…</div>
+                  <div className="text-sm text-muted-foreground py-8 text-center">
+                    جارٍ التحميل…
+                  </div>
                 ) : rowsQ.isError ? (
                   <div className="text-sm text-destructive py-8 text-center">
                     {(rowsQ.error as any)?.message ?? "تعذّر التحميل."}
                   </div>
                 ) : preview.length === 0 ? (
-                  <div className="text-sm text-muted-foreground py-8 text-center">لا توجد سجلات.</div>
+                  <div className="text-sm text-muted-foreground py-8 text-center">
+                    لا توجد سجلات.
+                  </div>
                 ) : (
                   <table className="w-full text-xs">
                     <thead>
                       <tr className="border-b">
                         {cols.map((c) => (
-                          <th key={c.header} className="text-right py-2 px-2 font-semibold whitespace-nowrap">
+                          <th
+                            key={c.header}
+                            className="text-right py-2 px-2 font-semibold whitespace-nowrap"
+                          >
                             {c.header}
                           </th>
                         ))}
@@ -298,7 +314,11 @@ function AuditExportPage() {
                             const v = c.accessor(r);
                             const s = v === null || v === undefined ? "" : String(v);
                             return (
-                              <td key={c.header} className="py-1.5 px-2 align-top max-w-[240px] truncate" title={s}>
+                              <td
+                                key={c.header}
+                                className="py-1.5 px-2 align-top max-w-[240px] truncate"
+                                title={s}
+                              >
                                 {s}
                               </td>
                             );

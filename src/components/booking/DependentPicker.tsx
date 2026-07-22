@@ -38,7 +38,12 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
   const { t } = useTranslation("booking");
   const [ready, setReady] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [selfProfile, setSelfProfile] = useState<{ full_name: string | null; phone: string | null; national_id: string | null; gender: string | null } | null>(null);
+  const [selfProfile, setSelfProfile] = useState<{
+    full_name: string | null;
+    phone: string | null;
+    national_id: string | null;
+    gender: string | null;
+  } | null>(null);
   const [dependents, setDependents] = useState<Dependent[]>([]);
   const [selected, setSelected] = useState<string>("self");
 
@@ -49,15 +54,23 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
       const uid = userRes.user?.id ?? null;
       if (cancelled) return;
       setUserId(uid);
-      if (!uid) { setReady(true); return; }
+      if (!uid) {
+        setReady(true);
+        return;
+      }
 
       const [profRes, depsRes, patRes] = await Promise.all([
         supabase.from("profiles").select("full_name,phone").eq("id", uid).maybeSingle(),
-        supabase.from("dependents")
+        supabase
+          .from("dependents")
           .select("id,full_name,relationship,national_id,phone,gender")
           .eq("guardian_user_id", uid)
           .order("full_name"),
-        supabase.from("patients").select("national_id,gender,full_name_ar,phone").eq("profile_id", uid).maybeSingle(),
+        supabase
+          .from("patients")
+          .select("national_id,gender,full_name_ar,phone")
+          .eq("profile_id", uid)
+          .maybeSingle(),
       ]);
       if (cancelled) return;
       setSelfProfile({
@@ -69,7 +82,9 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
       setDependents((depsRes.data ?? []) as Dependent[]);
       setReady(true);
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   if (!ready || !userId) return null;
@@ -110,14 +125,18 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
           type="button"
           onClick={() => apply("self")}
           className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-start text-sm transition ${
-            selected === "self" ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/50"
+            selected === "self"
+              ? "border-primary bg-primary/10"
+              : "border-border bg-card hover:border-primary/50"
           }`}
         >
           <UserCheck className="h-4 w-4 text-primary" />
           <div className="flex flex-col">
             <span className="font-medium">{t("patient.self", "لنفسي")}</span>
             {selfProfile?.full_name && (
-              <span className="text-xs text-muted-foreground truncate">{selfProfile.full_name}</span>
+              <span className="text-xs text-muted-foreground truncate">
+                {selfProfile.full_name}
+              </span>
             )}
           </div>
         </button>
@@ -127,7 +146,9 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
             type="button"
             onClick={() => apply(d.id)}
             className={`flex items-center gap-2 rounded-lg border-2 px-3 py-2 text-start text-sm transition ${
-              selected === d.id ? "border-primary bg-primary/10" : "border-border bg-card hover:border-primary/50"
+              selected === d.id
+                ? "border-primary bg-primary/10"
+                : "border-border bg-card hover:border-primary/50"
             }`}
           >
             <Users className="h-4 w-4 text-primary" />
@@ -140,10 +161,7 @@ export function DependentPicker({ lang, currentName, currentPhone, onApply }: Pr
           </button>
         ))}
       </div>
-      <p className="mt-2 text-[11px] text-muted-foreground">
-        {t("patientExtra.savedNote")}
-      </p>
-
+      <p className="mt-2 text-[11px] text-muted-foreground">{t("patientExtra.savedNote")}</p>
     </div>
   );
 }

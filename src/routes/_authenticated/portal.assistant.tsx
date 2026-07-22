@@ -31,7 +31,10 @@ export const Route = createFileRoute("/_authenticated/portal/assistant")({
   head: () => ({
     meta: [
       { title: "المساعد الذكي | بوابة المريض" },
-      { name: "description", content: "مساعد ذكي يجيب على استفساراتك حول مواعيدك وتقاريرك وطلباتك." },
+      {
+        name: "description",
+        content: "مساعد ذكي يجيب على استفساراتك حول مواعيدك وتقاريرك وطلباتك.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -124,7 +127,9 @@ function AssistantPage() {
       setMessages((m) => [...m, { role: "assistant", content: "", meta: initialMeta }]);
 
       let currentModel: string | undefined;
-      const usageRef: { current: { prompt: number; completion: number; total: number } | null } = { current: null };
+      const usageRef: { current: { prompt: number; completion: number; total: number } | null } = {
+        current: null,
+      };
       const result = await streamChatWithResume({
         surface: "portal",
         url: "/api/portal/ai-chat",
@@ -134,14 +139,24 @@ function AssistantPage() {
           messages: next,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (mdl) => { currentModel = mdl; setActiveModel(mdl); updateLastMeta({ model: mdl }); },
+        onModel: (mdl) => {
+          currentModel = mdl;
+          setActiveModel(mdl);
+          updateLastMeta({ model: mdl });
+        },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
           const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
           usageRef.current = { prompt, completion, total };
           updateLastMeta({ usage: usageRef.current });
-          if (prompt > 0) recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: prompt });
+          if (prompt > 0)
+            recordUsageSample({
+              model: currentModel,
+              text: promptText,
+              kind: "input",
+              tokens: prompt,
+            });
         },
         onDelta: (_delta, acc) => {
           setMessages((m) => {
@@ -177,19 +192,33 @@ function AssistantPage() {
       const endedAt = performance.now();
       updateLastMeta({ endedAt });
       if (usageRef.current && usageRef.current.completion > 0 && result.text) {
-        recordUsageSample({ model: currentModel, text: result.text, kind: "output", tokens: usageRef.current.completion });
+        recordUsageSample({
+          model: currentModel,
+          text: result.text,
+          kind: "output",
+          tokens: usageRef.current.completion,
+        });
       }
-      const spent = estimateCredits(estimateTokens(promptText), estimateTokens(result.text), currentModel);
+      const spent = estimateCredits(
+        estimateTokens(promptText),
+        estimateTokens(result.text),
+        currentModel,
+      );
       commitSessionCredits("portal", spent);
       setSessionCredits((v) => v + spent);
-      notifyMessageThresholds({ credits: spent, elapsedMs: endedAt - startedAt, surface: "portal" });
+      notifyMessageThresholds({
+        credits: spent,
+        elapsedMs: endedAt - startedAt,
+        surface: "portal",
+      });
       if (result.budgetStop) setError(result.budgetStop.message);
     } catch (e: unknown) {
       if ((e as Error).name === "AbortError") {
         updateLastMeta({ endedAt: performance.now() });
         return;
       }
-      const msg = e instanceof StreamHttpError ? e.message : e instanceof Error ? e.message : "خطأ غير متوقع";
+      const msg =
+        e instanceof StreamHttpError ? e.message : e instanceof Error ? e.message : "خطأ غير متوقع";
       setError(msg);
     } finally {
       setStreaming(false);
@@ -230,7 +259,9 @@ function AssistantPage() {
           {messages.length === 0 && (
             <div className="text-center py-8">
               <Sparkles className="mx-auto h-8 w-8 text-[color:var(--portal-primary)]" />
-              <p className="mt-3 text-sm text-[color:var(--portal-ink-2)]">اسأل عن مواعيدك أو تقاريرك أو خطوات الحجز.</p>
+              <p className="mt-3 text-sm text-[color:var(--portal-ink-2)]">
+                اسأل عن مواعيدك أو تقاريرك أو خطوات الحجز.
+              </p>
               <div className="mt-4 flex flex-wrap gap-2 justify-center">
                 {SUGGESTIONS.map((s) => (
                   <button
@@ -238,7 +269,9 @@ function AssistantPage() {
                     type="button"
                     onClick={() => send(s)}
                     className="text-xs px-3 py-1.5 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-2)] hover:bg-[color:var(--portal-surface-3)]"
-                  >{s}</button>
+                  >
+                    {s}
+                  </button>
                 ))}
               </div>
             </div>
@@ -247,7 +280,10 @@ function AssistantPage() {
           {messages.map((m, i) => {
             const isUser = m.role === "user";
             const parsed = isUser
-              ? { clean: m.content, actions: [] as ReturnType<typeof parseAssistantActions>["actions"] }
+              ? {
+                  clean: m.content,
+                  actions: [] as ReturnType<typeof parseAssistantActions>["actions"],
+                }
               : parseAssistantActions(m.content);
             return (
               <div key={i} className={isUser ? "flex justify-start" : "flex justify-end"}>
@@ -259,9 +295,13 @@ function AssistantPage() {
                       : "bg-[color:var(--portal-surface-2)] text-[color:var(--portal-ink)] border border-[color:var(--portal-border)]")
                   }
                 >
-                  {parsed.clean || (streaming && !isUser ? <span className="opacity-60">…</span> : "")}
+                  {parsed.clean ||
+                    (streaming && !isUser ? <span className="opacity-60">…</span> : "")}
                   {!isUser && streaming && i === messages.length - 1 && parsed.clean && (
-                    <span className="ml-1 inline-block h-3 w-1.5 -mb-0.5 bg-current opacity-70 animate-pulse align-baseline" aria-hidden />
+                    <span
+                      className="ml-1 inline-block h-3 w-1.5 -mb-0.5 bg-current opacity-70 animate-pulse align-baseline"
+                      aria-hidden
+                    />
                   )}
                   {parsed.actions.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-2">
@@ -315,14 +355,20 @@ function AssistantPage() {
         )}
 
         <form
-          onSubmit={(e) => { e.preventDefault(); send(input); }}
+          onSubmit={(e) => {
+            e.preventDefault();
+            send(input);
+          }}
           className="border-t border-[color:var(--portal-border)] p-3 sm:p-4 flex items-end gap-2 bg-[color:var(--portal-surface)]"
         >
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); }
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                send(input);
+              }
             }}
             rows={1}
             placeholder="اكتب سؤالك…"
@@ -340,7 +386,10 @@ function AssistantPage() {
                   const copy = prev.slice();
                   const last = copy[copy.length - 1];
                   if (last && last.role === "assistant") {
-                    copy[copy.length - 1] = { ...last, content: (last.content || "") + "\n\n_تم الإيقاف._" };
+                    copy[copy.length - 1] = {
+                      ...last,
+                      content: (last.content || "") + "\n\n_تم الإيقاف._",
+                    };
                   }
                   return copy;
                 });
@@ -368,7 +417,10 @@ function AssistantPage() {
 
       <p className="mt-4 text-center text-[11px] text-[color:var(--portal-ink-2)]">
         المساعد لا يقدّم تشخيصًا أو وصفًا للعلاج. للحالات الطبية تواصل مع طبيبك أو{" "}
-        <a href="tel:997" className="underline">997</a> للطوارئ.
+        <a href="tel:997" className="underline">
+          997
+        </a>{" "}
+        للطوارئ.
       </p>
     </div>
   );

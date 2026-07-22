@@ -1,12 +1,18 @@
 import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import {
-  Award, Calendar, Languages, MapPin, Star, Stethoscope,
-} from "lucide-react";
+import { Award, Calendar, Languages, MapPin, Star, Stethoscope } from "lucide-react";
 import { LANG_LABELS, type DoctorRow } from "./types";
 import { DemoBadge } from "@/components/DemoBadge";
 
-export function DoctorCard({ d, lang, nextSlotIso }: { d: DoctorRow; lang: "ar" | "en"; nextSlotIso?: string }) {
+export function DoctorCard({
+  d,
+  lang,
+  nextSlotIso,
+}: {
+  d: DoctorRow;
+  lang: "ar" | "en";
+  nextSlotIso?: string;
+}) {
   const name = lang === "ar" ? d.name_ar : d.name_en;
   const title = lang === "ar" ? d.title_ar : d.title_en;
   const specName = lang === "ar" ? d.specialty_name_ar : d.specialty_name_en;
@@ -28,12 +34,15 @@ export function DoctorCard({ d, lang, nextSlotIso }: { d: DoctorRow; lang: "ar" 
     const isToday = dt >= today && dt < tomorrow;
     const isTomorrow = dt >= tomorrow && dt < new Date(tomorrow.getTime() + 86400000);
     const timeStr = dt.toLocaleTimeString(lang === "ar" ? "ar-SA" : "en-US", {
-      hour: "2-digit", minute: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
     if (isToday) return lang === "ar" ? `اليوم ${timeStr}` : `Today ${timeStr}`;
     if (isTomorrow) return lang === "ar" ? `غدًا ${timeStr}` : `Tomorrow ${timeStr}`;
     const dateStr = dt.toLocaleDateString(lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US", {
-      weekday: "short", day: "numeric", month: "short",
+      weekday: "short",
+      day: "numeric",
+      month: "short",
     });
     return `${dateStr} · ${timeStr}`;
   }, [nextSlotIso, lang]);
@@ -68,9 +77,7 @@ export function DoctorCard({ d, lang, nextSlotIso }: { d: DoctorRow; lang: "ar" 
             )}
             <DemoBadge show={/\(DEMO\)/i.test(name)} />
           </h3>
-          {title && (
-            <div className="text-xs text-muted-foreground mt-0.5 truncate">{title}</div>
-          )}
+          {title && <div className="text-xs text-muted-foreground mt-0.5 truncate">{title}</div>}
           {specName && (
             <div className="text-sm text-primary mt-1 flex items-center gap-1 truncate">
               <Stethoscope className="h-3.5 w-3.5 shrink-0" />

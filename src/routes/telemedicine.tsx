@@ -84,19 +84,46 @@ function TelemedicinePage() {
       </PageHero>
 
       <section className="container-app py-10 grid gap-5 md:grid-cols-3">
-        <SectionCard icon={<Video className="h-5 w-5" />} title="مكالمة فيديو HD" desc="مكالمة آمنة مشفّرة عبر تطبيق باعشن الطبي، بدون تنصيب أدوات إضافية." />
-        <SectionCard icon={<Clock className="h-5 w-5" />} title="مواعيد مرنة" desc="فترات مسائية ونهاية الأسبوع لتناسب جدولك، مع توفر عاجل خلال 30 دقيقة." />
-        <SectionCard icon={<ShieldCheck className="h-5 w-5" />} title="سرية تامة" desc="بياناتك الطبية محفوظة وفق أنظمة حماية المعلومات الصحية السعودية." />
-        <SectionCard icon={<Smartphone className="h-5 w-5" />} title="وصفة إلكترونية" desc="نرسل وصفتك مباشرة إلى صيدلية باعشن لصرفها أو توصيلها." />
-        <SectionCard icon={<MessageCircle className="h-5 w-5" />} title="متابعة بعد الجلسة" desc="تواصل نصي مجاني لمدة 48 ساعة بعد الاستشارة للأسئلة المتعلقة." />
-        <SectionCard icon={<CheckCircle2 className="h-5 w-5" />} title="مناسبة لـ" desc="متابعة الأدوية، الاستفسارات، تفسير التحاليل، الأمراض المزمنة، والصحة النفسية." />
+        <SectionCard
+          icon={<Video className="h-5 w-5" />}
+          title="مكالمة فيديو HD"
+          desc="مكالمة آمنة مشفّرة عبر تطبيق باعشن الطبي، بدون تنصيب أدوات إضافية."
+        />
+        <SectionCard
+          icon={<Clock className="h-5 w-5" />}
+          title="مواعيد مرنة"
+          desc="فترات مسائية ونهاية الأسبوع لتناسب جدولك، مع توفر عاجل خلال 30 دقيقة."
+        />
+        <SectionCard
+          icon={<ShieldCheck className="h-5 w-5" />}
+          title="سرية تامة"
+          desc="بياناتك الطبية محفوظة وفق أنظمة حماية المعلومات الصحية السعودية."
+        />
+        <SectionCard
+          icon={<Smartphone className="h-5 w-5" />}
+          title="وصفة إلكترونية"
+          desc="نرسل وصفتك مباشرة إلى صيدلية باعشن لصرفها أو توصيلها."
+        />
+        <SectionCard
+          icon={<MessageCircle className="h-5 w-5" />}
+          title="متابعة بعد الجلسة"
+          desc="تواصل نصي مجاني لمدة 48 ساعة بعد الاستشارة للأسئلة المتعلقة."
+        />
+        <SectionCard
+          icon={<CheckCircle2 className="h-5 w-5" />}
+          title="مناسبة لـ"
+          desc="متابعة الأدوية، الاستفسارات، تفسير التحاليل، الأمراض المزمنة، والصحة النفسية."
+        />
       </section>
 
       <section className="container-app pb-4">
         <h2 className="text-2xl font-bold mb-4">التخصصات المتاحة عن بُعد</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {specialties.map((s) => (
-            <div key={s.name} className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4">
+            <div
+              key={s.name}
+              className="rounded-2xl border border-border bg-card p-5 flex items-center gap-4"
+            >
               <div className="grid h-11 w-11 place-items-center rounded-xl bg-primary/10 text-primary">
                 {s.icon}
               </div>

@@ -11,11 +11,7 @@
  * stream, giving a clear "you are about to spend ~X credits" cue.
  */
 import { Coins, Info } from "lucide-react";
-import {
-  estimateCredits,
-  formatCredits,
-  formatTokens,
-} from "@/lib/ai/pricing";
+import { estimateCredits, formatCredits, formatTokens } from "@/lib/ai/pricing";
 import { estimateTokensCalibrated } from "@/lib/ai/token-calibration";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -85,7 +81,8 @@ export function PreflightCostChip({
             <span className="whitespace-nowrap">{L.badge}</span>
             <span className="opacity-70">·</span>
             <span className="tabular-nums whitespace-nowrap">
-              {calibrated ? "" : "~"}{formatTokens(inTok)} {L.in}
+              {calibrated ? "" : "~"}
+              {formatTokens(inTok)} {L.in}
             </span>
             <span className="opacity-40">/</span>
             <span className="tabular-nums whitespace-nowrap">

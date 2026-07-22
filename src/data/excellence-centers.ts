@@ -1,4 +1,14 @@
-import { Heart, Bone, Eye, Baby, Sparkles, Stethoscope, Brain, Activity, type LucideIcon } from "lucide-react";
+import {
+  Heart,
+  Bone,
+  Eye,
+  Baby,
+  Sparkles,
+  Stethoscope,
+  Brain,
+  Activity,
+  type LucideIcon,
+} from "lucide-react";
 
 export type ExcellenceCenter = {
   slug: string;
@@ -94,12 +104,7 @@ export const EXCELLENCE_CENTERS: ExcellenceCenter[] = [
     desc: "تقويم، زراعة، حشوات تجميلية وعلاج جذور.",
     longDesc:
       "عيادات أسنان مجهّزة لخدمات التنظيف والحشوات والزراعة والتقويم وابتسامة هوليوود، مع تخصصات فرعية لأسنان الأطفال وعلاج الجذور.",
-    services: [
-      "حشوات تجميلية بالليزر",
-      "زراعة الأسنان",
-      "تقويم شفاف وتقليدي",
-      "علاج جذور وقنوات",
-    ],
+    services: ["حشوات تجميلية بالليزر", "زراعة الأسنان", "تقويم شفاف وتقليدي", "علاج جذور وقنوات"],
     team: "استشاريو تقويم، زراعة، ولب أسنان.",
   },
   {

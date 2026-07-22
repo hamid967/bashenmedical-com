@@ -37,9 +37,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
         }
 
         const ip = getClientIp(request);
-        const rl = checkRateLimit(`resv-cancel:${ip}`, [
-          { windowMs: 60_000, max: 10 },
-        ]);
+        const rl = checkRateLimit(`resv-cancel:${ip}`, [{ windowMs: 60_000, max: 10 }]);
         if (!rl.ok) {
           return jsonResponse(429, {
             ok: false,
@@ -68,11 +66,8 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
           });
         }
 
-
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const { data: appt, error: readErr } = await supabaseAdmin
             .from("appointments")
@@ -122,9 +117,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
             .update({
               status: "cancelled",
               cancelled_at: cancelledAt.toISOString(),
-              notes: parsed.data.reason
-                ? `[سبب الإلغاء] ${parsed.data.reason}`
-                : undefined,
+              notes: parsed.data.reason ? `[سبب الإلغاء] ${parsed.data.reason}` : undefined,
             })
             .eq("id", parsed.data.appointment_id);
           if (updErr) {
@@ -159,9 +152,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
           }
 
           try {
-            const { logReservationEvent } = await import(
-              "@/lib/reservation-events.server"
-            );
+            const { logReservationEvent } = await import("@/lib/reservation-events.server");
             await logReservationEvent({
               event_type: "cancel",
               phone: sess.phone,
@@ -170,7 +161,9 @@ export const Route = createFileRoute("/api/public/reservations/cancel")({
               waitlist_notified,
               ip,
             });
-          } catch { /* telemetry best-effort */ }
+          } catch {
+            /* telemetry best-effort */
+          }
 
           return jsonResponse(200, {
             ok: true,

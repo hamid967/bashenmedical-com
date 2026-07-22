@@ -8,7 +8,15 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
-import { Activity, AlertTriangle, CheckCircle2, RefreshCw, ShieldAlert, TriangleAlert, Zap } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  RefreshCw,
+  ShieldAlert,
+  TriangleAlert,
+  Zap,
+} from "lucide-react";
 import { getMyRoles } from "@/lib/admin.functions";
 import {
   getStreamSummary,
@@ -38,8 +46,7 @@ const summaryQuery = (windowMinutes: number, surface: Surface) =>
 const eventsQuery = (windowMinutes: number, surface: Surface, onlyErrors: boolean) =>
   queryOptions({
     queryKey: ["admin", "ai-streaming", "events", windowMinutes, surface, onlyErrors],
-    queryFn: () =>
-      listStreamEvents({ data: { windowMinutes, surface, onlyErrors, limit: 100 } }),
+    queryFn: () => listStreamEvents({ data: { windowMinutes, surface, onlyErrors, limit: 100 } }),
     staleTime: 15_000,
     refetchInterval: 30_000,
   });
@@ -61,8 +68,7 @@ export const Route = createFileRoute("/_authenticated/admin/ai-streaming")({
       throw redirect({ to: "/auth" });
     }
   },
-  loader: ({ context }) =>
-    context.queryClient.ensureQueryData(summaryQuery(60, "all")),
+  loader: ({ context }) => context.queryClient.ensureQueryData(summaryQuery(60, "all")),
   component: AiStreamingMonitor,
 });
 
@@ -116,7 +122,11 @@ function AiStreamingMonitor() {
         <section className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           <Kpi label="إجمالي الطلبات" value={summary.total.toLocaleString("ar-EG")} />
           <Kpi label="مكتملة" value={summary.completed.toLocaleString("ar-EG")} tone="ok" />
-          <Kpi label="أخطاء" value={summary.errors.toLocaleString("ar-EG")} tone={summary.errors ? "warn" : "ok"} />
+          <Kpi
+            label="أخطاء"
+            value={summary.errors.toLocaleString("ar-EG")}
+            tone={summary.errors ? "warn" : "ok"}
+          />
           <Kpi label="إلغاءات المستخدم" value={summary.aborted.toLocaleString("ar-EG")} />
           <Kpi
             label="معدل الأخطاء"
@@ -174,7 +184,10 @@ function SurfaceTabs({ value, onChange }: { value: Surface; onChange: (v: Surfac
     { v: "admin", label: "إدارة" },
   ];
   return (
-    <div className="inline-flex rounded-md border overflow-hidden" style={{ borderColor: "var(--ac-border)" }}>
+    <div
+      className="inline-flex rounded-md border overflow-hidden"
+      style={{ borderColor: "var(--ac-border)" }}
+    >
       {opts.map((o) => (
         <button
           key={o.v}
@@ -195,7 +208,10 @@ function SurfaceTabs({ value, onChange }: { value: Surface; onChange: (v: Surfac
 
 function WindowTabs({ value, onChange }: { value: number; onChange: (v: number) => void }) {
   return (
-    <div className="inline-flex rounded-md border overflow-hidden" style={{ borderColor: "var(--ac-border)" }}>
+    <div
+      className="inline-flex rounded-md border overflow-hidden"
+      style={{ borderColor: "var(--ac-border)" }}
+    >
       {WINDOWS.map((w) => (
         <button
           key={w.minutes}
@@ -227,9 +243,8 @@ function AlertBanner({ alert }: { alert: StreamSummary["alert"] }) {
         role="status"
       >
         <CheckCircle2 className="h-4 w-4" style={{ color: "var(--ac-success, #16a34a)" }} />
-        الأنظمة تعمل ضمن الحدود الطبيعية. عتبة التحذير{" "}
-        {(alert.threshold.warn * 100).toFixed(0)}% — الحد الحرج{" "}
-        {(alert.threshold.critical * 100).toFixed(0)}% (بعد {alert.minSamples}+ طلبات).
+        الأنظمة تعمل ضمن الحدود الطبيعية. عتبة التحذير {(alert.threshold.warn * 100).toFixed(0)}% —
+        الحد الحرج {(alert.threshold.critical * 100).toFixed(0)}% (بعد {alert.minSamples}+ طلبات).
       </div>
     );
   }
@@ -252,7 +267,9 @@ function AlertBanner({ alert }: { alert: StreamSummary["alert"] }) {
       )}
       <div>
         <div className="font-semibold">
-          {isCritical ? "تنبيه حرج: ارتفاع أخطاء الـAI Streaming" : "تحذير: ارتفاع أخطاء الـAI Streaming"}
+          {isCritical
+            ? "تنبيه حرج: ارتفاع أخطاء الـAI Streaming"
+            : "تحذير: ارتفاع أخطاء الـAI Streaming"}
         </div>
         <div className="text-xs mt-1 opacity-90">{alert.reason}</div>
       </div>
@@ -282,8 +299,12 @@ function Kpi({
       className="rounded-xl border p-3"
       style={{ borderColor: "var(--ac-border)", background: "var(--ac-surface)" }}
     >
-      <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>{label}</div>
-      <div className="mt-1 text-lg font-bold" style={{ color }}>{value}</div>
+      <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>
+        {label}
+      </div>
+      <div className="mt-1 text-lg font-bold" style={{ color }}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -301,15 +322,21 @@ function LatencyCard({ summary }: { summary: StreamSummary }) {
       </div>
       <div className="grid grid-cols-3 gap-2 text-center">
         <div>
-          <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>p50</div>
+          <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>
+            p50
+          </div>
           <div className="font-bold">{fmt(summary.latency.p50)}</div>
         </div>
         <div>
-          <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>p75</div>
+          <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>
+            p75
+          </div>
           <div className="font-bold">{fmt(summary.latency.p75)}</div>
         </div>
         <div>
-          <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>p95</div>
+          <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>
+            p95
+          </div>
           <div className="font-bold">{fmt(summary.latency.p95)}</div>
         </div>
       </div>
@@ -347,7 +374,11 @@ function BucketsCard({ summary }: { summary: StreamSummary }) {
           const total = (b.total / maxTotal) * 100;
           const errors = b.total ? (b.errors / b.total) * total : 0;
           return (
-            <div key={i} className="flex-1 flex flex-col justify-end" title={`${b.total} طلب — ${b.errors} خطأ`}>
+            <div
+              key={i}
+              className="flex-1 flex flex-col justify-end"
+              title={`${b.total} طلب — ${b.errors} خطأ`}
+            >
               <div
                 className="w-full rounded-t"
                 style={{ height: `${Math.max(2, total)}%`, background: "var(--ac-accent-soft)" }}
@@ -376,12 +407,17 @@ function ModelBreakdown({ summary }: { summary: StreamSummary }) {
       className="rounded-xl border overflow-hidden"
       style={{ borderColor: "var(--ac-border)", background: "var(--ac-surface)" }}
     >
-      <div className="px-4 py-2 border-b text-sm font-semibold" style={{ borderColor: "var(--ac-border)" }}>
+      <div
+        className="px-4 py-2 border-b text-sm font-semibold"
+        style={{ borderColor: "var(--ac-border)" }}
+      >
         حسب الطراز
       </div>
       <div className="p-2">
         {summary.byModel.length === 0 ? (
-          <div className="p-3 text-xs" style={{ color: "var(--ac-ink-3)" }}>لا توجد بيانات.</div>
+          <div className="p-3 text-xs" style={{ color: "var(--ac-ink-3)" }}>
+            لا توجد بيانات.
+          </div>
         ) : (
           <ul className="text-xs divide-y" style={{ borderColor: "var(--ac-border)" }}>
             {summary.byModel.map((m) => (
@@ -408,18 +444,26 @@ function ErrorBreakdown({ summary }: { summary: StreamSummary }) {
       className="rounded-xl border overflow-hidden"
       style={{ borderColor: "var(--ac-border)", background: "var(--ac-surface)" }}
     >
-      <div className="px-4 py-2 border-b text-sm font-semibold flex items-center gap-2" style={{ borderColor: "var(--ac-border)" }}>
-        <AlertTriangle className="h-4 w-4" style={{ color: "var(--ac-warning, #d97706)" }} /> أنواع الأخطاء
+      <div
+        className="px-4 py-2 border-b text-sm font-semibold flex items-center gap-2"
+        style={{ borderColor: "var(--ac-border)" }}
+      >
+        <AlertTriangle className="h-4 w-4" style={{ color: "var(--ac-warning, #d97706)" }} /> أنواع
+        الأخطاء
       </div>
       <div className="p-2">
         {summary.byErrorType.length === 0 ? (
-          <div className="p-3 text-xs" style={{ color: "var(--ac-ink-3)" }}>لا توجد أخطاء في هذه النافذة.</div>
+          <div className="p-3 text-xs" style={{ color: "var(--ac-ink-3)" }}>
+            لا توجد أخطاء في هذه النافذة.
+          </div>
         ) : (
           <ul className="text-xs divide-y" style={{ borderColor: "var(--ac-border)" }}>
             {summary.byErrorType.map((e) => (
               <li key={e.error_type} className="flex items-center justify-between py-2 px-1">
                 <span className="truncate">{e.error_type}</span>
-                <span className="tabular-nums" style={{ color: "var(--ac-danger, #dc2626)" }}>{e.count}</span>
+                <span className="tabular-nums" style={{ color: "var(--ac-danger, #dc2626)" }}>
+                  {e.count}
+                </span>
               </li>
             ))}
           </ul>
@@ -432,7 +476,9 @@ function ErrorBreakdown({ summary }: { summary: StreamSummary }) {
 function EventsTable({ rows }: { rows: StreamEventRow[] }) {
   if (!rows.length) {
     return (
-      <div className="p-4 text-xs" style={{ color: "var(--ac-ink-3)" }}>لا توجد أحداث.</div>
+      <div className="p-4 text-xs" style={{ color: "var(--ac-ink-3)" }}>
+        لا توجد أحداث.
+      </div>
     );
   }
   return (
@@ -454,11 +500,7 @@ function EventsTable({ rows }: { rows: StreamEventRow[] }) {
           {rows.map((r) => {
             const isErr = !r.aborted && (!r.completed || r.error_status != null);
             return (
-              <tr
-                key={r.id}
-                className="border-t"
-                style={{ borderColor: "var(--ac-border)" }}
-              >
+              <tr key={r.id} className="border-t" style={{ borderColor: "var(--ac-border)" }}>
                 <td className="px-3 py-2 whitespace-nowrap">
                   {new Date(r.created_at).toLocaleString("ar-SA")}
                 </td>

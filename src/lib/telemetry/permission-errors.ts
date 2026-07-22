@@ -49,7 +49,6 @@ export async function reportPermissionError(ctx: Ctx): Promise<void> {
   } catch {
     /* swallow — telemetry must never break the app */
   }
-
 }
 
 /** Call once during app bootstrap on the client. Idempotent. */
@@ -63,11 +62,12 @@ export function installPermissionErrorReporter(): void {
   window.fetch = async (input, init) => {
     const res = await origFetch(input as RequestInfo, init);
     if (res.status === 401 || res.status === 403) {
-      const url = typeof input === "string"
-        ? input
-        : input instanceof URL
-          ? input.toString()
-          : (input as Request).url;
+      const url =
+        typeof input === "string"
+          ? input
+          : input instanceof URL
+            ? input.toString()
+            : (input as Request).url;
       try {
         const u = new URL(url, window.location.origin);
         // Only /api/* and Supabase REST/RPC surface (rest/v1, rpc/*)
@@ -75,9 +75,7 @@ export function installPermissionErrorReporter(): void {
         const isApi = path.startsWith("/api/");
         const isRest = path.includes("/rest/v1/");
         if (isApi || isRest) {
-          const route = isRest
-            ? `rpc:${path.split("/rest/v1/").pop() ?? path}`
-            : path;
+          const route = isRest ? `rpc:${path.split("/rest/v1/").pop() ?? path}` : path;
           void reportPermissionError({
             statusCode: res.status as 401 | 403,
             route,

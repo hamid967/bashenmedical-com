@@ -29,10 +29,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/messaging-settings")({
   head: () => ({
-    meta: [
-      { title: "إعدادات المراسلة | لوحة الأدمن" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "إعدادات المراسلة | لوحة الأدمن" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <RequirePermission anyOf="settings.manage">
@@ -151,8 +148,8 @@ function MessagingSettingsPage() {
               حالة مزوّدي OTP / SMS
             </h2>
             <p className="mt-1 text-xs text-muted-foreground">
-              الحالة تُقرأ من متغيّرات البيئة الفعلية على الخادم. لإضافة مزوّد
-              اطلب من مسؤول النظام ربط الموصل الخاص به أو إضافة مفتاح API.
+              الحالة تُقرأ من متغيّرات البيئة الفعلية على الخادم. لإضافة مزوّد اطلب من مسؤول النظام
+              ربط الموصل الخاص به أو إضافة مفتاح API.
             </p>
             <ul className="mt-4 divide-y divide-border">
               <ProviderRow
@@ -182,9 +179,8 @@ function MessagingSettingsPage() {
               />
             </ul>
             <div className="mt-4 rounded-lg bg-muted/50 p-3 text-[11px] text-muted-foreground">
-              ملاحظة: تفعيل مزوّد SMS يتطلّب أيضًا ربطه في إعدادات مزود المصادقة
-              (Supabase Auth → Phone) ليعمل OTP للجوال. تحقّق من ذلك بعد إضافة
-              المفتاح.
+              ملاحظة: تفعيل مزوّد SMS يتطلّب أيضًا ربطه في إعدادات مزود المصادقة (Supabase Auth →
+              Phone) ليعمل OTP للجوال. تحقّق من ذلك بعد إضافة المفتاح.
             </div>
           </section>
         </>
@@ -219,14 +215,14 @@ function MissingConfigBanner({ cfg }: { cfg: MessagingConfig }) {
         <ul className="list-inside list-disc space-y-1 text-xs opacity-95">
           {missingWhatsapp && (
             <li>
-              لم يتم ضبط <b>رقم واتساب المجمع</b>. زر الاستفسار العائم لن يتمكّن
-              من فتح المحادثة، وستظهر رسالة خطأ للمستخدمين.
+              لم يتم ضبط <b>رقم واتساب المجمع</b>. زر الاستفسار العائم لن يتمكّن من فتح المحادثة،
+              وستظهر رسالة خطأ للمستخدمين.
             </li>
           )}
           {missingSms && (
             <li>
-              لا يوجد مزوّد <b>SMS</b> مُهيّأ على الخادم. سيعمل OTP عبر البريد
-              الإلكتروني فقط؛ ولن يعمل OTP للجوال حتى يتم ربط مزوّد رسائل.
+              لا يوجد مزوّد <b>SMS</b> مُهيّأ على الخادم. سيعمل OTP عبر البريد الإلكتروني فقط؛ ولن
+              يعمل OTP للجوال حتى يتم ربط مزوّد رسائل.
             </li>
           )}
         </ul>
@@ -243,15 +239,7 @@ function MissingConfigBanner({ cfg }: { cfg: MessagingConfig }) {
   );
 }
 
-function ProviderRow({
-  label,
-  sublabel,
-  ok,
-}: {
-  label: string;
-  sublabel: string;
-  ok: boolean;
-}) {
+function ProviderRow({ label, sublabel, ok }: { label: string; sublabel: string; ok: boolean }) {
   return (
     <li className="flex items-center justify-between gap-3 py-3">
       <div>

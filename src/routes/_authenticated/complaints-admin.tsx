@@ -71,10 +71,8 @@ function ComplaintsAdminPage() {
   useEffect(() => {
     const ch = supabase
       .channel("admin-complaints")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "complaints" },
-        () => qc.invalidateQueries({ queryKey: ["admin", "complaints"] }),
+      .on("postgres_changes", { event: "*", schema: "public", table: "complaints" }, () =>
+        qc.invalidateQueries({ queryKey: ["admin", "complaints"] }),
       )
       .subscribe();
     return () => {
@@ -83,10 +81,7 @@ function ComplaintsAdminPage() {
   }, [qc]);
 
   const rows = listQuery.data ?? [];
-  const selected = useMemo(
-    () => rows.find((r) => r.id === selectedId) ?? null,
-    [rows, selectedId],
-  );
+  const selected = useMemo(() => rows.find((r) => r.id === selectedId) ?? null, [rows, selectedId]);
 
   const updateMut = useMutation({
     mutationFn: (input: {
@@ -187,16 +182,12 @@ function ComplaintsAdminPage() {
                           {TYPE_AR[r.type] ?? r.type}
                         </span>
                         {r.department && (
-                          <span className="text-xs text-muted-foreground">
-                            · {r.department}
-                          </span>
+                          <span className="text-xs text-muted-foreground">· {r.department}</span>
                         )}
                       </div>
                       <p className="mt-1 text-sm font-medium">{r.patient_name}</p>
                       <p className="text-xs text-muted-foreground">{r.patient_phone}</p>
-                      <p className="mt-1 text-sm line-clamp-2 text-muted-foreground">
-                        {r.message}
-                      </p>
+                      <p className="mt-1 text-sm line-clamp-2 text-muted-foreground">{r.message}</p>
                     </div>
                     <div className="shrink-0 text-end">
                       <span
@@ -254,10 +245,7 @@ function ComplaintDetail({
     internal_notes: string | null;
     created_at: string;
   };
-  onUpdate: (patch: {
-    status?: (typeof STATUSES)[number];
-    internal_notes?: string | null;
-  }) => void;
+  onUpdate: (patch: { status?: (typeof STATUSES)[number]; internal_notes?: string | null }) => void;
   saving: boolean;
 }) {
   const [notes, setNotes] = useState(row.internal_notes ?? "");
@@ -304,9 +292,7 @@ function ComplaintDetail({
         <select
           value={row.status}
           disabled={saving}
-          onChange={(e) =>
-            onUpdate({ status: e.target.value as (typeof STATUSES)[number] })
-          }
+          onChange={(e) => onUpdate({ status: e.target.value as (typeof STATUSES)[number] })}
           className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
         >
           {STATUSES.map((s) => (

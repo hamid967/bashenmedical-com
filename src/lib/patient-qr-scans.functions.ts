@@ -38,7 +38,11 @@ export type PatientQrScanRow = {
 
 export const listPatientQrScans = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) => z.object({ patientId: z.string().uuid(), limit: z.number().int().min(1).max(200).default(50) }).parse(d))
+  .validator((d) =>
+    z
+      .object({ patientId: z.string().uuid(), limit: z.number().int().min(1).max(200).default(50) })
+      .parse(d),
+  )
   .handler(async ({ data, context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
@@ -61,7 +65,7 @@ export const listPatientQrScans = createServerFn({ method: "POST" })
     return list.map((r) => ({
       id: r.id,
       scanned_by: r.scanned_by,
-      scanner_name: r.scanned_by ? nameMap.get(r.scanned_by) ?? null : null,
+      scanner_name: r.scanned_by ? (nameMap.get(r.scanned_by) ?? null) : null,
       source: r.source,
       scanned_at: r.scanned_at,
     })) as PatientQrScanRow[];

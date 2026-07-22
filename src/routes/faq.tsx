@@ -48,7 +48,7 @@ export const Route = createFileRoute("/faq")({
     };
     return {
       meta: [
-      ...bmcOgImageMeta(),
+        ...bmcOgImageMeta(),
         { title: PAGE_TITLE_AR },
         { name: "description", content: PAGE_DESC_AR },
         { property: "og:title", content: PAGE_TITLE_AR },
@@ -62,9 +62,7 @@ export const Route = createFileRoute("/faq")({
       ],
       links: [{ rel: "canonical", href: PAGE_URL }],
       scripts:
-        faqs.length > 0
-          ? [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }]
-          : [],
+        faqs.length > 0 ? [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }] : [],
     };
   },
   component: FAQPage,

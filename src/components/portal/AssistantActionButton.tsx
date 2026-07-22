@@ -55,9 +55,7 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
 
   const isCancel = action.type === "cancel_appointment";
   const Icon = isCancel ? CalendarX : LifeBuoy;
-  const label =
-    action.label ??
-    (isCancel ? "إلغاء موعد" : "فتح تذكرة دعم");
+  const label = action.label ?? (isCancel ? "إلغاء موعد" : "فتح تذكرة دعم");
 
   async function run() {
     setError(null);
@@ -163,7 +161,9 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
               </label>
             ) : (
               <label className="mt-4 block text-xs">
-                <span className="text-[color:var(--portal-ink-2)]">تفاصيل التذكرة (10 أحرف على الأقل)</span>
+                <span className="text-[color:var(--portal-ink-2)]">
+                  تفاصيل التذكرة (10 أحرف على الأقل)
+                </span>
                 <textarea
                   value={ticketMessage}
                   onChange={(e) => setTicketMessage(e.target.value)}
@@ -201,7 +201,9 @@ export function AssistantActionButton({ action }: { action: AssistantAction }) {
                 onClick={run}
                 disabled={status === "running"}
                 className={`inline-flex items-center gap-1.5 rounded-full px-4 h-9 text-xs font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-60 ${
-                  isCancel ? "bg-[color:var(--portal-error)] hover:opacity-90" : "bg-[color:var(--portal-primary)] hover:opacity-90"
+                  isCancel
+                    ? "bg-[color:var(--portal-error)] hover:opacity-90"
+                    : "bg-[color:var(--portal-primary)] hover:opacity-90"
                 }`}
               >
                 {status === "running" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
@@ -224,25 +226,22 @@ export function parseAssistantActions(raw: string): {
   actions: AssistantAction[];
 } {
   const actions: AssistantAction[] = [];
-  const clean = raw.replace(
-    /```action\s*\n([\s\S]*?)```/gi,
-    (_full, body: string) => {
-      body
-        .split(/\n+/)
-        .map((l) => l.trim())
-        .filter(Boolean)
-        .forEach((line) => {
-          try {
-            const parsed = JSON.parse(line);
-            const a = normalizeAction(parsed);
-            if (a) actions.push(a);
-          } catch {
-            // ignore malformed JSON lines
-          }
-        });
-      return ""; // strip block from displayed text
-    },
-  );
+  const clean = raw.replace(/```action\s*\n([\s\S]*?)```/gi, (_full, body: string) => {
+    body
+      .split(/\n+/)
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .forEach((line) => {
+        try {
+          const parsed = JSON.parse(line);
+          const a = normalizeAction(parsed);
+          if (a) actions.push(a);
+        } catch {
+          // ignore malformed JSON lines
+        }
+      });
+    return ""; // strip block from displayed text
+  });
   return { clean: clean.replace(/\n{3,}/g, "\n\n").trim(), actions };
 }
 

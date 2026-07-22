@@ -9,12 +9,7 @@
  * signed-in patient via requireSupabaseAuth).
  */
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import {
-  queryOptions,
-  useSuspenseQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
@@ -94,8 +89,7 @@ function ConsentsPage() {
   const q = useSuspenseQuery(consentsQuery);
   const qc = useQueryClient();
 
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["portal", "my-consents"] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["portal", "my-consents"] });
 
   const grantMut = useMutation({
     mutationFn: (type: ConsentType) =>
@@ -104,20 +98,17 @@ function ConsentsPage() {
       invalidate();
       toast.success(r.already_active ? "الموافقة مسجّلة مسبقًا" : "تم تسجيل موافقتك");
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "تعذّر تسجيل الموافقة"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر تسجيل الموافقة"),
   });
 
   const withdrawMut = useMutation({
-    mutationFn: (v: { record_id: string; reason?: string }) =>
-      withdrawConsent({ data: v }),
+    mutationFn: (v: { record_id: string; reason?: string }) => withdrawConsent({ data: v }),
     onSuccess: () => {
       invalidate();
       toast.success("تم سحب الموافقة");
       setWithdrawTarget(null);
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "تعذّر سحب الموافقة"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر سحب الموافقة"),
   });
 
   const [withdrawTarget, setWithdrawTarget] = useState<{
@@ -128,9 +119,7 @@ function ConsentsPage() {
   const stats = useMemo(() => {
     const total = q.data.length;
     const granted = q.data.filter((v) => v.active).length;
-    const missingRequired = q.data.filter(
-      (v) => v.catalog.required && !v.active,
-    ).length;
+    const missingRequired = q.data.filter((v) => v.catalog.required && !v.active).length;
     return { total, granted, missingRequired };
   }, [q.data]);
 
@@ -144,101 +133,98 @@ function ConsentsPage() {
 
   return (
     <div className="mx-auto max-w-4xl" dir="rtl">
-        {/* Header */}
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <div
-              className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]"
-              style={{ background: "var(--portal-gradient)" }}
-              aria-hidden
-            >
-              <ShieldCheck className="h-5 w-5" />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">
-                الموافقات والخصوصية
-              </h1>
-              <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">
-                شروط الموافقة الصحية وسياسات الخصوصية الخاصة بحسابك — مع توثيق زمني كامل.
-              </p>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => invalidate()}
-            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
-          >
-            <RefreshCw className="h-4 w-4" />
-            تحديث
-          </button>
-        </header>
-
-        {/* Summary */}
-        <section className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <StatCard
-            label="إجمالي البنود"
-            value={stats.total}
-            icon={<FileCheck2 className="h-5 w-5" />}
-            tone="neutral"
-          />
-          <StatCard
-            label="ممنوحة"
-            value={stats.granted}
-            icon={<CheckCircle2 className="h-5 w-5" />}
-            tone="ok"
-          />
-          <StatCard
-            label="مطلوبة وغير ممنوحة"
-            value={stats.missingRequired}
-            icon={<AlertTriangle className="h-5 w-5" />}
-            tone={stats.missingRequired > 0 ? "warn" : "neutral"}
-          />
-        </section>
-
-        {stats.missingRequired > 0 && (
+      {/* Header */}
+      <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
           <div
-            role="alert"
-            className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 p-4 flex gap-3"
+            className="h-11 w-11 rounded-2xl grid place-items-center text-[color:var(--portal-on-primary)]"
+            style={{ background: "var(--portal-gradient)" }}
+            aria-hidden
           >
-            <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" aria-hidden />
-            <div className="text-sm leading-relaxed">
-              يوجد <strong>{stats.missingRequired}</strong> من الموافقات الأساسية لم يتم منحها بعد.
-              يُرجى مراجعة البنود ذات العلامة الحمراء وتسجيل موافقتك لاستمرار خدمات البوابة.
-            </div>
+            <ShieldCheck className="h-5 w-5" />
           </div>
-        )}
-
-        {/* Groups */}
-        <div className="space-y-8">
-          {groups.map((g) => (
-            <section key={g.key} aria-labelledby={`group-${g.key}`}>
-              <h2
-                id={`group-${g.key}`}
-                className="mb-3 text-sm font-semibold text-[color:var(--portal-ink-2)] px-1"
-              >
-                الموافقات {CATEGORY_LABEL[g.key]}
-              </h2>
-              <ul className="space-y-3">
-                {g.items.map((v) => (
-                  <ConsentRow
-                    key={v.catalog.type}
-                    view={v}
-                    onGrant={() => grantMut.mutate(v.catalog.type)}
-                    onWithdraw={(record) => setWithdrawTarget({ view: v, record })}
-                    granting={
-                      grantMut.isPending && grantMut.variables === v.catalog.type
-                    }
-                  />
-                ))}
-              </ul>
-            </section>
-          ))}
+          <div>
+            <h1 className="text-xl sm:text-2xl font-bold text-[color:var(--portal-ink)]">
+              الموافقات والخصوصية
+            </h1>
+            <p className="text-xs sm:text-sm text-[color:var(--portal-ink-2)]">
+              شروط الموافقة الصحية وسياسات الخصوصية الخاصة بحسابك — مع توثيق زمني كامل.
+            </p>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={() => invalidate()}
+          className="inline-flex items-center gap-1.5 h-9 px-3 rounded-full border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-sm text-[color:var(--portal-ink)] hover:bg-slate-50"
+        >
+          <RefreshCw className="h-4 w-4" />
+          تحديث
+        </button>
+      </header>
 
-        <p className="mt-8 text-center text-[11px] text-[color:var(--portal-ink-2)]">
-          توافق أنت وحدك على حساباتك — يمكنك سحب أي موافقة اختيارية في أي وقت.
-        </p>
-      
+      {/* Summary */}
+      <section className="mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <StatCard
+          label="إجمالي البنود"
+          value={stats.total}
+          icon={<FileCheck2 className="h-5 w-5" />}
+          tone="neutral"
+        />
+        <StatCard
+          label="ممنوحة"
+          value={stats.granted}
+          icon={<CheckCircle2 className="h-5 w-5" />}
+          tone="ok"
+        />
+        <StatCard
+          label="مطلوبة وغير ممنوحة"
+          value={stats.missingRequired}
+          icon={<AlertTriangle className="h-5 w-5" />}
+          tone={stats.missingRequired > 0 ? "warn" : "neutral"}
+        />
+      </section>
+
+      {stats.missingRequired > 0 && (
+        <div
+          role="alert"
+          className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 p-4 flex gap-3"
+        >
+          <AlertTriangle className="h-5 w-5 shrink-0 mt-0.5" aria-hidden />
+          <div className="text-sm leading-relaxed">
+            يوجد <strong>{stats.missingRequired}</strong> من الموافقات الأساسية لم يتم منحها بعد.
+            يُرجى مراجعة البنود ذات العلامة الحمراء وتسجيل موافقتك لاستمرار خدمات البوابة.
+          </div>
+        </div>
+      )}
+
+      {/* Groups */}
+      <div className="space-y-8">
+        {groups.map((g) => (
+          <section key={g.key} aria-labelledby={`group-${g.key}`}>
+            <h2
+              id={`group-${g.key}`}
+              className="mb-3 text-sm font-semibold text-[color:var(--portal-ink-2)] px-1"
+            >
+              الموافقات {CATEGORY_LABEL[g.key]}
+            </h2>
+            <ul className="space-y-3">
+              {g.items.map((v) => (
+                <ConsentRow
+                  key={v.catalog.type}
+                  view={v}
+                  onGrant={() => grantMut.mutate(v.catalog.type)}
+                  onWithdraw={(record) => setWithdrawTarget({ view: v, record })}
+                  granting={grantMut.isPending && grantMut.variables === v.catalog.type}
+                />
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      <p className="mt-8 text-center text-[11px] text-[color:var(--portal-ink-2)]">
+        توافق أنت وحدك على حساباتك — يمكنك سحب أي موافقة اختيارية في أي وقت.
+      </p>
 
       {withdrawTarget && (
         <WithdrawDialog
@@ -274,9 +260,7 @@ function ConsentRow({
 
   return (
     <li
-      className={`glass-card p-4 sm:p-5 transition ${
-        missingRequired ? "ring-1 ring-red-300" : ""
-      }`}
+      className={`glass-card p-4 sm:p-5 transition ${missingRequired ? "ring-1 ring-red-300" : ""}`}
     >
       <div className="flex items-start gap-3">
         <StatusBadge status={active ? "granted" : "none"} required={catalog.required} />
@@ -325,8 +309,7 @@ function ConsentRow({
           >
             <AlertTriangle className="h-3.5 w-3.5 mt-0.5 shrink-0" aria-hidden />
             <span>
-              <span className="font-semibold">الأثر المباشر داخل التطبيق:</span>{" "}
-              {catalog.impact_ar}
+              <span className="font-semibold">الأثر المباشر داخل التطبيق:</span> {catalog.impact_ar}
             </span>
           </div>
 
@@ -398,9 +381,7 @@ function ConsentRow({
                     {fullDate(r.granted_at)}
                   </span>
                   {r.withdrawn_at && (
-                    <span className="ms-2">
-                      — سُحبت في {fullDate(r.withdrawn_at)}
-                    </span>
+                    <span className="ms-2">— سُحبت في {fullDate(r.withdrawn_at)}</span>
                   )}
                   {r.withdrawal_reason && (
                     <div className="mt-1 text-[color:var(--portal-ink-2)]">
@@ -443,10 +424,7 @@ function WithdrawDialog({
       <div className="w-full max-w-md rounded-2xl bg-[color:var(--portal-surface)] shadow-2xl border border-[color:var(--portal-border)]">
         <div className="p-5 border-b border-[color:var(--portal-border)] flex items-start justify-between gap-3">
           <div>
-            <h3
-              id="withdraw-title"
-              className="text-base font-bold text-[color:var(--portal-ink)]"
-            >
+            <h3 id="withdraw-title" className="text-base font-bold text-[color:var(--portal-ink)]">
               تأكيد سحب الموافقة
             </h3>
             <p className="mt-1 text-xs text-[color:var(--portal-ink-2)]">
@@ -468,8 +446,8 @@ function WithdrawDialog({
             <div className="rounded-xl border border-red-200 bg-red-50 text-red-800 p-3 text-xs leading-relaxed flex gap-2">
               <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
               <div>
-                هذه موافقة <strong>أساسية</strong>. سحبها قد يوقف بعض خدمات البوابة
-                (الحجز، التقارير، الفواتير) حتى تعيد منحها.
+                هذه موافقة <strong>أساسية</strong>. سحبها قد يوقف بعض خدمات البوابة (الحجز،
+                التقارير، الفواتير) حتى تعيد منحها.
               </div>
             </div>
           )}
@@ -506,7 +484,11 @@ function WithdrawDialog({
             onClick={() => onConfirm(reason.trim() || undefined)}
             className="inline-flex items-center gap-1.5 h-9 px-4 rounded-full bg-red-600 text-[color:var(--portal-on-primary)] text-sm font-semibold hover:bg-red-700 disabled:opacity-60"
           >
-            {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldOff className="h-4 w-4" />}
+            {pending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldOff className="h-4 w-4" />
+            )}
             تأكيد السحب
           </button>
         </div>
@@ -547,13 +529,7 @@ function StatCard({
   );
 }
 
-function StatusBadge({
-  status,
-  required,
-}: {
-  status: "granted" | "none";
-  required: boolean;
-}) {
+function StatusBadge({ status, required }: { status: "granted" | "none"; required: boolean }) {
   if (status === "granted") {
     return (
       <div
@@ -600,24 +576,24 @@ function StatusPill({ status }: { status: ConsentRecord["status"] }) {
 function SkeletonState() {
   return (
     <div className="mx-auto max-w-4xl" dir="rtl">
-        <div className="mb-6 h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse" />
-        <div className="mb-6 grid grid-cols-3 gap-3">
-          {[0, 1, 2].map((i) => (
-            <div key={i} className="h-20 rounded-2xl bg-slate-200/60 animate-pulse" />
-          ))}
-        </div>
-        <ul className="space-y-3">
-          {CONSENT_CATALOG.slice(0, 5).map((c) => (
-            <li key={c.type} className="glass-card p-5 flex gap-3 items-start">
-              <div className="h-10 w-10 rounded-xl bg-slate-200/60 animate-pulse" />
-              <div className="flex-1 space-y-2">
-                <div className="h-4 w-1/2 rounded bg-slate-200/60 animate-pulse" />
-                <div className="h-3 w-4/5 rounded bg-slate-200/50 animate-pulse" />
-              </div>
-            </li>
-          ))}
-        </ul>
+      <div className="mb-6 h-11 w-64 rounded-2xl bg-slate-200/60 animate-pulse" />
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="h-20 rounded-2xl bg-slate-200/60 animate-pulse" />
+        ))}
       </div>
+      <ul className="space-y-3">
+        {CONSENT_CATALOG.slice(0, 5).map((c) => (
+          <li key={c.type} className="glass-card p-5 flex gap-3 items-start">
+            <div className="h-10 w-10 rounded-xl bg-slate-200/60 animate-pulse" />
+            <div className="flex-1 space-y-2">
+              <div className="h-4 w-1/2 rounded bg-slate-200/60 animate-pulse" />
+              <div className="h-3 w-4/5 rounded bg-slate-200/50 animate-pulse" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -632,9 +608,7 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
         >
           <AlertTriangle className="h-7 w-7" />
         </div>
-        <h2 className="text-xl font-bold text-[color:var(--portal-ink)]">
-          تعذّر تحميل الموافقات
-        </h2>
+        <h2 className="text-xl font-bold text-[color:var(--portal-ink)]">تعذّر تحميل الموافقات</h2>
         <p className="mt-2 text-sm text-[color:var(--portal-ink-2)] break-words">
           {error.message || "حدث خطأ غير متوقع."}
         </p>

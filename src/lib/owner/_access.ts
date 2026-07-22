@@ -48,11 +48,7 @@ export async function assertContentAccess(supabase: any, userId: string): Promis
  * When `claims` is passed, also enforces AAL2 (MFA) — required for all
  * super_admin endpoints.
  */
-export async function assertOwnerOnly(
-  supabase: any,
-  userId: string,
-  claims?: any,
-): Promise<void> {
+export async function assertOwnerOnly(supabase: any, userId: string, claims?: any): Promise<void> {
   const ok = await hasRole(supabase, userId, "super_admin");
   if (!ok) throw new Error("هذه العملية مخصصة لمالك الموقع فقط.");
   if (claims !== undefined) assertAAL2(claims);

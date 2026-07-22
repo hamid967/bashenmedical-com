@@ -28,9 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
   loader: ({ context }) => context.queryClient.ensureQueryData(logsQuery(24)),
   component: NphiesLogsPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">
-      تعذّر تحميل سجلات التأمين: {error.message}
-    </div>
+    <div className="p-6 text-sm text-destructive">تعذّر تحميل سجلات التأمين: {error.message}</div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm">غير موجود</div>,
 });
@@ -64,9 +62,7 @@ function NphiesLogsPage() {
             </button>
           ))}
           <button
-            onClick={() =>
-              qc.invalidateQueries({ queryKey: ["admin", "nphies-logs"] })
-            }
+            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "nphies-logs"] })}
             className="p-1.5 border rounded-md hover:bg-muted"
             aria-label="تحديث"
           >
@@ -77,18 +73,8 @@ function NphiesLogsPage() {
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Kpi label="إجمالي الطلبات" value={data.total} icon={Timer} />
-        <Kpi
-          label="مؤهل"
-          value={data.eligibleCount}
-          icon={ShieldCheck}
-          tone="ok"
-        />
-        <Kpi
-          label="غير مؤهل"
-          value={data.ineligibleCount}
-          icon={ShieldAlert}
-          tone="warn"
-        />
+        <Kpi label="مؤهل" value={data.eligibleCount} icon={ShieldCheck} tone="ok" />
+        <Kpi label="غير مؤهل" value={data.ineligibleCount} icon={ShieldAlert} tone="warn" />
         <Kpi
           label="أخطاء"
           value={data.errorCount}
@@ -110,9 +96,7 @@ function NphiesLogsPage() {
         <div className="rounded-xl border border-border p-4">
           <h2 className="text-sm font-semibold mb-2">أسباب الاستجابة</h2>
           <ul className="text-sm space-y-1">
-            {data.byReason.length === 0 && (
-              <li className="text-muted-foreground">لا بيانات</li>
-            )}
+            {data.byReason.length === 0 && <li className="text-muted-foreground">لا بيانات</li>}
             {data.byReason.map((r) => (
               <li key={r.reason} className="flex items-center justify-between">
                 <span>{r.reason}</span>

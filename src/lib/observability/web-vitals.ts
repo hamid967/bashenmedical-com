@@ -89,7 +89,10 @@ export function startWebVitals() {
     (entries) => {
       for (const e of entries) {
         if (e.hadRecentInput) continue;
-        if (sessionValue && (e.startTime - sessionLast > 1000 || e.startTime - sessionStart > 5000)) {
+        if (
+          sessionValue &&
+          (e.startTime - sessionLast > 1000 || e.startTime - sessionStart > 5000)
+        ) {
           sessionValue = 0;
           clsEntries = [];
         }
@@ -120,7 +123,8 @@ export function startWebVitals() {
       if (e.name === "first-contentful-paint") send(newMetric("FCP", e.startTime));
     }
   });
-  const nav = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+  const nav = performance.getEntriesByType("navigation")[0] as
+    PerformanceNavigationTiming | undefined;
   if (nav) send(newMetric("TTFB", Math.max(0, nav.responseStart - nav.startTime)));
 
   const flush = () => {

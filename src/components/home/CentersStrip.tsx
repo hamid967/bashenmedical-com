@@ -89,16 +89,12 @@ export function CentersStrip() {
                 <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-navy-deep/90 to-transparent" />
               </div>
               <div className="p-5">
-                <h3 className="text-lg font-bold text-white">
-                  {isAr ? c.name_ar : c.name_en}
-                </h3>
+                <h3 className="text-lg font-bold text-white">{isAr ? c.name_ar : c.name_en}</h3>
                 <p className="mt-1.5 text-sm text-white/70 line-clamp-2 min-h-[2.5rem]">
                   {isAr ? c.short_ar : c.short_en}
                 </p>
                 <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-white/90">
-                  {isAr
-                    ? `تفاصيل مركز ${c.name_ar}`
-                    : `Explore ${c.name_en}`}
+                  {isAr ? `تفاصيل مركز ${c.name_ar}` : `Explore ${c.name_en}`}
                   {isAr ? <ArrowLeft className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                 </span>
               </div>

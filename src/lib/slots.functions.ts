@@ -14,17 +14,13 @@ import { riyadhTodayIso } from "@/lib/riyadh-date";
  */
 
 function serverPublicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    {
-      auth: {
-        storage: undefined,
-        persistSession: false,
-        autoRefreshToken: false,
-      },
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: {
+      storage: undefined,
+      persistSession: false,
+      autoRefreshToken: false,
     },
-  );
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -33,7 +29,10 @@ function serverPublicClient() {
 const listSchema = z.object({
   doctorId: z.string().uuid(),
   fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  toDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
   branchId: z.string().uuid().optional().nullable(),
 });
 
@@ -175,9 +174,7 @@ export const bookSlotAsGuardian = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 export const releaseSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((raw: unknown) =>
-    z.object({ appointmentId: z.string().uuid() }).parse(raw),
-  )
+  .validator((raw: unknown) => z.object({ appointmentId: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const { data: released, error } = await context.supabase.rpc("release_slot", {
       p_appointment_id: data.appointmentId,
@@ -228,8 +225,7 @@ export const cancelMyAppointment = createServerFn({ method: "POST" })
     //    cancelled) and performs the UPDATE. RLS still applies to the
     //    UPDATE, so the "users cancel own appointments" policy enforces
     //    phone ownership + allowed transitions.
-    const reasonText =
-      (data.reason ?? "").trim() || "إلغاء ذاتي من بوابة المريض";
+    const reasonText = (data.reason ?? "").trim() || "إلغاء ذاتي من بوابة المريض";
     const { error: updErr } = await sb.rpc(
       "update_appointment_status" as any,
       { _id: data.appointmentId, _status: "cancelled", _reason: reasonText } as any,
@@ -260,7 +256,9 @@ function toMinutes(hhmm: string): number {
   return h * 60 + m;
 }
 function toHHMMSS(mins: number): string {
-  const h = Math.floor(mins / 60).toString().padStart(2, "0");
+  const h = Math.floor(mins / 60)
+    .toString()
+    .padStart(2, "0");
   const m = (mins % 60).toString().padStart(2, "0");
   return `${h}:${m}:00`;
 }
@@ -327,12 +325,10 @@ export const generateSlots = createServerFn({ method: "POST" })
       status: r.status as string,
     }));
 
-    const rows: typeof candidates[number]["row"][] = [];
+    const rows: (typeof candidates)[number]["row"][] = [];
     const conflicts: Array<{ start: string; end: string; withStatus: string }> = [];
     for (const c of candidates) {
-      const clash = existingRanges.find(
-        (e) => c.start_min < e.end && c.end_min > e.start,
-      );
+      const clash = existingRanges.find((e) => c.start_min < e.end && c.end_min > e.start);
       if (clash) {
         conflicts.push({
           start: c.row.start_time.slice(0, 5),
@@ -377,7 +373,10 @@ export const listSlotsAdmin = createServerFn({ method: "POST" })
       .object({
         doctorId: z.string().uuid(),
         fromDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-        toDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+        toDate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/)
+          .optional(),
       })
       .parse(raw),
   )
@@ -410,9 +409,7 @@ export const listSlotsAdmin = createServerFn({ method: "POST" })
 // ---------------------------------------------------------------------------
 export const deleteSlot = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((raw: unknown) =>
-    z.object({ slotId: z.string().uuid() }).parse(raw),
-  )
+  .validator((raw: unknown) => z.object({ slotId: z.string().uuid() }).parse(raw))
   .handler(async ({ data, context }) => {
     const roleChecks = await Promise.all(
       (["admin", "reception", "doctor"] as const).map((r) =>

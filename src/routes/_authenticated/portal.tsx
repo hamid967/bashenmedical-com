@@ -103,7 +103,9 @@ function PortalNotFound() {
     <div className="portal-root portal-gradient-bg min-h-dvh grid place-items-center p-6">
       <PortalCard className="max-w-md w-full p-8 text-center">
         <h2 className="text-6xl font-bold text-[color:var(--portal-primary)]">404</h2>
-        <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">الصفحة غير موجودة داخل البوابة.</p>
+        <p className="mt-2 text-sm text-[color:var(--portal-ink-2)]">
+          الصفحة غير موجودة داخل البوابة.
+        </p>
         <a
           href="/portal"
           className="mt-6 inline-flex rounded-full px-5 h-10 items-center text-sm font-semibold text-[color:var(--portal-on-primary)]"

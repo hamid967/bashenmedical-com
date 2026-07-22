@@ -8,9 +8,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-const BranchInput = z
-  .object({ branchId: z.string().uuid().nullable().optional() })
-  .default({});
+const BranchInput = z.object({ branchId: z.string().uuid().nullable().optional() }).default({});
 
 const BranchDaysInput = z
   .object({

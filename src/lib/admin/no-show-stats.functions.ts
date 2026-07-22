@@ -104,13 +104,32 @@ export const getNoShowStats = createServerFn({ method: "GET" })
     }
 
     // Aggregators
-    const emptyDoc = (): Omit<DoctorBreakdown, "doctor_id" | "doctor_name_ar" | "no_show_rate" | "avg_risk"> & { _riskSum: number; _riskN: number } => ({
-      total: 0, completed: 0, no_show: 0, cancelled: 0, confirmed: 0,
-      _riskSum: 0, _riskN: 0,
+    const emptyDoc = (): Omit<
+      DoctorBreakdown,
+      "doctor_id" | "doctor_name_ar" | "no_show_rate" | "avg_risk"
+    > & { _riskSum: number; _riskN: number } => ({
+      total: 0,
+      completed: 0,
+      no_show: 0,
+      cancelled: 0,
+      confirmed: 0,
+      _riskSum: 0,
+      _riskN: 0,
     });
     const docAgg = new Map<string, ReturnType<typeof emptyDoc>>();
-    const dayAgg = new Map<string, { total: number; completed: number; no_show: number; cancelled: number }>();
-    const totals = { total: 0, completed: 0, no_show: 0, cancelled: 0, confirmed: 0, _riskSum: 0, _riskN: 0 };
+    const dayAgg = new Map<
+      string,
+      { total: number; completed: number; no_show: number; cancelled: number }
+    >();
+    const totals = {
+      total: 0,
+      completed: 0,
+      no_show: 0,
+      cancelled: 0,
+      confirmed: 0,
+      _riskSum: 0,
+      _riskN: 0,
+    };
 
     for (const r of list) {
       totals.total++;
@@ -118,18 +137,33 @@ export const getNoShowStats = createServerFn({ method: "GET" })
       if (!docAgg.has(dKey)) docAgg.set(dKey, emptyDoc());
       const dbucket = docAgg.get(dKey)!;
       dbucket.total++;
-      if (!dayAgg.has(r.appointment_date)) dayAgg.set(r.appointment_date, { total: 0, completed: 0, no_show: 0, cancelled: 0 });
+      if (!dayAgg.has(r.appointment_date))
+        dayAgg.set(r.appointment_date, { total: 0, completed: 0, no_show: 0, cancelled: 0 });
       const daybucket = dayAgg.get(r.appointment_date)!;
       daybucket.total++;
 
-      if (r.status === "completed") { totals.completed++; dbucket.completed++; daybucket.completed++; }
-      else if (r.status === "no_show") { totals.no_show++; dbucket.no_show++; daybucket.no_show++; }
-      else if (r.status === "cancelled") { totals.cancelled++; dbucket.cancelled++; daybucket.cancelled++; }
-      else if (r.status === "confirmed") { totals.confirmed++; dbucket.confirmed++; }
+      if (r.status === "completed") {
+        totals.completed++;
+        dbucket.completed++;
+        daybucket.completed++;
+      } else if (r.status === "no_show") {
+        totals.no_show++;
+        dbucket.no_show++;
+        daybucket.no_show++;
+      } else if (r.status === "cancelled") {
+        totals.cancelled++;
+        dbucket.cancelled++;
+        daybucket.cancelled++;
+      } else if (r.status === "confirmed") {
+        totals.confirmed++;
+        dbucket.confirmed++;
+      }
 
       if (typeof r.no_show_risk === "number") {
-        totals._riskSum += r.no_show_risk; totals._riskN++;
-        dbucket._riskSum += r.no_show_risk; dbucket._riskN++;
+        totals._riskSum += r.no_show_risk;
+        totals._riskN++;
+        dbucket._riskSum += r.no_show_risk;
+        dbucket._riskN++;
       }
     }
 
@@ -138,7 +172,7 @@ export const getNoShowStats = createServerFn({ method: "GET" })
         const decided = b.completed + b.no_show;
         return {
           doctor_id: id === "unassigned" ? null : id,
-          doctor_name_ar: id === "unassigned" ? null : doctorMap.get(id) ?? null,
+          doctor_name_ar: id === "unassigned" ? null : (doctorMap.get(id) ?? null),
           total: b.total,
           completed: b.completed,
           no_show: b.no_show,
@@ -193,7 +227,9 @@ export const getNoShowStats = createServerFn({ method: "GET" })
         cancelled: totals.cancelled,
         confirmed: totals.confirmed,
         no_show_rate: decidedAll ? Math.round((totals.no_show / decidedAll) * 1000) / 10 : 0,
-        cancellation_rate: totals.total ? Math.round((totals.cancelled / totals.total) * 1000) / 10 : 0,
+        cancellation_rate: totals.total
+          ? Math.round((totals.cancelled / totals.total) * 1000) / 10
+          : 0,
         avg_risk: totals._riskN ? Math.round(totals._riskSum / totals._riskN) : null,
       },
       byDoctor,

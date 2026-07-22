@@ -36,7 +36,10 @@ const schema = z.object({
     .min(PHONE_MIN, "رقم الهاتف قصير جدًا")
     .max(PHONE_MAX, "رقم الهاتف طويل جدًا")
     .regex(PHONE_RE, "الهاتف يحتوي على أحرف غير مسموحة")
-    .refine((v) => SA_MOBILE_RE.test(v.replace(/[\s\-()]/g, "")), "أدخل رقم جوال سعودي صحيح (05XXXXXXXX)"),
+    .refine(
+      (v) => SA_MOBILE_RE.test(v.replace(/[\s\-()]/g, "")),
+      "أدخل رقم جوال سعودي صحيح (05XXXXXXXX)",
+    ),
   service: z.string().trim().min(1, "اختر نوع الخدمة"),
   appointment_date: z
     .string()
@@ -53,7 +56,12 @@ const schema = z.object({
       return d <= max;
     }, "التاريخ خارج فترة الحجز المتاحة (٤ أشهر)"),
   appointment_time: z.string().regex(/^\d{2}:\d{2}$/, "الوقت غير صالح"),
-  reason: z.string().trim().max(REASON_MAX, `السبب طويل جدًا (${REASON_MAX} حرفًا كحد أقصى)`).optional().or(z.literal("")),
+  reason: z
+    .string()
+    .trim()
+    .max(REASON_MAX, `السبب طويل جدًا (${REASON_MAX} حرفًا كحد أقصى)`)
+    .optional()
+    .or(z.literal("")),
 });
 
 type FormState = {
@@ -86,9 +94,6 @@ const EMPTY: FormState = {
   reason: "",
 };
 
-
-
-
 function formatArabicDate(iso: string): string {
   try {
     return new Date(iso + "T00:00:00").toLocaleDateString("ar-SA", {
@@ -113,9 +118,10 @@ export function CenterBookingForm({
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [submitError, setSubmitError] = useState<
-    { kind: Exclude<BookingSubmitKind, "success">; message: string } | null
-  >(null);
+  const [submitError, setSubmitError] = useState<{
+    kind: Exclude<BookingSubmitKind, "success">;
+    message: string;
+  } | null>(null);
   const lastPayloadRef = useRef<FormState | null>(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
@@ -199,13 +205,15 @@ export function CenterBookingForm({
       const summary =
         count > 1
           ? `يرجى تصحيح ${count} حقول قبل الإرسال — راجع الرسائل الحمراء أسفل كل حقل.`
-          : parsed.error.issues[0]?.message ?? "يرجى مراجعة الحقول";
+          : (parsed.error.issues[0]?.message ?? "يرجى مراجعة الحقول");
       setSubmitError({ kind: "validation", message: summary });
       toast.error(summary);
       // Focus the first invalid field for a11y.
       const firstKey = Object.keys(fe)[0] as keyof FormState | undefined;
       if (firstKey) {
-        const el = document.getElementById(`ff-${firstKey === "patient_name" ? "name" : firstKey === "patient_phone" ? "phone" : firstKey === "appointment_date" ? "date" : firstKey === "appointment_time" ? "time" : firstKey}`);
+        const el = document.getElementById(
+          `ff-${firstKey === "patient_name" ? "name" : firstKey === "patient_phone" ? "phone" : firstKey === "appointment_date" ? "date" : firstKey === "appointment_time" ? "time" : firstKey}`,
+        );
         el?.focus();
       }
       return;
@@ -234,7 +242,9 @@ export function CenterBookingForm({
           </div>
           <div>
             <h3 className="text-lg font-bold">تم استلام طلب الحجز بنجاح</h3>
-            <p className="text-xs text-muted-foreground">سيصلك تأكيد نهائي عبر رسالة SMS خلال دقائق.</p>
+            <p className="text-xs text-muted-foreground">
+              سيصلك تأكيد نهائي عبر رسالة SMS خلال دقائق.
+            </p>
           </div>
         </div>
 
@@ -256,12 +266,14 @@ export function CenterBookingForm({
                 نسخ
               </button>
             </div>
-            <div className="mt-1 text-lg font-mono font-bold tracking-wider">{confirmation.reference}</div>
+            <div className="mt-1 text-lg font-mono font-bold tracking-wider">
+              {confirmation.reference}
+            </div>
           </div>
         ) : (
           <div className="mt-5 rounded-xl border border-dashed border-border bg-background/60 p-4 text-xs text-muted-foreground">
-            سيصلك رقم الطلب في رسالة التأكيد على جوالك خلال دقائق. يمكنك بعدها تحميل تأكيد الحجز من صفحة{" "}
-            <span className="font-semibold">"تتبّع طلبك"</span>.
+            سيصلك رقم الطلب في رسالة التأكيد على جوالك خلال دقائق. يمكنك بعدها تحميل تأكيد الحجز من
+            صفحة <span className="font-semibold">"تتبّع طلبك"</span>.
           </div>
         )}
 
@@ -336,8 +348,10 @@ export function CenterBookingForm({
         />
       )}
 
-      <fieldset disabled={submitting} className="space-y-3 text-sm border-0 p-0 m-0 disabled:opacity-70">
-
+      <fieldset
+        disabled={submitting}
+        className="space-y-3 text-sm border-0 p-0 m-0 disabled:opacity-70"
+      >
         <Field label="الاسم الكامل" error={errors.patient_name} htmlFor="ff-name">
           <input
             id="ff-name"
@@ -351,7 +365,12 @@ export function CenterBookingForm({
           />
         </Field>
 
-        <Field label="رقم الجوال" error={errors.patient_phone} htmlFor="ff-phone" hint="مثال: 05XXXXXXXX">
+        <Field
+          label="رقم الجوال"
+          error={errors.patient_phone}
+          htmlFor="ff-phone"
+          hint="مثال: 05XXXXXXXX"
+        >
           <input
             id="ff-phone"
             required
@@ -438,7 +457,11 @@ export function CenterBookingForm({
         disabled={submitting}
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
-        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarPlus className="h-4 w-4" />}
+        {submitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <CalendarPlus className="h-4 w-4" />
+        )}
         {submitting ? "جاري الإرسال..." : "إرسال طلب الحجز"}
       </button>
     </form>

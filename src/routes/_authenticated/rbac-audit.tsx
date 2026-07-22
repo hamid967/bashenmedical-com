@@ -2,19 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import {
-  ShieldAlert,
-  RefreshCw,
-  ChevronLeft,
-  Filter,
-  X,
-  ArrowRight,
-} from "lucide-react";
-import {
-  listRbacAuditLog,
-  listUsersWithRoles,
-  listPermissionsCatalog,
-} from "@/lib/rbac.functions";
+import { ShieldAlert, RefreshCw, ChevronLeft, Filter, X, ArrowRight } from "lucide-react";
+import { listRbacAuditLog, listUsersWithRoles, listPermissionsCatalog } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 const ROLES = ["super_admin", "admin", "doctor", "reception", "pharmacy"];
@@ -89,7 +78,7 @@ function DiffCard({ row }: { row: Row }) {
       <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/5 p-3">
         <div className="text-xs font-medium text-emerald-700 mb-2">تمت إضافة سجل جديد</div>
         <pre className="text-[11px] leading-relaxed text-foreground/80 whitespace-pre-wrap font-mono">
-{JSON.stringify(newRow, null, 2)}
+          {JSON.stringify(newRow, null, 2)}
         </pre>
       </div>
     );
@@ -100,7 +89,7 @@ function DiffCard({ row }: { row: Row }) {
       <div className="rounded-lg border border-red-500/30 bg-red-500/5 p-3">
         <div className="text-xs font-medium text-red-700 mb-2">تم حذف السجل</div>
         <pre className="text-[11px] leading-relaxed text-foreground/80 whitespace-pre-wrap font-mono line-through decoration-red-400/40">
-{JSON.stringify(oldRow, null, 2)}
+          {JSON.stringify(oldRow, null, 2)}
         </pre>
       </div>
     );
@@ -109,7 +98,7 @@ function DiffCard({ row }: { row: Row }) {
   return (
     <div className="rounded-lg border border-border/60 bg-muted/20 p-3">
       <pre className="text-[11px] leading-relaxed text-foreground/70 whitespace-pre-wrap font-mono">
-{JSON.stringify(meta, null, 2)}
+        {JSON.stringify(meta, null, 2)}
       </pre>
     </div>
   );
@@ -144,18 +133,7 @@ function Page() {
   });
 
   const logsQ = useQuery({
-    queryKey: [
-      "rbac-audit",
-      table,
-      actor,
-      targetUser,
-      role,
-      permissionKey,
-      from,
-      to,
-      q,
-      limit,
-    ],
+    queryKey: ["rbac-audit", table, actor, targetUser, role, permissionKey, from, to, q, limit],
     queryFn: () =>
       runList({
         data: {
@@ -179,10 +157,16 @@ function Page() {
   const activeFilters = useMemo(() => {
     const items: Array<{ label: string; clear: () => void }> = [];
     if (table !== "all")
-      items.push({ label: `الجدول: ${TABLE_LABELS[table] ?? table}`, clear: () => setTable("all") });
+      items.push({
+        label: `الجدول: ${TABLE_LABELS[table] ?? table}`,
+        clear: () => setTable("all"),
+      });
     if (actor) {
       const u = users.find((x) => x.user_id === actor);
-      items.push({ label: `المُنفّذ: ${u?.full_name ?? actor.slice(0, 8)}`, clear: () => setActor("") });
+      items.push({
+        label: `المُنفّذ: ${u?.full_name ?? actor.slice(0, 8)}`,
+        clear: () => setActor(""),
+      });
     }
     if (targetUser) {
       const u = users.find((x) => x.user_id === targetUser);
@@ -403,8 +387,7 @@ function Page() {
         <section>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-sm">
-              النتائج{" "}
-              <span className="text-muted-foreground font-normal">({rows.length})</span>
+              النتائج <span className="text-muted-foreground font-normal">({rows.length})</span>
             </h2>
           </div>
 

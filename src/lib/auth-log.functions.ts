@@ -16,7 +16,7 @@ function getClientMeta() {
       const fwd = getRequestHeader("x-forwarded-for");
       const real = getRequestHeader("x-real-ip");
       const cf = getRequestHeader("cf-connecting-ip");
-      ip = (cf ?? real ?? (fwd ? fwd.split(",")[0]?.trim() : null)) ?? null;
+      ip = cf ?? real ?? (fwd ? fwd.split(",")[0]?.trim() : null) ?? null;
     }
   } catch {}
   return { ip, ua };
@@ -48,14 +48,17 @@ export const logAuthEvent = createServerFn({ method: "POST" })
       process.env.SUPABASE_PUBLISHABLE_KEY!,
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
-    const { error } = await supa.rpc("log_auth_event" as any, {
-      _action: data.action,
-      _user_id: data.user_id ?? null,
-      _email: data.email ?? null,
-      _ip: ip,
-      _ua: ua,
-      _metadata: (data.metadata ?? null) as any,
-    } as any);
+    const { error } = await supa.rpc(
+      "log_auth_event" as any,
+      {
+        _action: data.action,
+        _user_id: data.user_id ?? null,
+        _email: data.email ?? null,
+        _ip: ip,
+        _ua: ua,
+        _metadata: (data.metadata ?? null) as any,
+      } as any,
+    );
     if (error) {
       // Never block auth flow on logging errors
       console.error("logAuthEvent error", error.message);

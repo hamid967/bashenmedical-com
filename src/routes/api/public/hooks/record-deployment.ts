@@ -12,19 +12,21 @@ export const Route = createFileRoute("/api/public/hooks/record-deployment")({
     handlers: {
       POST: async ({ request }) => {
         const apikey = request.headers.get("apikey");
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY
-          ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const expected =
+          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         if (!apikey || (expected && apikey !== expected)) {
           return json({ error: "unauthorized" }, 401);
         }
         let body: { ref?: string; notes?: string } = {};
-        try { body = await request.json(); } catch { /* empty */ }
+        try {
+          body = await request.json();
+        } catch {
+          /* empty */
+        }
         const ref = (body.ref ?? "").slice(0, 200);
         if (!ref) return json({ error: "missing ref" }, 400);
 
-        const { supabaseAdmin } = await import(
-          "@/integrations/supabase/client.server"
-        );
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
         // Compute baseline: avg errors/hour over the trailing 7 days
         // (excluding the last 24h to avoid contamination from recent issues).
@@ -37,17 +39,15 @@ export const Route = createFileRoute("/api/public/hooks/record-deployment")({
         const baselineCount = (baseRows as unknown as { count?: number })?.count ?? 0;
         const baseline = baselineCount / (7 * 24);
 
-        const { error } = await supabaseAdmin
-          .from("deployment_markers")
-          .upsert(
-            {
-              migration_ref: ref,
-              baseline_errors_per_hour: baseline,
-              notes: body.notes?.slice(0, 500) ?? null,
-              merged_at: new Date().toISOString(),
-            },
-            { onConflict: "migration_ref" },
-          );
+        const { error } = await supabaseAdmin.from("deployment_markers").upsert(
+          {
+            migration_ref: ref,
+            baseline_errors_per_hour: baseline,
+            notes: body.notes?.slice(0, 500) ?? null,
+            merged_at: new Date().toISOString(),
+          },
+          { onConflict: "migration_ref" },
+        );
         if (error) return json({ error: error.message }, 500);
         return json({ ok: true, migration_ref: ref, baseline_per_hour: baseline });
       },

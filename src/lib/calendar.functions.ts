@@ -106,14 +106,17 @@ export const rescheduleAppointment = createServerFn({ method: "POST" })
 
     // Best-effort audit log (matches pattern used in updateAppointmentStatus)
     try {
-      await sb.rpc("log_security_event" as any, {
-        _action: "appointment_rescheduled",
-        _appointment_id: data.id,
-        _from_status: current.status,
-        _to_status: current.status,
-        _reason: `${current.appointment_date} ${current.appointment_time} → ${data.date} ${time}`,
-        _metadata: { actor: context.userId },
-      } as any);
+      await sb.rpc(
+        "log_security_event" as any,
+        {
+          _action: "appointment_rescheduled",
+          _appointment_id: data.id,
+          _from_status: current.status,
+          _to_status: current.status,
+          _reason: `${current.appointment_date} ${current.appointment_time} → ${data.date} ${time}`,
+          _metadata: { actor: context.userId },
+        } as any,
+      );
     } catch (e) {
       console.warn("[calendar] audit log failed", e);
     }

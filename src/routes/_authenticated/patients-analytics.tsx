@@ -27,7 +27,29 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { ArrowLeft, Users, Activity, Tag as TagIcon, Filter, ArrowUpRight, ArrowDownRight, Minus, Sparkles, RefreshCw, AlertTriangle, History, ExternalLink, User as UserIcon, FileSpreadsheet, FileText, RotateCcw, Search, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
+import {
+  ArrowLeft,
+  Users,
+  Activity,
+  Tag as TagIcon,
+  Filter,
+  ArrowUpRight,
+  ArrowDownRight,
+  Minus,
+  Sparkles,
+  RefreshCw,
+  AlertTriangle,
+  History,
+  ExternalLink,
+  User as UserIcon,
+  FileSpreadsheet,
+  FileText,
+  RotateCcw,
+  Search,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+} from "lucide-react";
 import {
   getPatientAnalytics,
   getPatientTransitions,
@@ -37,7 +59,12 @@ import {
   type RecentStatusEvent,
 } from "@/lib/patients-analytics.functions";
 import { getPatientsAiSummary, type AiSummary } from "@/lib/patients-ai-summary.functions";
-import { listPatientsForKpi, type KpiPatientRow, listPatientTransitionRows, type PatientTransitionRow } from "@/lib/patients-analytics.functions";
+import {
+  listPatientsForKpi,
+  type KpiPatientRow,
+  listPatientTransitionRows,
+  type PatientTransitionRow,
+} from "@/lib/patients-analytics.functions";
 import { exportXlsx, exportPdf, type Column } from "@/lib/export-utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -63,10 +90,7 @@ const searchSchema = z.object({
 export const Route = createFileRoute("/_authenticated/patients-analytics")({
   validateSearch: zodValidator(searchSchema),
   head: () => ({
-    meta: [
-      { title: "تحليلات المرضى | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تحليلات المرضى | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: PatientsAnalyticsPage,
 });
@@ -93,11 +117,12 @@ const COLORS = [
   "hsl(180 60% 45%)",
 ];
 
-
-
-
 type DrilldownState =
-  | { kind: "patients"; status: "active" | "inactive" | "archived" | "deceased" | null; title: string }
+  | {
+      kind: "patients";
+      status: "active" | "inactive" | "archived" | "deceased" | null;
+      title: string;
+    }
   | { kind: "events"; title: string };
 
 function PatientsAnalyticsPage() {
@@ -149,7 +174,6 @@ function PatientsAnalyticsPage() {
     from,
     to,
   };
-
 
   const q = useQuery({
     queryKey: ["patients-analytics", filters],
@@ -242,7 +266,13 @@ function PatientsAnalyticsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <ExportMenu data={data} transitions={transitions} filters={{ branchId, doctorId, gender, from, to }} branches={branches} doctors={doctors} />
+          <ExportMenu
+            data={data}
+            transitions={transitions}
+            filters={{ branchId, doctorId, gender, from, to }}
+            branches={branches}
+            doctors={doctors}
+          />
           <Link
             to="/transitions-stats"
             search={{ branchId, from, to }}
@@ -266,7 +296,9 @@ function PatientsAnalyticsPage() {
         <div className="mb-3 flex items-center justify-between gap-2 text-sm font-semibold text-muted-foreground">
           <span className="inline-flex items-center gap-2">
             <Filter className="h-4 w-4" /> الفلاتر
-            {q.isFetching && <span className="text-[10px] font-normal text-primary">جارٍ التحديث…</span>}
+            {q.isFetching && (
+              <span className="text-[10px] font-normal text-primary">جارٍ التحديث…</span>
+            )}
           </span>
           <button
             type="button"
@@ -366,7 +398,6 @@ function PatientsAnalyticsPage() {
         </div>
       </div>
 
-
       {q.isLoading && (
         <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
           جارٍ حساب التحليلات…
@@ -402,25 +433,33 @@ function PatientsAnalyticsPage() {
                 label="إجمالي المرضى"
                 value={data.total}
                 tone="primary"
-                onClick={() => setDrilldown({ kind: "patients", status: null, title: "إجمالي المرضى" })}
+                onClick={() =>
+                  setDrilldown({ kind: "patients", status: null, title: "إجمالي المرضى" })
+                }
               />
               <Kpi
                 label="نشط"
                 value={data.byStatus.find((s) => s.status === "active")?.count ?? 0}
                 tone="success"
-                onClick={() => setDrilldown({ kind: "patients", status: "active", title: "المرضى النشطون" })}
+                onClick={() =>
+                  setDrilldown({ kind: "patients", status: "active", title: "المرضى النشطون" })
+                }
               />
               <Kpi
                 label="مؤرشف"
                 value={data.byStatus.find((s) => s.status === "archived")?.count ?? 0}
                 tone="info"
-                onClick={() => setDrilldown({ kind: "patients", status: "archived", title: "المرضى المؤرشفون" })}
+                onClick={() =>
+                  setDrilldown({ kind: "patients", status: "archived", title: "المرضى المؤرشفون" })
+                }
               />
               <Kpi
                 label="تغيّرات الحالة (الفترة)"
                 value={data.statusChangesDaily.reduce((s, d) => s + d.count, 0)}
                 tone="warning"
-                onClick={() => setDrilldown({ kind: "events", title: "أحداث تغيير الحالة خلال الفترة" })}
+                onClick={() =>
+                  setDrilldown({ kind: "events", title: "أحداث تغيير الحالة خلال الفترة" })
+                }
               />
             </div>
 
@@ -428,7 +467,14 @@ function PatientsAnalyticsPage() {
               <Card title="توزيع الحالات">
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={statusChart} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+                    <Pie
+                      data={statusChart}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={2}
+                    >
                       {statusChart.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
@@ -436,13 +482,26 @@ function PatientsAnalyticsPage() {
                     <Tooltip contentStyle={tooltipStyle} />
                   </PieChart>
                 </ResponsiveContainer>
-                <Legend items={statusChart.map((s, i) => ({ name: s.name, value: s.value, color: COLORS[i % COLORS.length] }))} />
+                <Legend
+                  items={statusChart.map((s, i) => ({
+                    name: s.name,
+                    value: s.value,
+                    color: COLORS[i % COLORS.length],
+                  }))}
+                />
               </Card>
 
               <Card title="توزيع الجنس">
                 <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
-                    <Pie data={genderChart} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90} paddingAngle={2}>
+                    <Pie
+                      data={genderChart}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={55}
+                      outerRadius={90}
+                      paddingAngle={2}
+                    >
                       {genderChart.map((_, i) => (
                         <Cell key={i} fill={COLORS[(i + 2) % COLORS.length]} />
                       ))}
@@ -450,7 +509,13 @@ function PatientsAnalyticsPage() {
                     <Tooltip contentStyle={tooltipStyle} />
                   </PieChart>
                 </ResponsiveContainer>
-                <Legend items={genderChart.map((s, i) => ({ name: s.name, value: s.value, color: COLORS[(i + 2) % COLORS.length] }))} />
+                <Legend
+                  items={genderChart.map((s, i) => ({
+                    name: s.name,
+                    value: s.value,
+                    color: COLORS[(i + 2) % COLORS.length],
+                  }))}
+                />
               </Card>
 
               <Card title="الفئات العمرية">
@@ -458,7 +523,11 @@ function PatientsAnalyticsPage() {
                   <BarChart data={ageChart}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      allowDecimals={false}
+                    />
                     <Tooltip contentStyle={tooltipStyle} />
                     <Bar dataKey="عدد" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
                   </BarChart>
@@ -471,8 +540,19 @@ function PatientsAnalyticsPage() {
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={branchChart} layout="vertical" margin={{ left: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                    <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
-                    <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} width={110} />
+                    <XAxis
+                      type="number"
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      allowDecimals={false}
+                    />
+                    <YAxis
+                      type="category"
+                      dataKey="name"
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      width={110}
+                    />
                     <Tooltip contentStyle={tooltipStyle} />
                     <Bar dataKey="عدد" fill="hsl(217 91% 60%)" radius={[0, 6, 6, 0]} />
                   </BarChart>
@@ -486,8 +566,19 @@ function PatientsAnalyticsPage() {
                   <ResponsiveContainer width="100%" height={280}>
                     <BarChart data={tagChart} layout="vertical" margin={{ left: 20 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                      <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
-                      <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} width={110} />
+                      <XAxis
+                        type="number"
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={11}
+                        allowDecimals={false}
+                      />
+                      <YAxis
+                        type="category"
+                        dataKey="name"
+                        stroke="hsl(var(--muted-foreground))"
+                        fontSize={11}
+                        width={110}
+                      />
                       <Tooltip contentStyle={tooltipStyle} />
                       <Bar dataKey="عدد" fill="hsl(142 71% 45%)" radius={[0, 6, 6, 0]} />
                     </BarChart>
@@ -510,9 +601,19 @@ function PatientsAnalyticsPage() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      allowDecimals={false}
+                    />
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Area type="monotone" dataKey="تسجيلات" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#fillReg)" />
+                    <Area
+                      type="monotone"
+                      dataKey="تسجيلات"
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      fill="url(#fillReg)"
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </Card>
@@ -522,9 +623,19 @@ function PatientsAnalyticsPage() {
                   <LineChart data={changeChart}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={10} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      allowDecimals={false}
+                    />
                     <Tooltip contentStyle={tooltipStyle} />
-                    <Line type="monotone" dataKey="تغييرات" stroke="hsl(38 92% 50%)" strokeWidth={2} dot={false} />
+                    <Line
+                      type="monotone"
+                      dataKey="تغييرات"
+                      stroke="hsl(38 92% 50%)"
+                      strokeWidth={2}
+                      dot={false}
+                    />
                   </LineChart>
                 </ResponsiveContainer>
               </Card>
@@ -536,7 +647,11 @@ function PatientsAnalyticsPage() {
                   <BarChart data={changeBreakdown}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} />
-                    <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} allowDecimals={false} />
+                    <YAxis
+                      stroke="hsl(var(--muted-foreground))"
+                      fontSize={11}
+                      allowDecimals={false}
+                    />
                     <Tooltip contentStyle={tooltipStyle} />
                     <Bar dataKey="عدد" fill="hsl(280 65% 60%)" radius={[6, 6, 0, 0]} />
                   </BarChart>
@@ -550,8 +665,17 @@ function PatientsAnalyticsPage() {
           </TabsContent>
 
           <TabsContent value="transitions" className="space-y-6">
-            <TransitionsSection data={transitions} loading={transitionsQ.isLoading} error={transitionsQ.error as Error | null} />
-            <RecentStatusEventsSection branchId={branchId} doctorId={doctorId} from={from} to={to} />
+            <TransitionsSection
+              data={transitions}
+              loading={transitionsQ.isLoading}
+              error={transitionsQ.error as Error | null}
+            />
+            <RecentStatusEventsSection
+              branchId={branchId}
+              doctorId={doctorId}
+              from={from}
+              to={to}
+            />
             <PatientTransitionsTable
               branchId={branchId}
               doctorId={doctorId}
@@ -564,7 +688,6 @@ function PatientsAnalyticsPage() {
           </TabsContent>
         </Tabs>
       )}
-
 
       <DrilldownModal
         state={drilldown}
@@ -642,11 +765,7 @@ function Card({
   );
 }
 
-function Legend({
-  items,
-}: {
-  items: { name: string; value: number; color: string }[];
-}) {
+function Legend({ items }: { items: { name: string; value: number; color: string }[] }) {
   return (
     <div className="mt-1 flex flex-wrap justify-center gap-3 text-xs text-muted-foreground">
       {items.map((s) => (
@@ -721,7 +840,8 @@ function TransitionsSection({
         </h2>
         <p className="text-xs text-muted-foreground">
           الفترة الحالية: {data.period.from} → {data.period.to} ({data.period.days} يومًا) • مقارنة
-          بالسابقة: {data.previous.from} → {data.previous.to} • قاعدة الحساب: {data.denominator.toLocaleString("ar-SA")} مريض
+          بالسابقة: {data.previous.from} → {data.previous.to} • قاعدة الحساب:{" "}
+          {data.denominator.toLocaleString("ar-SA")} مريض
         </p>
       </div>
 
@@ -733,8 +853,14 @@ function TransitionsSection({
         />
         <TransitionKpi
           label="معدل التغيير الكلي"
-          current={data.denominator ? +((data.current.totalChanges / data.denominator) * 100).toFixed(2) : 0}
-          prior={data.denominator ? +((data.prior.totalChanges / data.denominator) * 100).toFixed(2) : 0}
+          current={
+            data.denominator
+              ? +((data.current.totalChanges / data.denominator) * 100).toFixed(2)
+              : 0
+          }
+          prior={
+            data.denominator ? +((data.prior.totalChanges / data.denominator) * 100).toFixed(2) : 0
+          }
           suffix="%"
         />
         <TransitionKpi
@@ -761,7 +887,9 @@ function TransitionsSection({
             {STATUS_KEYS_UI.map((k) => (
               <tr key={k} className="border-b border-border/50">
                 <td className="p-2 font-medium">{STATUS_LABEL[k] ?? k}</td>
-                <td className="p-2 tabular-nums">{data.current.perTarget[k].toLocaleString("ar-SA")}</td>
+                <td className="p-2 tabular-nums">
+                  {data.current.perTarget[k].toLocaleString("ar-SA")}
+                </td>
                 <td className="p-2 tabular-nums text-muted-foreground">
                   {data.prior.perTarget[k].toLocaleString("ar-SA")}
                 </td>
@@ -783,16 +911,16 @@ function TransitionsSection({
 
       {data.current.perTransition.length > 0 && (
         <div className="mt-4">
-          <p className="mb-2 text-xs font-semibold text-muted-foreground">تفصيل الانتقالات (من → إلى)</p>
+          <p className="mb-2 text-xs font-semibold text-muted-foreground">
+            تفصيل الانتقالات (من → إلى)
+          </p>
           <div className="flex flex-wrap gap-2">
             {data.current.perTransition.map((t) => (
               <span
                 key={`${t.from}-${t.to}`}
                 className="inline-flex items-center gap-1 rounded-full border border-border bg-muted/40 px-3 py-1 text-xs"
               >
-                <span className="text-muted-foreground">
-                  {STATUS_LABEL[t.from] ?? t.from}
-                </span>
+                <span className="text-muted-foreground">{STATUS_LABEL[t.from] ?? t.from}</span>
                 <span className="text-muted-foreground">→</span>
                 <span className="font-medium">{STATUS_LABEL[t.to] ?? t.to}</span>
                 <span className="ms-1 rounded-full bg-primary/10 px-1.5 text-primary tabular-nums">
@@ -940,17 +1068,12 @@ function AiSummarySection({
               </div>
               <div className="grid gap-2 md:grid-cols-2">
                 {data.actions.map((a, i) => (
-                  <div
-                    key={i}
-                    className="rounded-lg border border-border bg-background/60 p-3"
-                  >
+                  <div key={i} className="rounded-lg border border-border bg-background/60 p-3">
                     <div className="mb-1 flex items-center justify-between gap-2">
                       <span className="text-sm font-semibold">{a.title}</span>
                       <PriorityBadge p={a.priority} />
                     </div>
-                    <p className="text-xs leading-relaxed text-muted-foreground">
-                      {a.detail}
-                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{a.detail}</p>
                   </div>
                 ))}
               </div>
@@ -978,9 +1101,7 @@ function PriorityBadge({ p }: { p: "high" | "medium" | "low" }) {
     low: { label: "منخفضة", cls: "bg-emerald-500/10 text-emerald-600" },
   } as const;
   const { label, cls } = map[p];
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${cls}`}>{label}</span>
-  );
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${cls}`}>{label}</span>;
 }
 
 const STATUS_LABEL_LOCAL: Record<string, string> = {
@@ -1086,7 +1207,10 @@ function RecentStatusEventsSection({
                       <span className="font-medium">
                         {e.patient_name}
                         {e.patient_mrn && (
-                          <span className="ms-1 font-mono text-[10px] text-muted-foreground" dir="ltr">
+                          <span
+                            className="ms-1 font-mono text-[10px] text-muted-foreground"
+                            dir="ltr"
+                          >
                             #{e.patient_mrn}
                           </span>
                         )}
@@ -1144,15 +1268,17 @@ function StatusChip({ s, muted }: { s: string; muted?: boolean }) {
           : s === "deceased"
             ? "bg-red-500/10 text-red-600"
             : "bg-muted text-muted-foreground";
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${cls}`}>{label}</span>
-  );
+  return <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${cls}`}>{label}</span>;
 }
 
 // ============ Export menu ============
 
-type AnalyticsData = NonNullable<ReturnType<typeof useQuery<Awaited<ReturnType<typeof getPatientAnalytics>>>>["data"]>;
-type TransitionsData = NonNullable<ReturnType<typeof useQuery<Awaited<ReturnType<typeof getPatientTransitions>>>>["data"]>;
+type AnalyticsData = NonNullable<
+  ReturnType<typeof useQuery<Awaited<ReturnType<typeof getPatientAnalytics>>>>["data"]
+>;
+type TransitionsData = NonNullable<
+  ReturnType<typeof useQuery<Awaited<ReturnType<typeof getPatientTransitions>>>>["data"]
+>;
 
 function ExportMenu({
   data,
@@ -1163,14 +1289,24 @@ function ExportMenu({
 }: {
   data: AnalyticsData | undefined;
   transitions: TransitionsData | undefined;
-  filters: { branchId: string | null; doctorId: string | null; gender: string | null; from: string; to: string };
+  filters: {
+    branchId: string | null;
+    doctorId: string | null;
+    gender: string | null;
+    from: string;
+    to: string;
+  };
   branches: { id: string; name_ar: string }[];
   doctors: { id: string; name_ar: string }[];
 }) {
   const disabled = !data;
-  const branchName = filters.branchId ? branches.find((b) => b.id === filters.branchId)?.name_ar ?? "-" : "الكل";
-  const doctorName = filters.doctorId ? doctors.find((d) => d.id === filters.doctorId)?.name_ar ?? "-" : "الكل";
-  const genderLabel = filters.gender ? STATUS_LABEL[filters.gender] ?? filters.gender : "الكل";
+  const branchName = filters.branchId
+    ? (branches.find((b) => b.id === filters.branchId)?.name_ar ?? "-")
+    : "الكل";
+  const doctorName = filters.doctorId
+    ? (doctors.find((d) => d.id === filters.doctorId)?.name_ar ?? "-")
+    : "الكل";
+  const genderLabel = filters.gender ? (STATUS_LABEL[filters.gender] ?? filters.gender) : "الكل";
   const meta = {
     الفترة: `${filters.from} → ${filters.to}`,
     الفرع: branchName,
@@ -1253,7 +1389,6 @@ function ExportMenu({
   );
 }
 
-
 // ============ KPI Drill-down modal ============
 
 function DrilldownModal({
@@ -1275,7 +1410,12 @@ function DrilldownModal({
 }) {
   const open = state !== null;
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="max-w-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle>{state?.title ?? ""}</DialogTitle>
@@ -1310,7 +1450,13 @@ function PatientsDrilldown({
   const q = useQuery({
     queryKey: [
       "kpi-patients",
-      { status, branchId: filters.branchId, gender: filters.gender, minAge: filters.minAge, maxAge: filters.maxAge },
+      {
+        status,
+        branchId: filters.branchId,
+        gender: filters.gender,
+        minAge: filters.minAge,
+        maxAge: filters.maxAge,
+      },
     ],
     queryFn: () =>
       fn({
@@ -1447,7 +1593,10 @@ function EventsDrilldown({
                   </span>
                 )}
                 <span className="text-muted-foreground" dir="ltr">
-                  {new Date(e.created_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                  {new Date(e.created_at).toLocaleString("ar-SA", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
                 </span>
               </div>
               <div className="mt-1 text-xs">
@@ -1465,8 +1614,12 @@ function EventsDrilldown({
                     {e.count > 1 ? "عملية جماعية" : "مريض غير محدد"}
                   </span>
                 )}
-                {e.branch_name && <span className="ms-2 text-muted-foreground">· {e.branch_name}</span>}
-                {e.actor_name && <span className="ms-2 text-muted-foreground">· {e.actor_name}</span>}
+                {e.branch_name && (
+                  <span className="ms-2 text-muted-foreground">· {e.branch_name}</span>
+                )}
+                {e.actor_name && (
+                  <span className="ms-2 text-muted-foreground">· {e.actor_name}</span>
+                )}
               </div>
               {e.reason && (
                 <p className="mt-1 rounded-md bg-muted/40 p-2 text-xs text-foreground/90">
@@ -1499,7 +1652,7 @@ function HighlightText({ text, query }: { text: string | null | undefined; query
           </mark>
         ) : (
           <span key={i}>{part}</span>
-        )
+        ),
       )}
     </>
   );
@@ -1507,8 +1660,8 @@ function HighlightText({ text, query }: { text: string | null | undefined; query
 
 // ============ Patient transitions table (searchable + sortable) ============
 
-
-type TxSortKey = "created_at" | "patient_name" | "patient_mrn" | "branch_name" | "from" | "to" | "actor_name";
+type TxSortKey =
+  "created_at" | "patient_name" | "patient_mrn" | "branch_name" | "from" | "to" | "actor_name";
 
 function PatientTransitionsTable({
   branchId,
@@ -1532,8 +1685,12 @@ function PatientTransitionsTable({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [sortKey, setSortKey] = useState<TxSortKey>("created_at");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-  const [statusFilter, setStatusFilter] = useState<"" | "active" | "inactive" | "archived" | "deceased">("");
-  const [statusFromFilter, setStatusFromFilter] = useState<"" | "active" | "inactive" | "archived" | "deceased" | "__none__">("");
+  const [statusFilter, setStatusFilter] = useState<
+    "" | "active" | "inactive" | "archived" | "deceased"
+  >("");
+  const [statusFromFilter, setStatusFromFilter] = useState<
+    "" | "active" | "inactive" | "archived" | "deceased" | "__none__"
+  >("");
   const [txFrom, setTxFrom] = useState<string>("");
   const [txTo, setTxTo] = useState<string>("");
   const [bulkOnly, setBulkOnly] = useState<boolean>(false);
@@ -1550,10 +1707,31 @@ function PatientTransitionsTable({
   // Reset to page 1 whenever filters/search/sort/pageSize change
   useEffect(() => {
     setPage(1);
-  }, [branchId, doctorId, gender, minAge, maxAge, from, to, debouncedSearch, statusFilter, statusFromFilter, txFrom, txTo, bulkOnly, sortKey, sortDir, pageSize]);
+  }, [
+    branchId,
+    doctorId,
+    gender,
+    minAge,
+    maxAge,
+    from,
+    to,
+    debouncedSearch,
+    statusFilter,
+    statusFromFilter,
+    txFrom,
+    txTo,
+    bulkOnly,
+    sortKey,
+    sortDir,
+    pageSize,
+  ]);
 
   const activeAdvancedCount =
-    (statusFilter ? 1 : 0) + (statusFromFilter ? 1 : 0) + (txFrom ? 1 : 0) + (txTo ? 1 : 0) + (bulkOnly ? 1 : 0);
+    (statusFilter ? 1 : 0) +
+    (statusFromFilter ? 1 : 0) +
+    (txFrom ? 1 : 0) +
+    (txTo ? 1 : 0) +
+    (bulkOnly ? 1 : 0);
 
   const resetAdvanced = () => {
     setStatusFilter("");
@@ -1566,7 +1744,25 @@ function PatientTransitionsTable({
   const q = useQuery({
     queryKey: [
       "patient-transition-rows",
-      { branchId, doctorId, gender, minAge, maxAge, from, to, search: debouncedSearch, statusFilter, statusFromFilter, txFrom, txTo, bulkOnly, sortKey, sortDir, page, pageSize },
+      {
+        branchId,
+        doctorId,
+        gender,
+        minAge,
+        maxAge,
+        from,
+        to,
+        search: debouncedSearch,
+        statusFilter,
+        statusFromFilter,
+        txFrom,
+        txTo,
+        bulkOnly,
+        sortKey,
+        sortDir,
+        page,
+        pageSize,
+      },
     ],
     queryFn: () =>
       fn({
@@ -1595,7 +1791,8 @@ function PatientTransitionsTable({
     gcTime: 5 * 60_000,
     placeholderData: keepPreviousData,
   });
-  const pageData = q.data as { rows: PatientTransitionRow[]; total: number; page: number; pageSize: number } | undefined;
+  const pageData = q.data as
+    { rows: PatientTransitionRow[]; total: number; page: number; pageSize: number } | undefined;
   const sorted = pageData?.rows ?? [];
   const total = pageData?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -1661,7 +1858,9 @@ function PatientTransitionsTable({
           title="عدد الصفوف لكل صفحة"
         >
           {[10, 25, 50, 100].map((n) => (
-            <option key={n} value={n}>{n} / صفحة</option>
+            <option key={n} value={n}>
+              {n} / صفحة
+            </option>
           ))}
         </select>
       </div>
@@ -1720,7 +1919,9 @@ function PatientTransitionsTable({
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">تاريخ الانتقال من</label>
+            <label className="mb-1 block text-[11px] text-muted-foreground">
+              تاريخ الانتقال من
+            </label>
             <input
               type="date"
               value={txFrom}
@@ -1731,7 +1932,9 @@ function PatientTransitionsTable({
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-muted-foreground">تاريخ الانتقال إلى</label>
+            <label className="mb-1 block text-[11px] text-muted-foreground">
+              تاريخ الانتقال إلى
+            </label>
             <input
               type="date"
               value={txTo}
@@ -1754,7 +1957,6 @@ function PatientTransitionsTable({
           </div>
         </div>
       </div>
-
 
       {q.isLoading && (
         <div className="space-y-2">
@@ -1779,14 +1981,28 @@ function PatientTransitionsTable({
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10 bg-card">
               <tr className="border-b border-border text-xs">
-                <th className="p-2 text-start"><SortHeader k="created_at" label="التاريخ" /></th>
-                <th className="p-2 text-start"><SortHeader k="patient_name" label="المريض" /></th>
-                <th className="p-2 text-start"><SortHeader k="patient_mrn" label="MRN" /></th>
-                <th className="p-2 text-start"><SortHeader k="branch_name" label="الفرع" /></th>
-                <th className="p-2 text-start"><SortHeader k="from" label="من" /></th>
-                <th className="p-2 text-start"><SortHeader k="to" label="إلى" /></th>
+                <th className="p-2 text-start">
+                  <SortHeader k="created_at" label="التاريخ" />
+                </th>
+                <th className="p-2 text-start">
+                  <SortHeader k="patient_name" label="المريض" />
+                </th>
+                <th className="p-2 text-start">
+                  <SortHeader k="patient_mrn" label="MRN" />
+                </th>
+                <th className="p-2 text-start">
+                  <SortHeader k="branch_name" label="الفرع" />
+                </th>
+                <th className="p-2 text-start">
+                  <SortHeader k="from" label="من" />
+                </th>
+                <th className="p-2 text-start">
+                  <SortHeader k="to" label="إلى" />
+                </th>
                 <th className="p-2 text-start">السبب</th>
-                <th className="p-2 text-start"><SortHeader k="actor_name" label="الموظف" /></th>
+                <th className="p-2 text-start">
+                  <SortHeader k="actor_name" label="الموظف" />
+                </th>
                 <th className="p-2 text-start"></th>
               </tr>
             </thead>
@@ -1798,7 +2014,10 @@ function PatientTransitionsTable({
                   className="border-b border-border/50 cursor-pointer hover:bg-muted/30"
                 >
                   <td className="p-2 text-xs text-muted-foreground" dir="ltr">
-                    {new Date(r.created_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                    {new Date(r.created_at).toLocaleString("ar-SA", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    })}
                   </td>
                   <td className="p-2 font-medium">
                     <HighlightText text={r.patient_name} query={debouncedSearch} />
@@ -1808,14 +2027,31 @@ function PatientTransitionsTable({
                       </span>
                     )}
                   </td>
-                  <td className="p-2 font-mono text-xs" dir="ltr"><HighlightText text={r.patient_mrn} query={debouncedSearch} /></td>
-                  <td className="p-2 text-muted-foreground"><HighlightText text={r.branch_name} query={debouncedSearch} /></td>
-                  <td className="p-2">{r.from ? <StatusChip s={r.from} muted /> : <span className="text-muted-foreground">—</span>}</td>
-                  <td className="p-2"><StatusChip s={r.to} /></td>
-                  <td className="p-2 text-xs text-muted-foreground max-w-[220px] truncate" title={r.reason ?? ""}>
+                  <td className="p-2 font-mono text-xs" dir="ltr">
+                    <HighlightText text={r.patient_mrn} query={debouncedSearch} />
+                  </td>
+                  <td className="p-2 text-muted-foreground">
+                    <HighlightText text={r.branch_name} query={debouncedSearch} />
+                  </td>
+                  <td className="p-2">
+                    {r.from ? (
+                      <StatusChip s={r.from} muted />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </td>
+                  <td className="p-2">
+                    <StatusChip s={r.to} />
+                  </td>
+                  <td
+                    className="p-2 text-xs text-muted-foreground max-w-[220px] truncate"
+                    title={r.reason ?? ""}
+                  >
                     <HighlightText text={r.reason} query={debouncedSearch} />
                   </td>
-                  <td className="p-2 text-xs text-muted-foreground"><HighlightText text={r.actor_name} query={debouncedSearch} /></td>
+                  <td className="p-2 text-xs text-muted-foreground">
+                    <HighlightText text={r.actor_name} query={debouncedSearch} />
+                  </td>
                   <td className="p-2">
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                       <Link
@@ -1873,7 +2109,9 @@ function PatientTransitionsTable({
               السابقة
             </button>
             <span className="px-2 py-1">
-              صفحة <span className="font-semibold text-foreground">{page.toLocaleString("ar-SA")}</span> / {totalPages.toLocaleString("ar-SA")}
+              صفحة{" "}
+              <span className="font-semibold text-foreground">{page.toLocaleString("ar-SA")}</span>{" "}
+              / {totalPages.toLocaleString("ar-SA")}
               {q.isFetching && <span className="ms-2 text-primary">…جارٍ التحميل</span>}
             </span>
             <button
@@ -1929,7 +2167,16 @@ function TransitionDetailModal({
   const relatedQ = useQuery({
     queryKey: [
       "patient-transition-related",
-      { patientId: row?.patient_id, branchId: filters.branchId, doctorId: filters.doctorId, gender: filters.gender, minAge: filters.minAge, maxAge: filters.maxAge, from: filters.from, to: filters.to },
+      {
+        patientId: row?.patient_id,
+        branchId: filters.branchId,
+        doctorId: filters.doctorId,
+        gender: filters.gender,
+        minAge: filters.minAge,
+        maxAge: filters.maxAge,
+        from: filters.from,
+        to: filters.to,
+      },
     ],
     queryFn: () =>
       fn({
@@ -1951,12 +2198,17 @@ function TransitionDetailModal({
     staleTime: 60_000,
     gcTime: 5 * 60_000,
   });
-  const related = ((relatedQ.data as { rows: PatientTransitionRow[] } | undefined)?.rows ?? []).filter(
-    (r) => r.audit_id !== row?.audit_id || r.patient_id !== row?.patient_id,
-  );
+  const related = (
+    (relatedQ.data as { rows: PatientTransitionRow[] } | undefined)?.rows ?? []
+  ).filter((r) => r.audit_id !== row?.audit_id || r.patient_id !== row?.patient_id);
 
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) onClose();
+      }}
+    >
       <DialogContent className="max-w-2xl" dir="rtl">
         <DialogHeader>
           <DialogTitle>تفاصيل انتقال الحالة</DialogTitle>
@@ -1986,29 +2238,42 @@ function TransitionDetailModal({
               <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
                 <div>
                   <span className="text-xs text-muted-foreground">المريض</span>
-                  <p className="font-medium"><HighlightText text={row.patient_name} query={searchTerm} /></p>
+                  <p className="font-medium">
+                    <HighlightText text={row.patient_name} query={searchTerm} />
+                  </p>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground">MRN</span>
-                  <p className="font-mono text-xs" dir="ltr"><HighlightText text={row.patient_mrn} query={searchTerm} /></p>
+                  <p className="font-mono text-xs" dir="ltr">
+                    <HighlightText text={row.patient_mrn} query={searchTerm} />
+                  </p>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground">الفرع</span>
-                  <p><HighlightText text={row.branch_name} query={searchTerm} /></p>
+                  <p>
+                    <HighlightText text={row.branch_name} query={searchTerm} />
+                  </p>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground">تاريخ التغيير</span>
                   <p className="text-xs" dir="ltr">
-                    {new Date(row.created_at).toLocaleString("ar-SA", { dateStyle: "long", timeStyle: "short" })}
+                    {new Date(row.created_at).toLocaleString("ar-SA", {
+                      dateStyle: "long",
+                      timeStyle: "short",
+                    })}
                   </p>
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground">الموظف</span>
-                  <p><HighlightText text={row.actor_name} query={searchTerm} /></p>
+                  <p>
+                    <HighlightText text={row.actor_name} query={searchTerm} />
+                  </p>
                 </div>
                 <div className="sm:col-span-2">
                   <span className="text-xs text-muted-foreground">السبب</span>
-                  <p className="mt-0.5 rounded-md bg-background p-2 text-xs"><HighlightText text={row.reason} query={searchTerm} /></p>
+                  <p className="mt-0.5 rounded-md bg-background p-2 text-xs">
+                    <HighlightText text={row.reason} query={searchTerm} />
+                  </p>
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-2">
@@ -2065,12 +2330,28 @@ function TransitionDetailModal({
                     {related.map((r) => (
                       <tr key={r.audit_id} className="border-b border-border/50 hover:bg-muted/30">
                         <td className="p-2 text-xs text-muted-foreground" dir="ltr">
-                          {new Date(r.created_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                          {new Date(r.created_at).toLocaleString("ar-SA", {
+                            dateStyle: "short",
+                            timeStyle: "short",
+                          })}
                         </td>
-                        <td className="p-2">{r.from ? <StatusChip s={r.from} muted /> : <span className="text-muted-foreground">—</span>}</td>
-                        <td className="p-2"><StatusChip s={r.to} /></td>
-                        <td className="p-2 text-xs"><HighlightText text={r.actor_name} query={searchTerm} /></td>
-                        <td className="p-2 text-xs text-muted-foreground max-w-[200px] truncate" title={r.reason ?? ""}>
+                        <td className="p-2">
+                          {r.from ? (
+                            <StatusChip s={r.from} muted />
+                          ) : (
+                            <span className="text-muted-foreground">—</span>
+                          )}
+                        </td>
+                        <td className="p-2">
+                          <StatusChip s={r.to} />
+                        </td>
+                        <td className="p-2 text-xs">
+                          <HighlightText text={r.actor_name} query={searchTerm} />
+                        </td>
+                        <td
+                          className="p-2 text-xs text-muted-foreground max-w-[200px] truncate"
+                          title={r.reason ?? ""}
+                        >
                           <HighlightText text={r.reason} query={searchTerm} />
                         </td>
                       </tr>

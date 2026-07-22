@@ -3,19 +3,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import {
-  CalendarClock,
-  Loader2,
-  Plus,
-  Trash2,
-  AlertTriangle,
-  CheckCircle2,
-} from "lucide-react";
-import {
-  generateSlots,
-  listSlotsAdmin,
-  deleteSlot,
-} from "@/lib/slots.functions";
+import { CalendarClock, Loader2, Plus, Trash2, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { generateSlots, listSlotsAdmin, deleteSlot } from "@/lib/slots.functions";
 import { listDoctorsOverview } from "@/lib/doctors.functions";
 import { listBranches } from "@/lib/dashboard.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
@@ -26,8 +15,7 @@ export const Route = createFileRoute("/_authenticated/availability-management")(
       { title: "إدارة فترات التوفّر | مجمع باعشن الطبي" },
       {
         name: "description",
-        content:
-          "توليد وإدارة فترات المواعيد للأطباء مع التحقق التلقائي من التداخل.",
+        content: "توليد وإدارة فترات المواعيد للأطباء مع التحقق التلقائي من التداخل.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -90,8 +78,7 @@ function AvailabilityManagementPage() {
 
   const slotsQ = useQuery({
     queryKey: ["avail-mgmt", "slots", doctorId, date],
-    queryFn: () =>
-      listSlotsFn({ data: { doctorId, fromDate: date, toDate: date } }),
+    queryFn: () => listSlotsFn({ data: { doctorId, fromDate: date, toDate: date } }),
     enabled: Boolean(doctorId && date),
   });
 
@@ -137,10 +124,8 @@ function AvailabilityManagementPage() {
   const handleGenerate = () => {
     if (!doctorId) return toast.error("اختر الطبيب أولاً.");
     if (!date) return toast.error("اختر التاريخ.");
-    if (endTime <= startTime)
-      return toast.error("وقت النهاية يجب أن يكون بعد البداية.");
-    if (durationMinutes < 5)
-      return toast.error("مدة الفترة يجب ألّا تقلّ عن 5 دقائق.");
+    if (endTime <= startTime) return toast.error("وقت النهاية يجب أن يكون بعد البداية.");
+    if (durationMinutes < 5) return toast.error("مدة الفترة يجب ألّا تقلّ عن 5 دقائق.");
     generateM.mutate({
       doctorId,
       branchId: branchId || null,
@@ -173,8 +158,7 @@ function AvailabilityManagementPage() {
         <div>
           <h1 className="text-2xl font-bold">إدارة فترات التوفّر</h1>
           <p className="text-sm text-muted-foreground">
-            توليد فترات المواعيد لطبيب/تاريخ محدّد، مع تحقّق ضد التداخل قبل
-            الحفظ.
+            توليد فترات المواعيد لطبيب/تاريخ محدّد، مع تحقّق ضد التداخل قبل الحفظ.
           </p>
         </div>
       </header>
@@ -300,10 +284,7 @@ function AvailabilityManagementPage() {
             </div>
             <ul className="grid grid-cols-2 gap-1 sm:grid-cols-3 lg:grid-cols-4">
               {lastConflicts.map((c, i) => (
-                <li
-                  key={i}
-                  className="rounded bg-background/60 px-2 py-1 font-mono text-xs"
-                >
+                <li key={i} className="rounded bg-background/60 px-2 py-1 font-mono text-xs">
                   {c.start}–{c.end}{" "}
                   <span className="text-muted-foreground">
                     ({STATUS_META[c.withStatus]?.label ?? c.withStatus})
@@ -344,9 +325,7 @@ function AvailabilityManagementPage() {
         </div>
 
         {!doctorId ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            اختر طبيبًا لعرض فتراته.
-          </p>
+          <p className="py-8 text-center text-sm text-muted-foreground">اختر طبيبًا لعرض فتراته.</p>
         ) : slotsQ.isLoading ? (
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
             {Array.from({ length: 12 }).map((_, i) => (
@@ -376,8 +355,7 @@ function AvailabilityManagementPage() {
                   return (
                     <tr key={s.id} className="border-t">
                       <td className="p-2 font-mono">
-                        {String(s.start_time).slice(0, 5)} –{" "}
-                        {String(s.end_time).slice(0, 5)}
+                        {String(s.start_time).slice(0, 5)} – {String(s.end_time).slice(0, 5)}
                       </td>
                       <td className="p-2">
                         <span
@@ -394,11 +372,7 @@ function AvailabilityManagementPage() {
                             (deleteM.isPending && deleteM.variables === s.id)
                           }
                           onClick={() => {
-                            if (
-                              confirm(
-                                `حذف الفترة ${String(s.start_time).slice(0, 5)}؟`,
-                              )
-                            ) {
+                            if (confirm(`حذف الفترة ${String(s.start_time).slice(0, 5)}؟`)) {
                               deleteM.mutate(s.id);
                             }
                           }}

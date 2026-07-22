@@ -71,7 +71,11 @@ export const Route = createFileRoute("/_authenticated/admin/notification-logs")(
   head: () => ({
     meta: [
       { title: "سجلات تسليم الإشعارات | Admin" },
-      { name: "description", content: "مراقبة تسليم الإشعارات لكل قناة: داخل التطبيق، البريد، SMS، واتساب، ودفع المتصفح." },
+      {
+        name: "description",
+        content:
+          "مراقبة تسليم الإشعارات لكل قناة: داخل التطبيق، البريد، SMS، واتساب، ودفع المتصفح.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -100,7 +104,9 @@ function NotifLogsPage() {
       <header className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <nav className="text-xs text-muted-foreground flex items-center gap-1">
-            <Link to="/admin" className="hover:text-foreground">لوحة الإدارة</Link>
+            <Link to="/admin" className="hover:text-foreground">
+              لوحة الإدارة
+            </Link>
             <ChevronRight className="h-3 w-3 rotate-180" />
             <span className="text-foreground">سجلات تسليم الإشعارات</span>
           </nav>
@@ -187,11 +193,7 @@ function Kpi({
   tone?: "ok" | "danger" | "muted";
 }) {
   const toneCls =
-    tone === "ok"
-      ? "text-emerald-700"
-      : tone === "danger"
-      ? "text-rose-700"
-      : "text-foreground";
+    tone === "ok" ? "text-emerald-700" : tone === "danger" ? "text-rose-700" : "text-foreground";
   return (
     <div className="rounded-2xl border bg-white p-3">
       <div className="text-[11px] text-muted-foreground">{label}</div>
@@ -325,7 +327,10 @@ function LogsTable({ rows, loading }: { rows: NotificationDeliveryLog[]; loading
                   <ChannelBadge channel={r.channel} />
                 </td>
                 <td className="px-3 py-2 text-xs">{r.template ?? "—"}</td>
-                <td className="px-3 py-2 text-xs font-mono max-w-[220px] truncate" title={r.recipient ?? ""}>
+                <td
+                  className="px-3 py-2 text-xs font-mono max-w-[220px] truncate"
+                  title={r.recipient ?? ""}
+                >
                   {r.recipient ?? "—"}
                 </td>
                 <td className="px-3 py-2">
@@ -380,7 +385,9 @@ function ChannelBadge({ channel }: { channel: NotificationDeliveryLog["channel"]
   } as const;
   const { Icon, cls } = map[channel];
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${cls}`}
+    >
       <Icon className="h-3 w-3" />
       {channelLabel(channel)}
     </span>
@@ -398,7 +405,9 @@ function StatusBadge({ status }: { status: NotificationDeliveryLog["status"] }) 
   };
   const s = map[status];
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${s.cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${s.cls}`}
+    >
       {s.label}
     </span>
   );
@@ -429,7 +438,10 @@ function ErrorState({ error, reset }: { error: Error; reset: () => void }) {
         <h2 className="text-lg font-bold">تعذّر تحميل سجلات الإشعارات</h2>
         <p className="mt-2 text-sm text-muted-foreground">{error.message}</p>
         <button
-          onClick={() => { router.invalidate(); reset(); }}
+          onClick={() => {
+            router.invalidate();
+            reset();
+          }}
           className="mt-6 h-10 px-4 rounded-full bg-primary text-primary-foreground text-sm font-semibold inline-flex items-center gap-1"
         >
           <RefreshCw className="h-4 w-4" /> حاول مجددًا

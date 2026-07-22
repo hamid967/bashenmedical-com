@@ -29,7 +29,8 @@ export const getMyOwnerStatus = createServerFn({ method: "GET" })
       context.supabase.rpc("has_role", { _user_id: context.userId, _role: "content_manager" }),
     ]);
     if (ownerRes.error) console.error("[owner.gate] has_role super_admin failed:", ownerRes.error);
-    if (editorRes.error) console.error("[owner.gate] has_role content_manager failed:", editorRes.error);
+    if (editorRes.error)
+      console.error("[owner.gate] has_role content_manager failed:", editorRes.error);
     const isOwner = Boolean(ownerRes.data);
     const isEditor = Boolean(editorRes.data);
     return {

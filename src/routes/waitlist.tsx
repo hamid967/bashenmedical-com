@@ -20,7 +20,10 @@ export const Route = createFileRoute("/waitlist")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "حالة قائمة الانتظار | مجمع باعشن الطبي" },
-      { name: "description", content: "تحقّق من حالة تسجيلك في قائمة الانتظار للحصول على موعد شاغر." },
+      {
+        name: "description",
+        content: "تحقّق من حالة تسجيلك في قائمة الانتظار للحصول على موعد شاغر.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -53,7 +56,11 @@ function WaitlistStatusPage() {
 
   async function submit(e?: React.FormEvent) {
     e?.preventDefault();
-    setError(null); setData(null); setConfirmMsg(null); setBookedRef(null); setLoading(true);
+    setError(null);
+    setData(null);
+    setConfirmMsg(null);
+    setBookedRef(null);
+    setLoading(true);
     try {
       const p = new URLSearchParams({ ref, phone4 });
       const res = await fetch(`/api/public/book/waitlist?${p.toString()}`);
@@ -117,16 +124,30 @@ function WaitlistStatusPage() {
           </p>
         </header>
 
-        <form onSubmit={submit} className="rounded-2xl border border-border bg-card p-5 md:p-6 space-y-3">
+        <form
+          onSubmit={submit}
+          className="rounded-2xl border border-border bg-card p-5 md:p-6 space-y-3"
+        >
           <div>
             <Label htmlFor="ref">رقم الطلب</Label>
-            <Input id="ref" placeholder="WL-XXXXXXXX" value={ref}
-              onChange={(e) => setRef(e.target.value.toUpperCase())} className="mt-1 font-mono" />
+            <Input
+              id="ref"
+              placeholder="WL-XXXXXXXX"
+              value={ref}
+              onChange={(e) => setRef(e.target.value.toUpperCase())}
+              className="mt-1 font-mono"
+            />
           </div>
           <div>
             <Label htmlFor="p4">آخر ٤ أرقام من الجوال</Label>
-            <Input id="p4" inputMode="numeric" maxLength={4} value={phone4}
-              onChange={(e) => setPhone4(e.target.value.replace(/\D/g, ""))} className="mt-1" />
+            <Input
+              id="p4"
+              inputMode="numeric"
+              maxLength={4}
+              value={phone4}
+              onChange={(e) => setPhone4(e.target.value.replace(/\D/g, ""))}
+              className="mt-1"
+            />
           </div>
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" disabled={loading} className="w-full gap-2">
@@ -174,12 +195,16 @@ function WaitlistStatusPage() {
               )}
               <div>
                 <dt className="text-muted-foreground">نطاق التاريخ</dt>
-                <dd className="font-medium">{data.preferred_from} → {data.preferred_to}</dd>
+                <dd className="font-medium">
+                  {data.preferred_from} → {data.preferred_to}
+                </dd>
               </div>
               {data.notified_at && (
                 <div className="sm:col-span-2">
                   <dt className="text-muted-foreground">تم إعلامك بالفرصة في</dt>
-                  <dd className="font-medium">{new Date(data.notified_at).toLocaleString("ar-SA")}</dd>
+                  <dd className="font-medium">
+                    {new Date(data.notified_at).toLocaleString("ar-SA")}
+                  </dd>
                 </div>
               )}
             </dl>
@@ -190,14 +215,21 @@ function WaitlistStatusPage() {
                 <div className="font-bold text-lg mb-2">
                   {data.offered_date} — {data.offered_time.slice(0, 5)}
                 </div>
-                <OfferCountdown expiresAt={data.offered_expires_at} onExpire={() => void submit()} />
+                <OfferCountdown
+                  expiresAt={data.offered_expires_at}
+                  onExpire={() => void submit()}
+                />
                 {confirmMsg && <p className="mt-2 text-sm text-destructive">{confirmMsg}</p>}
                 <Button
                   onClick={confirmOffer}
                   disabled={confirming}
                   className="mt-3 w-full gap-2 bg-emerald-600 hover:bg-emerald-700"
                 >
-                  {confirming ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                  {confirming ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="h-4 w-4" />
+                  )}
                   {confirming ? "جارٍ التأكيد…" : "تأكيد الحجز الآن"}
                 </Button>
               </div>
@@ -235,18 +267,49 @@ function OfferCountdown({ expiresAt, onExpire }: { expiresAt: string; onExpire: 
     <div className="flex items-center gap-2 text-sm">
       <Clock className="h-4 w-4 text-emerald-700" />
       <span>ينتهي العرض خلال:</span>
-      <span className="font-mono font-bold text-emerald-700 tabular-nums">{mm}:{ss}</span>
+      <span className="font-mono font-bold text-emerald-700 tabular-nums">
+        {mm}:{ss}
+      </span>
     </div>
   );
 }
 
 function statusDisplay(s: StatusRes["status"]) {
   switch (s) {
-    case "waiting":   return { Icon: Clock,         color: "text-amber-600",   title: "قيد الانتظار",         hint: "سنُعلمك فور شغور فتحة مناسبة." };
-    case "notified":  return { Icon: AlertCircle,   color: "text-emerald-600", title: "توفّرت فتحة!",         hint: "أسرع في تأكيد الحجز — الأولوية لأول من يحجز." };
-    case "fulfilled": return { Icon: CheckCircle2,  color: "text-emerald-600", title: "تم إتمام الحجز",       hint: "شكرًا لاستخدامك خدمة الانتظار." };
-    case "expired":   return { Icon: XCircle,       color: "text-muted-foreground", title: "انتهت مدة الطلب", hint: "يمكنك تسجيل طلب جديد في أي وقت." };
-    case "cancelled": return { Icon: XCircle,       color: "text-muted-foreground", title: "طلب ملغى",         hint: "تم إلغاء هذا الطلب من قائمة الانتظار." };
+    case "waiting":
+      return {
+        Icon: Clock,
+        color: "text-amber-600",
+        title: "قيد الانتظار",
+        hint: "سنُعلمك فور شغور فتحة مناسبة.",
+      };
+    case "notified":
+      return {
+        Icon: AlertCircle,
+        color: "text-emerald-600",
+        title: "توفّرت فتحة!",
+        hint: "أسرع في تأكيد الحجز — الأولوية لأول من يحجز.",
+      };
+    case "fulfilled":
+      return {
+        Icon: CheckCircle2,
+        color: "text-emerald-600",
+        title: "تم إتمام الحجز",
+        hint: "شكرًا لاستخدامك خدمة الانتظار.",
+      };
+    case "expired":
+      return {
+        Icon: XCircle,
+        color: "text-muted-foreground",
+        title: "انتهت مدة الطلب",
+        hint: "يمكنك تسجيل طلب جديد في أي وقت.",
+      };
+    case "cancelled":
+      return {
+        Icon: XCircle,
+        color: "text-muted-foreground",
+        title: "طلب ملغى",
+        hint: "تم إلغاء هذا الطلب من قائمة الانتظار.",
+      };
   }
 }
-

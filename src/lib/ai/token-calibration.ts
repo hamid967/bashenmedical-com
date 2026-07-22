@@ -146,7 +146,10 @@ export function estimateTokensCalibrated(
 }
 
 /** Convenience: numeric estimate only (drop-in for estimateTokens). */
-export function estimateTokensSmart(text: string, opts: { model?: string; kind: TokenKind }): number {
+export function estimateTokensSmart(
+  text: string,
+  opts: { model?: string; kind: TokenKind },
+): number {
   return estimateTokensCalibrated(text, opts).tokens;
 }
 

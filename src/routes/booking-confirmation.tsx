@@ -23,7 +23,12 @@ import {
   Printer,
   QrCode,
 } from "lucide-react";
-import { downloadIcs, whatsappShareUrl, googleCalendarUrl, type ShareBooking } from "@/lib/booking-share";
+import {
+  downloadIcs,
+  whatsappShareUrl,
+  googleCalendarUrl,
+  type ShareBooking,
+} from "@/lib/booking-share";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
@@ -187,8 +192,6 @@ function BookingConfirmationPage() {
     };
   }, [appt?.id, fetchAppt]);
 
-
-
   const share: ShareBooking | null = appt
     ? {
         ref: appt.id.slice(0, 8).toUpperCase(),
@@ -196,8 +199,12 @@ function BookingConfirmationPage() {
         patient_phone: appt.patient_phone,
         appointment_date: appt.appointment_date,
         appointment_time: appt.appointment_time.slice(0, 5),
-        doctor: lang === "ar" ? appt.doctor_name_ar ?? undefined : appt.doctor_name_en ?? undefined,
-        specialty: lang === "ar" ? appt.specialty_name_ar ?? undefined : appt.specialty_name_en ?? undefined,
+        doctor:
+          lang === "ar" ? (appt.doctor_name_ar ?? undefined) : (appt.doctor_name_en ?? undefined),
+        specialty:
+          lang === "ar"
+            ? (appt.specialty_name_ar ?? undefined)
+            : (appt.specialty_name_en ?? undefined),
         reminder_24h: appt.reminder_24h,
         reminder_2h: appt.reminder_2h,
       }
@@ -297,7 +304,12 @@ function BookingConfirmationPage() {
                 </span>
                 {lastUpdated && (
                   <span className="opacity-70">
-                    · آخر تحديث {lastUpdated.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+                    · آخر تحديث{" "}
+                    {lastUpdated.toLocaleTimeString("ar-SA", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                    })}
                   </span>
                 )}
               </div>
@@ -312,7 +324,6 @@ function BookingConfirmationPage() {
               </button>
             </div>
 
-
             {/* Timeline of booking stages */}
             <OrderTimeline
               kind="appointment"
@@ -323,69 +334,74 @@ function BookingConfirmationPage() {
 
             {/* Predictive no-show risk — helps the patient understand
                 probability of missing the appointment and act early. */}
-            {appt.status !== "cancelled" && appt.status !== "completed" && (() => {
-              const level = riskLevel(appt.no_show_risk);
-              const score = appt.no_show_risk ?? 0;
-              const cfg = {
-                low: {
-                  cls: "border-green-500/30 bg-green-500/5 text-green-800",
-                  bar: "bg-green-500",
-                  titleAr: "احتمال الحضور مرتفع",
-                  titleEn: "High likelihood of attendance",
-                  descAr: "بيانات حجزك تشير إلى التزام جيد. حافظ على تفعيل التذكيرات وسيصلك تنبيه قبل الموعد.",
-                  descEn: "Your booking profile shows strong commitment. Keep reminders on and you'll be notified before your visit.",
-                },
-                medium: {
-                  cls: "border-amber-500/30 bg-amber-500/5 text-amber-900",
-                  bar: "bg-amber-500",
-                  titleAr: "احتمال متوسط لعدم الحضور",
-                  titleEn: "Moderate no-show risk",
-                  descAr: "ننصح بتفعيل تذكير الواتساب وتأكيد الحضور مبكرًا، أو إعادة الجدولة إذا لم يناسبك الموعد.",
-                  descEn: "We recommend enabling WhatsApp reminders and confirming attendance early, or rescheduling if the time doesn't suit you.",
-                },
-                high: {
-                  cls: "border-red-500/30 bg-red-500/5 text-red-800",
-                  bar: "bg-red-500",
-                  titleAr: "احتمال مرتفع لعدم الحضور",
-                  titleEn: "High no-show risk",
-                  descAr: "يرجى تأكيد الحضور عبر واتساب أو إعادة جدولة الموعد لتفادي إلغائه تلقائيًا وإتاحته لمريض آخر.",
-                  descEn: "Please confirm attendance via WhatsApp or reschedule to avoid automatic cancellation and free the slot for another patient.",
-                },
-              }[level];
-              return (
-                <div className={`rounded-2xl border p-5 ${cfg.cls}`}>
-                  <div className="flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
-                        <div className="text-sm font-bold">
-                          {lang === "ar" ? cfg.titleAr : cfg.titleEn}
+            {appt.status !== "cancelled" &&
+              appt.status !== "completed" &&
+              (() => {
+                const level = riskLevel(appt.no_show_risk);
+                const score = appt.no_show_risk ?? 0;
+                const cfg = {
+                  low: {
+                    cls: "border-green-500/30 bg-green-500/5 text-green-800",
+                    bar: "bg-green-500",
+                    titleAr: "احتمال الحضور مرتفع",
+                    titleEn: "High likelihood of attendance",
+                    descAr:
+                      "بيانات حجزك تشير إلى التزام جيد. حافظ على تفعيل التذكيرات وسيصلك تنبيه قبل الموعد.",
+                    descEn:
+                      "Your booking profile shows strong commitment. Keep reminders on and you'll be notified before your visit.",
+                  },
+                  medium: {
+                    cls: "border-amber-500/30 bg-amber-500/5 text-amber-900",
+                    bar: "bg-amber-500",
+                    titleAr: "احتمال متوسط لعدم الحضور",
+                    titleEn: "Moderate no-show risk",
+                    descAr:
+                      "ننصح بتفعيل تذكير الواتساب وتأكيد الحضور مبكرًا، أو إعادة الجدولة إذا لم يناسبك الموعد.",
+                    descEn:
+                      "We recommend enabling WhatsApp reminders and confirming attendance early, or rescheduling if the time doesn't suit you.",
+                  },
+                  high: {
+                    cls: "border-red-500/30 bg-red-500/5 text-red-800",
+                    bar: "bg-red-500",
+                    titleAr: "احتمال مرتفع لعدم الحضور",
+                    titleEn: "High no-show risk",
+                    descAr:
+                      "يرجى تأكيد الحضور عبر واتساب أو إعادة جدولة الموعد لتفادي إلغائه تلقائيًا وإتاحته لمريض آخر.",
+                    descEn:
+                      "Please confirm attendance via WhatsApp or reschedule to avoid automatic cancellation and free the slot for another patient.",
+                  },
+                }[level];
+                return (
+                  <div className={`rounded-2xl border p-5 ${cfg.cls}`}>
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-3 flex-wrap">
+                          <div className="text-sm font-bold">
+                            {lang === "ar" ? cfg.titleAr : cfg.titleEn}
+                          </div>
+                          <div className="text-[11px] opacity-70 font-mono">
+                            {lang === "ar" ? "درجة التوقّع" : "Risk score"}: {score}/100
+                          </div>
                         </div>
-                        <div className="text-[11px] opacity-70 font-mono">
-                          {lang === "ar" ? "درجة التوقّع" : "Risk score"}: {score}/100
+                        <div className="mt-2 h-1.5 w-full rounded-full bg-black/10 overflow-hidden">
+                          <div
+                            className={`h-full ${cfg.bar} transition-all`}
+                            style={{ width: `${Math.min(100, Math.max(4, score))}%` }}
+                          />
                         </div>
+                        <p className="mt-3 text-xs leading-6 opacity-90">
+                          {lang === "ar" ? cfg.descAr : cfg.descEn}
+                        </p>
+                        <p className="mt-2 text-[11px] opacity-70">
+                          {lang === "ar"
+                            ? "تقدير آلي بناءً على بيانات الحجز (وقت الموعد، سجل الحضور، التذكيرات، التأمين). لا يؤثّر على أولوية موعدك."
+                            : "Automatic estimate based on booking data (time, attendance history, reminders, insurance). It does not affect your appointment priority."}
+                        </p>
                       </div>
-                      <div className="mt-2 h-1.5 w-full rounded-full bg-black/10 overflow-hidden">
-                        <div
-                          className={`h-full ${cfg.bar} transition-all`}
-                          style={{ width: `${Math.min(100, Math.max(4, score))}%` }}
-                        />
-                      </div>
-                      <p className="mt-3 text-xs leading-6 opacity-90">
-                        {lang === "ar" ? cfg.descAr : cfg.descEn}
-                      </p>
-                      <p className="mt-2 text-[11px] opacity-70">
-                        {lang === "ar"
-                          ? "تقدير آلي بناءً على بيانات الحجز (وقت الموعد، سجل الحضور، التذكيرات، التأمين). لا يؤثّر على أولوية موعدك."
-                          : "Automatic estimate based on booking data (time, attendance history, reminders, insurance). It does not affect your appointment priority."}
-                      </p>
                     </div>
                   </div>
-                </div>
-              );
-            })()}
-
-
-
+                );
+              })()}
 
             {/* QR + quick actions row */}
             <div className="rounded-2xl border border-border bg-card p-6 flex flex-col sm:flex-row items-center gap-6 print:break-inside-avoid">
@@ -400,7 +416,8 @@ function BookingConfirmationPage() {
                   className="rounded-lg border border-border bg-white p-2"
                 />
                 <span className="mt-2 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <QrCode className="h-3 w-3" /> {lang === "ar" ? "امسح لعرض حجزك" : "Scan to view booking"}
+                  <QrCode className="h-3 w-3" />{" "}
+                  {lang === "ar" ? "امسح لعرض حجزك" : "Scan to view booking"}
                 </span>
               </div>
               <div className="flex-1 min-w-0 text-sm text-muted-foreground leading-6 text-center sm:text-start">
@@ -433,7 +450,11 @@ function BookingConfirmationPage() {
                   />
                 )}
                 {share.doctor && (
-                  <Row icon={<User className="h-4 w-4" />} label={t("nav_doctors")} value={share.doctor} />
+                  <Row
+                    icon={<User className="h-4 w-4" />}
+                    label={t("nav_doctors")}
+                    value={share.doctor}
+                  />
                 )}
                 <Row
                   icon={<Calendar className="h-4 w-4" />}
@@ -445,10 +466,22 @@ function BookingConfirmationPage() {
                   label={t("time")}
                   value={appt.appointment_time.slice(0, 5)}
                 />
-                <Row icon={<User className="h-4 w-4" />} label={t("name")} value={appt.patient_name} />
-                <Row icon={<Phone className="h-4 w-4" />} label={t("phone")} value={appt.patient_phone} />
+                <Row
+                  icon={<User className="h-4 w-4" />}
+                  label={t("name")}
+                  value={appt.patient_name}
+                />
+                <Row
+                  icon={<Phone className="h-4 w-4" />}
+                  label={t("phone")}
+                  value={appt.patient_phone}
+                />
                 {appt.reason && (
-                  <Row icon={<FileText className="h-4 w-4" />} label={t("reason")} value={appt.reason} />
+                  <Row
+                    icon={<FileText className="h-4 w-4" />}
+                    label={t("reason")}
+                    value={appt.reason}
+                  />
                 )}
               </div>
 

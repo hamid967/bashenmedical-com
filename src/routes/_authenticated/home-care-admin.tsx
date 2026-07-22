@@ -30,7 +30,15 @@ const STATUS_AR: Record<string, string> = {
   completed: "مكتمل",
   cancelled: "ملغي",
 };
-const STATUSES = ["new", "reviewed", "contacted", "waiting_patient", "scheduled", "completed", "cancelled"] as const;
+const STATUSES = [
+  "new",
+  "reviewed",
+  "contacted",
+  "waiting_patient",
+  "scheduled",
+  "completed",
+  "cancelled",
+] as const;
 
 function HomeCareAdminPage() {
   const qc = useQueryClient();
@@ -42,11 +50,13 @@ function HomeCareAdminPage() {
 
   const listQuery = useQuery({
     queryKey: ["admin", "home-care", statusFilter, search],
-    queryFn: () => listFn({ data: { status: statusFilter || undefined, search: search || undefined } }),
+    queryFn: () =>
+      listFn({ data: { status: statusFilter || undefined, search: search || undefined } }),
   });
 
   const mutation = useMutation({
-    mutationFn: (v: { id: string; status?: string; notes?: string }) => updateFn({ data: v as any }),
+    mutationFn: (v: { id: string; status?: string; notes?: string }) =>
+      updateFn({ data: v as any }),
     onSuccess: () => {
       toast.success("تم التحديث");
       qc.invalidateQueries({ queryKey: ["admin", "home-care"] });
@@ -126,8 +136,12 @@ function HomeCareAdminPage() {
                   <td className="p-3 font-mono text-xs">{r.patient_phone || "—"}</td>
                   <td className="p-3">
                     {r.service || "—"}
-                    {r.address && <div className="text-xs text-muted-foreground mt-1">{r.address}</div>}
-                    {r.notes && <div className="text-xs text-muted-foreground mt-1">📝 {r.notes}</div>}
+                    {r.address && (
+                      <div className="text-xs text-muted-foreground mt-1">{r.address}</div>
+                    )}
+                    {r.notes && (
+                      <div className="text-xs text-muted-foreground mt-1">📝 {r.notes}</div>
+                    )}
                   </td>
                   <td className="p-3 text-xs whitespace-nowrap">
                     {r.preferred_date || "—"}

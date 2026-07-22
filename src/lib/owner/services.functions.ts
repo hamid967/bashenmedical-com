@@ -37,7 +37,9 @@ export const listOwnerServices = createServerFn({ method: "GET" })
     await assertOwner(context.supabase, context.userId);
     const { data, error } = await context.supabase
       .from("service_catalog")
-      .select("id, slug, name_ar, name_en, description_ar, icon, price_from, duration_min, image_url, display_order, is_active, updated_at")
+      .select(
+        "id, slug, name_ar, name_en, description_ar, icon, price_from, duration_min, image_url, display_order, is_active, updated_at",
+      )
       .order("display_order", { ascending: true })
       .order("name_ar", { ascending: true });
     if (error) throw new Error(error.message);
@@ -79,9 +81,7 @@ export const createOwnerService = createServerFn({ method: "POST" })
 
 export const updateOwnerService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
-    z.object({ id: z.string().uuid() }).merge(svcInput).parse(d),
-  )
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).merge(svcInput).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
     const { id, ...rest } = data;
@@ -102,10 +102,7 @@ export const deleteOwnerService = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
-    const { error } = await context.supabase
-      .from("service_catalog")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("service_catalog").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -113,9 +110,13 @@ export const deleteOwnerService = createServerFn({ method: "POST" })
 export const reorderOwnerServices = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      order: z.array(z.object({ id: z.string().uuid(), display_order: z.number().int() })).max(500),
-    }).parse(d),
+    z
+      .object({
+        order: z
+          .array(z.object({ id: z.string().uuid(), display_order: z.number().int() }))
+          .max(500),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
@@ -127,9 +128,7 @@ export const reorderOwnerServices = createServerFn({ method: "POST" })
 
 export const toggleOwnerService = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
-    z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d),
-  )
+  .validator((d: unknown) => z.object({ id: z.string().uuid(), is_active: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
     const { error } = await context.supabase

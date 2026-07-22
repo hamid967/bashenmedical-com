@@ -41,12 +41,19 @@ export function UserPermissionsPanel({ userId }: { userId: string }) {
       grantPermission({
         data: { user_id: userId, resource_kind: kind, resource_id: resourceId, permission: perm },
       }),
-    onSuccess: () => { toast.success("تم منح الصلاحية"); setResourceId(""); invalidate(); },
+    onSuccess: () => {
+      toast.success("تم منح الصلاحية");
+      setResourceId("");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const mRevoke = useMutation({
     mutationFn: (id: string) => revokePermission({ data: { id } }),
-    onSuccess: () => { toast.success("تمت الإزالة"); invalidate(); },
+    onSuccess: () => {
+      toast.success("تمت الإزالة");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
 
@@ -83,7 +90,9 @@ export function UserPermissionsPanel({ userId }: { userId: string }) {
                 ) : (
                   <FileText className="h-3 w-3 text-emerald-500 shrink-0" />
                 )}
-                <span className="truncate text-slate-800">{labelFor(r.resource_kind, r.resource_id)}</span>
+                <span className="truncate text-slate-800">
+                  {labelFor(r.resource_kind, r.resource_id)}
+                </span>
                 <span className="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-600">
                   {PERM_LABELS[r.permission as Perm]}
                 </span>
@@ -104,7 +113,10 @@ export function UserPermissionsPanel({ userId }: { userId: string }) {
       <div className="grid gap-2 sm:grid-cols-[110px_1fr_120px_auto] pt-2 border-t border-slate-100">
         <select
           value={kind}
-          onChange={(e) => { setKind(e.target.value as Kind); setResourceId(""); }}
+          onChange={(e) => {
+            setKind(e.target.value as Kind);
+            setResourceId("");
+          }}
           className="px-2 py-1.5 border border-slate-300 rounded text-[11px] bg-white"
         >
           <option value="service">خدمة</option>
@@ -117,7 +129,9 @@ export function UserPermissionsPanel({ userId }: { userId: string }) {
         >
           <option value="">— اختر {kind === "service" ? "خدمة" : "صفحة"} —</option>
           {options.map((o) => (
-            <option key={o.id} value={o.id}>{o.label}</option>
+            <option key={o.id} value={o.id}>
+              {o.label}
+            </option>
           ))}
         </select>
         <select

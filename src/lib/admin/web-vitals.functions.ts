@@ -57,7 +57,12 @@ function pathnameOf(u: string): string {
 }
 
 const Input = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24),
   pathContains: z.string().trim().min(1).max(200).nullish(),
   limit: z.number().int().min(100).max(10_000).default(5000),
 });
@@ -100,7 +105,9 @@ export const getWebVitalsSummary = createServerFn({ method: "GET" })
     const stats: MetricStats[] = METRICS.map((metric) => {
       const arr = (grouped[metric] ?? []).slice().sort((a, b) => a - b);
       const [good, poor] = THRESHOLDS[metric];
-      let g = 0, n = 0, p = 0;
+      let g = 0,
+        n = 0,
+        p = 0;
       for (const v of arr) {
         if (v <= good) g++;
         else if (v <= poor) n++;
@@ -143,7 +150,12 @@ export type WebVitalRawRow = {
 };
 
 const RawInput = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24),
   pathContains: z.string().trim().min(1).max(200).nullish(),
   limit: z.number().int().min(1).max(1000).default(1000),
   before: z.string().datetime().nullish(),
@@ -156,27 +168,32 @@ const RawInput = z.object({
 export const listWebVitalsRaw = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => RawInput.parse(d ?? {}))
-  .handler(async ({ data, context }): Promise<{ rows: WebVitalRawRow[]; hasMore: boolean; nextBefore: string | null }> => {
-    await assertAdmin(context);
-    const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{ rows: WebVitalRawRow[]; hasMore: boolean; nextBefore: string | null }> => {
+      await assertAdmin(context);
+      const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
 
-    let q = context.supabase
-      .from("web_vitals")
-      .select("ts, metric, value, url, user_agent, metric_id")
-      .gte("ts", since)
-      .order("ts", { ascending: false })
-      .limit(data.limit);
+      let q = context.supabase
+        .from("web_vitals")
+        .select("ts, metric, value, url, user_agent, metric_id")
+        .gte("ts", since)
+        .order("ts", { ascending: false })
+        .limit(data.limit);
 
-    if (data.before) q = q.lt("ts", data.before);
-    if (data.pathContains) {
-      const safe = data.pathContains.replace(/[\\%_]/g, (m) => `\\${m}`);
-      q = q.ilike("url", `%${safe}%`);
-    }
+      if (data.before) q = q.lt("ts", data.before);
+      if (data.pathContains) {
+        const safe = data.pathContains.replace(/[\\%_]/g, (m) => `\\${m}`);
+        q = q.ilike("url", `%${safe}%`);
+      }
 
-    const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
-    const list = (rows ?? []) as WebVitalRawRow[];
-    const hasMore = list.length === data.limit;
-    const nextBefore = hasMore ? list[list.length - 1].ts : null;
-    return { rows: list, hasMore, nextBefore };
-  });
+      const { data: rows, error } = await q;
+      if (error) throw new Error(error.message);
+      const list = (rows ?? []) as WebVitalRawRow[];
+      const hasMore = list.length === data.limit;
+      const nextBefore = hasMore ? list[list.length - 1].ts : null;
+      return { rows: list, hasMore, nextBefore };
+    },
+  );

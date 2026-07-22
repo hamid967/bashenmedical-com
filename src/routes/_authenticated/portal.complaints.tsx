@@ -98,10 +98,7 @@ function MyComplaintsPage() {
     });
     return sorted;
   }, [rows, statusFilter, sortOrder]);
-  const selected = useMemo(
-    () => rows.find((r) => r.id === selectedId) ?? null,
-    [rows, selectedId],
-  );
+  const selected = useMemo(() => rows.find((r) => r.id === selectedId) ?? null, [rows, selectedId]);
 
   return (
     <div className="space-y-6">
@@ -180,36 +177,32 @@ function MyComplaintsPage() {
           ) : (
             <div className="grid gap-2">
               {filteredRows.map((r) => (
-            <button
-              key={r.id}
-              onClick={() => setSelectedId(r.id)}
-              className="w-full text-start rounded-xl border border-border bg-card p-4 hover:border-primary/40 transition-colors"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {r.reference}
-                    </span>
-                    <span className="text-xs px-1.5 py-0.5 rounded bg-muted">
-                      {TYPE_AR[r.type] ?? r.type}
-                    </span>
-                    {r.department && (
-                      <span className="text-xs text-muted-foreground">
-                        · {r.department}
-                      </span>
-                    )}
+                <button
+                  key={r.id}
+                  onClick={() => setSelectedId(r.id)}
+                  className="w-full text-start rounded-xl border border-border bg-card p-4 hover:border-primary/40 transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {r.reference}
+                        </span>
+                        <span className="text-xs px-1.5 py-0.5 rounded bg-muted">
+                          {TYPE_AR[r.type] ?? r.type}
+                        </span>
+                        {r.department && (
+                          <span className="text-xs text-muted-foreground">· {r.department}</span>
+                        )}
+                      </div>
+                      <p className="mt-1 text-sm line-clamp-2 text-muted-foreground">{r.message}</p>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-1">
+                      <OrderStatusBadge kind="complaint" status={r.status} />
+                      <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm line-clamp-2 text-muted-foreground">
-                    {r.message}
-                  </p>
-                </div>
-                <div className="shrink-0 flex flex-col items-end gap-1">
-                  <OrderStatusBadge kind="complaint" status={r.status} />
-                  <ChevronRight className="h-4 w-4 text-muted-foreground rtl:rotate-180" />
-                </div>
-              </div>
-            </button>
+                </button>
               ))}
             </div>
           )}
@@ -226,9 +219,7 @@ function MyComplaintsPage() {
                 {TYPE_AR[selected.type] ?? selected.type}
               </span>
               {selected.department && (
-                <span className="text-xs text-muted-foreground">
-                  · {selected.department}
-                </span>
+                <span className="text-xs text-muted-foreground">· {selected.department}</span>
               )}
               <button
                 onClick={() => {
@@ -263,11 +254,19 @@ function MyComplaintsPage() {
               complaintId={selected.id}
               attachments={
                 Array.isArray((selected as unknown as { attachments?: unknown }).attachments)
-                  ? ((selected as unknown as { attachments: Array<{ path: string; name: string; type?: string; size?: number }> }).attachments)
+                  ? (
+                      selected as unknown as {
+                        attachments: Array<{
+                          path: string;
+                          name: string;
+                          type?: string;
+                          size?: number;
+                        }>;
+                      }
+                    ).attachments
                   : []
               }
             />
-
 
             <div className="grid grid-cols-2 gap-3 text-xs text-muted-foreground">
               <div>
@@ -485,11 +484,7 @@ function NewComplaintForm({
         disabled={mut.isPending || uploading}
         className="rounded-md bg-primary text-primary-foreground font-semibold py-2.5 disabled:opacity-60"
       >
-        {uploading
-          ? "جارٍ رفع المرفقات…"
-          : mut.isPending
-            ? "جارٍ الإرسال…"
-            : "إرسال البلاغ"}
+        {uploading ? "جارٍ رفع المرفقات…" : mut.isPending ? "جارٍ الإرسال…" : "إرسال البلاغ"}
       </button>
     </form>
   );
@@ -587,9 +582,7 @@ function EditableMessage({
         </div>
       )}
       {!canEdit && (
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          لا يمكن التعديل بعد بدء المراجعة.
-        </p>
+        <p className="mt-1 text-[11px] text-muted-foreground">لا يمكن التعديل بعد بدء المراجعة.</p>
       )}
     </div>
   );
@@ -646,9 +639,7 @@ function AttachmentsList({
 
   return (
     <div>
-      <p className="text-xs text-muted-foreground mb-1">
-        المرفقات ({attachments.length})
-      </p>
+      <p className="text-xs text-muted-foreground mb-1">المرفقات ({attachments.length})</p>
       <ul className="space-y-1">
         {items.map((a, i) => (
           <li
@@ -658,9 +649,7 @@ function AttachmentsList({
             <span className="truncate">{a.name}</span>
             <div className="flex items-center gap-2 shrink-0">
               {typeof a.size === "number" && (
-                <span className="text-muted-foreground">
-                  {(a.size / 1024).toFixed(0)} KB
-                </span>
+                <span className="text-muted-foreground">{(a.size / 1024).toFixed(0)} KB</span>
               )}
               {a.url ? (
                 <a
@@ -672,9 +661,7 @@ function AttachmentsList({
                   عرض
                 </a>
               ) : (
-                <span className="text-muted-foreground">
-                  {q.isLoading ? "…" : "غير متاح"}
-                </span>
+                <span className="text-muted-foreground">{q.isLoading ? "…" : "غير متاح"}</span>
               )}
             </div>
           </li>

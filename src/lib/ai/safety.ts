@@ -4,21 +4,64 @@
  */
 
 export const EMERGENCY_KEYWORDS_AR = [
-  "ألم صدر","ألم في الصدر","ضيق تنفس","ضيق نفس","صعوبة تنفس","نزيف حاد","نزيف شديد",
-  "فقدان وعي","إغماء","سكتة","جلطة","تشنج","اختناق","حمّى شديدة","تسمم","انتحار",
-  "أنا هأموت","بأموت","لا أستطيع التنفس","دم كثير","حادث",
+  "ألم صدر",
+  "ألم في الصدر",
+  "ضيق تنفس",
+  "ضيق نفس",
+  "صعوبة تنفس",
+  "نزيف حاد",
+  "نزيف شديد",
+  "فقدان وعي",
+  "إغماء",
+  "سكتة",
+  "جلطة",
+  "تشنج",
+  "اختناق",
+  "حمّى شديدة",
+  "تسمم",
+  "انتحار",
+  "أنا هأموت",
+  "بأموت",
+  "لا أستطيع التنفس",
+  "دم كثير",
+  "حادث",
 ];
 export const EMERGENCY_KEYWORDS_EN = [
-  "chest pain","cannot breathe","can't breathe","shortness of breath","severe bleeding",
-  "unconscious","stroke","seizure","choking","overdose","suicide","kill myself","heart attack",
+  "chest pain",
+  "cannot breathe",
+  "can't breathe",
+  "shortness of breath",
+  "severe bleeding",
+  "unconscious",
+  "stroke",
+  "seizure",
+  "choking",
+  "overdose",
+  "suicide",
+  "kill myself",
+  "heart attack",
 ];
 
 export const MEDICAL_DIAGNOSIS_TRIGGERS_AR = [
-  "شخّص","شخص لي","ما هو مرضي","ماذا لدي","أي دواء","ما الجرعة","أوقف الدواء","استبدل الدواء",
-  "فسّر تحليلي","حلل نتيجتي",
+  "شخّص",
+  "شخص لي",
+  "ما هو مرضي",
+  "ماذا لدي",
+  "أي دواء",
+  "ما الجرعة",
+  "أوقف الدواء",
+  "استبدل الدواء",
+  "فسّر تحليلي",
+  "حلل نتيجتي",
 ];
 export const MEDICAL_DIAGNOSIS_TRIGGERS_EN = [
-  "diagnose","what disease","what do i have","prescribe","dosage","stop taking","interpret my lab",
+  "diagnose",
+  "what disease",
+  "what do i have",
+  "prescribe",
+  "dosage",
+  "stop taking",
+  "interpret my lab",
   "read my report",
 ];
 
@@ -40,14 +83,18 @@ export type SafetyClass =
 
 export function classifyUserMessage(text: string): SafetyClass {
   const t = (text ?? "").toLowerCase();
-  for (const k of EMERGENCY_KEYWORDS_AR) if (text.includes(k)) return { kind: "emergency", matched: k };
-  for (const k of EMERGENCY_KEYWORDS_EN) if (t.includes(k)) return { kind: "emergency", matched: k };
+  for (const k of EMERGENCY_KEYWORDS_AR)
+    if (text.includes(k)) return { kind: "emergency", matched: k };
+  for (const k of EMERGENCY_KEYWORDS_EN)
+    if (t.includes(k)) return { kind: "emergency", matched: k };
   for (const p of PROMPT_INJECTION_PATTERNS) {
     const m = text.match(p);
     if (m) return { kind: "prompt_injection", matched: m[0] };
   }
-  for (const k of MEDICAL_DIAGNOSIS_TRIGGERS_AR) if (text.includes(k)) return { kind: "medical_diagnosis", matched: k };
-  for (const k of MEDICAL_DIAGNOSIS_TRIGGERS_EN) if (t.includes(k)) return { kind: "medical_diagnosis", matched: k };
+  for (const k of MEDICAL_DIAGNOSIS_TRIGGERS_AR)
+    if (text.includes(k)) return { kind: "medical_diagnosis", matched: k };
+  for (const k of MEDICAL_DIAGNOSIS_TRIGGERS_EN)
+    if (t.includes(k)) return { kind: "medical_diagnosis", matched: k };
   return { kind: "ok" };
 }
 

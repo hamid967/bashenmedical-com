@@ -16,7 +16,11 @@ const slugRe = /^[a-z0-9_]+$/;
 
 const upsertSchema = z.object({
   id: z.string().uuid().optional(),
-  slug: z.string().min(2).max(64).regex(slugRe, "المعرّف يجب أن يحتوي حروف إنجليزية صغيرة وأرقام و _ فقط"),
+  slug: z
+    .string()
+    .min(2)
+    .max(64)
+    .regex(slugRe, "المعرّف يجب أن يحتوي حروف إنجليزية صغيرة وأرقام و _ فقط"),
   name_ar: z.string().min(1).max(120),
   name_en: z.string().min(1).max(120),
   display_order: z.number().int().min(0).max(9999).default(100),
@@ -85,7 +89,9 @@ export const reorderServiceCatalog = createServerFn({ method: "POST" })
     z
       .object({
         items: z
-          .array(z.object({ id: z.string().uuid(), display_order: z.number().int().min(0).max(9999) }))
+          .array(
+            z.object({ id: z.string().uuid(), display_order: z.number().int().min(0).max(9999) }),
+          )
           .min(1)
           .max(200),
       })

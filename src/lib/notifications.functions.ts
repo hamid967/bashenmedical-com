@@ -37,10 +37,7 @@ export type OutboundNotification = {
 const ListInput = z
   .object({
     channel: z.enum(["sms", "whatsapp", "email", "in_app"]).nullable().optional(),
-    status: z
-      .enum(["pending", "queued", "sent", "failed", "skipped"])
-      .nullable()
-      .optional(),
+    status: z.enum(["pending", "queued", "sent", "failed", "skipped"]).nullable().optional(),
     branchId: z.string().uuid().nullable().optional(),
     limit: z.number().int().min(1).max(500).optional(),
   })
@@ -164,10 +161,26 @@ const ListRemindersInput = z
     status: z.enum(["pending", "queued", "sent", "failed", "skipped"]).nullable().optional(),
     branchId: z.string().uuid().nullable().optional(),
     patientQuery: z.string().trim().max(120).nullable().optional(),
-    dateFrom: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-    dateTo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-    timeFrom: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).nullable().optional(),
-    timeTo: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/).nullable().optional(),
+    dateFrom: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .nullable()
+      .optional(),
+    dateTo: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .nullable()
+      .optional(),
+    timeFrom: z
+      .string()
+      .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+      .nullable()
+      .optional(),
+    timeTo: z
+      .string()
+      .regex(/^\d{2}:\d{2}(:\d{2})?$/)
+      .nullable()
+      .optional(),
     limit: z.number().int().min(1).max(500).optional(),
   })
   .default({});
@@ -180,7 +193,12 @@ export const listReminderDeliveries = createServerFn({ method: "POST" })
     ensureStaff(roles);
 
     const hasApptFilter =
-      !!data.patientQuery || !!data.dateFrom || !!data.dateTo || !!data.timeFrom || !!data.timeTo || !!data.branchId;
+      !!data.patientQuery ||
+      !!data.dateFrom ||
+      !!data.dateTo ||
+      !!data.timeFrom ||
+      !!data.timeTo ||
+      !!data.branchId;
     let restrictIds: string[] | null = null;
     if (hasApptFilter) {
       let aq = context.supabase.from("appointments").select("id").limit(2000);
@@ -222,7 +240,9 @@ export const listReminderDeliveries = createServerFn({ method: "POST" })
     if (apptIds.length > 0) {
       const { data: appts, error: aErr } = await context.supabase
         .from("appointments")
-        .select("id, patient_name, patient_phone, appointment_date, appointment_time, status, branch_id")
+        .select(
+          "id, patient_name, patient_phone, appointment_date, appointment_time, status, branch_id",
+        )
         .in("id", apptIds);
       if (aErr) throw new Error(aErr.message);
       for (const a of appts ?? []) {
@@ -239,7 +259,7 @@ export const listReminderDeliveries = createServerFn({ method: "POST" })
     }
     return (rows ?? []).map((r) => ({
       ...r,
-      appointment: r.appointment_id ? apptMap.get(r.appointment_id) ?? null : null,
+      appointment: r.appointment_id ? (apptMap.get(r.appointment_id) ?? null) : null,
     })) as unknown as ReminderDelivery[];
   });
 
@@ -274,9 +294,7 @@ export const retryReminderDelivery = createServerFn({ method: "POST" })
 
 export const retryReminderDeliveriesBulk = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z.object({ ids: z.array(z.string().uuid()).min(1).max(200) }).parse(d),
-  )
+  .validator((d) => z.object({ ids: z.array(z.string().uuid()).min(1).max(200) }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureStaff(roles);
@@ -321,7 +339,12 @@ export const exportReminderDeliveriesCsv = createServerFn({ method: "POST" })
 
     // Reuse the same filter shape but bump the row cap for exports
     const hasApptFilter =
-      !!data.patientQuery || !!data.dateFrom || !!data.dateTo || !!data.timeFrom || !!data.timeTo || !!data.branchId;
+      !!data.patientQuery ||
+      !!data.dateFrom ||
+      !!data.dateTo ||
+      !!data.timeFrom ||
+      !!data.timeTo ||
+      !!data.branchId;
     let restrictIds: string[] | null = null;
     if (hasApptFilter) {
       let aq = context.supabase.from("appointments").select("id").limit(5000);
@@ -338,7 +361,11 @@ export const exportReminderDeliveriesCsv = createServerFn({ method: "POST" })
       if (mErr) throw new Error(mErr.message);
       restrictIds = (matched ?? []).map((r) => r.id);
       if (restrictIds.length === 0) {
-        return { csv: "\uFEFFappointment_id,patient_name,patient_phone,appointment_date,appointment_time,kind,channel,audience,status,created_at,sent_at,last_error\n", count: 0, filename: buildFilename() };
+        return {
+          csv: "\uFEFFappointment_id,patient_name,patient_phone,appointment_date,appointment_time,kind,channel,audience,status,created_at,sent_at,last_error\n",
+          count: 0,
+          filename: buildFilename(),
+        };
       }
     }
 
@@ -361,7 +388,10 @@ export const exportReminderDeliveriesCsv = createServerFn({ method: "POST" })
     const apptIds = Array.from(
       new Set((rows ?? []).map((r) => r.appointment_id).filter((v): v is string => !!v)),
     );
-    const apptMap = new Map<string, { name: string | null; phone: string | null; date: string | null; time: string | null }>();
+    const apptMap = new Map<
+      string,
+      { name: string | null; phone: string | null; date: string | null; time: string | null }
+    >();
     if (apptIds.length > 0) {
       const { data: appts } = await context.supabase
         .from("appointments")
@@ -447,7 +477,12 @@ const MIN_RANGE_MS = 5 * 60 * 1000; // 5 minutes min
 const DeliveryStatsInput = z
   .object({
     // Preset in hours, OR custom from/to ISO datetime strings
-    hours: z.number().int().min(1).max(366 * 24).optional(),
+    hours: z
+      .number()
+      .int()
+      .min(1)
+      .max(366 * 24)
+      .optional(),
     from: z.string().datetime({ offset: true }).optional(),
     to: z.string().datetime({ offset: true }).optional(),
   })
@@ -473,7 +508,10 @@ const DeliveryStatsInput = z
       }
       return true;
     },
-    { message: "الفترة الزمنية غير صالحة (٥ دقائق حد أدنى، سنة واحدة حد أقصى، ويجب أن تسبق البداية النهاية)." },
+    {
+      message:
+        "الفترة الزمنية غير صالحة (٥ دقائق حد أدنى، سنة واحدة حد أقصى، ويجب أن تسبق البداية النهاية).",
+    },
   );
 
 export const getReminderDeliveryStats = createServerFn({ method: "POST" })
@@ -536,9 +574,7 @@ export const getReminderDeliveryStats = createServerFn({ method: "POST" })
       const ch = byChannelMap.get(r.channel as string);
       if (ch && st in ch) (ch as any)[st]++;
       const key =
-        bucket === "hour"
-          ? String(r.created_at).slice(0, 13)
-          : String(r.created_at).slice(0, 10);
+        bucket === "hour" ? String(r.created_at).slice(0, 13) : String(r.created_at).slice(0, 10);
       const b = bucketMap.get(key);
       if (b) {
         if (st === "sent") b.sent++;
@@ -562,7 +598,6 @@ export const getReminderDeliveryStats = createServerFn({ method: "POST" })
     };
   });
 
-
 /* -------- Per-user notifications (bell) -------- */
 
 const ListMyInput = z
@@ -584,15 +619,11 @@ export const listMyNotifications = createServerFn({ method: "POST" })
     );
     let q = sb
       .from("notifications")
-      .select(
-        "id, audience, kind, title, body, appointment_id, metadata, read_at, created_at",
-      )
+      .select("id, audience, kind, title, body, appointment_id, metadata, read_at, created_at")
       .eq("channel", "in_app")
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 30);
-    q = isStaff
-      ? q.or(`audience.eq.staff,user_id.eq.${userId}`)
-      : q.eq("user_id", userId);
+    q = isStaff ? q.or(`audience.eq.staff,user_id.eq.${userId}`) : q.eq("user_id", userId);
     if (data.onlyUnread) q = q.is("read_at", null);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -613,9 +644,7 @@ export const countUnreadNotifications = createServerFn({ method: "GET" })
       .select("id", { count: "exact", head: true })
       .is("read_at", null)
       .eq("channel", "in_app");
-    q = isStaff
-      ? q.or(`audience.eq.staff,user_id.eq.${userId}`)
-      : q.eq("user_id", userId);
+    q = isStaff ? q.or(`audience.eq.staff,user_id.eq.${userId}`) : q.eq("user_id", userId);
     const { count, error } = await q;
     if (error) throw new Error(error.message);
     return { count: count ?? 0 };
@@ -642,9 +671,7 @@ export const markNotificationsRead = createServerFn({ method: "POST" })
     let q = sb.from("notifications").update({ read_at: new Date().toISOString() });
     if (data.id) q = q.eq("id", data.id);
     else q = q.is("read_at", null);
-    q = isStaff
-      ? q.or(`audience.eq.staff,user_id.eq.${userId}`)
-      : q.eq("user_id", userId);
+    q = isStaff ? q.or(`audience.eq.staff,user_id.eq.${userId}`) : q.eq("user_id", userId);
     const { error } = await q;
     if (error) throw new Error(error.message);
     return { ok: true };

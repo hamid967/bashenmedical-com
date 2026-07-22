@@ -7,25 +7,14 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-type Role =
-  | "admin"
-  | "super_admin"
-  | "support_agent"
-  | "reception";
+type Role = "admin" | "super_admin" | "support_agent" | "reception";
 
-export async function assertHasRole(
-  supabase: any,
-  userId: string,
-  role: Role = "admin",
-) {
+export async function assertHasRole(supabase: any, userId: string, role: Role = "admin") {
   // Console-side callers pass "admin"; super_admin is granted implicitly so a
   // top-level owner never sees a permission wall on inquiries management.
-  const rolesToCheck: Role[] =
-    role === "admin" ? ["admin", "super_admin"] : [role];
+  const rolesToCheck: Role[] = role === "admin" ? ["admin", "super_admin"] : [role];
   const checks = await Promise.all(
-    rolesToCheck.map((r) =>
-      supabase.rpc("has_role", { _user_id: userId, _role: r }),
-    ),
+    rolesToCheck.map((r) => supabase.rpc("has_role", { _user_id: userId, _role: r })),
   );
   if (checks.some((c) => c.error)) {
     throw new Error("تعذّر التحقق من الصلاحية.");
@@ -35,7 +24,6 @@ export async function assertHasRole(
   }
   return true;
 }
-
 
 const STATUSES = [
   "new",
@@ -168,7 +156,7 @@ export const getInquiryDetail = createServerFn({ method: "GET" })
       inquiry: row.data,
       timeline: (timeline.data ?? []).map((t: any) => ({
         ...t,
-        actor_name: t.created_by ? profiles[t.created_by] ?? null : null,
+        actor_name: t.created_by ? (profiles[t.created_by] ?? null) : null,
       })),
     };
   });

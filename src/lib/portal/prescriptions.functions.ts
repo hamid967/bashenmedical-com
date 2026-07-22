@@ -66,7 +66,10 @@ export const getMyPrescriptions = createServerFn({ method: "GET" })
       .maybeSingle();
 
     const patient = patientRes.data
-      ? { id: patientRes.data.id as string, full_name_ar: (patientRes.data.full_name_ar as string | null) ?? null }
+      ? {
+          id: patientRes.data.id as string,
+          full_name_ar: (patientRes.data.full_name_ar as string | null) ?? null,
+        }
       : null;
 
     if (!patient) return { active: [], past: [], upcoming: [], patient: null };
@@ -74,19 +77,25 @@ export const getMyPrescriptions = createServerFn({ method: "GET" })
     const [rxRes, medsRes, aptsRes] = await Promise.all([
       supabase
         .from("prescriptions")
-        .select("id, medication, dosage, instructions, status, start_date, end_date, refills_remaining, notes, doctor_id, doctors:doctor_id(name_ar)")
+        .select(
+          "id, medication, dosage, instructions, status, start_date, end_date, refills_remaining, notes, doctor_id, doctors:doctor_id(name_ar)",
+        )
         .eq("patient_id", patient.id)
         .order("start_date", { ascending: false, nullsFirst: false })
         .limit(200),
       supabase
         .from("patient_medications")
-        .select("id, medication_name, dosage, frequency, route, start_date, end_date, status, prescribed_by_name, notes")
+        .select(
+          "id, medication_name, dosage, frequency, route, start_date, end_date, status, prescribed_by_name, notes",
+        )
         .eq("patient_id", patient.id)
         .order("start_date", { ascending: false, nullsFirst: false })
         .limit(200),
       supabase
         .from("appointments")
-        .select("id, appointment_date, appointment_time, status, reason, doctor_id, doctors:doctor_id(name_ar, specialties:specialty_id(name_ar))")
+        .select(
+          "id, appointment_date, appointment_time, status, reason, doctor_id, doctors:doctor_id(name_ar, specialties:specialty_id(name_ar))",
+        )
         .eq("patient_id", patient.id)
         .gte("appointment_date", new Date().toISOString().slice(0, 10))
         .in("status", ["new", "confirmed"])
@@ -108,7 +117,8 @@ export const getMyPrescriptions = createServerFn({ method: "GET" })
         notes: (r.notes as string | null) ?? null,
         doctor_id: (r.doctor_id as string | null) ?? null,
         doctor_name:
-          ((r as { doctors?: { name_ar?: string | null } | null }).doctors?.name_ar as string | null) ?? null,
+          ((r as { doctors?: { name_ar?: string | null } | null }).doctors?.name_ar as
+            string | null) ?? null,
         source: "prescription",
       });
     }
@@ -137,14 +147,23 @@ export const getMyPrescriptions = createServerFn({ method: "GET" })
     for (const it of items) {
       const isActive =
         (it.status ?? "").toLowerCase() === "active" ||
-        (!it.end_date || it.end_date >= today) && (it.status ?? "active").toLowerCase() !== "cancelled" &&
-        (it.status ?? "active").toLowerCase() !== "stopped" && (it.status ?? "active").toLowerCase() !== "completed";
+        ((!it.end_date || it.end_date >= today) &&
+          (it.status ?? "active").toLowerCase() !== "cancelled" &&
+          (it.status ?? "active").toLowerCase() !== "stopped" &&
+          (it.status ?? "active").toLowerCase() !== "completed");
       if (isActive) active.push(it);
       else past.push(it);
     }
 
     const upcoming: UpcomingAppointment[] = (aptsRes.data ?? []).map((a) => {
-      const doc = (a as { doctors?: { name_ar?: string | null; specialties?: { name_ar?: string | null } | null } | null }).doctors;
+      const doc = (
+        a as {
+          doctors?: {
+            name_ar?: string | null;
+            specialties?: { name_ar?: string | null } | null;
+          } | null;
+        }
+      ).doctors;
       return {
         id: a.id as string,
         date: a.appointment_date as string,
@@ -198,7 +217,10 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
 
     const patientRes = await supabase
-      .from("patients").select("id, full_name_ar").eq("profile_id", userId).maybeSingle();
+      .from("patients")
+      .select("id, full_name_ar")
+      .eq("profile_id", userId)
+      .maybeSingle();
     if (!patientRes.data) throw new Error("لا يوجد ملف مريض مرتبط.");
     const pid = patientRes.data.id;
 
@@ -210,10 +232,15 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
         .eq("patient_id", pid)
         .limit(60),
       supabase
-        .from("patient_allergies").select("allergen, reaction, severity").eq("patient_id", pid).limit(20),
+        .from("patient_allergies")
+        .select("allergen, reaction, severity")
+        .eq("patient_id", pid)
+        .limit(20),
       supabase
         .from("appointments")
-        .select("id, appointment_date, appointment_time, reason, status, doctors:doctor_id(name_ar, specialties:specialty_id(name_ar))")
+        .select(
+          "id, appointment_date, appointment_time, reason, status, doctors:doctor_id(name_ar, specialties:specialty_id(name_ar))",
+        )
         .eq("patient_id", pid)
         .gte("appointment_date", today)
         .in("status", ["new", "confirmed"])
@@ -257,7 +284,9 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
         headline: { type: "string" },
         overview: { type: "string" },
         slots: {
-          type: "array", minItems: 0, maxItems: 40,
+          type: "array",
+          minItems: 0,
+          maxItems: 40,
           items: {
             type: "object",
             properties: {
@@ -272,7 +301,9 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
           },
         },
         appointmentReminders: {
-          type: "array", minItems: 0, maxItems: 10,
+          type: "array",
+          minItems: 0,
+          maxItems: 10,
           items: {
             type: "object",
             properties: {
@@ -300,7 +331,12 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
           { role: "system", content: system },
           { role: "user", content: user },
         ],
-        tools: [{ type: "function", function: { name: "emit_plan", description: "خطة التذكيرات", parameters: schema } }],
+        tools: [
+          {
+            type: "function",
+            function: { name: "emit_plan", description: "خطة التذكيرات", parameters: schema },
+          },
+        ],
         tool_choice: { type: "function", function: { name: "emit_plan" } },
       }),
     });
@@ -309,13 +345,20 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
     if (r.status === 402) throw new Error("انتهت أرصدة الذكاء الاصطناعي.");
     if (!r.ok) throw new Error(`فشل الذكاء الاصطناعي: ${r.status}`);
     const j = (await r.json()) as {
-      choices?: { message?: { tool_calls?: { function?: { arguments?: string } }[]; content?: string } }[];
+      choices?: {
+        message?: { tool_calls?: { function?: { arguments?: string } }[]; content?: string };
+      }[];
     };
     const raw =
       j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ??
-      j.choices?.[0]?.message?.content ?? "";
+      j.choices?.[0]?.message?.content ??
+      "";
     let parsed: Partial<ReminderPlan> = {};
-    try { parsed = JSON.parse(raw); } catch { /* ignore */ }
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
 
     const plan: ReminderPlan = {
       headline: parsed.headline ?? "خطة التذكيرات اليومية",
@@ -379,7 +422,9 @@ export const getMedicationReminderLog = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const res = await supabase
       .from("notifications")
-      .select("id, title, body, channel, send_status, sent_at, created_at, read_at, last_error, metadata")
+      .select(
+        "id, title, body, channel, send_status, sent_at, created_at, read_at, last_error, metadata",
+      )
       .eq("audience", "user")
       .eq("user_id", userId)
       .eq("kind", "medication_reminder")
@@ -403,7 +448,6 @@ export const getMedicationReminderLog = createServerFn({ method: "GET" })
       };
     });
   });
-
 
 /* --------------------------- Confirmations & adherence --------------------------- */
 
@@ -478,7 +522,8 @@ export const getAdherenceStats = createServerFn({ method: "GET" })
       bucket.total += 1;
       if (r.read_at) bucket.taken += 1;
     }
-    let weekTotal = 0, weekTaken = 0;
+    let weekTotal = 0,
+      weekTaken = 0;
     for (const d of days) {
       d.pct = d.total > 0 ? Math.round((d.taken / d.total) * 100) : 0;
       weekTotal += d.total;
@@ -525,7 +570,9 @@ export const getReminderPreferences = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("reminder_preferences")
-      .select("medication_lead_minutes, appointment_lead_minutes, wake_hour, sleep_hour, daily_repeat_days")
+      .select(
+        "medication_lead_minutes, appointment_lead_minutes, wake_hour, sleep_hour, daily_repeat_days",
+      )
       .eq("user_id", userId)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -548,7 +595,9 @@ export const saveReminderPreferences = createServerFn({ method: "POST" })
     const { data: row, error } = await supabase
       .from("reminder_preferences")
       .upsert({ user_id: userId, ...data }, { onConflict: "user_id" })
-      .select("medication_lead_minutes, appointment_lead_minutes, wake_hour, sleep_hour, daily_repeat_days")
+      .select(
+        "medication_lead_minutes, appointment_lead_minutes, wake_hour, sleep_hour, daily_repeat_days",
+      )
       .single();
     if (error) throw new Error(error.message);
     return row;

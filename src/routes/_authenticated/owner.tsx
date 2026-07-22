@@ -14,7 +14,6 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-
 export const Route = createFileRoute("/_authenticated/owner")({
   beforeLoad: async () => {
     try {
@@ -46,7 +45,9 @@ export const Route = createFileRoute("/_authenticated/owner")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="p-8 text-center text-slate-600" dir="rtl">الصفحة غير موجودة</div>
+    <div className="p-8 text-center text-slate-600" dir="rtl">
+      الصفحة غير موجودة
+    </div>
   ),
 });
 
@@ -70,9 +71,7 @@ const NAV_GROUPS: ReadonlyArray<NavGroup> = [
   },
   {
     label: "العمليات",
-    items: [
-      { to: "/admin/service-inquiries", label: "الطلبات", icon: Inbox, ownerOnly: true },
-    ],
+    items: [{ to: "/admin/service-inquiries", label: "الطلبات", icon: Inbox, ownerOnly: true }],
   },
   {
     label: "الإدارة",
@@ -84,7 +83,6 @@ const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     ],
   },
 ];
-
 
 function OwnerLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -104,7 +102,9 @@ function OwnerLayout() {
         window.location.assign("/owner/security");
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [isOwner, pathname]);
 
   return (
@@ -112,9 +112,7 @@ function OwnerLayout() {
       <aside className="w-64 bg-slate-900 text-slate-100 flex flex-col">
         <div className="p-5 border-b border-slate-800">
           <div className="text-xs uppercase tracking-wider text-slate-400">Site Builder</div>
-          <div className="text-lg font-bold mt-1">
-            {isEditor ? "محرر المحتوى" : "لوحة المالك"}
-          </div>
+          <div className="text-lg font-bold mt-1">{isEditor ? "محرر المحتوى" : "لوحة المالك"}</div>
           <div
             className={`mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
               isEditor
@@ -136,9 +134,7 @@ function OwnerLayout() {
                 </div>
                 <div className="space-y-1">
                   {items.map((item) => {
-                    const active = item.exact
-                      ? pathname === item.to
-                      : pathname.startsWith(item.to);
+                    const active = item.exact ? pathname === item.to : pathname.startsWith(item.to);
                     const Icon = item.icon;
                     return (
                       <Link

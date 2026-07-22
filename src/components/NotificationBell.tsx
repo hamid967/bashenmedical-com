@@ -47,9 +47,7 @@ export function NotificationBell() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
-      setSignedIn(!!session)
-    );
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) => setSignedIn(!!session));
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -77,13 +75,9 @@ export function NotificationBell() {
     if (!signedIn) return;
     const channel = supabase
       .channel("notifications-bell")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "notifications" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["notifications"] });
-        }
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "notifications" }, () => {
+        qc.invalidateQueries({ queryKey: ["notifications"] });
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -176,16 +170,13 @@ export function NotificationBell() {
             </div>
           )}
           <div className="max-h-[65vh] overflow-y-auto divide-y divide-border">
-
             {listQuery.isLoading ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin inline-block me-1" />
                 جارٍ التحميل…
               </div>
             ) : items.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">
-                لا توجد إشعارات
-              </div>
+              <div className="p-6 text-center text-sm text-muted-foreground">لا توجد إشعارات</div>
             ) : (
               items.map((n) => {
                 const isUnread = !n.read_at;
@@ -202,9 +193,7 @@ export function NotificationBell() {
                       }`}
                     />
                     <div className="flex-1 min-w-0">
-                      <div className="font-medium text-foreground truncate">
-                        {n.title}
-                      </div>
+                      <div className="font-medium text-foreground truncate">{n.title}</div>
                       {n.body && (
                         <div className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
                           {n.body}
@@ -223,7 +212,10 @@ export function NotificationBell() {
                               typeof meta.refund_id === "string";
                             if (!hasReceipt) return null;
                             const refundId = meta.refund_id as string;
-                            const ref = typeof meta.receipt_reference === "string" ? meta.receipt_reference : null;
+                            const ref =
+                              typeof meta.receipt_reference === "string"
+                                ? meta.receipt_reference
+                                : null;
                             return (
                               <Link
                                 to="/portal/refunds"

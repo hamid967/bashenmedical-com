@@ -88,7 +88,10 @@ export const Route = createFileRoute("/accreditations")({
     <div className="container-app py-16 text-center">
       <p className="text-destructive font-semibold">تعذّر تحميل الاعتمادات</p>
       <p className="mt-1 text-sm text-muted-foreground">{error.message}</p>
-      <button onClick={reset} className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+      <button
+        onClick={reset}
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+      >
         إعادة المحاولة
       </button>
     </div>
@@ -154,7 +157,10 @@ function AccreditationsPage() {
               type="search"
               value={q}
               onChange={(e) =>
-                navigate({ search: (prev: { q: string; cat: string }) => ({ ...prev, q: e.target.value }), replace: true })
+                navigate({
+                  search: (prev: { q: string; cat: string }) => ({ ...prev, q: e.target.value }),
+                  replace: true,
+                })
               }
               placeholder="ابحث في الاعتمادات (اسم، جهة، سنة…)"
               aria-label="بحث في الاعتمادات"
@@ -164,7 +170,10 @@ function AccreditationsPage() {
           <select
             value={cat}
             onChange={(e) =>
-              navigate({ search: (prev: { q: string; cat: string }) => ({ ...prev, cat: e.target.value }), replace: true })
+              navigate({
+                search: (prev: { q: string; cat: string }) => ({ ...prev, cat: e.target.value }),
+                replace: true,
+              })
             }
             aria-label="تصفية حسب النوع"
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-primary min-w-40"
@@ -192,7 +201,12 @@ function AccreditationsPage() {
           <div className="mb-6 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => navigate({ search: (prev: { q: string; cat: string }) => ({ ...prev, cat: "" }), replace: true })}
+              onClick={() =>
+                navigate({
+                  search: (prev: { q: string; cat: string }) => ({ ...prev, cat: "" }),
+                  replace: true,
+                })
+              }
               className={`rounded-full px-3 py-1 text-xs font-semibold border transition ${
                 cat === ""
                   ? "bg-primary text-primary-foreground border-primary"
@@ -210,7 +224,10 @@ function AccreditationsPage() {
                   type="button"
                   onClick={() =>
                     navigate({
-                      search: (prev: { q: string; cat: string }) => ({ ...prev, cat: active ? "" : c }),
+                      search: (prev: { q: string; cat: string }) => ({
+                        ...prev,
+                        cat: active ? "" : c,
+                      }),
                       replace: true,
                     })
                   }

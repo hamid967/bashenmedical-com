@@ -25,10 +25,16 @@ const pageInput = z.object({
   content_en: z.string().max(200_000).default(""),
   seo_title: z.string().trim().max(200).nullish(),
   seo_description: z.string().trim().max(500).nullish(),
-  og_image: z.string().trim().max(500).refine(
-    (v) => v === "" || /^https?:\/\//i.test(v) || v.startsWith("/"),
-    "رابط الصورة يجب أن يبدأ بـ http(s):// أو /",
-  ).nullish().or(z.literal("")),
+  og_image: z
+    .string()
+    .trim()
+    .max(500)
+    .refine(
+      (v) => v === "" || /^https?:\/\//i.test(v) || v.startsWith("/"),
+      "رابط الصورة يجب أن يبدأ بـ http(s):// أو /",
+    )
+    .nullish()
+    .or(z.literal("")),
   status: z.enum(["draft", "published"]).default("draft"),
   show_in_nav: z.boolean().default(false),
   nav_order: z.number().int().min(0).max(999).default(0),
@@ -40,7 +46,9 @@ export const listOwnerPages = createServerFn({ method: "GET" })
     await assertOwner(context.supabase, context.userId);
     const { data, error } = await context.supabase
       .from("custom_pages")
-      .select("id, slug, title_ar, title_en, status, show_in_nav, nav_order, updated_at, published_at")
+      .select(
+        "id, slug, title_ar, title_en, status, show_in_nav, nav_order, updated_at, published_at",
+      )
       .order("updated_at", { ascending: false });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -83,9 +91,7 @@ export const createOwnerPage = createServerFn({ method: "POST" })
 
 export const updateOwnerPage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
-    z.object({ id: z.string().uuid() }).merge(pageInput).parse(d),
-  )
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).merge(pageInput).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
     const { id, ...rest } = data;
@@ -100,7 +106,7 @@ export const updateOwnerPage = createServerFn({ method: "POST" })
     const published_at =
       rest.status === "published" && current?.status !== "published"
         ? new Date().toISOString()
-        : current?.published_at ?? null;
+        : (current?.published_at ?? null);
 
     const { error } = await context.supabase
       .from("custom_pages")
@@ -119,10 +125,7 @@ export const deleteOwnerPage = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
-    const { error } = await context.supabase
-      .from("custom_pages")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("custom_pages").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -138,7 +141,8 @@ export const getPublicPageBySlug = createServerFn({ method: "GET" })
       global: {
         fetch: (input, init) => {
           const h = new Headers(init?.headers);
-          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`) h.delete("Authorization");
+          if (key.startsWith("sb_") && h.get("Authorization") === `Bearer ${key}`)
+            h.delete("Authorization");
           h.set("apikey", key);
           return fetch(input, { ...init, headers: h });
         },
@@ -146,7 +150,9 @@ export const getPublicPageBySlug = createServerFn({ method: "GET" })
     });
     const { data: row, error } = await supabase
       .from("custom_pages")
-      .select("slug, title_ar, title_en, content_ar, content_en, seo_title, seo_description, og_image, published_at")
+      .select(
+        "slug, title_ar, title_en, content_ar, content_en, seo_title, seo_description, og_image, published_at",
+      )
       .eq("slug", data.slug)
       .eq("status", "published")
       .maybeSingle();

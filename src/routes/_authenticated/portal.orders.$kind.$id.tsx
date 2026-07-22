@@ -63,13 +63,7 @@ const KIND_ICONS: Record<OrderTableKind, React.ComponentType<{ className?: strin
 };
 
 const DISPLAY_FIELDS: Record<OrderTableKind, string[]> = {
-  appointment: [
-    "appointment_date",
-    "appointment_time",
-    "specialty",
-    "reason",
-    "notes",
-  ],
+  appointment: ["appointment_date", "appointment_time", "specialty", "reason", "notes"],
   complaint: ["reference", "category", "message", "response"],
   medicine_order: ["delivery_type", "delivery_address", "total_amount", "notes"],
   home_care: ["service_type", "preferred_date", "preferred_time", "address", "notes"],
@@ -120,19 +114,14 @@ function fmt(iso: string) {
 
 export const Route = createFileRoute("/_authenticated/portal/orders/$kind/$id")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل الطلب | بوابة المريض" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل الطلب | بوابة المريض" }, { name: "robots", content: "noindex" }],
   }),
   component: MyOrderDetailsPage,
 });
 
 function MyOrderDetailsPage() {
   const { kind, id } = Route.useParams();
-  const kindTyped = (KINDS as readonly string[]).includes(kind)
-    ? (kind as OrderTableKind)
-    : null;
+  const kindTyped = (KINDS as readonly string[]).includes(kind) ? (kind as OrderTableKind) : null;
 
   const call = useServerFn(getMyOrderDetails);
   const q = useQuery({
@@ -151,7 +140,6 @@ function MyOrderDetailsPage() {
         </Link>
       </div>
     );
-
   }
 
   const Icon = KIND_ICONS[kindTyped];
@@ -159,7 +147,6 @@ function MyOrderDetailsPage() {
   return (
     <>
       <div className="mb-4 flex items-center justify-between gap-3 flex-wrap">
-
         <div>
           <Link
             to="/portal/orders"
@@ -297,5 +284,4 @@ function MyOrderDetailsPage() {
       )}
     </>
   );
-
 }

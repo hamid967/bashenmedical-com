@@ -99,15 +99,24 @@ function ReportsPage() {
       const d = doctorId || null;
       const s = status || null;
       if (type === "appointments") {
-        return { kind: "appointments" as const, rows: await apptFn({ data: { from, to, branchId: b, doctorId: d, status: s } }) };
+        return {
+          kind: "appointments" as const,
+          rows: await apptFn({ data: { from, to, branchId: b, doctorId: d, status: s } }),
+        };
       }
       if (type === "occupancy") {
         return { kind: "occupancy" as const, rows: await occFn({ data: { branchId: b, days } }) };
       }
       if (type === "pharmacy") {
-        return { kind: "pharmacy" as const, rows: await pharmFn({ data: { from, to, branchId: b, status: s } }) };
+        return {
+          kind: "pharmacy" as const,
+          rows: await pharmFn({ data: { from, to, branchId: b, status: s } }),
+        };
       }
-      return { kind: "patients" as const, rows: await patientsFn({ data: { from, to, branchId: b, gender: gender || null } }) };
+      return {
+        kind: "patients" as const,
+        rows: await patientsFn({ data: { from, to, branchId: b, gender: gender || null } }),
+      };
     },
     staleTime: 30_000,
   });
@@ -130,15 +139,27 @@ function ReportsPage() {
       return;
     }
     const stamp = new Date().toISOString().slice(0, 19).replace(/[T:]/g, "-");
-    const meta: Record<string, string> = { الفرع: branchName, "من": from, "إلى": to };
+    const meta: Record<string, string> = { الفرع: branchName, من: from, إلى: to };
     if (type === "occupancy") {
       meta["الفترة"] = `آخر ${days} يوم`;
     }
-    if (status) meta["الحالة"] = APPT_STATUSES.concat(PHARMACY_STATUSES).find((s) => s.v === status)?.ar ?? status;
+    if (status)
+      meta["الحالة"] =
+        APPT_STATUSES.concat(PHARMACY_STATUSES).find((s) => s.v === status)?.ar ?? status;
 
     let cfg:
-      | { title: string; file: string; cols: Column<AppointmentReportRow>[]; rows: AppointmentReportRow[] }
-      | { title: string; file: string; cols: Column<DoctorOccupancyRow>[]; rows: DoctorOccupancyRow[] }
+      | {
+          title: string;
+          file: string;
+          cols: Column<AppointmentReportRow>[];
+          rows: AppointmentReportRow[];
+        }
+      | {
+          title: string;
+          file: string;
+          cols: Column<DoctorOccupancyRow>[];
+          rows: DoctorOccupancyRow[];
+        }
       | { title: string; file: string; cols: Column<PharmacyOrderRow>[]; rows: PharmacyOrderRow[] }
       | { title: string; file: string; cols: Column<PatientReportRow>[]; rows: PatientReportRow[] };
 
@@ -150,11 +171,26 @@ function ReportsPage() {
         cols: APPT_COLS,
       };
     } else if (query.data.kind === "occupancy") {
-      cfg = { title: "تقرير إشغال الأطباء", file: `occupancy-${stamp}`, rows: query.data.rows, cols: OCC_COLS };
+      cfg = {
+        title: "تقرير إشغال الأطباء",
+        file: `occupancy-${stamp}`,
+        rows: query.data.rows,
+        cols: OCC_COLS,
+      };
     } else if (query.data.kind === "pharmacy") {
-      cfg = { title: "تقرير طلبات الصيدلية", file: `pharmacy-${stamp}`, rows: query.data.rows, cols: PHARM_COLS };
+      cfg = {
+        title: "تقرير طلبات الصيدلية",
+        file: `pharmacy-${stamp}`,
+        rows: query.data.rows,
+        cols: PHARM_COLS,
+      };
     } else {
-      cfg = { title: "تقرير المرضى", file: `patients-${stamp}`, rows: query.data.rows, cols: PATIENT_COLS };
+      cfg = {
+        title: "تقرير المرضى",
+        file: `patients-${stamp}`,
+        rows: query.data.rows,
+        cols: PATIENT_COLS,
+      };
     }
 
     // Type-erase for exporters (all Column<T> arrays are structurally compatible for row-in row-out use)
@@ -187,7 +223,9 @@ function ReportsPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold">التقارير القابلة للتصدير</h1>
-              <p className="text-xs text-muted-foreground">تصدير Excel و PDF و CSV مع احترام الفلاتر</p>
+              <p className="text-xs text-muted-foreground">
+                تصدير Excel و PDF و CSV مع احترام الفلاتر
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -215,7 +253,6 @@ function ReportsPage() {
             <TabsTrigger value="patients">المرضى</TabsTrigger>
           </TabsList>
         </Tabs>
-
 
         {/* Filters */}
         <div className="mb-6 rounded-xl border bg-card p-5">
@@ -355,9 +392,13 @@ function ReportsPage() {
                 <Loader2 className="h-3.5 w-3.5 animate-spin" /> جارٍ التحميل…
               </span>
             ) : query.isError ? (
-              <span className="text-destructive">تعذّر تحميل البيانات: {(query.error as Error).message}</span>
+              <span className="text-destructive">
+                تعذّر تحميل البيانات: {(query.error as Error).message}
+              </span>
             ) : (
-              <span>عدد السجلات: <b>{rowsCount}</b></span>
+              <span>
+                عدد السجلات: <b>{rowsCount}</b>
+              </span>
             )}
           </div>
           <div className="flex gap-2">
@@ -487,7 +528,11 @@ const PATIENT_COLS: Column<PatientReportRow>[] = [
   { header: "الرقم الطبي", accessor: (r) => r.mrn ?? "", width: 14 },
   { header: "الاسم", accessor: (r) => r.full_name, width: 26 },
   { header: "الجوال", accessor: (r) => r.phone ?? "", width: 15 },
-  { header: "الجنس", accessor: (r) => (r.gender === "male" ? "ذكر" : r.gender === "female" ? "أنثى" : ""), width: 8 },
+  {
+    header: "الجنس",
+    accessor: (r) => (r.gender === "male" ? "ذكر" : r.gender === "female" ? "أنثى" : ""),
+    width: 8,
+  },
   { header: "تاريخ الميلاد", accessor: (r) => r.date_of_birth ?? "", width: 14 },
   { header: "الفرع", accessor: (r) => r.branch_name_ar ?? "", width: 15 },
   { header: "تاريخ التسجيل", accessor: (r) => fmtDateTime(r.created_at), width: 18 },

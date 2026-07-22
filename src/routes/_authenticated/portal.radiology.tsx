@@ -10,9 +10,7 @@ import {
   type RadiologyAiSummary,
 } from "@/lib/portal/radiology.functions";
 import { Badge } from "@/components/ui/badge";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   AlertTriangle,
   Bone,
@@ -63,7 +61,10 @@ function RadiologyError({ error, reset }: { error: Error; reset: () => void }) {
         {error.message || "خطأ غير متوقع."}
       </p>
       <button
-        onClick={() => { router.invalidate(); reset(); }}
+        onClick={() => {
+          router.invalidate();
+          reset();
+        }}
         className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
@@ -76,13 +77,48 @@ function RadiologyError({ error, reset }: { error: Error; reset: () => void }) {
 /* ------------------------ styling helpers ------------------------ */
 
 const MODALITY_STYLES: Record<string, { bg: string; ring: string; icon: string; label: string }> = {
-  xray:  { bg: "from-slate-50 to-slate-100/50",   ring: "ring-slate-200",   icon: "text-slate-700",   label: "أشعة سينية" },
-  ct:    { bg: "from-teal-50 to-teal-100/50",       ring: "ring-teal-200",     icon: "text-teal-600",     label: "أشعة مقطعية CT" },
-  mri:   { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200",  icon: "text-teal-600",  label: "رنين مغناطيسي MRI" },
-  us:    { bg: "from-teal-50 to-teal-100/50",     ring: "ring-teal-200",    icon: "text-teal-600",    label: "موجات فوق صوتية" },
-  mammo: { bg: "from-pink-50 to-pink-100/50",     ring: "ring-pink-200",    icon: "text-pink-600",    label: "ماموغرام" },
-  pet:   { bg: "from-amber-50 to-amber-100/50",   ring: "ring-amber-200",   icon: "text-amber-600",   label: "PET" },
-  other: { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200",  icon: "text-teal-600",  label: "أخرى" },
+  xray: {
+    bg: "from-slate-50 to-slate-100/50",
+    ring: "ring-slate-200",
+    icon: "text-slate-700",
+    label: "أشعة سينية",
+  },
+  ct: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "أشعة مقطعية CT",
+  },
+  mri: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "رنين مغناطيسي MRI",
+  },
+  us: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "موجات فوق صوتية",
+  },
+  mammo: {
+    bg: "from-pink-50 to-pink-100/50",
+    ring: "ring-pink-200",
+    icon: "text-pink-600",
+    label: "ماموغرام",
+  },
+  pet: {
+    bg: "from-amber-50 to-amber-100/50",
+    ring: "ring-amber-200",
+    icon: "text-amber-600",
+    label: "PET",
+  },
+  other: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "أخرى",
+  },
 };
 
 function modalityKey(r: RadiologyReport): keyof typeof MODALITY_STYLES {
@@ -116,10 +152,7 @@ function RadiologyPage() {
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
-  const enriched = useMemo(
-    () => reports.map((r) => ({ ...r, _mod: modalityKey(r) })),
-    [reports],
-  );
+  const enriched = useMemo(() => reports.map((r) => ({ ...r, _mod: modalityKey(r) })), [reports]);
 
   const modalities = useMemo(() => {
     const counts = new Map<string, number>();
@@ -182,7 +215,9 @@ function RadiologyPage() {
       <div className="glass-card p-6 md:p-8">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
           <div>
-            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">RADIOLOGY</div>
+            <div className="text-xs font-semibold text-[color:var(--portal-ink-2)] tracking-wider">
+              RADIOLOGY
+            </div>
             <h1 className="text-2xl md:text-3xl font-bold mt-1">تقارير الأشعة</h1>
             <p className="text-sm text-[color:var(--portal-ink-2)] mt-1">
               اعرض ونزّل تقارير الأشعة الخاصة بك مع ملخص ذكي لأبرز النتائج.
@@ -213,7 +248,12 @@ function RadiologyPage() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            <ModChip active={activeMod === "all"} onClick={() => setActiveMod("all")} label="الكل" count={reports.length} />
+            <ModChip
+              active={activeMod === "all"}
+              onClick={() => setActiveMod("all")}
+              label="الكل"
+              count={reports.length}
+            />
             {modalities.map(([m, n]) => (
               <ModChip
                 key={m}
@@ -249,16 +289,18 @@ function RadiologyPage() {
               >
                 <header className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className={`h-11 w-11 rounded-2xl bg-white grid place-items-center shadow-sm ${style.icon}`}>
+                    <div
+                      className={`h-11 w-11 rounded-2xl bg-white grid place-items-center shadow-sm ${style.icon}`}
+                    >
                       <BodyIcon className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold leading-tight">
-                        {r.body_part ?? "—"}
-                      </h3>
+                      <h3 className="font-bold leading-tight">{r.body_part ?? "—"}</h3>
                       <p className="text-xs text-[color:var(--portal-ink-2)] mt-0.5">
                         {r.modality ?? style.label}
-                        {r.report_date ? ` • ${format(parseISO(r.report_date), "PPP", { locale: arLocale })}` : ""}
+                        {r.report_date
+                          ? ` • ${format(parseISO(r.report_date), "PPP", { locale: arLocale })}`
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -268,7 +310,9 @@ function RadiologyPage() {
                 </header>
 
                 <div className="rounded-2xl bg-white/70 ring-1 ring-white/60 p-3 min-h-[92px]">
-                  <div className="text-[11px] font-semibold text-[color:var(--portal-ink-2)] mb-1">النتائج</div>
+                  <div className="text-[11px] font-semibold text-[color:var(--portal-ink-2)] mb-1">
+                    النتائج
+                  </div>
                   <p className="text-sm whitespace-pre-line line-clamp-5">
                     {r.findings ?? "لا يوجد ملخص نصي متاح."}
                   </p>
@@ -288,7 +332,11 @@ function RadiologyPage() {
                     className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold text-[color:var(--portal-on-primary)] disabled:opacity-50"
                     style={{ background: "var(--portal-gradient)" }}
                   >
-                    {loadingId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Eye className="h-4 w-4" />}
+                    {loadingId === r.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                     عرض
                   </button>
                   <button
@@ -296,7 +344,11 @@ function RadiologyPage() {
                     onClick={() => downloadFile(r)}
                     className="inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold bg-white/80 hover:bg-[color:var(--portal-surface)] text-[color:var(--portal-ink)] disabled:opacity-50"
                   >
-                    {downloadingId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                    {downloadingId === r.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Download className="h-4 w-4" />
+                    )}
                     تنزيل
                   </button>
                 </footer>
@@ -317,11 +369,7 @@ function RadiologyPage() {
           </DialogHeader>
           {viewer && (
             <div className="h-full bg-slate-900">
-              <iframe
-                src={viewer.url}
-                className="w-full h-full"
-                title="Radiology viewer"
-              />
+              <iframe src={viewer.url} className="w-full h-full" title="Radiology viewer" />
             </div>
           )}
         </DialogContent>
@@ -332,11 +380,21 @@ function RadiologyPage() {
 
 /* ------------------------ subcomponents ------------------------ */
 
-function KpiPill({ label, value, tone }: { label: string; value: number | string; tone: "ok" | "warn" | "neutral" }) {
+function KpiPill({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number | string;
+  tone: "ok" | "warn" | "neutral";
+}) {
   const cls =
-    tone === "ok" ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
-    : tone === "warn" ? "bg-rose-50 text-rose-700 ring-rose-200"
-    : "bg-slate-50 text-slate-700 ring-slate-200";
+    tone === "ok"
+      ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
+      : tone === "warn"
+        ? "bg-rose-50 text-rose-700 ring-rose-200"
+        : "bg-slate-50 text-slate-700 ring-slate-200";
   return (
     <div className={`rounded-2xl px-4 py-2 ring-1 ${cls}`}>
       <div className="text-xs">{label}</div>
@@ -346,8 +404,18 @@ function KpiPill({ label, value, tone }: { label: string; value: number | string
 }
 
 function ModChip({
-  active, onClick, label, count, tone,
-}: { active: boolean; onClick: () => void; label: string; count: number; tone?: string }) {
+  active,
+  onClick,
+  label,
+  count,
+  tone,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+  tone?: string;
+}) {
   const style = tone ? MODALITY_STYLES[tone] : undefined;
   return (
     <button
@@ -359,7 +427,9 @@ function ModChip({
       }`}
     >
       {label}
-      <span className={`text-xs ${active ? "opacity-80" : "text-[color:var(--portal-ink-2)]"}`}>{count}</span>
+      <span className={`text-xs ${active ? "opacity-80" : "text-[color:var(--portal-ink-2)]"}`}>
+        {count}
+      </span>
     </button>
   );
 }
@@ -376,8 +446,10 @@ function AiSummaryCard() {
       className="rounded-3xl p-5 md:p-6 text-[color:var(--portal-on-primary)] shadow-lg relative overflow-hidden"
       style={{ background: "var(--portal-gradient)" }}
     >
-      <div className="absolute inset-0 opacity-20 pointer-events-none"
-        style={{ background: "radial-gradient(circle at 20% 20%, white, transparent 40%)" }} />
+      <div
+        className="absolute inset-0 opacity-20 pointer-events-none"
+        style={{ background: "radial-gradient(circle at 20% 20%, white, transparent 40%)" }}
+      />
       <div className="relative flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
           <div className="h-11 w-11 rounded-2xl bg-white/20 grid place-items-center backdrop-blur">
@@ -398,7 +470,11 @@ function AiSummaryCard() {
           disabled={mut.isPending}
           className="shrink-0 inline-flex items-center gap-2 rounded-full h-10 px-4 text-sm font-semibold bg-white/20 hover:bg-white/30 backdrop-blur disabled:opacity-60"
         >
-          {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+          {mut.isPending ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
           {summary ? "تحديث" : "توليد الملخص"}
         </button>
       </div>
@@ -424,7 +500,11 @@ function AiSummaryCard() {
                   <div className="flex items-center gap-2">
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${
-                        f.priority === "high" ? "bg-rose-300" : f.priority === "medium" ? "bg-amber-300" : "bg-emerald-300"
+                        f.priority === "high"
+                          ? "bg-rose-300"
+                          : f.priority === "medium"
+                            ? "bg-amber-300"
+                            : "bg-emerald-300"
                       }`}
                     />
                     <span className="font-semibold">{f.title}</span>

@@ -2,7 +2,18 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import QRCode from "qrcode";
-import { AlertCircle, Bell, Calendar as CalIcon, CalendarPlus, CheckCircle2, ClipboardList, Clock, Download, MessageCircle, QrCode } from "lucide-react";
+import {
+  AlertCircle,
+  Bell,
+  Calendar as CalIcon,
+  CalendarPlus,
+  CheckCircle2,
+  ClipboardList,
+  Clock,
+  Download,
+  MessageCircle,
+  QrCode,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/site";
@@ -12,15 +23,30 @@ import { formatArDate, type State } from "./types";
 import { EmailOtpLinker } from "./EmailOtpLinker";
 
 export function StepSuccess({
-  lang, state, branches, specialties, doctors, reference, phone, email, onNewBooking,
+  lang,
+  state,
+  branches,
+  specialties,
+  doctors,
+  reference,
+  phone,
+  email,
+  onNewBooking,
 }: {
-  lang: "ar" | "en"; state: State; branches: any[]; specialties: any[]; doctors: any[];
-  reference: string | null; phone: string; email?: string | null; onNewBooking: () => void;
+  lang: "ar" | "en";
+  state: State;
+  branches: any[];
+  specialties: any[];
+  doctors: any[];
+  reference: string | null;
+  phone: string;
+  email?: string | null;
+  onNewBooking: () => void;
 }) {
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
-  const spec   = specialties.find((s) => s.id === state.specialtyId);
-  const doc    = doctors.find((d: any) => d.id === state.doctorId);
+  const spec = specialties.find((s) => s.id === state.specialtyId);
+  const doc = doctors.find((d: any) => d.id === state.doctorId);
   const timeReadable = useMemo(() => {
     if (!state.time) return "—";
     const m = /^(\d{1,2}):(\d{2})/.exec(state.time);
@@ -43,18 +69,28 @@ export function StepSuccess({
       const p = JSON.parse(raw) as { r24?: boolean; r2?: boolean };
       if (typeof p.r24 === "boolean") setCal24h(p.r24);
       if (typeof p.r2 === "boolean") setCal2h(p.r2);
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       window.localStorage.setItem(CAL_PREF_KEY, JSON.stringify({ r24: cal24h, r2: cal2h }));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, [cal24h, cal2h]);
 
   const rows = [
-    { label: t("review.branch"), value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—" },
-    { label: t("review.specialty"), value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—" },
+    {
+      label: t("review.branch"),
+      value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—",
+    },
+    {
+      label: t("review.specialty"),
+      value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—",
+    },
     { label: t("review.doctor"), value: doc ? (lang === "ar" ? doc.name_ar : doc.name_en) : "—" },
     { label: t("review.date"), value: formatArDate(state.date, lang) },
     { label: t("review.time"), value: timeReadable },
@@ -77,8 +113,11 @@ export function StepSuccess({
     const header = t("success.detailsHeader");
     const footer = t("success.detailsFooter");
     const stamp = new Date().toLocaleString(lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US", {
-      year: "numeric", month: "long", day: "numeric",
-      hour: "2-digit", minute: "2-digit",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
 
     const labelWidth = Math.max(...rows.map((r) => r.label.length));
@@ -131,8 +170,13 @@ export function StepSuccess({
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!trackUrl || !qrCanvasRef.current) return;
-    QRCode.toCanvas(qrCanvasRef.current, trackUrl, { width: 176, margin: 1, errorCorrectionLevel: "M" })
-      .catch(() => {/* noop */});
+    QRCode.toCanvas(qrCanvasRef.current, trackUrl, {
+      width: 176,
+      margin: 1,
+      errorCorrectionLevel: "M",
+    }).catch(() => {
+      /* noop */
+    });
     QRCode.toDataURL(trackUrl, { width: 512, margin: 1 })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null));
@@ -143,7 +187,9 @@ export function StepSuccess({
     const a = document.createElement("a");
     a.href = qrDataUrl;
     a.download = `booking-${reference}-qr.png`;
-    document.body.appendChild(a); a.click(); a.remove();
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
   }
 
   function downloadPdf() {
@@ -173,7 +219,7 @@ export function StepSuccess({
   return (
     <div className="max-w-xl mx-auto text-center">
       <div className="mx-auto h-20 w-20 rounded-full bg-emerald-100 dark:bg-emerald-900/30 grid place-items-center mb-4">
-        <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400"/>
+        <CheckCircle2 className="h-12 w-12 text-emerald-600 dark:text-emerald-400" />
       </div>
       <h2 className="text-2xl md:text-3xl font-bold">{t("success.title")}</h2>
       <p className="mt-2 text-sm text-muted-foreground">{t("success.subtitle")}</p>
@@ -193,7 +239,7 @@ export function StepSuccess({
               {reference}
             </span>
             <Button variant="outline" size="sm" onClick={copyRef} className="gap-1">
-              <ClipboardList className="h-4 w-4"/>
+              <ClipboardList className="h-4 w-4" />
               {t("success.copy")}
             </Button>
           </div>
@@ -215,7 +261,13 @@ export function StepSuccess({
             </div>
             <p className="mt-1 text-xs text-muted-foreground break-all">{trackUrl}</p>
             <div className="mt-3 flex flex-wrap gap-2 justify-center sm:justify-start">
-              <Button variant="outline" size="sm" onClick={downloadQr} disabled={!qrDataUrl} className="gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={downloadQr}
+                disabled={!qrDataUrl}
+                className="gap-1"
+              >
                 <Download className="h-4 w-4" />
                 {t("success.downloadQr")}
               </Button>
@@ -281,13 +333,20 @@ export function StepSuccess({
               { label: t("success.timezone"), value: t("success.timezoneValue") },
               { label: t("success.duration"), value: t("success.durationValue") },
             ];
-            if (share.specialty) previewRows.push({ label: t("review.specialty"), value: share.specialty });
+            if (share.specialty)
+              previewRows.push({ label: t("review.specialty"), value: share.specialty });
             if (share.doctor) previewRows.push({ label: t("review.doctor"), value: share.doctor });
-            previewRows.push({ label: t("success.location"), value: lang === "ar" ? SITE.addressAr : (SITE.addressEn ?? SITE.addressAr) });
+            previewRows.push({
+              label: t("success.location"),
+              value: lang === "ar" ? SITE.addressAr : (SITE.addressEn ?? SITE.addressAr),
+            });
             previewRows.push({ label: t("success.reference"), value: reference });
-            const remindersText = [cal24h ? t("success.reminder24hLabel") : null,
-                                   cal2h ? t("success.reminder2hLabel") : null]
-              .filter(Boolean).join(t("success.remindersJoin"));
+            const remindersText = [
+              cal24h ? t("success.reminder24hLabel") : null,
+              cal2h ? t("success.reminder2hLabel") : null,
+            ]
+              .filter(Boolean)
+              .join(t("success.remindersJoin"));
             previewRows.push({
               label: t("success.remindersLabel"),
               value: remindersText || t("success.remindersNone"),
@@ -296,7 +355,9 @@ export function StepSuccess({
               <>
                 <div className="mb-3 rounded-lg border border-dashed border-primary/40 bg-primary/5 p-3">
                   <div className="mb-2 flex items-center justify-between gap-2">
-                    <div className="text-xs font-semibold text-primary">{t("success.eventPreview")}</div>
+                    <div className="text-xs font-semibold text-primary">
+                      {t("success.eventPreview")}
+                    </div>
                     <Button
                       variant="outline"
                       size="sm"
@@ -342,7 +403,12 @@ export function StepSuccess({
                     <CalendarPlus className="h-4 w-4" />
                     {t("success.addGoogle")}
                   </a>
-                  <Button variant="outline" size="sm" onClick={() => downloadIcs(share)} className="gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => downloadIcs(share)}
+                    className="gap-2"
+                  >
                     <Download className="h-4 w-4" />
                     {t("success.downloadIcs")}
                   </Button>
@@ -354,74 +420,97 @@ export function StepSuccess({
         </div>
       )}
 
-      {reference && state.date && state.time && (cal24h || cal2h) && (() => {
-        const [y, mo, d] = state.date.split("-").map(Number);
-        const [h, mi] = state.time.split(":").map(Number);
-        const apptUTC = new Date(Date.UTC(y, mo - 1, d, h - 3, mi));
-        const fmt = (dt: Date) =>
-          dt.toLocaleString(lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US", {
-            weekday: "long", year: "numeric", month: "long", day: "numeric",
-            hour: "2-digit", minute: "2-digit", hour12: true,
-            timeZone: "Asia/Riyadh",
-          });
-        const items: Array<{ offsetMin: number; label: string; channels: string }> = [];
-        if (cal24h) items.push({
-          offsetMin: 1440,
-          label: t("success.reminder24hLabel"),
-          channels: t("success.reminder24hChannels"),
-        });
-        if (cal2h) items.push({
-          offsetMin: 120,
-          label: t("success.reminder2hLabel"),
-          channels: t("success.reminder2hChannels"),
-        });
-        return (
-          <div className="mt-6 rounded-xl border border-border bg-card p-4 text-start">
-            <div className="text-sm font-semibold flex items-center gap-2 mb-1">
-              <Bell className="h-4 w-4 text-primary" />
-              {t("success.reminderPreview")}
-            </div>
-            <p className="text-xs text-muted-foreground mb-3">{t("success.reminderPreviewHint")}</p>
-            <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden">
-              {items.map((it) => {
-                const when = new Date(apptUTC.getTime() - it.offsetMin * 60000);
-                const past = when.getTime() < Date.now();
-                return (
-                  <li key={it.offsetMin} className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${past ? "bg-muted-foreground/40" : "bg-emerald-500"}`} />
-                      <div>
-                        <div className="text-sm font-semibold">{it.label}</div>
-                        <div className="text-[11px] text-muted-foreground">{it.channels}</div>
+      {reference &&
+        state.date &&
+        state.time &&
+        (cal24h || cal2h) &&
+        (() => {
+          const [y, mo, d] = state.date.split("-").map(Number);
+          const [h, mi] = state.time.split(":").map(Number);
+          const apptUTC = new Date(Date.UTC(y, mo - 1, d, h - 3, mi));
+          const fmt = (dt: Date) =>
+            dt.toLocaleString(lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: true,
+              timeZone: "Asia/Riyadh",
+            });
+          const items: Array<{ offsetMin: number; label: string; channels: string }> = [];
+          if (cal24h)
+            items.push({
+              offsetMin: 1440,
+              label: t("success.reminder24hLabel"),
+              channels: t("success.reminder24hChannels"),
+            });
+          if (cal2h)
+            items.push({
+              offsetMin: 120,
+              label: t("success.reminder2hLabel"),
+              channels: t("success.reminder2hChannels"),
+            });
+          return (
+            <div className="mt-6 rounded-xl border border-border bg-card p-4 text-start">
+              <div className="text-sm font-semibold flex items-center gap-2 mb-1">
+                <Bell className="h-4 w-4 text-primary" />
+                {t("success.reminderPreview")}
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                {t("success.reminderPreviewHint")}
+              </p>
+              <ul className="divide-y divide-border rounded-lg border border-border overflow-hidden">
+                {items.map((it) => {
+                  const when = new Date(apptUTC.getTime() - it.offsetMin * 60000);
+                  const past = when.getTime() < Date.now();
+                  return (
+                    <li
+                      key={it.offsetMin}
+                      className="p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${past ? "bg-muted-foreground/40" : "bg-emerald-500"}`}
+                        />
+                        <div>
+                          <div className="text-sm font-semibold">{it.label}</div>
+                          <div className="text-[11px] text-muted-foreground">{it.channels}</div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="text-xs tabular-nums text-muted-foreground sm:text-end">
-                      {fmt(when)}
-                      {past && (
-                        <span className="ms-2 rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                          {t("success.past")}
-                        </span>
-                      )}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-            <p className="mt-2 text-[11px] text-muted-foreground">{t("success.reminderPreviewFoot")}</p>
-          </div>
-        );
-      })()}
+                      <div className="text-xs tabular-nums text-muted-foreground sm:text-end">
+                        {fmt(when)}
+                        {past && (
+                          <span className="ms-2 rounded bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                            {t("success.past")}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="mt-2 text-[11px] text-muted-foreground">
+                {t("success.reminderPreviewFoot")}
+              </p>
+            </div>
+          );
+        })()}
 
       <div className="mt-6 flex items-center justify-between gap-2">
         <div className="text-sm font-semibold">{t("success.details")}</div>
         <Button variant="ghost" size="sm" onClick={copyAll} className="gap-1 text-primary">
-          <ClipboardList className="h-4 w-4"/>
+          <ClipboardList className="h-4 w-4" />
           {t("success.copyAll")}
         </Button>
       </div>
       <dl className="rounded-xl border border-border divide-y divide-border overflow-hidden text-start">
         {rows.map((r) => (
-          <div key={r.label} className="grid grid-cols-[1fr,2fr,auto] items-center p-3 text-sm gap-2">
+          <div
+            key={r.label}
+            className="grid grid-cols-[1fr,2fr,auto] items-center p-3 text-sm gap-2"
+          >
             <dt className="text-muted-foreground">{r.label}</dt>
             <dd className="font-medium break-words">{r.value}</dd>
             <button
@@ -430,7 +519,7 @@ export function StepSuccess({
               aria-label={t("success.copyLabel", { label: r.label })}
               className="p-1.5 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition"
             >
-              <ClipboardList className="h-3.5 w-3.5"/>
+              <ClipboardList className="h-3.5 w-3.5" />
             </button>
           </div>
         ))}
@@ -442,7 +531,7 @@ export function StepSuccess({
           search={{ ref: reference ?? undefined, phone4: phone4 || undefined } as never}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary text-primary-foreground px-4 py-3 text-sm font-bold hover:opacity-90"
         >
-          <ClipboardList className="h-4 w-4"/>
+          <ClipboardList className="h-4 w-4" />
           {t("success.trackInMyBookings")}
         </Link>
         <Link
@@ -450,7 +539,7 @@ export function StepSuccess({
           search={{ ref: reference ?? undefined, phone } as never}
           className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-3 text-sm font-bold hover:bg-muted"
         >
-          <CheckCircle2 className="h-4 w-4"/>
+          <CheckCircle2 className="h-4 w-4" />
           {t("success.viewFull")}
         </Link>
       </div>
@@ -486,20 +575,18 @@ export function StepSuccess({
           rel="noopener noreferrer"
           className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-3 text-sm font-bold text-white hover:bg-[#1ebe5b] transition"
         >
-          <MessageCircle className="h-4 w-4"/>
+          <MessageCircle className="h-4 w-4" />
           {t("success.waContact")}
         </a>
       </div>
       <div className="mt-3">
         <Button variant="outline" onClick={onNewBooking} className="gap-2 h-auto py-2 w-full">
-          <CalIcon className="h-4 w-4"/>
+          <CalIcon className="h-4 w-4" />
           {t("success.newBooking")}
         </Button>
       </div>
 
-      {reference && (
-        <EmailOtpLinker email={email ?? state.patient.email ?? null} lang={lang} />
-      )}
+      {reference && <EmailOtpLinker email={email ?? state.patient.email ?? null} lang={lang} />}
     </div>
   );
 }

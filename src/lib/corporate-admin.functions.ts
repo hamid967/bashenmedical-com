@@ -36,18 +36,15 @@ export const listCorporateRequests = createServerFn({ method: "GET" })
 
 export const updateCorporateRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input: {
-    id: string;
-    status?: CorporateRequestStatus;
-    admin_notes?: string | null;
-  }) =>
-    z
-      .object({
-        id: z.string().uuid(),
-        status: z.enum(STATUSES).optional(),
-        admin_notes: z.string().max(2000).nullable().optional(),
-      })
-      .parse(input),
+  .validator(
+    (input: { id: string; status?: CorporateRequestStatus; admin_notes?: string | null }) =>
+      z
+        .object({
+          id: z.string().uuid(),
+          status: z.enum(STATUSES).optional(),
+          admin_notes: z.string().max(2000).nullable().optional(),
+        })
+        .parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);

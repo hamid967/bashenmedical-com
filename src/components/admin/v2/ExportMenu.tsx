@@ -13,11 +13,7 @@ import { useState, type ReactNode } from "react";
 import { Download, FileText, FileSpreadsheet, FileType2, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { exportCsv, exportXlsx, exportPdf, type Column } from "@/lib/export-utils";
 
 export type ExportFormat = "csv" | "xlsx" | "pdf";
@@ -55,10 +51,7 @@ function stampName(base: string) {
   return `${base}-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
 }
 
-const FORMAT_META: Record<
-  ExportFormat,
-  { label: string; hint: string; icon: typeof FileText }
-> = {
+const FORMAT_META: Record<ExportFormat, { label: string; hint: string; icon: typeof FileText }> = {
   csv: { label: "CSV", hint: "ملف نصي مفصول بفواصل", icon: FileText },
   xlsx: { label: "Excel (XLSX)", hint: "جدول Excel كامل", icon: FileSpreadsheet },
   pdf: { label: "PDF", hint: "تقرير للطباعة", icon: FileType2 },
@@ -113,7 +106,8 @@ export function ExportMenu<T>({
       };
       if (format === "csv") exportCsv(name, columns, data);
       else if (format === "xlsx") exportXlsx(name, columns, data, title.slice(0, 31));
-      else exportPdf({ filename: name, title, subtitle, cols: columns, rows: data, meta: fullMeta });
+      else
+        exportPdf({ filename: name, title, subtitle, cols: columns, rows: data, meta: fullMeta });
       toast.success(`تم تصدير ${data.length} سجل بصيغة ${FORMAT_META[format].label}`);
       setOpen(false);
     } catch (err) {
@@ -135,11 +129,7 @@ export function ExportMenu<T>({
           disabled={disabled || busy !== null}
           className="gap-1.5"
         >
-          {busy ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Download className="h-4 w-4" />
-          )}
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {!compact && <span>{busy ? "جارٍ التصدير…" : label}</span>}
         </Button>
       </PopoverTrigger>

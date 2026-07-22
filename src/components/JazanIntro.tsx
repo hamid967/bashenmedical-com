@@ -38,11 +38,7 @@ function isDebugEnabled(settingsDebug: boolean): boolean {
   }
 }
 
-function debugLog(
-  enabled: boolean,
-  event: string,
-  payload: Record<string, unknown>,
-): void {
+function debugLog(enabled: boolean, event: string, payload: Record<string, unknown>): void {
   if (!enabled) return;
   const stamp = new Date().toISOString().slice(11, 23);
   // eslint-disable-next-line no-console
@@ -275,7 +271,11 @@ export function JazanIntro() {
       document.body.style.overflow = prevOverflow;
       const prev = prevFocusRef.current;
       if (prev && typeof prev.focus === "function") {
-        try { prev.focus(); } catch { /* noop */ }
+        try {
+          prev.focus();
+        } catch {
+          /* noop */
+        }
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -352,7 +352,10 @@ export function JazanIntro() {
               height={96}
               className="mx-auto h-24 w-24 object-contain"
             />
-            <h2 id={titleId} className="mt-4 text-2xl md:text-3xl font-extrabold text-[var(--jazan-teal)]">
+            <h2
+              id={titleId}
+              className="mt-4 text-2xl md:text-3xl font-extrabold text-[var(--jazan-teal)]"
+            >
               {text.brand}
             </h2>
             <p className="mt-2 text-sm md:text-base text-[var(--jazan-terracotta)] font-semibold">
@@ -398,7 +401,11 @@ function CinematicStage({
           </linearGradient>
           <linearGradient id="j-int-terr" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" style={{ stopColor: "var(--jazan-terracotta)" }} stopOpacity="0" />
-            <stop offset="100%" style={{ stopColor: "var(--jazan-terracotta)" }} stopOpacity="0.22" />
+            <stop
+              offset="100%"
+              style={{ stopColor: "var(--jazan-terracotta)" }}
+              stopOpacity="0.22"
+            />
           </linearGradient>
         </defs>
 
@@ -415,7 +422,13 @@ function CinematicStage({
           <path d="M100 250 L400 100 L700 250 L400 400 Z" opacity="0.55" />
           <path d="M180 250 L400 160 L620 250 L400 340 Z" opacity="0.7" />
           <path d="M260 250 L400 210 L540 250 L400 290 Z" />
-          <circle cx="400" cy="250" r="4" style={{ fill: "var(--jazan-terracotta)" }} stroke="none" />
+          <circle
+            cx="400"
+            cy="250"
+            r="4"
+            style={{ fill: "var(--jazan-terracotta)" }}
+            stroke="none"
+          />
         </g>
 
         {/* Mountain/coast landscape (phase >= 2) */}

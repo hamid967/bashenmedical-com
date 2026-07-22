@@ -39,8 +39,6 @@ export interface MyAuditRow {
   created_at: string;
 }
 
-
-
 export const listMyAuditLog = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => ListSchema.parse(i ?? {}))

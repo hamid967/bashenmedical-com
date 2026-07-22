@@ -78,8 +78,7 @@ export const requestInquiryUploadUrl = createServerFn({ method: "POST" })
     }
 
     const acc = await assertAccessibleInquiry(supabase, userId, data.inquiry_id);
-    if (!acc.isStaff && acc.isClosed)
-      throw new Error("لا يمكن إضافة مرفقات بعد إغلاق الطلب.");
+    if (!acc.isStaff && acc.isClosed) throw new Error("لا يمكن إضافة مرفقات بعد إغلاق الطلب.");
 
     // Enforce per-inquiry cap
     const { count, error: cErr } = await supabase
@@ -134,8 +133,7 @@ export const registerInquiryAttachment = createServerFn({ method: "POST" })
       throw new Error("مسار الملف غير صالح.");
     }
     const acc = await assertAccessibleInquiry(supabase, userId, data.inquiry_id);
-    if (!acc.isStaff && acc.isClosed)
-      throw new Error("لا يمكن إضافة مرفقات بعد إغلاق الطلب.");
+    if (!acc.isStaff && acc.isClosed) throw new Error("لا يمكن إضافة مرفقات بعد إغلاق الطلب.");
 
     // Verify the storage object actually exists and matches size claim
     const parent = data.storage_path.split("/").slice(0, -1).join("/");
@@ -166,7 +164,10 @@ export const registerInquiryAttachment = createServerFn({ method: "POST" })
       .select("id, created_at")
       .single();
     if (error) {
-      await supabase.storage.from(BUCKET).remove([data.storage_path]).catch(() => {});
+      await supabase.storage
+        .from(BUCKET)
+        .remove([data.storage_path])
+        .catch(() => {});
       throw new Error(error.message);
     }
 
@@ -218,12 +219,7 @@ export const listInquiryAttachments = createServerFn({ method: "GET" })
       size_bytes: r.size_bytes,
       created_at: r.created_at,
       uploaded_by: r.uploaded_by,
-      scan_status: r.scan_status as
-        | "pending"
-        | "scanning"
-        | "clean"
-        | "infected"
-        | "error",
+      scan_status: r.scan_status as "pending" | "scanning" | "clean" | "infected" | "error",
       scan_result: (r.scan_result ?? null) as {
         reason?: string;
         detections?: string[];
@@ -254,7 +250,10 @@ export const deleteInquiryAttachment = createServerFn({ method: "POST" })
       .delete()
       .eq("id", data.id);
     if (dErr) throw new Error(dErr.message);
-    await supabase.storage.from(BUCKET).remove([row.storage_path]).catch(() => {});
+    await supabase.storage
+      .from(BUCKET)
+      .remove([row.storage_path])
+      .catch(() => {});
 
     await supabase.from("service_inquiry_updates").insert({
       inquiry_id: row.inquiry_id,
@@ -270,8 +269,7 @@ export const ATTACHMENT_LIMITS = {
   maxPerInquiry: MAX_PER_INQUIRY,
   maxBytes: MAX_BYTES,
   allowedContentTypes: Array.from(ALLOWED.keys()),
-  allowedAcceptAttr:
-    "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf",
+  allowedAcceptAttr: "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf",
 } as const;
 
 // ---------------------------------------------------------------------------
@@ -286,8 +284,7 @@ export const ATTACHMENT_LIMITS = {
 // A file failing any check is quarantined: row updated to `infected`, storage
 // object removed, and the attachment update trail records the reason.
 
-const EICAR_SIG =
-  "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
+const EICAR_SIG = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
 
 function startsWith(buf: Uint8Array, sig: number[]): boolean {
   if (buf.length < sig.length) return false;
@@ -297,8 +294,7 @@ function startsWith(buf: Uint8Array, sig: number[]): boolean {
 
 function detectMagic(buf: Uint8Array): string | null {
   if (startsWith(buf, [0xff, 0xd8, 0xff])) return "image/jpeg";
-  if (startsWith(buf, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))
-    return "image/png";
+  if (startsWith(buf, [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return "image/png";
   // WEBP: "RIFF"...."WEBP"
   if (
     startsWith(buf, [0x52, 0x49, 0x46, 0x46]) &&
@@ -318,8 +314,7 @@ function detectMagic(buf: Uint8Array): string | null {
     buf[7] === 0x70
   ) {
     const brand = String.fromCharCode(buf[8], buf[9], buf[10], buf[11]);
-    if (["heic", "heix", "mif1", "msf1", "hevc", "hevx"].includes(brand))
-      return "image/heic";
+    if (["heic", "heix", "mif1", "msf1", "hevc", "hevx"].includes(brand)) return "image/heic";
   }
   // PDF: "%PDF-"
   if (startsWith(buf, [0x25, 0x50, 0x44, 0x46, 0x2d])) return "application/pdf";
@@ -335,8 +330,7 @@ function scanBuffer(
 
   const detected = detectMagic(buf);
   const compatible =
-    detected === declared ||
-    (declared === "image/heif" && detected === "image/heic");
+    detected === declared || (declared === "image/heif" && detected === "image/heic");
   if (!detected) {
     return {
       ok: false,
@@ -360,12 +354,7 @@ function scanBuffer(
       detections.push("embedded_pe");
       return { ok: false, reason: "تم اكتشاف رأس تنفيذي مضمّن (PE).", detections };
     }
-    if (
-      buf[i] === 0x7f &&
-      buf[i + 1] === 0x45 &&
-      buf[i + 2] === 0x4c &&
-      buf[i + 3] === 0x46
-    ) {
+    if (buf[i] === 0x7f && buf[i + 1] === 0x45 && buf[i + 2] === 0x4c && buf[i + 3] === 0x46) {
       detections.push("embedded_elf");
       return { ok: false, reason: "تم اكتشاف رأس تنفيذي مضمّن (ELF).", detections };
     }
@@ -429,9 +418,7 @@ export const scanInquiryAttachment = createServerFn({ method: "POST" })
     // Load the attachment via the caller's RLS to authorize access.
     const { data: row, error } = await supabase
       .from("service_inquiry_attachments")
-      .select(
-        "id, inquiry_id, storage_path, content_type, size_bytes, scan_status",
-      )
+      .select("id, inquiry_id, storage_path, content_type, size_bytes, scan_status")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -445,9 +432,7 @@ export const scanInquiryAttachment = createServerFn({ method: "POST" })
       };
     }
 
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // Mark as scanning.
     await supabaseAdmin
@@ -457,9 +442,7 @@ export const scanInquiryAttachment = createServerFn({ method: "POST" })
 
     let result: { ok: boolean; reason?: string; detections: string[] };
     try {
-      const dl = await supabaseAdmin.storage
-        .from(BUCKET)
-        .download(row.storage_path);
+      const dl = await supabaseAdmin.storage.from(BUCKET).download(row.storage_path);
       if (dl.error || !dl.data) {
         throw new Error(dl.error?.message ?? "تعذّر تحميل الملف للفحص.");
       }
@@ -486,7 +469,10 @@ export const scanInquiryAttachment = createServerFn({ method: "POST" })
 
     if (!result.ok) {
       // Quarantine: remove the physical file, keep the row so audit remains.
-      await supabaseAdmin.storage.from(BUCKET).remove([row.storage_path]).catch(() => {});
+      await supabaseAdmin.storage
+        .from(BUCKET)
+        .remove([row.storage_path])
+        .catch(() => {});
       await supabaseAdmin
         .from("service_inquiry_attachments")
         .update({

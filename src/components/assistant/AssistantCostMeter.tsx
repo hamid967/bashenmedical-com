@@ -12,12 +12,7 @@
  *  - final  : after completion — show real gateway usage when available
  */
 import { Coins } from "lucide-react";
-import {
-  estimateCredits,
-  estimateTokens,
-  formatCredits,
-  formatTokens,
-} from "@/lib/ai/pricing";
+import { estimateCredits, estimateTokens, formatCredits, formatTokens } from "@/lib/ai/pricing";
 
 export type CostMeterUsage = { prompt: number; completion: number; total?: number };
 
@@ -44,9 +39,7 @@ export function AssistantCostMeter({
 }) {
   const isAr = lang === "ar";
   const liveOutTok = streaming ? estimateTokens(streamedText) : 0;
-  const liveCredits = streaming
-    ? estimateCredits(preEstimate.inTok, liveOutTok, model)
-    : 0;
+  const liveCredits = streaming ? estimateCredits(preEstimate.inTok, liveOutTok, model) : 0;
 
   let state: "idle" | "pre" | "live" | "final" = "idle";
   if (usage) state = "final";
@@ -54,12 +47,38 @@ export function AssistantCostMeter({
   else if (hasInput) state = "pre";
 
   const label = isAr
-    ? { idle: "شفافية التكلفة", pre: "قبل الإرسال · تقدير", live: "أثناء التوليد", final: "بعد الاكتمال · فعلي" }[state]
-    : { idle: "Cost transparency", pre: "Before send · estimate", live: "Streaming", final: "Final · actual" }[state];
+    ? {
+        idle: "شفافية التكلفة",
+        pre: "قبل الإرسال · تقدير",
+        live: "أثناء التوليد",
+        final: "بعد الاكتمال · فعلي",
+      }[state]
+    : {
+        idle: "Cost transparency",
+        pre: "Before send · estimate",
+        live: "Streaming",
+        final: "Final · actual",
+      }[state];
 
   const L = isAr
-    ? { in: "مدخلات", out: "مخرجات", outExpected: "مخرجات متوقعة", cost: "التكلفة", running: "جارٍ", total: "الإجمالي", credit: "ائتمان" }
-    : { in: "input", out: "output", outExpected: "expected output", cost: "cost", running: "running", total: "total", credit: "cr" };
+    ? {
+        in: "مدخلات",
+        out: "مخرجات",
+        outExpected: "مخرجات متوقعة",
+        cost: "التكلفة",
+        running: "جارٍ",
+        total: "الإجمالي",
+        credit: "ائتمان",
+      }
+    : {
+        in: "input",
+        out: "output",
+        outExpected: "expected output",
+        cost: "cost",
+        running: "running",
+        total: "total",
+        credit: "cr",
+      };
 
   return (
     <div
@@ -92,7 +111,11 @@ export function AssistantCostMeter({
         <>
           <Metric label={L.in} value={`~${formatTokens(preEstimate.inTok)}`} />
           <Metric label={L.outExpected} value={`~${formatTokens(preEstimate.outTok)}`} />
-          <Metric label={L.cost} value={`~${formatCredits(preEstimate.credits)} ${L.credit}`} strong />
+          <Metric
+            label={L.cost}
+            value={`~${formatCredits(preEstimate.credits)} ${L.credit}`}
+            strong
+          />
         </>
       )}
 

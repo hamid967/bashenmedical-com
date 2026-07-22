@@ -23,13 +23,18 @@ export const getMyRadiologyReports = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     const patientRes = await supabase
-      .from("patients").select("id").eq("profile_id", userId).maybeSingle();
+      .from("patients")
+      .select("id")
+      .eq("profile_id", userId)
+      .maybeSingle();
     const patient = patientRes.data;
     if (!patient) return { reports: [] as RadiologyReport[] };
 
     const res = await supabase
       .from("radiology_reports")
-      .select("id, modality, body_part, findings, report_date, file_path, status, ordered_by, released_at, doctors:ordered_by(name_ar)")
+      .select(
+        "id, modality, body_part, findings, report_date, file_path, status, ordered_by, released_at, doctors:ordered_by(name_ar)",
+      )
       .eq("patient_id", patient.id)
       .not("released_at", "is", null)
       .order("report_date", { ascending: false })
@@ -47,7 +52,8 @@ export const getMyRadiologyReports = createServerFn({ method: "GET" })
         ordered_by: (r.ordered_by as string | null) ?? null,
         released_at: (r.released_at as string | null) ?? null,
         doctor_name:
-          ((r as { doctors?: { name_ar?: string | null } | null }).doctors?.name_ar as string | null) ?? null,
+          ((r as { doctors?: { name_ar?: string | null } | null }).doctors?.name_ar as
+            string | null) ?? null,
       })),
     };
   });
@@ -64,15 +70,19 @@ export const getRadiologyFileUrl = createServerFn({ method: "POST" })
     if (!patientId) throw new Error("لا يوجد ملف مريض مرتبط.");
 
     const owns = await supabase
-      .from("radiology_reports").select("id")
-      .eq("patient_id", patientId).eq("file_path", data.path)
-      .not("released_at", "is", null).limit(1);
+      .from("radiology_reports")
+      .select("id")
+      .eq("patient_id", patientId)
+      .eq("file_path", data.path)
+      .not("released_at", "is", null)
+      .limit(1);
     const reportId = owns.data?.[0]?.id as string | undefined;
     if (!reportId) throw new Error("لا تملك صلاحية الوصول لهذا الملف.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: signed, error } = await supabaseAdmin.storage
-      .from("radiology-reports").createSignedUrl(data.path, 300);
+      .from("radiology-reports")
+      .createSignedUrl(data.path, 300);
     if (error) throw new Error(error.message);
 
     const { logAppEvent } = await import("@/lib/audit-log.server");
@@ -124,7 +134,9 @@ export const getRadiologyAiSummary = createServerFn({ method: "POST" })
         headline: { type: "string" },
         highlights: { type: "array", items: { type: "string" }, minItems: 1, maxItems: 6 },
         followUps: {
-          type: "array", minItems: 0, maxItems: 5,
+          type: "array",
+          minItems: 0,
+          maxItems: 5,
           items: {
             type: "object",
             properties: {
@@ -150,7 +162,12 @@ export const getRadiologyAiSummary = createServerFn({ method: "POST" })
           { role: "system", content: system },
           { role: "user", content: user },
         ],
-        tools: [{ type: "function", function: { name: "emit_summary", description: "ملخص الأشعة", parameters: schema } }],
+        tools: [
+          {
+            type: "function",
+            function: { name: "emit_summary", description: "ملخص الأشعة", parameters: schema },
+          },
+        ],
         tool_choice: { type: "function", function: { name: "emit_summary" } },
       }),
     });
@@ -160,13 +177,20 @@ export const getRadiologyAiSummary = createServerFn({ method: "POST" })
     if (!r.ok) throw new Error(`فشل الذكاء الاصطناعي: ${r.status}`);
 
     const j = (await r.json()) as {
-      choices?: { message?: { tool_calls?: { function?: { arguments?: string } }[]; content?: string } }[];
+      choices?: {
+        message?: { tool_calls?: { function?: { arguments?: string } }[]; content?: string };
+      }[];
     };
     const raw =
       j.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments ??
-      j.choices?.[0]?.message?.content ?? "";
+      j.choices?.[0]?.message?.content ??
+      "";
     let parsed: Partial<RadiologyAiSummary> = {};
-    try { parsed = JSON.parse(raw); } catch { /* ignore */ }
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
 
     return {
       headline: parsed.headline ?? "ملخص تقارير الأشعة",
