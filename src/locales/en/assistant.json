@@ -1,0 +1,33 @@
+{
+  "title": "Baeshen AI Assistant",
+  "subtitle": "Safe search & booking helper. Not medical advice.",
+  "openAria": "Baeshen AI Assistant",
+  "closeAria": "Close",
+  "noSaveTooltip": "Do not save this session",
+  "noSave": "Don't save",
+  "newChat": "New chat",
+  "emergencyBadge": "Emergency",
+  "emergencyText": "Call 997 or go to the nearest ER immediately.",
+  "call997": "Call 997",
+  "welcome": "Welcome to Baeshen Medical Center. How can I help you today?",
+  "thinking": "Thinking...",
+  "placeholder": "Type your question here...",
+  "stopAria": "Stop generating",
+  "sendAria": "Send",
+  "piiWarning": "Do not share IDs or sensitive reports.",
+  "humanCta": "Talk to a human",
+  "whatsappPrefill": "I need a human agent.",
+  "stoppedSuffix": "\n\n_Stopped._",
+  "surfaceLabel": "Public Assistant",
+  "errors": {
+    "connectionLost": "Connection lost — resuming…",
+    "resumeFailed": "Could not resume the response.",
+    "disabled": "Assistant is temporarily disabled.",
+    "rateLimited": "Too many requests, try again shortly.",
+    "creditsOut": "AI credits exhausted.",
+    "sessionExpired": "Session expired, please sign in again.",
+    "connect": "Failed to reach the assistant.",
+    "generic": "Something went wrong.",
+    "empty": "No response was generated."
+  }
+}
