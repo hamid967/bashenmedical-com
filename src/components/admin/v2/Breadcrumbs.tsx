@@ -14,6 +14,7 @@ const LABELS: Record<string, string> = {
   "visual-analytics": "تحليلات بصرية",
   "reservations-usage": "استخدام الحجوزات",
   "booking-funnel": "قمع الحجوزات",
+  v3: "ترقية V3",
   "no-show-risk": "توقّع الغياب",
   "no-show-stats": "إحصاءات الغياب",
   "no-show-detail": "المواعيد عالية المخاطرة",
