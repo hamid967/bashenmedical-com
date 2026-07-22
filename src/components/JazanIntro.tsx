@@ -307,16 +307,16 @@ function CinematicStage({
       >
         <defs>
           <linearGradient id="j-int-mtn" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#075E63" stopOpacity="0" />
-            <stop offset="100%" stopColor="#075E63" stopOpacity="0.28" />
+            <stop offset="0%" style={{ stopColor: "var(--jazan-teal)" }} stopOpacity="0" />
+            <stop offset="100%" style={{ stopColor: "var(--jazan-teal)" }} stopOpacity="0.28" />
           </linearGradient>
           <linearGradient id="j-int-mtn2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#24745E" stopOpacity="0" />
-            <stop offset="100%" stopColor="#24745E" stopOpacity="0.32" />
+            <stop offset="0%" style={{ stopColor: "var(--jazan-palm)" }} stopOpacity="0" />
+            <stop offset="100%" style={{ stopColor: "var(--jazan-palm)" }} stopOpacity="0.32" />
           </linearGradient>
           <linearGradient id="j-int-terr" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#B85C3C" stopOpacity="0" />
-            <stop offset="100%" stopColor="#B85C3C" stopOpacity="0.22" />
+            <stop offset="0%" style={{ stopColor: "var(--jazan-terracotta)" }} stopOpacity="0" />
+            <stop offset="100%" style={{ stopColor: "var(--jazan-terracotta)" }} stopOpacity="0.22" />
           </linearGradient>
         </defs>
 
@@ -325,15 +325,15 @@ function CinematicStage({
           style={{
             opacity: phase >= 1 ? 1 : 0,
             transition: "opacity 900ms ease-out",
+            stroke: "var(--jazan-gold)",
           }}
-          stroke="#C7A46B"
           strokeWidth="0.8"
           fill="none"
         >
           <path d="M100 250 L400 100 L700 250 L400 400 Z" opacity="0.55" />
           <path d="M180 250 L400 160 L620 250 L400 340 Z" opacity="0.7" />
           <path d="M260 250 L400 210 L540 250 L400 290 Z" />
-          <circle cx="400" cy="250" r="4" fill="#B85C3C" stroke="none" />
+          <circle cx="400" cy="250" r="4" style={{ fill: "var(--jazan-terracotta)" }} stroke="none" />
         </g>
 
         {/* Mountain/coast landscape (phase >= 2) */}
@@ -362,14 +362,14 @@ function CinematicStage({
             y1="478"
             x2="800"
             y2="478"
-            stroke="#0B8585"
+            style={{ stroke: "var(--jazan-teal-light)" }}
             strokeOpacity="0.4"
             strokeWidth="1"
             strokeDasharray="4 8"
           />
           {/* palm frond, corner */}
           <g
-            stroke="#24745E"
+            style={{ stroke: "var(--jazan-palm)" }}
             strokeWidth="1"
             fill="none"
             opacity="0.55"
@@ -445,12 +445,12 @@ function CinematicStage({
               y1="6"
               x2="36"
               y2="6"
-              stroke="#C7A46B"
+              style={{ stroke: "var(--jazan-gold)" }}
               strokeWidth="1"
             />
             <path
               d="M48 1 L58 6 L48 11 L38 6 Z"
-              fill="#C7A46B"
+              style={{ fill: "var(--jazan-gold)" }}
               opacity="0.8"
             />
             <line
@@ -458,7 +458,7 @@ function CinematicStage({
               y1="6"
               x2="96"
               y2="6"
-              stroke="#C7A46B"
+              style={{ stroke: "var(--jazan-gold)" }}
               strokeWidth="1"
             />
           </svg>
