@@ -29,6 +29,12 @@ import arPortalFamily from "@/locales/ar/portalFamily.json";
 import enPortalFamily from "@/locales/en/portalFamily.json";
 import arPortalUsage from "@/locales/ar/portalUsage.json";
 import enPortalUsage from "@/locales/en/portalUsage.json";
+import arHomeSections from "@/locales/ar/homeSections.json";
+import enHomeSections from "@/locales/en/homeSections.json";
+import arAssistant from "@/locales/ar/assistant.json";
+import enAssistant from "@/locales/en/assistant.json";
+import arPortalShell from "@/locales/ar/portalShell.json";
+import enPortalShell from "@/locales/en/portalShell.json";
 
 // Primary UI languages — surfaced in the language switcher and used across
 // the app to key layout/direction. Adding a code here forces every
@@ -58,6 +64,9 @@ export const resources = {
     portalHome: arPortalHome,
     portalFamily: arPortalFamily,
     portalUsage: arPortalUsage,
+    homeSections: arHomeSections,
+    assistant: arAssistant,
+    portalShell: arPortalShell,
   },
   en: {
     common: enCommon,
@@ -72,6 +81,9 @@ export const resources = {
     portalHome: enPortalHome,
     portalFamily: enPortalFamily,
     portalUsage: enPortalUsage,
+    homeSections: enHomeSections,
+    assistant: enAssistant,
+    portalShell: enPortalShell,
   },
   ur: { common: urCommon, booking: urBooking, programs: urPrograms },
 } as const;
