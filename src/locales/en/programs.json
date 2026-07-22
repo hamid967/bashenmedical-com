@@ -1,0 +1,136 @@
+{
+  "seo": {
+    "title": "Bashen Medical Programs — Integrated Care for Every Stage",
+    "description": "Specialized medical programs at Bashen Medical Complex in Sabya, Jazan: corporate wellness, home care, maternal & child health, chronic disease management, second opinion, telemedicine, and international patients. Apply online."
+  },
+  "hero": {
+    "eyebrow": "Integrated Medical Programs",
+    "title": "Our Medical Programs",
+    "subtitle": "Comprehensive care packages designed for every age and condition — apply online and start your journey with our team."
+  },
+  "labels": {
+    "programNumber": "Program {{n}}",
+    "benefitsTitle": "Program Benefits",
+    "servicesTitle": "Included Services"
+  },
+  "cta": {
+    "title": "Didn't find the right program?",
+    "subtitle": "Our medical team is ready to design a personalized care plan for you or your family. Contact us and we'll help you choose the best fit.",
+    "contact": "Contact Us",
+    "book": "Book an Appointment"
+  },
+  "items": {
+    "executive-health": {
+      "title": "Executive Comprehensive Checkup Program",
+      "tagline": "A complete medical checkup in a single day, with a detailed report and consultant consultation.",
+      "audience": "Executives and adults over 35 seeking a thorough preventive checkup.",
+      "benefits": [
+        "Over 60 lab tests and imaging studies",
+        "ECG, echo, and stress test as needed",
+        "Consultation with internal medicine and nutrition specialists",
+        "Detailed digital medical report and follow-up plan"
+      ],
+      "services": ["Platinum Full Checkup", "Heart Health Screening", "Diabetes Screening", "Hormones & Vitamins Panel"],
+      "applyLabel": "Browse packages and apply now",
+      "secondaryLabel": "Medical Specialties"
+    },
+    "corporate-wellness": {
+      "title": "Corporate & Employee Wellness Program",
+      "tagline": "Medical agreements, pre-employment screening, and on-site clinics at your workplace.",
+      "audience": "Companies, factories, government entities, and educational institutions.",
+      "benefits": [
+        "Preferential rates for employees and their families",
+        "Pre-employment screening and annual fitness checks",
+        "Awareness campaigns and seasonal vaccinations",
+        "Dedicated account management and unified monthly billing"
+      ],
+      "services": ["Pre-employment Screening", "On-site Periodic Clinics", "Occupational Health Programs", "Flu Vaccination"],
+      "applyLabel": "Request a corporate agreement",
+      "secondaryLabel": "Contact the Corporate Team"
+    },
+    "home-care": {
+      "title": "Home Care Program",
+      "tagline": "Complete medical and nursing care at home, supervised by a qualified team.",
+      "audience": "Elderly patients, post-operative patients, and those with chronic conditions.",
+      "benefits": [
+        "Regular physician and nursing visits",
+        "In-home physical and respiratory therapy",
+        "Wound, catheter, and nutrition follow-up",
+        "Medical equipment and supplies provisioning"
+      ],
+      "services": ["Nursing Visits", "Home Physical Therapy", "Elderly Care", "Post-surgical Care"],
+      "applyLabel": "Request a home visit",
+      "secondaryLabel": "Frequently Asked Questions"
+    },
+    "maternal-child": {
+      "title": "Maternal & Child Health Program",
+      "tagline": "Pregnancy and delivery follow-up, childhood vaccinations, and growth & nutrition clinics.",
+      "audience": "Pregnant women, new mothers, and children up to age 14.",
+      "benefits": [
+        "Monthly pregnancy follow-up with an OB/GYN consultant",
+        "4D ultrasound and a full-service lab",
+        "MOH-approved vaccination schedule",
+        "Lactation and pediatric nutrition consultations"
+      ],
+      "services": ["OB/GYN Clinic", "Pediatric Clinic", "Vaccinations", "Radiology & Lab"],
+      "applyLabel": "Book a maternal & child appointment",
+      "secondaryLabel": "Related Specialties"
+    },
+    "chronic-care": {
+      "title": "Chronic Disease Management Program",
+      "tagline": "Ongoing follow-up for patients with diabetes, hypertension, asthma, and heart disease.",
+      "audience": "Patients with one or more chronic conditions.",
+      "benefits": [
+        "Individualized treatment plan with measurable goals",
+        "Automated appointment and medication reminders",
+        "Remote monitoring of glucose and blood pressure readings",
+        "Nutrition and mental health consultations when needed"
+      ],
+      "services": ["Diabetes Clinic", "Hypertension & Cardiology Clinic", "Asthma & Chest Clinic", "Health Education"],
+      "applyLabel": "Enroll in the follow-up program",
+      "secondaryLabel": "Diabetes & Heart Package"
+    },
+    "second-opinion": {
+      "title": "Second Medical Opinion Program",
+      "tagline": "Review of your medical file by top consultants before making treatment decisions.",
+      "audience": "Patients candidates for surgery or long-term treatment plans.",
+      "benefits": [
+        "Full review of reports, imaging, and lab work",
+        "Written, documented opinion within 72 hours",
+        "Alternative treatment options where available",
+        "Full privacy and file encryption"
+      ],
+      "services": ["Upload reports and imaging", "Consultant consultation", "Written medical report", "Proposed treatment plan"],
+      "applyLabel": "Submit a second-opinion request",
+      "secondaryLabel": "How does it work?"
+    },
+    "telemedicine": {
+      "title": "Telemedicine Program",
+      "tagline": "Video consultation with a licensed consultant based in Saudi Arabia.",
+      "audience": "Patients who prefer to consult from home or from outside Sabya.",
+      "benefits": [
+        "Appointments within 30 minutes",
+        "E-prescriptions and medication delivery",
+        "Remote lab result follow-up",
+        "Fixed, insurance-approved pricing"
+      ],
+      "services": ["General Consultation", "Pediatric Consultation", "Mental Health Consultation", "Chronic Disease Follow-up"],
+      "applyLabel": "Start an online consultation",
+      "secondaryLabel": "Available Specialties"
+    },
+    "international": {
+      "title": "International Patients Program",
+      "tagline": "End-to-end service including medical coordination, translation, and accommodation.",
+      "audience": "Patients traveling to the Kingdom for treatment or checkups.",
+      "benefits": [
+        "Dedicated medical coordinator for each patient",
+        "Medical translation (Arabic, English, Urdu)",
+        "Accommodation and transportation booking",
+        "Post-return remote follow-up"
+      ],
+      "services": ["Pre-travel remote assessment", "Medical coordination", "Translation services", "Post-treatment follow-up"],
+      "applyLabel": "Submit an international patient request",
+      "secondaryLabel": "Contact the International Office"
+    }
+  }
+}
