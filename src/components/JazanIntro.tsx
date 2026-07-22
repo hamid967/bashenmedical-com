@@ -394,6 +394,7 @@ function CinematicStage({
           {text.tagline}
         </p>
         <h1
+          id={titleId}
           className="mt-2 text-2xl md:text-4xl font-extrabold text-[var(--jazan-teal)] tracking-tight"
           style={{
             opacity: phase >= 4 ? 1 : 0,
