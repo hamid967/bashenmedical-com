@@ -19,6 +19,42 @@ const bmcLogo = bmcLogoAsset.url;
 
 const STORAGE_KEY = "bmc_jazan_intro_last_v1";
 const DISABLED_KEY = "bmc_jazan_intro_disabled_v1";
+const DEBUG_KEY = "bmc_jazan_intro_debug";
+
+/** Debug logging gated on Vite DEV or a manual localStorage flag (`bmc_jazan_intro_debug=1`). */
+function isDebugEnabled(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    if (localStorage.getItem(DEBUG_KEY) === "1") return true;
+    return Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
+  } catch {
+    return false;
+  }
+}
+
+function debugLog(event: string, payload: Record<string, unknown>): void {
+  if (!isDebugEnabled()) return;
+  const stamp = new Date().toISOString().slice(11, 23);
+  // eslint-disable-next-line no-console
+  console.groupCollapsed(
+    `%c[JazanIntro]%c ${event} %c${stamp}`,
+    "color:#075E63;font-weight:bold",
+    "color:inherit;font-weight:600",
+    "color:#9AA0A6;font-weight:normal",
+  );
+  if ("reason" in payload) {
+    // eslint-disable-next-line no-console
+    console.log("reason:", payload.reason);
+  }
+  if ("duration_ms" in payload) {
+    // eslint-disable-next-line no-console
+    console.log("duration_ms:", payload.duration_ms);
+  }
+  // eslint-disable-next-line no-console
+  console.log("payload:", payload);
+  // eslint-disable-next-line no-console
+  console.groupEnd();
+}
 
 /** Fallback defaults; live values come from JazanSettingsProvider. */
 export const INTRO_CONFIG = {
