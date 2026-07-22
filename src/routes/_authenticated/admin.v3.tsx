@@ -73,19 +73,38 @@ const PILLAR_TONE: Record<V3Pillar, string> = {
 function V3RolloutPage() {
   const qc = useQueryClient();
   const { data, isFetching } = useSuspenseQuery(rolloutQuery);
+  const { data: health } = useQuery(healthQuery);
   const [busy, setBusy] = useState<string | null>(null);
 
   async function toggle(f: V3FlagState) {
     setBusy(f.key);
     try {
       await setV3Flag({ data: { key: f.key, enabled: !f.enabled } });
-      await qc.invalidateQueries({ queryKey: ["admin", "v3-rollout"] });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["admin", "v3-rollout"] }),
+        qc.invalidateQueries({ queryKey: ["admin", "v3-rollback-health"] }),
+      ]);
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function doRollback(key: string, reason: string) {
+    if (!window.confirm(`تراجع فوري عن هذه الميزة؟\n${reason}`)) return;
+    setBusy(key);
+    try {
+      await rollbackV3Flag({ data: { key, reason } });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["admin", "v3-rollout"] }),
+        qc.invalidateQueries({ queryKey: ["admin", "v3-rollback-health"] }),
+      ]);
     } finally {
       setBusy(null);
     }
   }
 
   const overallPct = Math.round((data.totalEnabled / Math.max(1, data.total)) * 100);
+
 
   return (
     <div className="admin-console" dir="rtl">
