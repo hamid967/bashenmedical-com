@@ -4,9 +4,19 @@
  * see progress per pillar and per phase.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Rocket, RefreshCw, Sparkles, ShieldCheck, LayoutDashboard, User } from "lucide-react";
+import {
+  Rocket,
+  RefreshCw,
+  Sparkles,
+  ShieldCheck,
+  LayoutDashboard,
+  User,
+  AlertTriangle,
+  Undo2,
+  Activity,
+} from "lucide-react";
 import {
   getV3Rollout,
   setV3Flag,
@@ -15,11 +25,24 @@ import {
   type V3FlagState,
   type V3RolloutSummary,
 } from "@/lib/v3/flags.functions";
+import {
+  getV3RollbackHealth,
+  rollbackV3Flag,
+  type FlagHealth,
+  type Severity,
+} from "@/lib/v3/rollback.functions";
 
 const rolloutQuery = queryOptions({
   queryKey: ["admin", "v3-rollout"],
   queryFn: () => getV3Rollout(),
   staleTime: 20_000,
+});
+
+const healthQuery = queryOptions({
+  queryKey: ["admin", "v3-rollback-health"],
+  queryFn: () => getV3RollbackHealth(),
+  staleTime: 30_000,
+  refetchInterval: 60_000,
 });
 
 export const Route = createFileRoute("/_authenticated/admin/v3")({
