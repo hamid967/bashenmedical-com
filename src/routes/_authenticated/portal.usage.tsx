@@ -65,7 +65,7 @@ function UsagePage() {
 
   const dateFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(i18n.t("portalUsage:en_gb"), {
+      new Intl.DateTimeFormat(isAr ? "ar-SA" : "en-GB", {
         month: "short",
         day: "numeric",
         hour: "2-digit",
