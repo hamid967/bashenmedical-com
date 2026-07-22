@@ -269,11 +269,7 @@ export function JazanIntro() {
       <div className="absolute top-4 end-4 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => {
-            markDisabled();
-            setVisible(false);
-            window.setTimeout(() => setMounted(false), 500);
-          }}
+          onClick={() => endIntro("disabled")}
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--jazan-hairline)] bg-white/70 backdrop-blur px-4 py-2 text-xs font-medium text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
           aria-label={isAr ? "عدم عرض المقدمة مجددًا" : "Don't show intro again"}
         >
