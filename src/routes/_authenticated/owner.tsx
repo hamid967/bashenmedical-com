@@ -68,9 +68,6 @@ const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     items: [
       { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, exact: true },
       { to: "/owner/pages", label: "الصفحات", icon: FileText },
-      { to: "/owner/content", label: "المحتوى", icon: Palette },
-      { to: "/owner/media", label: "الوسائط", icon: ImageIcon },
-      { to: "/owner/navigation", label: "القوائم", icon: MenuIcon },
       { to: "/owner/services", label: "الخدمات", icon: Stethoscope },
     ],
   },
