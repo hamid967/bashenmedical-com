@@ -26,20 +26,19 @@ export const Route = createFileRoute("/api/public/hooks/permission-watchdog")({
     handlers: {
       POST: async ({ request }) => {
         const apikey = request.headers.get("apikey");
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY
-          ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+        const expected =
+          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
         if (!apikey || (expected && apikey !== expected)) {
           return json({ error: "unauthorized" }, 401);
         }
 
-        const { supabaseAdmin } = await import(
-          "@/integrations/supabase/client.server"
-        );
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-        const { data, error } = await supabaseAdmin.rpc(
-          "evaluate_permission_error_spike",
-          { _warn_ratio: 3.0, _rollback_ratio: 6.0, _min_observed_per_hour: 5.0 },
-        );
+        const { data, error } = await supabaseAdmin.rpc("evaluate_permission_error_spike", {
+          _warn_ratio: 3.0,
+          _rollback_ratio: 6.0,
+          _min_observed_per_hour: 5.0,
+        });
         if (error) return json({ error: error.message }, 500);
 
         const rows = (data ?? []) as SpikeRow[];
@@ -81,7 +80,10 @@ async function notifySlack(row: SpikeRow): Promise<void> {
     `${emoji} *Permission-error spike after* \`${row.migration_ref}\`\n` +
     `severity=*${row.severity}* observed=${row.observed.toFixed(2)}/h ` +
     `baseline=${row.baseline.toFixed(2)}/h ratio=${row.ratio.toFixed(2)}x\n` +
-    `top routes: ${row.top_routes.slice(0, 3).map((r) => `\`${r.route}\` (${r.n})`).join(", ")}` +
+    `top routes: ${row.top_routes
+      .slice(0, 3)
+      .map((r) => `\`${r.route}\` (${r.n})`)
+      .join(", ")}` +
     (row.severity === "rollback"
       ? `\n:arrow_backward: *Automatic rollback recommended* — see rollback_recommendations table.`
       : "");

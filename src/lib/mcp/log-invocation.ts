@@ -64,9 +64,11 @@ export async function logMcpInvocation(params: {
       },
     );
 
-    await (supabase as unknown as {
-      from: (t: string) => { insert: (row: Record<string, unknown>) => Promise<unknown> };
-    })
+    await (
+      supabase as unknown as {
+        from: (t: string) => { insert: (row: Record<string, unknown>) => Promise<unknown> };
+      }
+    )
       .from("mcp_tool_invocations")
       .insert({
         user_id: userId,

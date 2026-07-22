@@ -21,19 +21,14 @@ export function AnnouncementBar() {
       aria-label={isAr ? "شريط الإعلانات" : "Announcement bar"}
     >
       {/* faint pattern watermark */}
-      <JazanPattern
-        variant="subtle"
-        className="absolute inset-0 h-full w-full opacity-30"
-      />
+      <JazanPattern variant="subtle" className="absolute inset-0 h-full w-full opacity-30" />
       <div className="container-app relative flex h-9 items-center justify-center gap-3 text-[12px] sm:text-[13px]">
         <JazanPattern
           orientation="vertical"
           variant="standard"
           className="h-5 w-4 shrink-0 hidden sm:block"
         />
-        <span className="font-semibold tracking-tight text-center truncate">
-          {message}
-        </span>
+        <span className="font-semibold tracking-tight text-center truncate">{message}</span>
         <JazanPattern
           orientation="vertical"
           variant="standard"

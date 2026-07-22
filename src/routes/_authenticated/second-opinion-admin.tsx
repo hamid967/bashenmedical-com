@@ -21,7 +21,9 @@ export const Route = createFileRoute("/_authenticated/second-opinion-admin")({
   errorComponent: ({ error, reset }) => (
     <div className="container mx-auto p-6">
       <p className="text-destructive">حدث خطأ: {error.message}</p>
-      <button onClick={reset} className="mt-2 rounded-md border px-3 py-1.5 text-sm">إعادة المحاولة</button>
+      <button onClick={reset} className="mt-2 rounded-md border px-3 py-1.5 text-sm">
+        إعادة المحاولة
+      </button>
     </div>
   ),
   notFoundComponent: () => <div className="container mx-auto p-6">الصفحة غير موجودة</div>,
@@ -64,7 +66,9 @@ function SecondOpinionAdminPage() {
   const [filter, setFilter] = useState<SecondOpinionStatus | "all">("all");
   const [openId, setOpenId] = useState<string | null>(null);
   const [notesDraft, setNotesDraft] = useState<Record<string, string>>({});
-  const [attachments, setAttachments] = useState<Record<string, { path: string; url: string | null }[]>>({});
+  const [attachments, setAttachments] = useState<
+    Record<string, { path: string; url: string | null }[]>
+  >({});
   const [loadingAtt, setLoadingAtt] = useState<string | null>(null);
 
   const listQ = useQuery({
@@ -101,9 +105,14 @@ function SecondOpinionAdminPage() {
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">طلبات الرأي الطبي الثاني</h1>
-          <p className="text-sm text-muted-foreground">مراجعة الطلبات وتغيير حالتها وعرض المرفقات</p>
+          <p className="text-sm text-muted-foreground">
+            مراجعة الطلبات وتغيير حالتها وعرض المرفقات
+          </p>
         </div>
-        <Link to="/admin" className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted">
+        <Link
+          to="/admin"
+          className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+        >
           <ArrowLeft className="h-4 w-4" /> رجوع
         </Link>
       </div>
@@ -145,7 +154,9 @@ function SecondOpinionAdminPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold">{row.patient_name}</h3>
-                      <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[row.status]}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs ${STATUS_STYLES[row.status]}`}
+                      >
                         {STATUS_LABELS[row.status] ?? row.status}
                       </span>
                     </div>
@@ -159,7 +170,10 @@ function SecondOpinionAdminPage() {
                     <select
                       value={row.status}
                       onChange={(e) =>
-                        updateMut.mutate({ id: row.id, status: e.target.value as SecondOpinionStatus })
+                        updateMut.mutate({
+                          id: row.id,
+                          status: e.target.value as SecondOpinionStatus,
+                        })
                       }
                       disabled={updateMut.isPending}
                       className="rounded-md border bg-background px-2 py-1 text-sm"
@@ -217,7 +231,9 @@ function SecondOpinionAdminPage() {
                                   {a.path.split("/").pop()}
                                 </a>
                               ) : (
-                                <span className="text-sm text-muted-foreground">{a.path} (تعذّر إنشاء الرابط)</span>
+                                <span className="text-sm text-muted-foreground">
+                                  {a.path} (تعذّر إنشاء الرابط)
+                                </span>
                               )}
                             </li>
                           ))}

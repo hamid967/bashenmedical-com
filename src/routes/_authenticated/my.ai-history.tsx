@@ -209,7 +209,8 @@ function AiHistoryPage() {
           <ul className="max-h-[65vh] divide-y overflow-y-auto">
             {items === null && (
               <li className="flex items-center gap-2 p-4 text-sm text-muted-foreground">
-                <Loader2 className="h-3.5 w-3.5 animate-spin" /> {t("جارٍ التحميل...", "Loading...")}
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />{" "}
+                {t("جارٍ التحميل...", "Loading...")}
               </li>
             )}
             {items && items.length === 0 && (
@@ -262,7 +263,8 @@ function AiHistoryPage() {
           )}
           {selectedId && loadingMsgs && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" /> {t("تحميل الرسائل...", "Loading messages...")}
+              <Loader2 className="h-4 w-4 animate-spin" />{" "}
+              {t("تحميل الرسائل...", "Loading messages...")}
             </div>
           )}
           {selectedId && !loadingMsgs && (
@@ -275,10 +277,7 @@ function AiHistoryPage() {
               {messages.map((m) => (
                 <div
                   key={m.id}
-                  className={cn(
-                    "flex",
-                    m.role === "user" ? "justify-end" : "justify-start",
-                  )}
+                  className={cn("flex", m.role === "user" ? "justify-end" : "justify-start")}
                 >
                   <div
                     className={cn(

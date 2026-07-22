@@ -33,9 +33,7 @@ export const getAttachmentSignedUrl = createServerFn({ method: "POST" })
  */
 export const generateMrn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: { branchId: string }) =>
-    z.object({ branchId: z.string().uuid() }).parse(d),
-  )
+  .validator((d: { branchId: string }) => z.object({ branchId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: mrn, error } = await context.supabase.rpc("generate_mrn", {
       _branch_id: data.branchId,

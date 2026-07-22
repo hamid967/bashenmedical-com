@@ -24,10 +24,7 @@ import { listPatientsAdvanced } from "@/lib/patients-mgmt.functions";
 
 export const Route = createFileRoute("/_authenticated/qr-cards")({
   head: () => ({
-    meta: [
-      { title: "بطاقات QR | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "بطاقات QR | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: QrCardsPage,
 });
@@ -48,10 +45,16 @@ function QrCardsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Link to="/ratings" className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted">
+          <Link
+            to="/ratings"
+            className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
+          >
             <Star className="h-4 w-4 text-amber-500" /> التقييمات
           </Link>
-          <Link to="/admin" className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
+          >
             <ArrowLeft className="h-4 w-4" /> لوحة التحكم
           </Link>
         </div>
@@ -59,16 +62,36 @@ function QrCardsPage() {
 
       <Tabs defaultValue="patient" className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 sm:w-auto sm:inline-flex">
-          <TabsTrigger value="patient"><User className="h-4 w-4 ml-1.5" />بطاقة مريض</TabsTrigger>
-          <TabsTrigger value="batch"><Users className="h-4 w-4 ml-1.5" />دفعة مرضى</TabsTrigger>
-          <TabsTrigger value="booking"><Stethoscope className="h-4 w-4 ml-1.5" />بطاقة حجز</TabsTrigger>
-          <TabsTrigger value="rating"><Star className="h-4 w-4 ml-1.5" />بطاقة تقييم</TabsTrigger>
+          <TabsTrigger value="patient">
+            <User className="h-4 w-4 ml-1.5" />
+            بطاقة مريض
+          </TabsTrigger>
+          <TabsTrigger value="batch">
+            <Users className="h-4 w-4 ml-1.5" />
+            دفعة مرضى
+          </TabsTrigger>
+          <TabsTrigger value="booking">
+            <Stethoscope className="h-4 w-4 ml-1.5" />
+            بطاقة حجز
+          </TabsTrigger>
+          <TabsTrigger value="rating">
+            <Star className="h-4 w-4 ml-1.5" />
+            بطاقة تقييم
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="patient"><PatientCardTab /></TabsContent>
-        <TabsContent value="batch"><BatchCardsTab /></TabsContent>
-        <TabsContent value="booking"><BookingCardTab /></TabsContent>
-        <TabsContent value="rating"><RatingCardTab /></TabsContent>
+        <TabsContent value="patient">
+          <PatientCardTab />
+        </TabsContent>
+        <TabsContent value="batch">
+          <BatchCardsTab />
+        </TabsContent>
+        <TabsContent value="booking">
+          <BookingCardTab />
+        </TabsContent>
+        <TabsContent value="rating">
+          <RatingCardTab />
+        </TabsContent>
       </Tabs>
     </div>
   );
@@ -78,7 +101,12 @@ function QrCardsPage() {
 
 function PatientCardTab() {
   const [q, setQ] = useState("");
-  const [selected, setSelected] = useState<{ id: string; mrn: string; full_name_ar: string; branch_name_ar?: string | null } | null>(null);
+  const [selected, setSelected] = useState<{
+    id: string;
+    mrn: string;
+    full_name_ar: string;
+    branch_name_ar?: string | null;
+  } | null>(null);
   const listFn = useServerFn(listPatientsAdvanced);
 
   const searchQ = useQuery({
@@ -114,11 +142,21 @@ function PatientCardTab() {
             (searchQ.data?.rows ?? []).map((p) => (
               <button
                 key={p.id}
-                onClick={() => setSelected({ id: p.id, mrn: p.mrn, full_name_ar: p.full_name_ar, branch_name_ar: p.branch_name_ar })}
+                onClick={() =>
+                  setSelected({
+                    id: p.id,
+                    mrn: p.mrn,
+                    full_name_ar: p.full_name_ar,
+                    branch_name_ar: p.branch_name_ar,
+                  })
+                }
                 className={`w-full text-right px-3 py-2 hover:bg-muted transition ${selected?.id === p.id ? "bg-primary/10" : ""}`}
               >
                 <p className="text-sm font-medium">{p.full_name_ar}</p>
-                <p className="text-xs text-muted-foreground font-mono">{p.mrn}{p.phone ? ` · ${p.phone}` : ""}</p>
+                <p className="text-xs text-muted-foreground font-mono">
+                  {p.mrn}
+                  {p.phone ? ` · ${p.phone}` : ""}
+                </p>
               </button>
             ))
           )}
@@ -147,9 +185,16 @@ function PatientCardTab() {
 
 function BookingCardTab() {
   const doctorsFn = useServerFn(listDoctorsForRatings);
-  const doctorsQ = useQuery({ queryKey: ["qr-doctors"], queryFn: () => doctorsFn(), staleTime: 60_000 });
+  const doctorsQ = useQuery({
+    queryKey: ["qr-doctors"],
+    queryFn: () => doctorsFn(),
+    staleTime: 60_000,
+  });
   const [doctorId, setDoctorId] = useState<string | null>(null);
-  const selected = useMemo(() => (doctorsQ.data ?? []).find((d) => d.id === doctorId), [doctorsQ.data, doctorId]);
+  const selected = useMemo(
+    () => (doctorsQ.data ?? []).find((d) => d.id === doctorId),
+    [doctorsQ.data, doctorId],
+  );
   const origin = typeof window !== "undefined" ? window.location.origin : "";
   const url = selected ? `${origin}/book?doctor=${selected.id}` : "";
 
@@ -167,7 +212,9 @@ function BookingCardTab() {
         >
           <option value="">—</option>
           {(doctorsQ.data ?? []).map((d) => (
-            <option key={d.id} value={d.id}>{d.name_ar}</option>
+            <option key={d.id} value={d.id}>
+              {d.name_ar}
+            </option>
           ))}
         </select>
         <p className="text-xs text-muted-foreground">
@@ -197,14 +244,25 @@ function BookingCardTab() {
 function RatingCardTab() {
   const branchesFn = useServerFn(listBranchesForRatings);
   const doctorsFn = useServerFn(listDoctorsForRatings);
-  const branchesQ = useQuery({ queryKey: ["qr-r-branches"], queryFn: () => branchesFn(), staleTime: 60_000 });
-  const doctorsQ = useQuery({ queryKey: ["qr-r-doctors"], queryFn: () => doctorsFn(), staleTime: 60_000 });
+  const branchesQ = useQuery({
+    queryKey: ["qr-r-branches"],
+    queryFn: () => branchesFn(),
+    staleTime: 60_000,
+  });
+  const doctorsQ = useQuery({
+    queryKey: ["qr-r-doctors"],
+    queryFn: () => doctorsFn(),
+    staleTime: 60_000,
+  });
 
   const [branchId, setBranchId] = useState<string | null>(null);
   const [doctorId, setDoctorId] = useState<string | null>(null);
 
   const filteredDoctors = useMemo(
-    () => (branchId ? (doctorsQ.data ?? []).filter((d) => d.branch_id === branchId) : (doctorsQ.data ?? [])),
+    () =>
+      branchId
+        ? (doctorsQ.data ?? []).filter((d) => d.branch_id === branchId)
+        : (doctorsQ.data ?? []),
     [doctorsQ.data, branchId],
   );
 
@@ -227,20 +285,37 @@ function RatingCardTab() {
           <label className="text-xs text-muted-foreground mb-1 block flex items-center gap-1.5">
             <Building2 className="h-3.5 w-3.5" /> الفرع
           </label>
-          <select value={branchId ?? ""} onChange={(e) => { setBranchId(e.target.value || null); setDoctorId(null); }}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select
+            value={branchId ?? ""}
+            onChange={(e) => {
+              setBranchId(e.target.value || null);
+              setDoctorId(null);
+            }}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
             <option value="">—</option>
-            {(branchesQ.data ?? []).map((b) => <option key={b.id} value={b.id}>{b.name_ar}</option>)}
+            {(branchesQ.data ?? []).map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name_ar}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block flex items-center gap-1.5">
             <Stethoscope className="h-3.5 w-3.5" /> الطبيب (اختياري)
           </label>
-          <select value={doctorId ?? ""} onChange={(e) => setDoctorId(e.target.value || null)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select
+            value={doctorId ?? ""}
+            onChange={(e) => setDoctorId(e.target.value || null)}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
             <option value="">—</option>
-            {filteredDoctors.map((d) => <option key={d.id} value={d.id}>{d.name_ar}</option>)}
+            {filteredDoctors.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name_ar}
+              </option>
+            ))}
           </select>
         </div>
         <p className="text-xs text-muted-foreground">
@@ -267,7 +342,12 @@ function RatingCardTab() {
 
 /* ------------------------------ Batch patients ------------------------------ */
 
-type BatchPatient = { id: string; mrn: string; full_name_ar: string; branch_name_ar?: string | null };
+type BatchPatient = {
+  id: string;
+  mrn: string;
+  full_name_ar: string;
+  branch_name_ar?: string | null;
+};
 
 function BatchCardsTab() {
   const [q, setQ] = useState("");
@@ -278,11 +358,17 @@ function BatchCardsTab() {
   const listFn = useServerFn(listPatientsAdvanced);
   const branchesFn = useServerFn(listBranchesForRatings);
 
-  const branchesQ = useQuery({ queryKey: ["qr-batch-branches"], queryFn: () => branchesFn(), staleTime: 60_000 });
+  const branchesQ = useQuery({
+    queryKey: ["qr-batch-branches"],
+    queryFn: () => branchesFn(),
+    staleTime: 60_000,
+  });
   const searchQ = useQuery({
     queryKey: ["qr-batch-patients", q, branchId],
     queryFn: () =>
-      listFn({ data: { q: q || undefined, branchId: branchId || undefined, page: 1, pageSize: 50 } }),
+      listFn({
+        data: { q: q || undefined, branchId: branchId || undefined, page: 1, pageSize: 50 },
+      }),
   });
 
   const rows = searchQ.data?.rows ?? [];
@@ -301,7 +387,16 @@ function BatchCardsTab() {
     setSelected((s) => {
       const next = { ...s };
       if (allShownSelected) rows.forEach((r) => delete next[r.id]);
-      else rows.forEach((r) => (next[r.id] = { id: r.id, mrn: r.mrn, full_name_ar: r.full_name_ar, branch_name_ar: r.branch_name_ar }));
+      else
+        rows.forEach(
+          (r) =>
+            (next[r.id] = {
+              id: r.id,
+              mrn: r.mrn,
+              full_name_ar: r.full_name_ar,
+              branch_name_ar: r.branch_name_ar,
+            }),
+        );
       return next;
     });
 
@@ -340,7 +435,8 @@ function BatchCardsTab() {
         </div>`,
         )
         .join("");
-      w.document.write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>بطاقات QR</title>
+      w.document
+        .write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>بطاقات QR</title>
         <style>
           @page { size: A4; margin: 10mm; }
           body { font-family: -apple-system, "Segoe UI", Tahoma, sans-serif; margin:0; padding:8mm; background:#f5f5f5; }
@@ -439,7 +535,9 @@ function BatchCardsTab() {
             >
               <option value="">الكل</option>
               {(branchesQ.data ?? []).map((b) => (
-                <option key={b.id} value={b.id}>{b.name_ar}</option>
+                <option key={b.id} value={b.id}>
+                  {b.name_ar}
+                </option>
               ))}
             </select>
           </div>
@@ -476,14 +574,21 @@ function BatchCardsTab() {
                     type="checkbox"
                     checked={isSel}
                     onChange={() =>
-                      toggle({ id: p.id, mrn: p.mrn, full_name_ar: p.full_name_ar, branch_name_ar: p.branch_name_ar })
+                      toggle({
+                        id: p.id,
+                        mrn: p.mrn,
+                        full_name_ar: p.full_name_ar,
+                        branch_name_ar: p.branch_name_ar,
+                      })
                     }
                     className="h-4 w-4 accent-primary"
                   />
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{p.full_name_ar}</p>
                     <p className="text-xs text-muted-foreground font-mono truncate">
-                      {p.mrn}{p.phone ? ` · ${p.phone}` : ""}{p.branch_name_ar ? ` · ${p.branch_name_ar}` : ""}
+                      {p.mrn}
+                      {p.phone ? ` · ${p.phone}` : ""}
+                      {p.branch_name_ar ? ` · ${p.branch_name_ar}` : ""}
                     </p>
                   </div>
                 </label>
@@ -509,11 +614,16 @@ function BatchCardsTab() {
         </div>
 
         {selectedList.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-6">اختر مريضًا أو أكثر من القائمة.</p>
+          <p className="text-sm text-muted-foreground text-center py-6">
+            اختر مريضًا أو أكثر من القائمة.
+          </p>
         ) : (
           <div className="max-h-56 overflow-auto space-y-1.5">
             {selectedList.map((p) => (
-              <div key={p.id} className="flex items-center justify-between rounded-md border border-border px-2.5 py-1.5 text-xs">
+              <div
+                key={p.id}
+                className="flex items-center justify-between rounded-md border border-border px-2.5 py-1.5 text-xs"
+              >
                 <div className="min-w-0">
                   <p className="font-medium truncate">{p.full_name_ar}</p>
                   <p className="text-muted-foreground font-mono">{p.mrn}</p>
@@ -558,7 +668,6 @@ function BatchCardsTab() {
 
 /* ---------------------------------- Shared ---------------------------------- */
 
-
 function EmptyPreview({ label }: { label: string }) {
   return (
     <div className="rounded-xl border-2 border-dashed border-border p-12 text-center text-sm text-muted-foreground">
@@ -592,15 +701,28 @@ function CardPreview({
   }, [url]);
 
   const toneMap = {
-    primary: { bg: "from-primary/10 to-primary/5", accent: "text-primary", ring: "border-primary/30" },
-    emerald: { bg: "from-emerald-500/10 to-emerald-500/5", accent: "text-emerald-600", ring: "border-emerald-500/30" },
-    amber: { bg: "from-amber-500/10 to-amber-500/5", accent: "text-amber-600", ring: "border-amber-500/30" },
+    primary: {
+      bg: "from-primary/10 to-primary/5",
+      accent: "text-primary",
+      ring: "border-primary/30",
+    },
+    emerald: {
+      bg: "from-emerald-500/10 to-emerald-500/5",
+      accent: "text-emerald-600",
+      ring: "border-emerald-500/30",
+    },
+    amber: {
+      bg: "from-amber-500/10 to-amber-500/5",
+      accent: "text-amber-600",
+      ring: "border-amber-500/30",
+    },
   }[tone];
 
   const printCard = () => {
     const w = window.open("", "_blank", "width=700,height=900");
     if (!w) return;
-    w.document.write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title}</title>
+    w.document
+      .write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${title}</title>
       <style>
         body { font-family: -apple-system, "Segoe UI", Tahoma, sans-serif; margin:0; padding:40px; display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f5f5f5; }
         .card { width: 360px; padding: 32px; border-radius: 20px; background:#fff; box-shadow: 0 8px 30px rgba(0,0,0,.08); text-align:center; border: 2px solid ${tone === "primary" ? "#3b82f6" : tone === "emerald" ? "#10b981" : "#f59e0b"}; }
@@ -637,8 +759,12 @@ function CardPreview({
 
   return (
     <div className="space-y-4">
-      <div className={`rounded-2xl border-2 ${toneMap.ring} bg-gradient-to-br ${toneMap.bg} p-8 text-center shadow-sm`}>
-        <p className={`text-[10px] uppercase tracking-widest ${toneMap.accent} font-bold mb-2`}>{CLINIC_NAME}</p>
+      <div
+        className={`rounded-2xl border-2 ${toneMap.ring} bg-gradient-to-br ${toneMap.bg} p-8 text-center shadow-sm`}
+      >
+        <p className={`text-[10px] uppercase tracking-widest ${toneMap.accent} font-bold mb-2`}>
+          {CLINIC_NAME}
+        </p>
         <h2 className="text-xl font-bold">{title}</h2>
         {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
         <div className="mt-5 mx-auto w-56 h-56 bg-white rounded-xl p-3 shadow-inner grid place-items-center">
@@ -649,15 +775,26 @@ function CardPreview({
           )}
         </div>
         <p className="mt-4 text-sm font-medium">{hint}</p>
-        <p className="mt-3 text-[11px] text-muted-foreground border-t pt-3 break-all font-mono" dir="ltr">{url}</p>
+        <p
+          className="mt-3 text-[11px] text-muted-foreground border-t pt-3 break-all font-mono"
+          dir="ltr"
+        >
+          {url}
+        </p>
       </div>
       <div className="flex gap-2">
-        <button onClick={printCard} disabled={!dataUrl}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm hover:opacity-90 disabled:opacity-40">
+        <button
+          onClick={printCard}
+          disabled={!dataUrl}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm hover:opacity-90 disabled:opacity-40"
+        >
           <Printer className="h-4 w-4" /> طباعة
         </button>
-        <button onClick={download} disabled={!dataUrl}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm hover:bg-muted disabled:opacity-40">
+        <button
+          onClick={download}
+          disabled={!dataUrl}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm hover:bg-muted disabled:opacity-40"
+        >
           <Download className="h-4 w-4" /> تنزيل PNG
         </button>
       </div>

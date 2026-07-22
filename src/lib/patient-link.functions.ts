@@ -34,7 +34,9 @@ export const linkGuestAppointments = createServerFn({ method: "POST" })
         message: error.message,
       };
     }
-    const row = Array.isArray(data) ? (data[0] as { patient_id?: string; linked_count?: number } | undefined) : null;
+    const row = Array.isArray(data)
+      ? (data[0] as { patient_id?: string; linked_count?: number } | undefined)
+      : null;
     return {
       ok: true,
       patientId: row?.patient_id ?? null,

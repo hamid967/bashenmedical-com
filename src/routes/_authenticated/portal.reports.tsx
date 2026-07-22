@@ -264,10 +264,7 @@ function ReportsPage() {
             <HistoryIcon className="h-3.5 w-3.5" />
             سجل التحميلات
           </Link>
-          <Link
-            to="/portal/records"
-            className="text-xs text-primary hover:underline"
-          >
+          <Link to="/portal/records" className="text-xs text-primary hover:underline">
             عرض السجل الزمني الكامل
           </Link>
         </div>
@@ -360,9 +357,7 @@ function ReportsPage() {
               <Button variant="ghost" size="sm" onClick={resetFilters} className="h-7 px-2 text-xs">
                 مسح الفلاتر
               </Button>
-              <span className="text-muted-foreground">
-                يتم حفظ فلاترك تلقائيًا لهذا الجهاز.
-              </span>
+              <span className="text-muted-foreground">يتم حفظ فلاترك تلقائيًا لهذا الجهاز.</span>
             </>
           )}
         </div>
@@ -389,7 +384,10 @@ function ReportsPage() {
                   </span>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Badge variant="outline" className={`${meta.tint} ${meta.bg} border-0 text-[11px]`}>
+                      <Badge
+                        variant="outline"
+                        className={`${meta.tint} ${meta.bg} border-0 text-[11px]`}
+                      >
                         {meta.label}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
@@ -424,15 +422,9 @@ function ReportsPage() {
                         ) : (
                           <Download className="h-4 w-4" />
                         )}
-                        <span className="ms-2">
-                          {r.file_path ? "تنزيل PDF" : "لا يوجد ملف"}
-                        </span>
+                        <span className="ms-2">{r.file_path ? "تنزيل PDF" : "لا يوجد ملف"}</span>
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => setDetailId(r.id)}
-                      >
+                      <Button size="sm" variant="outline" onClick={() => setDetailId(r.id)}>
                         <Info className="h-4 w-4" />
                         <span className="ms-2">التفاصيل</span>
                       </Button>
@@ -445,10 +437,7 @@ function ReportsPage() {
         </ul>
       )}
 
-      <ReportDetailDialog
-        reportId={detailId}
-        onClose={() => setDetailId(null)}
-      />
+      <ReportDetailDialog reportId={detailId} onClose={() => setDetailId(null)} />
     </div>
   );
 }
@@ -472,7 +461,7 @@ function ReportDetailDialog({
     staleTime: 30_000,
   });
 
-  const meta = data ? TYPE_META[data.report_type] ?? TYPE_META.other : null;
+  const meta = data ? (TYPE_META[data.report_type] ?? TYPE_META.other) : null;
 
   async function downloadMain(d: MyMedicalReportDetail) {
     if (!d.file_path) {
@@ -528,10 +517,7 @@ function ReportDetailDialog({
           <>
             <DialogHeader className="text-right">
               <div className="flex items-center gap-2 flex-wrap">
-                <Badge
-                  variant="outline"
-                  className={`${meta.tint} ${meta.bg} border-0 text-[11px]`}
-                >
+                <Badge variant="outline" className={`${meta.tint} ${meta.bg} border-0 text-[11px]`}>
                   {meta.label}
                 </Badge>
                 <DemoBadge show={data.is_demo} />
@@ -567,16 +553,8 @@ function ReportDetailDialog({
                   label="آخر تحديث"
                   value={format(new Date(data.updated_at), "d MMMM yyyy", { locale: arLocale })}
                 />
-                <MetaRow
-                  Icon={UserIcon}
-                  label="الطبيب"
-                  value={data.doctor_name_ar ?? "—"}
-                />
-                <MetaRow
-                  Icon={MapPin}
-                  label="الفرع"
-                  value={data.branch_name_ar ?? "—"}
-                />
+                <MetaRow Icon={UserIcon} label="الطبيب" value={data.doctor_name_ar ?? "—"} />
+                <MetaRow Icon={MapPin} label="الفرع" value={data.branch_name_ar ?? "—"} />
                 {data.appointment_date && (
                   <MetaRow
                     Icon={Calendar}
@@ -590,19 +568,13 @@ function ReportDetailDialog({
 
               {data.summary && (
                 <section>
-                  <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">
-                    الوصف
-                  </h4>
-                  <p className="whitespace-pre-line leading-relaxed text-sm">
-                    {data.summary}
-                  </p>
+                  <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">الوصف</h4>
+                  <p className="whitespace-pre-line leading-relaxed text-sm">{data.summary}</p>
                 </section>
               )}
 
               <section>
-                <h4 className="mb-2 text-xs font-semibold text-muted-foreground">
-                  روابط التحميل
-                </h4>
+                <h4 className="mb-2 text-xs font-semibold text-muted-foreground">روابط التحميل</h4>
                 <div className="rounded-lg border border-border divide-y">
                   <div className="flex items-center justify-between p-2.5">
                     <div className="flex items-center gap-2 text-sm">
@@ -620,9 +592,7 @@ function ReportDetailDialog({
                       ) : (
                         <Download className="h-4 w-4" />
                       )}
-                      <span className="ms-1.5">
-                        {data.file_path ? "تنزيل" : "غير متاح"}
-                      </span>
+                      <span className="ms-1.5">{data.file_path ? "تنزيل" : "غير متاح"}</span>
                     </Button>
                   </div>
                 </div>
@@ -641,9 +611,7 @@ function ReportDetailDialog({
                         className="flex items-center justify-between gap-2 p-2.5"
                       >
                         <div className="min-w-0">
-                          <div className="text-sm font-medium">
-                            نسخة #{v.version_number}
-                          </div>
+                          <div className="text-sm font-medium">نسخة #{v.version_number}</div>
                           <div className="text-[11px] text-muted-foreground">
                             {format(new Date(v.changed_at), "d MMMM yyyy — HH:mm", {
                               locale: arLocale,
@@ -674,8 +642,7 @@ function ReportDetailDialog({
               )}
 
               <section className="text-[11px] text-muted-foreground">
-                معرّف التقرير:{" "}
-                <span className="font-mono">{data.id.slice(0, 8)}…</span>
+                معرّف التقرير: <span className="font-mono">{data.id.slice(0, 8)}…</span>
               </section>
             </div>
 
@@ -691,28 +658,17 @@ function ReportDetailDialog({
   );
 }
 
-function MetaRow({
-  Icon,
-  label,
-  value,
-}: {
-  Icon: typeof FileText;
-  label: string;
-  value: string;
-}) {
+function MetaRow({ Icon, label, value }: { Icon: typeof FileText; label: string; value: string }) {
   return (
     <div className="flex items-start gap-2">
       <Icon className="h-3.5 w-3.5 mt-0.5 text-muted-foreground shrink-0" />
       <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
-          {label}
-        </div>
+        <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
         <div className="text-sm truncate">{value}</div>
       </div>
     </div>
   );
 }
-
 
 function EmptyState({ hasReports, onReset }: { hasReports: boolean; onReset: () => void }) {
   return (

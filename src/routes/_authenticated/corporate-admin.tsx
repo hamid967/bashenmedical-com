@@ -25,9 +25,7 @@ export const Route = createFileRoute("/_authenticated/corporate-admin")({
       </button>
     </div>
   ),
-  notFoundComponent: () => (
-    <div className="container mx-auto p-6">الصفحة غير موجودة</div>
-  ),
+  notFoundComponent: () => <div className="container mx-auto p-6">الصفحة غير موجودة</div>,
   component: CorporateAdminPage,
 });
 
@@ -104,17 +102,19 @@ function CorporateAdminPage() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {(["all", ...(Object.keys(STATUS_LABELS) as CorporateRequestStatus[])] as const).map((s) => (
-          <button
-            key={s}
-            onClick={() => setFilter(s)}
-            className={`rounded-md border px-3 py-1.5 text-sm ${
-              filter === s ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-            }`}
-          >
-            {s === "all" ? "الكل" : STATUS_LABELS[s]}
-          </button>
-        ))}
+        {(["all", ...(Object.keys(STATUS_LABELS) as CorporateRequestStatus[])] as const).map(
+          (s) => (
+            <button
+              key={s}
+              onClick={() => setFilter(s)}
+              className={`rounded-md border px-3 py-1.5 text-sm ${
+                filter === s ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+              }`}
+            >
+              {s === "all" ? "الكل" : STATUS_LABELS[s]}
+            </button>
+          ),
+        )}
         <button
           onClick={() => qc.invalidateQueries({ queryKey: ["corporate-admin"] })}
           className="ms-auto inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
@@ -128,9 +128,7 @@ function CorporateAdminPage() {
           <Loader2 className="h-4 w-4 animate-spin" /> جاري التحميل...
         </div>
       ) : listQ.isError ? (
-        <p className="text-destructive">
-          تعذّر جلب الطلبات: {(listQ.error as Error).message}
-        </p>
+        <p className="text-destructive">تعذّر جلب الطلبات: {(listQ.error as Error).message}</p>
       ) : !listQ.data?.length ? (
         <p className="text-muted-foreground">لا توجد طلبات مطابقة.</p>
       ) : (
@@ -207,9 +205,7 @@ function CorporateAdminPage() {
                     </div>
 
                     <div>
-                      <div className="mb-1 text-sm font-medium">
-                        المرفقات
-                      </div>
+                      <div className="mb-1 text-sm font-medium">المرفقات</div>
                       <p className="text-sm text-muted-foreground">
                         نموذج طلب الشركات الحالي لا يدعم رفع ملفات. لتفعيل ذلك، أضف عمود مرفقات
                         وحاوية تخزين مخصصة للطلبات.
@@ -220,9 +216,7 @@ function CorporateAdminPage() {
                       <label className="mb-1 block text-sm font-medium">ملاحظات المراجعة</label>
                       <textarea
                         value={notes}
-                        onChange={(e) =>
-                          setNotesDraft((s) => ({ ...s, [row.id]: e.target.value }))
-                        }
+                        onChange={(e) => setNotesDraft((s) => ({ ...s, [row.id]: e.target.value }))}
                         rows={4}
                         maxLength={2000}
                         className="w-full rounded-md border bg-background p-2 text-sm"

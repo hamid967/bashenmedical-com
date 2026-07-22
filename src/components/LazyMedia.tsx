@@ -21,12 +21,7 @@ const SKELETON_CLASS =
   "before:animate-[shimmer_1.4s_infinite]";
 
 function Skeleton({ rounded = "rounded-lg" }: { rounded?: string }) {
-  return (
-    <span
-      aria-hidden="true"
-      className={`${SKELETON_CLASS} ${rounded}`}
-    />
-  );
+  return <span aria-hidden="true" className={`${SKELETON_CLASS} ${rounded}`} />;
 }
 
 type LazyImageProps = {
@@ -41,7 +36,14 @@ type LazyImageProps = {
 };
 
 export function LazyImage({
-  src, alt, className, width, height, eager, rounded = "rounded-lg", onError,
+  src,
+  alt,
+  className,
+  width,
+  height,
+  eager,
+  rounded = "rounded-lg",
+  onError,
 }: LazyImageProps) {
   const ref = useRef<HTMLImageElement | null>(null);
   const mountedAt = useRef<number>(performance.now());
@@ -112,7 +114,6 @@ export function LazyImage({
   );
 }
 
-
 type LazyVideoProps = {
   src: string;
   poster?: string;
@@ -123,7 +124,12 @@ type LazyVideoProps = {
 };
 
 export function LazyVideo({
-  src, poster, className, width, height, rounded = "rounded-lg",
+  src,
+  poster,
+  className,
+  width,
+  height,
+  rounded = "rounded-lg",
 }: LazyVideoProps) {
   const ref = useRef<HTMLVideoElement | null>(null);
   const mountedAt = useRef<number>(performance.now());

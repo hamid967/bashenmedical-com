@@ -33,7 +33,9 @@ export const getMyLabReports = createServerFn({ method: "GET" })
 
     const labs = await supabase
       .from("lab_reports")
-      .select("id, title, test_type, summary, status, report_date, file_path, ordered_by, released_at, doctors:ordered_by(name_ar)")
+      .select(
+        "id, title, test_type, summary, status, report_date, file_path, ordered_by, released_at, doctors:ordered_by(name_ar)",
+      )
       .eq("patient_id", patient.id)
       .not("released_at", "is", null)
       .order("report_date", { ascending: false })
@@ -49,7 +51,9 @@ export const getMyLabReports = createServerFn({ method: "GET" })
       file_path: (r.file_path as string | null) ?? null,
       ordered_by: (r.ordered_by as string | null) ?? null,
       released_at: (r.released_at as string | null) ?? null,
-      doctor_name: ((r as { doctors?: { name_ar?: string | null } | null }).doctors?.name_ar as string | null) ?? null,
+      doctor_name:
+        ((r as { doctors?: { name_ar?: string | null } | null }).doctors?.name_ar as
+          string | null) ?? null,
     }));
 
     return { reports };
@@ -141,8 +145,7 @@ export const shareLabWithDoctor = createServerFn({ method: "POST" })
       body:
         `المريض ${patient.full_name_ar ?? ""} (رقم ${patient.mrn ?? "-"}) شارك تقرير "${
           labRes.data.title ?? labRes.data.test_type ?? "مختبر"
-        }" بتاريخ ${labRes.data.report_date ?? ""}` +
-        (data.note ? ` — ملاحظة: ${data.note}` : ""),
+        }" بتاريخ ${labRes.data.report_date ?? ""}` + (data.note ? ` — ملاحظة: ${data.note}` : ""),
       branch_id: docRes.data.branch_id ?? patient.branch_id ?? null,
       metadata: {
         lab_report_id: labRes.data.id,
@@ -173,7 +176,8 @@ export const getLabShareDoctors = createServerFn({ method: "GET" })
         name_en: (d.name_en as string | null) ?? null,
         title_ar: (d.title_ar as string | null) ?? null,
         specialty:
-          ((d as { specialties?: { name_ar?: string | null } | null }).specialties?.name_ar as string | null) ?? null,
+          ((d as { specialties?: { name_ar?: string | null } | null }).specialties?.name_ar as
+            string | null) ?? null,
       })),
     };
   });

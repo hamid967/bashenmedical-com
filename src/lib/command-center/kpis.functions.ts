@@ -50,11 +50,13 @@ export const getCommandCenterKpis = createServerFn({ method: "GET" })
     ]);
 
     const k = (kpisRes?.data ?? {}) as Record<string, number>;
-    const daily = ((dailyRes?.data ?? []) as Array<{
-      day: string;
-      total: number;
-      confirmed: number;
-    }>).slice(-7);
+    const daily = (
+      (dailyRes?.data ?? []) as Array<{
+        day: string;
+        total: number;
+        confirmed: number;
+      }>
+    ).slice(-7);
 
     return {
       today_patients: Number(k.today_unique_patients ?? 0),

@@ -16,7 +16,17 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { AlertCircle, Building2, Stethoscope, CalendarPlus, ChevronLeft, Upload, Download, CheckCircle2, XCircle } from "lucide-react";
+import {
+  AlertCircle,
+  Building2,
+  Stethoscope,
+  CalendarPlus,
+  ChevronLeft,
+  Upload,
+  Download,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import {
   createBranch,
   createDoctor,
@@ -61,16 +71,32 @@ function QuickAddPage() {
       </div>
 
       <div className="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <TabButton active={tab === "branch"} onClick={() => setTab("branch")} icon={<Building2 className="h-4 w-4" />}>
+        <TabButton
+          active={tab === "branch"}
+          onClick={() => setTab("branch")}
+          icon={<Building2 className="h-4 w-4" />}
+        >
           عيادة
         </TabButton>
-        <TabButton active={tab === "doctor"} onClick={() => setTab("doctor")} icon={<Stethoscope className="h-4 w-4" />}>
+        <TabButton
+          active={tab === "doctor"}
+          onClick={() => setTab("doctor")}
+          icon={<Stethoscope className="h-4 w-4" />}
+        >
           طبيب
         </TabButton>
-        <TabButton active={tab === "appointment"} onClick={() => setTab("appointment")} icon={<CalendarPlus className="h-4 w-4" />}>
+        <TabButton
+          active={tab === "appointment"}
+          onClick={() => setTab("appointment")}
+          icon={<CalendarPlus className="h-4 w-4" />}
+        >
           موعد
         </TabButton>
-        <TabButton active={tab === "import"} onClick={() => setTab("import")} icon={<Upload className="h-4 w-4" />}>
+        <TabButton
+          active={tab === "import"}
+          onClick={() => setTab("import")}
+          icon={<Upload className="h-4 w-4" />}
+        >
           استيراد
         </TabButton>
       </div>
@@ -186,7 +212,15 @@ function BranchForm() {
     mutationFn: (data: BranchFormValues) => submit({ data }),
     onSuccess: () => {
       toast.success("تمت إضافة العيادة بنجاح");
-      setForm({ slug: "", name_ar: "", name_en: "", city_ar: "", phone: "", email: "", address_ar: "" });
+      setForm({
+        slug: "",
+        name_ar: "",
+        name_en: "",
+        city_ar: "",
+        phone: "",
+        email: "",
+        address_ar: "",
+      });
       setErrors({});
       setSubmitAttempted(false);
     },
@@ -297,7 +331,10 @@ function DoctorForm() {
   const submit = useServerFn(createDoctor);
   const submitSpec = useServerFn(createSpecialty);
   const branchesQ = useQuery({ queryKey: ["qa", "branches"], queryFn: () => listBranchesAdmin() });
-  const specialtiesQ = useQuery({ queryKey: ["qa", "specs"], queryFn: () => listSpecialtiesFull() });
+  const specialtiesQ = useQuery({
+    queryKey: ["qa", "specs"],
+    queryFn: () => listSpecialtiesFull(),
+  });
 
   const [form, setForm] = useState({
     name_ar: "",
@@ -312,7 +349,14 @@ function DoctorForm() {
     mutationFn: (data: any) => submit({ data }),
     onSuccess: () => {
       toast.success("تمت إضافة الطبيب بنجاح");
-      setForm({ name_ar: "", name_en: "", title_ar: "", specialty_id: form.specialty_id, branch_id: form.branch_id, slug: "" });
+      setForm({
+        name_ar: "",
+        name_en: "",
+        title_ar: "",
+        specialty_id: form.specialty_id,
+        branch_id: form.branch_id,
+        slug: "",
+      });
     },
     onError: (e: any) => toast.error(e?.message ?? "تعذّر إضافة الطبيب"),
   });
@@ -323,7 +367,12 @@ function DoctorForm() {
     mutationFn: (name_ar: string) =>
       submitSpec({
         data: {
-          slug: name_ar.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "") || "spec-" + Date.now(),
+          slug:
+            name_ar
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, "-")
+              .replace(/[^a-z0-9-]/g, "") || "spec-" + Date.now(),
           name_ar: name_ar.trim(),
           name_en: name_ar.trim(),
           is_active: true,
@@ -453,7 +502,10 @@ function DoctorForm() {
 function AppointmentForm() {
   const submit = useServerFn(createAppointmentAdmin);
   const branchesQ = useQuery({ queryKey: ["qa", "branches"], queryFn: () => listBranchesAdmin() });
-  const specialtiesQ = useQuery({ queryKey: ["qa", "specs"], queryFn: () => listSpecialtiesFull() });
+  const specialtiesQ = useQuery({
+    queryKey: ["qa", "specs"],
+    queryFn: () => listSpecialtiesFull(),
+  });
   const doctorsQ = useQuery({ queryKey: ["qa", "doctors"], queryFn: () => listDoctorsAdmin() });
 
   const [form, setForm] = useState({
@@ -635,7 +687,13 @@ function Field({
       <span className="text-muted-foreground">
         {label} {required && <span className="text-destructive">*</span>}
       </span>
-      <div className={error ? "[&_input]:border-destructive [&_select]:border-destructive [&_textarea]:border-destructive" : ""}>
+      <div
+        className={
+          error
+            ? "[&_input]:border-destructive [&_select]:border-destructive [&_textarea]:border-destructive"
+            : ""
+        }
+      >
         {children}
       </div>
       {error && <span className="text-xs text-destructive">{error}</span>}
@@ -676,26 +734,56 @@ type RowStatus = {
   data: Record<string, string>;
 };
 
-const IMPORT_TEMPLATES: Record<ImportKind, { headers: string[]; sample: string[]; hint: string }> = {
-  branch: {
-    headers: ["slug", "name_ar", "name_en", "city_ar", "phone", "email", "address_ar"],
-    sample: ["jeddah-main", "فرع جدة الرئيسي", "Jeddah Main", "جدة", "+96612345678", "info@example.com", "شارع الملك عبدالعزيز"],
-    hint: "الأعمدة المطلوبة: slug, name_ar, name_en. الباقي اختياري.",
-  },
-  doctor: {
-    headers: ["name_ar", "name_en", "title_ar", "specialty", "branch", "slug"],
-    sample: ["د. أحمد علي", "Dr. Ahmed Ali", "استشاري", "أسنان", "جدة الرئيسي", "dr-ahmed-ali"],
-    hint: "specialty و branch يقبلان الاسم (سيتم البحث تلقائيًا). name_ar مطلوب.",
-  },
-  appointment: {
-    headers: ["patient_name", "patient_phone", "branch", "specialty", "doctor", "appointment_date", "appointment_time", "reason"],
-    sample: ["محمد سالم", "+966500000000", "جدة الرئيسي", "أسنان", "د. أحمد علي", "2026-07-20", "10:30", "فحص دوري"],
-    hint: "التنسيقات: التاريخ YYYY-MM-DD، الوقت HH:MM. حقول doctor/specialty/branch تُطابَق بالاسم.",
-  },
-};
+const IMPORT_TEMPLATES: Record<ImportKind, { headers: string[]; sample: string[]; hint: string }> =
+  {
+    branch: {
+      headers: ["slug", "name_ar", "name_en", "city_ar", "phone", "email", "address_ar"],
+      sample: [
+        "jeddah-main",
+        "فرع جدة الرئيسي",
+        "Jeddah Main",
+        "جدة",
+        "+96612345678",
+        "info@example.com",
+        "شارع الملك عبدالعزيز",
+      ],
+      hint: "الأعمدة المطلوبة: slug, name_ar, name_en. الباقي اختياري.",
+    },
+    doctor: {
+      headers: ["name_ar", "name_en", "title_ar", "specialty", "branch", "slug"],
+      sample: ["د. أحمد علي", "Dr. Ahmed Ali", "استشاري", "أسنان", "جدة الرئيسي", "dr-ahmed-ali"],
+      hint: "specialty و branch يقبلان الاسم (سيتم البحث تلقائيًا). name_ar مطلوب.",
+    },
+    appointment: {
+      headers: [
+        "patient_name",
+        "patient_phone",
+        "branch",
+        "specialty",
+        "doctor",
+        "appointment_date",
+        "appointment_time",
+        "reason",
+      ],
+      sample: [
+        "محمد سالم",
+        "+966500000000",
+        "جدة الرئيسي",
+        "أسنان",
+        "د. أحمد علي",
+        "2026-07-20",
+        "10:30",
+        "فحص دوري",
+      ],
+      hint: "التنسيقات: التاريخ YYYY-MM-DD، الوقت HH:MM. حقول doctor/specialty/branch تُطابَق بالاسم.",
+    },
+  };
 
 function parseCsv(text: string): Record<string, string>[] {
-  const clean = text.replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n").trim();
+  const clean = text
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n?/g, "\n")
+    .trim();
   if (!clean) return [];
   const rows: string[][] = [];
   let cur: string[] = [];
@@ -704,14 +792,22 @@ function parseCsv(text: string): Record<string, string>[] {
   for (let i = 0; i < clean.length; i++) {
     const c = clean[i];
     if (inQuotes) {
-      if (c === '"' && clean[i + 1] === '"') { field += '"'; i++; }
-      else if (c === '"') inQuotes = false;
+      if (c === '"' && clean[i + 1] === '"') {
+        field += '"';
+        i++;
+      } else if (c === '"') inQuotes = false;
       else field += c;
     } else {
       if (c === '"') inQuotes = true;
-      else if (c === ",") { cur.push(field); field = ""; }
-      else if (c === "\n") { cur.push(field); rows.push(cur); cur = []; field = ""; }
-      else field += c;
+      else if (c === ",") {
+        cur.push(field);
+        field = "";
+      } else if (c === "\n") {
+        cur.push(field);
+        rows.push(cur);
+        cur = [];
+        field = "";
+      } else field += c;
     }
   }
   cur.push(field);
@@ -721,14 +817,22 @@ function parseCsv(text: string): Record<string, string>[] {
     .filter((r) => r.some((v) => v.trim() !== ""))
     .map((r) => {
       const o: Record<string, string> = {};
-      headers.forEach((h, i) => { o[h] = (r[i] ?? "").trim(); });
+      headers.forEach((h, i) => {
+        o[h] = (r[i] ?? "").trim();
+      });
       return o;
     });
 }
 
 function toCsvTemplate(kind: ImportKind): string {
   const t = IMPORT_TEMPLATES[kind];
-  return "\uFEFF" + t.headers.join(",") + "\n" + t.sample.map((v) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)).join(",") + "\n";
+  return (
+    "\uFEFF" +
+    t.headers.join(",") +
+    "\n" +
+    t.sample.map((v) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v)).join(",") +
+    "\n"
+  );
 }
 
 function downloadTemplate(kind: ImportKind) {
@@ -749,8 +853,7 @@ function findByName<T extends { id: string; name_ar?: string | null; name_en?: s
   const n = needle.trim().toLowerCase();
   const hit = list.find(
     (x) =>
-      (x.name_ar ?? "").trim().toLowerCase() === n ||
-      (x.name_en ?? "").trim().toLowerCase() === n,
+      (x.name_ar ?? "").trim().toLowerCase() === n || (x.name_en ?? "").trim().toLowerCase() === n,
   );
   return hit?.id ?? null;
 }
@@ -760,7 +863,10 @@ function ImportPanel() {
   const submitDoctor = useServerFn(createDoctor);
   const submitAppt = useServerFn(createAppointmentAdmin);
   const branchesQ = useQuery({ queryKey: ["qa", "branches"], queryFn: () => listBranchesAdmin() });
-  const specialtiesQ = useQuery({ queryKey: ["qa", "specs"], queryFn: () => listSpecialtiesFull() });
+  const specialtiesQ = useQuery({
+    queryKey: ["qa", "specs"],
+    queryFn: () => listSpecialtiesFull(),
+  });
   const doctorsQ = useQuery({ queryKey: ["qa", "doctors"], queryFn: () => listDoctorsAdmin() });
 
   const [kind, setKind] = useState<ImportKind>("branch");
@@ -805,7 +911,9 @@ function ImportPanel() {
             } as any,
           });
         } else if (kind === "doctor") {
-          const specialty_id = r.specialty ? findByName(specialtiesQ.data as any, r.specialty) : null;
+          const specialty_id = r.specialty
+            ? findByName(specialtiesQ.data as any, r.specialty)
+            : null;
           const branch_id = r.branch ? findByName(branchesQ.data as any, r.branch) : null;
           if (r.specialty && !specialty_id) throw new Error(`تخصص غير موجود: ${r.specialty}`);
           if (r.branch && !branch_id) throw new Error(`فرع غير موجود: ${r.branch}`);
@@ -823,13 +931,16 @@ function ImportPanel() {
             } as any,
           });
         } else {
-          const specialty_id = r.specialty ? findByName(specialtiesQ.data as any, r.specialty) : null;
+          const specialty_id = r.specialty
+            ? findByName(specialtiesQ.data as any, r.specialty)
+            : null;
           const branch_id = r.branch ? findByName(branchesQ.data as any, r.branch) : null;
           const doctor_id = r.doctor ? findByName(doctorsQ.data as any, r.doctor) : null;
           if (r.specialty && !specialty_id) throw new Error(`تخصص غير موجود: ${r.specialty}`);
           if (r.branch && !branch_id) throw new Error(`فرع غير موجود: ${r.branch}`);
           if (r.doctor && !doctor_id) throw new Error(`طبيب غير موجود: ${r.doctor}`);
-          const time = r.appointment_time?.length === 5 ? r.appointment_time + ":00" : r.appointment_time;
+          const time =
+            r.appointment_time?.length === 5 ? r.appointment_time + ":00" : r.appointment_time;
           await submitAppt({
             data: {
               patient_name: r.patient_name,
@@ -868,10 +979,17 @@ function ImportPanel() {
             <button
               key={k}
               type="button"
-              onClick={() => { setKind(k); setRows([]); setResults([]); setFileName(""); }}
+              onClick={() => {
+                setKind(k);
+                setRows([]);
+                setResults([]);
+                setFileName("");
+              }}
               className={
                 "rounded-md border px-3 py-2 text-sm " +
-                (kind === k ? "border-primary bg-primary text-primary-foreground" : "border-input hover:bg-muted")
+                (kind === k
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-input hover:bg-muted")
               }
             >
               {k === "branch" ? "عيادات" : k === "doctor" ? "أطباء" : "مواعيد"}
@@ -903,10 +1021,17 @@ function ImportPanel() {
         <input
           type="file"
           accept=".csv,text/csv"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onFile(f);
+          }}
           className="block w-full text-sm file:me-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-primary-foreground hover:file:bg-primary/90"
         />
-        {fileName && <span className="text-xs text-muted-foreground">الملف: {fileName} — {rows.length} سطر</span>}
+        {fileName && (
+          <span className="text-xs text-muted-foreground">
+            الملف: {fileName} — {rows.length} سطر
+          </span>
+        )}
       </label>
 
       {rows.length > 0 && (
@@ -917,7 +1042,9 @@ function ImportPanel() {
                 <tr>
                   <th className="p-2 text-start">#</th>
                   {template.headers.map((h) => (
-                    <th key={h} className="p-2 text-start">{h}</th>
+                    <th key={h} className="p-2 text-start">
+                      {h}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -926,7 +1053,9 @@ function ImportPanel() {
                   <tr key={i} className="border-t border-input">
                     <td className="p-2 text-muted-foreground">{i + 1}</td>
                     {template.headers.map((h) => (
-                      <td key={h} className="p-2">{r[h] ?? ""}</td>
+                      <td key={h} className="p-2">
+                        {r[h] ?? ""}
+                      </td>
                     ))}
                   </tr>
                 ))}
@@ -948,14 +1077,17 @@ function ImportPanel() {
           onClick={runImport}
           className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
         >
-          {running ? `جارٍ الاستيراد... (${results.length}/${rows.length})` : `استيراد ${rows.length} سطر`}
+          {running
+            ? `جارٍ الاستيراد... (${results.length}/${rows.length})`
+            : `استيراد ${rows.length} سطر`}
         </button>
       </div>
 
       {results.length > 0 && (
         <div className="rounded-md border border-input">
           <div className="border-b border-input bg-muted/40 p-2 text-sm">
-            نتائج: نجح {results.filter((r) => r.ok).length} • فشل {results.filter((r) => !r.ok).length}
+            نتائج: نجح {results.filter((r) => r.ok).length} • فشل{" "}
+            {results.filter((r) => !r.ok).length}
           </div>
           <div className="max-h-64 overflow-auto">
             <ul className="divide-y divide-input">

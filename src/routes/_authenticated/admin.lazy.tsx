@@ -81,7 +81,9 @@ function AdminNotFound() {
     <div className="admin-console min-h-dvh grid place-items-center p-6" dir="rtl">
       <div className="ac-card max-w-md w-full p-8 text-center">
         <h2 className="text-6xl font-bold text-[color:var(--ac-accent)]">404</h2>
-        <p className="mt-2 text-sm text-[color:var(--ac-ink-3)]">الصفحة غير موجودة داخل لوحة الإدارة.</p>
+        <p className="mt-2 text-sm text-[color:var(--ac-ink-3)]">
+          الصفحة غير موجودة داخل لوحة الإدارة.
+        </p>
         <a
           href="/admin"
           className="mt-6 inline-flex rounded-full px-5 h-10 items-center text-white text-sm font-semibold bg-[color:var(--ac-accent)]"

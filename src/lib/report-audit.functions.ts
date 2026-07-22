@@ -17,8 +17,7 @@ const filterSchema = z.object({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function humanize(err: any) {
   const msg = String(err?.message ?? "");
-  if (/forbidden|42501|permission/i.test(msg))
-    return "ليست لديك الصلاحية لعرض سجل التنزيلات.";
+  if (/forbidden|42501|permission/i.test(msg)) return "ليست لديك الصلاحية لعرض سجل التنزيلات.";
   return msg || "تعذّر تحميل السجل.";
 }
 
@@ -27,18 +26,14 @@ export const listReportDownloadAudit = createServerFn({ method: "POST" })
   .validator((d: unknown) => filterSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { data: rls } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
+    const { data: rls } = await supabase.from("user_roles").select("role").eq("user_id", userId);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const roles = (rls ?? []).map((r: any) => r.role as string);
     if (!roles.some((r) => r === "admin" || r === "super_admin")) {
       throw new Error("ليست لديك الصلاحية لعرض سجل التنزيلات.");
     }
 
-    const actions =
-      data.action === "all" ? (ACTIONS as unknown as string[]) : [data.action];
+    const actions = data.action === "all" ? (ACTIONS as unknown as string[]) : [data.action];
 
     let q = supabase
       .from("security_audit_log")
@@ -79,8 +74,8 @@ export const listReportDownloadAudit = createServerFn({ method: "POST" })
         id: r.id as string,
         action: r.action as string,
         actor: r.actor as string | null,
-        actor_name: r.actor ? actorMap.get(r.actor)?.name ?? null : null,
-        actor_phone: r.actor ? actorMap.get(r.actor)?.phone ?? null : null,
+        actor_name: r.actor ? (actorMap.get(r.actor)?.name ?? null) : null,
+        actor_phone: r.actor ? (actorMap.get(r.actor)?.phone ?? null) : null,
         report_id: (meta.report_id as string | null) ?? null,
         patient_id: (meta.patient_id as string | null) ?? null,
         bucket: (meta.bucket as string | null) ?? null,

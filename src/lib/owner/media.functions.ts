@@ -25,15 +25,25 @@ const MAX_BYTES = 8 * 1024 * 1024; // 8 MB
 
 function sanitizeName(name: string): string {
   const base = name.replace(/\.[^.]+$/, "").toLowerCase();
-  return base.replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60) || "file";
+  return (
+    base
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "")
+      .slice(0, 60) || "file"
+  );
 }
 function extFromMime(mime: string): string {
-  return mime === "image/jpeg" ? "jpg"
-    : mime === "image/png" ? "png"
-    : mime === "image/webp" ? "webp"
-    : mime === "image/gif" ? "gif"
-    : mime === "image/svg+xml" ? "svg"
-    : "bin";
+  return mime === "image/jpeg"
+    ? "jpg"
+    : mime === "image/png"
+      ? "png"
+      : mime === "image/webp"
+        ? "webp"
+        : mime === "image/gif"
+          ? "gif"
+          : mime === "image/svg+xml"
+            ? "svg"
+            : "bin";
 }
 
 export const listOwnerMedia = createServerFn({ method: "GET" })
@@ -55,12 +65,14 @@ export const listOwnerMedia = createServerFn({ method: "GET" })
 export const uploadOwnerMedia = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      file_name: z.string().min(1).max(200),
-      mime_type: z.string().min(1).max(100),
-      data_base64: z.string().min(1),
-      alt_text: z.string().max(200).optional().default(""),
-    }).parse(d),
+    z
+      .object({
+        file_name: z.string().min(1).max(200),
+        mime_type: z.string().min(1).max(100),
+        data_base64: z.string().min(1),
+        alt_text: z.string().max(200).optional().default(""),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertContentAccess(context.supabase, context.userId);
@@ -95,7 +107,10 @@ export const uploadOwnerMedia = createServerFn({ method: "POST" })
       .single();
     if (error) {
       // Best-effort cleanup
-      await supabaseAdmin.storage.from("site-media").remove([key]).catch(() => {});
+      await supabaseAdmin.storage
+        .from("site-media")
+        .remove([key])
+        .catch(() => {});
       throw new Error(error.message);
     }
 
@@ -116,7 +131,10 @@ export const deleteOwnerMedia = createServerFn({ method: "POST" })
     if (!row) throw new Error("العنصر غير موجود.");
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    await supabaseAdmin.storage.from("site-media").remove([row.storage_path]).catch(() => {});
+    await supabaseAdmin.storage
+      .from("site-media")
+      .remove([row.storage_path])
+      .catch(() => {});
 
     const { error } = await context.supabase.from("media_library").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

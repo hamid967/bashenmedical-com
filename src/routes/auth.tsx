@@ -51,7 +51,8 @@ export const Route = createFileRoute("/auth")({
       { title: "تسجيل الدخول | مجمع باعشن الطبي" },
       {
         name: "description",
-        content: "بوابة المريض في مجمع باعشن الطبي — سجل دخولك بأمان لإدارة مواعيدك وسجلاتك الطبية.",
+        content:
+          "بوابة المريض في مجمع باعشن الطبي — سجل دخولك بأمان لإدارة مواعيدك وسجلاتك الطبية.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -238,7 +239,11 @@ function AuthPage() {
           },
         });
         if (error) {
-          safeLog({ action: "login_failed", email: value, metadata: { via: "email_otp", error: error.message } });
+          safeLog({
+            action: "login_failed",
+            email: value,
+            metadata: { via: "email_otp", error: error.message },
+          });
           throw error;
         }
         setOtpStep("verify");
@@ -301,7 +306,10 @@ function AuthPage() {
       }
       const { data, error } = result;
       if (error) {
-        safeLog({ action: "login_failed", metadata: { via: otpChannel === "email" ? "email_otp" : "phone", error: error.message } });
+        safeLog({
+          action: "login_failed",
+          metadata: { via: otpChannel === "email" ? "email_otp" : "phone", error: error.message },
+        });
         throw error;
       }
       safeLog({
@@ -318,7 +326,10 @@ function AuthPage() {
             .from("profiles")
             .update({ phone: e164 })
             .eq("id", data.user.id)
-            .then(() => {}, () => {});
+            .then(
+              () => {},
+              () => {},
+            );
         }
       }
       toast.success("تم تسجيل الدخول بنجاح");
@@ -348,8 +359,7 @@ function AuthPage() {
           <div
             className="absolute inset-0"
             style={{
-              backgroundImage:
-                "radial-gradient(rgba(31,174,255,0.18) 1px, transparent 1px)",
+              backgroundImage: "radial-gradient(rgba(31,174,255,0.18) 1px, transparent 1px)",
               backgroundSize: "40px 40px",
             }}
           />
@@ -372,19 +382,22 @@ function AuthPage() {
               <span className="text-[10rem] leading-none font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-[#1FAEFF] drop-shadow-[0_0_30px_rgba(31,174,255,0.4)]">
                 40
               </span>
-              <span className="text-3xl font-bold mt-4 tracking-wide">
-                عاماً من العطاء المستمر
-              </span>
+              <span className="text-3xl font-bold mt-4 tracking-wide">عاماً من العطاء المستمر</span>
             </div>
           </div>
 
           <p className="mt-8 text-lg text-white/60 max-w-lg mx-auto font-light leading-relaxed">
-            أربعة عقود من الخبرة الطبية الراسخة، والريادة في تقديم أفضل الرعاية الصحية وفق أعلى المعايير العالمية.
+            أربعة عقود من الخبرة الطبية الراسخة، والريادة في تقديم أفضل الرعاية الصحية وفق أعلى
+            المعايير العالمية.
           </p>
 
           {/* Pulse Animation */}
           <div className="mt-12 h-24 w-full flex items-center justify-center">
-            <svg className="w-full max-w-md h-full" viewBox="0 0 400 100" preserveAspectRatio="none">
+            <svg
+              className="w-full max-w-md h-full"
+              viewBox="0 0 400 100"
+              preserveAspectRatio="none"
+            >
               <path
                 d="M0 50 L120 50 L135 30 L150 70 L170 10 L190 90 L210 40 L225 55 L400 50"
                 fill="none"
@@ -470,7 +483,6 @@ function AuthPage() {
             </button>
           </div>
 
-
           {/* Divider */}
           <div className="relative flex items-center mb-5">
             <div className="flex-grow border-t border-white/10" />
@@ -509,7 +521,6 @@ function AuthPage() {
             </button>
           </div>
 
-
           {channel === "email" ? (
             <form onSubmit={handleSubmit} className="relative space-y-4">
               {mode === "signup" && (
@@ -533,7 +544,9 @@ function AuthPage() {
               />
               <div>
                 <div className="flex justify-between items-center px-1 mb-1.5">
-                  <label htmlFor="auth-password" className="text-xs font-semibold text-[#48C7FF]">كلمة المرور</label>
+                  <label htmlFor="auth-password" className="text-xs font-semibold text-[#48C7FF]">
+                    كلمة المرور
+                  </label>
                   {mode === "signin" && (
                     <button
                       type="button"
@@ -631,7 +644,10 @@ function AuthPage() {
 
               {otpChannel === "email" ? (
                 <div>
-                  <label htmlFor="otp-email" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                  <label
+                    htmlFor="otp-email"
+                    className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1"
+                  >
                     البريد الإلكتروني
                   </label>
                   <div className="relative">
@@ -657,7 +673,10 @@ function AuthPage() {
                 </div>
               ) : (
                 <div>
-                  <label htmlFor="otp-phone" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                  <label
+                    htmlFor="otp-phone"
+                    className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1"
+                  >
                     رقم الجوال
                   </label>
                   <div className="relative">
@@ -696,7 +715,6 @@ function AuthPage() {
                 إرسال رمز التحقق
               </button>
             </form>
-
           ) : (
             <form onSubmit={handleVerifyOtp} className="relative space-y-4">
               <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-white/70 flex items-center justify-between">
@@ -719,7 +737,10 @@ function AuthPage() {
               </div>
 
               <div>
-                <label htmlFor="otp-code" className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1">
+                <label
+                  htmlFor="otp-code"
+                  className="mb-1.5 block text-xs font-semibold text-[#48C7FF] px-1"
+                >
                   رمز التحقق
                 </label>
                 <div className="relative">
@@ -851,7 +872,10 @@ function Field({
         {label}
       </label>
       <div className="relative">
-        <span className="absolute inset-y-0 start-3 grid place-items-center text-white/40" aria-hidden="true">
+        <span
+          className="absolute inset-y-0 start-3 grid place-items-center text-white/40"
+          aria-hidden="true"
+        >
           {icon}
         </span>
         <input
@@ -872,10 +896,22 @@ function Field({
 function GoogleIcon() {
   return (
     <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden>
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.75h3.57c2.08-1.92 3.28-4.74 3.28-8.07z"/>
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.68l-3.57-2.75c-.99.66-2.25 1.06-3.71 1.06-2.85 0-5.27-1.92-6.14-4.51H2.18v2.83C4 20.99 7.7 23 12 23z"/>
-      <path fill="#FBBC05" d="M5.86 14.12c-.22-.66-.35-1.36-.35-2.12s.13-1.46.35-2.12V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.68-2.83z"/>
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 4 3.01 2.18 6.05l3.68 2.83C6.73 6.29 9.15 5.38 12 5.38z"/>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.75h3.57c2.08-1.92 3.28-4.74 3.28-8.07z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.68l-3.57-2.75c-.99.66-2.25 1.06-3.71 1.06-2.85 0-5.27-1.92-6.14-4.51H2.18v2.83C4 20.99 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.86 14.12c-.22-.66-.35-1.36-.35-2.12s.13-1.46.35-2.12V7.05H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.95l3.68-2.83z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 4 3.01 2.18 6.05l3.68 2.83C6.73 6.29 9.15 5.38 12 5.38z"
+      />
     </svg>
   );
 }
@@ -883,7 +919,7 @@ function GoogleIcon() {
 function AppleIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-white" aria-hidden>
-      <path d="M17.05 20.28c-.98.95-2.05.86-3.08.38-1.09-.5-2.08-.52-3.24 0-1.44.62-2.2.44-3.06-.38C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+      <path d="M17.05 20.28c-.98.95-2.05.86-3.08.38-1.09-.5-2.08-.52-3.24 0-1.44.62-2.2.44-3.06-.38C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
     </svg>
   );
 }

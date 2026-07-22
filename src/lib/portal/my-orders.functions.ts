@@ -52,11 +52,7 @@ export const getMyRecentOrders = createServerFn({ method: "GET" })
     // 1) هوية المريض (patient row) + هاتف الملف الشخصي — للربط عبر الهاتف
     const [{ data: profile }, { data: patient }] = await Promise.all([
       supabase.from("profiles").select("phone").eq("id", userId).maybeSingle(),
-      supabase
-        .from("patients")
-        .select("id")
-        .eq("profile_id", userId)
-        .maybeSingle(),
+      supabase.from("patients").select("id").eq("profile_id", userId).maybeSingle(),
     ]);
 
     const patientId = patient?.id ?? null;
@@ -178,7 +174,9 @@ export const getMyRecentOrders = createServerFn({ method: "GET" })
           id: r.id,
           reference: null,
           title: `${KIND_TITLES.appointment}${
-            r.appointment_date ? ` — ${r.appointment_date}${r.appointment_time ? " " + r.appointment_time.slice(0, 5) : ""}` : ""
+            r.appointment_date
+              ? ` — ${r.appointment_date}${r.appointment_time ? " " + r.appointment_time.slice(0, 5) : ""}`
+              : ""
           }`,
           status: r.status,
           created_at: r.created_at,

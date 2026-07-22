@@ -7,21 +7,12 @@
  * public FloatingWhatsAppButton confirmation flow.
  */
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import {
-  queryOptions,
-  useSuspenseQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import {
-  listMyInquiries,
-  claimMyInquiry,
-  type MyInquiry,
-} from "@/lib/portal/inquiries.functions";
+import { listMyInquiries, claimMyInquiry, type MyInquiry } from "@/lib/portal/inquiries.functions";
 import {
   MessageCircle,
   RefreshCw,
@@ -86,7 +77,9 @@ function removePending(reqNum: string) {
   try {
     const arr = readPending().filter((r) => r.request_number !== reqNum);
     localStorage.setItem(LS_KEY, JSON.stringify(arr));
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }
 
 function MyInquiriesPage() {
@@ -230,7 +223,11 @@ function MyInquiriesPage() {
             disabled={manual.isPending}
             className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
           >
-            {manual.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {manual.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             ربط
           </button>
         </form>
@@ -323,9 +320,7 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
             التاريخ المفضل: {i.preferred_date}
           </div>
         )}
-        {i.notes && (
-          <p className="text-xs text-muted-foreground line-clamp-3 mt-1">{i.notes}</p>
-        )}
+        {i.notes && <p className="text-xs text-muted-foreground line-clamp-3 mt-1">{i.notes}</p>}
       </div>
 
       {/* شريط الحالة: قيد الربط → قيد المراجعة → مكتمل */}
@@ -333,7 +328,9 @@ function InquiryCard({ i, highlighted }: { i: MyInquiry; highlighted: boolean })
 
       <div className="mt-3 flex flex-wrap gap-1.5 text-[11px]">
         <Badge tone="primary">{STATUS_LABEL[i.internal_status] ?? i.internal_status}</Badge>
-        <Badge tone="muted">واتساب: {HANDOFF_LABEL[i.whatsapp_handoff_status] ?? i.whatsapp_handoff_status}</Badge>
+        <Badge tone="muted">
+          واتساب: {HANDOFF_LABEL[i.whatsapp_handoff_status] ?? i.whatsapp_handoff_status}
+        </Badge>
       </div>
 
       <div className="mt-4 pt-3 border-t border-border">
@@ -374,8 +371,7 @@ function StatusStepper({ inquiry: i }: { inquiry: MyInquiry }) {
   const status = i.internal_status;
   const isCancelled = status === "cancelled";
   const isCompleted = status === "closed" || status === "completed" || status === "scheduled";
-  const isReviewing =
-    status === "in_progress" || status === "contacted";
+  const isReviewing = status === "in_progress" || status === "contacted";
   const isLinked = !!i.linked_at;
 
   const steps: Step[] = [
@@ -488,5 +484,9 @@ function Badge({ children, tone }: { children: React.ReactNode; tone: "primary" 
     tone === "primary"
       ? "bg-primary/10 text-primary border-primary/20"
       : "bg-muted text-muted-foreground border-border";
-  return <span className={`inline-flex items-center rounded-full border px-2 py-0.5 ${cls}`}>{children}</span>;
+  return (
+    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 ${cls}`}>
+      {children}
+    </span>
+  );
 }

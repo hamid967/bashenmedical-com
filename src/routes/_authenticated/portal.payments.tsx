@@ -12,17 +12,18 @@ const paymentsQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/portal/payments")({
   loader: async ({ context }) => context.queryClient.ensureQueryData(paymentsQuery),
   head: () => ({
-    meta: [
-      { title: "المدفوعات | بوابة المريض" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "المدفوعات | بوابة المريض" }, { name: "robots", content: "noindex" }],
   }),
   component: PortalPaymentsPage,
 });
 
 function fmtSAR(n: number, currency = "SAR") {
   try {
-    return new Intl.NumberFormat("ar-SA", { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+    return new Intl.NumberFormat("ar-SA", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(n);
   } catch {
     return `${n.toFixed(2)} ${currency}`;
   }
@@ -51,9 +52,13 @@ const methodLabel: Record<string, string> = {
 
 function PortalPaymentsPage() {
   const { data } = useSuspenseQuery(paymentsQuery);
-  const succeeded = data.payments.filter((p) => ["succeeded", "paid", "completed"].includes(p.status));
+  const succeeded = data.payments.filter((p) =>
+    ["succeeded", "paid", "completed"].includes(p.status),
+  );
   const totalPaid = succeeded.reduce((s, p) => s + Number(p.amount ?? 0), 0);
-  const pendingCount = data.payments.filter((p) => ["pending", "processing"].includes(p.status)).length;
+  const pendingCount = data.payments.filter((p) =>
+    ["pending", "processing"].includes(p.status),
+  ).length;
 
   return (
     <div className="portal-magazine min-h-full">
@@ -77,9 +82,19 @@ function PortalPaymentsPage() {
         </header>
 
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Stat icon={CheckCircle2} label="إجمالي المدفوع" value={fmtSAR(totalPaid)} tone="success" />
+          <Stat
+            icon={CheckCircle2}
+            label="إجمالي المدفوع"
+            value={fmtSAR(totalPaid)}
+            tone="success"
+          />
           <Stat icon={Wallet} label="عدد العمليات" value={String(data.payments.length)} />
-          <Stat icon={Clock} label="قيد المعالجة" value={String(pendingCount)} tone={pendingCount > 0 ? "warning" : "default"} />
+          <Stat
+            icon={Clock}
+            label="قيد المعالجة"
+            value={String(pendingCount)}
+            tone={pendingCount > 0 ? "warning" : "default"}
+          />
         </section>
 
         {data.payments.length === 0 ? (
@@ -94,15 +109,20 @@ function PortalPaymentsPage() {
             {data.payments.map((p) => {
               const ok = ["succeeded", "paid", "completed"].includes(p.status);
               return (
-                <li key={p.id} className="mag-card mag-card-hover p-4 sm:p-5 flex flex-wrap items-center gap-4">
+                <li
+                  key={p.id}
+                  className="mag-card mag-card-hover p-4 sm:p-5 flex flex-wrap items-center gap-4"
+                >
                   <div
                     className={`h-11 w-11 rounded-xl grid place-items-center ${
-                      ok
-                        ? "bg-emerald-50 text-emerald-700"
-                        : "bg-amber-50 text-amber-700"
+                      ok ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"
                     }`}
                   >
-                    {ok ? <CheckCircle2 className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+                    {ok ? (
+                      <CheckCircle2 className="h-5 w-5" />
+                    ) : (
+                      <AlertCircle className="h-5 w-5" />
+                    )}
                   </div>
                   <div className="flex-1 min-w-[180px]">
                     <div className="font-semibold">
@@ -149,8 +169,8 @@ function Stat({
     tone === "success"
       ? "bg-emerald-50 text-emerald-700"
       : tone === "warning"
-      ? "bg-amber-50 text-amber-700"
-      : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]";
+        ? "bg-amber-50 text-amber-700"
+        : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]";
   return (
     <div className="mag-card p-5">
       <div className={`h-10 w-10 rounded-xl grid place-items-center ${toneCls}`}>

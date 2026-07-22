@@ -50,7 +50,8 @@ export const PortalInput = forwardRef<HTMLInputElement, PortalInputProps>(functi
           background: "#ffffff",
           border: `1px solid ${invalid ? "var(--ds-error-500)" : "var(--ds-border-strong)"}`,
           borderRadius: "var(--ds-radius-md)",
-          transition: "border-color var(--ds-dur-base) var(--ds-ease-out), box-shadow var(--ds-dur-base) var(--ds-ease-out)",
+          transition:
+            "border-color var(--ds-dur-base) var(--ds-ease-out), box-shadow var(--ds-dur-base) var(--ds-ease-out)",
         }}
       >
         {leadingIcon && (

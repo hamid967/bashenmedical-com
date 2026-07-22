@@ -67,9 +67,7 @@ export function PortalPageHeader({
             </p>
           )}
         </div>
-        {actions && (
-          <div className="shrink-0 flex flex-wrap items-center gap-2">{actions}</div>
-        )}
+        {actions && <div className="shrink-0 flex flex-wrap items-center gap-2">{actions}</div>}
       </div>
     </header>
   );

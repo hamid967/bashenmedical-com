@@ -49,10 +49,25 @@ export const Route = createFileRoute("/_authenticated/patients-management")({
   ),
 });
 
-const STATUS_META: Record<PatientStatus, { ar: string; className: string; icon: React.ComponentType<{ className?: string }> }> = {
-  active: { ar: "نشط", className: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: UserCheck },
-  inactive: { ar: "غير نشط", className: "bg-amber-100 text-amber-700 border-amber-200", icon: UserX },
-  archived: { ar: "مؤرشف", className: "bg-slate-100 text-slate-700 border-slate-200", icon: Archive },
+const STATUS_META: Record<
+  PatientStatus,
+  { ar: string; className: string; icon: React.ComponentType<{ className?: string }> }
+> = {
+  active: {
+    ar: "نشط",
+    className: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    icon: UserCheck,
+  },
+  inactive: {
+    ar: "غير نشط",
+    className: "bg-amber-100 text-amber-700 border-amber-200",
+    icon: UserX,
+  },
+  archived: {
+    ar: "مؤرشف",
+    className: "bg-slate-100 text-slate-700 border-slate-200",
+    icon: Archive,
+  },
   deceased: { ar: "متوفى", className: "bg-rose-100 text-rose-700 border-rose-200", icon: HeartOff },
 };
 
@@ -98,7 +113,11 @@ function PatientsManagement() {
   const branchesQ = useQuery({ queryKey: ["pm", "branches"], queryFn: () => branchesFn() });
   const tagsQ = useQuery({ queryKey: ["pm", "tags"], queryFn: () => tagsFn() });
   const listQ = useQuery({
-    queryKey: ["pm", "list", { q, branchId, status, gender, tag, minAge, maxAge, createdFrom, createdTo, page }],
+    queryKey: [
+      "pm",
+      "list",
+      { q, branchId, status, gender, tag, minAge, maxAge, createdFrom, createdTo, page },
+    ],
     queryFn: () =>
       listFn({
         data: {
@@ -440,7 +459,10 @@ function PatientsManagement() {
                   const M = STATUS_META[r.status];
                   const isSel = selected.has(r.id);
                   return (
-                    <tr key={r.id} className={`border-t ${isSel ? "bg-primary/5" : "hover:bg-muted/30"}`}>
+                    <tr
+                      key={r.id}
+                      className={`border-t ${isSel ? "bg-primary/5" : "hover:bg-muted/30"}`}
+                    >
                       <td className="px-3 py-2">
                         <button onClick={() => toggleOne(r.id)} aria-label="تحديد">
                           {isSel ? (
@@ -602,7 +624,9 @@ function StatusEditorDialog({
     }
     setSaving(true);
     try {
-      await fn({ data: { patientId: patient.id, status: next, reason: reason.trim() || undefined } });
+      await fn({
+        data: { patientId: patient.id, status: next, reason: reason.trim() || undefined },
+      });
       toast.success(`تم تحديث حالة ${patient.full_name_ar}`);
       onSaved();
     } catch (e) {
@@ -639,7 +663,9 @@ function StatusEditorDialog({
                     key={s}
                     onClick={() => setNext(s)}
                     className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm ${
-                      next === s ? `${M.className} ring-2 ring-primary/40` : "border-input hover:bg-muted"
+                      next === s
+                        ? `${M.className} ring-2 ring-primary/40`
+                        : "border-input hover:bg-muted"
                     }`}
                   >
                     <M.icon className="h-4 w-4" />
@@ -737,7 +763,9 @@ function BulkStatusDialog({
         <div className="space-y-3 p-5 text-sm">
           <div>
             سيتم تحديث <b>{ids.length}</b> مريضًا إلى الحالة:{" "}
-            <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs ${M.className}`}>
+            <span
+              className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs ${M.className}`}
+            >
               <M.icon className="h-3 w-3" /> {M.ar}
             </span>
           </div>

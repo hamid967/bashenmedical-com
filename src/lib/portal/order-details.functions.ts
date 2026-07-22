@@ -84,8 +84,7 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
     // ownership check (بعد التحقق من RLS، هذا حزام أمان إضافي على مستوى التطبيق).
     const ownerByPatient = patientId && (order as any).patient_id === patientId;
     const ownerByPhone =
-      phone &&
-      ((order as any).patient_phone === phone || (order as any).phone === phone);
+      phone && ((order as any).patient_phone === phone || (order as any).phone === phone);
     if (!ownerByPatient && !ownerByPhone) {
       throw new Error("لا تملك صلاحية الاطّلاع على هذا الطلب.");
     }

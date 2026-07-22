@@ -30,11 +30,7 @@ export function JazanDivider({ className, variant = "standard" }: Props) {
           opacity: lineOpacity,
         }}
       />
-      <svg
-        viewBox="0 0 40 16"
-        className="h-3 w-8 sm:h-4 sm:w-10 shrink-0"
-        aria-hidden="true"
-      >
+      <svg viewBox="0 0 40 16" className="h-3 w-8 sm:h-4 sm:w-10 shrink-0" aria-hidden="true">
         <path
           d="M2 8 L8 8"
           stroke="currentColor"
@@ -42,23 +38,9 @@ export function JazanDivider({ className, variant = "standard" }: Props) {
           strokeLinecap="round"
           opacity="0.6"
         />
-        <path
-          d="M12 8 L20 2 L28 8 L20 14 Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1"
-        />
-        <path
-          d="M16 8 L20 5 L24 8 L20 11 Z"
-          fill="var(--jazan-gold, #C7A46B)"
-          opacity="0.7"
-        />
-        <circle
-          cx="20"
-          cy="8"
-          r="1.2"
-          fill="var(--jazan-terracotta, #B85C3C)"
-        />
+        <path d="M12 8 L20 2 L28 8 L20 14 Z" fill="none" stroke="currentColor" strokeWidth="1" />
+        <path d="M16 8 L20 5 L24 8 L20 11 Z" fill="var(--jazan-gold, #C7A46B)" opacity="0.7" />
+        <circle cx="20" cy="8" r="1.2" fill="var(--jazan-terracotta, #B85C3C)" />
         <path
           d="M32 8 L38 8"
           stroke="currentColor"

@@ -36,9 +36,7 @@ export const Route = createFileRoute("/api/public/reservations/list")({
         }
 
         const ip = getClientIp(request);
-        const rl = checkRateLimit(`resv-list:${ip}`, [
-          { windowMs: 60_000, max: 30 },
-        ]);
+        const rl = checkRateLimit(`resv-list:${ip}`, [{ windowMs: 60_000, max: 30 }]);
         if (!rl.ok) {
           return jsonResponse(429, {
             ok: false,
@@ -55,12 +53,8 @@ export const Route = createFileRoute("/api/public/reservations/list")({
         }
 
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
-          const since = new Date(
-            Date.now() - 90 * 24 * 3600 * 1000,
-          ).toISOString();
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const since = new Date(Date.now() - 90 * 24 * 3600 * 1000).toISOString();
 
           const { data, error } = await supabaseAdmin
             .from("appointments")
@@ -98,7 +92,7 @@ export const Route = createFileRoute("/api/public/reservations/list")({
             branch: { name_ar: string | null; name_en: string | null } | null;
             specialty: { name_ar: string | null; name_en: string | null } | null;
           };
-          const appointments = (data as Row[] | null ?? []).map((r) => ({
+          const appointments = ((data as Row[] | null) ?? []).map((r) => ({
             id: r.id,
             reference: toReference(r.id),
             date: r.appointment_date,

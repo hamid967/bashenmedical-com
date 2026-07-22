@@ -142,10 +142,9 @@ const PAYLOAD_PRESETS: PayloadPreset[] = [
     body: "يرجى تسوية الفاتورة لتجنّب تأجيل الخدمات.",
     url: "/portal/invoices",
     requireInteraction: true,
-    dataJson:
-      '{\n  "kind": "invoice_due",\n  "invoiceId": "INV-2026-0042",\n  "amount": 350\n}',
+    dataJson: '{\n  "kind": "invoice_due",\n  "invoiceId": "INV-2026-0042",\n  "amount": 350\n}',
   },
-]
+];
 
 export function PushSubscriptionCard() {
   const push = usePushNotifications(true);
@@ -188,10 +187,7 @@ export function PushSubscriptionCard() {
           return;
         }
         const script =
-          reg.active?.scriptURL ||
-          reg.waiting?.scriptURL ||
-          reg.installing?.scriptURL ||
-          null;
+          reg.active?.scriptURL || reg.waiting?.scriptURL || reg.installing?.scriptURL || null;
         setSwDiag({
           supported: true,
           registered: true,
@@ -223,7 +219,7 @@ export function PushSubscriptionCard() {
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;
     let cancelled = false;
-    let cleanupFns: Array<() => void> = [];
+    const cleanupFns: Array<() => void> = [];
 
     void (async () => {
       await readSwState("initial");
@@ -301,8 +297,6 @@ export function PushSubscriptionCard() {
       setRetryingPermission(false);
     }
   }, [push]);
-
-
 
   // Refresh subscription details whenever the subscribed state changes.
   useEffect(() => {
@@ -428,15 +422,16 @@ export function PushSubscriptionCard() {
     }
   }, [sendServer, payload]);
 
-
-
-
   // Status pill config
   const statusPill = (() => {
     if (push.state === "unsupported")
       return { icon: XCircle, label: "غير مدعوم في هذا المتصفح", tone: "muted" as const };
     if (push.state === "denied")
-      return { icon: ShieldAlert, label: "الإذن مرفوض — فعّله من إعدادات المتصفح", tone: "danger" as const };
+      return {
+        icon: ShieldAlert,
+        label: "الإذن مرفوض — فعّله من إعدادات المتصفح",
+        tone: "danger" as const,
+      };
     if (push.state === "granted" && push.subscribed)
       return { icon: ShieldCheck, label: "مفعّل — الاشتراك نشط", tone: "success" as const };
     if (push.state === "granted")
@@ -446,10 +441,13 @@ export function PushSubscriptionCard() {
 
   const StatusIcon = statusPill.icon;
   const toneClass = {
-    success: "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900",
-    danger: "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900",
+    success:
+      "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-900",
+    danger:
+      "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-900",
     info: "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/40 dark:text-sky-300 dark:border-sky-900",
-    muted: "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700",
+    muted:
+      "bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700",
   }[statusPill.tone];
 
   return (
@@ -468,16 +466,30 @@ export function PushSubscriptionCard() {
       </div>
 
       {/* Status */}
-      <div className={`mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${toneClass}`}>
+      <div
+        className={`mb-4 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm ${toneClass}`}
+      >
         <StatusIcon className="size-4" />
         <span>{statusPill.label}</span>
       </div>
 
       {/* Diagnostic grid */}
       <dl className="mb-4 grid grid-cols-2 gap-3 rounded-xl border bg-muted/30 p-3 text-xs sm:grid-cols-4">
-        <Diagnostic label="Support" value={push.state === "unsupported" ? "لا" : "نعم"} ok={push.state !== "unsupported"} />
-        <Diagnostic label="Permission" value={push.state === "unknown" ? "—" : push.state} ok={push.state === "granted"} />
-        <Diagnostic label="Subscribed" value={push.subscribed ? "نعم" : "لا"} ok={push.subscribed} />
+        <Diagnostic
+          label="Support"
+          value={push.state === "unsupported" ? "لا" : "نعم"}
+          ok={push.state !== "unsupported"}
+        />
+        <Diagnostic
+          label="Permission"
+          value={push.state === "unknown" ? "—" : push.state}
+          ok={push.state === "granted"}
+        />
+        <Diagnostic
+          label="Subscribed"
+          value={push.subscribed ? "نعم" : "لا"}
+          ok={push.subscribed}
+        />
         <Diagnostic
           label="Endpoint"
           value={details?.endpoint ? `${new URL(details.endpoint).host.slice(0, 20)}…` : "—"}
@@ -488,20 +500,30 @@ export function PushSubscriptionCard() {
       {/* Subscription details (when active) */}
       {details && (
         <div className="mb-4 space-y-2 rounded-xl border bg-background p-3">
-          <DetailRow label="Endpoint" value={details.endpoint} onCopy={() => copy(details.endpoint, "الـ endpoint")} />
+          <DetailRow
+            label="Endpoint"
+            value={details.endpoint}
+            onCopy={() => copy(details.endpoint, "الـ endpoint")}
+          />
           {details.p256dh && (
-            <DetailRow label="p256dh" value={details.p256dh} onCopy={() => copy(details.p256dh!, "المفتاح p256dh")} />
+            <DetailRow
+              label="p256dh"
+              value={details.p256dh}
+              onCopy={() => copy(details.p256dh!, "المفتاح p256dh")}
+            />
           )}
           {details.auth && (
-            <DetailRow label="auth" value={details.auth} onCopy={() => copy(details.auth!, "المفتاح auth")} />
+            <DetailRow
+              label="auth"
+              value={details.auth}
+              onCopy={() => copy(details.auth!, "المفتاح auth")}
+            />
           )}
         </div>
       )}
 
       {/* Service Worker diagnostic panel */}
       <SwDiagnosticPanel diag={swDiag} onRefresh={forceSwUpdate} refreshing={swRefreshing} />
-
-
 
       {/* Stale subscription banner — expired or endpoint rotated */}
       {push.stale && (
@@ -510,9 +532,7 @@ export function PushSubscriptionCard() {
             <RotateCcw className="mt-0.5 size-4 text-amber-700 dark:text-amber-300" />
             <div className="text-xs text-amber-900 dark:text-amber-100">
               <div className="font-semibold">
-                {push.stale === "expired"
-                  ? "انتهت صلاحية الاشتراك"
-                  : "تغيّر endpoint الاشتراك"}
+                {push.stale === "expired" ? "انتهت صلاحية الاشتراك" : "تغيّر endpoint الاشتراك"}
               </div>
               <div className="mt-0.5 text-amber-800/80 dark:text-amber-200/80">
                 {push.stale === "expired"
@@ -527,7 +547,11 @@ export function PushSubscriptionCard() {
             disabled={push.busy}
             className="inline-flex items-center gap-2 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm transition hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {push.busy ? <Loader2 className="size-3.5 animate-spin" /> : <RotateCcw className="size-3.5" />}
+            {push.busy ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <RotateCcw className="size-3.5" />
+            )}
             إعادة الاشتراك
           </button>
         </div>
@@ -551,7 +575,11 @@ export function PushSubscriptionCard() {
             disabled={push.busy}
             className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {push.busy ? <Loader2 className="size-4 animate-spin" /> : <BellOff className="size-4" />}
+            {push.busy ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <BellOff className="size-4" />
+            )}
             إيقاف الاشتراك
           </button>
         )}
@@ -562,7 +590,11 @@ export function PushSubscriptionCard() {
           className="inline-flex items-center gap-2 rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium transition hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
           title="إشعار محلي عبر showNotification()"
         >
-          {testing ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+          {testing ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <CheckCircle2 className="size-4" />
+          )}
           إشعار محلي
         </button>
 
@@ -572,7 +604,11 @@ export function PushSubscriptionCard() {
           className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
           title="Web Push حقيقي من الخادم عبر VAPID → مزوّد المتصفح"
         >
-          {serverSending ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
+          {serverSending ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : (
+            <Send className="size-4" />
+          )}
           إرسال من الخادم
         </button>
 
@@ -594,9 +630,7 @@ export function PushSubscriptionCard() {
               <span className="text-xs font-semibold text-muted-foreground">
                 قوالب جاهزة — Presets
               </span>
-              <span className="text-[10px] text-muted-foreground">
-                تستبدل الحقول أدناه
-              </span>
+              <span className="text-[10px] text-muted-foreground">تستبدل الحقول أدناه</span>
             </div>
             <div className="flex flex-wrap gap-1.5">
               {PAYLOAD_PRESETS.map((preset) => (
@@ -624,7 +658,6 @@ export function PushSubscriptionCard() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-
             <label className="space-y-1 text-xs">
               <span className="font-semibold text-muted-foreground">العنوان — Title</span>
               <input
@@ -663,9 +696,7 @@ export function PushSubscriptionCard() {
             <input
               type="checkbox"
               checked={payload.requireInteraction}
-              onChange={(e) =>
-                setPayload((p) => ({ ...p, requireInteraction: e.target.checked }))
-              }
+              onChange={(e) => setPayload((p) => ({ ...p, requireInteraction: e.target.checked }))}
               className="rounded border-input"
             />
             <span>يتطلّب تفاعل المستخدم للإخفاء (requireInteraction)</span>
@@ -716,7 +747,8 @@ export function PushSubscriptionCard() {
             ) : (
               <span className="block text-[11px] text-muted-foreground">
                 تُدمج في <code className="rounded bg-background px-1">metadata</code> وتصل إلى{" "}
-                <code className="rounded bg-background px-1">event.notification.data</code> داخل الـ SW.
+                <code className="rounded bg-background px-1">event.notification.data</code> داخل الـ
+                SW.
               </span>
             )}
           </label>
@@ -729,7 +761,6 @@ export function PushSubscriptionCard() {
         </div>
       )}
 
-
       {push.state === "denied" && (
         <PermissionDeniedGuide onRetry={retryPermission} retrying={retryingPermission} />
       )}
@@ -740,8 +771,12 @@ export function PushSubscriptionCard() {
 function Diagnostic({ label, value, ok }: { label: string; value: string; ok: boolean }) {
   return (
     <div>
-      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{label}</dt>
-      <dd className={`mt-0.5 truncate font-mono text-xs ${ok ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}>
+      <dt className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+        {label}
+      </dt>
+      <dd
+        className={`mt-0.5 truncate font-mono text-xs ${ok ? "text-emerald-600 dark:text-emerald-400" : "text-muted-foreground"}`}
+      >
         {value}
       </dd>
     </div>
@@ -842,9 +877,7 @@ function SwDiagnosticPanel({
       <div className="mb-2 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Activity className="size-4 text-muted-foreground" />
-          <h3 className="text-sm font-semibold text-foreground">
-            تشخيص الـ Service Worker
-          </h3>
+          <h3 className="text-sm font-semibold text-foreground">تشخيص الـ Service Worker</h3>
           <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
               !diag.supported
@@ -874,21 +907,17 @@ function SwDiagnosticPanel({
       </div>
 
       {!diag.supported && (
-        <p className="text-xs text-muted-foreground">
-          لا يدعم هذا المتصفح Service Workers.
-        </p>
+        <p className="text-xs text-muted-foreground">لا يدعم هذا المتصفح Service Workers.</p>
       )}
 
       {diag.supported && !registered && !diag.error && (
         <p className="text-xs text-muted-foreground">
-          الملف <code className="rounded bg-background px-1">/sw-push.js</code> غير
-          مسجّل بعد. اضغط «تفعيل الإشعارات» لتسجيله.
+          الملف <code className="rounded bg-background px-1">/sw-push.js</code> غير مسجّل بعد. اضغط
+          «تفعيل الإشعارات» لتسجيله.
         </p>
       )}
 
-      {diag.error && (
-        <p className="text-xs text-rose-600 dark:text-rose-400">خطأ: {diag.error}</p>
-      )}
+      {diag.error && <p className="text-xs text-rose-600 dark:text-rose-400">خطأ: {diag.error}</p>}
 
       {registered && (
         <div className="space-y-2">
@@ -935,9 +964,7 @@ function SwDiagnosticPanel({
             </span>
             <span>
               آخر حدث:{" "}
-              <code className="rounded bg-background px-1 font-mono">
-                {diag.lastEvent ?? "—"}
-              </code>
+              <code className="rounded bg-background px-1 font-mono">{diag.lastEvent ?? "—"}</code>
             </span>
             <span>
               آخر تحديث:{" "}
@@ -951,7 +978,6 @@ function SwDiagnosticPanel({
     </div>
   );
 }
-
 
 type BrowserGuide = {
   name: string;
@@ -1071,9 +1097,9 @@ function PermissionDeniedGuide({
             تم رفض إذن الإشعارات
           </h4>
           <p className="mt-0.5 text-xs text-rose-800/80 dark:text-rose-300/80">
-            المتصفح المكتشف: <span className="font-semibold">{guide.name}</span>. اتبع
-            الخطوات التالية ثم اضغط «إعادة المحاولة». المتصفحات لا تسمح لصفحة الويب
-            بإعادة طلب الإذن تلقائيًا بعد الرفض.
+            المتصفح المكتشف: <span className="font-semibold">{guide.name}</span>. اتبع الخطوات
+            التالية ثم اضغط «إعادة المحاولة». المتصفحات لا تسمح لصفحة الويب بإعادة طلب الإذن
+            تلقائيًا بعد الرفض.
           </p>
         </div>
       </div>
@@ -1131,8 +1157,8 @@ function PermissionDeniedGuide({
       <p className="mt-3 flex items-start gap-1.5 text-[11px] text-rose-800/70 dark:text-rose-300/70">
         <Info className="mt-0.5 size-3 shrink-0" />
         <span>
-          بعد تغيير الإعدادات، قد يتطلب المتصفح إعادة تحميل الصفحة لتفعيل الحالة
-          الجديدة قبل الاشتراك.
+          بعد تغيير الإعدادات، قد يتطلب المتصفح إعادة تحميل الصفحة لتفعيل الحالة الجديدة قبل
+          الاشتراك.
         </span>
       </p>
     </div>

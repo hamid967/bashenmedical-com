@@ -75,7 +75,12 @@ export function useDoctorSearch(): DoctorSearchContextValue {
 // ---- shared helpers -------------------------------------------------------
 
 const csvToList = (v: string): string[] =>
-  v ? v.split(",").map((s) => s.trim()).filter(Boolean) : [];
+  v
+    ? v
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
 const listToCsv = (l: string[]): string => l.join(",");
 
 const toggle = (current: string[], id: string): string[] =>
@@ -84,15 +89,10 @@ const toggle = (current: string[], id: string): string[] =>
 const clampSort = (s: string | undefined): SortKey =>
   (SORT_KEYS as readonly string[]).includes(s ?? "") ? (s as SortKey) : "rating";
 
-const clampGender = (g: string | undefined): Gender =>
-  g === "male" || g === "female" ? g : "";
+const clampGender = (g: string | undefined): Gender => (g === "male" || g === "female" ? g : "");
 
 const computeActive = (s: DoctorSearchState): number =>
-  s.specialty.length +
-  s.branch.length +
-  (s.gender ? 1 : 0) +
-  s.language.length +
-  (s.q ? 1 : 0);
+  s.specialty.length + s.branch.length + (s.gender ? 1 : 0) + s.language.length + (s.q ? 1 : 0);
 
 // ---- URL-backed provider (used by /doctors) -------------------------------
 
@@ -135,7 +135,15 @@ export function UrlDoctorSearchProvider({ params, onPatch, onReset, children }: 
       sort: clampSort(params.sort),
       page: Math.max(1, params.page),
     };
-  }, [params.q, params.specialty, params.branch, params.gender, params.language, params.sort, params.page]);
+  }, [
+    params.q,
+    params.specialty,
+    params.branch,
+    params.gender,
+    params.language,
+    params.sort,
+    params.page,
+  ]);
 
   // Live text input, debounced writes to URL. Kept in sync with external URL
   // changes (browser back/forward or programmatic navigate).
@@ -157,10 +165,7 @@ export function UrlDoctorSearchProvider({ params, onPatch, onReset, children }: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qInput]);
 
-  const patch = useCallback(
-    (p: UrlPatch, resetPage = true) => onPatch(p, resetPage),
-    [onPatch],
-  );
+  const patch = useCallback((p: UrlPatch, resetPage = true) => onPatch(p, resetPage), [onPatch]);
 
   const actions = useMemo<DoctorSearchActions>(
     () => ({
@@ -223,7 +228,8 @@ export function LocalDoctorSearchProvider({ initial, children }: LocalProviderPr
     () => ({
       setQInput: (v) => setState((s) => ({ ...s, qInput: v })),
       setSpecialty: (ids) => setState((s) => ({ ...s, specialty: ids, page: 1 })),
-      toggleSpecialty: (id) => setState((s) => ({ ...s, specialty: toggle(s.specialty, id), page: 1 })),
+      toggleSpecialty: (id) =>
+        setState((s) => ({ ...s, specialty: toggle(s.specialty, id), page: 1 })),
       setBranch: (ids) => setState((s) => ({ ...s, branch: ids, page: 1 })),
       toggleBranch: (id) => setState((s) => ({ ...s, branch: toggle(s.branch, id), page: 1 })),
       setGender: (g) => setState((s) => ({ ...s, gender: g, page: 1 })),

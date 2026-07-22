@@ -10,7 +10,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 const schema = z.object({
-  request_number: z.string().trim().regex(/^BMC-WA-\d{8}-\d{4}$/, "رقم طلب غير صالح"),
+  request_number: z
+    .string()
+    .trim()
+    .regex(/^BMC-WA-\d{8}-\d{4}$/, "رقم طلب غير صالح"),
 });
 
 function json(status: number, body: Record<string, unknown>) {

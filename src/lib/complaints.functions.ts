@@ -15,11 +15,9 @@ import { SIGNED_URL_TTL_SECONDS } from "@/lib/download-error";
  */
 
 function serverPublicClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
+  });
 }
 
 const complaintTypes = ["complaint", "suggestion", "thanks", "inquiry"] as const;
@@ -38,7 +36,11 @@ const attachmentSchema = z.object({
   path: z.string().min(1).max(500),
   name: z.string().min(1).max(255),
   type: z.string().max(120).optional().or(z.literal("")),
-  size: z.number().int().nonnegative().max(20 * 1024 * 1024),
+  size: z
+    .number()
+    .int()
+    .nonnegative()
+    .max(20 * 1024 * 1024),
 });
 
 const submitSchema = z.object({
@@ -87,9 +89,7 @@ export const submitMyComplaint = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     // Enforce path ownership on attachments — every stored path must live
     // under the caller's uid folder. Prevents cross-user path forgery.
-    const atts = (data.attachments ?? []).filter(
-      (a) => a.path.startsWith(`${context.userId}/`),
-    );
+    const atts = (data.attachments ?? []).filter((a) => a.path.startsWith(`${context.userId}/`));
     const { data: row, error } = await context.supabase
       .from("complaints")
       .insert({
@@ -144,8 +144,6 @@ export const editMyComplaint = createServerFn({ method: "POST" })
     if (error) throw new Error("تعذّر تعديل البلاغ، حاول مرة أخرى.");
     return { ok: true };
   });
-
-
 
 // ---------------------------------------------------------------------------
 // Track (public by reference + phone)
@@ -294,10 +292,7 @@ export const updateComplaint = createServerFn({ method: "POST" })
     if (data.internal_notes !== undefined) patch.internal_notes = data.internal_notes;
     if (Object.keys(patch).length === 0) return { ok: true };
 
-    const { error } = await context.supabase
-      .from("complaints")
-      .update(patch)
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("complaints").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

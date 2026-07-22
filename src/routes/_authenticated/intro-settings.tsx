@@ -8,7 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   DEFAULT_INTRO_SETTINGS,
@@ -60,7 +66,10 @@ function IntroSettingsAdmin() {
       ]);
       const ok = !!(adminRole || superRole);
       setAllowed(ok);
-      if (!ok) { setLoading(false); return; }
+      if (!ok) {
+        setLoading(false);
+        return;
+      }
 
       const { data, error } = await supabase
         .from("intro_settings")
@@ -117,7 +126,9 @@ function IntroSettingsAdmin() {
       <div className="max-w-lg mx-auto p-8 text-center">
         <h1 className="text-xl font-semibold mb-2">صلاحيات غير كافية</h1>
         <p className="text-muted-foreground">هذه الصفحة مخصصة للمدراء فقط.</p>
-        <Button asChild className="mt-4"><Link to="/">العودة للرئيسية</Link></Button>
+        <Button asChild className="mt-4">
+          <Link to="/">العودة للرئيسية</Link>
+        </Button>
       </div>
     );
   }
@@ -143,27 +154,46 @@ function IntroSettingsAdmin() {
       </header>
 
       <Card>
-        <CardHeader><CardTitle>العرض والعناوين</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>العرض والعناوين</CardTitle>
+        </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2 flex items-center gap-3">
-            <Switch checked={row.is_active} onCheckedChange={(v) => setRow({ ...row, is_active: v })} />
+            <Switch
+              checked={row.is_active}
+              onCheckedChange={(v) => setRow({ ...row, is_active: v })}
+            />
             <Label>تفعيل عرض المقدمة على الموقع</Label>
           </div>
           <div>
             <Label>العنوان (عربي)</Label>
-            <Input value={row.headline_ar ?? ""} onChange={(e) => setRow({ ...row, headline_ar: e.target.value })} />
+            <Input
+              value={row.headline_ar ?? ""}
+              onChange={(e) => setRow({ ...row, headline_ar: e.target.value })}
+            />
           </div>
           <div>
             <Label>العنوان (إنجليزي)</Label>
-            <Input dir="ltr" value={row.headline_en ?? ""} onChange={(e) => setRow({ ...row, headline_en: e.target.value })} />
+            <Input
+              dir="ltr"
+              value={row.headline_en ?? ""}
+              onChange={(e) => setRow({ ...row, headline_en: e.target.value })}
+            />
           </div>
           <div>
             <Label>الشعار الفرعي (عربي)</Label>
-            <Input value={row.tagline_ar ?? ""} onChange={(e) => setRow({ ...row, tagline_ar: e.target.value })} />
+            <Input
+              value={row.tagline_ar ?? ""}
+              onChange={(e) => setRow({ ...row, tagline_ar: e.target.value })}
+            />
           </div>
           <div>
             <Label>الشعار الفرعي (إنجليزي)</Label>
-            <Input dir="ltr" value={row.tagline_en ?? ""} onChange={(e) => setRow({ ...row, tagline_en: e.target.value })} />
+            <Input
+              dir="ltr"
+              value={row.tagline_en ?? ""}
+              onChange={(e) => setRow({ ...row, tagline_en: e.target.value })}
+            />
           </div>
         </CardContent>
       </Card>
@@ -181,9 +211,7 @@ function IntroSettingsAdmin() {
             <Label>تفعيل التحميل المسبق لوسائط المشهد التالي</Label>
           </div>
           <div className="md:col-span-2">
-            <Label>
-              التأخير قبل بدء المشهد (بالمللي ثانية): {row.prefetch_lead_ms}
-            </Label>
+            <Label>التأخير قبل بدء المشهد (بالمللي ثانية): {row.prefetch_lead_ms}</Label>
             <Input
               type="number"
               min={0}
@@ -199,49 +227,79 @@ function IntroSettingsAdmin() {
               }}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              كم من الوقت قبل بدء المشهد يبدأ تحميل صوره/فيديوهاته (0–10000 مللي ثانية، الافتراضي 1500).
+              كم من الوقت قبل بدء المشهد يبدأ تحميل صوره/فيديوهاته (0–10000 مللي ثانية، الافتراضي
+              1500).
             </p>
           </div>
         </CardContent>
       </Card>
-
 
       <Card>
         <CardHeader>
           <CardTitle>ترتيب المشاهد</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-xs text-muted-foreground mb-3">استخدم الأسهم لإعادة ترتيب المشاهد. يمكنك إخفاء أي مشهد بإزالته.</p>
+          <p className="text-xs text-muted-foreground mb-3">
+            استخدم الأسهم لإعادة ترتيب المشاهد. يمكنك إخفاء أي مشهد بإزالته.
+          </p>
           <div className="space-y-2">
             {row.scene_order.map((key, i) => (
               <div key={key} className="flex items-center gap-2 rounded-md border p-2">
                 <GripVertical className="w-4 h-4 text-muted-foreground" />
                 <span className="flex-1 text-sm">{SCENE_LABELS[key] ?? key}</span>
-                <Button size="sm" variant="ghost" disabled={i === 0}
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={i === 0}
                   onClick={() => {
                     const next = [...row.scene_order];
                     [next[i - 1], next[i]] = [next[i], next[i - 1]];
                     setRow({ ...row, scene_order: next });
-                  }}>↑</Button>
-                <Button size="sm" variant="ghost" disabled={i === row.scene_order.length - 1}
+                  }}
+                >
+                  ↑
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={i === row.scene_order.length - 1}
                   onClick={() => {
                     const next = [...row.scene_order];
                     [next[i + 1], next[i]] = [next[i], next[i + 1]];
                     setRow({ ...row, scene_order: next });
-                  }}>↓</Button>
-                <Button size="sm" variant="ghost" onClick={() => {
-                  setRow({ ...row, scene_order: row.scene_order.filter((_, j) => j !== i) });
-                }}><Trash2 className="w-4 h-4" /></Button>
+                  }}
+                >
+                  ↓
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setRow({ ...row, scene_order: row.scene_order.filter((_, j) => j !== i) });
+                  }}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
             ))}
           </div>
           <div className="mt-3 flex items-center gap-2">
-            <Select onValueChange={(v) => setRow({ ...row, scene_order: [...row.scene_order, v as SceneKey] })}>
-              <SelectTrigger className="w-56"><SelectValue placeholder="إضافة مشهد…" /></SelectTrigger>
+            <Select
+              onValueChange={(v) =>
+                setRow({ ...row, scene_order: [...row.scene_order, v as SceneKey] })
+              }
+            >
+              <SelectTrigger className="w-56">
+                <SelectValue placeholder="إضافة مشهد…" />
+              </SelectTrigger>
               <SelectContent>
                 {(Object.keys(SCENE_LABELS) as SceneKey[])
                   .filter((k) => !row.scene_order.includes(k))
-                  .map((k) => <SelectItem key={k} value={k}>{SCENE_LABELS[k]}</SelectItem>)}
+                  .map((k) => (
+                    <SelectItem key={k} value={k}>
+                      {SCENE_LABELS[k]}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
@@ -251,16 +309,33 @@ function IntroSettingsAdmin() {
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle>الخدمات المعروضة</CardTitle>
-          <Button size="sm" variant="outline" onClick={() => setRow({
-            ...row,
-            services: [...row.services, { id: `svc-${Date.now()}`, titleAr: "", titleEn: "", icon: "Stethoscope" }],
-          })}><Plus className="w-4 h-4 ms-1" /> إضافة خدمة</Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              setRow({
+                ...row,
+                services: [
+                  ...row.services,
+                  { id: `svc-${Date.now()}`, titleAr: "", titleEn: "", icon: "Stethoscope" },
+                ],
+              })
+            }
+          >
+            <Plus className="w-4 h-4 ms-1" /> إضافة خدمة
+          </Button>
         </CardHeader>
         <CardContent className="space-y-2">
           {row.services.map((s, i) => (
-            <ServiceRow key={i} value={s} onChange={(v) => {
-              const next = [...row.services]; next[i] = v; setRow({ ...row, services: next });
-            }} onRemove={() => setRow({ ...row, services: row.services.filter((_, j) => j !== i) })}
+            <ServiceRow
+              key={i}
+              value={s}
+              onChange={(v) => {
+                const next = [...row.services];
+                next[i] = v;
+                setRow({ ...row, services: next });
+              }}
+              onRemove={() => setRow({ ...row, services: row.services.filter((_, j) => j !== i) })}
               onMove={(dir) => {
                 const j = i + dir;
                 if (j < 0 || j >= row.services.length) return;
@@ -276,26 +351,49 @@ function IntroSettingsAdmin() {
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <CardTitle>مقاييس الإحصائيات</CardTitle>
-          <Button size="sm" variant="outline" onClick={() => setRow({
-            ...row,
-            stat_metrics: [...row.stat_metrics, { id: `stat-${Date.now()}`, labelAr: "", value: 0, icon: "Award", source: "" }],
-          })}><Plus className="w-4 h-4 ms-1" /> إضافة مقياس</Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() =>
+              setRow({
+                ...row,
+                stat_metrics: [
+                  ...row.stat_metrics,
+                  { id: `stat-${Date.now()}`, labelAr: "", value: 0, icon: "Award", source: "" },
+                ],
+              })
+            }
+          >
+            <Plus className="w-4 h-4 ms-1" /> إضافة مقياس
+          </Button>
         </CardHeader>
         <CardContent className="space-y-2">
           <p className="text-xs text-muted-foreground">
-            علّم "مباشر" للمقاييس التي تُحسب من قاعدة البيانات (حاليًا مدعوم: <code>doctors</code>). القيمة الرقمية تُتجاهل في هذه الحالة.
+            علّم "مباشر" للمقاييس التي تُحسب من قاعدة البيانات (حاليًا مدعوم: <code>doctors</code>).
+            القيمة الرقمية تُتجاهل في هذه الحالة.
           </p>
           <Separator />
           {row.stat_metrics.map((m, i) => (
-            <StatRow key={i} value={m} onChange={(v) => {
-              const next = [...row.stat_metrics]; next[i] = v; setRow({ ...row, stat_metrics: next });
-            }} onRemove={() => setRow({ ...row, stat_metrics: row.stat_metrics.filter((_, j) => j !== i) })} />
+            <StatRow
+              key={i}
+              value={m}
+              onChange={(v) => {
+                const next = [...row.stat_metrics];
+                next[i] = v;
+                setRow({ ...row, stat_metrics: next });
+              }}
+              onRemove={() =>
+                setRow({ ...row, stat_metrics: row.stat_metrics.filter((_, j) => j !== i) })
+              }
+            />
           ))}
         </CardContent>
       </Card>
 
       <div className="flex justify-between items-center pt-2">
-        <Button asChild variant="ghost"><Link to="/">← العودة للرئيسية</Link></Button>
+        <Button asChild variant="ghost">
+          <Link to="/">← العودة للرئيسية</Link>
+        </Button>
         <Button onClick={save} disabled={saving}>
           <Save className="w-4 h-4 ms-1" /> {saving ? "جارٍ الحفظ…" : "حفظ التغييرات"}
           <ArrowRight className="w-4 h-4 me-1" />
@@ -305,7 +403,12 @@ function IntroSettingsAdmin() {
   );
 }
 
-function ServiceRow({ value, onChange, onRemove, onMove }: {
+function ServiceRow({
+  value,
+  onChange,
+  onRemove,
+  onMove,
+}: {
   value: RawService;
   onChange: (v: RawService) => void;
   onRemove: () => void;
@@ -314,23 +417,40 @@ function ServiceRow({ value, onChange, onRemove, onMove }: {
   return (
     <div className="grid grid-cols-1 md:grid-cols-[auto,1fr,1fr,10rem,auto] gap-2 items-end rounded-md border p-2">
       <div className="flex flex-col gap-1">
-        <Button size="sm" variant="ghost" onClick={() => onMove(-1)}>↑</Button>
-        <Button size="sm" variant="ghost" onClick={() => onMove(1)}>↓</Button>
+        <Button size="sm" variant="ghost" onClick={() => onMove(-1)}>
+          ↑
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => onMove(1)}>
+          ↓
+        </Button>
       </div>
       <div>
         <Label className="text-xs">العنوان (عربي)</Label>
-        <Input value={value.titleAr} onChange={(e) => onChange({ ...value, titleAr: e.target.value })} />
+        <Input
+          value={value.titleAr}
+          onChange={(e) => onChange({ ...value, titleAr: e.target.value })}
+        />
       </div>
       <div>
         <Label className="text-xs">العنوان (إنجليزي)</Label>
-        <Input dir="ltr" value={value.titleEn} onChange={(e) => onChange({ ...value, titleEn: e.target.value })} />
+        <Input
+          dir="ltr"
+          value={value.titleEn}
+          onChange={(e) => onChange({ ...value, titleEn: e.target.value })}
+        />
       </div>
       <div>
         <Label className="text-xs">الأيقونة</Label>
         <Select value={value.icon} onValueChange={(v) => onChange({ ...value, icon: v })}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent className="max-h-64">
-            {ICON_OPTIONS.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+            {ICON_OPTIONS.map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
@@ -341,7 +461,11 @@ function ServiceRow({ value, onChange, onRemove, onMove }: {
   );
 }
 
-function StatRow({ value, onChange, onRemove }: {
+function StatRow({
+  value,
+  onChange,
+  onRemove,
+}: {
   value: RawStatMetric;
   onChange: (v: RawStatMetric) => void;
   onRemove: () => void;
@@ -350,33 +474,60 @@ function StatRow({ value, onChange, onRemove }: {
     <div className="grid grid-cols-1 md:grid-cols-[1fr,6rem,5rem,5rem,10rem,1fr,auto,auto] gap-2 items-end rounded-md border p-2">
       <div>
         <Label className="text-xs">النص العربي</Label>
-        <Input value={value.labelAr} onChange={(e) => onChange({ ...value, labelAr: e.target.value })} />
+        <Input
+          value={value.labelAr}
+          onChange={(e) => onChange({ ...value, labelAr: e.target.value })}
+        />
       </div>
       <div>
         <Label className="text-xs">القيمة</Label>
-        <Input type="number" value={value.value ?? ""} disabled={!!value.live}
-          onChange={(e) => onChange({ ...value, value: e.target.value === "" ? undefined : Number(e.target.value) })} />
+        <Input
+          type="number"
+          value={value.value ?? ""}
+          disabled={!!value.live}
+          onChange={(e) =>
+            onChange({
+              ...value,
+              value: e.target.value === "" ? undefined : Number(e.target.value),
+            })
+          }
+        />
       </div>
       <div>
         <Label className="text-xs">Prefix</Label>
-        <Input value={value.prefix ?? ""} onChange={(e) => onChange({ ...value, prefix: e.target.value })} />
+        <Input
+          value={value.prefix ?? ""}
+          onChange={(e) => onChange({ ...value, prefix: e.target.value })}
+        />
       </div>
       <div>
         <Label className="text-xs">Suffix</Label>
-        <Input value={value.suffix ?? ""} onChange={(e) => onChange({ ...value, suffix: e.target.value })} />
+        <Input
+          value={value.suffix ?? ""}
+          onChange={(e) => onChange({ ...value, suffix: e.target.value })}
+        />
       </div>
       <div>
         <Label className="text-xs">الأيقونة</Label>
         <Select value={value.icon} onValueChange={(v) => onChange({ ...value, icon: v })}>
-          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
           <SelectContent className="max-h-64">
-            {ICON_OPTIONS.map((name) => <SelectItem key={name} value={name}>{name}</SelectItem>)}
+            {ICON_OPTIONS.map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
       <div>
         <Label className="text-xs">المصدر</Label>
-        <Input value={value.source} onChange={(e) => onChange({ ...value, source: e.target.value })} />
+        <Input
+          value={value.source}
+          onChange={(e) => onChange({ ...value, source: e.target.value })}
+        />
       </div>
       <div className="flex flex-col items-center gap-1">
         <Label className="text-xs">مباشر</Label>

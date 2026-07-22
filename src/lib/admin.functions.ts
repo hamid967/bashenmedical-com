@@ -149,7 +149,7 @@ export const getAdminStats = createServerFn({ method: "GET" })
 export const getAdminTrends = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((input: { range?: "week" | "month" }) => ({
-    range: input?.range === "month" ? "month" as const : "week" as const,
+    range: input?.range === "month" ? ("month" as const) : ("week" as const),
   }))
   .handler(async ({ context, data }) => {
     const roles = await getRoles(context.supabase, context.userId);
@@ -241,12 +241,7 @@ export const getAdminTrends = createServerFn({ method: "GET" })
  * appointments-only KPIs, admin/super_admin see everything.
  * ───────────────────────────────────────────────────────────── */
 export type AdminKpiKey =
-  | "appointments"
-  | "appointments_today"
-  | "orders"
-  | "patients_new"
-  | "inquiries"
-  | "complaints";
+  "appointments" | "appointments_today" | "orders" | "patients_new" | "inquiries" | "complaints";
 
 export type AdminKpi = {
   key: AdminKpiKey;
@@ -264,7 +259,12 @@ export type AdminKpi = {
 export const getAdminKpis = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((input: { range?: "7d" | "30d" | "90d" }) => ({
-    range: input?.range === "30d" ? "30d" as const : input?.range === "90d" ? "90d" as const : "7d" as const,
+    range:
+      input?.range === "30d"
+        ? ("30d" as const)
+        : input?.range === "90d"
+          ? ("90d" as const)
+          : ("7d" as const),
   }))
   .handler(async ({ context, data }): Promise<{ range: string; kpis: AdminKpi[] }> => {
     const roles = await getRoles(context.supabase, context.userId);
@@ -549,7 +549,7 @@ export const listAppointmentAudit = createServerFn({ method: "GET" })
     if (error) throw new Error(humanizeSupabaseError(error));
     // Enrich with actor email (best-effort; requires admin)
     const ids = Array.from(new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)));
-    let emailById = new Map<string, string>();
+    const emailById = new Map<string, string>();
     if (ids.length) {
       const { data: profs } = await context.supabase
         .from("profiles")
@@ -865,9 +865,7 @@ export const listReminderPreferenceAudit = createServerFn({ method: "GET" })
     if (error) throw new Error(humanizeSupabaseError(error));
 
     // Enrich actor names (best-effort).
-    const ids = Array.from(
-      new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)),
-    );
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)));
     const nameById = new Map<string, string>();
     if (ids.length) {
       const { data: profs } = await context.supabase
@@ -887,7 +885,6 @@ export const listReminderPreferenceAudit = createServerFn({ method: "GET" })
       pageSize: data.pageSize,
     };
   });
-
 
 export const getReminderPreferenceStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -992,18 +989,8 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
   .validator((d) =>
     z
       .object({
-        ref: z
-          .string()
-          .trim()
-          .min(4, "الرجاء إدخال 4 أحرف على الأقل من ref")
-          .max(64)
-          .optional(),
-        phone: z
-          .string()
-          .trim()
-          .min(4, "رقم الهاتف قصير جدًا")
-          .max(32)
-          .optional(),
+        ref: z.string().trim().min(4, "الرجاء إدخال 4 أحرف على الأقل من ref").max(64).optional(),
+        phone: z.string().trim().min(4, "رقم الهاتف قصير جدًا").max(32).optional(),
         from: z.string().datetime().optional(),
         to: z.string().datetime().optional(),
       })
@@ -1033,15 +1020,11 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
     let matching = apptRows ?? [];
     if (data.phone) {
       const digits = data.phone.replace(/\D/g, "");
-      matching = matching.filter(
-        (a: any) => (a.patient_phone ?? "").replace(/\D/g, "") === digits,
-      );
+      matching = matching.filter((a: any) => (a.patient_phone ?? "").replace(/\D/g, "") === digits);
     }
     if (data.ref) {
       const ref = data.ref.toLowerCase().replace(/-/g, "");
-      matching = matching.filter((a: any) =>
-        a.id.toLowerCase().replace(/-/g, "").startsWith(ref),
-      );
+      matching = matching.filter((a: any) => a.id.toLowerCase().replace(/-/g, "").startsWith(ref));
     }
 
     const header =
@@ -1070,10 +1053,7 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
     );
     const nameById = new Map<string, string>();
     if (actorIds.length) {
-      const { data: profs } = await sb
-        .from("profiles")
-        .select("id, full_name")
-        .in("id", actorIds);
+      const { data: profs } = await sb.from("profiles").select("id, full_name").in("id", actorIds);
       for (const p of profs ?? []) nameById.set(p.id, p.full_name ?? "");
     }
 
@@ -1142,10 +1122,7 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
     // Optional: resolve appointment IDs matching ref/phone first
     let appointmentIdFilter: string[] | null = null;
     if (data.ref || data.phone) {
-      let apQ = supabase
-        .from("appointments")
-        .select("id, patient_name, patient_phone")
-        .limit(2000);
+      let apQ = supabase.from("appointments").select("id, patient_name, patient_phone").limit(2000);
       if (data.phone) {
         const digits = data.phone.replace(/\D/g, "");
         if (digits.length > 0) apQ = apQ.ilike("patient_phone", `%${digits}%`);
@@ -1165,10 +1142,11 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
       }
     }
 
-
     let q = supabase
       .from("security_audit_log")
-      .select("id, action, actor, appointment_id, from_status, to_status, reason, metadata, created_at")
+      .select(
+        "id, action, actor, appointment_id, from_status, to_status, reason, metadata, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(data.limit);
 
@@ -1181,11 +1159,9 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
     if (error) throw new Error(humanizeSupabaseError(error));
 
     const appointmentIds = Array.from(
-      new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean))
+      new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean)),
     );
-    const actorIds = Array.from(
-      new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean))
-    );
+    const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)));
 
     const [apptsRes, profilesRes] = await Promise.all([
       appointmentIds.length
@@ -1208,12 +1184,18 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
       id: r.id,
       action: r.action,
       actor: r.actor,
-      actor_name: r.actor ? profileMap.get(r.actor)?.full_name ?? null : null,
+      actor_name: r.actor ? (profileMap.get(r.actor)?.full_name ?? null) : null,
       appointment_id: r.appointment_id,
-      patient_name: r.appointment_id ? apptMap.get(r.appointment_id)?.patient_name ?? null : null,
-      patient_phone: r.appointment_id ? apptMap.get(r.appointment_id)?.patient_phone ?? null : null,
-      appointment_date: r.appointment_id ? apptMap.get(r.appointment_id)?.appointment_date ?? null : null,
-      appointment_time: r.appointment_id ? apptMap.get(r.appointment_id)?.appointment_time ?? null : null,
+      patient_name: r.appointment_id ? (apptMap.get(r.appointment_id)?.patient_name ?? null) : null,
+      patient_phone: r.appointment_id
+        ? (apptMap.get(r.appointment_id)?.patient_phone ?? null)
+        : null,
+      appointment_date: r.appointment_id
+        ? (apptMap.get(r.appointment_id)?.appointment_date ?? null)
+        : null,
+      appointment_time: r.appointment_id
+        ? (apptMap.get(r.appointment_id)?.appointment_time ?? null)
+        : null,
       from_status: r.from_status,
       to_status: r.to_status,
       reason: r.reason,
@@ -1230,10 +1212,7 @@ export const listSecurityAuditActions = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     const roles = await getRoles(supabase, userId);
     ensureRole(roles, ["admin"]);
-    const { data, error } = await supabase
-      .from("security_audit_log")
-      .select("action")
-      .limit(1000);
+    const { data, error } = await supabase.from("security_audit_log").select("action").limit(1000);
     if (error) throw new Error(humanizeSupabaseError(error));
     const actions = Array.from(new Set((data ?? []).map((r: any) => r.action))).sort();
     return { actions };
@@ -1285,7 +1264,10 @@ export const updateFaq = createServerFn({ method: "POST" })
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
     const { id, ...rest } = data;
-    const { error } = await context.supabase.from("faqs").update(rest as any).eq("id", id);
+    const { error } = await context.supabase
+      .from("faqs")
+      .update(rest as any)
+      .eq("id", id);
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
   });
@@ -1367,10 +1349,7 @@ export const deleteAboutSection = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
-    const { error } = await context.supabase
-      .from("about_sections")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await context.supabase.from("about_sections").delete().eq("id", data.id);
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
   });
@@ -1435,10 +1414,7 @@ export const updateClinicSettings = createServerFn({ method: "POST" })
       email: data.email || null,
       maps_url: data.maps_url || null,
     };
-    const { error } = await context.supabase
-      .from("clinic_settings")
-      .update(payload)
-      .eq("id", 1);
+    const { error } = await context.supabase.from("clinic_settings").update(payload).eq("id", 1);
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
   });
@@ -1514,9 +1490,7 @@ const appointmentAdminInput = z.object({
   appointment_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
   reason: z.string().trim().max(500).nullable().optional(),
   notes: z.string().trim().max(500).nullable().optional(),
-  status: z
-    .enum(["new", "confirmed"])
-    .default("confirmed"),
+  status: z.enum(["new", "confirmed"]).default("confirmed"),
 });
 
 export const createAppointmentAdmin = createServerFn({ method: "POST" })

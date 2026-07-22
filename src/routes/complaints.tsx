@@ -175,9 +175,7 @@ function ComplaintsPage() {
                   <span className="font-medium">نوع الرسالة</span>
                   <select
                     value={form.type}
-                    onChange={(e) =>
-                      setForm({ ...form, type: e.target.value as typeof form.type })
-                    }
+                    onChange={(e) => setForm({ ...form, type: e.target.value as typeof form.type })}
                     className="mt-1 w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
                   >
                     <option value="complaint">شكوى</option>
@@ -256,11 +254,7 @@ function ComplaintsPage() {
                 disabled={lookup.isPending}
                 className="rounded-md border border-primary/40 bg-primary/5 text-primary font-semibold py-2 text-sm disabled:opacity-60"
               >
-                {lookup.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin mx-auto" />
-                ) : (
-                  "بحث"
-                )}
+                {lookup.isPending ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "بحث"}
               </button>
             </form>
             {tracked && (

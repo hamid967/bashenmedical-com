@@ -51,7 +51,9 @@ async function aiStreamingHealth(sb: any): Promise<ServiceHealth> {
     status,
     last_event_at: last?.created_at ?? null,
     last_error_at: lastErr?.created_at ?? null,
-    last_error_message: lastErr ? `${lastErr.error_type ?? ""} ${lastErr.error_status ?? ""}`.trim() : null,
+    last_error_message: lastErr
+      ? `${lastErr.error_type ?? ""} ${lastErr.error_status ?? ""}`.trim()
+      : null,
     success_1h: ok,
     error_1h: err,
   };
@@ -101,16 +103,18 @@ async function notificationsHealth(sb: any): Promise<ServiceHealth[]> {
   const list = rows ?? [];
   const channels = Array.from(new Set(list.map((r: any) => r.channel).filter(Boolean)));
   if (channels.length === 0) {
-    return [{
-      key: "notifications",
-      label: "Notifications",
-      status: "idle",
-      last_event_at: null,
-      last_error_at: null,
-      last_error_message: null,
-      success_1h: 0,
-      error_1h: 0,
-    }];
+    return [
+      {
+        key: "notifications",
+        label: "Notifications",
+        status: "idle",
+        last_event_at: null,
+        last_error_at: null,
+        last_error_message: null,
+        success_1h: 0,
+        error_1h: 0,
+      },
+    ];
   }
   return channels.map((ch: any) => {
     const sub = list.filter((r: any) => r.channel === ch);
@@ -144,22 +148,28 @@ async function integrationsHealth(sb: any): Promise<ServiceHealth[]> {
   const list = rows ?? [];
   const keys = Array.from(new Set(list.map((r: any) => r.integration_key).filter(Boolean)));
   if (keys.length === 0) {
-    return [{
-      key: "integrations",
-      label: "Integrations",
-      status: "idle",
-      last_event_at: null,
-      last_error_at: null,
-      last_error_message: null,
-      success_1h: 0,
-      error_1h: 0,
-    }];
+    return [
+      {
+        key: "integrations",
+        label: "Integrations",
+        status: "idle",
+        last_event_at: null,
+        last_error_at: null,
+        last_error_message: null,
+        success_1h: 0,
+        error_1h: 0,
+      },
+    ];
   }
   return keys.map((k: any) => {
     const sub = list.filter((r: any) => r.integration_key === k);
     const ok = sub.filter((r: any) => r.status === "success" || r.status === "ok").length;
-    const err = sub.filter((r: any) => r.status === "error" || r.status === "failed" || r.error_message).length;
-    const lastErr = sub.find((r: any) => r.error_message || r.status === "error" || r.status === "failed");
+    const err = sub.filter(
+      (r: any) => r.status === "error" || r.status === "failed" || r.error_message,
+    ).length;
+    const lastErr = sub.find(
+      (r: any) => r.error_message || r.status === "error" || r.status === "failed",
+    );
     const total = ok + err;
     const status: ServiceHealthStatus =
       total === 0 ? "idle" : err === 0 ? "ok" : err / total > 0.2 ? "down" : "degraded";
@@ -194,7 +204,9 @@ async function apiPermissionsHealth(sb: any): Promise<ServiceHealth> {
     status,
     last_event_at: lastErr?.occurred_at ?? null,
     last_error_at: lastErr?.occurred_at ?? null,
-    last_error_message: lastErr ? `${lastErr.route ?? ""} — ${lastErr.message ?? lastErr.status_code}` : null,
+    last_error_message: lastErr
+      ? `${lastErr.route ?? ""} — ${lastErr.message ?? lastErr.status_code}`
+      : null,
     success_1h: 0,
     error_1h: err,
   };
@@ -211,16 +223,19 @@ async function aiSafetyHealth(sb: any): Promise<ServiceHealth> {
   const list = rows ?? [];
   const err = list.length;
   const last = list[0];
-  const critical = list.filter((r: any) => r.severity === "high" || r.severity === "critical").length;
-  const status: ServiceHealthStatus =
-    err === 0 ? "ok" : critical > 0 ? "down" : "degraded";
+  const critical = list.filter(
+    (r: any) => r.severity === "high" || r.severity === "critical",
+  ).length;
+  const status: ServiceHealthStatus = err === 0 ? "ok" : critical > 0 ? "down" : "degraded";
   return {
     key: "ai_safety",
     label: "AI Safety",
     status,
     last_event_at: last?.created_at ?? null,
     last_error_at: last?.created_at ?? null,
-    last_error_message: last ? `${last.kind ?? ""} (${last.severity ?? ""}) → ${last.action_taken ?? ""}` : null,
+    last_error_message: last
+      ? `${last.kind ?? ""} (${last.severity ?? ""}) → ${last.action_taken ?? ""}`
+      : null,
     success_1h: 0,
     error_1h: err,
   };

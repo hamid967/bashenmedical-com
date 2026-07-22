@@ -29,9 +29,7 @@ export const Route = createFileRoute("/api/public/reservations/session-from-auth
     handlers: {
       POST: async ({ request }) => {
         const authHeader = request.headers.get("Authorization") ?? "";
-        const token = authHeader.startsWith("Bearer ")
-          ? authHeader.slice(7).trim()
-          : "";
+        const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
         if (!token) {
           return jsonResponse(401, { ok: false, message: "غير مصرّح." });
         }
@@ -83,29 +81,28 @@ export const Route = createFileRoute("/api/public/reservations/session-from-auth
             _user_id: userId,
             _phone: phone,
           });
-        } catch { /* best-effort — session still works via server APIs */ }
+        } catch {
+          /* best-effort — session still works via server APIs */
+        }
 
         const session_token = generateSessionToken();
         const session_expires_at = new Date(Date.now() + SESSION_TTL_MS).toISOString();
 
         // Insert a fully-verified session row. Reuse the guest table so
         // downstream list/cancel/reschedule endpoints work unchanged.
-        const { error: insErr } = await supabaseAdmin
-          .from("guest_reservation_sessions")
-          .insert({
-            phone,
-            code_hash: "auth-bypass",
-            code_expires_at: new Date().toISOString(),
-            attempts: 0,
-            verified_at: new Date().toISOString(),
-            session_token,
-            session_expires_at,
-            ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
-          });
+        const { error: insErr } = await supabaseAdmin.from("guest_reservation_sessions").insert({
+          phone,
+          code_hash: "auth-bypass",
+          code_expires_at: new Date().toISOString(),
+          attempts: 0,
+          verified_at: new Date().toISOString(),
+          session_token,
+          session_expires_at,
+          ip: request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+        });
         if (insErr) {
           return jsonResponse(500, { ok: false, message: "تعذّر إنشاء الجلسة." });
         }
-
 
         // Mask phone for display: +9665X****NNNN
         const masked = phone.replace(/^(\+9665\d)(\d{4})(\d{3})$/, "$1****$3");

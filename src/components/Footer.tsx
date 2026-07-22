@@ -16,8 +16,19 @@ export function Footer() {
 
   return (
     <footer className="mt-16 bg-gradient-to-b from-muted/40 to-muted/70 border-t border-border relative">
-      <JazanPattern variant="subtle" className="absolute inset-x-0 top-0 h-3 opacity-70 pointer-events-none" />
-      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-px" style={{ background: "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B), var(--jazan-terracotta,#B85C3C), var(--jazan-gold,#C7A46B), transparent)", opacity: 0.45 }} />
+      <JazanPattern
+        variant="subtle"
+        className="absolute inset-x-0 top-0 h-3 opacity-70 pointer-events-none"
+      />
+      <span
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 h-px"
+        style={{
+          background:
+            "linear-gradient(90deg, transparent, var(--jazan-gold,#C7A46B), var(--jazan-terracotta,#B85C3C), var(--jazan-gold,#C7A46B), transparent)",
+          opacity: 0.45,
+        }}
+      />
       <div className="container-app py-12 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
         {/* Brand */}
         <div className="rounded-2xl p-4 bg-background/50 jazan-hairline">
@@ -50,14 +61,46 @@ export function Footer() {
         <div>
           <JazanSectionLabel className="mb-3">{tf("servicesHeading")}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/specialties" className="hover:text-primary">{t("nav_specialties")}</Link></li>
-            <li><Link to="/doctors" className="hover:text-primary">{t("nav_doctors")}</Link></li>
-            <li><Link to="/excellence" className="hover:text-primary">{tf("excellenceCenters")}</Link></li>
-            <li><Link to="/packages" className="hover:text-primary">{tf("packages")}</Link></li>
-            <li><Link to="/programs" className="hover:text-primary">{tf("programs")}</Link></li>
-            <li><Link to="/telemedicine" className="hover:text-primary">{tf("telemedicine")}</Link></li>
-            <li><Link to="/home-care" className="hover:text-primary">{tf("homeCare")}</Link></li>
-            <li><Link to="/pharmacy" className="hover:text-primary">{t("nav_pharmacy")}</Link></li>
+            <li>
+              <Link to="/specialties" className="hover:text-primary">
+                {t("nav_specialties")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/doctors" className="hover:text-primary">
+                {t("nav_doctors")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/excellence" className="hover:text-primary">
+                {tf("excellenceCenters")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/packages" className="hover:text-primary">
+                {tf("packages")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/programs" className="hover:text-primary">
+                {tf("programs")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/telemedicine" className="hover:text-primary">
+                {tf("telemedicine")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/home-care" className="hover:text-primary">
+                {tf("homeCare")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/pharmacy" className="hover:text-primary">
+                {t("nav_pharmacy")}
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -65,14 +108,46 @@ export function Footer() {
         <div>
           <JazanSectionLabel className="mb-3">{tf("patientPortalHeading")}</JazanSectionLabel>
           <ul className="space-y-2 text-sm text-muted-foreground">
-            <li><Link to="/book" className="hover:text-primary">{t("nav_book")}</Link></li>
-            <li><Link to="/lookup" className="hover:text-primary">{t("nav_lookup")}</Link></li>
-            <li><Link to="/my" className="hover:text-primary">{t("nav_my")}</Link></li>
-            <li><Link to="/insurance" className="hover:text-primary">{tf("insurance")}</Link></li>
-            <li><Link to="/faq" className="hover:text-primary">{t("nav_faq")}</Link></li>
-            <li><Link to="/health" className="hover:text-primary">{t("nav_health")}</Link></li>
-            <li><Link to="/careers" className="hover:text-primary">{tf("careers")}</Link></li>
-            <li><Link to="/accreditations" className="hover:text-primary">{tf("accreditations")}</Link></li>
+            <li>
+              <Link to="/book" className="hover:text-primary">
+                {t("nav_book")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/lookup" className="hover:text-primary">
+                {t("nav_lookup")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/my" className="hover:text-primary">
+                {t("nav_my")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/insurance" className="hover:text-primary">
+                {tf("insurance")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/faq" className="hover:text-primary">
+                {t("nav_faq")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/health" className="hover:text-primary">
+                {t("nav_health")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/careers" className="hover:text-primary">
+                {tf("careers")}
+              </Link>
+            </li>
+            <li>
+              <Link to="/accreditations" className="hover:text-primary">
+                {tf("accreditations")}
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -137,7 +212,9 @@ export function Footer() {
             <Link to="/complaints" className="hover:text-primary">
               {tf("complaints")}
             </Link>
-            <Link to="/contact" className="hover:text-primary">{t("nav_contact")}</Link>
+            <Link to="/contact" className="hover:text-primary">
+              {t("nav_contact")}
+            </Link>
           </div>
         </div>
       </div>

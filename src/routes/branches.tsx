@@ -1,4 +1,10 @@
-import { createFileRoute, Link, ErrorComponent, type ErrorComponentProps, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  ErrorComponent,
+  type ErrorComponentProps,
+  useRouter,
+} from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { MapPin, Phone, Clock, ArrowLeft, Building2, Siren } from "lucide-react";
 import { PageHero, SectionCard } from "@/components/PageShell";
@@ -16,7 +22,11 @@ export const Route = createFileRoute("/branches")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "مستشفياتنا وفروعنا — مجمع باعشن الطبي" },
-      { name: "description", content: "تعرّف على فروع مجمع باعشن الطبي مع الصور، الخريطة، ساعات العمل وأرقام الطوارئ لكل فرع." },
+      {
+        name: "description",
+        content:
+          "تعرّف على فروع مجمع باعشن الطبي مع الصور، الخريطة، ساعات العمل وأرقام الطوارئ لكل فرع.",
+      },
       { property: "og:title", content: "مستشفياتنا وفروعنا — مجمع باعشن الطبي" },
       { property: "og:description", content: "قائمة فروع مجمع باعشن الطبي بالخريطة وساعات العمل." },
       { property: "og:url", content: "https://bashenmedical.com/branches" },
@@ -38,7 +48,10 @@ function BranchesError({ error, reset }: ErrorComponentProps) {
       <ErrorComponent error={error} />
       <button
         className="mt-4 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm"
-        onClick={() => { reset(); router.invalidate(); }}
+        onClick={() => {
+          reset();
+          router.invalidate();
+        }}
       >
         إعادة المحاولة
       </button>
@@ -47,8 +60,13 @@ function BranchesError({ error, reset }: ErrorComponentProps) {
 }
 
 const DAY_LABELS: Record<string, string> = {
-  sat: "السبت", sun: "الأحد", mon: "الاثنين", tue: "الثلاثاء",
-  wed: "الأربعاء", thu: "الخميس", fri: "الجمعة",
+  sat: "السبت",
+  sun: "الأحد",
+  mon: "الاثنين",
+  tue: "الثلاثاء",
+  wed: "الأربعاء",
+  thu: "الخميس",
+  fri: "الجمعة",
 };
 
 function formatHours(hours: PublicBranch["working_hours"]): { day: string; time: string }[] {
@@ -102,7 +120,12 @@ function BranchesPage() {
                 }}
               >
                 {b.hero_image_url ? (
-                  <img src={b.hero_image_url} alt={b.name_ar} className="h-full w-full object-cover" loading="lazy" />
+                  <img
+                    src={b.hero_image_url}
+                    alt={b.name_ar}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
                 ) : (
                   <div className="h-full w-full grid place-items-center">
                     <Building2 className="h-14 w-14 text-[color:var(--brand-deep)]/70" />
@@ -120,7 +143,9 @@ function BranchesPage() {
                   )}
                 </div>
                 {b.description_ar && (
-                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">{b.description_ar}</p>
+                  <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                    {b.description_ar}
+                  </p>
                 )}
 
                 <ul className="mt-4 space-y-2 text-sm">
@@ -133,13 +158,19 @@ function BranchesPage() {
                   {b.phone && (
                     <li className="flex items-start gap-2">
                       <Phone className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                      <a href={`tel:${b.phone}`} className="hover:text-primary" dir="ltr">{b.phone}</a>
+                      <a href={`tel:${b.phone}`} className="hover:text-primary" dir="ltr">
+                        {b.phone}
+                      </a>
                     </li>
                   )}
                   {b.emergency_phone && (
                     <li className="flex items-start gap-2">
                       <Siren className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
-                      <a href={`tel:${b.emergency_phone}`} className="text-destructive font-semibold hover:underline" dir="ltr">
+                      <a
+                        href={`tel:${b.emergency_phone}`}
+                        className="text-destructive font-semibold hover:underline"
+                        dir="ltr"
+                      >
                         طوارئ: {b.emergency_phone}
                       </a>
                     </li>
@@ -204,7 +235,10 @@ function BranchesPage() {
           title="قريباً — توسّع في جازان"
           desc="نعمل على افتتاح فروع جديدة في مدن جازان وأبو عريش وصامطة لخدمتك بشكل أوسع."
         >
-          <Link to="/contact" className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline">
+          <Link
+            to="/contact"
+            className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-primary hover:underline"
+          >
             اقترح موقعاً جديداً <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
           </Link>
         </SectionCard>

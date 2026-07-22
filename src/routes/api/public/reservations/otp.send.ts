@@ -74,17 +74,13 @@ export const Route = createFileRoute("/api/public/reservations/otp/send")({
         const code_expires_at = new Date(Date.now() + OTP_TTL_MS).toISOString();
 
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
-          const { error } = await supabaseAdmin
-            .from("guest_reservation_sessions")
-            .insert({
-              phone,
-              code_hash,
-              code_expires_at,
-              ip,
-            });
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { error } = await supabaseAdmin.from("guest_reservation_sessions").insert({
+            phone,
+            code_hash,
+            code_expires_at,
+            ip,
+          });
           if (error) {
             return jsonResponse(500, {
               ok: false,
@@ -99,19 +95,18 @@ export const Route = createFileRoute("/api/public/reservations/otp/send")({
             `[reservations-otp] Sent code to ${phone.replace(/(\d{3})\d+(\d{2})/, "$1***$2")} (dev only log)`,
           );
 
-          const devEcho =
-            process.env.NODE_ENV !== "production" ? { dev_code: code } : {};
+          const devEcho = process.env.NODE_ENV !== "production" ? { dev_code: code } : {};
 
           try {
-            const { logReservationEvent } = await import(
-              "@/lib/reservation-events.server"
-            );
+            const { logReservationEvent } = await import("@/lib/reservation-events.server");
             await logReservationEvent({
               event_type: "otp_sent",
               phone,
               ip,
             });
-          } catch { /* telemetry best-effort */ }
+          } catch {
+            /* telemetry best-effort */
+          }
 
           return jsonResponse(200, {
             ok: true,

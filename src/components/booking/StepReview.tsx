@@ -7,24 +7,45 @@ import { StepShell } from "./StepShell";
 import { formatArDate, type State } from "./types";
 
 export function StepReview({
-  lang, state, branches, specialties, doctors, errorMsg, errorKind = "unknown",
-  submitting, onSubmit, patientValid, onEditPatient,
+  lang,
+  state,
+  branches,
+  specialties,
+  doctors,
+  errorMsg,
+  errorKind = "unknown",
+  submitting,
+  onSubmit,
+  patientValid,
+  onEditPatient,
 }: {
-  lang: "ar" | "en"; state: State; branches: any[]; specialties: any[]; doctors: any[];
+  lang: "ar" | "en";
+  state: State;
+  branches: any[];
+  specialties: any[];
+  doctors: any[];
   errorMsg: string | null;
   errorKind?: Exclude<BookingSubmitKind, "success">;
-  submitting: boolean; onSubmit: () => void;
-  patientValid: boolean; onEditPatient: () => void;
+  submitting: boolean;
+  onSubmit: () => void;
+  patientValid: boolean;
+  onEditPatient: () => void;
 }) {
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
-  const spec   = specialties.find((s) => s.id === state.specialtyId);
-  const doc    = doctors.find((d: any) => d.id === state.doctorId);
+  const spec = specialties.find((s) => s.id === state.specialtyId);
+  const doc = doctors.find((d: any) => d.id === state.doctorId);
   const est = state.patient.insuranceEstimate;
   const isInsurance = state.patient.payerType === "insurance";
   const rows = [
-    { label: t("review.branch"), value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—" },
-    { label: t("review.specialty"), value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—" },
+    {
+      label: t("review.branch"),
+      value: branch ? (lang === "ar" ? branch.name_ar : branch.name_en) : "—",
+    },
+    {
+      label: t("review.specialty"),
+      value: spec ? (lang === "ar" ? spec.name_ar : spec.name_en) : "—",
+    },
     { label: t("review.doctor"), value: doc ? (lang === "ar" ? doc.name_ar : doc.name_en) : "—" },
     { label: t("review.date"), value: formatArDate(state.date, lang) },
     { label: t("review.time"), value: state.time ?? "—" },
@@ -87,16 +108,26 @@ export function StepReview({
           </div>
         )}
 
-        {errorMsg && <div className="mt-4"><SubmitErrorBanner kind={errorKind} message={errorMsg}/></div>}
+        {errorMsg && (
+          <div className="mt-4">
+            <SubmitErrorBanner kind={errorKind} message={errorMsg} />
+          </div>
+        )}
 
         <Button
           onClick={onSubmit}
           disabled={submitting || !patientValid}
           className="w-full mt-6 gap-2 h-12 text-base"
         >
-          {submitting
-            ? <><Loader2 className="h-4 w-4 animate-spin"/> {t("review.submitting")}</>
-            : <><CheckCircle2 className="h-5 w-5"/> {t("review.confirm")}</>}
+          {submitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" /> {t("review.submitting")}
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="h-5 w-5" /> {t("review.confirm")}
+            </>
+          )}
         </Button>
         <p className="mt-3 text-center text-xs text-muted-foreground">{t("review.terms")}</p>
       </div>

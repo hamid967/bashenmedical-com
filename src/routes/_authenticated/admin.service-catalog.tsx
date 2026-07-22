@@ -141,7 +141,11 @@ function ServiceCatalogAdmin() {
               disabled={reorderMut.isPending}
               className="inline-flex items-center gap-2 px-3 h-10 rounded-lg bg-[color:var(--ac-accent)] text-white text-sm"
             >
-              {reorderMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {reorderMut.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
               حفظ الترتيب
             </button>
           )}
@@ -205,7 +209,11 @@ function ServiceCatalogAdmin() {
               disabled={upsertMut.isPending || !newRow.slug || !newRow.name_ar || !newRow.name_en}
               className="inline-flex items-center gap-2 px-4 h-10 rounded-lg bg-[color:var(--ac-accent)] text-white text-sm disabled:opacity-50"
             >
-              {upsertMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {upsertMut.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
               حفظ
             </button>
           </div>
@@ -218,7 +226,9 @@ function ServiceCatalogAdmin() {
             <Loader2 className="h-6 w-6 animate-spin text-[color:var(--ac-muted)]" />
           </div>
         ) : rows.length === 0 ? (
-          <div className="p-10 text-center text-sm text-[color:var(--ac-muted)]">لا توجد خدمات.</div>
+          <div className="p-10 text-center text-sm text-[color:var(--ac-muted)]">
+            لا توجد خدمات.
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-[color:var(--ac-subtle)] text-[color:var(--ac-ink-3)]">
@@ -254,7 +264,9 @@ function ServiceCatalogAdmin() {
                       </button>
                     </div>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs text-[color:var(--ac-muted)]">{r.slug}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-[color:var(--ac-muted)]">
+                    {r.slug}
+                  </td>
                   <td className="px-3 py-2">
                     <input
                       className="w-full h-9 px-2 rounded border border-transparent hover:border-[color:var(--ac-line)] focus:border-[color:var(--ac-accent)] bg-transparent"

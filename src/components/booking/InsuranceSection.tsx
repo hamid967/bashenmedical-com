@@ -35,8 +35,7 @@ async function verifyInsurance(input: {
     body: JSON.stringify(input),
   });
   const body = (await res.json().catch(() => null)) as
-    | (InsuranceEstimate & { ok?: boolean })
-    | null;
+    (InsuranceEstimate & { ok?: boolean }) | null;
   if (!body || body.ok === false) return null;
   return body;
 }
@@ -92,8 +91,7 @@ export function InsuranceSection({
   }
 
   const est = value.insuranceEstimate;
-  const canVerify =
-    !!doctorId && !!value.insuranceProviderId && !verifying;
+  const canVerify = !!doctorId && !!value.insuranceProviderId && !verifying;
 
   return (
     <div className="sm:col-span-2 rounded-xl border-2 border-dashed border-primary/20 bg-primary/5 p-4 space-y-3">
@@ -103,11 +101,7 @@ export function InsuranceSection({
       </div>
 
       {/* Payer type toggle */}
-      <div
-        role="radiogroup"
-        aria-label={t("insurance.title")}
-        className="grid grid-cols-2 gap-2"
-      >
+      <div role="radiogroup" aria-label={t("insurance.title")} className="grid grid-cols-2 gap-2">
         {(["self", "insurance"] as PayerType[]).map((p) => (
           <button
             key={p}
@@ -147,9 +141,7 @@ export function InsuranceSection({
             </span>
             <select
               value={value.insuranceProviderId ?? ""}
-              onChange={(e) =>
-                onChange({ insuranceProviderId: e.target.value || null })
-              }
+              onChange={(e) => onChange({ insuranceProviderId: e.target.value || null })}
               disabled={loadingProviders}
               className="w-full border border-border bg-background rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
@@ -180,9 +172,7 @@ export function InsuranceSection({
               />
             </label>
             <label className="block">
-              <span className="text-xs font-semibold mb-1.5 block">
-                {t("insurance.memberId")}
-              </span>
+              <span className="text-xs font-semibold mb-1.5 block">{t("insurance.memberId")}</span>
               <input
                 value={value.insuranceMemberId}
                 onChange={(e) =>
@@ -241,9 +231,7 @@ export function InsuranceSection({
                 )}
                 {est.eligible ? t("insurance.eligible") : t("insurance.notEligible")}
               </div>
-              {est.message && (
-                <div className="text-xs opacity-90">{est.message}</div>
-              )}
+              {est.message && <div className="text-xs opacity-90">{est.message}</div>}
               {est.eligible && (est.estimated_cost != null || est.patient_share != null) && (
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-xs">
                   {est.consultation_fee != null && (
@@ -261,9 +249,7 @@ export function InsuranceSection({
                   {est.patient_share != null && (
                     <>
                       <dt className="opacity-70">{t("insurance.patientShare")}</dt>
-                      <dd className="font-mono font-semibold">
-                        {est.patient_share} SAR
-                      </dd>
+                      <dd className="font-mono font-semibold">{est.patient_share} SAR</dd>
                     </>
                   )}
                 </dl>

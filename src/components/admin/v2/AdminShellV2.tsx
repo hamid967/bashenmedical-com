@@ -56,28 +56,61 @@ type NavGroup = { title: string; items: NavItem[] };
 const NAV: NavGroup[] = [
   {
     title: "عام",
-    items: [
-      { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard },
-    ],
+    items: [{ to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard }],
   },
 
   {
     title: "العمليات",
     items: [
-      { to: "/admin/inbox", label: "الصندوق الموحد", icon: Inbox, roles: ["admin", "super_admin", "reception"] },
-      { to: "/appointments-queue", label: "طابور المواعيد", icon: CalendarCheck, roles: ["admin", "reception", "doctor"] },
+      {
+        to: "/admin/inbox",
+        label: "الصندوق الموحد",
+        icon: Inbox,
+        roles: ["admin", "super_admin", "reception"],
+      },
+      {
+        to: "/appointments-queue",
+        label: "طابور المواعيد",
+        icon: CalendarCheck,
+        roles: ["admin", "reception", "doctor"],
+      },
       { to: "/calendar", label: "التقويم", icon: CalendarCheck },
-      { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
-      { to: "/orders-unified", label: "الطلبات الموحدة", icon: Package, roles: ["admin", "reception", "pharmacy"] },
-      { to: "/complaints-admin", label: "الشكاوى", icon: MessageSquare, roles: ["admin", "reception"] },
-      { to: "/admin/service-inquiries", label: "طلبات واتساب", icon: MessageSquare, roles: ["admin", "reception"] },
+      {
+        to: "/patients-management",
+        label: "المرضى",
+        icon: Users,
+        roles: ["admin", "reception", "doctor", "nurse"],
+      },
+      {
+        to: "/orders-unified",
+        label: "الطلبات الموحدة",
+        icon: Package,
+        roles: ["admin", "reception", "pharmacy"],
+      },
+      {
+        to: "/complaints-admin",
+        label: "الشكاوى",
+        icon: MessageSquare,
+        roles: ["admin", "reception"],
+      },
+      {
+        to: "/admin/service-inquiries",
+        label: "طلبات واتساب",
+        icon: MessageSquare,
+        roles: ["admin", "reception"],
+      },
     ],
   },
   {
     title: "الطاقم الطبي",
     items: [
       { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
-      { to: "/availability-management", label: "جدولة التوفر", icon: ClipboardList, roles: ["admin", "hr"] },
+      {
+        to: "/availability-management",
+        label: "جدولة التوفر",
+        icon: ClipboardList,
+        roles: ["admin", "hr"],
+      },
       { to: "/nurses", label: "التمريض", icon: UserCog, roles: ["admin", "hr", "nurse"] },
     ],
   },
@@ -85,8 +118,18 @@ const NAV: NavGroup[] = [
     title: "الموارد",
     items: [
       { to: "/hr-management", label: "الموظفون", icon: Users, roles: ["admin", "hr"] },
-      { to: "/inventory-management", label: "المخزون", icon: ArchiveRestore, roles: ["admin", "pharmacy"] },
-      { to: "/pharmacy-management", label: "الصيدلية", icon: ArchiveRestore, roles: ["admin", "pharmacy"] },
+      {
+        to: "/inventory-management",
+        label: "المخزون",
+        icon: ArchiveRestore,
+        roles: ["admin", "pharmacy"],
+      },
+      {
+        to: "/pharmacy-management",
+        label: "الصيدلية",
+        icon: ArchiveRestore,
+        roles: ["admin", "pharmacy"],
+      },
       { to: "/corporate-admin", label: "الشركات", icon: Building2, roles: ["admin"] },
       { to: "/reports", label: "التقارير", icon: FileBarChart, roles: ["admin"] },
     ],
@@ -107,21 +150,51 @@ const NAV: NavGroup[] = [
     title: "أدوات",
     items: [
       { to: "/admin/ai/overview", label: "نظرة AI الشاملة", icon: Sparkles, roles: ["admin"] },
-      { to: "/admin/design-tokens", label: "Design Tokens", icon: Palette, roles: ["admin", "super_admin"] },
-      { to: "/messaging-settings", label: "إعدادات الرسائل", icon: MessageSquare, roles: ["admin"] },
-      { to: "/intro-settings", label: "إعدادات الانترو", icon: Settings, roles: ["admin", "super_admin"] },
+      {
+        to: "/admin/design-tokens",
+        label: "Design Tokens",
+        icon: Palette,
+        roles: ["admin", "super_admin"],
+      },
+      {
+        to: "/messaging-settings",
+        label: "إعدادات الرسائل",
+        icon: MessageSquare,
+        roles: ["admin"],
+      },
+      {
+        to: "/intro-settings",
+        label: "إعدادات الانترو",
+        icon: Settings,
+        roles: ["admin", "super_admin"],
+      },
       { to: "/mcp-status", label: "حالة MCP", icon: Activity, roles: ["admin", "super_admin"] },
-      { to: "/report-downloads-audit", label: "تدقيق تنزيلات التقارير", icon: ScrollText, roles: ["admin"] },
+      {
+        to: "/report-downloads-audit",
+        label: "تدقيق تنزيلات التقارير",
+        icon: ScrollText,
+        roles: ["admin"],
+      },
     ],
   },
   {
     title: "الحوكمة",
     items: [
       { to: "/rbac", label: "الأدوار", icon: ShieldCheck, roles: ["admin"] },
-      { to: "/admin/role-permissions-matrix", label: "مصفوفة الصلاحيات", icon: ShieldCheck, roles: ["admin"] },
+      {
+        to: "/admin/role-permissions-matrix",
+        label: "مصفوفة الصلاحيات",
+        icon: ShieldCheck,
+        roles: ["admin"],
+      },
       { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/web-vitals", label: "Web Vitals", icon: Gauge, roles: ["admin"] },
-      { to: "/admin/visual-analytics", label: "تحليلات بصرية", icon: FileBarChart, roles: ["admin"] },
+      {
+        to: "/admin/visual-analytics",
+        label: "تحليلات بصرية",
+        icon: FileBarChart,
+        roles: ["admin"],
+      },
       { to: "/admin/notification-logs", label: "الإشعارات", icon: Bell, roles: ["admin"] },
       { to: "/admin/no-show-risk", label: "توقّع الغياب", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/realtime-monitor", label: "مراقبة Realtime", icon: Gauge, roles: ["admin"] },
@@ -171,13 +244,19 @@ export function AdminShellV2({
     try {
       const saved = localStorage.getItem(SIDEBAR_STATE_KEY);
       if (saved) setCollapsed(saved === "1");
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   function toggleCollapse() {
     setCollapsed((c) => {
       const next = !c;
-      try { localStorage.setItem(SIDEBAR_STATE_KEY, next ? "1" : "0"); } catch { /* ignore */ }
+      try {
+        localStorage.setItem(SIDEBAR_STATE_KEY, next ? "1" : "0");
+      } catch {
+        /* ignore */
+      }
       return next;
     });
   }

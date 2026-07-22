@@ -17,21 +17,37 @@ const SA_MOBILE_RE = /^(?:\+?966|00966|0)?5\d{8}$/;
 
 const schema = z.object({
   patient_name: z.string().trim().min(2, "الاسم قصير جدًا").max(120, "الاسم طويل"),
-  patient_phone: z.string().trim().regex(PHONE_RE, "رقم غير صحيح")
+  patient_phone: z
+    .string()
+    .trim()
+    .regex(PHONE_RE, "رقم غير صحيح")
     .refine((v) => SA_MOBILE_RE.test(v.replace(/[\s\-()]/g, "")), "أدخل جوال سعودي (05XXXXXXXX)"),
   service: z.string().trim().min(1, "اختر نوع الخدمة"),
   address: z.string().trim().min(5, "أدخل العنوان بالتفصيل").max(500),
   notes: z.string().trim().max(1000).optional().or(z.literal("")),
-  preferred_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "التاريخ غير صالح").optional().or(z.literal("")),
-  preferred_time: z.string().regex(/^\d{2}:\d{2}$/, "الوقت غير صالح").optional().or(z.literal("")),
+  preferred_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "التاريخ غير صالح")
+    .optional()
+    .or(z.literal("")),
+  preferred_time: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/, "الوقت غير صالح")
+    .optional()
+    .or(z.literal("")),
 });
 
 type Form = z.infer<typeof schema>;
 
 export function HomeCareRequestForm({ services }: { services: string[] }) {
   const [form, setForm] = useState<Form>({
-    patient_name: "", patient_phone: "", service: services[0] ?? "",
-    address: "", notes: "", preferred_date: "", preferred_time: "",
+    patient_name: "",
+    patient_phone: "",
+    service: services[0] ?? "",
+    address: "",
+    notes: "",
+    preferred_date: "",
+    preferred_time: "",
   });
   const [errors, setErrors] = useState<Partial<Record<keyof Form, string>>>({});
   const [submitting, setSubmitting] = useState(false);
@@ -88,7 +104,9 @@ export function HomeCareRequestForm({ services }: { services: string[] }) {
           </div>
           <div>
             <h3 className="text-xl font-bold">تم استلام طلبك</h3>
-            <p className="text-sm text-muted-foreground">سنتواصل معك خلال ساعة عمل لتأكيد التفاصيل.</p>
+            <p className="text-sm text-muted-foreground">
+              سنتواصل معك خلال ساعة عمل لتأكيد التفاصيل.
+            </p>
           </div>
         </div>
         <div className="rounded-xl bg-card p-4 mb-4">
@@ -96,38 +114,69 @@ export function HomeCareRequestForm({ services }: { services: string[] }) {
           <div className="flex items-center justify-between gap-2">
             <span className="font-mono text-lg font-bold">#{result.reference}</span>
             <Button
-              variant="outline" size="sm"
-              onClick={() => { navigator.clipboard?.writeText(result.reference); toast.success("تم النسخ"); }}
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard?.writeText(result.reference);
+                toast.success("تم النسخ");
+              }}
             >
               <Copy className="h-3.5 w-3.5" /> نسخ
             </Button>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link to="/my-orders"><Button variant="premium">تتبع طلباتي</Button></Link>
-          <Button variant="outline" onClick={() => setResult(null)}>طلب جديد</Button>
+          <Link to="/my-orders">
+            <Button variant="premium">تتبع طلباتي</Button>
+          </Link>
+          <Button variant="outline" onClick={() => setResult(null)}>
+            طلب جديد
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-border bg-card p-6 md:p-7 space-y-4" noValidate>
+    <form
+      onSubmit={submit}
+      className="rounded-2xl border border-border bg-card p-6 md:p-7 space-y-4"
+      noValidate
+    >
       <div>
         <h3 className="text-xl font-bold">اطلب زيارة منزلية</h3>
-        <p className="mt-1 text-sm text-muted-foreground">سنتواصل معك خلال ساعة عمل لتأكيد التفاصيل.</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          سنتواصل معك خلال ساعة عمل لتأكيد التفاصيل.
+        </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="hc_name">الاسم الكامل *</Label>
-          <Input id="hc_name" value={form.patient_name} onChange={(e) => set("patient_name", e.target.value)} required />
-          {errors.patient_name && <p className="mt-1 text-xs text-destructive">{errors.patient_name}</p>}
+          <Input
+            id="hc_name"
+            value={form.patient_name}
+            onChange={(e) => set("patient_name", e.target.value)}
+            required
+          />
+          {errors.patient_name && (
+            <p className="mt-1 text-xs text-destructive">{errors.patient_name}</p>
+          )}
         </div>
         <div>
           <Label htmlFor="hc_phone">رقم الجوال *</Label>
-          <Input id="hc_phone" type="tel" inputMode="tel" value={form.patient_phone} onChange={(e) => set("patient_phone", e.target.value)} placeholder="05XXXXXXXX" required />
-          {errors.patient_phone && <p className="mt-1 text-xs text-destructive">{errors.patient_phone}</p>}
+          <Input
+            id="hc_phone"
+            type="tel"
+            inputMode="tel"
+            value={form.patient_phone}
+            onChange={(e) => set("patient_phone", e.target.value)}
+            placeholder="05XXXXXXXX"
+            required
+          />
+          {errors.patient_phone && (
+            <p className="mt-1 text-xs text-destructive">{errors.patient_phone}</p>
+          )}
         </div>
       </div>
 
@@ -140,7 +189,11 @@ export function HomeCareRequestForm({ services }: { services: string[] }) {
           className="mt-1 flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           required
         >
-          {services.map((s) => <option key={s} value={s}>{s}</option>)}
+          {services.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
         </select>
         {errors.service && <p className="mt-1 text-xs text-destructive">{errors.service}</p>}
       </div>
@@ -162,11 +215,22 @@ export function HomeCareRequestForm({ services }: { services: string[] }) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <Label htmlFor="hc_date">التاريخ المفضّل</Label>
-          <Input id="hc_date" type="date" value={form.preferred_date} onChange={(e) => set("preferred_date", e.target.value)} min={new Date().toISOString().slice(0,10)} />
+          <Input
+            id="hc_date"
+            type="date"
+            value={form.preferred_date}
+            onChange={(e) => set("preferred_date", e.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+          />
         </div>
         <div>
           <Label htmlFor="hc_time">الوقت المفضّل</Label>
-          <Input id="hc_time" type="time" value={form.preferred_time} onChange={(e) => set("preferred_time", e.target.value)} />
+          <Input
+            id="hc_time"
+            type="time"
+            value={form.preferred_time}
+            onChange={(e) => set("preferred_time", e.target.value)}
+          />
         </div>
       </div>
 
@@ -183,7 +247,13 @@ export function HomeCareRequestForm({ services }: { services: string[] }) {
       </div>
 
       <Button type="submit" variant="premium" size="xl" className="w-full" disabled={submitting}>
-        {submitting ? <><Loader2 className="h-4 w-4 animate-spin" /> جاري الإرسال...</> : "أرسل طلب الزيارة"}
+        {submitting ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" /> جاري الإرسال...
+          </>
+        ) : (
+          "أرسل طلب الزيارة"
+        )}
       </Button>
       <p className="text-xs text-muted-foreground text-center">
         بإرسالك الطلب أنت توافق على تواصلنا معك عبر الجوال المُدخل.

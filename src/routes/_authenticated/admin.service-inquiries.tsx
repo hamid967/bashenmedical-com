@@ -189,9 +189,7 @@ function ServiceInquiriesAdminPage() {
         <select
           className="h-10 px-2 rounded-lg border border-[color:var(--ac-line)] bg-transparent text-sm"
           value={filters.whatsapp_status ?? ""}
-          onChange={(e) =>
-            setFilters({ ...filters, whatsapp_status: e.target.value || undefined })
-          }
+          onChange={(e) => setFilters({ ...filters, whatsapp_status: e.target.value || undefined })}
         >
           <option value="">حالة الواتساب</option>
           {Object.entries(WA_AR).map(([k, v]) => (
@@ -286,7 +284,7 @@ function ServiceInquiriesAdminPage() {
                       )}
                     </td>
                     <td className="px-3 py-2 text-xs">
-                      {r.assigned_to ? staffMap.get(r.assigned_to) ?? "…" : "—"}
+                      {r.assigned_to ? (staffMap.get(r.assigned_to) ?? "…") : "—"}
                     </td>
                     <td className="px-3 py-2">
                       <span
@@ -440,35 +438,25 @@ function InquiryDrawer({
               <Field label="المريض" value={inquiry.full_name} />
               <Field label="الجوال" value={inquiry.mobile_e164} mono />
               <Field label="البريد" value={inquiry.email ?? "—"} />
-              <Field
-                label="الخدمة"
-                value={inquiry.service?.name_ar ?? inquiry.service_label}
-              />
+              <Field label="الخدمة" value={inquiry.service?.name_ar ?? inquiry.service_label} />
               <Field label="الفرع" value={inquiry.branches?.name_ar ?? "—"} />
               <Field label="المصدر" value={SOURCE_AR[inquiry.source] ?? inquiry.source} />
-              <Field
-                label="طريقة التواصل"
-                value={inquiry.preferred_contact_method ?? "—"}
-              />
-              <Field
-                label="التاريخ المفضّل"
-                value={inquiry.preferred_date ?? "—"}
-              />
+              <Field label="طريقة التواصل" value={inquiry.preferred_contact_method ?? "—"} />
+              <Field label="التاريخ المفضّل" value={inquiry.preferred_date ?? "—"} />
               <Field
                 label="حالة الواتساب"
                 value={WA_AR[inquiry.whatsapp_handoff_status] ?? inquiry.whatsapp_handoff_status}
               />
-              <Field
-                label="الحساب"
-                value={inquiry.user_id ? "مرتبط" : "غير مرتبط"}
-              />
+              <Field label="الحساب" value={inquiry.user_id ? "مرتبط" : "غير مرتبط"} />
               <Field
                 label="أُنشئ في"
                 value={new Date(inquiry.created_at).toLocaleString("ar-SA")}
               />
               <Field
                 label="أُغلق في"
-                value={inquiry.closed_at ? new Date(inquiry.closed_at).toLocaleString("ar-SA") : "—"}
+                value={
+                  inquiry.closed_at ? new Date(inquiry.closed_at).toLocaleString("ar-SA") : "—"
+                }
               />
             </section>
 
@@ -693,7 +681,8 @@ function InquiryDrawer({
                         </div>
                       )}
                       <div className="mt-1 text-[11px] text-[color:var(--ac-muted)]">
-                        بواسطة: {t.actor_name ?? (t.created_by ? t.created_by.slice(0, 8) : "النظام")}
+                        بواسطة:{" "}
+                        {t.actor_name ?? (t.created_by ? t.created_by.slice(0, 8) : "النظام")}
                       </div>
                     </li>
                   ))}
@@ -718,6 +707,9 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
 
 function formatMetadata(m: Record<string, any>): string {
   return Object.entries(m)
-    .map(([k, v]) => `${k}: ${v === null ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v)}`)
+    .map(
+      ([k, v]) =>
+        `${k}: ${v === null ? "—" : typeof v === "object" ? JSON.stringify(v) : String(v)}`,
+    )
     .join(" · ");
 }

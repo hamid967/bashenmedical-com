@@ -10,12 +10,7 @@ import {
   listPatientQrScans,
   getPatientQrScanCount,
 } from "@/lib/patient-qr-scans.functions";
-import {
-  Tabs,
-  TabsList,
-  TabsTrigger,
-  TabsContent,
-} from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   User,
@@ -197,7 +192,11 @@ function PatientDetail() {
               </div>
             </div>
             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-              <InfoRow icon={IdCard} label="رقم الملف" value={<span className="font-mono">{p.mrn}</span>} />
+              <InfoRow
+                icon={IdCard}
+                label="رقم الملف"
+                value={<span className="font-mono">{p.mrn}</span>}
+              />
               <InfoRow icon={Phone} label="الجوال" value={p.phone} />
               <InfoRow icon={IdCard} label="الهوية" value={p.national_id ?? "—"} />
               <InfoRow
@@ -218,8 +217,6 @@ function PatientDetail() {
           </div>
         </div>
       </div>
-
-
 
       <Tabs defaultValue="profile">
         <TabsList className="grid grid-cols-2 sm:grid-cols-4 sm:inline-flex h-auto">
@@ -279,7 +276,6 @@ function PatientDetail() {
           <AttachmentsSection patientId={patientId} />
         </TabsContent>
       </Tabs>
-
     </div>
   );
 }
@@ -358,18 +354,16 @@ function QrScanStats({ patientId }: { patientId: string }) {
               {listQ.isLoading ? (
                 <p className="p-4 text-sm text-muted-foreground text-center">جارٍ التحميل…</p>
               ) : (listQ.data ?? []).length === 0 ? (
-                <p className="p-4 text-sm text-muted-foreground text-center">لا يوجد مسح مسجّل بعد.</p>
+                <p className="p-4 text-sm text-muted-foreground text-center">
+                  لا يوجد مسح مسجّل بعد.
+                </p>
               ) : (
                 <ul className="divide-y divide-border text-sm">
                   {(listQ.data ?? []).map((r) => (
                     <li key={r.id} className="px-3 py-2 flex items-center justify-between">
                       <div className="min-w-0">
-                        <p className="font-medium truncate">
-                          {r.scanner_name ?? "—"}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          المصدر: {r.source}
-                        </p>
+                        <p className="font-medium truncate">{r.scanner_name ?? "—"}</p>
+                        <p className="text-xs text-muted-foreground">المصدر: {r.source}</p>
                       </div>
                       <span className="text-xs text-muted-foreground font-mono whitespace-nowrap">
                         {formatFull(r.scanned_at)}
@@ -437,7 +431,13 @@ function OverviewSection({ patient: p }: { patient: Patient }) {
       <KV k="العنوان" v={p.address} />
       <KV k="البريد" v={p.email} />
       <KV k="جوال بديل" v={p.secondary_phone} />
-      <KV k="جهة اتصال طوارئ" v={p.emergency_contact_name && `${p.emergency_contact_name} — ${p.emergency_contact_phone ?? ""}`} />
+      <KV
+        k="جهة اتصال طوارئ"
+        v={
+          p.emergency_contact_name &&
+          `${p.emergency_contact_name} — ${p.emergency_contact_phone ?? ""}`
+        }
+      />
       <div className="md:col-span-2">
         <KV k="ملاحظات" v={p.notes} />
       </div>
@@ -540,9 +540,7 @@ function AllergiesSection({ patientId }: { patientId: string }) {
                 {a.reaction && (
                   <div className="text-sm text-muted-foreground mt-1">التفاعل: {a.reaction}</div>
                 )}
-                {a.notes && (
-                  <div className="text-xs text-muted-foreground mt-1">{a.notes}</div>
-                )}
+                {a.notes && <div className="text-xs text-muted-foreground mt-1">{a.notes}</div>}
               </div>
               <button
                 onClick={() => del(a.id)}
@@ -972,7 +970,11 @@ function VisitsSection({ patientId }: { patientId: string }) {
         </ul>
       )}
       {open && (
-        <VisitDialog patientId={patientId} onClose={() => setOpen(false)} onSaved={() => q.refetch()} />
+        <VisitDialog
+          patientId={patientId}
+          onClose={() => setOpen(false)}
+          onSaved={() => q.refetch()}
+        />
       )}
     </SectionShell>
   );
@@ -1047,12 +1049,18 @@ function VisitDialog({
       <form onSubmit={submit} className="w-full max-w-3xl rounded-2xl bg-card border border-border">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="font-bold">زيارة سريرية جديدة</h3>
-          <button type="button" onClick={onClose}>×</button>
+          <button type="button" onClick={onClose}>
+            ×
+          </button>
         </div>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[70vh] overflow-auto text-sm">
           <div className="md:col-span-2">
             <label className="text-xs text-muted-foreground">الشكوى الرئيسية</label>
-            <input value={f.chief_complaint} onChange={(e) => u("chief_complaint", e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2" />
+            <input
+              value={f.chief_complaint}
+              onChange={(e) => u("chief_complaint", e.target.value)}
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2"
+            />
           </div>
           <fieldset className="md:col-span-2 grid grid-cols-2 md:grid-cols-7 gap-2 border border-border rounded-md p-3">
             <legend className="px-1 text-xs text-muted-foreground">العلامات الحيوية</legend>
@@ -1067,7 +1075,11 @@ function VisitDialog({
             ].map(([k, l]) => (
               <div key={k}>
                 <label className="text-[10px] text-muted-foreground">{l}</label>
-                <input value={(f as any)[k]} onChange={(e) => u(k as any, e.target.value)} className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs" />
+                <input
+                  value={(f as any)[k]}
+                  onChange={(e) => u(k as any, e.target.value)}
+                  className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs"
+                />
               </div>
             ))}
           </fieldset>
@@ -1079,17 +1091,35 @@ function VisitDialog({
           ].map(([k, l]) => (
             <div key={k}>
               <label className="text-xs text-muted-foreground">{l}</label>
-              <textarea value={(f as any)[k]} onChange={(e) => u(k as any, e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 min-h-24" />
+              <textarea
+                value={(f as any)[k]}
+                onChange={(e) => u(k as any, e.target.value)}
+                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 min-h-24"
+              />
             </div>
           ))}
           <div>
             <label className="text-xs text-muted-foreground">تاريخ المتابعة</label>
-            <input type="date" value={f.follow_up_date} onChange={(e) => u("follow_up_date", e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2" />
+            <input
+              type="date"
+              value={f.follow_up_date}
+              onChange={(e) => u("follow_up_date", e.target.value)}
+              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2"
+            />
           </div>
         </div>
         <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-          <button type="button" onClick={onClose} className="rounded-md border border-input px-4 py-2 text-sm">إلغاء</button>
-          <button disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-input px-4 py-2 text-sm"
+          >
+            إلغاء
+          </button>
+          <button
+            disabled={saving}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          >
             {saving ? "…" : "حفظ الزيارة"}
           </button>
         </div>
@@ -1185,13 +1215,23 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
       <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2 items-end rounded-xl border border-dashed border-border p-4">
         <div>
           <label className="text-xs text-muted-foreground">العنوان *</label>
-          <input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          />
         </div>
         <div>
           <label className="text-xs text-muted-foreground">النوع</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
             {Object.entries(ATTACH_CATEGORY).map(([v, l]) => (
-              <option key={v} value={v}>{l}</option>
+              <option key={v} value={v}>
+                {l}
+              </option>
             ))}
           </select>
         </div>
@@ -1202,7 +1242,11 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
             disabled={uploading}
             className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
           >
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {uploading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="h-4 w-4" />
+            )}
             رفع
           </button>
         </div>
@@ -1272,7 +1316,8 @@ function SimpleFormDialog({
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     for (const f of fields) {
-      if (f.required && !values[f.key]?.trim()) return toast.error(`${f.label.replace(" *", "")} مطلوب`);
+      if (f.required && !values[f.key]?.trim())
+        return toast.error(`${f.label.replace(" *", "")} مطلوب`);
     }
     setSaving(true);
     try {
@@ -1291,12 +1336,16 @@ function SimpleFormDialog({
       <form onSubmit={submit} className="w-full max-w-lg rounded-2xl bg-card border border-border">
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <h3 className="font-bold">{title}</h3>
-          <button type="button" onClick={onClose}>×</button>
+          <button type="button" onClick={onClose}>
+            ×
+          </button>
         </div>
         <div className="p-6 space-y-3 max-h-[70vh] overflow-auto">
           {fields.map((f) => (
             <div key={f.key}>
-              <label className="block text-xs font-medium text-muted-foreground mb-1">{f.label}</label>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {f.label}
+              </label>
               {f.type === "textarea" ? (
                 <textarea
                   value={values[f.key] ?? ""}
@@ -1310,7 +1359,9 @@ function SimpleFormDialog({
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 >
                   {f.options?.map((o) => (
-                    <option key={o.v} value={o.v}>{o.l}</option>
+                    <option key={o.v} value={o.v}>
+                      {o.l}
+                    </option>
                   ))}
                 </select>
               ) : (
@@ -1325,8 +1376,17 @@ function SimpleFormDialog({
           ))}
         </div>
         <div className="flex justify-end gap-2 border-t border-border px-6 py-4">
-          <button type="button" onClick={onClose} className="rounded-md border border-input px-4 py-2 text-sm">إلغاء</button>
-          <button disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border border-input px-4 py-2 text-sm"
+          >
+            إلغاء
+          </button>
+          <button
+            disabled={saving}
+            className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60"
+          >
             {saving ? "…" : "حفظ"}
           </button>
         </div>

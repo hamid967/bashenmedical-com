@@ -118,8 +118,6 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-
-
 const STATS = [
   { k: "12+", ar: "تخصص طبي", en: "Specialties" },
   { k: "40+", ar: "طبيب استشاري", en: "Consultants" },
@@ -314,9 +312,7 @@ function HomePage() {
               <span className="block text-[color:var(--fut-ink)]">
                 {i18n.t("home:baeshen_medical_complex_specialist_care")}
               </span>
-              <span className="block text-neon">
-                {i18n.t("home:in_sabya_jazan")}
-              </span>
+              <span className="block text-neon">{i18n.t("home:in_sabya_jazan")}</span>
             </h1>
             <p className="mt-5 text-base md:text-lg text-[color:var(--fut-ink-muted)] leading-8">
               {i18n.t("home:book_certified_consultants_track_reports")}
@@ -367,7 +363,6 @@ function HomePage() {
           </StaggerReveal>
         </div>
       </section>
-
 
       {/* ===== QUICK BOOKING ===== */}
       <section className="relative py-16 md:py-20">
@@ -478,8 +473,7 @@ function HomePage() {
             errorFallback={
               <SectionError
                 title={i18n.t("home:could_not_load_specialties")}
-                hint={i18n.t("home:a_network_error_occurred_check_your_conn")
-                }
+                hint={i18n.t("home:a_network_error_occurred_check_your_conn")}
                 retryLabel={i18n.t("home:try_again")}
                 onRetry={() => refetchSpecialties()}
               />
@@ -508,7 +502,9 @@ function HomePage() {
             </StaggerReveal>
           </SkeletonSwap>
         </div>
-        <div className="container-app"><JazanDivider variant="subtle" className="mt-16" /></div>
+        <div className="container-app">
+          <JazanDivider variant="subtle" className="mt-16" />
+        </div>
       </section>
 
       {/* ===== ANNOUNCEMENTS ===== */}
@@ -516,7 +512,6 @@ function HomePage() {
 
       {/* ===== WHY US ===== */}
       <section className="py-16 md:py-20">
-
         <div className="container-app">
           <div className="mb-10 max-w-2xl">
             <JazanSectionLabel>{i18n.t("home:why_baeshen")}</JazanSectionLabel>
@@ -529,7 +524,10 @@ function HomePage() {
               const Icon = f.icon;
               const c = isAr ? f.ar : f.en;
               return (
-                <RevealItem key={i} className="glass-fut neon-glow-hover p-6 jazan-hairline jazan-hairline-hover transition">
+                <RevealItem
+                  key={i}
+                  className="glass-fut neon-glow-hover p-6 jazan-hairline jazan-hairline-hover transition"
+                >
                   <JazanIconFrame>
                     <Icon className="h-5 w-5" />
                   </JazanIconFrame>
@@ -572,8 +570,7 @@ function HomePage() {
             errorFallback={
               <SectionError
                 title={i18n.t("home:could_not_load_doctors")}
-                hint={i18n.t("home:a_network_error_occurred_check_your_conn")
-                }
+                hint={i18n.t("home:a_network_error_occurred_check_your_conn")}
                 retryLabel={i18n.t("home:try_again")}
                 onRetry={() => refetchDoctors()}
               />
@@ -585,8 +582,10 @@ function HomePage() {
                   key={d.id}
                   className="glass-fut neon-glow-hover flex flex-col items-center p-6 text-center"
                 >
-                  <div className="grid h-24 w-24 place-items-center rounded-full text-2xl font-bold text-[#04121a] shadow-[var(--fut-glow-teal)]"
-                       style={{ background: "var(--fut-gradient-neon)" }}>
+                  <div
+                    className="grid h-24 w-24 place-items-center rounded-full text-2xl font-bold text-[#04121a] shadow-[var(--fut-glow-teal)]"
+                    style={{ background: "var(--fut-gradient-neon)" }}
+                  >
                     {(isAr ? d.name_ar : d.name_en).charAt(0)}
                   </div>
                   <div className="mt-4">
@@ -616,7 +615,9 @@ function HomePage() {
 
       {/* ===== VISIT / MAP ===== */}
       <section className="py-16 md:py-20">
-        <div className="container-app"><JazanDivider variant="subtle" className="mb-12" /></div>
+        <div className="container-app">
+          <JazanDivider variant="subtle" className="mb-12" />
+        </div>
         <div className="container-app grid items-center gap-8 md:grid-cols-2">
           <div>
             <JazanSectionLabel>{i18n.t("home:visit_us")}</JazanSectionLabel>
@@ -630,12 +631,7 @@ function HomePage() {
               {isAr ? `الرمز البريدي ${SITE.postalCode}` : `Postal code ${SITE.postalCode}`}
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <a
-                href={SITE.mapsUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-magnetic"
-              >
+              <a href={SITE.mapsUrl} target="_blank" rel="noreferrer" className="btn-magnetic">
                 <MapPin className="h-4 w-4" />
                 {i18n.t("home:open_in_maps")}
               </a>
@@ -694,5 +690,3 @@ function HomePage() {
     </div>
   );
 }
-
-

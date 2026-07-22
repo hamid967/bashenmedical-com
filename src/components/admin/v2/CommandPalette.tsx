@@ -22,7 +22,12 @@ import {
 } from "lucide-react";
 import { globalSearch } from "@/lib/admin/global-search.functions";
 
-type RouteItem = { to: string; label: string; icon: React.ComponentType<{ className?: string }>; group: string };
+type RouteItem = {
+  to: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  group: string;
+};
 
 const ROUTES: RouteItem[] = [
   { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard, group: "التنقل" },
@@ -96,10 +101,7 @@ export function CommandPalette({
       className="fixed inset-0 z-[100] grid place-items-start justify-center pt-[10vh] px-4"
       onClick={() => onOpenChange(false)}
     >
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        aria-hidden="true"
-      />
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
       <div
         className="relative w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden"
         style={{
@@ -129,7 +131,10 @@ export function CommandPalette({
           </div>
 
           <Command.List className="max-h-[60vh] overflow-y-auto p-2">
-            <Command.Empty className="py-8 text-center text-sm" style={{ color: "var(--ac-ink-3)" }}>
+            <Command.Empty
+              className="py-8 text-center text-sm"
+              style={{ color: "var(--ac-ink-3)" }}
+            >
               لا توجد نتائج
             </Command.Empty>
 
@@ -179,7 +184,10 @@ export function CommandPalette({
                         <Stethoscope className="h-4 w-4 opacity-70" />
                         <span>{d.name_ar}</span>
                         {d.specialty && (
-                          <span className="mr-auto text-[11px]" style={{ color: "var(--ac-muted)" }}>
+                          <span
+                            className="mr-auto text-[11px]"
+                            style={{ color: "var(--ac-muted)" }}
+                          >
                             {d.specialty}
                           </span>
                         )}
@@ -199,7 +207,10 @@ export function CommandPalette({
                 >
                   <r.icon className="h-4 w-4 opacity-70" />
                   <span>{r.label}</span>
-                  <span className="mr-auto text-[11px] font-mono" style={{ color: "var(--ac-muted)" }}>
+                  <span
+                    className="mr-auto text-[11px] font-mono"
+                    style={{ color: "var(--ac-muted)" }}
+                  >
                     {r.to}
                   </span>
                 </Command.Item>

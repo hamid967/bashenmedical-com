@@ -9,8 +9,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 const bodySchema = z.object({
-  ref: z.string().trim().regex(/^WL-[0-9A-Fa-f]{8}$/, "المرجع غير صالح."),
-  phone4: z.string().trim().regex(/^\d{4}$/, "أدخل آخر ٤ أرقام من الجوال."),
+  ref: z
+    .string()
+    .trim()
+    .regex(/^WL-[0-9A-Fa-f]{8}$/, "المرجع غير صالح."),
+  phone4: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, "أدخل آخر ٤ أرقام من الجوال."),
 });
 
 function json(status: number, body: Record<string, unknown>) {

@@ -173,7 +173,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
     for (const r of (iRes.data ?? []) as any[]) if (r.patient_id) patientIds.add(r.patient_id);
     for (const r of (lRes.data ?? []) as any[]) if (r.patient_id) patientIds.add(r.patient_id);
     for (const r of (rRes.data ?? []) as any[]) if (r.patient_id) patientIds.add(r.patient_id);
-    let pmap = new Map<string, { name: string | null; phone: string | null }>();
+    const pmap = new Map<string, { name: string | null; phone: string | null }>();
     if (patientIds.size) {
       const { data: pats } = await supabase
         .from("patients")
@@ -195,10 +195,9 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         status: r.status,
         created_at: r.created_at,
         updated_at: r.updated_at ?? r.created_at,
-        meta:
-          r.appointment_date
-            ? `${r.appointment_date}${r.appointment_time ? " " + String(r.appointment_time).slice(0, 5) : ""}`
-            : null,
+        meta: r.appointment_date
+          ? `${r.appointment_date}${r.appointment_time ? " " + String(r.appointment_time).slice(0, 5) : ""}`
+          : null,
       });
     }
     for (const r of (cRes.data ?? []) as any[]) {

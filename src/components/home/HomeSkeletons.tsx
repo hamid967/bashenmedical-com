@@ -37,7 +37,7 @@ export function SkeletonSwap({
         exit={{ opacity: 0 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       >
-        {state === "error" ? errorFallback ?? <SectionError /> : null}
+        {state === "error" ? (errorFallback ?? <SectionError />) : null}
         {state === "skeleton" ? skeleton : null}
         {state === "content" ? children : null}
       </motion.div>
@@ -101,13 +101,7 @@ function JazanSkeletonHeader({ label }: { label?: string }) {
  * Specialties grid — matches real card: glass-fut p-5 + jazan-hairline,
  * icon 44×44, title + 2-line description.
  */
-export function SpecialtiesSkeleton({
-  count = 8,
-  label,
-}: {
-  count?: number;
-  label?: string;
-}) {
+export function SpecialtiesSkeleton({ count = 8, label }: { count?: number; label?: string }) {
   return (
     <div>
       <JazanSkeletonHeader label={label} />
@@ -132,19 +126,16 @@ export function SpecialtiesSkeleton({
  * Featured doctors grid — matches real card: glass-fut items-center p-6,
  * avatar 96×96 rounded-full, name/title/button.
  */
-export function DoctorsSkeleton({
-  count = 4,
-  label,
-}: {
-  count?: number;
-  label?: string;
-}) {
+export function DoctorsSkeleton({ count = 4, label }: { count?: number; label?: string }) {
   return (
     <div>
       <JazanSkeletonHeader label={label} />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: count }).map((_, i) => (
-          <div key={i} className="glass-fut jazan-hairline flex flex-col items-center p-6 text-center">
+          <div
+            key={i}
+            className="glass-fut jazan-hairline flex flex-col items-center p-6 text-center"
+          >
             <div className="skeleton-jazan h-24 w-24 rounded-full" />
             <div className="skeleton-jazan mt-4 h-4 w-2/3 rounded" />
             <div className="skeleton-jazan mt-1 h-3 w-1/2 rounded" />
@@ -160,13 +151,7 @@ export function DoctorsSkeleton({
 /**
  * Announcements grid — badge + date, title, 3-line body, CTA pinned bottom.
  */
-export function AnnouncementsSkeleton({
-  count = 3,
-  label,
-}: {
-  count?: number;
-  label?: string;
-}) {
+export function AnnouncementsSkeleton({ count = 3, label }: { count?: number; label?: string }) {
   return (
     <div>
       <JazanSkeletonHeader label={label} />

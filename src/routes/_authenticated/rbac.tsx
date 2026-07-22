@@ -16,7 +16,17 @@ import {
   type AppRole,
 } from "@/lib/rbac.functions";
 import { getMyRoles } from "@/lib/admin.functions";
-import { ShieldCheck, UserPlus, X, ArrowRight, Users, KeyRound, Layers, Download, Upload } from "lucide-react";
+import {
+  ShieldCheck,
+  UserPlus,
+  X,
+  ArrowRight,
+  Users,
+  KeyRound,
+  Layers,
+  Download,
+  Upload,
+} from "lucide-react";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 export const Route = createFileRoute("/_authenticated/rbac")({
@@ -88,7 +98,9 @@ function RbacPage() {
   const [tab, setTab] = useState<Tab>("users");
 
   if (myRoles.isLoading) {
-    return <div className="container-app py-16 text-center text-muted-foreground">جارٍ التحميل…</div>;
+    return (
+      <div className="container-app py-16 text-center text-muted-foreground">جارٍ التحميل…</div>
+    );
   }
   if (!isAdmin) {
     return (
@@ -387,15 +399,13 @@ function RolesTab() {
               <h3 className="text-lg font-semibold">{ROLE_LABELS[r]}</h3>
               <p className="mt-1 text-sm text-muted-foreground">{ROLE_DESCRIPTIONS[r]}</p>
             </div>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">
-              {r}
-            </span>
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary">{r}</span>
           </div>
         </div>
       ))}
       <div className="rounded-lg border border-dashed border-border bg-muted/30 p-4 text-sm text-muted-foreground md:col-span-2">
-        الأدوار محددة على مستوى النظام. لإضافة أدوار جديدة يلزم تعديل مخطط قاعدة البيانات.
-        استخدم تبويب <strong>الصلاحيات</strong> لتخصيص ما يستطيع كل دور فعله.
+        الأدوار محددة على مستوى النظام. لإضافة أدوار جديدة يلزم تعديل مخطط قاعدة البيانات. استخدم
+        تبويب <strong>الصلاحيات</strong> لتخصيص ما يستطيع كل دور فعله.
       </div>
     </div>
   );
@@ -428,9 +438,7 @@ function PermissionsTab(props: {
       const prev = qc.getQueryData<any[]>(["rbac-perm-matrix"]) ?? [];
       const next = v.enabled
         ? [...prev, { role: v.role, permission_key: v.permission_key }]
-        : prev.filter(
-            (r) => !(r.role === v.role && r.permission_key === v.permission_key),
-          );
+        : prev.filter((r) => !(r.role === v.role && r.permission_key === v.permission_key));
       qc.setQueryData(["rbac-perm-matrix"], next);
       return { prev };
     },
@@ -502,8 +510,7 @@ function PermissionsTab(props: {
                   </td>
                   {ROLES.map((r) => {
                     const on = r === "super_admin" ? true : set.has(`${r}::${p.key}`);
-                    const locked =
-                      r === "super_admin" || (!isSuper && r === "admin");
+                    const locked = r === "super_admin" || (!isSuper && r === "admin");
                     return (
                       <td key={r} className="px-3 py-2 text-center">
                         <button
@@ -532,7 +539,6 @@ function PermissionsTab(props: {
                 </tr>
               )),
             ])}
-
           </tbody>
         </table>
       </div>
@@ -542,10 +548,7 @@ function PermissionsTab(props: {
 
 /* ------------------------ Import / Export toolbar ----------------------- */
 
-function ImportExportToolbar(props: {
-  isSuper: boolean;
-  qc: ReturnType<typeof useQueryClient>;
-}) {
+function ImportExportToolbar(props: { isSuper: boolean; qc: ReturnType<typeof useQueryClient> }) {
   const { isSuper, qc } = props;
   const exportFn = useServerFn(exportRolePermissions);
   const importFn = useServerFn(importRolePermissions);
@@ -656,7 +659,13 @@ function ImportExportToolbar(props: {
 
             <p className="mb-3 text-xs text-muted-foreground">
               الصق محتوى ملف JSON أو ارفعه. سيتم تجاهل دور <code>super_admin</code>
-              {!isSuper && <> ودور <code>admin</code></>} تلقائياً.
+              {!isSuper && (
+                <>
+                  {" "}
+                  ودور <code>admin</code>
+                </>
+              )}{" "}
+              تلقائياً.
             </p>
 
             <div className="mb-3 flex flex-wrap items-center gap-4 text-xs">

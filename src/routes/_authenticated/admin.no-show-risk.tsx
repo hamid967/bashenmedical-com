@@ -28,9 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/no-show-risk")({
   loader: ({ context }) => context.queryClient.ensureQueryData(riskQuery(14)),
   component: NoShowRiskPage,
   errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">
-      تعذّر تحميل توقّعات الغياب: {error.message}
-    </div>
+    <div className="p-6 text-sm text-destructive">تعذّر تحميل توقّعات الغياب: {error.message}</div>
   ),
   notFoundComponent: () => <div className="p-6 text-sm">غير موجود</div>,
 });
@@ -71,9 +69,7 @@ function NoShowRiskPage() {
             </button>
           ))}
           <button
-            onClick={() =>
-              qc.invalidateQueries({ queryKey: ["admin", "no-show-risk"] })
-            }
+            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "no-show-risk"] })}
             className="p-1.5 border rounded-md hover:bg-muted"
             aria-label="تحديث"
           >
@@ -85,12 +81,7 @@ function NoShowRiskPage() {
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Kpi label="إجمالي المواعيد" value={data.total} icon={Users} tone="muted" />
         <Kpi label="مخاطرة منخفضة" value={data.buckets.low} icon={TrendingUp} tone="ok" />
-        <Kpi
-          label="مخاطرة متوسطة"
-          value={data.buckets.medium}
-          icon={AlertTriangle}
-          tone="warn"
-        />
+        <Kpi label="مخاطرة متوسطة" value={data.buckets.medium} icon={AlertTriangle} tone="warn" />
         <Kpi
           label="مخاطرة عالية"
           value={data.buckets.high}
@@ -132,9 +123,7 @@ function NoShowRiskPage() {
                     className="border-t border-border"
                   >
                     <td className="p-2 text-xs">{s.appointment_date}</td>
-                    <td className="p-2 font-mono text-xs">
-                      {s.appointment_time.slice(0, 5)}
-                    </td>
+                    <td className="p-2 font-mono text-xs">{s.appointment_time.slice(0, 5)}</td>
                     <td className="p-2">{s.doctor_name_ar ?? "—"}</td>
                     <td className="p-2 font-mono">{s.booked_count}</td>
                     <td className="p-2 font-mono">{s.avg_risk}%</td>
@@ -188,9 +177,7 @@ function NoShowRiskPage() {
                       <RiskBadge value={r.no_show_risk} tone={tone} />
                     </td>
                     <td className="p-2 text-xs">{r.appointment_date}</td>
-                    <td className="p-2 font-mono text-xs">
-                      {r.appointment_time.slice(0, 5)}
-                    </td>
+                    <td className="p-2 font-mono text-xs">{r.appointment_time.slice(0, 5)}</td>
                     <td className="p-2">{r.patient_name ?? "—"}</td>
                     <td className="p-2">{r.doctor_name_ar ?? "—"}</td>
                     <td className="p-2 text-xs text-muted-foreground">{r.status}</td>

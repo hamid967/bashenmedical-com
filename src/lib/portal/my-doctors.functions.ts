@@ -80,8 +80,7 @@ export const listMyDoctors = createServerFn({ method: "GET" })
       };
       cur.total_visits += 1;
       const upcoming =
-        (a.appointment_date ?? "") >= today &&
-        (a.status === "new" || a.status === "confirmed");
+        (a.appointment_date ?? "") >= today && (a.status === "new" || a.status === "confirmed");
       if (upcoming) cur.upcoming_count += 1;
       const isPastCompleted = a.status === "completed";
       if (isPastCompleted) {
@@ -120,8 +119,7 @@ export const listMyDoctors = createServerFn({ method: "GET" })
           title_en: d.title_en ?? null,
           photo_url: d.photo_url ?? null,
           slug: d.slug ?? null,
-          specialty_ar:
-            specialtyMap.get(d.specialty_id ?? agg.specialty_id ?? "") ?? null,
+          specialty_ar: specialtyMap.get(d.specialty_id ?? agg.specialty_id ?? "") ?? null,
           branch_ar: branchMap.get(d.branch_id ?? agg.branch_id ?? "") ?? null,
           last_visit_date: agg.last_visit_date,
           upcoming_count: agg.upcoming_count,
@@ -130,8 +128,7 @@ export const listMyDoctors = createServerFn({ method: "GET" })
         };
       })
       .sort((a, b) => {
-        if (a.upcoming_count !== b.upcoming_count)
-          return b.upcoming_count - a.upcoming_count;
+        if (a.upcoming_count !== b.upcoming_count) return b.upcoming_count - a.upcoming_count;
         return (b.last_visit_date ?? "").localeCompare(a.last_visit_date ?? "");
       });
   });

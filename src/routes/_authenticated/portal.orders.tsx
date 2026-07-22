@@ -26,10 +26,7 @@ import {
   FlaskConical,
   Scan,
 } from "lucide-react";
-import {
-  getMyRecentOrders,
-  type MyRecentOrder,
-} from "@/lib/portal/my-orders.functions";
+import { getMyRecentOrders, type MyRecentOrder } from "@/lib/portal/my-orders.functions";
 import type { OrderTableKind } from "@/lib/unified-status";
 
 const KIND_LABELS_AR: Record<OrderTableKind, string> = {
@@ -79,10 +76,7 @@ function formatDate(iso: string): string {
 
 export const Route = createFileRoute("/_authenticated/portal/orders")({
   head: () => ({
-    meta: [
-      { title: "طلباتي | بوابة المريض" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "طلباتي | بوابة المريض" }, { name: "robots", content: "noindex" }],
   }),
   component: MyOrdersPage,
 });
@@ -110,7 +104,6 @@ function MyOrdersPage() {
   return (
     <>
       <div className="mb-4 flex items-center justify-between gap-2 flex-wrap">
-
         <div className="flex items-center gap-2">
           <div className="h-10 w-10 rounded-xl grid place-items-center bg-primary/10 text-primary">
             <Inbox className="h-5 w-5" />
@@ -216,5 +209,4 @@ function MyOrdersPage() {
       )}
     </>
   );
-
 }

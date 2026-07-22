@@ -60,12 +60,17 @@ type MockResult = {
 
 function planLabel(tier: string | null): string | null {
   switch ((tier ?? "").toLowerCase()) {
-    case "limited": return "خطة محدودة";
-    case "basic": return "خطة أساسية";
-    case "comprehensive": return "خطة شاملة";
+    case "limited":
+      return "خطة محدودة";
+    case "basic":
+      return "خطة أساسية";
+    case "comprehensive":
+      return "خطة شاملة";
     case "vip":
-    case "premium": return "خطة مميّزة";
-    default: return tier ? "خطة قياسية" : null;
+    case "premium":
+      return "خطة مميّزة";
+    default:
+      return tier ? "خطة قياسية" : null;
   }
 }
 
@@ -107,29 +112,53 @@ function applyMockAdapter(
   if (ctx.policy) {
     if (upPolicy.includes("EXP")) {
       return finalize({
-        eligible: false, reason: "policy_expired", coverage: 0, fee,
-        copay: null, deductible: null, tier, label,
+        eligible: false,
+        reason: "policy_expired",
+        coverage: 0,
+        fee,
+        copay: null,
+        deductible: null,
+        tier,
+        label,
         notes: ["يمكنك تجديد الوثيقة ثم إعادة التحقق."],
       });
     }
     if (upPolicy.endsWith("99")) {
       return finalize({
-        eligible: false, reason: "out_of_network", coverage: 0, fee,
-        copay: null, deductible: null, tier, label,
+        eligible: false,
+        reason: "out_of_network",
+        coverage: 0,
+        fee,
+        copay: null,
+        deductible: null,
+        tier,
+        label,
         notes: ["اسأل عن طبيب داخل الشبكة، أو تواصل مع خدمة العملاء."],
       });
     }
     if (upPolicy.endsWith("LMT")) {
       return finalize({
-        eligible: false, reason: "limit_exceeded", coverage: 0, fee,
-        copay: null, deductible: null, tier, label,
+        eligible: false,
+        reason: "limit_exceeded",
+        coverage: 0,
+        fee,
+        copay: null,
+        deductible: null,
+        tier,
+        label,
         notes: ["تم استخدام كامل المخصص السنوي لهذه الوثيقة."],
       });
     }
     if (upPolicy.endsWith("WAIT")) {
       return finalize({
-        eligible: false, reason: "waiting_period", coverage: 0, fee,
-        copay: null, deductible: null, tier, label,
+        eligible: false,
+        reason: "waiting_period",
+        coverage: 0,
+        fee,
+        copay: null,
+        deductible: null,
+        tier,
+        label,
         notes: ["يمكن تفعيل التغطية بعد انتهاء فترة الانتظار."],
       });
     }
@@ -174,15 +203,27 @@ function applyMockAdapter(
   }
 
   return finalize({
-    eligible, reason, coverage, fee,
-    copay, deductible, tier, label,
+    eligible,
+    reason,
+    coverage,
+    fee,
+    copay,
+    deductible,
+    tier,
+    label,
     notes,
   });
 }
 
 function finalize(x: {
-  eligible: boolean; reason: string; coverage: number; fee: number | null;
-  copay: number | null; deductible: number | null; tier: string | null; label: string | null;
+  eligible: boolean;
+  reason: string;
+  coverage: number;
+  fee: number | null;
+  copay: number | null;
+  deductible: number | null;
+  tier: string | null;
+  label: string | null;
   notes: string[];
 }): MockResult {
   let covered: number | null = null;
@@ -202,7 +243,8 @@ function finalize(x: {
     }
   }
 
-  const base = REASON_MESSAGES[x.reason] ??
+  const base =
+    REASON_MESSAGES[x.reason] ??
     (x.eligible ? "التأمين مؤهل." : "لم نتمكّن من تأكيد الأهلية. تواصل مع الاستقبال.");
   const prefix = x.label ? `${x.label}: ` : "";
 
@@ -284,7 +326,6 @@ export const verifyMyInsurance = createServerFn({ method: "POST" })
     return { ok: true, id, ...result };
   });
 
-
 async function logAttempt(
   supabase: any,
   userId: string,
@@ -292,9 +333,7 @@ async function logAttempt(
   policy: string,
   r: MockResult,
 ): Promise<string | null> {
-  const messageForLog = r.notes.length
-    ? `${r.message} — ${r.notes.join(" · ")}`
-    : r.message;
+  const messageForLog = r.notes.length ? `${r.message} — ${r.notes.join(" · ")}` : r.message;
 
   // Link the verification to the patient chart that belongs to this user so
   // reception/doctor screens can surface it from the patient record. Missing
@@ -374,8 +413,6 @@ export const attachVerificationToAppointment = createServerFn({ method: "POST" }
     return { ok: true };
   });
 
-
-
 /* --------------------------- listMyVerifications -------------------------- */
 
 const ListSchema = z.object({
@@ -405,7 +442,9 @@ export const listMyInsuranceVerifications = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // Enrich provider name (small in-memory lookup — providers list is short).
-    const providerIds = Array.from(new Set((rows ?? []).map((r) => r.provider_id).filter(Boolean))) as string[];
+    const providerIds = Array.from(
+      new Set((rows ?? []).map((r) => r.provider_id).filter(Boolean)),
+    ) as string[];
     let providerMap = new Map<string, { name_ar: string | null }>();
     if (providerIds.length) {
       const { data: provs } = await supabase
@@ -417,6 +456,6 @@ export const listMyInsuranceVerifications = createServerFn({ method: "POST" })
 
     return (rows ?? []).map((r) => ({
       ...r,
-      provider_name_ar: r.provider_id ? providerMap.get(r.provider_id)?.name_ar ?? null : null,
+      provider_name_ar: r.provider_id ? (providerMap.get(r.provider_id)?.name_ar ?? null) : null,
     }));
   });

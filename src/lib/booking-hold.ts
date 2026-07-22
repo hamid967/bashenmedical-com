@@ -9,9 +9,17 @@ export function getBookingSessionId(): string {
   try {
     const existing = sessionStorage.getItem(SESSION_KEY);
     if (existing && existing.length >= 8) return existing;
-  } catch { /* fall through */ }
-  const rand = (globalThis.crypto?.randomUUID?.() ?? `s-${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(/-/g, "");
-  try { sessionStorage.setItem(SESSION_KEY, rand); } catch { /* ignore */ }
+  } catch {
+    /* fall through */
+  }
+  const rand = (
+    globalThis.crypto?.randomUUID?.() ?? `s-${Date.now()}-${Math.random().toString(36).slice(2)}`
+  ).replace(/-/g, "");
+  try {
+    sessionStorage.setItem(SESSION_KEY, rand);
+  } catch {
+    /* ignore */
+  }
   return rand;
 }
 
@@ -50,5 +58,7 @@ export async function releaseHold(id?: string): Promise<void> {
       body,
       keepalive: true,
     });
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
 }

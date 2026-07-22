@@ -21,9 +21,9 @@ export const runMcpTool = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: { toolName: string; args: Record<string, unknown> }) => input)
   .handler(async ({ data, context }): Promise<RunToolResult> => {
-    const tool = (mcp as unknown as { tools: Array<{ name: string; handler: Function }> }).tools.find(
-      (t) => t.name === data.toolName,
-    );
+    const tool = (
+      mcp as unknown as { tools: Array<{ name: string; handler: Function }> }
+    ).tools.find((t) => t.name === data.toolName);
     if (!tool) throw new Error(`Unknown tool: ${data.toolName}`);
 
     const authHeader = getRequestHeader("authorization") ?? "";
@@ -67,7 +67,8 @@ export const runMcpTool = createServerFn({ method: "POST" })
     }
 
     const first = result.content?.[0];
-    const text = typeof first?.text === "string" ? first.text : JSON.stringify(result.content ?? []);
+    const text =
+      typeof first?.text === "string" ? first.text : JSON.stringify(result.content ?? []);
     return {
       ok: !result.isError,
       isError: !!result.isError,

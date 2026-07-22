@@ -160,10 +160,7 @@ function fmt(iso: string) {
 
 export const Route = createFileRoute("/_authenticated/orders-unified/$kind/$id")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل الطلب | باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل الطلب | باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: OrderDetailsPage,
 });
@@ -263,13 +260,9 @@ function OrderDetailsInner() {
                 {DISPLAY_FIELDS[kindTyped].map((k) => {
                   const v = q.data.order[k];
                   if (v === null || v === undefined || v === "") return null;
-                  const isLong =
-                    typeof v === "string" && (v.length > 60 || v.includes("\n"));
+                  const isLong = typeof v === "string" && (v.length > 60 || v.includes("\n"));
                   return (
-                    <div
-                      key={k}
-                      className={isLong ? "sm:col-span-2" : ""}
-                    >
+                    <div key={k} className={isLong ? "sm:col-span-2" : ""}>
                       <dt className="text-xs text-muted-foreground mb-0.5">
                         {FIELD_LABELS_AR[k] ?? k}
                       </dt>
@@ -372,9 +365,7 @@ function OrderDetailsInner() {
                   )}
                 </dl>
               ) : (
-                <p className="text-sm text-muted-foreground">
-                  لم يُربط الطلب بمريض مسجّل بعد.
-                </p>
+                <p className="text-sm text-muted-foreground">لم يُربط الطلب بمريض مسجّل بعد.</p>
               )}
             </section>
 

@@ -62,7 +62,7 @@ export async function streamChatWithResume(
   opts: StreamWithResumeOptions,
 ): Promise<StreamWithResumeResult> {
   const maxRetries = opts.maxRetries ?? DEFAULT_MAX_RETRIES;
-  const startedAt = (typeof performance !== "undefined" ? performance.now() : Date.now());
+  const startedAt = typeof performance !== "undefined" ? performance.now() : Date.now();
   let acc = "";
   let attempt = 0;
   let resumeAttempts = 0;
@@ -187,7 +187,11 @@ export async function streamChatWithResume(
                 if (opts.budgetCheck) {
                   const check = opts.budgetCheck(acc);
                   if (!check.ok) {
-                    try { await reader.cancel(); } catch { /* ignore */ }
+                    try {
+                      await reader.cancel();
+                    } catch {
+                      /* ignore */
+                    }
                     emit("aborted", null, "budget_exceeded");
                     return {
                       text: acc,

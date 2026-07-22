@@ -14,10 +14,7 @@ import {
   Scan,
   ChevronLeft,
 } from "lucide-react";
-import {
-  getMyRecentOrders,
-  type MyRecentOrder,
-} from "@/lib/portal/my-orders.functions";
+import { getMyRecentOrders, type MyRecentOrder } from "@/lib/portal/my-orders.functions";
 import { OrderStatusBadge } from "@/components/OrderStatusBadge";
 import type { OrderTableKind } from "@/lib/unified-status";
 
@@ -118,9 +115,7 @@ export function MyRecentOrders({ limit = 8 }: { limit?: number }) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{o.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {formatDate(o.created_at)}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{formatDate(o.created_at)}</p>
                   </div>
                   <OrderStatusBadge kind={KIND_TO_UNIFIED[o.kind]} status={o.status} />
                   <ChevronLeft className="h-4 w-4 text-muted-foreground shrink-0" />

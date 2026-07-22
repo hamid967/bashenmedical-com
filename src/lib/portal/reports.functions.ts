@@ -78,7 +78,11 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-    const logAttempt = async (status: "success" | "failure", reason?: string, extra?: Record<string, unknown>) => {
+    const logAttempt = async (
+      status: "success" | "failure",
+      reason?: string,
+      extra?: Record<string, unknown>,
+    ) => {
       try {
         await supabaseAdmin.from("audit_logs").insert({
           actor_id: userId,
@@ -86,7 +90,13 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
           action: "medical_report.download",
           entity_type: "medical_report",
           entity_id: data.id,
-          metadata: { version: "current", ttl_seconds: 60, status, reason: reason ?? null, ...extra },
+          metadata: {
+            version: "current",
+            ttl_seconds: 60,
+            status,
+            reason: reason ?? null,
+            ...extra,
+          },
         });
       } catch {
         /* audit logging is best-effort */
@@ -128,11 +138,12 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
 
 function buildDownloadName(title: string | null, type: string, path: string): string {
   const ext = (path.split(".").pop() ?? "pdf").toLowerCase().replace(/[^a-z0-9]/g, "") || "pdf";
-  const base = (title ?? type ?? "report")
-    .replace(/[\\/:*?"<>|\r\n\t]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 80) || "report";
+  const base =
+    (title ?? type ?? "report")
+      .replace(/[\\/:*?"<>|\r\n\t]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 80) || "report";
   return `${base}.${ext}`;
 }
 
@@ -228,7 +239,12 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
           action: "medical_report.download",
           entity_type: "medical_report",
           entity_id: data.report_id,
-          metadata: { version: data.version_number, ttl_seconds: 60, status, reason: reason ?? null },
+          metadata: {
+            version: data.version_number,
+            ttl_seconds: 60,
+            status,
+            reason: reason ?? null,
+          },
         });
       } catch {
         /* best-effort */
@@ -336,7 +352,9 @@ export const listMyReportDownloads = createServerFn({ method: "POST" })
         .from("medical_reports")
         .select("id, title_ar, report_type")
         .in("id", ids);
-      titles = new Map((reps ?? []).map((r: any) => [r.id, { title_ar: r.title_ar, report_type: r.report_type }]));
+      titles = new Map(
+        (reps ?? []).map((r: any) => [r.id, { title_ar: r.title_ar, report_type: r.report_type }]),
+      );
     }
 
     const needle = data.q?.trim().toLowerCase() ?? "";
@@ -344,9 +362,10 @@ export const listMyReportDownloads = createServerFn({ method: "POST" })
       .map((r: any): MyReportDownloadEntry => {
         const m = (r.metadata ?? {}) as Record<string, unknown>;
         const t = r.entity_id ? titles.get(r.entity_id) : undefined;
-        const status = (m.status as string) === "success" || (m.status as string) === "failure"
-          ? (m.status as "success" | "failure")
-          : "unknown";
+        const status =
+          (m.status as string) === "success" || (m.status as string) === "failure"
+            ? (m.status as "success" | "failure")
+            : "unknown";
         return {
           id: r.id,
           created_at: r.created_at,

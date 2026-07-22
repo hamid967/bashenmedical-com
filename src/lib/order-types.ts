@@ -116,16 +116,15 @@ type BaseDetail = {
   scheduled_at: string | null;
 };
 
-export type AppointmentDetail   = BaseDetail & { kind: "appointment";    metadata: AppointmentMetadata };
-export type PharmacyDetail      = BaseDetail & { kind: "pharmacy";       metadata: PharmacyMetadata };
-export type SecondOpinionDetail = BaseDetail & { kind: "second_opinion"; metadata: SecondOpinionMetadata };
-export type HomeCareDetail      = BaseDetail & { kind: "home_care";      metadata: HomeCareMetadata };
+export type AppointmentDetail = BaseDetail & { kind: "appointment"; metadata: AppointmentMetadata };
+export type PharmacyDetail = BaseDetail & { kind: "pharmacy"; metadata: PharmacyMetadata };
+export type SecondOpinionDetail = BaseDetail & {
+  kind: "second_opinion";
+  metadata: SecondOpinionMetadata;
+};
+export type HomeCareDetail = BaseDetail & { kind: "home_care"; metadata: HomeCareMetadata };
 
-export type OrderDetail =
-  | AppointmentDetail
-  | PharmacyDetail
-  | SecondOpinionDetail
-  | HomeCareDetail;
+export type OrderDetail = AppointmentDetail | PharmacyDetail | SecondOpinionDetail | HomeCareDetail;
 
 // ============================================================================
 // Parsers — تحويل مخرجات الـRPC (unknown-ish) إلى أنواع صارمة
@@ -174,7 +173,9 @@ export class OrderParseError extends Error {
  * يحمل نوعًا أو حالة غير معروفة — بدل الابتلاع الصامت — كي تستطيع الواجهة إخبار
  * المستخدم بأن هناك سجلًا لا يمكن عرضه.
  */
-export function parseOrderSummaries(rows: readonly SummaryRow[] | null | undefined): OrderSummary[] {
+export function parseOrderSummaries(
+  rows: readonly SummaryRow[] | null | undefined,
+): OrderSummary[] {
   if (!rows) return [];
   const out: OrderSummary[] = [];
   for (const r of rows) {
@@ -202,7 +203,6 @@ export function parseOrderSummaries(rows: readonly SummaryRow[] | null | undefin
   }
   return out;
 }
-
 
 type DetailRow = {
   kind: string;
@@ -232,7 +232,10 @@ export function parseOrderDetail(row: DetailRow | null | undefined): OrderDetail
     });
   }
 
-  const m = (row.metadata && typeof row.metadata === "object" ? row.metadata : {}) as Record<string, unknown>;
+  const m = (row.metadata && typeof row.metadata === "object" ? row.metadata : {}) as Record<
+    string,
+    unknown
+  >;
   const base: BaseDetail = {
     id: row.id,
     reference: row.reference,
@@ -247,22 +250,22 @@ export function parseOrderDetail(row: DetailRow | null | undefined): OrderDetail
         ...base,
         kind: "appointment",
         metadata: {
-          patient_name:       asString(m.patient_name) ?? "",
-          patient_phone:      asString(m.patient_phone) ?? "",
-          appointment_date:   asString(m.appointment_date) ?? "",
-          appointment_time:   asString(m.appointment_time) ?? "",
-          reason:             asString(m.reason),
-          notes:              asString(m.notes),
-          specialty_id:       asString(m.specialty_id),
-          doctor_id:          asString(m.doctor_id),
-          specialty_name_ar:  asString(m.specialty_name_ar),
-          specialty_name_en:  asString(m.specialty_name_en),
-          doctor_name_ar:     asString(m.doctor_name_ar),
-          doctor_name_en:     asString(m.doctor_name_en),
-          reminder_24h:       asBool(m.reminder_24h),
-          reminder_2h:        asBool(m.reminder_2h),
-          cancel_reason:      asString(m.cancel_reason),
-          cancelled_at:       asString(m.cancelled_at),
+          patient_name: asString(m.patient_name) ?? "",
+          patient_phone: asString(m.patient_phone) ?? "",
+          appointment_date: asString(m.appointment_date) ?? "",
+          appointment_time: asString(m.appointment_time) ?? "",
+          reason: asString(m.reason),
+          notes: asString(m.notes),
+          specialty_id: asString(m.specialty_id),
+          doctor_id: asString(m.doctor_id),
+          specialty_name_ar: asString(m.specialty_name_ar),
+          specialty_name_en: asString(m.specialty_name_en),
+          doctor_name_ar: asString(m.doctor_name_ar),
+          doctor_name_en: asString(m.doctor_name_en),
+          reminder_24h: asBool(m.reminder_24h),
+          reminder_2h: asBool(m.reminder_2h),
+          cancel_reason: asString(m.cancel_reason),
+          cancelled_at: asString(m.cancelled_at),
         },
       };
     case "pharmacy":
@@ -271,9 +274,9 @@ export function parseOrderDetail(row: DetailRow | null | undefined): OrderDetail
         kind: "pharmacy",
         metadata: {
           delivery_type: asString(m.delivery_type),
-          address:       asString(m.address),
-          district:      asString(m.district),
-          notes:         asString(m.notes),
+          address: asString(m.address),
+          district: asString(m.district),
+          notes: asString(m.notes),
         },
       };
     case "second_opinion":
@@ -282,7 +285,7 @@ export function parseOrderDetail(row: DetailRow | null | undefined): OrderDetail
         kind: "second_opinion",
         metadata: {
           specialty: asString(m.specialty),
-          email:     asString(m.email),
+          email: asString(m.email),
         },
       };
     case "home_care":
@@ -291,7 +294,7 @@ export function parseOrderDetail(row: DetailRow | null | undefined): OrderDetail
         kind: "home_care",
         metadata: {
           address: asString(m.address),
-          notes:   asString(m.notes),
+          notes: asString(m.notes),
         },
       };
   }

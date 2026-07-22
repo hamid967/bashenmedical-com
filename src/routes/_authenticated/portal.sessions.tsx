@@ -128,8 +128,7 @@ function SessionsPage() {
       toast.success("تم تسجيل الخروج من الجلسة");
       qc.invalidateQueries({ queryKey: ["portal", "sessions"] });
     },
-    onError: (e: unknown) =>
-      toast.error(e instanceof Error ? e.message : "تعذّر إلغاء الجلسة"),
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر إلغاء الجلسة"),
     onSettled: () => setRevokingId(null),
   });
 
@@ -248,9 +247,7 @@ function SessionsPage() {
       {confirm && (
         <ConfirmDialog
           kind={confirm.kind}
-          busy={
-            (confirm.kind === "revoke" && revokingId !== null) || signingOutScope !== null
-          }
+          busy={(confirm.kind === "revoke" && revokingId !== null) || signingOutScope !== null}
           onCancel={() => setConfirm(null)}
           onConfirm={() => {
             if (confirm.kind === "revoke" && confirm.sessionId) {
@@ -298,9 +295,7 @@ function SessionCard({
           <div className="flex items-center gap-1.5">
             <Globe className="h-3.5 w-3.5" />
             <span>عنوان IP:</span>
-            <span className="text-[color:var(--portal-ink)] font-mono">
-              {session.ip ?? "—"}
-            </span>
+            <span className="text-[color:var(--portal-ink)] font-mono">{session.ip ?? "—"}</span>
           </div>
           <div>
             <span>آخر نشاط: </span>

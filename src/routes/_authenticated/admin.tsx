@@ -61,10 +61,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
     return null;
   },
   head: () => ({
-    meta: [
-      { title: "لوحة الإدارة | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "لوحة الإدارة | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
 });
 

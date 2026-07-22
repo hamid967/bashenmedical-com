@@ -18,7 +18,7 @@ function getClientMeta() {
       const fwd = getRequestHeader("x-forwarded-for");
       const real = getRequestHeader("x-real-ip");
       const cf = getRequestHeader("cf-connecting-ip");
-      ip = (cf ?? real ?? (fwd ? fwd.split(",")[0]?.trim() : null)) ?? null;
+      ip = cf ?? real ?? (fwd ? fwd.split(",")[0]?.trim() : null) ?? null;
     }
   } catch {}
   return { ip, ua };

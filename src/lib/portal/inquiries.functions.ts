@@ -35,7 +35,7 @@ export const listMyInquiries = createServerFn({ method: "GET" })
          branch_id, preferred_date, preferred_contact_method, notes,
          internal_status, whatsapp_handoff_status, whatsapp_opened_at,
          created_at, linked_at,
-         branches:branch_id ( name_ar )`
+         branches:branch_id ( name_ar )`,
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })

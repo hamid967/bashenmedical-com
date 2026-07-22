@@ -58,7 +58,11 @@ export function SessionExportButton(props: SessionExportButtonProps) {
   };
 
   return (
-    <div ref={rootRef} className={`relative inline-block ${className ?? ""}`} dir={isAr ? "rtl" : "ltr"}>
+    <div
+      ref={rootRef}
+      className={`relative inline-block ${className ?? ""}`}
+      dir={isAr ? "rtl" : "ltr"}
+    >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -70,7 +74,10 @@ export function SessionExportButton(props: SessionExportButtonProps) {
       >
         <Download className="h-3.5 w-3.5" aria-hidden />
         <span>{t("تصدير", "Export")}</span>
-        <ChevronDown className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`} aria-hidden />
+        <ChevronDown
+          className={`h-3 w-3 transition-transform ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        />
       </button>
 
       {open ? (
@@ -88,7 +95,9 @@ export function SessionExportButton(props: SessionExportButtonProps) {
             className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-muted"
           >
             <FileText className="h-3.5 w-3.5 text-rose-500" aria-hidden />
-            <span className="flex-1 text-start">{t("تقرير PDF (طباعة)", "PDF report (print)")}</span>
+            <span className="flex-1 text-start">
+              {t("تقرير PDF (طباعة)", "PDF report (print)")}
+            </span>
           </button>
           <button
             type="button"
@@ -103,7 +112,10 @@ export function SessionExportButton(props: SessionExportButtonProps) {
             <span className="flex-1 text-start">{t("جدول CSV", "CSV spreadsheet")}</span>
           </button>
           <div className="px-3 py-1.5 text-[10px] text-muted-foreground border-t border-black/5 dark:border-white/10">
-            {t("يشمل الرصيد، المدخلات/المخرجات، وخلاصة الطلبات", "Includes credits, input/output tokens, and request summary")}
+            {t(
+              "يشمل الرصيد، المدخلات/المخرجات، وخلاصة الطلبات",
+              "Includes credits, input/output tokens, and request summary",
+            )}
           </div>
         </div>
       ) : null}

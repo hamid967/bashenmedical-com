@@ -20,7 +20,10 @@ import {
 
 const schema = z.object({
   phone: z.string().trim().min(6).max(32),
-  code: z.string().trim().regex(/^\d{6}$/, "أدخل الرمز المكوّن من 6 أرقام."),
+  code: z
+    .string()
+    .trim()
+    .regex(/^\d{6}$/, "أدخل الرمز المكوّن من 6 أرقام."),
 });
 
 export const Route = createFileRoute("/api/public/reservations/otp/verify")({
@@ -37,8 +40,7 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
         if (!parsed.success) {
           return jsonResponse(400, {
             ok: false,
-            message:
-              parsed.error.issues[0]?.message ?? "بيانات غير صالحة.",
+            message: parsed.error.issues[0]?.message ?? "بيانات غير صالحة.",
           });
         }
         const phone = normalizeSaPhone(parsed.data.phone);
@@ -72,9 +74,7 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
         }
 
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const { data: rows, error: readErr } = await supabaseAdmin
             .from("guest_reservation_sessions")
@@ -123,9 +123,7 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
           }
 
           const session_token = generateSessionToken();
-          const session_expires_at = new Date(
-            Date.now() + SESSION_TTL_MS,
-          ).toISOString();
+          const session_expires_at = new Date(Date.now() + SESSION_TTL_MS).toISOString();
 
           const { error: updErr } = await supabaseAdmin
             .from("guest_reservation_sessions")
@@ -143,15 +141,15 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
           }
 
           try {
-            const { logReservationEvent } = await import(
-              "@/lib/reservation-events.server"
-            );
+            const { logReservationEvent } = await import("@/lib/reservation-events.server");
             await logReservationEvent({
               event_type: "otp_verified",
               phone,
               ip,
             });
-          } catch { /* telemetry best-effort */ }
+          } catch {
+            /* telemetry best-effort */
+          }
 
           return jsonResponse(200, {
             ok: true,

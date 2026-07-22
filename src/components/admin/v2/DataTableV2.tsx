@@ -33,11 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 /* ────────────────────────────────────────────────────────────
@@ -53,12 +49,7 @@ export type ColumnFilter =
   | { type: "boolean"; trueLabel?: string; falseLabel?: string }
   | { type: "date-range" };
 
-export type FilterValue =
-  | string
-  | string[]
-  | boolean
-  | { from?: string; to?: string }
-  | undefined;
+export type FilterValue = string | string[] | boolean | { from?: string; to?: string } | undefined;
 
 export type ColumnDef<T> = {
   /** Unique id — also used as the filter key in `filters` state. */
@@ -221,9 +212,7 @@ export function DataTableV2<T>({
   }, [safePage]);
 
   const rangeStart =
-    effectivePagination.total === 0
-      ? 0
-      : (safePage - 1) * effectivePagination.perPage + 1;
+    effectivePagination.total === 0 ? 0 : (safePage - 1) * effectivePagination.perPage + 1;
   const rangeEnd = Math.min(safePage * effectivePagination.perPage, effectivePagination.total);
 
   /* Sort handler. */
@@ -321,9 +310,7 @@ export function DataTableV2<T>({
               disabled={isLoading || isFetching}
               className="h-9"
             >
-              <RefreshCw
-                className={cn("ml-2 h-4 w-4", isFetching && "animate-spin")}
-              />
+              <RefreshCw className={cn("ml-2 h-4 w-4", isFetching && "animate-spin")} />
               تحديث
             </Button>
           )}
@@ -335,11 +322,7 @@ export function DataTableV2<T>({
         <div className="flex flex-wrap items-center gap-2">
           <Filter className="h-3.5 w-3.5 text-muted-foreground" />
           {activeFilterChips.map((c) => (
-            <Badge
-              key={c.id}
-              variant="secondary"
-              className="gap-1 pr-1 text-xs"
-            >
+            <Badge key={c.id} variant="secondary" className="gap-1 pr-1 text-xs">
               <span>{c.label}</span>
               <button
                 type="button"
@@ -351,12 +334,7 @@ export function DataTableV2<T>({
               </button>
             </Badge>
           ))}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs"
-            onClick={clearAllFilters}
-          >
+          <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={clearAllFilters}>
             مسح الكل
           </Button>
         </div>
@@ -421,10 +399,7 @@ export function DataTableV2<T>({
               {hasColumnSearch && onColumnSearchChange && (
                 <tr className="bg-background/40">
                   {visibleColumns.map((col) => (
-                    <th
-                      key={`s-${col.id}`}
-                      className={cn("px-2 pb-2", col.className)}
-                    >
+                    <th key={`s-${col.id}`} className={cn("px-2 pb-2", col.className)}>
                       {col.searchable ? (
                         <Input
                           value={columnSearch?.[col.id] ?? ""}
@@ -475,9 +450,7 @@ export function DataTableV2<T>({
                   <td colSpan={colCount} className="px-3 py-12">
                     <div className="flex flex-col items-center gap-1.5 text-center">
                       <p className="text-sm font-semibold text-foreground">{emptyTitle}</p>
-                      <p className="max-w-md text-xs text-muted-foreground">
-                        {emptyDescription}
-                      </p>
+                      <p className="max-w-md text-xs text-muted-foreground">{emptyDescription}</p>
                     </div>
                   </td>
                 </tr>
@@ -551,9 +524,7 @@ export function DataTableV2<T>({
             size="sm"
             className="h-8"
             disabled={safePage <= 1 || isLoading}
-            onClick={() =>
-              updatePagination({ ...effectivePagination, page: safePage - 1 })
-            }
+            onClick={() => updatePagination({ ...effectivePagination, page: safePage - 1 })}
           >
             <ChevronRight className="h-4 w-4" />
             السابق
@@ -566,9 +537,7 @@ export function DataTableV2<T>({
             size="sm"
             className="h-8"
             disabled={safePage >= totalPages || isLoading}
-            onClick={() =>
-              updatePagination({ ...effectivePagination, page: safePage + 1 })
-            }
+            onClick={() => updatePagination({ ...effectivePagination, page: safePage + 1 })}
           >
             التالي
             <ChevronLeft className="h-4 w-4" />
@@ -630,12 +599,7 @@ function FiltersPopover<T>({
         <div className="flex items-center justify-between">
           <p className="text-sm font-semibold">فلاتر متقدمة</p>
           {activeCount > 0 && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 text-xs"
-              onClick={() => onChange({})}
-            >
+            <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => onChange({})}>
               مسح الكل
             </Button>
           )}
@@ -646,9 +610,7 @@ function FiltersPopover<T>({
             const v = values[col.id];
             return (
               <div key={col.id} className="space-y-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  {col.header}
-                </label>
+                <label className="text-xs font-medium text-muted-foreground">{col.header}</label>
                 {f.type === "text" && (
                   <Input
                     value={typeof v === "string" ? v : ""}
@@ -687,9 +649,7 @@ function FiltersPopover<T>({
                           onClick={() =>
                             setVal(
                               col.id,
-                              active
-                                ? arr.filter((x) => x !== o.value)
-                                : [...arr, o.value],
+                              active ? arr.filter((x) => x !== o.value) : [...arr, o.value],
                             )
                           }
                           className={cn(
@@ -709,10 +669,7 @@ function FiltersPopover<T>({
                   <Select
                     value={v === true ? "true" : v === false ? "false" : "__all"}
                     onValueChange={(nv) =>
-                      setVal(
-                        col.id,
-                        nv === "__all" ? undefined : nv === "true",
-                      )
+                      setVal(col.id, nv === "__all" ? undefined : nv === "true")
                     }
                   >
                     <SelectTrigger className="h-8 text-sm">
@@ -729,28 +686,18 @@ function FiltersPopover<T>({
                   <div className="grid grid-cols-2 gap-1.5">
                     <Input
                       type="date"
-                      value={
-                        typeof v === "object" && v && !Array.isArray(v)
-                          ? (v.from ?? "")
-                          : ""
-                      }
+                      value={typeof v === "object" && v && !Array.isArray(v) ? (v.from ?? "") : ""}
                       onChange={(e) => {
-                        const cur =
-                          typeof v === "object" && v && !Array.isArray(v) ? v : {};
+                        const cur = typeof v === "object" && v && !Array.isArray(v) ? v : {};
                         setVal(col.id, { ...cur, from: e.target.value || undefined });
                       }}
                       className="h-8 text-xs"
                     />
                     <Input
                       type="date"
-                      value={
-                        typeof v === "object" && v && !Array.isArray(v)
-                          ? (v.to ?? "")
-                          : ""
-                      }
+                      value={typeof v === "object" && v && !Array.isArray(v) ? (v.to ?? "") : ""}
                       onChange={(e) => {
-                        const cur =
-                          typeof v === "object" && v && !Array.isArray(v) ? v : {};
+                        const cur = typeof v === "object" && v && !Array.isArray(v) ? v : {};
                         setVal(col.id, { ...cur, to: e.target.value || undefined });
                       }}
                       className="h-8 text-xs"

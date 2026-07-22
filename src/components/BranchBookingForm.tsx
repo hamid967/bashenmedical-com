@@ -20,7 +20,8 @@ import {
 import { friendlyInsertError } from "@/lib/insert-errors";
 import type { BranchSpecialty } from "@/lib/branches.functions";
 
-const NAME_MIN = 2, NAME_MAX = 120;
+const NAME_MIN = 2,
+  NAME_MAX = 120;
 const PHONE_MAX = 32;
 const REASON_MAX = 500;
 const PHONE_ALLOWED_RE = /^[+0-9\s\-()]+$/;
@@ -71,7 +72,12 @@ const schema = z.object({
 
 type FieldErrors = Partial<Record<"name" | "phone" | "gender" | "reason", string>>;
 
-function computeFieldErrors(form: { name: string; phone: string; gender: string; reason: string }): FieldErrors {
+function computeFieldErrors(form: {
+  name: string;
+  phone: string;
+  gender: string;
+  reason: string;
+}): FieldErrors {
   const errs: FieldErrors = {};
   const n = nameSchema.safeParse(form.name);
   if (!n.success) errs.name = n.error.issues[0]?.message;
@@ -109,7 +115,13 @@ function stepIndex(id: StepId) {
 
 function validateStep(
   id: StepId,
-  state: { specialtyId: string; doctorId: string; date: string; time: string; form: { name: string; phone: string; gender: string; reason: string } },
+  state: {
+    specialtyId: string;
+    doctorId: string;
+    date: string;
+    time: string;
+    form: { name: string; phone: string; gender: string; reason: string };
+  },
 ): string | null {
   switch (id) {
     case "service":
@@ -122,7 +134,8 @@ function validateStep(
       if (!state.time) return "اختر وقت الموعد";
       return null;
     case "patient":
-      if (!state.specialtyId || !state.doctorId || !state.date || !state.time) return " أكمل الخطوات السابقة";
+      if (!state.specialtyId || !state.doctorId || !state.date || !state.time)
+        return " أكمل الخطوات السابقة";
       const errs = computeFieldErrors(state.form);
       const firstKey = (["name", "phone", "gender", "reason"] as const).find((k) => errs[k]);
       if (firstKey) return errs[firstKey] ?? "بيانات غير صالحة";
@@ -155,7 +168,12 @@ export function BranchBookingForm({
   const [doctorId, setDoctorId] = useState<string>("");
   const [date, setDate] = useState<string>("");
   const [time, setTime] = useState<string>("");
-  const [form, setForm] = useState({ name: "", phone: "", gender: "male" as "male" | "female", reason: "" });
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    gender: "male" as "male" | "female",
+    reason: "",
+  });
   const [reminderOffsets, setReminderOffsets] = useState<number[]>([1440, 120]);
   const [touched, setTouched] = useState<Record<"name" | "phone" | "gender" | "reason", boolean>>({
     name: false,
@@ -246,8 +264,13 @@ export function BranchBookingForm({
     if (!draftHydrated.current) return;
     if (typeof window === "undefined") return;
     const hasAny =
-      !!specialtyId || !!doctorId || !!date || !!time ||
-      !!form.name || !!form.phone || !!form.reason;
+      !!specialtyId ||
+      !!doctorId ||
+      !!date ||
+      !!time ||
+      !!form.name ||
+      !!form.phone ||
+      !!form.reason;
     try {
       if (!hasAny) {
         window.localStorage.removeItem(draftKey);
@@ -255,7 +278,16 @@ export function BranchBookingForm({
       }
       window.localStorage.setItem(
         draftKey,
-        JSON.stringify({ step, specialtyId, doctorId, date, time, form, reminderOffsets, savedAt: Date.now() }),
+        JSON.stringify({
+          step,
+          specialtyId,
+          doctorId,
+          date,
+          time,
+          form,
+          reminderOffsets,
+          savedAt: Date.now(),
+        }),
       );
     } catch {
       // ignore quota / privacy errors
@@ -304,7 +336,10 @@ export function BranchBookingForm({
     queryKey: ["branch-availability", doctorId],
     enabled: !!doctorId,
     queryFn: async () => {
-      const { data, error } = await supabase.from("availability").select("*").eq("doctor_id", doctorId);
+      const { data, error } = await supabase
+        .from("availability")
+        .select("*")
+        .eq("doctor_id", doctorId);
       if (error) throw error;
       return data ?? [];
     },
@@ -334,16 +369,20 @@ export function BranchBookingForm({
     if (!date || !availability) return [];
     const wd = new Date(date).getDay();
     const slots = new Set<string>();
-    availability.filter((a) => a.weekday === wd).forEach((a) => {
-      const [sh, sm] = a.start_time.split(":").map(Number);
-      const [eh, em] = a.end_time.split(":").map(Number);
-      let m = sh * 60 + sm;
-      const end = eh * 60 + em;
-      while (m + a.slot_minutes <= end) {
-        slots.add(`${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`);
-        m += a.slot_minutes;
-      }
-    });
+    availability
+      .filter((a) => a.weekday === wd)
+      .forEach((a) => {
+        const [sh, sm] = a.start_time.split(":").map(Number);
+        const [eh, em] = a.end_time.split(":").map(Number);
+        let m = sh * 60 + sm;
+        const end = eh * 60 + em;
+        while (m + a.slot_minutes <= end) {
+          slots.add(
+            `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`,
+          );
+          m += a.slot_minutes;
+        }
+      });
     return Array.from(slots).sort();
   }, [date, availability]);
 
@@ -466,8 +505,6 @@ export function BranchBookingForm({
     clearDraft();
   };
 
-
-
   const currentStepIdx = stepIndex(step);
   const progress = ((currentStepIdx + 1) / STEPS.length) * 100;
 
@@ -492,7 +529,8 @@ export function BranchBookingForm({
           <ol className="relative z-10 flex items-center justify-between">
             {STEPS.map((s, i) => {
               const Icon = s.icon;
-              const status = i < currentStepIdx ? "done" : i === currentStepIdx ? "active" : "pending";
+              const status =
+                i < currentStepIdx ? "done" : i === currentStepIdx ? "active" : "pending";
               const isClickable = i <= currentStepIdx || stepIndex(s.id) < currentStepIdx;
               return (
                 <li key={s.id} className="flex flex-col items-center gap-1.5">
@@ -509,15 +547,23 @@ export function BranchBookingForm({
                       status === "active"
                         ? "border-primary bg-primary text-primary-foreground"
                         : status === "done"
-                        ? "border-primary bg-primary/15 text-primary"
-                        : "border-muted bg-background text-muted-foreground"
+                          ? "border-primary bg-primary/15 text-primary"
+                          : "border-muted bg-background text-muted-foreground"
                     } ${isClickable ? "cursor-pointer" : "cursor-not-allowed opacity-60"}`}
                   >
-                    {status === "done" ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                    {status === "done" ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Icon className="h-4 w-4" />
+                    )}
                   </button>
                   <span
                     className={`text-[10px] font-medium ${
-                      status === "active" ? "text-primary" : status === "done" ? "text-foreground" : "text-muted-foreground"
+                      status === "active"
+                        ? "text-primary"
+                        : status === "done"
+                          ? "text-foreground"
+                          : "text-muted-foreground"
                     }`}
                   >
                     {s.label}
@@ -564,13 +610,14 @@ export function BranchBookingForm({
 
       {/* Step content */}
       <div className="min-h-[200px]">
-
         {step === "service" && (
           <div className="grid gap-4 animate-in fade-in duration-200">
             <div>
               <label className="block text-xs font-semibold mb-1">التخصص</label>
               {specialties.length === 0 ? (
-                <p className="text-sm text-muted-foreground">لا توجد تخصصات متاحة في هذا الفرع حالياً.</p>
+                <p className="text-sm text-muted-foreground">
+                  لا توجد تخصصات متاحة في هذا الفرع حالياً.
+                </p>
               ) : (
                 <select
                   className={inputCls}
@@ -612,7 +659,9 @@ export function BranchBookingForm({
                   ))}
                 </select>
                 {doctors && doctors.length === 0 && (
-                  <p className="mt-1 text-xs text-muted-foreground">لا يوجد أطباء متاحون لهذا التخصص في الفرع.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    لا يوجد أطباء متاحون لهذا التخصص في الفرع.
+                  </p>
                 )}
               </div>
             )}
@@ -713,7 +762,10 @@ export function BranchBookingForm({
                 placeholder="مثال: محمد أحمد"
               />
               {showErr("name") ? (
-                <p id="bk-name-err" className="mt-1 flex items-center gap-1 text-xs text-destructive">
+                <p
+                  id="bk-name-err"
+                  className="mt-1 flex items-center gap-1 text-xs text-destructive"
+                >
                   <AlertCircle className="h-3.5 w-3.5" /> {fieldErrors.name}
                 </p>
               ) : (
@@ -744,7 +796,10 @@ export function BranchBookingForm({
                 placeholder="05xxxxxxxx"
               />
               {showErr("phone") ? (
-                <p id="bk-phone-err" className="mt-1 flex items-center gap-1 text-xs text-destructive">
+                <p
+                  id="bk-phone-err"
+                  className="mt-1 flex items-center gap-1 text-xs text-destructive"
+                >
                   <AlertCircle className="h-3.5 w-3.5" /> {fieldErrors.phone}
                 </p>
               ) : (
@@ -770,7 +825,10 @@ export function BranchBookingForm({
                 <option value="female">أنثى</option>
               </select>
               {showErr("gender") && (
-                <p id="bk-gender-err" className="mt-1 flex items-center gap-1 text-xs text-destructive">
+                <p
+                  id="bk-gender-err"
+                  className="mt-1 flex items-center gap-1 text-xs text-destructive"
+                >
                   <AlertCircle className="h-3.5 w-3.5" /> {fieldErrors.gender}
                 </p>
               )}
@@ -792,7 +850,10 @@ export function BranchBookingForm({
               />
               <div className="mt-1 flex items-center justify-between gap-2">
                 {showErr("reason") ? (
-                  <p id="bk-reason-err" className="flex items-center gap-1 text-xs text-destructive">
+                  <p
+                    id="bk-reason-err"
+                    className="flex items-center gap-1 text-xs text-destructive"
+                  >
                     <AlertCircle className="h-3.5 w-3.5" /> {fieldErrors.reason}
                   </p>
                 ) : (
@@ -805,8 +866,6 @@ export function BranchBookingForm({
             </div>
           </div>
         )}
-
-
 
         {step === "confirm" && (
           <div className="grid gap-4 animate-in fade-in duration-200">
@@ -923,7 +982,11 @@ export function BranchBookingForm({
               aria-busy={submitting}
               className="inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="h-4 w-4" />
+              )}
               {submitting ? "جارٍ إرسال الحجز…" : submitError ? "إعادة إرسال الحجز" : "تأكيد الحجز"}
             </button>
           </div>
@@ -949,7 +1012,6 @@ export function BranchBookingForm({
         >
           <RotateCcw className="h-3.5 w-3.5" /> إعادة البدء
         </button>
-
 
         {step !== "confirm" && (
           <button

@@ -58,9 +58,9 @@ export const getMessagingConfig = createServerFn({ method: "GET" })
         messagebird: Boolean(env.MESSAGEBIRD_API_KEY),
         sms_any_configured: Boolean(
           env.GATEWAYAPI_API_KEY ||
-            env.TWILIO_AUTH_TOKEN ||
-            env.TWILIO_API_KEY ||
-            env.MESSAGEBIRD_API_KEY,
+          env.TWILIO_AUTH_TOKEN ||
+          env.TWILIO_API_KEY ||
+          env.MESSAGEBIRD_API_KEY,
         ),
         email_otp_available: true,
         resend: Boolean(env.RESEND_API_KEY),

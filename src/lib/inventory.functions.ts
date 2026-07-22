@@ -63,17 +63,25 @@ export const listWarehouseSummary = createServerFn({ method: "GET" })
   .handler(async ({ context }) => {
     const [branchesRes, itemsRes] = await Promise.all([
       context.supabase.from("branches" as never).select("id,name_ar,name_en"),
-      context.supabase.from("inventory_items" as never)
+      context.supabase
+        .from("inventory_items" as never)
         .select("branch_id,quantity,min_stock,price,expiry_date")
         .eq("is_active", true),
     ]);
     if (branchesRes.error) throw new Error(branchesRes.error.message);
     if (itemsRes.error) throw new Error(itemsRes.error.message);
 
-    const branches = (branchesRes.data ?? []) as Array<{ id: string; name_ar: string; name_en: string | null }>;
+    const branches = (branchesRes.data ?? []) as Array<{
+      id: string;
+      name_ar: string;
+      name_en: string | null;
+    }>;
     const items = (itemsRes.data ?? []) as Array<{
-      branch_id: string | null; quantity: number; min_stock: number;
-      price: number | null; expiry_date: string | null;
+      branch_id: string | null;
+      quantity: number;
+      min_stock: number;
+      price: number | null;
+      expiry_date: string | null;
     }>;
 
     const now = Date.now();
@@ -82,13 +90,25 @@ export const listWarehouseSummary = createServerFn({ method: "GET" })
     const key = (id: string | null) => id ?? "__none__";
     for (const b of branches) {
       map.set(b.id, {
-        branch_id: b.id, branch_name: b.name_ar || b.name_en || "فرع",
-        items_count: 0, low_count: 0, out_count: 0, expiring_count: 0, expired_count: 0, total_value: 0,
+        branch_id: b.id,
+        branch_name: b.name_ar || b.name_en || "فرع",
+        items_count: 0,
+        low_count: 0,
+        out_count: 0,
+        expiring_count: 0,
+        expired_count: 0,
+        total_value: 0,
       });
     }
     map.set("__none__", {
-      branch_id: null, branch_name: "غير مخصص",
-      items_count: 0, low_count: 0, out_count: 0, expiring_count: 0, expired_count: 0, total_value: 0,
+      branch_id: null,
+      branch_name: "غير مخصص",
+      items_count: 0,
+      low_count: 0,
+      out_count: 0,
+      expiring_count: 0,
+      expired_count: 0,
+      total_value: 0,
     });
 
     for (const it of items) {
@@ -108,15 +128,18 @@ export const listWarehouseSummary = createServerFn({ method: "GET" })
   });
 
 // -------- Low stock alerts --------
-const LowStockInput = z.object({
-  branchId: z.string().uuid().nullable().optional(),
-}).default({});
+const LowStockInput = z
+  .object({
+    branchId: z.string().uuid().nullable().optional(),
+  })
+  .default({});
 
 export const listLowStockAlerts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => LowStockInput.parse(d))
   .handler(async ({ data, context }) => {
-    let q = context.supabase.from("inventory_items" as never)
+    let q = context.supabase
+      .from("inventory_items" as never)
       .select("id,name_ar,branch_id,quantity,min_stock,unit")
       .eq("is_active", true)
       .order("quantity", { ascending: true })
@@ -125,40 +148,63 @@ export const listLowStockAlerts = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const filtered = ((rows ?? []) as Array<{
-      id: string; name_ar: string; branch_id: string | null;
-      quantity: number; min_stock: number; unit: string | null;
-    }>).filter((r) => r.quantity <= r.min_stock);
+    const filtered = (
+      (rows ?? []) as Array<{
+        id: string;
+        name_ar: string;
+        branch_id: string | null;
+        quantity: number;
+        min_stock: number;
+        unit: string | null;
+      }>
+    ).filter((r) => r.quantity <= r.min_stock);
 
     // Resolve branch names
-    const branchIds = Array.from(new Set(filtered.map((r) => r.branch_id).filter(Boolean))) as string[];
-    let names = new Map<string, string>();
+    const branchIds = Array.from(
+      new Set(filtered.map((r) => r.branch_id).filter(Boolean)),
+    ) as string[];
+    const names = new Map<string, string>();
     if (branchIds.length) {
-      const { data: br } = await context.supabase.from("branches" as never)
-        .select("id,name_ar,name_en").in("id", branchIds);
-      for (const b of ((br ?? []) as Array<{ id: string; name_ar: string; name_en: string | null }>)) {
+      const { data: br } = await context.supabase
+        .from("branches" as never)
+        .select("id,name_ar,name_en")
+        .in("id", branchIds);
+      for (const b of (br ?? []) as Array<{
+        id: string;
+        name_ar: string;
+        name_en: string | null;
+      }>) {
         names.set(b.id, b.name_ar || b.name_en || "");
       }
     }
     return filtered.map<LowStockAlert>((r) => ({
-      id: r.id, name_ar: r.name_ar, branch_id: r.branch_id,
+      id: r.id,
+      name_ar: r.name_ar,
+      branch_id: r.branch_id,
       branch_name: r.branch_id ? (names.get(r.branch_id) ?? null) : null,
-      quantity: r.quantity, min_stock: r.min_stock, unit: r.unit,
+      quantity: r.quantity,
+      min_stock: r.min_stock,
+      unit: r.unit,
       status: r.quantity <= 0 ? "out" : "low",
     }));
   });
 
 // -------- Purchase Requests --------
-const PRListInput = z.object({
-  branchId: z.string().uuid().nullable().optional(),
-  status: z.enum(["pending", "approved", "rejected", "received", "cancelled", "all"]).default("all"),
-}).default({});
+const PRListInput = z
+  .object({
+    branchId: z.string().uuid().nullable().optional(),
+    status: z
+      .enum(["pending", "approved", "rejected", "received", "cancelled", "all"])
+      .default("all"),
+  })
+  .default({});
 
 export const listPurchaseRequests = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => PRListInput.parse(d))
   .handler(async ({ data, context }) => {
-    let q = context.supabase.from("purchase_requests" as never)
+    let q = context.supabase
+      .from("purchase_requests" as never)
       .select("*")
       .order("created_at", { ascending: false })
       .limit(200);
@@ -174,27 +220,37 @@ export const listPurchaseRequests = createServerFn({ method: "GET" })
     const branchIds = Array.from(new Set(list.map((r) => r.branch_id).filter(Boolean))) as string[];
 
     const [itemsRes, branchesRes] = await Promise.all([
-      context.supabase.from("purchase_request_items" as never).select("*").in("request_id", ids),
+      context.supabase
+        .from("purchase_request_items" as never)
+        .select("*")
+        .in("request_id", ids),
       branchIds.length
-        ? context.supabase.from("branches" as never).select("id,name_ar,name_en").in("id", branchIds)
+        ? context.supabase
+            .from("branches" as never)
+            .select("id,name_ar,name_en")
+            .in("id", branchIds)
         : Promise.resolve({ data: [], error: null } as { data: unknown[]; error: null }),
     ]);
     if (itemsRes.error) throw new Error(itemsRes.error.message);
 
     const itemsByReq = new Map<string, PurchaseRequestItem[]>();
-    for (const it of ((itemsRes.data ?? []) as PurchaseRequestItem[])) {
+    for (const it of (itemsRes.data ?? []) as PurchaseRequestItem[]) {
       const arr = itemsByReq.get(it.request_id) ?? [];
       arr.push(it);
       itemsByReq.set(it.request_id, arr);
     }
     const bmap = new Map<string, string>();
-    for (const b of ((branchesRes.data ?? []) as Array<{ id: string; name_ar: string; name_en: string | null }>)) {
+    for (const b of (branchesRes.data ?? []) as Array<{
+      id: string;
+      name_ar: string;
+      name_en: string | null;
+    }>) {
       bmap.set(b.id, b.name_ar || b.name_en || "");
     }
 
     return list.map<PurchaseRequest>((r) => ({
       ...r,
-      branch_name: r.branch_id ? bmap.get(r.branch_id) ?? null : null,
+      branch_name: r.branch_id ? (bmap.get(r.branch_id) ?? null) : null,
       items: itemsByReq.get(r.id) ?? [],
     }));
   });
@@ -203,14 +259,18 @@ const PRCreateInput = z.object({
   branch_id: z.string().uuid().nullable().optional(),
   priority: z.enum(["low", "normal", "high", "urgent"]).default("normal"),
   notes: z.string().max(1000).nullable().optional(),
-  items: z.array(z.object({
-    item_id: z.string().uuid().nullable().optional(),
-    name_ar: z.string().min(1).max(160),
-    quantity: z.number().int().min(1),
-    unit: z.string().max(30).nullable().optional(),
-    estimated_price: z.number().min(0).nullable().optional(),
-    notes: z.string().max(300).nullable().optional(),
-  })).min(1),
+  items: z
+    .array(
+      z.object({
+        item_id: z.string().uuid().nullable().optional(),
+        name_ar: z.string().min(1).max(160),
+        quantity: z.number().int().min(1),
+        unit: z.string().max(30).nullable().optional(),
+        estimated_price: z.number().min(0).nullable().optional(),
+        notes: z.string().max(300).nullable().optional(),
+      }),
+    )
+    .min(1),
 });
 
 export const createPurchaseRequest = createServerFn({ method: "POST" })
@@ -218,7 +278,8 @@ export const createPurchaseRequest = createServerFn({ method: "POST" })
   .validator((d: unknown) => PRCreateInput.parse(d))
   .handler(async ({ data, context }) => {
     const request_no = `PR-${Date.now().toString(36).toUpperCase()}`;
-    const { data: pr, error } = await context.supabase.from("purchase_requests" as never)
+    const { data: pr, error } = await context.supabase
+      .from("purchase_requests" as never)
       .insert({
         branch_id: data.branch_id ?? null,
         request_no,
@@ -240,7 +301,8 @@ export const createPurchaseRequest = createServerFn({ method: "POST" })
       estimated_price: i.estimated_price ?? null,
       notes: i.notes ?? null,
     }));
-    const { error: iErr } = await context.supabase.from("purchase_request_items" as never)
+    const { error: iErr } = await context.supabase
+      .from("purchase_request_items" as never)
       .insert(rows as never);
     if (iErr) throw new Error(iErr.message);
     return { ok: true, id: requestId, request_no };
@@ -262,19 +324,23 @@ export const updatePurchaseRequestStatus = createServerFn({ method: "POST" })
       reviewed_by: context.userId,
       reviewed_at: new Date().toISOString(),
     };
-    const { error } = await context.supabase.from("purchase_requests" as never)
+    const { error } = await context.supabase
+      .from("purchase_requests" as never)
       .update(patch as never)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
 
     // On "received", auto-add stock movements for linked items
     if (data.status === "received") {
-      const { data: items } = await context.supabase.from("purchase_request_items" as never)
+      const { data: items } = await context.supabase
+        .from("purchase_request_items" as never)
         .select("item_id,quantity")
         .eq("request_id", data.id);
-      const { data: prRow } = await context.supabase.from("purchase_requests" as never)
+      const { data: prRow } = await context.supabase
+        .from("purchase_requests" as never)
         .select("branch_id,request_no")
-        .eq("id", data.id).single();
+        .eq("id", data.id)
+        .single();
       const branchId = (prRow as { branch_id: string | null } | null)?.branch_id ?? null;
       const refNo = (prRow as { request_no: string | null } | null)?.request_no ?? null;
       const moves = ((items ?? []) as Array<{ item_id: string | null; quantity: number }>)
@@ -299,8 +365,10 @@ export const deletePurchaseRequest = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("purchase_requests" as never)
-      .delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("purchase_requests" as never)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

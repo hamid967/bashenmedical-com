@@ -42,9 +42,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
         }
 
         const ip = getClientIp(request);
-        const rl = checkRateLimit(`resv-cancel-undo:${ip}`, [
-          { windowMs: 60_000, max: 15 },
-        ]);
+        const rl = checkRateLimit(`resv-cancel-undo:${ip}`, [{ windowMs: 60_000, max: 15 }]);
         if (!rl.ok) {
           return jsonResponse(429, {
             ok: false,
@@ -71,11 +69,8 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           });
         }
 
-
         try {
-          const { supabaseAdmin } = await import(
-            "@/integrations/supabase/client.server"
-          );
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
           const { data: appt, error: readErr } = await supabaseAdmin
             .from("appointments")
@@ -107,9 +102,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           const ageSec = (Date.now() - cancelledAt) / 1000;
           if (ageSec > UNDO_WINDOW_SECONDS) {
             try {
-              const { logReservationEvent } = await import(
-                "@/lib/reservation-events.server"
-              );
+              const { logReservationEvent } = await import("@/lib/reservation-events.server");
               await logReservationEvent({
                 event_type: "cancel_undo_failed",
                 phone: sess.phone,
@@ -117,7 +110,9 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
                 meta: { reason: "expired" },
                 ip,
               });
-            } catch { /* telemetry best-effort */ }
+            } catch {
+              /* telemetry best-effort */
+            }
             return jsonResponse(410, {
               ok: false,
               message: "انتهت مهلة التراجع (30 ثانية).",
@@ -137,9 +132,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
               .limit(1);
             if (conflict && conflict.length > 0) {
               try {
-                const { logReservationEvent } = await import(
-                  "@/lib/reservation-events.server"
-                );
+                const { logReservationEvent } = await import("@/lib/reservation-events.server");
                 await logReservationEvent({
                   event_type: "cancel_undo_failed",
                   phone: sess.phone,
@@ -147,7 +140,9 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
                   meta: { reason: "slot_taken" },
                   ip,
                 });
-              } catch { /* telemetry best-effort */ }
+              } catch {
+                /* telemetry best-effort */
+              }
               return jsonResponse(409, {
                 ok: false,
                 message: "لم يعد الموعد متاحًا — تم حجزه من قِبل شخص آخر.",
@@ -227,9 +222,7 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
           }
 
           try {
-            const { logReservationEvent } = await import(
-              "@/lib/reservation-events.server"
-            );
+            const { logReservationEvent } = await import("@/lib/reservation-events.server");
             await logReservationEvent({
               event_type: "cancel_undo_success",
               phone: sess.phone,
@@ -238,7 +231,9 @@ export const Route = createFileRoute("/api/public/reservations/cancel/undo")({
               waitlist_reverted,
               ip,
             });
-          } catch { /* telemetry best-effort */ }
+          } catch {
+            /* telemetry best-effort */
+          }
 
           return jsonResponse(200, {
             ok: true,

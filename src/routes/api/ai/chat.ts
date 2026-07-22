@@ -21,7 +21,13 @@ import {
   MEDICAL_REFUSAL_EN,
   maskSensitive,
 } from "@/lib/ai/safety";
-import { getFeatureFlag, getModel, recordSafetyIncident, serverClient, readAuthUser } from "@/lib/ai/ai.server";
+import {
+  getFeatureFlag,
+  getModel,
+  recordSafetyIncident,
+  serverClient,
+  readAuthUser,
+} from "@/lib/ai/ai.server";
 
 const SYSTEM_BASE_AR = `أنت "مساعد باعشن الذكي" في مجمع باعشن الطبي.
 - تحدث بالعربية بلهجة سعودية مهنية موجزة (أو الإنجليزية إذا استخدم المستخدم الإنجليزية).
@@ -55,20 +61,37 @@ async function loadPublicKnowledge(): Promise<string> {
     const [branches, specs, faqs, insurance] = await Promise.all([
       sb.from("branches").select("name_ar, name_en, phone").limit(10),
       sb.from("specialties").select("name_ar, name_en").limit(30),
-      sb.from("faqs").select("question_ar, answer_ar").eq("is_active", true).order("sort_order").limit(15),
-      sb.from("insurance_providers").select("name_ar, name_en").eq("active", true).order("sort_order").limit(20),
+      sb
+        .from("faqs")
+        .select("question_ar, answer_ar")
+        .eq("is_active", true)
+        .order("sort_order")
+        .limit(15),
+      sb
+        .from("insurance_providers")
+        .select("name_ar, name_en")
+        .eq("active", true)
+        .order("sort_order")
+        .limit(20),
     ]);
-    const b = (branches.data ?? []).map((x) => `${x.name_ar}${x.phone ? ` (${x.phone})` : ""}`).join(" | ");
+    const b = (branches.data ?? [])
+      .map((x) => `${x.name_ar}${x.phone ? ` (${x.phone})` : ""}`)
+      .join(" | ");
     const s = (specs.data ?? []).map((x) => x.name_ar).join("، ");
     const i = (insurance.data ?? []).map((x) => x.name_ar).join("، ");
-    const f = (faqs.data ?? []).slice(0, 10).map((x, idx) => `س${idx + 1}: ${x.question_ar}\nج${idx + 1}: ${x.answer_ar}`).join("\n");
+    const f = (faqs.data ?? [])
+      .slice(0, 10)
+      .map((x, idx) => `س${idx + 1}: ${x.question_ar}\nج${idx + 1}: ${x.answer_ar}`)
+      .join("\n");
     return [
       "معلومات المجمع (مصدر معتمد للجلسة):",
       b ? `- الفروع: ${b}` : "",
       s ? `- التخصصات: ${s}` : "",
       i ? `- شركات التأمين المقبولة: ${i}` : "",
       f ? `- أسئلة شائعة:\n${f}` : "",
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
   } catch {
     return "معلومات المجمع: تعذّر جلب البيانات الآن.";
   }
@@ -84,11 +107,14 @@ async function loadPatientSnapshot(userId: string, token: string): Promise<strin
     const [profileRes, patientRes, upcomingRes, notifRes] = await Promise.all([
       sb.from("profiles").select("full_name, preferred_language").eq("id", userId).maybeSingle(),
       sb.from("patients").select("id").eq("profile_id", userId).maybeSingle(),
-      sb.from("appointments")
+      sb
+        .from("appointments")
         .select("id, appointment_date, appointment_time, status")
         .gte("appointment_date", today)
         .in("status", ["new", "confirmed"])
-        .order("appointment_date").order("appointment_time").limit(3),
+        .order("appointment_date")
+        .order("appointment_time")
+        .limit(3),
       sb.from("notifications").select("id, read_at").eq("user_id", userId),
     ]);
     const patientId = patientRes.data?.id;
@@ -96,15 +122,24 @@ async function loadPatientSnapshot(userId: string, token: string): Promise<strin
     let pendingInsurance = 0;
     if (patientId) {
       const [inv, ins] = await Promise.all([
-        sb.from("invoices").select("total").eq("patient_id", patientId).in("status", ["unpaid", "partially_paid", "pending"]),
-        sb.from("insurance_approvals").select("id", { count: "exact", head: true }).eq("patient_id", patientId).in("status", ["submitted", "under_review", "additional_info_required"]),
+        sb
+          .from("invoices")
+          .select("total")
+          .eq("patient_id", patientId)
+          .in("status", ["unpaid", "partially_paid", "pending"]),
+        sb
+          .from("insurance_approvals")
+          .select("id", { count: "exact", head: true })
+          .eq("patient_id", patientId)
+          .in("status", ["submitted", "under_review", "additional_info_required"]),
       ]);
       outstandingTotal = (inv.data ?? []).reduce((s, r) => s + Number(r.total ?? 0), 0);
       pendingInsurance = ins.count ?? 0;
     }
     const unread = (notifRes.data ?? []).filter((n) => !n.read_at).length;
-    const upcoming = (upcomingRes.data ?? []).map((a) =>
-      `id=${a.id} | ${a.appointment_date} ${(a.appointment_time as string)?.slice(0, 5)} (${a.status})`,
+    const upcoming = (upcomingRes.data ?? []).map(
+      (a) =>
+        `id=${a.id} | ${a.appointment_date} ${(a.appointment_time as string)?.slice(0, 5)} (${a.status})`,
     );
     return [
       "بيانات المستخدم (المصدر الوحيد لبياناته الشخصية):",
@@ -139,7 +174,11 @@ export const Route = createFileRoute("/api/ai/chat")({
         if (!apiKey) return new Response("AI not configured", { status: 500 });
 
         let body: ChatBody = {};
-        try { body = await request.json(); } catch { return new Response("Bad request", { status: 400 }); }
+        try {
+          body = await request.json();
+        } catch {
+          return new Response("Bad request", { status: 400 });
+        }
         const messages = Array.isArray(body.messages) ? body.messages.slice(-16) : [];
         if (messages.length === 0) return new Response("No messages", { status: 400 });
 
@@ -192,7 +231,8 @@ export const Route = createFileRoute("/api/ai/chat")({
         // Mask sensitive tokens in each user message before sending upstream
         const safeMessages = messages.map((m) => ({
           role: m.role === "assistant" ? "assistant" : "user",
-          content: m.role === "user" ? maskSensitive(m.content).slice(0, 4000) : m.content.slice(0, 4000),
+          content:
+            m.role === "user" ? maskSensitive(m.content).slice(0, 4000) : m.content.slice(0, 4000),
         }));
 
         const systemMessages: { role: "system"; content: string }[] = [
@@ -205,12 +245,12 @@ export const Route = createFileRoute("/api/ai/chat")({
           content: `النطاق الحالي: ${scope}. اللغة: ${lang}. لا تُنفّذ أي إجراء تعديلي؛ اقترح فقط.`,
         });
 
-        const resumePartial = typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
+        const resumePartial =
+          typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
         if (resumePartial) {
           systemMessages.push({
             role: "system",
-            content:
-              `الرد السابق انقطع بسبب مشكلة اتصال. أكمل الرد من حيث توقف تمامًا بدون تكرار أي كلمة أو تحية أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
+            content: `الرد السابق انقطع بسبب مشكلة اتصال. أكمل الرد من حيث توقف تمامًا بدون تكرار أي كلمة أو تحية أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
           });
         }
 
@@ -292,13 +332,22 @@ async function persistConversation(p: {
     });
     let convId = p.conversationId ?? null;
     if (!convId) {
-      const { data } = await sb.from("ai_conversations").insert({
-        user_id: p.userId, scope: p.scope, lang: p.lang,
-        title: p.userText.slice(0, 60),
-      }).select("id").maybeSingle();
+      const { data } = await sb
+        .from("ai_conversations")
+        .insert({
+          user_id: p.userId,
+          scope: p.scope,
+          lang: p.lang,
+          title: p.userText.slice(0, 60),
+        })
+        .select("id")
+        .maybeSingle();
       convId = (data as { id?: string } | null)?.id ?? null;
     } else {
-      await sb.from("ai_conversations").update({ last_activity_at: new Date().toISOString() }).eq("id", convId);
+      await sb
+        .from("ai_conversations")
+        .update({ last_activity_at: new Date().toISOString() })
+        .eq("id", convId);
     }
     if (convId) {
       await sb.from("ai_messages").insert({
@@ -308,5 +357,7 @@ async function persistConversation(p: {
         model: p.model,
       });
     }
-  } catch { /* best-effort */ }
+  } catch {
+    /* best-effort */
+  }
 }

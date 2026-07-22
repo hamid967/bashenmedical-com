@@ -30,7 +30,8 @@ export function useFilteredDoctors(
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
     const list = doctors.filter((d) => {
-      if (specialty.length && (!d.specialty_id || !specialty.includes(d.specialty_id))) return false;
+      if (specialty.length && (!d.specialty_id || !specialty.includes(d.specialty_id)))
+        return false;
       if (branch.length) {
         const ids = d.branch_ids ?? [];
         if (!ids.some((b) => branch.includes(b))) return false;

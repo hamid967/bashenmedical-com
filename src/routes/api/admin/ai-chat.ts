@@ -61,12 +61,12 @@ export const Route = createFileRoute("/api/admin/ai-chat")({
         const systemMessages: { role: string; content: string }[] = [
           { role: "system", content: SYSTEM_PROMPT },
         ];
-        const resumePartial = typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
+        const resumePartial =
+          typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
         if (resumePartial) {
           systemMessages.push({
             role: "system",
-            content:
-              `الرد السابق انقطع بسبب مشكلة اتصال. أكمل من حيث توقف تمامًا بدون تكرار أي كلمة أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
+            content: `الرد السابق انقطع بسبب مشكلة اتصال. أكمل من حيث توقف تمامًا بدون تكرار أي كلمة أو مقدمة، وبدون ذكر أن هناك انقطاعًا. الجزء الذي وصل للمستخدم:\n\n<<<PARTIAL_START>>>\n${resumePartial.slice(-3000)}\n<<<PARTIAL_END>>>\n\nأكمل مباشرة من الحرف التالي.`,
           });
         }
 

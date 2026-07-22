@@ -1,10 +1,5 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import {
-  queryOptions,
-  useSuspenseQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { getDashboardSummary } from "@/lib/portal/portal.functions";
@@ -109,13 +104,25 @@ const T = {
     en: "Lab and radiology reports will appear here as soon as they're published.",
   },
   empty_notifs_t: { ar: "لا إشعارات جديدة", en: "You're all caught up" },
-  empty_notifs_b: { ar: "سنعلمك بأي جديد فور حدوثه.", en: "We'll let you know when something happens." },
+  empty_notifs_b: {
+    ar: "سنعلمك بأي جديد فور حدوثه.",
+    en: "We'll let you know when something happens.",
+  },
   empty_invoices_t: { ar: "لا فواتير مستحقة", en: "No amounts due" },
-  empty_invoices_b: { ar: "كل فواتيرك مدفوعة. شكرًا لك.", en: "All invoices are settled. Thank you." },
+  empty_invoices_b: {
+    ar: "كل فواتيرك مدفوعة. شكرًا لك.",
+    en: "All invoices are settled. Thank you.",
+  },
   empty_ins_t: { ar: "لا موافقات معلّقة", en: "No pending approvals" },
-  empty_ins_b: { ar: "لا توجد طلبات تأمين قيد المراجعة.", en: "No insurance requests are under review." },
+  empty_ins_b: {
+    ar: "لا توجد طلبات تأمين قيد المراجعة.",
+    en: "No insurance requests are under review.",
+  },
   empty_family_t: { ar: "لم تُضف أفراد عائلة", en: "No family members added" },
-  empty_family_b: { ar: "أضف معالًا لتحجز نيابةً عنه.", en: "Add a dependent to book on their behalf." },
+  empty_family_b: {
+    ar: "أضف معالًا لتحجز نيابةً عنه.",
+    en: "Add a dependent to book on their behalf.",
+  },
   add_dep: { ar: "إضافة معال", en: "Add dependent" },
   browse_all: { ar: "استكشف الكل", en: "Browse all" },
   demo: { ar: "بيانات تجريبية", en: "Demo data" },
@@ -165,12 +172,12 @@ function OverviewError({ error, reset }: { error: Error; reset: () => void }) {
 
 function PortalOverview() {
   const { data } = useSuspenseQuery(dashboardQuery);
-  const lang: Lang = (data.profile?.preferred_language as string | undefined) === "en" ? "en" : "ar";
+  const lang: Lang =
+    (data.profile?.preferred_language as string | undefined) === "en" ? "en" : "ar";
   const isAr = lang === "ar";
-  const dir =i18n.t("portalHome:ltr");
+  const dir = i18n.t("portalHome:ltr");
 
-  const firstName =
-    data.profile?.full_name?.trim().split(/\s+/)[0] ?? i18n.t("portalHome:there");
+  const firstName = data.profile?.full_name?.trim().split(/\s+/)[0] ?? i18n.t("portalHome:there");
 
   const hour = new Date().getHours();
   const greetKey: "hello_am" | "hello_pm" | "hello_night" =
@@ -283,19 +290,62 @@ function PortalOverview() {
         {/* ─── Quick services strip ─── */}
         <section aria-labelledby="quick-heading">
           <div className="flex items-baseline justify-between mb-3">
-            <h2 id="quick-heading" className="text-sm font-bold uppercase tracking-wider text-[color:var(--mag-ink-3)]">
+            <h2
+              id="quick-heading"
+              className="text-sm font-bold uppercase tracking-wider text-[color:var(--mag-ink-3)]"
+            >
               {tt("quick", lang)}
             </h2>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
-            <QuickPill lang={lang} to="/portal/book" icon={<CalendarPlus className="h-4 w-4" />} label={tt("s_book", lang)} />
-            <QuickPill lang={lang} to="/portal/reports" icon={<FileText className="h-4 w-4" />} label={tt("s_reports", lang)} />
-            <QuickPill lang={lang} to="/portal/laboratory" icon={<FlaskConical className="h-4 w-4" />} label={i18n.t("portalHome:lab")} />
-            <QuickPill lang={lang} to="/portal/prescriptions" icon={<Pill className="h-4 w-4" />} label={tt("s_prescriptions", lang)} />
-            <QuickPill lang={lang} to="/portal/invoices" icon={<ReceiptText className="h-4 w-4" />} label={tt("s_invoices", lang)} />
-            <QuickPill lang={lang} to="/portal/insurance" icon={<ShieldCheck className="h-4 w-4" />} label={tt("s_insurance", lang)} />
-            <QuickPill lang={lang} to="/portal/family" icon={<Users className="h-4 w-4" />} label={tt("s_family", lang)} />
-            <QuickPill lang={lang} to="/portal/complaints" icon={<MessageSquareWarning className="h-4 w-4" />} label={tt("s_complaints", lang)} />
+            <QuickPill
+              lang={lang}
+              to="/portal/book"
+              icon={<CalendarPlus className="h-4 w-4" />}
+              label={tt("s_book", lang)}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/reports"
+              icon={<FileText className="h-4 w-4" />}
+              label={tt("s_reports", lang)}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/laboratory"
+              icon={<FlaskConical className="h-4 w-4" />}
+              label={i18n.t("portalHome:lab")}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/prescriptions"
+              icon={<Pill className="h-4 w-4" />}
+              label={tt("s_prescriptions", lang)}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/invoices"
+              icon={<ReceiptText className="h-4 w-4" />}
+              label={tt("s_invoices", lang)}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/insurance"
+              icon={<ShieldCheck className="h-4 w-4" />}
+              label={tt("s_insurance", lang)}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/family"
+              icon={<Users className="h-4 w-4" />}
+              label={tt("s_family", lang)}
+            />
+            <QuickPill
+              lang={lang}
+              to="/portal/complaints"
+              icon={<MessageSquareWarning className="h-4 w-4" />}
+              label={tt("s_complaints", lang)}
+            />
           </div>
         </section>
 
@@ -310,7 +360,11 @@ function PortalOverview() {
               to="/portal/reports"
             />
             {data.recentLabs.length === 0 ? (
-              <EmptyBlock lang={lang} title={tt("empty_reports_t", lang)} body={tt("empty_reports_b", lang)} />
+              <EmptyBlock
+                lang={lang}
+                title={tt("empty_reports_t", lang)}
+                body={tt("empty_reports_b", lang)}
+              />
             ) : (
               <ol className="mt-5 divide-y divide-[color:var(--mag-line)]">
                 {data.recentLabs.slice(0, 5).map((l, i) => (
@@ -320,11 +374,14 @@ function PortalOverview() {
                         {String(i + 1).padStart(2, "0")}
                       </span>
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-[color:var(--mag-ink)] truncate">{l.title}</div>
+                        <div className="text-sm font-semibold text-[color:var(--mag-ink)] truncate">
+                          {l.title}
+                        </div>
                         <div className="text-xs text-[color:var(--mag-ink-3)] truncate mt-0.5">
                           {l.test_type ?? i18n.t("portalHome:report")} ·{" "}
                           {l.report_date
-                            ? new Date(l.report_date).toLocaleDateString(i18n.t("portalHome:en_us"),
+                            ? new Date(l.report_date).toLocaleDateString(
+                                i18n.t("portalHome:en_us"),
                                 { day: "2-digit", month: "short", year: "numeric" },
                               )
                             : "—"}
@@ -348,7 +405,11 @@ function PortalOverview() {
               badge={data.unreadCount > 0 ? String(data.unreadCount) : undefined}
             />
             {data.notifications.length === 0 ? (
-              <EmptyBlock lang={lang} title={tt("empty_notifs_t", lang)} body={tt("empty_notifs_b", lang)} />
+              <EmptyBlock
+                lang={lang}
+                title={tt("empty_notifs_t", lang)}
+                body={tt("empty_notifs_b", lang)}
+              />
             ) : (
               <ul className="mt-5 space-y-3.5">
                 {data.notifications.slice(0, 5).map((n) => (
@@ -356,14 +417,20 @@ function PortalOverview() {
                     <span
                       className={
                         "mt-1.5 h-2 w-2 shrink-0 rounded-full " +
-                        (n.read_at ? "bg-[color:var(--mag-line-strong)]" : "bg-[color:var(--mag-accent)]")
+                        (n.read_at
+                          ? "bg-[color:var(--mag-line-strong)]"
+                          : "bg-[color:var(--mag-accent)]")
                       }
                       aria-hidden
                     />
                     <div className="min-w-0 flex-1">
-                      <div className="text-sm font-semibold text-[color:var(--mag-ink)] truncate">{n.title}</div>
+                      <div className="text-sm font-semibold text-[color:var(--mag-ink)] truncate">
+                        {n.title}
+                      </div>
                       {n.body && (
-                        <div className="text-xs text-[color:var(--mag-ink-3)] line-clamp-2 mt-0.5">{n.body}</div>
+                        <div className="text-xs text-[color:var(--mag-ink-3)] line-clamp-2 mt-0.5">
+                          {n.body}
+                        </div>
                       )}
                     </div>
                   </li>
@@ -383,14 +450,22 @@ function PortalOverview() {
               to="/portal/invoices"
             />
             {data.outstandingInvoices.length === 0 ? (
-              <EmptyBlock lang={lang} title={tt("empty_invoices_t", lang)} body={tt("empty_invoices_b", lang)} />
+              <EmptyBlock
+                lang={lang}
+                title={tt("empty_invoices_t", lang)}
+                body={tt("empty_invoices_b", lang)}
+              />
             ) : (
               <>
                 <div className="mt-5 flex items-baseline justify-between rounded-2xl bg-[color:var(--mag-subtle)] px-4 py-3">
-                  <div className="text-xs text-[color:var(--mag-ink-3)]">{tt("amount_due_label", lang)}</div>
+                  <div className="text-xs text-[color:var(--mag-ink-3)]">
+                    {tt("amount_due_label", lang)}
+                  </div>
                   <div className="text-xl font-bold text-[color:var(--mag-ink)] tabular-nums">
                     {formatMoney(data.outstandingTotal, lang)}{" "}
-                    <span className="text-xs font-semibold text-[color:var(--mag-ink-3)]">{tt("sar", lang)}</span>
+                    <span className="text-xs font-semibold text-[color:var(--mag-ink-3)]">
+                      {tt("sar", lang)}
+                    </span>
                   </div>
                 </div>
                 <ul className="mt-4 divide-y divide-[color:var(--mag-line)]">
@@ -402,7 +477,8 @@ function PortalOverview() {
                             {inv.invoice_number || `#${inv.id.slice(0, 8)}`}
                           </div>
                           <div className="text-xs text-[color:var(--mag-ink-3)] mt-0.5">
-                            {new Date(inv.issued_at).toLocaleDateString(i18n.t("portalHome:en_us"),
+                            {new Date(inv.issued_at).toLocaleDateString(
+                              i18n.t("portalHome:en_us"),
                               { day: "2-digit", month: "short", year: "numeric" },
                             )}{" "}
                             · <InvoiceStatusChip status={inv.status} lang={lang} inline />
@@ -420,7 +496,11 @@ function PortalOverview() {
                   className="mt-4 inline-flex items-center justify-center w-full gap-2 rounded-full h-11 px-5 bg-[color:var(--mag-accent)] text-white text-sm font-semibold hover:bg-[color:var(--mag-accent-ink)] transition"
                 >
                   {tt("pay_now", lang)}
-                  {isAr ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                  {isAr ? (
+                    <ChevronLeft className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
                 </Link>
               </>
             )}
@@ -434,7 +514,11 @@ function PortalOverview() {
               to="/portal/insurance"
             />
             {data.pendingInsurance.length === 0 ? (
-              <EmptyBlock lang={lang} title={tt("empty_ins_t", lang)} body={tt("empty_ins_b", lang)} />
+              <EmptyBlock
+                lang={lang}
+                title={tt("empty_ins_t", lang)}
+                body={tt("empty_ins_b", lang)}
+              />
             ) : (
               <ul className="mt-5 space-y-3">
                 {data.pendingInsurance.slice(0, 4).map((r) => (
@@ -446,7 +530,8 @@ function PortalOverview() {
                         </div>
                         <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
                           {r.submitted_at
-                            ? new Date(r.submitted_at).toLocaleDateString(i18n.t("portalHome:en_us"),
+                            ? new Date(r.submitted_at).toLocaleDateString(
+                                i18n.t("portalHome:en_us"),
                                 { day: "2-digit", month: "short", year: "numeric" },
                               )
                             : "—"}
@@ -480,8 +565,8 @@ function PortalOverview() {
                         {a.doctor
                           ? isAr
                             ? a.doctor.name_ar
-                            : a.doctor.name_en ?? a.doctor.name_ar
-                          :i18n.t("portalHome:doctor")}
+                            : (a.doctor.name_en ?? a.doctor.name_ar)
+                          : i18n.t("portalHome:doctor")}
                       </div>
                       <div className="text-[11px] text-[color:var(--mag-ink-3)] truncate mt-0.5">
                         {a.appointment_time?.slice(0, 5)} ·{" "}
@@ -561,13 +646,13 @@ function PortalOverview() {
                     className="w-14 h-14 rounded-full grid place-items-center bg-[color:var(--mag-accent-soft)] text-[color:var(--mag-accent-ink)] font-semibold text-sm"
                     aria-hidden
                   >
-                    {initials(isAr ? d.name_ar : d.name_en ?? d.name_ar)}
+                    {initials(isAr ? d.name_ar : (d.name_en ?? d.name_ar))}
                   </span>
                   <div className="mt-2 text-xs font-semibold text-[color:var(--mag-ink)] leading-tight truncate w-full">
-                    {isAr ? d.name_ar : d.name_en ?? d.name_ar}
+                    {isAr ? d.name_ar : (d.name_en ?? d.name_ar)}
                   </div>
                   <div className="text-[10px] text-[color:var(--mag-ink-3)] truncate w-full mt-0.5">
-                    {isAr ? d.title_ar ?? "استشاري" : d.title_en ?? "Consultant"}
+                    {isAr ? (d.title_ar ?? "استشاري") : (d.title_en ?? "Consultant")}
                   </div>
                 </Link>
               ))}
@@ -641,8 +726,8 @@ function FeatureNextVisit({
               {appt.doctor
                 ? isAr
                   ? appt.doctor.name_ar
-                  : appt.doctor.name_en ?? appt.doctor.name_ar
-                :i18n.t("portalHome:baeshen_doctor")}
+                  : (appt.doctor.name_en ?? appt.doctor.name_ar)
+                : i18n.t("portalHome:baeshen_doctor")}
             </h2>
             <p className="text-sm text-white/80 mt-1 line-clamp-2">
               {appt.reason ?? i18n.t("portalHome:general_consultation")}
@@ -683,7 +768,11 @@ function FeatureNextVisit({
               disabled={cancelling}
               className="inline-flex items-center gap-2 rounded-full bg-transparent hover:bg-rose-500/20 border border-rose-300/40 text-rose-100 px-4 h-10 text-sm font-semibold transition disabled:opacity-50"
             >
-              {cancelling ? <Loader2 className="h-4 w-4 animate-spin" /> : <XCircle className="h-4 w-4" />}
+              {cancelling ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <XCircle className="h-4 w-4" />
+              )}
               {tt("cancel", lang)}
             </button>
           )}
@@ -701,9 +790,7 @@ function FeatureEmpty({ lang }: { lang: Lang }) {
         <Sparkles className="h-3.5 w-3.5" />
         {tt("next_visit", lang)}
       </div>
-      <h2 className="mt-4 text-2xl font-bold text-[color:var(--mag-ink)]">
-        {tt("no_next", lang)}
-      </h2>
+      <h2 className="mt-4 text-2xl font-bold text-[color:var(--mag-ink)]">{tt("no_next", lang)}</h2>
       <p className="mt-2 text-sm text-[color:var(--mag-ink-2)] max-w-md">
         {i18n.t("portalHome:start_with_one_of_our_consultants_bookin")}
       </p>
@@ -741,10 +828,10 @@ function KpiTile({
     tone === "accent"
       ? "text-[color:var(--mag-accent-ink)] bg-[color:var(--mag-accent-soft)]"
       : tone === "warning"
-      ? "text-[color:var(--mag-warning)] bg-amber-50"
-      : tone === "muted"
-      ? "text-[color:var(--mag-ink-3)] bg-[color:var(--mag-subtle)]"
-      : "text-[color:var(--mag-ink)] bg-[color:var(--mag-subtle)]";
+        ? "text-[color:var(--mag-warning)] bg-amber-50"
+        : tone === "muted"
+          ? "text-[color:var(--mag-ink-3)] bg-[color:var(--mag-subtle)]"
+          : "text-[color:var(--mag-ink)] bg-[color:var(--mag-subtle)]";
   return (
     <Link
       to={to}
@@ -814,10 +901,10 @@ function SectionHeader({
         <span className="h-7 w-7 shrink-0 grid place-items-center rounded-lg bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]">
           {icon}
         </span>
-        <h3 className="truncate text-sm md:text-base font-bold text-[color:var(--mag-ink)]">{title}</h3>
-        {badge && (
-          <span className="mag-chip bg-[color:var(--mag-accent)] text-white">{badge}</span>
-        )}
+        <h3 className="truncate text-sm md:text-base font-bold text-[color:var(--mag-ink)]">
+          {title}
+        </h3>
+        {badge && <span className="mag-chip bg-[color:var(--mag-accent)] text-white">{badge}</span>}
       </div>
       {to && (
         <Link
@@ -825,7 +912,11 @@ function SectionHeader({
           className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--mag-ink-2)] hover:text-[color:var(--mag-accent-ink)] transition shrink-0"
         >
           {actionLabel ?? tt("view_all", lang)}
-          {isAr ? <ChevronLeft className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+          {isAr ? (
+            <ChevronLeft className="h-3.5 w-3.5" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5" />
+          )}
         </Link>
       )}
     </div>
@@ -876,7 +967,15 @@ function MiniDateChip({ iso, lang }: { iso: string; lang: Lang }) {
   );
 }
 
-function ApptStatusChip({ status, lang, onDark }: { status: string; lang: Lang; onDark?: boolean }) {
+function ApptStatusChip({
+  status,
+  lang,
+  onDark,
+}: {
+  status: string;
+  lang: Lang;
+  onDark?: boolean;
+}) {
   const map: Record<string, { l_ar: string; l_en: string; ring: string }> = {
     new: { l_ar: "جديد", l_en: "New", ring: "bg-amber-500/20 text-amber-100 border-amber-300/30" },
     confirmed: {
@@ -884,26 +983,40 @@ function ApptStatusChip({ status, lang, onDark }: { status: string; lang: Lang; 
       l_en: "Confirmed",
       ring: "bg-emerald-500/20 text-emerald-100 border-emerald-300/30",
     },
-    cancelled: { l_ar: "ملغى", l_en: "Cancelled", ring: "bg-rose-500/20 text-rose-100 border-rose-300/30" },
-    completed: { l_ar: "منتهٍ", l_en: "Done", ring: "bg-slate-500/20 text-slate-100 border-slate-300/30" },
+    cancelled: {
+      l_ar: "ملغى",
+      l_en: "Cancelled",
+      ring: "bg-rose-500/20 text-rose-100 border-rose-300/30",
+    },
+    completed: {
+      l_ar: "منتهٍ",
+      l_en: "Done",
+      ring: "bg-slate-500/20 text-slate-100 border-slate-300/30",
+    },
   };
-  const c = map[status] ?? { l_ar: status, l_en: status, ring: "bg-slate-500/20 text-slate-100 border-slate-300/30" };
+  const c = map[status] ?? {
+    l_ar: status,
+    l_en: status,
+    ring: "bg-slate-500/20 text-slate-100 border-slate-300/30",
+  };
   const lightMap: Record<string, string> = {
     new: "bg-amber-50 text-amber-700 border-amber-200",
     confirmed: "bg-emerald-50 text-emerald-700 border-emerald-200",
     cancelled: "bg-rose-50 text-rose-700 border-rose-200",
     completed: "bg-slate-50 text-slate-700 border-slate-200",
   };
-  const cls = onDark ? c.ring : lightMap[status] ?? "bg-slate-50 text-slate-700 border-slate-200";
-  return (
-    <span className={`mag-chip border ${cls}`}>{lang === "ar" ? c.l_ar : c.l_en}</span>
-  );
+  const cls = onDark ? c.ring : (lightMap[status] ?? "bg-slate-50 text-slate-700 border-slate-200");
+  return <span className={`mag-chip border ${cls}`}>{lang === "ar" ? c.l_ar : c.l_en}</span>;
 }
 
 function LabStatusChip({ status, lang }: { status: string | null; lang: Lang }) {
   const s = (status ?? "normal").toLowerCase();
   const map: Record<string, { l_ar: string; l_en: string; cls: string }> = {
-    normal: { l_ar: "طبيعي", l_en: "Normal", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+    normal: {
+      l_ar: "طبيعي",
+      l_en: "Normal",
+      cls: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    },
     low: { l_ar: "منخفض", l_en: "Low", cls: "bg-teal-50 text-teal-700 border-teal-200" },
     high: { l_ar: "مرتفع", l_en: "High", cls: "bg-amber-50 text-amber-700 border-amber-200" },
     critical: { l_ar: "حرج", l_en: "Critical", cls: "bg-rose-50 text-rose-700 border-rose-200" },
@@ -927,7 +1040,8 @@ function InvoiceStatusChip({
     pending: { l_ar: "قيد الانتظار", l_en: "Pending", cls: "text-slate-600" },
   };
   const c = map[status] ?? map.pending;
-  if (inline) return <span className={`font-semibold ${c.cls}`}>{lang === "ar" ? c.l_ar : c.l_en}</span>;
+  if (inline)
+    return <span className={`font-semibold ${c.cls}`}>{lang === "ar" ? c.l_ar : c.l_en}</span>;
   return (
     <span className={`mag-chip border border-current/20 ${c.cls}`}>
       {lang === "ar" ? c.l_ar : c.l_en}
@@ -937,7 +1051,11 @@ function InvoiceStatusChip({
 
 function InsuranceStatusChip({ status, lang }: { status: string; lang: Lang }) {
   const map: Record<string, { l_ar: string; l_en: string; cls: string }> = {
-    submitted: { l_ar: "مُقدّم", l_en: "Submitted", cls: "bg-teal-50 text-teal-700 border-teal-200" },
+    submitted: {
+      l_ar: "مُقدّم",
+      l_en: "Submitted",
+      cls: "bg-teal-50 text-teal-700 border-teal-200",
+    },
     under_review: {
       l_ar: "قيد المراجعة",
       l_en: "Under review",

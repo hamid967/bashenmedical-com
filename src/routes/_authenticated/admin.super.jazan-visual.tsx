@@ -20,7 +20,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
   DEFAULT_JAZAN_SETTINGS,
@@ -34,7 +40,10 @@ export const Route = createFileRoute("/_authenticated/admin/super/jazan-visual")
   head: () => ({
     meta: [
       { title: "الهوية البصرية لجازان — لوحة الإدارة" },
-      { name: "description", content: "تحكّم Super Admin بمقدمة الموقع، شريط الإعلان، شدة النمط، والتراث حسب الصفحة." },
+      {
+        name: "description",
+        content: "تحكّم Super Admin بمقدمة الموقع، شريط الإعلان، شدة النمط، والتراث حسب الصفحة.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -106,7 +115,9 @@ function JazanVisualAdmin() {
       <div className="max-w-lg mx-auto p-8 text-center">
         <h1 className="text-xl font-semibold mb-2">صلاحيات غير كافية</h1>
         <p className="text-muted-foreground">هذه الصفحة مخصصة لـ Super Admin فقط.</p>
-        <Button asChild className="mt-4"><Link to="/admin">العودة للوحة الإدارة</Link></Button>
+        <Button asChild className="mt-4">
+          <Link to="/admin">العودة للوحة الإدارة</Link>
+        </Button>
       </div>
     );
   }
@@ -135,7 +146,9 @@ function JazanVisualAdmin() {
 
       {/* Intro overlay */}
       <Card>
-        <CardHeader><CardTitle>مقدمة الموقع (Intro)</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>مقدمة الموقع (Intro)</CardTitle>
+        </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2 flex items-center gap-3">
             <Switch
@@ -147,36 +160,77 @@ function JazanVisualAdmin() {
           <div>
             <Label>تردد الظهور (ساعات)</Label>
             <Input
-              type="number" min={0} max={24 * 90} step={1}
+              type="number"
+              min={0}
+              max={24 * 90}
+              step={1}
               value={s.intro.cooldownHours}
-              onChange={(e) => setS({ ...s, intro: { ...s.intro, cooldownHours: Math.max(0, Math.round(Number(e.target.value) || 0)) } })}
+              onChange={(e) =>
+                setS({
+                  ...s,
+                  intro: {
+                    ...s.intro,
+                    cooldownHours: Math.max(0, Math.round(Number(e.target.value) || 0)),
+                  },
+                })
+              }
             />
-            <p className="text-xs text-muted-foreground mt-1">0 = كل زيارة. الافتراضي 168 (كل 7 أيام).</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              0 = كل زيارة. الافتراضي 168 (كل 7 أيام).
+            </p>
           </div>
           <div>
             <Label>المدة الكلية (مللي ثانية)</Label>
             <Input
-              type="number" min={4000} max={20000} step={500}
+              type="number"
+              min={4000}
+              max={20000}
+              step={500}
               value={s.intro.durationMs}
-              onChange={(e) => setS({ ...s, intro: { ...s.intro, durationMs: Math.max(4000, Math.min(20000, Math.round(Number(e.target.value) || 10000))) } })}
+              onChange={(e) =>
+                setS({
+                  ...s,
+                  intro: {
+                    ...s.intro,
+                    durationMs: Math.max(
+                      4000,
+                      Math.min(20000, Math.round(Number(e.target.value) || 10000)),
+                    ),
+                  },
+                })
+              }
             />
             <p className="text-xs text-muted-foreground mt-1">يوصى بين 8000 و 12000.</p>
           </div>
           <div>
             <Label>العنوان الرئيسي (عربي)</Label>
-            <Input value={s.intro.headlineAr} onChange={(e) => setS({ ...s, intro: { ...s.intro, headlineAr: e.target.value } })} />
+            <Input
+              value={s.intro.headlineAr}
+              onChange={(e) => setS({ ...s, intro: { ...s.intro, headlineAr: e.target.value } })}
+            />
           </div>
           <div>
             <Label>Headline (English)</Label>
-            <Input dir="ltr" value={s.intro.headlineEn} onChange={(e) => setS({ ...s, intro: { ...s.intro, headlineEn: e.target.value } })} />
+            <Input
+              dir="ltr"
+              value={s.intro.headlineEn}
+              onChange={(e) => setS({ ...s, intro: { ...s.intro, headlineEn: e.target.value } })}
+            />
           </div>
           <div>
             <Label>الشعار الفرعي (عربي)</Label>
-            <Input value={s.intro.taglineAr} onChange={(e) => setS({ ...s, intro: { ...s.intro, taglineAr: e.target.value } })} />
+            <Input
+              value={s.intro.taglineAr}
+              onChange={(e) => setS({ ...s, intro: { ...s.intro, taglineAr: e.target.value } })}
+            />
           </div>
           <div>
             <Label>Tagline (English)</Label>
-            <Input dir="ltr" value={s.intro.taglineEn} onChange={(e) => setS({ ...s, intro: { ...s.intro, taglineEn: e.target.value } })} />
+            <Input
+              dir="ltr"
+              value={s.intro.taglineEn}
+              onChange={(e) => setS({ ...s, intro: { ...s.intro, taglineEn: e.target.value } })}
+            />
           </div>
           <div className="md:col-span-2">
             <Label>رابط الشعار المرخّص (اختياري)</Label>
@@ -186,10 +240,16 @@ function JazanVisualAdmin() {
               value={s.intro.logoUrl}
               onChange={(e) => setS({ ...s, intro: { ...s.intro, logoUrl: e.target.value } })}
             />
-            <p className="text-xs text-muted-foreground mt-1">اتركه فارغًا لاستخدام شعار المجمع الافتراضي. استخدم فقط شعارًا لديك حق استعماله.</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              اتركه فارغًا لاستخدام شعار المجمع الافتراضي. استخدم فقط شعارًا لديك حق استعماله.
+            </p>
             {s.intro.logoUrl?.trim() && (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={s.intro.logoUrl} alt="" className="mt-2 h-16 w-16 object-contain rounded border" />
+              <img
+                src={s.intro.logoUrl}
+                alt=""
+                className="mt-2 h-16 w-16 object-contain rounded border"
+              />
             )}
           </div>
           <div className="md:col-span-2 flex items-start gap-3 rounded-md border border-dashed p-3">
@@ -201,7 +261,9 @@ function JazanVisualAdmin() {
             <div className="flex-1">
               <Label>وضع تصحيح المقدمة (Debug)</Label>
               <p className="text-xs text-muted-foreground mt-1">
-                يطبع أحداث <code>shown</code> و<code>skipped</code> و<code>completed</code> في كونسول المتصفح مع <code>reason</code> و<code>duration_ms</code>. للمطوّرين فقط — أوقفه في الإنتاج.
+                يطبع أحداث <code>shown</code> و<code>skipped</code> و<code>completed</code> في
+                كونسول المتصفح مع <code>reason</code> و<code>duration_ms</code>. للمطوّرين فقط —
+                أوقفه في الإنتاج.
               </p>
             </div>
           </div>
@@ -210,7 +272,9 @@ function JazanVisualAdmin() {
 
       {/* Pattern intensity */}
       <Card>
-        <CardHeader><CardTitle>شدة النمط الزخرفي (Jazan Pattern)</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>شدة النمط الزخرفي (Jazan Pattern)</CardTitle>
+        </CardHeader>
         <CardContent className="space-y-3">
           <div>
             <Label>الشدة العامة</Label>
@@ -218,15 +282,20 @@ function JazanVisualAdmin() {
               value={s.patternIntensity}
               onValueChange={(v) => setS({ ...s, patternIntensity: v as JazanIntensity })}
             >
-              <SelectTrigger className="w-56"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="w-56">
+                <SelectValue />
+              </SelectTrigger>
               <SelectContent>
                 {(Object.keys(INTENSITY_LABELS) as JazanIntensity[]).map((k) => (
-                  <SelectItem key={k} value={k}>{INTENSITY_LABELS[k]}</SelectItem>
+                  <SelectItem key={k} value={k}>
+                    {INTENSITY_LABELS[k]}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
-              يضبط CSS variable <code>--jazan-intensity</code> ويؤثر على شفافية العناصر الزخرفية المتوافقة.
+              يضبط CSS variable <code>--jazan-intensity</code> ويؤثر على شفافية العناصر الزخرفية
+              المتوافقة.
             </p>
           </div>
         </CardContent>
@@ -234,7 +303,9 @@ function JazanVisualAdmin() {
 
       {/* Heritage per area */}
       <Card>
-        <CardHeader><CardTitle>تفعيل عناصر التراث حسب الصفحة</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>تفعيل عناصر التراث حسب الصفحة</CardTitle>
+        </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           {(
             [
@@ -248,25 +319,32 @@ function JazanVisualAdmin() {
             <label key={key} className="flex items-center gap-3 rounded-md border p-3">
               <Switch
                 checked={s.heritageAreas[key]}
-                onCheckedChange={(v) => setS({ ...s, heritageAreas: { ...s.heritageAreas, [key]: v } })}
+                onCheckedChange={(v) =>
+                  setS({ ...s, heritageAreas: { ...s.heritageAreas, [key]: v } })
+                }
               />
               <span className="text-sm">{label}</span>
             </label>
           ))}
           <p className="md:col-span-2 text-xs text-muted-foreground">
-            يُضاف class مثل <code>heritage-header</code> على <code>&lt;html&gt;</code> — يمكن للأنماط التصميمية الاستفادة منه لإظهار/إخفاء العناصر الزخرفية.
+            يُضاف class مثل <code>heritage-header</code> على <code>&lt;html&gt;</code> — يمكن
+            للأنماط التصميمية الاستفادة منه لإظهار/إخفاء العناصر الزخرفية.
           </p>
         </CardContent>
       </Card>
 
       {/* Announcement bar */}
       <Card>
-        <CardHeader><CardTitle>شريط الإعلان العلوي</CardTitle></CardHeader>
+        <CardHeader>
+          <CardTitle>شريط الإعلان العلوي</CardTitle>
+        </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-2">
           <div className="md:col-span-2 flex items-center gap-3">
             <Switch
               checked={s.announcement.enabled}
-              onCheckedChange={(v) => setS({ ...s, announcement: { ...s.announcement, enabled: v } })}
+              onCheckedChange={(v) =>
+                setS({ ...s, announcement: { ...s.announcement, enabled: v } })
+              }
             />
             <Label>إظهار شريط الإعلان أعلى الموقع</Label>
           </div>
@@ -275,15 +353,20 @@ function JazanVisualAdmin() {
             <Textarea
               rows={2}
               value={s.announcement.messageAr}
-              onChange={(e) => setS({ ...s, announcement: { ...s.announcement, messageAr: e.target.value } })}
+              onChange={(e) =>
+                setS({ ...s, announcement: { ...s.announcement, messageAr: e.target.value } })
+              }
             />
           </div>
           <div>
             <Label>Message (English)</Label>
             <Textarea
-              dir="ltr" rows={2}
+              dir="ltr"
+              rows={2}
               value={s.announcement.messageEn}
-              onChange={(e) => setS({ ...s, announcement: { ...s.announcement, messageEn: e.target.value } })}
+              onChange={(e) =>
+                setS({ ...s, announcement: { ...s.announcement, messageEn: e.target.value } })
+              }
             />
           </div>
         </CardContent>
@@ -292,7 +375,9 @@ function JazanVisualAdmin() {
       <Separator />
 
       <div className="flex justify-between items-center pt-2">
-        <Button asChild variant="ghost"><Link to="/admin">← العودة للوحة الإدارة</Link></Button>
+        <Button asChild variant="ghost">
+          <Link to="/admin">← العودة للوحة الإدارة</Link>
+        </Button>
         <Button onClick={save} disabled={saving}>
           <Save className="w-4 h-4 ms-1" /> {saving ? "جارٍ الحفظ…" : "حفظ التغييرات"}
         </Button>

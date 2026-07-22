@@ -80,11 +80,17 @@ function checkRateLimit(
 
 function clientKey(sessionId?: string): string {
   let ip = "";
-  try { ip = getRequestIP({ xForwardedFor: true }) ?? ""; } catch { /* noop */ }
+  try {
+    ip = getRequestIP({ xForwardedFor: true }) ?? "";
+  } catch {
+    /* noop */
+  }
   if (!ip) {
     try {
       ip = (getRequestHeader("cf-connecting-ip") ?? getRequestHeader("x-real-ip") ?? "").toString();
-    } catch { /* noop */ }
+    } catch {
+      /* noop */
+    }
   }
   return `${ip || "unknown"}::${sessionId || "no-session"}`;
 }
@@ -113,12 +119,21 @@ export const Route = createFileRoute("/api/public/book/hold")({
     handlers: {
       POST: async ({ request }) => {
         let body: unknown;
-        try { body = await request.json(); } catch { return json(400, { ok: false, kind: "validation", message: "invalid_json" }); }
+        try {
+          body = await request.json();
+        } catch {
+          return json(400, { ok: false, kind: "validation", message: "invalid_json" });
+        }
         const parsed = holdSchema.safeParse(body);
         if (!parsed.success) {
-          return json(400, { ok: false, kind: "validation", message: parsed.error.issues[0]?.message ?? "invalid" });
+          return json(400, {
+            ok: false,
+            kind: "validation",
+            message: parsed.error.issues[0]?.message ?? "invalid",
+          });
         }
-        const { doctor_id, branch_id, appointment_date, appointment_time, session_id } = parsed.data;
+        const { doctor_id, branch_id, appointment_date, appointment_time, session_id } =
+          parsed.data;
 
         const rl = checkRateLimit(`hold:post:${clientKey(session_id)}`, [
           { windowMs: 60_000, max: 10 },
@@ -126,7 +141,8 @@ export const Route = createFileRoute("/api/public/book/hold")({
         ]);
         if (!rl.ok) return rateLimited(rl.retryAfter);
 
-        const timeHHMMSS = appointment_time.length === 5 ? `${appointment_time}:00` : appointment_time;
+        const timeHHMMSS =
+          appointment_time.length === 5 ? `${appointment_time}:00` : appointment_time;
         const expires_at = new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString();
 
         try {
@@ -215,7 +231,11 @@ export const Route = createFileRoute("/api/public/book/hold")({
 
       DELETE: async ({ request }) => {
         let body: unknown;
-        try { body = await request.json(); } catch { return json(400, { ok: false, message: "invalid_json" }); }
+        try {
+          body = await request.json();
+        } catch {
+          return json(400, { ok: false, message: "invalid_json" });
+        }
         const parsed = releaseSchema.safeParse(body);
         if (!parsed.success) return json(400, { ok: false, message: "invalid" });
 

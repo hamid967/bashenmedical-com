@@ -14,11 +14,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createHash } from "node:crypto";
-import {
-  checkRateLimit,
-  getClientIp,
-  rateLimitedResponse,
-} from "@/lib/rate-limit.server";
+import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rate-limit.server";
 
 const NAME_MAX = 120;
 const PHONE_MAX = 32;
@@ -51,7 +47,13 @@ const schema = z.object({
     .refine((v) => SA_MOBILE_RE.test(v.replace(/[\s\-()]/g, "")), {
       message: "أدخل رقم جوال سعودي صحيح (05XXXXXXXX)",
     }),
-  email: z.string().trim().max(EMAIL_MAX).email("بريد إلكتروني غير صالح").optional().or(z.literal("")),
+  email: z
+    .string()
+    .trim()
+    .max(EMAIL_MAX)
+    .email("بريد إلكتروني غير صالح")
+    .optional()
+    .or(z.literal("")),
   national_id: z.string().trim().max(NID_MAX, "رقم الهوية طويل جدًا").optional().or(z.literal("")),
   service_id: z.string().uuid("خدمة غير صالحة"),
   specialty_id: z.string().uuid().optional().or(z.literal("")),
@@ -64,9 +66,16 @@ const schema = z.object({
     .optional()
     .or(z.literal("")),
   insurance_provider_id: z.string().uuid().optional().or(z.literal("")),
-  notes: z.string().trim().max(NOTES_MAX, `الملاحظات طويلة جدًا (الحد ${NOTES_MAX} حرفًا)`).optional().or(z.literal("")),
+  notes: z
+    .string()
+    .trim()
+    .max(NOTES_MAX, `الملاحظات طويلة جدًا (الحد ${NOTES_MAX} حرفًا)`)
+    .optional()
+    .or(z.literal("")),
   consent: z.literal(true, { message: "يجب الموافقة على سياسة الخصوصية" }),
-  source: z.enum(["website", "mobile_web", "patient_portal", "campaign", "direct_link"]).default("website"),
+  source: z
+    .enum(["website", "mobile_web", "patient_portal", "campaign", "direct_link"])
+    .default("website"),
 });
 
 function json(status: number, body: Record<string, unknown>) {
@@ -134,7 +143,6 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
         }
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-
 
         // Soft rate limit: max 3 inquiries per mobile per hour.
         try {

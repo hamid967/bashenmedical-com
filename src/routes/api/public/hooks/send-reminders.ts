@@ -74,22 +74,24 @@ async function sendTwilioMessage(opts: {
 
   const params = new URLSearchParams({
     To: opts.channel === "whatsapp" ? `whatsapp:${to}` : to,
-    From: opts.channel === "whatsapp" ? (from.startsWith("whatsapp:") ? from : `whatsapp:${from}`) : from,
+    From:
+      opts.channel === "whatsapp"
+        ? from.startsWith("whatsapp:")
+          ? from
+          : `whatsapp:${from}`
+        : from,
     Body: opts.body,
   });
 
   try {
-    const res = await fetch(
-      `https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: params.toString(),
+    const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString("base64")}`,
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    );
+      body: params.toString(),
+    });
     if (!res.ok) {
       const text = await res.text();
       return { ok: false, error: `twilio ${res.status}: ${text.slice(0, 300)}` };
@@ -234,10 +236,7 @@ async function sendPushRun(admin: any): Promise<{
     const key = [...roles].sort().join(",");
     const cached = staffUsersCache.get(key);
     if (cached) return cached;
-    const { data, error } = await admin
-      .from("user_roles")
-      .select("user_id")
-      .in("role", roles);
+    const { data, error } = await admin.from("user_roles").select("user_id").in("role", roles);
     if (error) {
       console.error("staff role lookup failed:", error);
       staffUsersCache.set(key, []);
@@ -395,10 +394,10 @@ async function handle(request: Request): Promise<Response> {
     return Response.json({ ok: true, push: pushResult, messaging });
   } catch (e) {
     console.error("send-reminders failed:", e);
-    return new Response(
-      JSON.stringify({ error: e instanceof Error ? e.message : String(e) }),
-      { status: 500, headers: { "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : String(e) }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
 

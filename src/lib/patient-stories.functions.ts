@@ -15,18 +15,18 @@ export type PatientStory = {
 };
 
 function serverClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 export const listPatientStories = createServerFn({ method: "GET" }).handler(
   async (): Promise<PatientStory[]> => {
     const { data, error } = await serverClient()
       .from("patient_stories")
-      .select("id, slug, title_ar, title_en, excerpt, body_md, hero_image_url, specialty, published_at")
+      .select(
+        "id, slug, title_ar, title_en, excerpt, body_md, hero_image_url, specialty, published_at",
+      )
       .eq("status", "published")
       .not("published_at", "is", null)
       .order("display_order", { ascending: true })
@@ -45,7 +45,9 @@ export const getPatientStory = createServerFn({ method: "GET" })
   .handler(async ({ data }): Promise<PatientStory | null> => {
     const { data: rows, error } = await serverClient()
       .from("patient_stories")
-      .select("id, slug, title_ar, title_en, excerpt, body_md, hero_image_url, specialty, published_at")
+      .select(
+        "id, slug, title_ar, title_en, excerpt, body_md, hero_image_url, specialty, published_at",
+      )
       .eq("slug", data.slug)
       .eq("status", "published")
       .not("published_at", "is", null)

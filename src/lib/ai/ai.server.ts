@@ -19,13 +19,13 @@ export function serverClient(bearer?: string): SupabaseClient {
   const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
   return createClient(process.env.SUPABASE_URL!, key, {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: bearer
-      ? { headers: { Authorization: `Bearer ${bearer}` } }
-      : undefined,
+    global: bearer ? { headers: { Authorization: `Bearer ${bearer}` } } : undefined,
   });
 }
 
-export async function readAuthUser(request: Request): Promise<{ userId: string; token: string } | null> {
+export async function readAuthUser(
+  request: Request,
+): Promise<{ userId: string; token: string } | null> {
   const auth = request.headers.get("authorization") ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
   if (!token) return null;
@@ -37,17 +37,29 @@ export async function readAuthUser(request: Request): Promise<{ userId: string; 
 
 export async function getFeatureFlag(key: string): Promise<boolean> {
   try {
-    const { data } = await supabaseAdmin.from("ai_feature_flags").select("enabled").eq("key", key).maybeSingle();
+    const { data } = await supabaseAdmin
+      .from("ai_feature_flags")
+      .select("enabled")
+      .eq("key", key)
+      .maybeSingle();
     return !!data?.enabled;
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 }
 
 export async function getModel(route: "fast" | "deep"): Promise<string> {
   try {
-    const { data } = await supabaseAdmin.from("ai_model_routes").select("model_id, fallback_id, enabled").eq("route_name", route).maybeSingle();
+    const { data } = await supabaseAdmin
+      .from("ai_model_routes")
+      .select("model_id, fallback_id, enabled")
+      .eq("route_name", route)
+      .maybeSingle();
     if (data?.enabled && data.model_id) return data.model_id;
     if (data?.fallback_id) return data.fallback_id;
-  } catch { /* fall through */ }
+  } catch {
+    /* fall through */
+  }
   return route === "deep" ? DEFAULT_DEEP : DEFAULT_FAST;
 }
 
@@ -68,5 +80,7 @@ export async function recordSafetyIncident(params: {
       action_taken: params.action ?? null,
       details: (params.details ?? {}) as never,
     });
-  } catch { /* best-effort */ }
+  } catch {
+    /* best-effort */
+  }
 }

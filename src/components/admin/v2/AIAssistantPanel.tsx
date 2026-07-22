@@ -2,12 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Sparkles, X, Send, Loader2, AlertCircle, RotateCcw, Coins } from "lucide-react";
 import { toast } from "sonner";
-import {
-  estimateTokens,
-  estimateCredits,
-  formatCredits,
-  formatTokens,
-} from "@/lib/ai/pricing";
+import { estimateTokens, estimateCredits, formatCredits, formatTokens } from "@/lib/ai/pricing";
 import {
   budgetBlockMessage,
   checkRunningBudget,
@@ -73,12 +68,18 @@ export function AIAssistantPanel({
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) setMessages(JSON.parse(raw));
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   }, []);
 
   // Persist
   useEffect(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(messages)); } catch { /* ignore */ }
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    } catch {
+      /* ignore */
+    }
   }, [messages]);
 
   // Autoscroll
@@ -172,7 +173,12 @@ export function AIAssistantPanel({
           setUsage(liveUsage);
           setStreamMeta((prev) => (prev ? { ...prev, usage: liveUsage ?? undefined } : prev));
           if (liveUsage.prompt > 0) {
-            recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: liveUsage.prompt });
+            recordUsageSample({
+              model: currentModel,
+              text: promptText,
+              kind: "input",
+              tokens: liveUsage.prompt,
+            });
           }
         },
         onRetry: (phase, attempt) => {
@@ -198,7 +204,12 @@ export function AIAssistantPanel({
       } else if (liveUsage && acc) {
         const u = liveUsage as Usage;
         if (u.completion > 0) {
-          recordUsageSample({ model: currentModel, text: acc, kind: "output", tokens: u.completion });
+          recordUsageSample({
+            model: currentModel,
+            text: acc,
+            kind: "output",
+            tokens: u.completion,
+          });
         }
       }
       if (liveUsage) {
@@ -208,7 +219,6 @@ export function AIAssistantPanel({
       }
 
       if (result.budgetStop) toast.warning(result.budgetStop.message);
-
 
       const endedAt = performance.now();
       const finalMeta: MessageCostMeta = {
@@ -235,7 +245,8 @@ export function AIAssistantPanel({
         setStreamed("");
         setStreamMeta(null);
       } else {
-        const msg = e instanceof StreamHttpError ? e.message : (e as Error).message || "خطأ غير متوقع";
+        const msg =
+          e instanceof StreamHttpError ? e.message : (e as Error).message || "خطأ غير متوقع";
         toast.error(msg);
         setStreamMeta(null);
       }
@@ -251,7 +262,11 @@ export function AIAssistantPanel({
     setStreamed("");
     setUsage(null);
     setSessionCredits(0);
-    try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
   }
 
   return (
@@ -292,8 +307,12 @@ export function AIAssistantPanel({
             <Sparkles className="h-5 w-5" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold" style={{ color: "var(--ac-ink)" }}>مساعد حامد الذكي</div>
-            <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>Wave 1 · للقراءة فقط</div>
+            <div className="text-sm font-bold" style={{ color: "var(--ac-ink)" }}>
+              مساعد حامد الذكي
+            </div>
+            <div className="text-[11px]" style={{ color: "var(--ac-ink-3)" }}>
+              Wave 1 · للقراءة فقط
+            </div>
           </div>
           <button
             onClick={clearChat}
@@ -339,7 +358,10 @@ export function AIAssistantPanel({
                 ].map((s) => (
                   <button
                     key={s}
-                    onClick={() => { setInput(s); setTimeout(() => inputRef.current?.focus(), 20); }}
+                    onClick={() => {
+                      setInput(s);
+                      setTimeout(() => inputRef.current?.focus(), 20);
+                    }}
                     className="w-full text-start text-[13px] px-3 py-2 rounded-lg border transition hover:opacity-80"
                     style={{ borderColor: "var(--ac-line)", color: "var(--ac-ink-2)" }}
                   >
@@ -389,15 +411,16 @@ export function AIAssistantPanel({
               <div className="flex items-center gap-2 text-sm" style={{ color: "var(--ac-ink-3)" }}>
                 <Loader2 className="h-4 w-4 animate-spin" /> يفكر…
               </div>
-              {streamMeta && (
-                <MessageCostBadge meta={streamMeta} live now={nowTick} lang="ar" />
-              )}
+              {streamMeta && <MessageCostBadge meta={streamMeta} live now={nowTick} lang="ar" />}
             </div>
           )}
           {resumeNotice && (
             <div
               className="flex items-center gap-2 rounded-md border px-3 py-2 text-xs"
-              style={{ borderColor: "var(--ac-warning, #d97706)", color: "var(--ac-warning, #d97706)" }}
+              style={{
+                borderColor: "var(--ac-warning, #d97706)",
+                color: "var(--ac-warning, #d97706)",
+              }}
               role="status"
               aria-live="polite"
             >
@@ -528,9 +551,7 @@ function CostMeter({
   hasInput: boolean;
 }) {
   const liveOutTok = streaming ? estimateTokens(streamedText) : 0;
-  const liveCredits = streaming
-    ? estimateCredits(preEstimate.inTok, liveOutTok, model)
-    : 0;
+  const liveCredits = streaming ? estimateCredits(preEstimate.inTok, liveOutTok, model) : 0;
 
   let state: "idle" | "pre" | "live" | "final" = "idle";
   if (usage) state = "final";
@@ -554,7 +575,11 @@ function CostMeter({
   return (
     <div
       className="px-3 py-2 border-t text-[11px] flex flex-wrap items-center gap-x-3 gap-y-1"
-      style={{ borderColor: "var(--ac-line)", background: "var(--ac-subtle)", color: "var(--ac-ink-2)" }}
+      style={{
+        borderColor: "var(--ac-line)",
+        background: "var(--ac-subtle)",
+        color: "var(--ac-ink-2)",
+      }}
       role="status"
       aria-live="polite"
     >
@@ -592,9 +617,7 @@ function CostMeter({
       )}
 
       {sessionCredits > 0 && (
-        <span className="ms-auto opacity-80">
-          الإجمالي: {formatCredits(sessionCredits)} ائتمان
-        </span>
+        <span className="ms-auto opacity-80">الإجمالي: {formatCredits(sessionCredits)} ائتمان</span>
       )}
     </div>
   );

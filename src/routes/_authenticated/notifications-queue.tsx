@@ -24,10 +24,7 @@ import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 export const Route = createFileRoute("/_authenticated/notifications-queue")({
   head: () => ({
-    meta: [
-      { title: "قائمة الإشعارات | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "قائمة الإشعارات | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <RequirePermission anyOf="notifications.manage">
@@ -53,9 +50,7 @@ const STATUS_LABEL: Record<string, { label: string; color: string }> = {
 
 function NotificationsQueuePage() {
   const [channel, setChannel] = useState<"sms" | "whatsapp" | "email" | null>(null);
-  const [status, setStatus] = useState<
-    "pending" | "sent" | "failed" | "skipped" | null
-  >("pending");
+  const [status, setStatus] = useState<"pending" | "sent" | "failed" | "skipped" | null>("pending");
 
   const listFn = useServerFn(listOutboundNotifications);
   const statsFn = useServerFn(outboundNotificationStats);
@@ -74,12 +69,9 @@ function NotificationsQueuePage() {
     refetchInterval: visibilityAwareInterval(60_000, 5 * 60_000),
   });
 
-
   const update = useMutation({
-    mutationFn: (v: {
-      id: string;
-      status: "sent" | "skipped" | "pending" | "failed";
-    }) => setStatusFn({ data: v }),
+    mutationFn: (v: { id: string; status: "sent" | "skipped" | "pending" | "failed" }) =>
+      setStatusFn({ data: v }),
     onSuccess: () => {
       toast.success("تم التحديث");
       qc.invalidateQueries({ queryKey: ["notif-queue"] });
@@ -91,7 +83,10 @@ function NotificationsQueuePage() {
     <div className="container-app py-6">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Link to="/admin" className="rounded-md border border-input px-2.5 py-1.5 text-sm hover:bg-muted">
+          <Link
+            to="/admin"
+            className="rounded-md border border-input px-2.5 py-1.5 text-sm hover:bg-muted"
+          >
             ← الإدارة
           </Link>
           <h1 className="flex items-center gap-2 text-2xl font-bold">
@@ -117,7 +112,9 @@ function NotificationsQueuePage() {
               key={c}
               onClick={() => setChannel(channel === c ? null : c)}
               className={`rounded-lg border p-3 text-right transition ${
-                channel === c ? "border-primary ring-2 ring-primary/30" : "border-border hover:bg-muted"
+                channel === c
+                  ? "border-primary ring-2 ring-primary/30"
+                  : "border-border hover:bg-muted"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -187,7 +184,9 @@ function NotificationsQueuePage() {
               return (
                 <tr key={n.id} className="border-t border-border/60 align-top">
                   <td className="px-3 py-2">
-                    <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs ${ch.color}`}>
+                    <span
+                      className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs ${ch.color}`}
+                    >
                       <ch.Icon className="h-3 w-3" /> {ch.label}
                     </span>
                   </td>
@@ -211,34 +210,37 @@ function NotificationsQueuePage() {
                   </td>
                   <td className="px-3 py-2 text-left">
                     <div className="inline-flex gap-1">
-                      {n.channel === "whatsapp" && n.send_status !== "sent" && (() => {
-                        const to = (n.recipient ?? "").replace(/\D/g, "");
-                        const meta = (n.metadata ?? {}) as Record<string, unknown>;
-                        const trackPath = typeof meta.tracking_path === "string" ? meta.tracking_path : "";
-                        const origin = typeof window !== "undefined" ? window.location.origin : "";
-                        const trackUrl = trackPath ? `${origin}${trackPath}` : "";
-                        const body = (n.body ?? "").replace(
-                          /\/track\?ref=[^\s]+|\/appointment-tracker\?ref=[^\s]+/,
-                          trackUrl || "$&",
-                        );
-                        const finalText = trackUrl && !body.includes(trackUrl)
-                          ? `${body}\n${trackUrl}`
-                          : body;
-                        const href = to
-                          ? `https://wa.me/${to}?text=${encodeURIComponent(finalText)}`
-                          : `https://wa.me/?text=${encodeURIComponent(finalText)}`;
-                        return (
-                          <a
-                            href={href}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="فتح واتساب للإرسال"
-                            className="rounded p-1 text-emerald-700 hover:bg-emerald-50"
-                          >
-                            <MessageCircle className="h-4 w-4" />
-                          </a>
-                        );
-                      })()}
+                      {n.channel === "whatsapp" &&
+                        n.send_status !== "sent" &&
+                        (() => {
+                          const to = (n.recipient ?? "").replace(/\D/g, "");
+                          const meta = (n.metadata ?? {}) as Record<string, unknown>;
+                          const trackPath =
+                            typeof meta.tracking_path === "string" ? meta.tracking_path : "";
+                          const origin =
+                            typeof window !== "undefined" ? window.location.origin : "";
+                          const trackUrl = trackPath ? `${origin}${trackPath}` : "";
+                          const body = (n.body ?? "").replace(
+                            /\/track\?ref=[^\s]+|\/appointment-tracker\?ref=[^\s]+/,
+                            trackUrl || "$&",
+                          );
+                          const finalText =
+                            trackUrl && !body.includes(trackUrl) ? `${body}\n${trackUrl}` : body;
+                          const href = to
+                            ? `https://wa.me/${to}?text=${encodeURIComponent(finalText)}`
+                            : `https://wa.me/?text=${encodeURIComponent(finalText)}`;
+                          return (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="فتح واتساب للإرسال"
+                              className="rounded p-1 text-emerald-700 hover:bg-emerald-50"
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </a>
+                          );
+                        })()}
                       {n.send_status !== "sent" && (
                         <button
                           onClick={() => update.mutate({ id: n.id, status: "sent" })}

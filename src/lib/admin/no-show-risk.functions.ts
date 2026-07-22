@@ -93,7 +93,7 @@ export const getNoShowRisk = createServerFn({ method: "GET" })
 
     const enriched: NoShowRiskRow[] = (rows ?? []).map((r: any) => ({
       ...r,
-      doctor_name_ar: r.doctor_id ? doctorMap.get(r.doctor_id) ?? null : null,
+      doctor_name_ar: r.doctor_id ? (doctorMap.get(r.doctor_id) ?? null) : null,
     }));
 
     const risks = enriched
@@ -112,14 +112,14 @@ export const getNoShowRisk = createServerFn({ method: "GET" })
     }
 
     // Overbooking suggestions via RPC
-    const { data: suggRows, error: suggErr } = await context.supabase.rpc(
-      "suggest_overbooking",
-      { _from: fromISO, _to: toISO },
-    );
+    const { data: suggRows, error: suggErr } = await context.supabase.rpc("suggest_overbooking", {
+      _from: fromISO,
+      _to: toISO,
+    });
     if (suggErr) throw new Error(suggErr.message);
     const suggestions: OverbookingSuggestion[] = (suggRows ?? []).map((s: any) => ({
       doctor_id: s.doctor_id,
-      doctor_name_ar: s.doctor_id ? doctorMap.get(s.doctor_id) ?? null : null,
+      doctor_name_ar: s.doctor_id ? (doctorMap.get(s.doctor_id) ?? null) : null,
       branch_id: s.branch_id,
       appointment_date: s.appointment_date,
       appointment_time: s.appointment_time,

@@ -1,5 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { HomeIcon, Syringe, Stethoscope, Activity, Baby, Pill, MapPin, Clock, Check } from "lucide-react";
+import {
+  HomeIcon,
+  Syringe,
+  Stethoscope,
+  Activity,
+  Baby,
+  Pill,
+  MapPin,
+  Clock,
+  Check,
+} from "lucide-react";
 import { PageHero, SectionCard } from "@/components/PageShell";
 import { HomeCareRequestForm } from "@/components/HomeCareRequestForm";
 import { bmcOgImageMeta } from "@/lib/og-meta";
@@ -33,7 +43,10 @@ export const Route = createFileRoute("/home-care")({
           inLanguage: "ar-SA",
           isPartOf: { "@id": "https://bashenmedical.com/#website" },
           provider: { "@id": "https://bashenmedical.com/#organization" },
-          areaServed: [{ "@type": "City", name: "Sabya" }, { "@type": "AdministrativeArea", name: "Jazan Region" }],
+          areaServed: [
+            { "@type": "City", name: "Sabya" },
+            { "@type": "AdministrativeArea", name: "Jazan Region" },
+          ],
           medicalSpecialty: ["GeneralPractice", "Nursing", "Physiotherapy"],
           audience: { "@type": "MedicalAudience", audienceType: "Patient" },
         }),
@@ -94,12 +107,36 @@ function HomeCarePage() {
       </PageHero>
 
       <section className="container-app py-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-        <SectionCard icon={<Stethoscope className="h-5 w-5" />} title="زيارة طبيب بالمنزل" desc="كشف وتشخيص من طبيب مؤهل في منزلك." />
-        <SectionCard icon={<HomeIcon className="h-5 w-5" />} title="خدمات تمريض" desc="جرعات، ضمادات، رعاية جروح وقسطرة، متابعة يومية." />
-        <SectionCard icon={<Syringe className="h-5 w-5" />} title="سحب عينات مختبر" desc="سحب عينة من المنزل وتوصيل النتائج إلكترونياً." />
-        <SectionCard icon={<Activity className="h-5 w-5" />} title="علاج طبيعي" desc="جلسات إعادة تأهيل ما بعد الجراحة أو الإصابات." />
-        <SectionCard icon={<Baby className="h-5 w-5" />} title="رعاية الأطفال" desc="تطعيمات ومتابعة نمو الرضّع في بيئة مألوفة." />
-        <SectionCard icon={<Pill className="h-5 w-5" />} title="توصيل الأدوية" desc="من صيدلية باعشن بضمان سلسلة التبريد للأدوية الحسّاسة." />
+        <SectionCard
+          icon={<Stethoscope className="h-5 w-5" />}
+          title="زيارة طبيب بالمنزل"
+          desc="كشف وتشخيص من طبيب مؤهل في منزلك."
+        />
+        <SectionCard
+          icon={<HomeIcon className="h-5 w-5" />}
+          title="خدمات تمريض"
+          desc="جرعات، ضمادات، رعاية جروح وقسطرة، متابعة يومية."
+        />
+        <SectionCard
+          icon={<Syringe className="h-5 w-5" />}
+          title="سحب عينات مختبر"
+          desc="سحب عينة من المنزل وتوصيل النتائج إلكترونياً."
+        />
+        <SectionCard
+          icon={<Activity className="h-5 w-5" />}
+          title="علاج طبيعي"
+          desc="جلسات إعادة تأهيل ما بعد الجراحة أو الإصابات."
+        />
+        <SectionCard
+          icon={<Baby className="h-5 w-5" />}
+          title="رعاية الأطفال"
+          desc="تطعيمات ومتابعة نمو الرضّع في بيئة مألوفة."
+        />
+        <SectionCard
+          icon={<Pill className="h-5 w-5" />}
+          title="توصيل الأدوية"
+          desc="من صيدلية باعشن بضمان سلسلة التبريد للأدوية الحسّاسة."
+        />
       </section>
 
       <section className="container-app pb-4">
@@ -130,7 +167,10 @@ function HomeCarePage() {
             </div>
             <div className="flex flex-wrap gap-2">
               {coverageAreas.map((c) => (
-                <span key={c} className="rounded-full bg-primary/10 text-primary text-xs font-semibold px-3 py-1">
+                <span
+                  key={c}
+                  className="rounded-full bg-primary/10 text-primary text-xs font-semibold px-3 py-1"
+                >
                   {c}
                 </span>
               ))}
@@ -180,7 +220,6 @@ function HomeCarePage() {
         </div>
 
         <HomeCareRequestForm services={services} />
-
       </section>
     </>
   );

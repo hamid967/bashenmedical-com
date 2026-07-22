@@ -13,8 +13,7 @@ export const Route = createFileRoute("/excellence/$slug")({
   },
   head: ({ loaderData }) => {
     const c = loaderData?.center;
-    if (!c) return { meta: [
-      ...bmcOgImageMeta(),{ title: "مركز غير موجود — مجمع باعشن الطبي" }] };
+    if (!c) return { meta: [...bmcOgImageMeta(), { title: "مركز غير موجود — مجمع باعشن الطبي" }] };
     const url = `https://bashenmedical.com/excellence/${c.slug}`;
     const title = `${c.name} — مراكز التميز | مجمع باعشن الطبي`;
     return {
@@ -34,7 +33,10 @@ export const Route = createFileRoute("/excellence/$slug")({
     <div className="container-app py-16 text-center">
       <h1 className="text-2xl font-bold text-destructive">تعذّر تحميل المركز</h1>
       <p className="mt-2 text-sm text-muted-foreground">{(error as Error)?.message}</p>
-      <button onClick={reset} className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+      <button
+        onClick={reset}
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+      >
         إعادة المحاولة
       </button>
     </div>
@@ -42,8 +44,13 @@ export const Route = createFileRoute("/excellence/$slug")({
   notFoundComponent: () => (
     <div className="container-app py-16 text-center">
       <h1 className="text-2xl font-bold">المركز غير موجود</h1>
-      <p className="mt-2 text-sm text-muted-foreground">قد يكون الرابط قديماً أو المركز غير متاح.</p>
-      <Link to="/excellence" className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+      <p className="mt-2 text-sm text-muted-foreground">
+        قد يكون الرابط قديماً أو المركز غير متاح.
+      </p>
+      <Link
+        to="/excellence"
+        className="mt-4 inline-flex rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+      >
         عودة لمراكز التميز
       </Link>
     </div>
@@ -58,11 +65,7 @@ function CenterPage() {
 
   return (
     <>
-      <PageHero
-        eyebrow="مراكز التميز"
-        title={center.name}
-        subtitle={center.desc}
-      >
+      <PageHero eyebrow="مراكز التميز" title={center.name} subtitle={center.desc}>
         <div className="flex flex-wrap gap-3">
           <Link
             to="/book"

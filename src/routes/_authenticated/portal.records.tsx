@@ -66,7 +66,10 @@ function RecordsError({ error, reset }: { error: Error; reset: () => void }) {
         {error.message || "خطأ غير متوقع."}
       </p>
       <button
-        onClick={() => { router.invalidate(); reset(); }}
+        onClick={() => {
+          router.invalidate();
+          reset();
+        }}
         className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
@@ -78,7 +81,11 @@ function RecordsError({ error, reset }: { error: Error; reset: () => void }) {
 
 type FilterKey = "all" | TimelineKind;
 
-const FILTERS: { key: FilterKey; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
+const FILTERS: {
+  key: FilterKey;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
   { key: "all", label: "الكل", icon: Activity },
   { key: "diagnosis", label: "التشخيصات", icon: Stethoscope },
   { key: "immunization", label: "التطعيمات", icon: Syringe },
@@ -148,8 +155,10 @@ function RecordsPage() {
   }, [data.items]);
 
   const downloadMut = useMutation({
-    mutationFn: (input: { bucket: "lab-reports" | "radiology-reports" | "patient-files"; path: string }) =>
-      getRecordFileUrl({ data: input }),
+    mutationFn: (input: {
+      bucket: "lab-reports" | "radiology-reports" | "patient-files";
+      path: string;
+    }) => getRecordFileUrl({ data: input }),
     onSuccess: (res) => {
       window.open(res.url, "_blank", "noopener,noreferrer");
     },
@@ -219,7 +228,9 @@ function RecordsPage() {
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-xs text-[color:var(--portal-on-primary)]/70">ملخص ذكي بواسطة AI</div>
+              <div className="text-xs text-[color:var(--portal-on-primary)]/70">
+                ملخص ذكي بواسطة AI
+              </div>
               <h2 className="text-lg font-bold">
                 {aiSummary?.headline ?? "احصل على قراءة سريعة لسجلك الطبي"}
               </h2>
@@ -230,7 +241,11 @@ function RecordsPage() {
             disabled={aiMut.isPending}
             className="inline-flex items-center gap-2 rounded-full bg-white/15 hover:bg-white/25 px-4 h-10 text-sm font-semibold backdrop-blur border border-white/20"
           >
-            {aiMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            {aiMut.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="h-4 w-4" />
+            )}
             {aiSummary ? "تحديث الملخص" : "توليد الملخص"}
           </button>
         </div>
@@ -238,7 +253,9 @@ function RecordsPage() {
         {aiSummary && (
           <div className="relative mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-2xl bg-white/10 border border-white/15 p-4">
-              <div className="text-xs text-[color:var(--portal-on-primary)]/70 mb-2">أبرز النقاط</div>
+              <div className="text-xs text-[color:var(--portal-on-primary)]/70 mb-2">
+                أبرز النقاط
+              </div>
               <ul className="space-y-2 text-sm">
                 {aiSummary.highlights.map((h, i) => (
                   <li key={i} className="flex items-start gap-2">
@@ -249,7 +266,9 @@ function RecordsPage() {
               </ul>
             </div>
             <div className="rounded-2xl bg-white/10 border border-white/15 p-4">
-              <div className="text-xs text-[color:var(--portal-on-primary)]/70 mb-2">متابعات مقترحة</div>
+              <div className="text-xs text-[color:var(--portal-on-primary)]/70 mb-2">
+                متابعات مقترحة
+              </div>
               <ul className="space-y-2 text-sm">
                 {aiSummary.followUps.map((f, i) => (
                   <li key={i} className="flex items-start gap-2">
@@ -258,13 +277,15 @@ function RecordsPage() {
                         f.priority === "high"
                           ? "bg-rose-300"
                           : f.priority === "medium"
-                          ? "bg-amber-300"
-                          : "bg-emerald-300"
+                            ? "bg-amber-300"
+                            : "bg-emerald-300"
                       }`}
                     />
                     <div>
                       <div className="font-semibold">{f.title}</div>
-                      <div className="text-[color:var(--portal-on-primary)]/80 text-xs mt-0.5">{f.detail}</div>
+                      <div className="text-[color:var(--portal-on-primary)]/80 text-xs mt-0.5">
+                        {f.detail}
+                      </div>
                     </div>
                   </li>
                 ))}
@@ -281,7 +302,7 @@ function RecordsPage() {
       <section className="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1">
         {FILTERS.map(({ key, label, icon: Icon }) => {
           const active = filter === key;
-          const count = key === "all" ? data.items.length : counts[key] ?? 0;
+          const count = key === "all" ? data.items.length : (counts[key] ?? 0);
           return (
             <button
               key={key}
@@ -294,7 +315,9 @@ function RecordsPage() {
               style={active ? { background: "var(--portal-gradient)" } : undefined}
             >
               <Icon className="h-4 w-4" /> {label}
-              <span className={`text-[11px] rounded-full px-1.5 ${active ? "bg-white/20" : "bg-slate-100"}`}>
+              <span
+                className={`text-[11px] rounded-full px-1.5 ${active ? "bg-white/20" : "bg-slate-100"}`}
+              >
                 {count}
               </span>
             </button>
@@ -332,7 +355,10 @@ function RecordsPage() {
                           <div className="flex items-start justify-between gap-3 flex-wrap">
                             <div className="min-w-0">
                               <div className="flex items-center gap-2 flex-wrap">
-                                <Badge variant="outline" className={`${kstyle.text} ${kstyle.bg} border-0 text-[11px]`}>
+                                <Badge
+                                  variant="outline"
+                                  className={`${kstyle.text} ${kstyle.bg} border-0 text-[11px]`}
+                                >
                                   {kstyle.label}
                                 </Badge>
                                 <span className="text-xs text-[color:var(--portal-ink-2)]">
@@ -346,7 +372,10 @@ function RecordsPage() {
                                   </Badge>
                                 )}
                               </div>
-                              <h4 className="font-bold mt-1.5 break-words flex items-center gap-2 flex-wrap"><span>{it.title}</span><DemoBadge show={/\(DEMO\)|^DEMO-/i.test(it.title ?? "")} /></h4>
+                              <h4 className="font-bold mt-1.5 break-words flex items-center gap-2 flex-wrap">
+                                <span>{it.title}</span>
+                                <DemoBadge show={/\(DEMO\)|^DEMO-/i.test(it.title ?? "")} />
+                              </h4>
                               {it.subtitle && (
                                 <p className="text-xs text-[color:var(--portal-ink-2)] mt-0.5">
                                   {it.subtitle}
@@ -359,7 +388,10 @@ function RecordsPage() {
                               )}
                               {it.meta?.next_due_on && (
                                 <p className="text-xs mt-2 text-emerald-600 font-semibold">
-                                  الجرعة التالية: {format(new Date(String(it.meta.next_due_on)), "d MMM yyyy", { locale: arLocale })}
+                                  الجرعة التالية:{" "}
+                                  {format(new Date(String(it.meta.next_due_on)), "d MMM yyyy", {
+                                    locale: arLocale,
+                                  })}
                                 </p>
                               )}
                             </div>
@@ -374,7 +406,8 @@ function RecordsPage() {
                                 disabled={downloadMut.isPending}
                                 className="shrink-0 inline-flex items-center gap-2 rounded-full h-9 px-4 text-sm font-semibold border border-[color:var(--portal-primary)]/25 text-[color:var(--portal-primary)] bg-[color:var(--portal-primary)]/5 hover:bg-[color:var(--portal-primary)]/10"
                               >
-                                {downloadMut.isPending && downloadMut.variables?.path === it.file.path ? (
+                                {downloadMut.isPending &&
+                                downloadMut.variables?.path === it.file.path ? (
                                   <Loader2 className="h-4 w-4 animate-spin" />
                                 ) : (
                                   <Download className="h-4 w-4" />

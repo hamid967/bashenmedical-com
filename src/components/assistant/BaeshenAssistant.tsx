@@ -1,5 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
-import { MessageCircle, X, Send, Loader2, Sparkles, Trash2, PhoneCall, Bot, Square } from "lucide-react";
+import {
+  MessageCircle,
+  X,
+  Send,
+  Loader2,
+  Sparkles,
+  Trash2,
+  PhoneCall,
+  Bot,
+  Square,
+} from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -117,9 +127,7 @@ export function BaeshenAssistant() {
 
     const startedAt = performance.now();
     const historyForPrompt: Msg[] = [...messages, { role: "user", content: trimmed }];
-    const promptText = historyForPrompt
-      .map((m) => `${m.role}: ${m.content}`)
-      .join("\n");
+    const promptText = historyForPrompt.map((m) => `${m.role}: ${m.content}`).join("\n");
 
     // Pre-flight budget check — block obviously oversized prompts before we spend anything.
     const limits = getDefaultLimits("public");
@@ -130,7 +138,11 @@ export function BaeshenAssistant() {
     }
 
     const initialMeta: MessageCostMeta = { startedAt, promptText };
-    const next2: Msg[] = [...messages, { role: "user", content: trimmed }, { role: "assistant", content: "", meta: initialMeta }];
+    const next2: Msg[] = [
+      ...messages,
+      { role: "user", content: trimmed },
+      { role: "assistant", content: "", meta: initialMeta },
+    ];
     setMessages(next2);
     setBusy(true);
 
@@ -149,7 +161,9 @@ export function BaeshenAssistant() {
     };
 
     let currentModel: string | undefined;
-    const usageRef: { current: { prompt: number; completion: number; total: number } | null } = { current: null };
+    const usageRef: { current: { prompt: number; completion: number; total: number } | null } = {
+      current: null,
+    };
     try {
       const { data: sessionRes } = await supabase.auth.getSession();
       const bearer = sessionRes.session?.access_token;
@@ -165,14 +179,24 @@ export function BaeshenAssistant() {
           save_history: !noSave,
           ...(resumePartial ? { resume_partial: resumePartial } : {}),
         }),
-        onModel: (m) => { currentModel = m; setActiveModel(m); updateLastMeta({ model: m }); },
+        onModel: (m) => {
+          currentModel = m;
+          setActiveModel(m);
+          updateLastMeta({ model: m });
+        },
         onUsage: (u) => {
           const prompt = Number((u.prompt_tokens as number | undefined) ?? 0);
           const completion = Number((u.completion_tokens as number | undefined) ?? 0);
           const total = Number((u.total_tokens as number | undefined) ?? prompt + completion);
           usageRef.current = { prompt, completion, total };
           updateLastMeta({ usage: usageRef.current });
-          if (prompt > 0) recordUsageSample({ model: currentModel, text: promptText, kind: "input", tokens: prompt });
+          if (prompt > 0)
+            recordUsageSample({
+              model: currentModel,
+              text: promptText,
+              kind: "input",
+              tokens: prompt,
+            });
         },
         onDelta: (_delta, acc) => {
           setMessages((prev) => {
@@ -194,22 +218,31 @@ export function BaeshenAssistant() {
           return { ok: false, message: budgetBlockMessage(c, isAr ? "ar" : "en") };
         },
         onRetry: (phase) => {
-          if (phase === "reconnecting") setError(t("انقطع الاتصال — جاري الاستئناف…", "Connection lost — resuming…"));
+          if (phase === "reconnecting")
+            setError(t("انقطع الاتصال — جاري الاستئناف…", "Connection lost — resuming…"));
           else if (phase === "resumed") setError(null);
-          else if (phase === "failed") setError(t("تعذّر استئناف الرد.", "Could not resume the response."));
+          else if (phase === "failed")
+            setError(t("تعذّر استئناف الرد.", "Could not resume the response."));
         },
         mapStatusError: (s) => {
           if (s === 503) return t("المساعد معطّل مؤقتًا.", "Assistant is temporarily disabled.");
-          if (s === 429) return t("طلبات كثيرة، حاول بعد قليل.", "Too many requests, try again shortly.");
+          if (s === 429)
+            return t("طلبات كثيرة، حاول بعد قليل.", "Too many requests, try again shortly.");
           if (s === 402) return t("انتهت أرصدة الذكاء الاصطناعي.", "AI credits exhausted.");
-          if (s === 401) return t("انتهت الجلسة، أعد تسجيل الدخول.", "Session expired, please sign in again.");
+          if (s === 401)
+            return t("انتهت الجلسة، أعد تسجيل الدخول.", "Session expired, please sign in again.");
           return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
         },
       });
       const endedAt = performance.now();
       updateLastMeta({ endedAt });
       if (usageRef.current && usageRef.current.completion > 0 && result.text) {
-        recordUsageSample({ model: currentModel, text: result.text, kind: "output", tokens: usageRef.current.completion });
+        recordUsageSample({
+          model: currentModel,
+          text: result.text,
+          kind: "output",
+          tokens: usageRef.current.completion,
+        });
       }
       // Commit estimated credits for the session running total.
       const promptTok = estimateTokens(promptText);
@@ -230,7 +263,11 @@ export function BaeshenAssistant() {
         setMessages((prev) => {
           const copy = prev.slice();
           const last = copy[copy.length - 1];
-          copy[copy.length - 1] = { role: "assistant", content: t("لم أستطع توليد رد الآن.", "No response was generated."), meta: last?.meta };
+          copy[copy.length - 1] = {
+            role: "assistant",
+            content: t("لم أستطع توليد رد الآن.", "No response was generated."),
+            meta: last?.meta,
+          };
           return copy;
         });
       }
@@ -239,13 +276,19 @@ export function BaeshenAssistant() {
         updateLastMeta({ endedAt: performance.now() });
         return;
       }
-      const msg = err instanceof StreamHttpError
-        ? err.message
-        : (err as Error).message || t("حدث خطأ.", "Something went wrong.");
+      const msg =
+        err instanceof StreamHttpError
+          ? err.message
+          : (err as Error).message || t("حدث خطأ.", "Something went wrong.");
       setError(msg);
       setMessages((prev) => {
         const copy = prev.slice();
-        if (copy.length && copy[copy.length - 1].role === "assistant" && !copy[copy.length - 1].content) copy.pop();
+        if (
+          copy.length &&
+          copy[copy.length - 1].role === "assistant" &&
+          !copy[copy.length - 1].content
+        )
+          copy.pop();
         return copy;
       });
     } finally {
@@ -314,9 +357,17 @@ export function BaeshenAssistant() {
               {t("مساعد باعشن الذكي", "Baeshen AI Assistant")}
             </SheetTitle>
             <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span className="min-w-0 truncate">{t("مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.", "Safe search & booking helper. Not medical advice.")}</span>
+              <span className="min-w-0 truncate">
+                {t(
+                  "مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.",
+                  "Safe search & booking helper. Not medical advice.",
+                )}
+              </span>
               <div className="flex shrink-0 items-center gap-1">
-                <label className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 hover:bg-muted" title={t("لا تحفظ سجل هذه الجلسة", "Do not save this session")}>
+                <label
+                  className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 hover:bg-muted"
+                  title={t("لا تحفظ سجل هذه الجلسة", "Do not save this session")}
+                >
                   <input
                     type="checkbox"
                     className="h-3 w-3 accent-primary"
@@ -349,9 +400,14 @@ export function BaeshenAssistant() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
             {showEmergency && (
               <div className="mb-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-                <div className="font-semibold text-destructive">{t("تنبيه طوارئ", "Emergency")}</div>
+                <div className="font-semibold text-destructive">
+                  {t("تنبيه طوارئ", "Emergency")}
+                </div>
                 <p className="mt-1 text-foreground/90">
-                  {t("اتصل بالإسعاف 997 أو توجه للطوارئ فورًا.", "Call 997 or go to the nearest ER immediately.")}
+                  {t(
+                    "اتصل بالإسعاف 997 أو توجه للطوارئ فورًا.",
+                    "Call 997 or go to the nearest ER immediately.",
+                  )}
                 </p>
                 <a
                   href="tel:997"
@@ -388,7 +444,10 @@ export function BaeshenAssistant() {
 
             <div className="space-y-3">
               {messages.map((m, i) => {
-                const { body, actions } = m.role === "assistant" ? extractActions(m.content) : { body: m.content, actions: [] };
+                const { body, actions } =
+                  m.role === "assistant"
+                    ? extractActions(m.content)
+                    : { body: m.content, actions: [] };
                 return (
                   <div
                     key={i}
@@ -406,10 +465,13 @@ export function BaeshenAssistant() {
                         <div className="whitespace-pre-wrap">
                           {body}
                           {m.role === "assistant" && busy && i === messages.length - 1 && (
-                            <span className="ml-1 inline-block h-3 w-1.5 -mb-0.5 bg-current opacity-70 animate-pulse align-baseline" aria-hidden />
+                            <span
+                              className="ml-1 inline-block h-3 w-1.5 -mb-0.5 bg-current opacity-70 animate-pulse align-baseline"
+                              aria-hidden
+                            />
                           )}
                         </div>
-                      ) : (busy && i === messages.length - 1 && !actions.length) ? (
+                      ) : busy && i === messages.length - 1 && !actions.length ? (
                         <span className="inline-flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
                           {t("يكتب...", "Thinking...")}
@@ -437,9 +499,7 @@ export function BaeshenAssistant() {
               })}
             </div>
 
-            {error && (
-              <p className="mt-3 text-xs text-destructive">{error}</p>
-            )}
+            {error && <p className="mt-3 text-xs text-destructive">{error}</p>}
           </div>
 
           <AssistantCostMeter
@@ -492,7 +552,12 @@ export function BaeshenAssistant() {
               </Button>
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>{t("لا تشارك بيانات الهوية أو التقارير الحساسة.", "Do not share IDs or sensitive reports.")}</span>
+              <span>
+                {t(
+                  "لا تشارك بيانات الهوية أو التقارير الحساسة.",
+                  "Do not share IDs or sensitive reports.",
+                )}
+              </span>
               <a
                 href={whatsappUrl(t("أحتاج مساعدة بشرية.", "I need a human agent."))}
                 target="_blank"

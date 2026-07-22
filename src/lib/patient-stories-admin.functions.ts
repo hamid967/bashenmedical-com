@@ -45,8 +45,7 @@ export const setPatientStoryStatus = createServerFn({ method: "POST" })
     await assertAdmin(context);
     const patch: { status: PatientStoryStatus; published_at: string | null } = {
       status: data.status,
-      published_at:
-        data.status === "published" ? new Date().toISOString() : null,
+      published_at: data.status === "published" ? new Date().toISOString() : null,
     };
     const { error } = await context.supabase
       .from("patient_stories")

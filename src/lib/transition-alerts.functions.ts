@@ -108,10 +108,7 @@ export const deleteAlertRule = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
-    const { error } = await sb
-      .from("transition_alert_rules")
-      .delete()
-      .eq("id", data.id);
+    const { error } = await sb.from("transition_alert_rules").delete().eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

@@ -1,5 +1,11 @@
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -61,7 +67,10 @@ const profileQuery = queryOptions({
 const SearchSchema = z.object({
   forDependent: z.string().uuid().optional(),
   doctorId: z.string().uuid().optional(),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/portal/book")({
@@ -135,9 +144,7 @@ function BookPage() {
   const [branchId, setBranchId] = useState<string>(
     initialDoctor?.branch_id ?? profile?.default_branch_id ?? "",
   );
-  const [specialtyId, setSpecialtyId] = useState<string>(
-    initialDoctor?.specialty_id ?? "",
-  );
+  const [specialtyId, setSpecialtyId] = useState<string>(initialDoctor?.specialty_id ?? "");
   const [doctorId, setDoctorId] = useState<string>(initialDoctor?.id ?? "");
   const [date, setDate] = useState<Date | undefined>(() => {
     if (!initialDate) return undefined;
@@ -174,8 +181,6 @@ function BookPage() {
     deductible: number | null;
     plan_label: string | null;
   }>(null);
-
-
 
   // When a dependent is selected via query param, prefill the patient fields
   // with their info (and keep them in sync if the dependent switches).
@@ -369,13 +374,10 @@ function BookPage() {
     setVerify(null);
   }, [doctorId, providerId]);
 
-
-
   const selectedDoctor = options.doctors.find((d) => d.id === doctorId);
   const selectedBranch = options.branches.find((b) => b.id === branchId);
   const selectedSpecialty = options.specialties.find((s) => s.id === specialtyId);
   const selectedProvider = options.providers?.find((p: any) => p.id === providerId);
-
 
   function handleConfirm() {
     if (!doctorId || !dateStr || !slot || !slotId) return;
@@ -412,8 +414,16 @@ function BookPage() {
             سنرسل لك تذكيرًا قبل الموعد. يمكنك متابعة تفاصيل الحجز من الأسفل.
           </p>
           <div className="mt-6 grid gap-3 text-right">
-            <SummaryRow icon={<UserRound className="h-4 w-4" />} label="الطبيب" value={selectedDoctor?.name_ar ?? "—"} />
-            <SummaryRow icon={<MapPin className="h-4 w-4" />} label="الفرع" value={selectedBranch?.name_ar ?? "—"} />
+            <SummaryRow
+              icon={<UserRound className="h-4 w-4" />}
+              label="الطبيب"
+              value={selectedDoctor?.name_ar ?? "—"}
+            />
+            <SummaryRow
+              icon={<MapPin className="h-4 w-4" />}
+              label="الفرع"
+              value={selectedBranch?.name_ar ?? "—"}
+            />
             <SummaryRow
               icon={<CalendarCheck className="h-4 w-4" />}
               label="التاريخ"
@@ -461,7 +471,6 @@ function BookPage() {
       ]
     : [];
   if (dependent && dependentMissing.length > 0) {
-
     return (
       <div className="max-w-2xl mx-auto">
         <div className="glass-card p-8 text-center">
@@ -470,7 +479,11 @@ function BookPage() {
           </div>
           <h2 className="text-2xl font-bold">بيانات المُعال ناقصة</h2>
           <p className="mt-2 text-[color:var(--portal-ink-2)]">
-            لا يمكن متابعة الحجز نيابةً عن <span className="font-semibold text-[color:var(--portal-ink)]">{dependent.full_name}</span> قبل استكمال الحقول التالية:
+            لا يمكن متابعة الحجز نيابةً عن{" "}
+            <span className="font-semibold text-[color:var(--portal-ink)]">
+              {dependent.full_name}
+            </span>{" "}
+            قبل استكمال الحقول التالية:
           </p>
           <ul className="mt-3 inline-block text-right list-disc pr-6 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-4 py-2">
             {dependentMissing.map((m) => (
@@ -498,8 +511,6 @@ function BookPage() {
       </div>
     );
   }
-
-
 
   return (
     <div className="space-y-6 pb-24 md:pb-6">
@@ -542,7 +553,6 @@ function BookPage() {
           </Link>
         </div>
       )}
-
 
       {/* Filters */}
       <section className="glass-card p-4 md:p-6">
@@ -618,9 +628,16 @@ function BookPage() {
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full grid place-items-center text-[color:var(--portal-on-primary)] font-bold shrink-0" style={{ background: "var(--portal-gradient)" }}>
+                    <div
+                      className="h-12 w-12 rounded-full grid place-items-center text-[color:var(--portal-on-primary)] font-bold shrink-0"
+                      style={{ background: "var(--portal-gradient)" }}
+                    >
                       {d.photo_url ? (
-                        <img src={d.photo_url} alt="" className="h-12 w-12 rounded-full object-cover" />
+                        <img
+                          src={d.photo_url}
+                          alt=""
+                          className="h-12 w-12 rounded-full object-cover"
+                        />
                       ) : (
                         <span>{initials}</span>
                       )}
@@ -708,8 +725,8 @@ function BookPage() {
                             active
                               ? "text-white border-transparent shadow-md"
                               : s.available
-                              ? "bg-white border-[color:var(--portal-border)] hover:border-[color:var(--portal-primary)] text-[color:var(--portal-ink)]"
-                              : "bg-slate-50 border-transparent text-slate-400 line-through cursor-not-allowed"
+                                ? "bg-white border-[color:var(--portal-border)] hover:border-[color:var(--portal-primary)] text-[color:var(--portal-ink)]"
+                                : "bg-slate-50 border-transparent text-slate-400 line-through cursor-not-allowed"
                           }`}
                           style={active ? { background: "var(--portal-gradient)" } : undefined}
                         >
@@ -740,7 +757,11 @@ function BookPage() {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <Label className="text-xs mb-1 block">الاسم الكامل</Label>
-              <Input value={patientName} onChange={(e) => setPatientName(e.target.value)} className="bg-[color:var(--portal-surface)]" />
+              <Input
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                className="bg-[color:var(--portal-surface)]"
+              />
             </div>
             <div>
               <Label className="text-xs mb-1 block">رقم الجوال</Label>
@@ -771,12 +792,24 @@ function BookPage() {
                 <span className="font-bold">{dependent.full_name}</span>
               </div>
             )}
-            <SummaryRow icon={<UserRound className="h-4 w-4" />} label="الطبيب" value={selectedDoctor?.name_ar ?? "—"} />
+            <SummaryRow
+              icon={<UserRound className="h-4 w-4" />}
+              label="الطبيب"
+              value={selectedDoctor?.name_ar ?? "—"}
+            />
             {selectedBranch && (
-              <SummaryRow icon={<MapPin className="h-4 w-4" />} label="الفرع" value={selectedBranch.name_ar} />
+              <SummaryRow
+                icon={<MapPin className="h-4 w-4" />}
+                label="الفرع"
+                value={selectedBranch.name_ar}
+              />
             )}
             {selectedSpecialty && (
-              <SummaryRow icon={<Stethoscope className="h-4 w-4" />} label="التخصص" value={selectedSpecialty.name_ar} />
+              <SummaryRow
+                icon={<Stethoscope className="h-4 w-4" />}
+                label="التخصص"
+                value={selectedSpecialty.name_ar}
+              />
             )}
             <SummaryRow
               icon={<CalendarCheck className="h-4 w-4" />}
@@ -786,7 +819,6 @@ function BookPage() {
             <SummaryRow icon={<Clock className="h-4 w-4" />} label="الوقت" value={slot} />
           </div>
 
-
           {/* Appointment cost & insurance eligibility */}
           <div className="mt-5 rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] p-4">
             <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
@@ -794,7 +826,9 @@ function BookPage() {
                 <BadgeCheck className="h-4 w-4 text-[color:var(--portal-primary)]" />
                 تكلفة الموعد والتحقق من الأهلية
               </h3>
-              <span className="text-xs text-[color:var(--portal-ink-2)]">اختياري — يساعدك في تقدير حصتك</span>
+              <span className="text-xs text-[color:var(--portal-ink-2)]">
+                اختياري — يساعدك في تقدير حصتك
+              </span>
             </div>
 
             <div className="grid gap-3 md:grid-cols-2">
@@ -808,7 +842,9 @@ function BookPage() {
                     {(options.providers ?? []).map((p: any) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name_ar}
-                        {typeof p.coverage_percent === "number" ? ` — تغطية ${p.coverage_percent}%` : ""}
+                        {typeof p.coverage_percent === "number"
+                          ? ` — تغطية ${p.coverage_percent}%`
+                          : ""}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -916,12 +952,13 @@ function BookPage() {
                     {verify.patient_share !== null && (
                       <>
                         <span className="opacity-80 font-semibold">حصة المريض:</span>
-                        <span className="font-mono text-left font-semibold">{verify.patient_share} ر.س</span>
+                        <span className="font-mono text-left font-semibold">
+                          {verify.patient_share} ر.س
+                        </span>
                       </>
                     )}
                   </div>
                 )}
-
               </div>
             )}
             {verify?.id && (
@@ -931,7 +968,6 @@ function BookPage() {
               </p>
             )}
           </div>
-
 
           {/* Verification history */}
           {doctorId && (
@@ -971,7 +1007,8 @@ function BookPage() {
                     <div className="flex-1 space-y-1">
                       <div className="font-semibold">تعذّر تحميل سجل عمليات التحقق</div>
                       <div className="opacity-90">
-                        {(historyQ.error as Error | null)?.message ?? "قد تكون هناك مشكلة بالاتصال."}
+                        {(historyQ.error as Error | null)?.message ??
+                          "قد تكون هناك مشكلة بالاتصال."}
                       </div>
                     </div>
                     <button
@@ -1047,8 +1084,7 @@ function BookPage() {
                           <div className="flex items-center gap-3 flex-wrap pt-1">
                             {h.estimated_cost !== null && (
                               <span>
-                                الاستشارة:{" "}
-                                <span className="font-mono">{h.estimated_cost} ر.س</span>
+                                الاستشارة: <span className="font-mono">{h.estimated_cost} ر.س</span>
                               </span>
                             )}
                             {h.coverage_percent !== null && (
@@ -1058,8 +1094,7 @@ function BookPage() {
                             )}
                             {h.patient_share !== null && (
                               <span className="font-semibold">
-                                حصة المريض:{" "}
-                                <span className="font-mono">{h.patient_share} ر.س</span>
+                                حصة المريض: <span className="font-mono">{h.patient_share} ر.س</span>
                               </span>
                             )}
                           </div>
@@ -1071,11 +1106,6 @@ function BookPage() {
               )}
             </details>
           )}
-
-
-
-
-
 
           <div className="mt-5 flex items-center justify-between flex-wrap gap-3">
             <Badge variant="outline" className="text-xs">

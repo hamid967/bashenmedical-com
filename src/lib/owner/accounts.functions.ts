@@ -41,19 +41,21 @@ async function logAudit(
 
 export const listAccounts = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: {
-    page?: number;
-    perPage?: number;
-    search?: string;
-    status?: "all" | "confirmed" | "unconfirmed" | "disabled";
-    role?: "all" | "none" | AppRole;
-  }) => ({
-    page: Math.max(1, d?.page ?? 1),
-    perPage: Math.min(200, Math.max(10, d?.perPage ?? 50)),
-    search: (d?.search ?? "").trim().toLowerCase(),
-    status: d?.status ?? "all",
-    role: d?.role ?? "all",
-  }))
+  .validator(
+    (d: {
+      page?: number;
+      perPage?: number;
+      search?: string;
+      status?: "all" | "confirmed" | "unconfirmed" | "disabled";
+      role?: "all" | "none" | AppRole;
+    }) => ({
+      page: Math.max(1, d?.page ?? 1),
+      perPage: Math.min(200, Math.max(10, d?.perPage ?? 50)),
+      search: (d?.search ?? "").trim().toLowerCase(),
+      status: d?.status ?? "all",
+      role: d?.role ?? "all",
+    }),
+  )
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -145,11 +147,7 @@ export const listAccounts = createServerFn({ method: "POST" })
 
 export const grantRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z
-      .object({ user_id: z.string().uuid(), role: z.enum(ROLES) })
-      .parse(d),
-  )
+  .validator((d) => z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -168,9 +166,7 @@ export const grantRole = createServerFn({ method: "POST" })
 
 export const revokeRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d),
-  )
+  .validator((d) => z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
     if (data.user_id === context.userId && data.role === "super_admin") {
@@ -229,9 +225,7 @@ export const setUserPassword = createServerFn({ method: "POST" })
 
 export const setUserBan = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z.object({ user_id: z.string().uuid(), disable: z.boolean() }).parse(d),
-  )
+  .validator((d) => z.object({ user_id: z.string().uuid(), disable: z.boolean() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
     if (data.user_id === context.userId && data.disable) {
@@ -255,9 +249,7 @@ export const setUserBan = createServerFn({ method: "POST" })
 export const deleteAccount = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d) =>
-    z
-      .object({ user_id: z.string().uuid(), confirm_email: z.string().email() })
-      .parse(d),
+    z.object({ user_id: z.string().uuid(), confirm_email: z.string().email() }).parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertOwnerOnly(context.supabase, context.userId, context.claims);
@@ -265,8 +257,9 @@ export const deleteAccount = createServerFn({ method: "POST" })
       throw new Error("لا يمكنك حذف حسابك.");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: userRes, error: getErr } =
-      await supabaseAdmin.auth.admin.getUserById(data.user_id);
+    const { data: userRes, error: getErr } = await supabaseAdmin.auth.admin.getUserById(
+      data.user_id,
+    );
     if (getErr) throw new Error(getErr.message);
     if (userRes.user?.email?.toLowerCase() !== data.confirm_email.toLowerCase()) {
       throw new Error("تأكيد البريد غير مطابق.");

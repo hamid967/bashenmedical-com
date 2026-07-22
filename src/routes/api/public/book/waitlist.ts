@@ -10,11 +10,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import {
-  NAME_MIN, NAME_MAX,
-  PHONE_MIN, PHONE_MAX,
-  PHONE_RE,
-} from "@/lib/booking-limits";
+import { NAME_MIN, NAME_MAX, PHONE_MIN, PHONE_MAX, PHONE_RE } from "@/lib/booking-limits";
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
@@ -29,7 +25,12 @@ function refFromId(id: string): string {
 
 const createSchema = z.object({
   patient_name: z.string().trim().min(NAME_MIN, "الاسم قصير جدًا").max(NAME_MAX, "الاسم طويل جدًا"),
-  patient_phone: z.string().trim().min(PHONE_MIN, "رقم الجوال قصير جدًا").max(PHONE_MAX, "رقم الجوال طويل جدًا").regex(PHONE_RE, "رقم الجوال غير صالح"),
+  patient_phone: z
+    .string()
+    .trim()
+    .min(PHONE_MIN, "رقم الجوال قصير جدًا")
+    .max(PHONE_MAX, "رقم الجوال طويل جدًا")
+    .regex(PHONE_RE, "رقم الجوال غير صالح"),
   doctor_id: z.string().uuid("معرّف الطبيب غير صالح"),
   specialty_id: z.string().uuid().nullable().optional(),
   branch_id: z.string().uuid().nullable().optional(),
@@ -43,13 +44,16 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
     handlers: {
       POST: async ({ request }) => {
         let body: unknown;
-        try { body = await request.json(); } catch {
+        try {
+          body = await request.json();
+        } catch {
           return json(400, { ok: false, kind: "validation", message: "طلب غير صالح." });
         }
         const parsed = createSchema.safeParse(body);
         if (!parsed.success) {
           return json(400, {
-            ok: false, kind: "validation",
+            ok: false,
+            kind: "validation",
             message: parsed.error.issues[0]?.message ?? "بيانات غير صالحة",
           });
         }
@@ -90,7 +94,11 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
             .select("id")
             .single();
           if (insErr || !inserted) {
-            return json(500, { ok: false, kind: "server", message: "تعذّر تسجيل الطلب. حاول لاحقًا." });
+            return json(500, {
+              ok: false,
+              kind: "server",
+              message: "تعذّر تسجيل الطلب. حاول لاحقًا.",
+            });
           }
           const reference = refFromId(inserted.id);
           await supabaseAdmin
@@ -111,16 +119,23 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
           return json(400, { ok: false, kind: "validation", message: "المرجع غير صالح." });
         }
         if (!/^\d{4}$/.test(phone4)) {
-          return json(400, { ok: false, kind: "validation", message: "أدخل آخر ٤ أرقام من الجوال." });
+          return json(400, {
+            ok: false,
+            kind: "validation",
+            message: "أدخل آخر ٤ أرقام من الجوال.",
+          });
         }
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
           const { data } = await supabaseAdmin
             .from("appointment_waitlist")
-            .select("id, patient_phone, status, notified_at, preferred_from, preferred_to, created_at, doctor_id, offered_date, offered_time, offered_expires_at")
+            .select(
+              "id, patient_phone, status, notified_at, preferred_from, preferred_to, created_at, doctor_id, offered_date, offered_time, offered_expires_at",
+            )
             .eq("reference", ref)
             .maybeSingle();
-          if (!data) return json(404, { ok: false, kind: "not_found", message: "لم يتم العثور على الطلب." });
+          if (!data)
+            return json(404, { ok: false, kind: "not_found", message: "لم يتم العثور على الطلب." });
           const digits = (data.patient_phone ?? "").replace(/\D/g, "");
           if (digits.slice(-4) !== phone4) {
             return json(404, { ok: false, kind: "not_found", message: "لم يتم العثور على الطلب." });

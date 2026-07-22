@@ -62,7 +62,9 @@ export const getMyMedicalRecords = createServerFn({ method: "GET" })
     ] = await Promise.all([
       supabase
         .from("patient_visits")
-        .select("id, visit_date, chief_complaint, assessment, plan, doctor_id, doctors:doctor_id(name_ar)")
+        .select(
+          "id, visit_date, chief_complaint, assessment, plan, doctor_id, doctors:doctor_id(name_ar)",
+        )
         .eq("patient_id", patient.id)
         .order("visit_date", { ascending: false })
         .limit(50),
@@ -80,13 +82,17 @@ export const getMyMedicalRecords = createServerFn({ method: "GET" })
         .limit(50),
       supabase
         .from("patient_immunizations")
-        .select("id, vaccine_name, dose_number, administered_on, next_due_on, provider_name, lot_number, notes")
+        .select(
+          "id, vaccine_name, dose_number, administered_on, next_due_on, provider_name, lot_number, notes",
+        )
         .eq("patient_id", patient.id)
         .order("administered_on", { ascending: false })
         .limit(100),
       supabase
         .from("patient_medications")
-        .select("id, medication_name, dosage, frequency, start_date, end_date, status, prescribed_by_name, notes")
+        .select(
+          "id, medication_name, dosage, frequency, start_date, end_date, status, prescribed_by_name, notes",
+        )
         .eq("patient_id", patient.id)
         .order("start_date", { ascending: false, nullsFirst: false })
         .limit(100),
@@ -164,10 +170,10 @@ export const getMyMedicalRecords = createServerFn({ method: "GET" })
         kind: "immunization",
         date: i.administered_on as string,
         title: i.vaccine_name,
-        subtitle: [
-          i.dose_number ? `الجرعة ${i.dose_number}` : null,
-          i.provider_name,
-        ].filter(Boolean).join(" • ") || null,
+        subtitle:
+          [i.dose_number ? `الجرعة ${i.dose_number}` : null, i.provider_name]
+            .filter(Boolean)
+            .join(" • ") || null,
         body: i.notes,
         meta: {
           next_due_on: (i.next_due_on as string | null) ?? null,
@@ -275,17 +281,29 @@ export const getRecordFileUrl = createServerFn({ method: "POST" })
     let owns = false;
     if (data.bucket === "lab-reports") {
       const q = await supabase
-        .from("lab_reports").select("id").eq("patient_id", patientId).eq("file_path", data.path)
-        .not("released_at", "is", null).limit(1);
+        .from("lab_reports")
+        .select("id")
+        .eq("patient_id", patientId)
+        .eq("file_path", data.path)
+        .not("released_at", "is", null)
+        .limit(1);
       owns = (q.data ?? []).length > 0;
     } else if (data.bucket === "radiology-reports") {
       const q = await supabase
-        .from("radiology_reports").select("id").eq("patient_id", patientId).eq("file_path", data.path)
-        .not("released_at", "is", null).limit(1);
+        .from("radiology_reports")
+        .select("id")
+        .eq("patient_id", patientId)
+        .eq("file_path", data.path)
+        .not("released_at", "is", null)
+        .limit(1);
       owns = (q.data ?? []).length > 0;
     } else {
       const q = await supabase
-        .from("patient_attachments").select("id").eq("patient_id", patientId).eq("file_path", data.path).limit(1);
+        .from("patient_attachments")
+        .select("id")
+        .eq("patient_id", patientId)
+        .eq("file_path", data.path)
+        .limit(1);
       owns = (q.data ?? []).length > 0;
     }
     if (!owns) throw new Error("لا تملك صلاحية الوصول لهذا الملف.");
@@ -324,11 +342,35 @@ export const getRecordsAiSummary = createServerFn({ method: "POST" })
     const pid = patientRes.data.id;
 
     const [diagRes, allergyRes, medsRes, immRes, labsRes] = await Promise.all([
-      supabase.from("patient_medical_history").select("condition, status, category, onset_date").eq("patient_id", pid).limit(50),
-      supabase.from("patient_allergies").select("allergen, reaction, severity").eq("patient_id", pid).limit(20),
-      supabase.from("patient_medications").select("medication_name, dosage, frequency, status").eq("patient_id", pid).eq("status", "active").limit(50),
-      supabase.from("patient_immunizations").select("vaccine_name, administered_on, next_due_on").eq("patient_id", pid).order("administered_on", { ascending: false }).limit(20),
-      supabase.from("lab_reports").select("title, test_type, summary, report_date").eq("patient_id", pid).not("released_at", "is", null).order("report_date", { ascending: false }).limit(10),
+      supabase
+        .from("patient_medical_history")
+        .select("condition, status, category, onset_date")
+        .eq("patient_id", pid)
+        .limit(50),
+      supabase
+        .from("patient_allergies")
+        .select("allergen, reaction, severity")
+        .eq("patient_id", pid)
+        .limit(20),
+      supabase
+        .from("patient_medications")
+        .select("medication_name, dosage, frequency, status")
+        .eq("patient_id", pid)
+        .eq("status", "active")
+        .limit(50),
+      supabase
+        .from("patient_immunizations")
+        .select("vaccine_name, administered_on, next_due_on")
+        .eq("patient_id", pid)
+        .order("administered_on", { ascending: false })
+        .limit(20),
+      supabase
+        .from("lab_reports")
+        .select("title, test_type, summary, report_date")
+        .eq("patient_id", pid)
+        .not("released_at", "is", null)
+        .order("report_date", { ascending: false })
+        .limit(10),
     ]);
 
     const facts = {
@@ -383,10 +425,12 @@ export const getRecordsAiSummary = createServerFn({ method: "POST" })
           { role: "system", content: system },
           { role: "user", content: user },
         ],
-        tools: [{
-          type: "function",
-          function: { name: "emit_summary", description: "ملخص المريض", parameters: schema },
-        }],
+        tools: [
+          {
+            type: "function",
+            function: { name: "emit_summary", description: "ملخص المريض", parameters: schema },
+          },
+        ],
         tool_choice: { type: "function", function: { name: "emit_summary" } },
       }),
     });
@@ -410,7 +454,11 @@ export const getRecordsAiSummary = createServerFn({ method: "POST" })
       json.choices?.[0]?.message?.content ??
       "";
     let parsed: Partial<RecordsAiSummary> = {};
-    try { parsed = JSON.parse(raw); } catch { /* ignore */ }
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      /* ignore */
+    }
 
     return {
       headline: parsed.headline ?? "ملخص السجل الطبي",

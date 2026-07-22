@@ -21,7 +21,15 @@ function fmt(secs: number) {
  * Small SVG progress ring that visualises the remaining slot-hold time.
  * `progress` is 0..1 (1 = full hold, 0 = expired).
  */
-function HoldRing({ progress, label, tone }: { progress: number; label: string; tone: "primary" | "warn" }) {
+function HoldRing({
+  progress,
+  label,
+  tone,
+}: {
+  progress: number;
+  label: string;
+  tone: "primary" | "warn";
+}) {
   const clamped = Math.max(0, Math.min(1, progress));
   const size = 40;
   const stroke = 4;
@@ -64,7 +72,14 @@ function HoldRing({ progress, label, tone }: { progress: number; label: string; 
   );
 }
 
-export function SlotHoldBanner({ secondsLeft, totalSeconds, expired, conflict, onRefresh, onChangeTime }: Props) {
+export function SlotHoldBanner({
+  secondsLeft,
+  totalSeconds,
+  expired,
+  conflict,
+  onRefresh,
+  onChangeTime,
+}: Props) {
   const { t } = useTranslation("booking");
 
   if (conflict) {

@@ -24,7 +24,9 @@ export default defineTool({
       .string()
       .trim()
       .optional()
-      .describe("Fallback branch slug used only when `branch_slug` is not given and the user has no stored default branch."),
+      .describe(
+        "Fallback branch slug used only when `branch_slug` is not given and the user has no stored default branch.",
+      ),
     language: z
       .string()
       .trim()
@@ -140,7 +142,8 @@ export default defineTool({
     if (branchId) query = query.eq("branch_id", branchId);
     if (specialtyId) query = query.eq("specialty_id", specialtyId);
     if (input.gender) query = query.eq("gender", input.gender);
-    if (input.booking_enabled !== undefined) query = query.eq("booking_enabled", input.booking_enabled);
+    if (input.booking_enabled !== undefined)
+      query = query.eq("booking_enabled", input.booking_enabled);
     if (input.language) query = query.contains("languages", [input.language]);
     if (input.search) {
       const s = `%${input.search}%`;

@@ -15,10 +15,7 @@ import {
   Inbox,
   RefreshCw,
 } from "lucide-react";
-import {
-  listMyReportDownloads,
-  type MyReportDownloadEntry,
-} from "@/lib/portal/reports.functions";
+import { listMyReportDownloads, type MyReportDownloadEntry } from "@/lib/portal/reports.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -138,7 +135,9 @@ function DownloadsPage() {
             />
           </div>
           <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
-            <SelectTrigger><SelectValue placeholder="الحالة" /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue placeholder="الحالة" />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">كل الحالات</SelectItem>
               <SelectItem value="success">ناجحة</SelectItem>
@@ -222,8 +221,8 @@ function StatCard({
     tone === "success"
       ? "text-emerald-600"
       : tone === "danger"
-      ? "text-destructive"
-      : "text-foreground";
+        ? "text-destructive"
+        : "text-foreground";
   return (
     <div className="rounded-lg border bg-card p-4">
       <div className="text-xs text-muted-foreground">{label}</div>
@@ -238,14 +237,13 @@ function DownloadRow({ row }: { row: MyReportDownloadEntry }) {
     <tr className="border-t hover:bg-muted/30">
       <td className="p-3 whitespace-nowrap">
         <div>{format(dt, "yyyy/MM/dd", { locale: arLocale })}</div>
-        <div className="text-xs text-muted-foreground">{format(dt, "HH:mm", { locale: arLocale })}</div>
+        <div className="text-xs text-muted-foreground">
+          {format(dt, "HH:mm", { locale: arLocale })}
+        </div>
       </td>
       <td className="p-3">
         {row.report_id ? (
-          <Link
-            to="/portal/reports"
-            className="text-primary hover:underline"
-          >
+          <Link to="/portal/reports" className="text-primary hover:underline">
             {row.report_title_ar ?? "تقرير طبي"}
           </Link>
         ) : (

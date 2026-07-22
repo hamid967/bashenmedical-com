@@ -17,8 +17,7 @@ export const Route = createFileRoute("/media/stories")({
       { title: "قصص المرضى — مجمع باعشن الطبي" },
       {
         name: "description",
-        content:
-          "قصص حقيقية من مرضى مجمع باعشن الطبي — رحلات علاج، تجارب نجاح، وشهادات ملهمة.",
+        content: "قصص حقيقية من مرضى مجمع باعشن الطبي — رحلات علاج، تجارب نجاح، وشهادات ملهمة.",
       },
       { property: "og:title", content: "قصص المرضى — مجمع باعشن" },
       { property: "og:description", content: "تجارب علاج ملهمة من مرضانا." },
@@ -35,7 +34,9 @@ export const Route = createFileRoute("/media/stories")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="container-app py-16 text-center text-muted-foreground">لا توجد قصص منشورة بعد.</div>
+    <div className="container-app py-16 text-center text-muted-foreground">
+      لا توجد قصص منشورة بعد.
+    </div>
   ),
   component: StoriesPage,
 });

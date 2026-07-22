@@ -1,7 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { queryOptions, useSuspenseQuery, useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useQueryClient,
+  useMutation,
+  useQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -34,7 +40,12 @@ import {
 /* ---------------- PDF receipt (print window) ---------------- */
 
 function isFinalized(status: string) {
-  return status === "processed" || status === "refunded" || status === "canceled" || status === "rejected";
+  return (
+    status === "processed" ||
+    status === "refunded" ||
+    status === "canceled" ||
+    status === "rejected"
+  );
 }
 
 type ReceiptFieldKey =
@@ -63,45 +74,115 @@ type ReceiptField = {
 };
 
 const RECEIPT_FIELDS: ReceiptField[] = [
-  { key: "reference", label: "الرقم المرجعي للإيصال", group: "identifiers",
-    isAvailable: (r) => !!r.receipt_reference, defaultOn: (r) => !!r.receipt_reference },
-  { key: "request_id", label: "معرّف الطلب (UUID)", group: "identifiers",
-    isAvailable: () => true, defaultOn: () => true },
-  { key: "invoice", label: "رقم الفاتورة", group: "identifiers",
-    isAvailable: (r) => !!r.invoice_number, defaultOn: (r) => !!r.invoice_number },
-  { key: "status", label: "حالة الطلب", group: "identifiers",
-    isAvailable: () => true, defaultOn: () => true },
+  {
+    key: "reference",
+    label: "الرقم المرجعي للإيصال",
+    group: "identifiers",
+    isAvailable: (r) => !!r.receipt_reference,
+    defaultOn: (r) => !!r.receipt_reference,
+  },
+  {
+    key: "request_id",
+    label: "معرّف الطلب (UUID)",
+    group: "identifiers",
+    isAvailable: () => true,
+    defaultOn: () => true,
+  },
+  {
+    key: "invoice",
+    label: "رقم الفاتورة",
+    group: "identifiers",
+    isAvailable: (r) => !!r.invoice_number,
+    defaultOn: (r) => !!r.invoice_number,
+  },
+  {
+    key: "status",
+    label: "حالة الطلب",
+    group: "identifiers",
+    isAvailable: () => true,
+    defaultOn: () => true,
+  },
 
-  { key: "amount_hero", label: "بطاقة المبلغ البارزة (أعلى الإيصال)", group: "layout",
+  {
+    key: "amount_hero",
+    label: "بطاقة المبلغ البارزة (أعلى الإيصال)",
+    group: "layout",
     isAvailable: () => true,
-    defaultOn: (r) => r.status === "processed" || r.status === "refunded" },
-  { key: "refund_amount", label: "المبلغ المُسترد", group: "amounts",
+    defaultOn: (r) => r.status === "processed" || r.status === "refunded",
+  },
+  {
+    key: "refund_amount",
+    label: "المبلغ المُسترد",
+    group: "amounts",
     isAvailable: () => true,
-    defaultOn: (r) => r.status !== "canceled" },
-  { key: "original_amount", label: "قيمة الدفعة الأصلية", group: "amounts",
-    isAvailable: () => true, defaultOn: () => true },
-  { key: "payment_method", label: "وسيلة الدفع", group: "amounts",
-    isAvailable: (r) => !!r.payment_method, defaultOn: (r) => !!r.payment_method },
+    defaultOn: (r) => r.status !== "canceled",
+  },
+  {
+    key: "original_amount",
+    label: "قيمة الدفعة الأصلية",
+    group: "amounts",
+    isAvailable: () => true,
+    defaultOn: () => true,
+  },
+  {
+    key: "payment_method",
+    label: "وسيلة الدفع",
+    group: "amounts",
+    isAvailable: (r) => !!r.payment_method,
+    defaultOn: (r) => !!r.payment_method,
+  },
 
-  { key: "payment_paid_at", label: "تاريخ الدفعة الأصلية", group: "dates",
-    isAvailable: (r) => !!r.payment_paid_at, defaultOn: (r) => !!r.payment_paid_at },
-  { key: "created_at", label: "تاريخ تقديم الطلب", group: "dates",
-    isAvailable: () => true, defaultOn: () => true },
-  { key: "updated_at", label: "آخر تحديث", group: "dates",
+  {
+    key: "payment_paid_at",
+    label: "تاريخ الدفعة الأصلية",
+    group: "dates",
+    isAvailable: (r) => !!r.payment_paid_at,
+    defaultOn: (r) => !!r.payment_paid_at,
+  },
+  {
+    key: "created_at",
+    label: "تاريخ تقديم الطلب",
+    group: "dates",
     isAvailable: () => true,
-    defaultOn: (r) => r.status !== "processed" },
-  { key: "processed_at", label: "تاريخ المعالجة/الصرف", group: "dates",
+    defaultOn: () => true,
+  },
+  {
+    key: "updated_at",
+    label: "آخر تحديث",
+    group: "dates",
+    isAvailable: () => true,
+    defaultOn: (r) => r.status !== "processed",
+  },
+  {
+    key: "processed_at",
+    label: "تاريخ المعالجة/الصرف",
+    group: "dates",
     isAvailable: (r) => !!r.processed_at,
-    defaultOn: (r) => !!r.processed_at && (r.status === "processed" || r.status === "refunded") },
+    defaultOn: (r) => !!r.processed_at && (r.status === "processed" || r.status === "refunded"),
+  },
 
-  { key: "reason", label: "سبب طلبك للاسترداد", group: "reasons",
-    isAvailable: (r) => !!r.reason, defaultOn: (r) => !!r.reason },
-  { key: "decision_reason", label: "قرار وملاحظة المحاسبة", group: "reasons",
+  {
+    key: "reason",
+    label: "سبب طلبك للاسترداد",
+    group: "reasons",
+    isAvailable: (r) => !!r.reason,
+    defaultOn: (r) => !!r.reason,
+  },
+  {
+    key: "decision_reason",
+    label: "قرار وملاحظة المحاسبة",
+    group: "reasons",
     isAvailable: (r) => !!r.decision_reason,
-    defaultOn: (r) => !!r.decision_reason },
+    defaultOn: (r) => !!r.decision_reason,
+  },
 
-  { key: "footer_note", label: "الملاحظة القانونية في الأسفل", group: "layout",
-    isAvailable: () => true, defaultOn: () => true },
+  {
+    key: "footer_note",
+    label: "الملاحظة القانونية في الأسفل",
+    group: "layout",
+    isAvailable: () => true,
+    defaultOn: () => true,
+  },
 ];
 
 const GROUP_LABELS: Record<ReceiptField["group"], string> = {
@@ -131,17 +212,23 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
   const meta = statusMeta(r.status);
   const has = (k: ReceiptFieldKey) => selected.has(k);
   const rows: Array<[string, string]> = [];
-  if (has("reference") && r.receipt_reference) rows.push(["الرقم المرجعي", toArabicIndic(r.receipt_reference)]);
+  if (has("reference") && r.receipt_reference)
+    rows.push(["الرقم المرجعي", toArabicIndic(r.receipt_reference)]);
   if (has("request_id")) rows.push(["معرّف الطلب", r.id]);
-  if (has("invoice")) rows.push(["الفاتورة", r.invoice_number ? toArabicIndic(`#${r.invoice_number}`) : "—"]);
+  if (has("invoice"))
+    rows.push(["الفاتورة", r.invoice_number ? toArabicIndic(`#${r.invoice_number}`) : "—"]);
   if (has("status")) rows.push(["حالة الطلب", meta.label]);
-  if (has("refund_amount")) rows.push(["المبلغ المُسترد", toArabicIndic(fmtSAR(r.amount, r.currency))]);
-  if (has("original_amount")) rows.push(["قيمة الدفعة الأصلية", toArabicIndic(fmtSAR(r.payment_amount, r.currency))]);
+  if (has("refund_amount"))
+    rows.push(["المبلغ المُسترد", toArabicIndic(fmtSAR(r.amount, r.currency))]);
+  if (has("original_amount"))
+    rows.push(["قيمة الدفعة الأصلية", toArabicIndic(fmtSAR(r.payment_amount, r.currency))]);
   if (has("payment_method")) rows.push(["وسيلة الدفع", r.payment_method ?? "—"]);
-  if (has("payment_paid_at")) rows.push(["تاريخ الدفعة", toArabicIndic(fmtDate(r.payment_paid_at))]);
+  if (has("payment_paid_at"))
+    rows.push(["تاريخ الدفعة", toArabicIndic(fmtDate(r.payment_paid_at))]);
   if (has("created_at")) rows.push(["تاريخ الطلب", toArabicIndic(fmtDateTime(r.created_at))]);
   if (has("updated_at")) rows.push(["آخر تحديث", toArabicIndic(fmtDateTime(r.updated_at))]);
-  if (has("processed_at") && r.processed_at) rows.push(["تاريخ المعالجة", toArabicIndic(fmtDateTime(r.processed_at))]);
+  if (has("processed_at") && r.processed_at)
+    rows.push(["تاريخ المعالجة", toArabicIndic(fmtDateTime(r.processed_at))]);
   if (has("reason")) rows.push(["سبب الطلب", r.reason || "—"]);
   if (has("decision_reason")) rows.push(["قرار المحاسبة", r.decision_reason || "—"]);
 
@@ -406,7 +493,9 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
           </div>
           <span class="badge">${meta.label}</span>
         </div>
-        ${showHero ? `<div class="amount">
+        ${
+          showHero
+            ? `<div class="amount">
           <div>
             <div class="lbl">المبلغ المُسترد</div>
             <div class="val num">${isolate(amountDisplay)}</div>
@@ -415,21 +504,30 @@ function openRefundReceipt(r: RefundRow, selected: Set<ReceiptFieldKey>) {
             <div class="lbl">من دفعة أصلية</div>
             <div class="val-sm num">${isolate(originalAmountDisplay)}</div>
           </div>
-        </div>` : ""}
-        ${rows.length ? `<table class="grid">
-          ${rows.map(([k, v]) => {
-            const safe = String(v).replace(/</g, "&lt;");
-            const trimmed = safe.trim();
-            // Detect tokens that must render as an atomic Arabic-Indic block:
-            // - references beginning with RF- or UUID-like
-            // - purely numeric / date / currency strings (Arabic-Indic or Western digits)
-            const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(trimmed);
-            const isNumeric = /^[\d\u0660-\u0669\s.,+\-/:%#SARر\.س]+$/.test(trimmed) && trimmed.length > 0;
-            const cls = looksRef ? "ref" : isNumeric ? "num" : "";
-            const inner = cls ? `<span class="${cls}">${isolate(safe)}</span>` : safe;
-            return `<tr><td class="k">${k}</td><td class="v">${inner}</td></tr>`;
-          }).join("")}
-        </table>` : ""}
+        </div>`
+            : ""
+        }
+        ${
+          rows.length
+            ? `<table class="grid">
+          ${rows
+            .map(([k, v]) => {
+              const safe = String(v).replace(/</g, "&lt;");
+              const trimmed = safe.trim();
+              // Detect tokens that must render as an atomic Arabic-Indic block:
+              // - references beginning with RF- or UUID-like
+              // - purely numeric / date / currency strings (Arabic-Indic or Western digits)
+              const looksRef = /^(RF-|[0-9a-f-]{8,})/i.test(trimmed);
+              const isNumeric =
+                /^[\d\u0660-\u0669\s.,+\-/:%#SARر\.س]+$/.test(trimmed) && trimmed.length > 0;
+              const cls = looksRef ? "ref" : isNumeric ? "num" : "";
+              const inner = cls ? `<span class="${cls}">${isolate(safe)}</span>` : safe;
+              return `<tr><td class="k">${k}</td><td class="v">${inner}</td></tr>`;
+            })
+            .join("")}
+        </table>`
+            : ""
+        }
         ${showNote ? `<div class="note">هذا الإيصال مُستخرج تلقائيًا من بوابة المريض ويعكس حالة طلب الاسترداد وقت التنزيل. للاستفسار يُرجى التواصل مع قسم المحاسبة والإشارة إلى معرّف الطلب أعلاه.</div>` : ""}
         <div class="ft">
           Bashen Medical · بوابة المريض · إيصال إلكتروني لا يستلزم توقيعًا
@@ -500,13 +598,9 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_authenticated/portal/refunds")({
   validateSearch: zodValidator(searchSchema),
-  loader: async ({ context }) =>
-    context.queryClient.ensureQueryData(refundsQuery),
+  loader: async ({ context }) => context.queryClient.ensureQueryData(refundsQuery),
   head: () => ({
-    meta: [
-      { title: "طلبات الاسترداد | بوابة المريض" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "طلبات الاسترداد | بوابة المريض" }, { name: "robots", content: "noindex" }],
   }),
   component: PortalRefundsPage,
 });
@@ -515,7 +609,11 @@ export const Route = createFileRoute("/_authenticated/portal/refunds")({
 
 function fmtSAR(n: number, currency = "SAR") {
   try {
-    return new Intl.NumberFormat("ar-SA", { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+    return new Intl.NumberFormat("ar-SA", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(n);
   } catch {
     return `${n.toFixed(2)} ${currency}`;
   }
@@ -523,7 +621,11 @@ function fmtSAR(n: number, currency = "SAR") {
 function fmtDate(iso: string | null) {
   if (!iso) return "—";
   try {
-    return new Intl.DateTimeFormat("ar-SA", { year: "numeric", month: "short", day: "numeric" }).format(new Date(iso));
+    return new Intl.DateTimeFormat("ar-SA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(new Date(iso));
   } catch {
     return iso.slice(0, 10);
   }
@@ -532,8 +634,11 @@ function fmtDateTime(iso: string | null) {
   if (!iso) return "—";
   try {
     return new Intl.DateTimeFormat("ar-SA", {
-      year: "numeric", month: "short", day: "numeric",
-      hour: "2-digit", minute: "2-digit",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(new Date(iso));
   } catch {
     return iso.slice(0, 16).replace("T", " ");
@@ -548,7 +653,9 @@ const STATUS_META: Record<Status, { label: string; cls: string; icon: any }> = {
   canceled: { label: "أُلغيت", cls: "bg-slate-100 text-slate-600", icon: Ban },
 };
 function statusMeta(s: string) {
-  return STATUS_META[(s as Status)] ?? { label: s, cls: "bg-slate-100 text-slate-600", icon: AlertCircle };
+  return (
+    STATUS_META[s as Status] ?? { label: s, cls: "bg-slate-100 text-slate-600", icon: AlertCircle }
+  );
 }
 
 /* ---------------- page ---------------- */
@@ -577,7 +684,10 @@ function PortalRefundsPage() {
   const [detailsId, setDetailsId] = useState<string | null>(null);
 
   const receiptRefund = useMemo(
-    () => (receipt ? data.refunds.find((r) => r.id === receipt && isFinalized(r.status)) ?? null : null),
+    () =>
+      receipt
+        ? (data.refunds.find((r) => r.id === receipt && isFinalized(r.status)) ?? null)
+        : null,
     [data.refunds, receipt],
   );
   const closeReceipt = () =>
@@ -601,18 +711,24 @@ function PortalRefundsPage() {
   }, [data.refunds]);
 
   const visible = useMemo(() => {
-    const filtered = safeStatus === "all"
-      ? data.refunds
-      : data.refunds.filter((r) => r.status === safeStatus);
+    const filtered =
+      safeStatus === "all" ? data.refunds : data.refunds.filter((r) => r.status === safeStatus);
     const lastAt = (r: RefundRow) => new Date(r.processed_at ?? r.updated_at).getTime();
     const createdAt = (r: RefundRow) => new Date(r.created_at).getTime();
     const sorted = [...filtered];
     switch (safeSort) {
-      case "updated_asc": sorted.sort((a, b) => lastAt(a) - lastAt(b)); break;
-      case "created_desc": sorted.sort((a, b) => createdAt(b) - createdAt(a)); break;
-      case "created_asc": sorted.sort((a, b) => createdAt(a) - createdAt(b)); break;
+      case "updated_asc":
+        sorted.sort((a, b) => lastAt(a) - lastAt(b));
+        break;
+      case "created_desc":
+        sorted.sort((a, b) => createdAt(b) - createdAt(a));
+        break;
+      case "created_asc":
+        sorted.sort((a, b) => createdAt(a) - createdAt(b));
+        break;
       case "updated_desc":
-      default: sorted.sort((a, b) => lastAt(b) - lastAt(a));
+      default:
+        sorted.sort((a, b) => lastAt(b) - lastAt(a));
     }
     return sorted;
   }, [data.refunds, safeStatus, safeSort]);
@@ -643,7 +759,10 @@ function PortalRefundsPage() {
             </p>
           </div>
           <button
-            onClick={() => { setPrefillPaymentId(null); setOpenNew(true); }}
+            onClick={() => {
+              setPrefillPaymentId(null);
+              setOpenNew(true);
+            }}
             className="inline-flex items-center gap-2 h-11 px-5 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)]"
           >
             <Plus className="h-4 w-4" />
@@ -655,7 +774,12 @@ function PortalRefundsPage() {
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <KpiCard icon={RotateCcw} label="إجمالي الطلبات" value={String(kpis.count)} />
           <KpiCard icon={Clock} label="قيد المراجعة" value={String(kpis.pending)} tone="warn" />
-          <KpiCard icon={CheckCircle2} label="مبالغ مُستردة" value={fmtSAR(kpis.refunded)} tone="success" />
+          <KpiCard
+            icon={CheckCircle2}
+            label="مبالغ مُستردة"
+            value={fmtSAR(kpis.refunded)}
+            tone="success"
+          />
         </section>
 
         {/* Filters + sort */}
@@ -679,10 +803,16 @@ function PortalRefundsPage() {
                     ].join(" ")}
                   >
                     {t.label}
-                    <span className={[
-                      "min-w-5 h-5 px-1.5 grid place-items-center rounded-full text-[10px] font-bold",
-                      active ? "bg-white/20 text-white" : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-3)]",
-                    ].join(" ")}>{count}</span>
+                    <span
+                      className={[
+                        "min-w-5 h-5 px-1.5 grid place-items-center rounded-full text-[10px] font-bold",
+                        active
+                          ? "bg-white/20 text-white"
+                          : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-3)]",
+                      ].join(" ")}
+                    >
+                      {count}
+                    </span>
                   </button>
                 );
               })}
@@ -696,7 +826,9 @@ function PortalRefundsPage() {
                 aria-label="ترتيب النتائج"
               >
                 {SORT_OPTIONS.map((o) => (
-                  <option key={o.key} value={o.key}>{o.label}</option>
+                  <option key={o.key} value={o.key}>
+                    {o.label}
+                  </option>
                 ))}
               </select>
             </label>
@@ -705,7 +837,12 @@ function PortalRefundsPage() {
 
         {/* List */}
         {data.refunds.length === 0 ? (
-          <EmptyState onNew={() => { setPrefillPaymentId(null); setOpenNew(true); }} />
+          <EmptyState
+            onNew={() => {
+              setPrefillPaymentId(null);
+              setOpenNew(true);
+            }}
+          />
         ) : visible.length === 0 ? (
           <div className="mag-card p-8 text-center text-sm text-[color:var(--mag-ink-2)]">
             لا توجد طلبات تطابق الفلتر الحالي.
@@ -726,17 +863,10 @@ function PortalRefundsPage() {
       </div>
 
       {openNew && (
-        <NewRefundDrawer
-          onClose={() => setOpenNew(false)}
-          prefillPaymentId={prefillPaymentId}
-        />
+        <NewRefundDrawer onClose={() => setOpenNew(false)} prefillPaymentId={prefillPaymentId} />
       )}
-      {selected && (
-        <RefundDetailsDrawer r={selected} onClose={() => setDetailsId(null)} />
-      )}
-      {receiptRefund && (
-        <ReceiptCustomizerModal r={receiptRefund} onClose={closeReceipt} />
-      )}
+      {selected && <RefundDetailsDrawer r={selected} onClose={() => setDetailsId(null)} />}
+      {receiptRefund && <ReceiptCustomizerModal r={receiptRefund} onClose={closeReceipt} />}
     </div>
   );
 }
@@ -755,9 +885,11 @@ function KpiCard({
   tone?: "default" | "success" | "warn";
 }) {
   const toneCls =
-    tone === "success" ? "bg-emerald-50 text-emerald-700"
-    : tone === "warn" ? "bg-amber-50 text-amber-700"
-    : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]";
+    tone === "success"
+      ? "bg-emerald-50 text-emerald-700"
+      : tone === "warn"
+        ? "bg-amber-50 text-amber-700"
+        : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]";
   return (
     <div className="mag-card p-5">
       <div className={`h-10 w-10 rounded-xl grid place-items-center ${toneCls}`}>
@@ -856,13 +988,15 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
           disabled={mutation.isPending}
           className="h-9 px-3 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-xs font-semibold text-[color:var(--mag-danger)] hover:bg-red-50 disabled:opacity-60 inline-flex items-center gap-1"
         >
-          {mutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Ban className="h-3.5 w-3.5" />}
+          {mutation.isPending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Ban className="h-3.5 w-3.5" />
+          )}
           إلغاء الطلب
         </button>
       )}
-      {receiptOpen && (
-        <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />
-      )}
+      {receiptOpen && <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />}
     </li>
   );
 }
@@ -894,36 +1028,78 @@ function buildTimeline(r: RefundRow): TimelineStep[] {
   if (status === "pending") {
     return [
       submitted,
-      { key: "review", title: "قيد مراجعة المحاسبة", at: null, state: "current", icon: Clock,
-        note: "سيتم مراجعة الطلب خلال أيام العمل الرسمية." },
-      { key: "processed", title: "المعالجة والصرف", at: null, state: "upcoming", icon: CheckCircle2 },
+      {
+        key: "review",
+        title: "قيد مراجعة المحاسبة",
+        at: null,
+        state: "current",
+        icon: Clock,
+        note: "سيتم مراجعة الطلب خلال أيام العمل الرسمية.",
+      },
+      {
+        key: "processed",
+        title: "المعالجة والصرف",
+        at: null,
+        state: "upcoming",
+        icon: CheckCircle2,
+      },
     ];
   }
 
   if (status === "approved") {
     return [
       submitted,
-      { key: "review", title: "تمت الموافقة على الطلب", at: lastAt, state: "done", icon: CheckCircle2,
-        note: r.decision_reason ?? null },
-      { key: "processed", title: "قيد الصرف", at: null, state: "current", icon: RotateCcw,
-        note: "جارٍ تحويل المبلغ إلى وسيلة الدفع الأصلية." },
+      {
+        key: "review",
+        title: "تمت الموافقة على الطلب",
+        at: lastAt,
+        state: "done",
+        icon: CheckCircle2,
+        note: r.decision_reason ?? null,
+      },
+      {
+        key: "processed",
+        title: "قيد الصرف",
+        at: null,
+        state: "current",
+        icon: RotateCcw,
+        note: "جارٍ تحويل المبلغ إلى وسيلة الدفع الأصلية.",
+      },
     ];
   }
 
   if (status === "processed") {
     return [
       submitted,
-      { key: "review", title: "تمت الموافقة على الطلب", at: null, state: "done", icon: CheckCircle2 },
-      { key: "processed", title: "تمت معالجة الاسترداد", at: lastAt, state: "done", icon: CheckCircle2,
-        note: r.decision_reason ?? "تم إعادة المبلغ إلى وسيلة الدفع الأصلية." },
+      {
+        key: "review",
+        title: "تمت الموافقة على الطلب",
+        at: null,
+        state: "done",
+        icon: CheckCircle2,
+      },
+      {
+        key: "processed",
+        title: "تمت معالجة الاسترداد",
+        at: lastAt,
+        state: "done",
+        icon: CheckCircle2,
+        note: r.decision_reason ?? "تم إعادة المبلغ إلى وسيلة الدفع الأصلية.",
+      },
     ];
   }
 
   if (status === "rejected") {
     return [
       submitted,
-      { key: "review", title: "تم رفض الطلب", at: lastAt, state: "failed", icon: XCircle,
-        note: r.decision_reason ?? "لم يتم ذكر سبب. يرجى التواصل مع قسم المحاسبة." },
+      {
+        key: "review",
+        title: "تم رفض الطلب",
+        at: lastAt,
+        state: "failed",
+        icon: XCircle,
+        note: r.decision_reason ?? "لم يتم ذكر سبب. يرجى التواصل مع قسم المحاسبة.",
+      },
       { key: "processed", title: "لن تتم المعالجة", at: null, state: "skipped", icon: Ban },
     ];
   }
@@ -931,8 +1107,14 @@ function buildTimeline(r: RefundRow): TimelineStep[] {
   // canceled
   return [
     submitted,
-    { key: "review", title: "تم إلغاء الطلب", at: lastAt, state: "failed", icon: Ban,
-      note: r.decision_reason ?? "تم إلغاء الطلب قبل اكتمال المراجعة." },
+    {
+      key: "review",
+      title: "تم إلغاء الطلب",
+      at: lastAt,
+      state: "failed",
+      icon: Ban,
+      note: r.decision_reason ?? "تم إلغاء الطلب قبل اكتمال المراجعة.",
+    },
     { key: "processed", title: "لن تتم المعالجة", at: null, state: "skipped", icon: Ban },
   ];
 }
@@ -961,7 +1143,11 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
       <div className="relative ms-auto h-full w-full max-w-lg bg-[color:var(--portal-surface)] shadow-xl flex flex-col">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div className="font-bold">تفاصيل طلب الاسترداد</div>
-          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]"
+            aria-label="إغلاق"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -977,7 +1163,9 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             </div>
             <div className="flex items-end justify-between gap-3">
               <div>
-                <div className="text-[11px] text-[color:var(--mag-ink-3)]">المبلغ المطلوب استرداده</div>
+                <div className="text-[11px] text-[color:var(--mag-ink-3)]">
+                  المبلغ المطلوب استرداده
+                </div>
                 <div className="text-2xl font-bold">{fmtSAR(r.amount, r.currency)}</div>
               </div>
               <div className="text-end">
@@ -990,9 +1178,16 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
             </div>
             <div className="pt-2 mt-1 border-t border-[color:var(--mag-line)] text-[11px] text-[color:var(--mag-ink-3)] flex flex-wrap gap-x-4 gap-y-1">
               {r.receipt_reference && (
-                <span>الرقم المرجعي: <span className="font-mono font-semibold text-[color:var(--mag-ink-1)]">{r.receipt_reference}</span></span>
+                <span>
+                  الرقم المرجعي:{" "}
+                  <span className="font-mono font-semibold text-[color:var(--mag-ink-1)]">
+                    {r.receipt_reference}
+                  </span>
+                </span>
               )}
-              <span>معرّف الطلب: <span className="font-mono">{r.id.slice(0, 8)}…</span></span>
+              <span>
+                معرّف الطلب: <span className="font-mono">{r.id.slice(0, 8)}…</span>
+              </span>
               <span>آخر تحديث: {fmtDateTime(r.processed_at ?? r.updated_at)}</span>
             </div>
           </section>
@@ -1004,18 +1199,24 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
               {steps.map((s) => {
                 const Icon = s.icon;
                 const dot =
-                  s.state === "done" ? "bg-emerald-500 text-white"
-                  : s.state === "current" ? "bg-amber-500 text-white animate-pulse"
-                  : s.state === "failed" ? "bg-[color:var(--mag-danger)] text-white"
-                  : s.state === "skipped" ? "bg-slate-200 text-slate-400"
-                  : "bg-white text-[color:var(--mag-ink-3)] border border-[color:var(--mag-line)]";
+                  s.state === "done"
+                    ? "bg-emerald-500 text-white"
+                    : s.state === "current"
+                      ? "bg-amber-500 text-white animate-pulse"
+                      : s.state === "failed"
+                        ? "bg-[color:var(--mag-danger)] text-white"
+                        : s.state === "skipped"
+                          ? "bg-slate-200 text-slate-400"
+                          : "bg-white text-[color:var(--mag-ink-3)] border border-[color:var(--mag-line)]";
                 const titleCls =
                   s.state === "upcoming" || s.state === "skipped"
                     ? "text-[color:var(--mag-ink-3)]"
                     : "text-[color:var(--mag-ink-1)]";
                 return (
                   <li key={s.key} className="relative">
-                    <span className={`absolute -start-[34px] top-0 h-7 w-7 rounded-full grid place-items-center ${dot}`}>
+                    <span
+                      className={`absolute -start-[34px] top-0 h-7 w-7 rounded-full grid place-items-center ${dot}`}
+                    >
                       <Icon className="h-3.5 w-3.5" />
                     </span>
                     <div className={`font-semibold text-sm ${titleCls}`}>{s.title}</div>
@@ -1023,12 +1224,14 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
                       {s.at ? fmtDateTime(s.at) : s.state === "current" ? "الآن" : "—"}
                     </div>
                     {s.note && (
-                      <div className={[
-                        "mt-2 text-xs rounded-lg p-3",
-                        s.state === "failed"
-                          ? "bg-red-50 text-[color:var(--mag-danger)]"
-                          : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]",
-                      ].join(" ")}>
+                      <div
+                        className={[
+                          "mt-2 text-xs rounded-lg p-3",
+                          s.state === "failed"
+                            ? "bg-red-50 text-[color:var(--mag-danger)]"
+                            : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]",
+                        ].join(" ")}
+                      >
                         {s.note}
                       </div>
                     )}
@@ -1062,16 +1265,18 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
                 disabled={mutation.isPending}
                 className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-danger)] hover:opacity-90 disabled:opacity-60 inline-flex items-center justify-center gap-2"
               >
-                {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Ban className="h-4 w-4" />}
+                {mutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Ban className="h-4 w-4" />
+                )}
                 إلغاء طلب الاسترداد
               </button>
             )}
           </div>
         )}
       </div>
-      {receiptOpen && (
-        <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />
-      )}
+      {receiptOpen && <ReceiptCustomizerModal r={r} onClose={() => setReceiptOpen(false)} />}
     </div>
   );
 }
@@ -1085,7 +1290,8 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
   const toggle = (k: ReceiptFieldKey) =>
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(k)) next.delete(k); else next.add(k);
+      if (next.has(k)) next.delete(k);
+      else next.add(k);
       return next;
     });
   const setAll = (on: boolean) =>
@@ -1124,7 +1330,11 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
   };
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="absolute inset-0 bg-slate-900/50" onClick={onClose} />
       <div className="relative w-full max-w-md bg-[color:var(--portal-surface)] rounded-2xl shadow-2xl flex flex-col max-h-[85vh]">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
@@ -1134,22 +1344,32 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
               حسب الحالة: <span className="font-semibold">{meta.label}</span>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]"
+            aria-label="إغلاق"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         <div className="px-5 pt-3 pb-2 flex flex-wrap items-center gap-2 border-b border-[color:var(--mag-line)]">
-          <button onClick={() => setAll(true)}
-            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+          <button
+            onClick={() => setAll(true)}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]"
+          >
             تحديد الكل
           </button>
-          <button onClick={() => setAll(false)}
-            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+          <button
+            onClick={() => setAll(false)}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]"
+          >
             إلغاء التحديد
           </button>
-          <button onClick={resetDefaults}
-            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]">
+          <button
+            onClick={resetDefaults}
+            className="h-8 px-3 rounded-full border border-[color:var(--mag-line)] text-xs font-semibold hover:bg-[color:var(--mag-subtle)]"
+          >
             الافتراضي حسب الحالة
           </button>
           <span className="ms-auto text-[11px] text-[color:var(--mag-ink-3)]">
@@ -1167,36 +1387,45 @@ function ReceiptCustomizerModal({ r, onClose }: { r: RefundRow; onClose: () => v
                 {fields.map((f) => {
                   const on = selected.has(f.key);
                   return (
-                    <label key={f.key}
-                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[color:var(--mag-subtle)] cursor-pointer">
+                    <label
+                      key={f.key}
+                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[color:var(--mag-subtle)] cursor-pointer"
+                    >
                       <input
                         type="checkbox"
                         checked={on}
                         onChange={() => toggle(f.key)}
                         className="h-4 w-4 accent-[color:var(--mag-accent)]"
                       />
-                      <span className="text-sm text-[color:var(--mag-ink-1)] font-medium">{f.label}</span>
+                      <span className="text-sm text-[color:var(--mag-ink-1)] font-medium">
+                        {f.label}
+                      </span>
                     </label>
                   );
                 })}
               </div>
             </div>
           ))}
-          {!r.decision_reason && (r.status === "processed" || r.status === "rejected" || r.status === "canceled") && (
-            <div className="text-[11px] text-[color:var(--mag-ink-3)] p-2.5 rounded-lg bg-[color:var(--mag-subtle)]">
-              لا يوجد قرار محاسبي مسجّل لهذا الطلب، لذا لا يظهر خيار «قرار المحاسبة».
-            </div>
-          )}
+          {!r.decision_reason &&
+            (r.status === "processed" || r.status === "rejected" || r.status === "canceled") && (
+              <div className="text-[11px] text-[color:var(--mag-ink-3)] p-2.5 rounded-lg bg-[color:var(--mag-subtle)]">
+                لا يوجد قرار محاسبي مسجّل لهذا الطلب، لذا لا يظهر خيار «قرار المحاسبة».
+              </div>
+            )}
         </div>
 
         <div className="p-4 border-t border-[color:var(--mag-line)] flex items-center gap-3">
-          <button onClick={onClose}
-            className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm font-semibold">
+          <button
+            onClick={onClose}
+            className="h-11 px-4 rounded-full border border-[color:var(--mag-line)] bg-[color:var(--portal-surface)] text-sm font-semibold"
+          >
             إلغاء
           </button>
-          <button onClick={generate}
+          <button
+            onClick={generate}
             disabled={selected.size === 0}
-            className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2">
+            className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2"
+          >
             <Download className="h-4 w-4" />
             توليد الإيصال
           </button>
@@ -1242,8 +1471,7 @@ function NewRefundDrawer({
     const list = paysRes?.payments ?? [];
     return list.filter(
       (p) =>
-        !p.is_mock &&
-        ["succeeded", "completed", "paid", "partially_refunded"].includes(p.status),
+        !p.is_mock && ["succeeded", "completed", "paid", "partially_refunded"].includes(p.status),
     );
   }, [paysRes?.payments]);
 
@@ -1312,11 +1540,7 @@ function NewRefundDrawer({
   });
 
   const canSubmit =
-    !!paymentId &&
-    reason.trim().length >= 3 &&
-    !mutation.isPending &&
-    !exceedsMax &&
-    !noAvailable;
+    !!paymentId && reason.trim().length >= 3 && !mutation.isPending && !exceedsMax && !noAvailable;
 
   return (
     <div className="fixed inset-0 z-50 flex" role="dialog" aria-modal="true">
@@ -1324,7 +1548,11 @@ function NewRefundDrawer({
       <div className="relative ms-auto h-full w-full max-w-lg bg-[color:var(--portal-surface)] shadow-xl flex flex-col">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div className="font-bold">طلب استرداد جديد</div>
-          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]"
+            aria-label="إغلاق"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -1338,8 +1566,8 @@ function NewRefundDrawer({
             <div className="mag-card p-5 text-sm text-[color:var(--mag-ink-2)] flex items-start gap-3">
               <AlertCircle className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                لا توجد دفعات قابلة للاسترداد على حسابك حاليًا. الدفعات التجريبية (وضع محاكاة)
-                لا يمكن استردادها عبر البوابة.
+                لا توجد دفعات قابلة للاسترداد على حسابك حاليًا. الدفعات التجريبية (وضع محاكاة) لا
+                يمكن استردادها عبر البوابة.
               </div>
             </div>
           ) : (
@@ -1363,7 +1591,8 @@ function NewRefundDrawer({
                         <div className="flex items-center justify-between gap-3">
                           <div className="min-w-0">
                             <div className="font-semibold text-sm">
-                              {p.invoice_number ? `فاتورة #${p.invoice_number}` : "دفعة"} · {p.method}
+                              {p.invoice_number ? `فاتورة #${p.invoice_number}` : "دفعة"} ·{" "}
+                              {p.method}
                             </div>
                             <div className="text-xs text-[color:var(--mag-ink-3)] mt-0.5">
                               {fmtDate(p.paid_at ?? p.created_at)} · {p.status}
@@ -1390,7 +1619,9 @@ function NewRefundDrawer({
                   <dl className="text-xs space-y-1.5">
                     <div className="flex items-center justify-between">
                       <dt className="text-[color:var(--mag-ink-3)]">قيمة الدفعة الأصلية</dt>
-                      <dd className="font-semibold">{fmtSAR(breakdown.gross, selected.currency)}</dd>
+                      <dd className="font-semibold">
+                        {fmtSAR(breakdown.gross, selected.currency)}
+                      </dd>
                     </div>
                     <div className="flex items-center justify-between">
                       <dt className="text-[color:var(--mag-ink-3)]">
@@ -1406,9 +1637,10 @@ function NewRefundDrawer({
                     <div className="flex items-center justify-between">
                       <dt className="text-[color:var(--mag-ink-3)]">
                         طلبات جارية
-                        {(breakdown.pendingCount + breakdown.approvedCount) > 0 && (
+                        {breakdown.pendingCount + breakdown.approvedCount > 0 && (
                           <span className="ms-1 text-[10px]">
-                            (قيد المراجعة: {breakdown.pendingCount} · معتمدة: {breakdown.approvedCount})
+                            (قيد المراجعة: {breakdown.pendingCount} · معتمدة:{" "}
+                            {breakdown.approvedCount})
                           </span>
                         )}
                       </dt>
@@ -1419,11 +1651,17 @@ function NewRefundDrawer({
                   </dl>
                   <div className="pt-3 border-t border-[color:var(--mag-line)] flex items-end justify-between gap-3">
                     <div>
-                      <div className="text-[11px] text-[color:var(--mag-ink-3)]">المتاح للاسترداد الآن</div>
-                      <div className={[
-                        "text-xl font-bold",
-                        breakdown.available > 0 ? "text-[color:var(--mag-ink-1)]" : "text-[color:var(--mag-danger)]",
-                      ].join(" ")}>
+                      <div className="text-[11px] text-[color:var(--mag-ink-3)]">
+                        المتاح للاسترداد الآن
+                      </div>
+                      <div
+                        className={[
+                          "text-xl font-bold",
+                          breakdown.available > 0
+                            ? "text-[color:var(--mag-ink-1)]"
+                            : "text-[color:var(--mag-danger)]",
+                        ].join(" ")}
+                      >
                         {fmtSAR(breakdown.available, selected.currency)}
                       </div>
                     </div>
@@ -1440,7 +1678,10 @@ function NewRefundDrawer({
                   {noAvailable && (
                     <div className="text-xs rounded-lg p-2.5 bg-red-50 text-[color:var(--mag-danger)] flex items-start gap-2">
                       <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                      <span>لا يوجد مبلغ متاح للاسترداد على هذه الدفعة (تمت تغطية كامل المبلغ بطلبات سابقة أو جارية).</span>
+                      <span>
+                        لا يوجد مبلغ متاح للاسترداد على هذه الدفعة (تمت تغطية كامل المبلغ بطلبات
+                        سابقة أو جارية).
+                      </span>
                     </div>
                   )}
                 </section>
@@ -1473,7 +1714,8 @@ function NewRefundDrawer({
                 />
                 {exceedsMax && breakdown && (
                   <div className="mt-1.5 text-[11px] text-[color:var(--mag-danger)]">
-                    يتجاوز المبلغ الحد الأقصى المتاح ({fmtSAR(breakdown.available, selected?.currency)}).
+                    يتجاوز المبلغ الحد الأقصى المتاح (
+                    {fmtSAR(breakdown.available, selected?.currency)}).
                   </div>
                 )}
               </div>
@@ -1490,8 +1732,8 @@ function NewRefundDrawer({
               </div>
 
               <div className="mag-card p-3 bg-[color:var(--mag-accent-soft)] text-xs text-[color:var(--mag-ink-2)]">
-                يتم تحويل الطلب فور إرساله إلى قسم المحاسبة للمراجعة. عند اعتماد الطلب ومعالجته،
-                يتم تحديث حالة الفاتورة والدفعة تلقائيًا.
+                يتم تحويل الطلب فور إرساله إلى قسم المحاسبة للمراجعة. عند اعتماد الطلب ومعالجته، يتم
+                تحديث حالة الفاتورة والدفعة تلقائيًا.
               </div>
             </>
           )}
@@ -1510,7 +1752,11 @@ function NewRefundDrawer({
               disabled={!canSubmit}
               className="flex-1 h-11 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 inline-flex items-center justify-center gap-2"
             >
-              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+              {mutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <RotateCcw className="h-4 w-4" />
+              )}
               إرسال طلب الاسترداد
             </button>
           </div>

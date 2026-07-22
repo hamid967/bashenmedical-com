@@ -27,7 +27,8 @@ async function unregisterAppSW(): Promise<void> {
   try {
     const regs = await navigator.serviceWorker.getRegistrations();
     for (const reg of regs) {
-      const url = reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || "";
+      const url =
+        reg.active?.scriptURL || reg.installing?.scriptURL || reg.waiting?.scriptURL || "";
       // Only unregister our app-shell worker; leave /sw-push.js (Web Push) alone.
       if (url.endsWith(APP_SW_URL)) {
         await reg.unregister();
@@ -95,8 +96,7 @@ export function registerAppServiceWorker(opts: RegisterOptions = {}): void {
   const killSwitch = url.searchParams.get("sw") === "off";
   const hostname = window.location.hostname;
 
-  const refuse =
-    !import.meta.env.PROD || inIframe || isPreviewHost(hostname) || killSwitch;
+  const refuse = !import.meta.env.PROD || inIframe || isPreviewHost(hostname) || killSwitch;
 
   if (refuse) {
     void unregisterAppSW();
@@ -109,9 +109,12 @@ export function registerAppServiceWorker(opts: RegisterOptions = {}): void {
       .then((reg) => {
         watchForWaitingWorker(reg, opts.onUpdateAvailable);
         // Poll for updates every hour so long-lived tabs pick up new deploys.
-        setInterval(() => {
-          void reg.update().catch(() => {});
-        }, 60 * 60 * 1000);
+        setInterval(
+          () => {
+            void reg.update().catch(() => {});
+          },
+          60 * 60 * 1000,
+        );
       })
       .catch(() => {
         /* ignore registration errors */

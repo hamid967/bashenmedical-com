@@ -4,9 +4,28 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { toast } from "sonner";
-import { Search, Calendar, Clock, User, Phone, Stethoscope, X, CheckCircle2, AlertCircle, XCircle, Clock3, CalendarClock, CalendarPlus } from "lucide-react";
+import {
+  Search,
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  Stethoscope,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Clock3,
+  CalendarClock,
+  CalendarPlus,
+} from "lucide-react";
 import { WEEKDAYS_AR } from "@/lib/site";
-import { downloadIcs, whatsappShareUrl, googleCalendarUrl, type ShareBooking } from "@/lib/booking-share";
+import {
+  downloadIcs,
+  whatsappShareUrl,
+  googleCalendarUrl,
+  type ShareBooking,
+} from "@/lib/booking-share";
 import { ReminderHistoryByRefModal } from "@/components/ReminderPreferenceHistory";
 import { AppointmentAuditHistory } from "@/components/booking/AppointmentAuditHistory";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
@@ -31,7 +50,10 @@ export const Route = createFileRoute("/lookup")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "تتبع حجزك | مجمع باعشن الطبي" },
-      { name: "description", content: "استعرض حالة موعدك في مجمع باعشن الطبي برقم الحجز ورقم الجوال." },
+      {
+        name: "description",
+        content: "استعرض حالة موعدك في مجمع باعشن الطبي برقم الحجز ورقم الجوال.",
+      },
       { property: "og:title", content: "تتبع حجزك — مجمع باعشن الطبي" },
     ],
   }),
@@ -48,15 +70,9 @@ type AppointmentRow = AppointmentDetail["metadata"] & {
   created_at: string;
 };
 
-
-
 function statusKey(s: string) {
   return `status_${s}` as
-    | "status_new"
-    | "status_confirmed"
-    | "status_completed"
-    | "status_cancelled"
-    | "status_no_show";
+    "status_new" | "status_confirmed" | "status_completed" | "status_cancelled" | "status_no_show";
 }
 
 function statusColor(s: string) {
@@ -137,15 +153,14 @@ function LookupPage() {
   const [showReminderHistory, setShowReminderHistory] = useState(false);
   const autoRan = useRef(false);
 
-
   const toggleReminder = async (which: "24h" | "2h", value: boolean) => {
     if (!appt) return;
     setSavingReminders(true);
     const payload = {
       _ref: ref.trim(),
       _phone: phone.trim(),
-      _reminder_24h: which === "24h" ? value : appt.reminder_24h ?? true,
-      _reminder_2h: which === "2h" ? value : appt.reminder_2h ?? true,
+      _reminder_24h: which === "24h" ? value : (appt.reminder_24h ?? true),
+      _reminder_2h: which === "2h" ? value : (appt.reminder_2h ?? true),
     };
     const { data, error } = await supabase.rpc("update_reminders_by_ref", payload);
     setSavingReminders(false);
@@ -275,9 +290,7 @@ function LookupPage() {
     }
   };
 
-
   const isFinal = isFinalStatus;
-
 
   const fetchAppt = async (opts?: { silent?: boolean }): Promise<AppointmentRow | null> => {
     const { data, error } = await supabase.rpc("get_order_by_ref", {
@@ -312,8 +325,6 @@ function LookupPage() {
       ...detail.metadata,
     };
   };
-
-
 
   const submit = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -388,24 +399,20 @@ function LookupPage() {
     if (!appt) return;
     if (routeSearch.action === "cancel" && (appt.status === "new" || appt.status === "confirmed")) {
       setShowCancel(true);
-    } else if (routeSearch.action === "reschedule" && (appt.status === "new" || appt.status === "confirmed")) {
+    } else if (
+      routeSearch.action === "reschedule" &&
+      (appt.status === "new" || appt.status === "confirmed")
+    ) {
       setShowReschedule(true);
     }
   }, [appt, routeSearch.action]);
 
-
-
-  const doctorName = appt
-    ? lang === "ar"
-      ? appt.doctor_name_ar
-      : appt.doctor_name_en
-    : null;
+  const doctorName = appt ? (lang === "ar" ? appt.doctor_name_ar : appt.doctor_name_en) : null;
   const specialtyName = appt
     ? lang === "ar"
       ? appt.specialty_name_ar
       : appt.specialty_name_en
     : null;
-
 
   const share: ShareBooking | null = appt
     ? {
@@ -414,10 +421,10 @@ function LookupPage() {
         patient_phone: appt.patient_phone,
         appointment_date: appt.appointment_date,
         appointment_time: appt.appointment_time,
-      doctor: doctorName ?? undefined,
-      specialty: specialtyName ?? undefined,
-      reminder_24h: appt.reminder_24h,
-      reminder_2h: appt.reminder_2h,
+        doctor: doctorName ?? undefined,
+        specialty: specialtyName ?? undefined,
+        reminder_24h: appt.reminder_24h,
+        reminder_2h: appt.reminder_2h,
       }
     : null;
 
@@ -543,13 +550,19 @@ function LookupPage() {
               phone={appt.patient_phone}
             />
 
-
-
             {/* Details card */}
             <div className="rounded-2xl border border-border bg-card p-6">
               <div className="grid gap-3 text-sm">
-                <Row icon={<User className="h-4 w-4" />} label={t("name")} value={appt.patient_name} />
-                <Row icon={<Phone className="h-4 w-4" />} label={t("phone")} value={appt.patient_phone} />
+                <Row
+                  icon={<User className="h-4 w-4" />}
+                  label={t("name")}
+                  value={appt.patient_name}
+                />
+                <Row
+                  icon={<Phone className="h-4 w-4" />}
+                  label={t("phone")}
+                  value={appt.patient_phone}
+                />
                 {specialtyName && (
                   <Row
                     icon={<Stethoscope className="h-4 w-4" />}
@@ -558,7 +571,11 @@ function LookupPage() {
                   />
                 )}
                 {doctorName && (
-                  <Row icon={<User className="h-4 w-4" />} label={t("nav_doctors")} value={doctorName} />
+                  <Row
+                    icon={<User className="h-4 w-4" />}
+                    label={t("nav_doctors")}
+                    value={doctorName}
+                  />
                 )}
                 <Row
                   icon={<Calendar className="h-4 w-4" />}
@@ -620,8 +637,6 @@ function LookupPage() {
                 </div>
               )}
 
-
-
               <div className="mt-6 flex flex-wrap gap-2">
                 <a
                   href={googleCalendarUrl(share)}
@@ -658,14 +673,16 @@ function LookupPage() {
                       <CalendarPlus className="h-4 w-4" /> إعادة جدولة
                     </button>
                   )}
-                {(appt.status === "new" || appt.status === "confirmed") && !showCancel && !showReschedule && (
-                  <button
-                    onClick={() => setShowCancel(true)}
-                    className="ms-auto inline-flex items-center gap-2 rounded-md border border-destructive/40 px-4 py-2 text-sm text-destructive hover:bg-destructive/5"
-                  >
-                    <X className="h-4 w-4" /> {t("cancel_booking")}
-                  </button>
-                )}
+                {(appt.status === "new" || appt.status === "confirmed") &&
+                  !showCancel &&
+                  !showReschedule && (
+                    <button
+                      onClick={() => setShowCancel(true)}
+                      className="ms-auto inline-flex items-center gap-2 rounded-md border border-destructive/40 px-4 py-2 text-sm text-destructive hover:bg-destructive/5"
+                    >
+                      <X className="h-4 w-4" /> {t("cancel_booking")}
+                    </button>
+                  )}
               </div>
 
               {showReschedule && (
@@ -674,22 +691,37 @@ function LookupPage() {
                     <div>
                       <div className="text-sm font-semibold text-primary">اختيار موعد جديد</div>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        اختر تاريخاً ووقتاً متاحاً ثم أكّد لإعادة الجدولة. سيتم إعادة التأكيد من الاستقبال.
+                        اختر تاريخاً ووقتاً متاحاً ثم أكّد لإعادة الجدولة. سيتم إعادة التأكيد من
+                        الاستقبال.
                       </p>
                       <div className="mt-3 rounded-lg border border-primary/20 bg-primary/10 p-3 text-xs text-primary/90">
                         <div className="flex items-start gap-2">
                           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                           <div>
-                            <span className="font-semibold">تنبيه:</span> اختر تفضيلات التذكير للموعد الجديد قبل تأكيد إعادة الجدولة. ستُطبّق هذه الإعدادات على الحجز المُعاد جدولته.
+                            <span className="font-semibold">تنبيه:</span> اختر تفضيلات التذكير
+                            للموعد الجديد قبل تأكيد إعادة الجدولة. ستُطبّق هذه الإعدادات على الحجز
+                            المُعاد جدولته.
                           </div>
                         </div>
                       </div>
                       <div className="mt-3">
-                        <div className="mb-2 text-xs font-medium text-muted-foreground">تذكيرات الموعد الجديد</div>
+                        <div className="mb-2 text-xs font-medium text-muted-foreground">
+                          تذكيرات الموعد الجديد
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {[
-                            { key: "24h" as const, label: "قبل 24 ساعة", value: rescheduleReminder24h, setter: setRescheduleReminder24h },
-                            { key: "2h" as const, label: "قبل ساعتين", value: rescheduleReminder2h, setter: setRescheduleReminder2h },
+                            {
+                              key: "24h" as const,
+                              label: "قبل 24 ساعة",
+                              value: rescheduleReminder24h,
+                              setter: setRescheduleReminder24h,
+                            },
+                            {
+                              key: "2h" as const,
+                              label: "قبل ساعتين",
+                              value: rescheduleReminder2h,
+                              setter: setRescheduleReminder2h,
+                            },
                           ].map((r) => (
                             <button
                               key={r.key}
@@ -728,7 +760,9 @@ function LookupPage() {
                   ) : (
                     <>
                       <div className="mt-4">
-                        <div className="mb-2 text-xs font-medium text-muted-foreground">التاريخ</div>
+                        <div className="mb-2 text-xs font-medium text-muted-foreground">
+                          التاريخ
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {availableDates.map((d) => (
                             <button
@@ -752,7 +786,9 @@ function LookupPage() {
 
                       {newDate && (
                         <div className="mt-4">
-                          <div className="mb-2 text-xs font-medium text-muted-foreground">الوقت</div>
+                          <div className="mb-2 text-xs font-medium text-muted-foreground">
+                            الوقت
+                          </div>
                           {availableTimes.length === 0 ? (
                             <div className="text-xs text-muted-foreground">لا توجد أوقات متاحة</div>
                           ) : (
@@ -799,7 +835,6 @@ function LookupPage() {
                   </div>
                 </div>
               )}
-
 
               {showCancel && (
                 <div className="mt-4 rounded-xl border border-destructive/30 bg-destructive/5 p-4">
@@ -891,5 +926,3 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
     </div>
   );
 }
-
-

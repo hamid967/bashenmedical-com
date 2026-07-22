@@ -17,12 +17,7 @@ const DISMISS_KEY = "bmc-wa-widget-dismissed";
 /** Small inline SVG that echoes the Jazan geometric pattern in the reference image. */
 function JazanPattern({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 24 96"
-      aria-hidden="true"
-      className={className}
-      preserveAspectRatio="none"
-    >
+    <svg viewBox="0 0 24 96" aria-hidden="true" className={className} preserveAspectRatio="none">
       <defs>
         <pattern id="jazan-diamonds" width="24" height="24" patternUnits="userSpaceOnUse">
           <path d="M12 2 L22 12 L12 22 L2 12 Z" fill="none" stroke="#0f5d4a" strokeWidth="1.2" />
@@ -77,7 +72,15 @@ export function FloatingWhatsAppButton() {
         >
           {/* Chevron */}
           <span className="hidden sm:flex items-center px-3 text-[#0f5d4a]">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 rtl:rotate-180" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-4 w-4 rtl:rotate-180"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <polyline points="9 6 15 12 9 18" />
             </svg>
           </span>
@@ -105,7 +108,11 @@ export function FloatingWhatsAppButton() {
         <button
           type="button"
           onClick={() => {
-            try { sessionStorage.setItem(DISMISS_KEY, "1"); } catch { /* ignore */ }
+            try {
+              sessionStorage.setItem(DISMISS_KEY, "1");
+            } catch {
+              /* ignore */
+            }
             setDismissed(true);
           }}
           aria-label="إخفاء زر واتساب لهذه الجلسة"

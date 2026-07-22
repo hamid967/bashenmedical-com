@@ -8,7 +8,6 @@ import { specialtyDoctorCountsQuery } from "@/lib/accreditations";
 import { PageHero } from "@/components/PageShell";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
-
 const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/specialties`;
 const PAGE_TITLE_AR = "التخصصات الطبية — مجمع باعشن الطبي بصبيا، جازان";
@@ -55,7 +54,7 @@ export const Route = createFileRoute("/specialties/")({
     };
     return {
       meta: [
-      ...bmcOgImageMeta(),
+        ...bmcOgImageMeta(),
         { title: PAGE_TITLE_AR },
         { name: "description", content: PAGE_DESC_AR },
         { property: "og:title", content: PAGE_TITLE_AR },
@@ -69,16 +68,23 @@ export const Route = createFileRoute("/specialties/")({
       ],
       links: [{ rel: "canonical", href: PAGE_URL }],
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(buildLocalBusinessSchema({ pageUrl: PAGE_URL })) },
-        { type: "application/ld+json", children: JSON.stringify(buildBreadcrumbs([
-          { name: "الرئيسية", path: "/" },
-          { name: "التخصصات", path: "/specialties" },
-        ])) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(buildLocalBusinessSchema({ pageUrl: PAGE_URL })),
+        },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(
+            buildBreadcrumbs([
+              { name: "الرئيسية", path: "/" },
+              { name: "التخصصات", path: "/specialties" },
+            ]),
+          ),
+        },
         ...(list.length > 0
           ? [{ type: "application/ld+json", children: JSON.stringify(jsonLd) }]
           : []),
       ],
-
     };
   },
   component: SpecialtiesPage,
@@ -108,7 +114,8 @@ function SpecialtiesPage() {
                 </div>
                 {counts?.[s.id] ? (
                   <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--brand-mist)] text-[color:var(--brand-deep)] px-2.5 py-1 text-[11px] font-semibold border border-[color:var(--brand-gold-soft)]">
-                    <Users className="h-3 w-3" /> {counts[s.id]}+ {lang === "ar" ? "طبيب" : "doctors"}
+                    <Users className="h-3 w-3" /> {counts[s.id]}+{" "}
+                    {lang === "ar" ? "طبيب" : "doctors"}
                   </span>
                 ) : null}
               </div>

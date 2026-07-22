@@ -120,7 +120,10 @@ export const Route = createFileRoute("/health/$slug")({
       { property: "og:locale", content: "ar_SA" },
       { property: "article:published_time", content: article.published_at ?? "" },
       { property: "article:modified_time", content: article.updated_at },
-      { name: "twitter:card", content: article.cover_image_url ? "summary_large_image" : "summary" },
+      {
+        name: "twitter:card",
+        content: article.cover_image_url ? "summary_large_image" : "summary",
+      },
       { name: "twitter:title", content: article.title_ar },
       { name: "twitter:description", content: desc },
     ];
@@ -160,7 +163,10 @@ function ArticleError({ reset }: { reset: () => void }) {
   return (
     <div className="container-app py-20 text-center">
       <h1 className="text-3xl font-bold">حدث خطأ</h1>
-      <button onClick={reset} className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground">
+      <button
+        onClick={reset}
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground"
+      >
         إعادة المحاولة
       </button>
     </div>
@@ -170,10 +176,7 @@ function ArticleError({ reset }: { reset: () => void }) {
 // Minimal, safe markdown -> HTML for our controlled content.
 function renderMarkdown(md: string): string {
   const escape = (s: string) =>
-    s
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const lines = md.split(/\r?\n/);
   const out: string[] = [];
@@ -266,9 +269,13 @@ function ArticleDetail() {
       <section className="hero-gradient-deep text-white py-14">
         <div className="container-app">
           <nav className="text-xs text-white/80 mb-3">
-            <Link to="/" className="hover:underline">الرئيسية</Link>
+            <Link to="/" className="hover:underline">
+              الرئيسية
+            </Link>
             <span className="mx-2">/</span>
-            <Link to="/health" className="hover:underline">المدونة الصحية</Link>
+            <Link to="/health" className="hover:underline">
+              المدونة الصحية
+            </Link>
             {article.health_categories && (
               <>
                 <span className="mx-2">/</span>
@@ -276,9 +283,7 @@ function ArticleDetail() {
               </>
             )}
           </nav>
-          <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">
-            {article.title_ar}
-          </h1>
+          <h1 className="text-3xl md:text-4xl font-extrabold leading-tight">{article.title_ar}</h1>
           <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/85">
             {seasonLabel && (
               <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium">

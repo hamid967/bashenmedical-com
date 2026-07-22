@@ -6,7 +6,17 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Activity, AlertTriangle, CheckCircle2, Gauge, Pause, Play, Radio, RefreshCw, Trash2 } from "lucide-react";
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  Gauge,
+  Pause,
+  Play,
+  Radio,
+  RefreshCw,
+  Trash2,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
@@ -20,7 +30,7 @@ type Status = "idle" | "subscribing" | "subscribed" | "error" | "closed";
 
 interface LogRow {
   id: string;
-  ts: number;              // arrival time (client clock)
+  ts: number; // arrival time (client clock)
   commitTs: number | null; // event commit time (server clock) if present
   latencyMs: number | null;
   table: TableName;
@@ -61,11 +71,16 @@ function fmtMs(v: number | null): string {
 
 function statusColor(s: Status): string {
   switch (s) {
-    case "subscribed": return "text-emerald-600 bg-emerald-500/10 border-emerald-500/30";
-    case "subscribing": return "text-amber-600 bg-amber-500/10 border-amber-500/30";
-    case "error": return "text-red-600 bg-red-500/10 border-red-500/30";
-    case "closed": return "text-slate-600 bg-slate-500/10 border-slate-500/30";
-    default: return "text-slate-600 bg-slate-500/10 border-slate-500/30";
+    case "subscribed":
+      return "text-emerald-600 bg-emerald-500/10 border-emerald-500/30";
+    case "subscribing":
+      return "text-amber-600 bg-amber-500/10 border-amber-500/30";
+    case "error":
+      return "text-red-600 bg-red-500/10 border-red-500/30";
+    case "closed":
+      return "text-slate-600 bg-slate-500/10 border-slate-500/30";
+    default:
+      return "text-slate-600 bg-slate-500/10 border-slate-500/30";
   }
 }
 
@@ -82,7 +97,10 @@ function summarize(table: TableName, kind: EventKind, row: Record<string, unknow
 }
 
 function RealtimeMonitorPage() {
-  const [status, setStatus] = useState<Record<TableName, Status>>({ appointments: "idle", slot_holds: "idle" });
+  const [status, setStatus] = useState<Record<TableName, Status>>({
+    appointments: "idle",
+    slot_holds: "idle",
+  });
   const [counters, setCounters] = useState<Record<TableName, Counters>>({
     appointments: emptyCounters(),
     slot_holds: emptyCounters(),
@@ -109,40 +127,36 @@ function RealtimeMonitorPage() {
       setStatus((s) => ({ ...s, [table]: "subscribing" }));
       const ch = supabase
         .channel(`admin-monitor:${table}`)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table },
-          (payload) => {
-            if (pausedRef.current) return;
-            const kind = payload.eventType as EventKind;
-            const commitStr = (payload as { commit_timestamp?: string }).commit_timestamp ?? null;
-            const commitTs = commitStr ? new Date(commitStr).getTime() : null;
-            const now = Date.now();
-            const latency = commitTs !== null ? Math.max(0, now - commitTs) : null;
-            const row = (payload.new ?? payload.old ?? null) as Record<string, unknown> | null;
-            const rowId = row && typeof row.id === "string" ? row.id : null;
-            const entry: LogRow = {
-              id: `${table}-${now}-${Math.random().toString(36).slice(2, 7)}`,
-              ts: now,
-              commitTs,
-              latencyMs: latency,
-              table,
-              kind,
-              rowId,
-              summary: summarize(table, kind, row),
-            };
-            setLog((prev) => [entry, ...prev].slice(0, MAX_LOG));
-            setCounters((prev) => {
-              const c = { ...prev[table] };
-              c.ok += 1;
-              c.byKind = { ...c.byKind, [kind]: c.byKind[kind] + 1 };
-              if (latency !== null) {
-                c.latencies = [...c.latencies, latency].slice(-MAX_LAT);
-              }
-              return { ...prev, [table]: c };
-            });
-          },
-        )
+        .on("postgres_changes", { event: "*", schema: "public", table }, (payload) => {
+          if (pausedRef.current) return;
+          const kind = payload.eventType as EventKind;
+          const commitStr = (payload as { commit_timestamp?: string }).commit_timestamp ?? null;
+          const commitTs = commitStr ? new Date(commitStr).getTime() : null;
+          const now = Date.now();
+          const latency = commitTs !== null ? Math.max(0, now - commitTs) : null;
+          const row = (payload.new ?? payload.old ?? null) as Record<string, unknown> | null;
+          const rowId = row && typeof row.id === "string" ? row.id : null;
+          const entry: LogRow = {
+            id: `${table}-${now}-${Math.random().toString(36).slice(2, 7)}`,
+            ts: now,
+            commitTs,
+            latencyMs: latency,
+            table,
+            kind,
+            rowId,
+            summary: summarize(table, kind, row),
+          };
+          setLog((prev) => [entry, ...prev].slice(0, MAX_LOG));
+          setCounters((prev) => {
+            const c = { ...prev[table] };
+            c.ok += 1;
+            c.byKind = { ...c.byKind, [kind]: c.byKind[kind] + 1 };
+            if (latency !== null) {
+              c.latencies = [...c.latencies, latency].slice(-MAX_LAT);
+            }
+            return { ...prev, [table]: c };
+          });
+        })
         .on("system", {}, (payload) => {
           const ev = String((payload as { event?: string }).event ?? "");
           if (ev === "channel_error" || ev === "phx_error" || ev === "postgres_changes_error") {
@@ -157,7 +171,10 @@ function RealtimeMonitorPage() {
           if (s === "SUBSCRIBED") setStatus((prev) => ({ ...prev, [table]: "subscribed" }));
           else if (s === "CHANNEL_ERROR" || s === "TIMED_OUT") {
             setStatus((prev) => ({ ...prev, [table]: "error" }));
-            setCounters((prev) => ({ ...prev, [table]: { ...prev[table], err: prev[table].err + 1 } }));
+            setCounters((prev) => ({
+              ...prev,
+              [table]: { ...prev[table], err: prev[table].err + 1 },
+            }));
           } else if (s === "CLOSED") setStatus((prev) => ({ ...prev, [table]: "closed" }));
         });
       channels.push(ch);
@@ -201,7 +218,8 @@ function RealtimeMonitorPage() {
           <div>
             <h1 className="text-xl font-semibold">مراقبة Realtime — الحجوزات والـHolds</h1>
             <p className="text-sm text-muted-foreground">
-              متابعة مباشرة لأحداث <code>appointments</code> و<code>slot_holds</code> مع عدّادات النجاح/الخطأ وزمن التأخر.
+              متابعة مباشرة لأحداث <code>appointments</code> و<code>slot_holds</code> مع عدّادات
+              النجاح/الخطأ وزمن التأخر.
             </p>
           </div>
         </div>
@@ -225,7 +243,12 @@ function RealtimeMonitorPage() {
       {/* KPI cards */}
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Kpi icon={CheckCircle2} label="أحداث ناجحة" value={String(totals.ok)} tone="ok" />
-        <Kpi icon={AlertTriangle} label="أخطاء" value={String(totals.err)} tone={totals.err > 0 ? "err" : "muted"} />
+        <Kpi
+          icon={AlertTriangle}
+          label="أخطاء"
+          value={String(totals.err)}
+          tone={totals.err > 0 ? "err" : "muted"}
+        />
         <Kpi icon={Activity} label="المعدل / ثانية" value={totals.rate} tone="muted" />
         <Kpi icon={Gauge} label="زمن التأخر p95" value={fmtMs(totals.p95)} tone="muted" />
       </section>
@@ -240,8 +263,12 @@ function RealtimeMonitorPage() {
           return (
             <div key={t} className="rounded-lg border bg-card p-4">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-semibold">{t === "appointments" ? "الحجوزات" : "حجز المواعيد المؤقت (holds)"}</h2>
-                <span className={`rounded-full border px-2 py-0.5 text-xs ${statusColor(status[t])}`}>
+                <h2 className="font-semibold">
+                  {t === "appointments" ? "الحجوزات" : "حجز المواعيد المؤقت (holds)"}
+                </h2>
+                <span
+                  className={`rounded-full border px-2 py-0.5 text-xs ${statusColor(status[t])}`}
+                >
                   {status[t]}
                 </span>
               </div>
@@ -265,7 +292,9 @@ function RealtimeMonitorPage() {
       <section className="rounded-lg border bg-card">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b p-3">
           <div className="flex items-center gap-2 text-sm">
-            <RefreshCw className={`h-4 w-4 ${paused ? "text-muted-foreground" : "text-emerald-600 animate-pulse"}`} />
+            <RefreshCw
+              className={`h-4 w-4 ${paused ? "text-muted-foreground" : "text-emerald-600 animate-pulse"}`}
+            />
             <span>سجل الأحداث المباشر ({displayLog.length})</span>
           </div>
           <div className="flex items-center gap-1 text-xs">
@@ -307,11 +336,15 @@ function RealtimeMonitorPage() {
                     </td>
                     <td className="p-2">{r.table === "appointments" ? "حجوزات" : "holds"}</td>
                     <td className="p-2">
-                      <span className={`rounded px-1.5 py-0.5 text-xs ${
-                        r.kind === "INSERT" ? "bg-emerald-500/10 text-emerald-700"
-                          : r.kind === "UPDATE" ? "bg-sky-500/10 text-sky-700"
-                          : "bg-rose-500/10 text-rose-700"
-                      }`}>
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-xs ${
+                          r.kind === "INSERT"
+                            ? "bg-emerald-500/10 text-emerald-700"
+                            : r.kind === "UPDATE"
+                              ? "bg-sky-500/10 text-sky-700"
+                              : "bg-rose-500/10 text-rose-700"
+                        }`}
+                      >
                         {r.kind}
                       </span>
                     </td>
@@ -355,11 +388,21 @@ function Kpi({
   );
 }
 
-function Stat({ label, value, tone = "default" }: { label: string; value: string | number; tone?: "default" | "err" }) {
+function Stat({
+  label,
+  value,
+  tone = "default",
+}: {
+  label: string;
+  value: string | number;
+  tone?: "default" | "err";
+}) {
   return (
     <div className="rounded-md bg-muted/40 p-2">
       <div className="text-xs text-muted-foreground">{label}</div>
-      <div className={`font-semibold tabular-nums ${tone === "err" ? "text-red-600" : ""}`}>{value}</div>
+      <div className={`font-semibold tabular-nums ${tone === "err" ? "text-red-600" : ""}`}>
+        {value}
+      </div>
     </div>
   );
 }

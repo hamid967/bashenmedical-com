@@ -2,13 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { Users, Stethoscope, CalendarCheck2, Award } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 
-type Stat = { value: number; suffix?: string; labelAr: string; labelEn: string; icon: React.ElementType };
+type Stat = {
+  value: number;
+  suffix?: string;
+  labelAr: string;
+  labelEn: string;
+  icon: React.ElementType;
+};
 
 const STATS: Stat[] = [
   { value: 15, suffix: "+", labelAr: "سنة خبرة", labelEn: "Years experience", icon: Award },
   { value: 40, suffix: "+", labelAr: "استشاري وأخصائي", labelEn: "Consultants", icon: Stethoscope },
   { value: 14, suffix: "+", labelAr: "تخصص طبي", labelEn: "Specialties", icon: Users },
-  { value: 50000, suffix: "+", labelAr: "مريض سنوياً", labelEn: "Patients / year", icon: CalendarCheck2 },
+  {
+    value: 50000,
+    suffix: "+",
+    labelAr: "مريض سنوياً",
+    labelEn: "Patients / year",
+    icon: CalendarCheck2,
+  },
 ];
 
 function useCountUp(target: number, active: boolean, duration = 1200) {

@@ -27,7 +27,8 @@ const listQuery = (from: string, to: string, doctorId: string, branchId: string,
     queryFn: () =>
       listHighRiskAppointments({
         data: {
-          from, to,
+          from,
+          to,
           doctorId: doctorId || null,
           branchId: branchId || null,
           minRisk,
@@ -66,10 +67,16 @@ export const Route = createFileRoute("/_authenticated/admin/no-show-detail")({
 });
 
 const STATUS_LABELS: Record<string, string> = {
-  new: "جديد", confirmed: "مؤكد", held: "محجوز مؤقتًا",
-  pending_verification: "بانتظار التحقق", pending_payment: "بانتظار الدفع",
-  checked_in: "تم الحضور", in_progress: "قيد الخدمة", completed: "مكتمل",
-  cancelled: "ملغى", no_show: "لم يحضر",
+  new: "جديد",
+  confirmed: "مؤكد",
+  held: "محجوز مؤقتًا",
+  pending_verification: "بانتظار التحقق",
+  pending_payment: "بانتظار الدفع",
+  checked_in: "تم الحضور",
+  in_progress: "قيد الخدمة",
+  completed: "مكتمل",
+  cancelled: "ملغى",
+  no_show: "لم يحضر",
 };
 
 function riskTone(risk: number | null): string {
@@ -90,7 +97,9 @@ function fmtDateTime(iso: string): string {
   try {
     const d = new Date(iso);
     return d.toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" });
-  } catch { return iso; }
+  } catch {
+    return iso;
+  }
 }
 
 function AppointmentRow({ appt }: { appt: HighRiskAppointment }) {
@@ -109,7 +118,11 @@ function AppointmentRow({ appt }: { appt: HighRiskAppointment }) {
             aria-expanded={open}
             aria-label={open ? "إخفاء السجل" : "عرض السجل"}
           >
-            {open ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            {open ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
             <span>{appt.audit.length}</span>
           </button>
         </td>
@@ -124,16 +137,23 @@ function AppointmentRow({ appt }: { appt: HighRiskAppointment }) {
         </td>
         <td className="p-3 text-sm">{appt.doctor_name_ar ?? "—"}</td>
         <td className="p-3 text-center">
-          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusTone(appt.status)}`}>
+          <span
+            className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusTone(appt.status)}`}
+          >
             {STATUS_LABELS[appt.status] ?? appt.status}
           </span>
         </td>
         <td className="p-3 text-center">
-          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${riskTone(appt.no_show_risk)}`}>
+          <span
+            className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold tabular-nums ${riskTone(appt.no_show_risk)}`}
+          >
             {appt.no_show_risk ?? "—"}
           </span>
         </td>
-        <td className="p-3 text-xs text-muted-foreground max-w-[240px] truncate" title={primaryReason ?? ""}>
+        <td
+          className="p-3 text-xs text-muted-foreground max-w-[240px] truncate"
+          title={primaryReason ?? ""}
+        >
           {primaryReason ?? "—"}
         </td>
       </tr>
@@ -148,7 +168,10 @@ function AppointmentRow({ appt }: { appt: HighRiskAppointment }) {
             ) : (
               <ol className="space-y-2">
                 {appt.audit.map((a) => (
-                  <li key={a.id} className="rounded-md border border-border bg-background p-2.5 text-xs">
+                  <li
+                    key={a.id}
+                    className="rounded-md border border-border bg-background p-2.5 text-xs"
+                  >
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2">
                         {a.old_status && (
@@ -157,11 +180,15 @@ function AppointmentRow({ appt }: { appt: HighRiskAppointment }) {
                           </span>
                         )}
                         <span className="text-muted-foreground">←</span>
-                        <span className={`px-1.5 py-0.5 rounded font-semibold ${statusTone(a.new_status ?? "")}`}>
+                        <span
+                          className={`px-1.5 py-0.5 rounded font-semibold ${statusTone(a.new_status ?? "")}`}
+                        >
                           {a.new_status ? (STATUS_LABELS[a.new_status] ?? a.new_status) : "—"}
                         </span>
                       </div>
-                      <span className="text-muted-foreground font-mono">{fmtDateTime(a.changed_at)}</span>
+                      <span className="text-muted-foreground font-mono">
+                        {fmtDateTime(a.changed_at)}
+                      </span>
                     </div>
                     {a.reason && (
                       <div className="mt-1.5 text-foreground whitespace-pre-wrap">{a.reason}</div>
@@ -188,9 +215,17 @@ function NoShowDetailPage() {
   const [doctorId, setDoctorId] = useState("");
   const [branchId, setBranchId] = useState("");
   const [minRisk, setMinRisk] = useState(60);
-  const [applied, setApplied] = useState({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "", minRisk: 60 });
+  const [applied, setApplied] = useState({
+    from: defaultFrom,
+    to: defaultTo,
+    doctorId: "",
+    branchId: "",
+    minRisk: 60,
+  });
 
-  const { data } = useSuspenseQuery(listQuery(applied.from, applied.to, applied.doctorId, applied.branchId, applied.minRisk));
+  const { data } = useSuspenseQuery(
+    listQuery(applied.from, applied.to, applied.doctorId, applied.branchId, applied.minRisk),
+  );
   const { data: doctors = [] } = useQuery(doctorsQuery);
   const { data: branches = [] } = useQuery(branchesQuery);
 
@@ -199,9 +234,15 @@ function NoShowDetailPage() {
     return doctors.find((d) => d.id === applied.doctorId)?.name_ar ?? applied.doctorId;
   }, [applied.doctorId, doctors]);
 
-  function apply() { setApplied({ from, to, doctorId, branchId, minRisk }); }
+  function apply() {
+    setApplied({ from, to, doctorId, branchId, minRisk });
+  }
   function reset() {
-    setFrom(defaultFrom); setTo(defaultTo); setDoctorId(""); setBranchId(""); setMinRisk(60);
+    setFrom(defaultFrom);
+    setTo(defaultTo);
+    setDoctorId("");
+    setBranchId("");
+    setMinRisk(60);
     setApplied({ from: defaultFrom, to: defaultTo, doctorId: "", branchId: "", minRisk: 60 });
   }
 
@@ -223,49 +264,84 @@ function NoShowDetailPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">من</span>
-            <input type="date" value={from} onChange={(e) => setFrom(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm" />
+            <input
+              type="date"
+              value={from}
+              onChange={(e) => setFrom(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            />
           </label>
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">إلى</span>
-            <input type="date" value={to} onChange={(e) => setTo(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm" />
+            <input
+              type="date"
+              value={to}
+              onChange={(e) => setTo(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            />
           </label>
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">الطبيب</span>
-            <select value={doctorId} onChange={(e) => setDoctorId(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm">
+            <select
+              value={doctorId}
+              onChange={(e) => setDoctorId(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            >
               <option value="">كل الأطباء</option>
-              {doctors.map((d) => <option key={d.id} value={d.id}>{d.name_ar}</option>)}
+              {doctors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name_ar}
+                </option>
+              ))}
             </select>
           </label>
           <label className="text-xs">
             <span className="block text-muted-foreground mb-1">الفرع</span>
-            <select value={branchId} onChange={(e) => setBranchId(e.target.value)}
-              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm">
+            <select
+              value={branchId}
+              onChange={(e) => setBranchId(e.target.value)}
+              className="w-full rounded-md border border-border bg-background px-2 py-1.5 text-sm"
+            >
               <option value="">كل الفروع</option>
-              {branches.map((b) => <option key={b.id} value={b.id}>{b.name_ar}</option>)}
+              {branches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name_ar}
+                </option>
+              ))}
             </select>
           </label>
           <label className="text-xs">
-            <span className="block text-muted-foreground mb-1">الحد الأدنى للمخاطرة: {minRisk}</span>
-            <input type="range" min={0} max={100} step={5} value={minRisk}
+            <span className="block text-muted-foreground mb-1">
+              الحد الأدنى للمخاطرة: {minRisk}
+            </span>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={minRisk}
               onChange={(e) => setMinRisk(Number(e.target.value))}
-              className="w-full" />
+              className="w-full"
+            />
           </label>
           <div className="flex items-end gap-2">
-            <button onClick={apply}
-              className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90">
+            <button
+              onClick={apply}
+              className="flex-1 rounded-md bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground hover:opacity-90"
+            >
               تطبيق
             </button>
-            <button onClick={reset}
-              className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted">
+            <button
+              onClick={reset}
+              className="rounded-md border border-border px-3 py-2 text-sm hover:bg-muted"
+            >
               مسح
             </button>
           </div>
         </div>
         <p className="mt-3 text-[11px] text-muted-foreground">
-          النطاق النشط: {applied.from} → {applied.to} · {activeDoctor} · مخاطرة ≥ {applied.minRisk} · النتائج: {data.length}
+          النطاق النشط: {applied.from} → {applied.to} · {activeDoctor} · مخاطرة ≥ {applied.minRisk}{" "}
+          · النتائج: {data.length}
         </p>
       </section>
 

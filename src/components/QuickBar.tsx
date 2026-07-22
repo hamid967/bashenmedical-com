@@ -20,7 +20,11 @@ export function QuickBar() {
     {
       icon: MessageCircle,
       label: "WhatsApp",
-      href: whatsappUrl(lang === "ar" ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.` : `Hello ${SITE.nameEn}, I would like to inquire.`),
+      href: whatsappUrl(
+        lang === "ar"
+          ? `مرحبًا ${SITE.nameAr}، أرغب بالاستفسار.`
+          : `Hello ${SITE.nameEn}, I would like to inquire.`,
+      ),
       tone: "bg-accent/15 text-accent",
     },
     {

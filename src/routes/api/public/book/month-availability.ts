@@ -48,9 +48,12 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
         if (!year || !month || month < 1 || month > 12) {
           return json(400, { ok: false, error: "invalid_month" });
         }
-        if (doctorId && !UUID_RE.test(doctorId)) return json(400, { ok: false, error: "invalid_doctor_id" });
-        if (specialtyId && !UUID_RE.test(specialtyId)) return json(400, { ok: false, error: "invalid_specialty_id" });
-        if (branchId && !UUID_RE.test(branchId)) return json(400, { ok: false, error: "invalid_branch_id" });
+        if (doctorId && !UUID_RE.test(doctorId))
+          return json(400, { ok: false, error: "invalid_doctor_id" });
+        if (specialtyId && !UUID_RE.test(specialtyId))
+          return json(400, { ok: false, error: "invalid_specialty_id" });
+        if (branchId && !UUID_RE.test(branchId))
+          return json(400, { ok: false, error: "invalid_branch_id" });
         if (!doctorId && !specialtyId) return json(400, { ok: false, error: "missing_scope" });
 
         const empty = { ok: true, dates: [] as string[] };
@@ -119,7 +122,10 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
                   String(l.start_date) <= iso &&
                   String(l.end_date) >= iso,
               );
-              if (!onLeave) { anyAvailable = true; break; }
+              if (!onLeave) {
+                anyAvailable = true;
+                break;
+              }
             }
             if (anyAvailable) dates.push(iso);
           }

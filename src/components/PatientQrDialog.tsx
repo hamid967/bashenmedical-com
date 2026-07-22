@@ -122,7 +122,8 @@ function QrModal({
     const heading = isRating ? "قيّم تجربتك معنا" : fullNameAr;
     const sub = isRating ? "رأيك يهمّنا ويساعدنا على التحسين" : `رقم الملف: ${mrn}`;
     const hint = isRating ? "امسح الرمز لتقييم زيارتك" : "امسح لفتح ملف المريض والتقارير";
-    w.document.write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${esc(title)}</title>
+    w.document
+      .write(`<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>${esc(title)}</title>
       <style>
         body { font-family: -apple-system, "Segoe UI", Tahoma, sans-serif; margin:0; padding:40px; display:flex; align-items:center; justify-content:center; min-height:100vh; background:#f5f5f5; }
         .card { width: 360px; padding: 32px; border-radius: 20px; background:#fff; box-shadow: 0 8px 30px rgba(0,0,0,.08); text-align:center; border: 2px solid ${borderColor}; }
@@ -161,11 +162,7 @@ function QrModal({
           <h3 className="text-lg font-bold flex items-center gap-2">
             <QrCode className={`h-5 w-5 ${accentText}`} /> بطاقة QR
           </h3>
-          <button
-            onClick={onClose}
-            aria-label="إغلاق"
-            className="rounded-md p-1 hover:bg-muted"
-          >
+          <button onClick={onClose} aria-label="إغلاق" className="rounded-md p-1 hover:bg-muted">
             <X className="h-4 w-4" />
           </button>
         </div>
@@ -188,23 +185,21 @@ function QrModal({
           </button>
         </div>
 
-        <div className={`rounded-2xl border-2 ${accentBorder} bg-gradient-to-br ${accentBg} p-6 text-center`}>
+        <div
+          className={`rounded-2xl border-2 ${accentBorder} bg-gradient-to-br ${accentBg} p-6 text-center`}
+        >
           <p className={`text-[10px] uppercase tracking-widest ${accentText} font-bold mb-2`}>
             {CLINIC_NAME}
           </p>
           {isRating ? (
             <>
               <h2 className="text-xl font-bold">قيّم تجربتك معنا</h2>
-              <p className="text-sm text-muted-foreground mt-1">
-                {fullNameAr}
-              </p>
+              <p className="text-sm text-muted-foreground mt-1">{fullNameAr}</p>
             </>
           ) : (
             <>
               <h2 className="text-xl font-bold">{fullNameAr}</h2>
-              <p className="text-sm text-muted-foreground mt-1 font-mono">
-                رقم الملف: {mrn}
-              </p>
+              <p className="text-sm text-muted-foreground mt-1 font-mono">رقم الملف: {mrn}</p>
             </>
           )}
           <div className="mt-5 mx-auto w-56 h-56 bg-white rounded-xl p-3 shadow-inner grid place-items-center">

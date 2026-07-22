@@ -63,7 +63,9 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
     if (wantSource("appointment")) {
       const { data: rows } = await sb
         .from("appointments")
-        .select("id, patient_name, patient_phone, appointment_date, appointment_time, status, branch_id, created_at, reason")
+        .select(
+          "id, patient_name, patient_phone, appointment_date, appointment_time, status, branch_id, created_at, reason",
+        )
         .gte("created_at", start)
         .lte("created_at", end)
         .order("created_at", { ascending: false })
@@ -89,7 +91,9 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
     if (wantSource("service_inquiry")) {
       const { data: rows } = await sb
         .from("service_inquiries")
-        .select("id, request_number, full_name, mobile_e164, service_label, internal_status, branch_id, created_at, source")
+        .select(
+          "id, request_number, full_name, mobile_e164, service_label, internal_status, branch_id, created_at, source",
+        )
         .gte("created_at", start)
         .lte("created_at", end)
         .order("created_at", { ascending: false })

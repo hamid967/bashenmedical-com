@@ -86,7 +86,13 @@ export function WelcomeSplash() {
             className="group absolute top-6 left-6 md:top-8 md:left-10 z-20 inline-flex min-h-11 items-center gap-3 rounded-full border border-white/15 bg-white/[0.05] px-5 py-2.5 text-xs tracking-[0.35em] uppercase text-[#e8edf3] backdrop-blur-md transition hover:bg-white/[0.12] hover:border-[#00D9C0]/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#00D9C0] focus-visible:ring-offset-2 focus-visible:ring-offset-[#07101f]"
           >
             <span aria-hidden="true">تخطي</span>
-            <svg aria-hidden="true" className="h-3 w-3 rotate-180 transition-transform group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg
+              aria-hidden="true"
+              className="h-3 w-3 rotate-180 transition-transform group-hover:-translate-x-1"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -117,7 +123,12 @@ export function WelcomeSplash() {
               />
               <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full bg-gradient-to-b from-[#132749] to-[#07101f] p-1 shadow-[0_0_60px_rgba(0,217,192,0.25)]">
                 <div className="w-full h-full rounded-full border border-[#c9a84c]/30 bg-[#07101f] flex items-center justify-center overflow-hidden">
-                  <img src={bmcLogo} alt="" aria-hidden="true" className="w-[85%] h-[85%] object-contain" />
+                  <img
+                    src={bmcLogo}
+                    alt=""
+                    aria-hidden="true"
+                    className="w-[85%] h-[85%] object-contain"
+                  />
                 </div>
               </div>
             </div>
@@ -157,7 +168,8 @@ export function WelcomeSplash() {
             </motion.div>
 
             <p className="mt-6 text-[10px] tracking-[0.3em] uppercase text-[#e8edf3]/50">
-              اضغط <kbd className="rounded border border-white/20 px-1.5 py-0.5 mx-1">Esc</kbd> للتخطي
+              اضغط <kbd className="rounded border border-white/20 px-1.5 py-0.5 mx-1">Esc</kbd>{" "}
+              للتخطي
             </p>
           </motion.div>
         </motion.div>
@@ -165,4 +177,3 @@ export function WelcomeSplash() {
     </AnimatePresence>
   );
 }
-

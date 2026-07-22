@@ -123,7 +123,8 @@ function SuperPermissionsPage() {
   );
 
   const categories = useMemo(
-    () => Array.from(new Set(catalog.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "ar")),
+    () =>
+      Array.from(new Set(catalog.map((p) => p.category))).sort((a, b) => a.localeCompare(b, "ar")),
     [catalog],
   );
 
@@ -176,7 +177,6 @@ function SuperPermissionsPage() {
     setStatusFilter("all");
   }
 
-
   const mut = useMutation({
     mutationFn: async (v: { role: AppRole; permission_key: string; enabled: boolean }) => {
       await setPerm({ data: v });
@@ -187,15 +187,12 @@ function SuperPermissionsPage() {
       setPending((s) => new Set(s).add(cellKey));
       // Snapshot for rollback
       const prev = qc.getQueryData(matrixQuery.queryKey) as
-        | Array<{ role: AppRole; permission_key: string }>
-        | undefined;
+        Array<{ role: AppRole; permission_key: string }> | undefined;
       // Optimistic update
       if (prev) {
         const next = v.enabled
           ? [...prev, { role: v.role, permission_key: v.permission_key }]
-          : prev.filter(
-              (r) => !(r.role === v.role && r.permission_key === v.permission_key),
-            );
+          : prev.filter((r) => !(r.role === v.role && r.permission_key === v.permission_key));
         qc.setQueryData(matrixQuery.queryKey, next);
       }
       return { prev, cellKey };
@@ -211,14 +208,13 @@ function SuperPermissionsPage() {
       const roleLabel = ROLE_LABEL[v.role] ?? v.role;
       const action = v.enabled ? "تفعيل" : "تعطيل";
       const raw = String(err?.message ?? "").trim();
-      const reason =
-        /forbidden|permission denied|42501|ليست لديك/i.test(raw)
-          ? "ليست لديك الصلاحية الكافية."
-          : /super_admin/i.test(raw)
-            ? "هذا التعديل يتطلب صلاحية المسؤول الأعلى."
-            : /network|fetch|failed to fetch|timeout/i.test(raw)
-              ? "تعذّر الاتصال بالخادم — تحقّق من الشبكة."
-              : raw || "حدث خطأ غير متوقّع.";
+      const reason = /forbidden|permission denied|42501|ليست لديك/i.test(raw)
+        ? "ليست لديك الصلاحية الكافية."
+        : /super_admin/i.test(raw)
+          ? "هذا التعديل يتطلب صلاحية المسؤول الأعلى."
+          : /network|fetch|failed to fetch|timeout/i.test(raw)
+            ? "تعذّر الاتصال بالخادم — تحقّق من الشبكة."
+            : raw || "حدث خطأ غير متوقّع.";
       toast.error(`تعذّر ${action} «${permLabel}» للدور «${roleLabel}»`, {
         description: reason + " — أُعيدت الحالة السابقة.",
         action: {
@@ -256,16 +252,10 @@ function SuperPermissionsPage() {
   }
 
   function handleExportCsv() {
-    const header = [
-      "permission_key",
-      "category",
-      "description_ar",
-      "description_en",
-      ...ALL_ROLES,
-    ];
+    const header = ["permission_key", "category", "description_ar", "description_en", ...ALL_ROLES];
     const lines = [header.map(csvEscape).join(",")];
-    const sorted = [...catalog].sort((a, b) =>
-      a.category.localeCompare(b.category, "ar") || a.key.localeCompare(b.key),
+    const sorted = [...catalog].sort(
+      (a, b) => a.category.localeCompare(b.category, "ar") || a.key.localeCompare(b.key),
     );
     for (const p of sorted) {
       const row = [
@@ -377,7 +367,8 @@ function SuperPermissionsPage() {
         },
       });
       const parts = [`أُضيف: ${res.added ?? 0}`, `أُلغي: ${res.removed ?? 0}`];
-      if (res.skipped_unknown?.length) parts.push(`تُخطّي غير معروف: ${res.skipped_unknown.length}`);
+      if (res.skipped_unknown?.length)
+        parts.push(`تُخطّي غير معروف: ${res.skipped_unknown.length}`);
       if (res.skipped_roles?.length) parts.push(`تُخطّي أدوار: ${res.skipped_roles.length}`);
       if (res.errors?.length) parts.push(`أخطاء: ${res.errors.length}`);
       toast.success("تم الاستيراد — " + parts.join("، "));
@@ -392,7 +383,6 @@ function SuperPermissionsPage() {
       setImporting(false);
     }
   }
-
 
   return (
     <div className="container-app py-8 space-y-6" dir="rtl">
@@ -481,8 +471,7 @@ function SuperPermissionsPage() {
               <SelectItem value="all">كل الأدوار</SelectItem>
               {ALL_ROLES.map((r) => (
                 <SelectItem key={r} value={r}>
-                  {ROLE_LABEL[r]}{" "}
-                  <span className="font-mono text-[10px] opacity-60">({r})</span>
+                  {ROLE_LABEL[r]} <span className="font-mono text-[10px] opacity-60">({r})</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -513,9 +502,7 @@ function SuperPermissionsPage() {
               <Badge variant="secondary">{activeFilterCount} فلتر نشط</Badge>
             )}
             {roleFocus !== "all" && (
-              <Badge variant="outline">
-                عرض دور واحد: {ROLE_LABEL[roleFocus as AppRole]}
-              </Badge>
+              <Badge variant="outline">عرض دور واحد: {ROLE_LABEL[roleFocus as AppRole]}</Badge>
             )}
           </div>
           {activeFilterCount > 0 && (
@@ -550,7 +537,10 @@ function SuperPermissionsPage() {
           <tbody>
             {grouped.length === 0 && (
               <tr>
-                <td colSpan={visibleRoles.length + 1} className="py-10 text-center text-muted-foreground">
+                <td
+                  colSpan={visibleRoles.length + 1}
+                  className="py-10 text-center text-muted-foreground"
+                >
                   لا توجد نتائج مطابقة.
                 </td>
               </tr>
@@ -672,9 +662,7 @@ function SuperPermissionsPage() {
                   الملف: <span className="font-mono">{importFileName}</span>
                 </p>
               )}
-              {importError && (
-                <p className="text-xs text-destructive">{importError}</p>
-              )}
+              {importError && <p className="text-xs text-destructive">{importError}</p>}
               {importPayload && (
                 <div className="rounded-md border border-border bg-muted/30 p-2 text-xs">
                   معاينة: {Object.keys(importPayload).length} دور،{" "}
@@ -726,12 +714,10 @@ function PermissionDetailDialog({
   }>;
   enabledSet: Set<string>;
 }) {
-  const perm = permKey ? catalog.find((p) => p.key === permKey) ?? null : null;
+  const perm = permKey ? (catalog.find((p) => p.key === permKey) ?? null) : null;
   const enabledRoles = useMemo<AppRole[]>(() => {
     if (!perm) return [];
-    return ALL_ROLES.filter(
-      (r) => r === "super_admin" || enabledSet.has(`${r}::${perm.key}`),
-    );
+    return ALL_ROLES.filter((r) => r === "super_admin" || enabledSet.has(`${r}::${perm.key}`));
   }, [perm, enabledSet]);
 
   const constraints = useMemo<string[]>(() => {
@@ -767,17 +753,13 @@ function PermissionDetailDialog({
 
             <div className="space-y-5 text-sm">
               <section>
-                <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">
-                  التصنيف
-                </h4>
+                <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">التصنيف</h4>
                 <Badge variant="secondary">{perm.category}</Badge>
               </section>
 
               {perm.description_en && (
                 <section>
-                  <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">
-                    الوصف (EN)
-                  </h4>
+                  <h4 className="mb-1.5 text-xs font-semibold text-muted-foreground">الوصف (EN)</h4>
                   <p dir="ltr" className="text-sm leading-relaxed">
                     {perm.description_en}
                   </p>

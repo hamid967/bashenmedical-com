@@ -24,10 +24,7 @@ import { listBranches } from "@/lib/dashboard.functions";
 
 export const Route = createFileRoute("/_authenticated/calendar")({
   head: () => ({
-    meta: [
-      { title: "التقويم | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "التقويم | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: CalendarPage,
 });
@@ -142,13 +139,11 @@ function CalendarPage() {
 
   const apptsQ = useQuery({
     queryKey: ["calendar", "appts", range.from, range.to, branchId, doctorId],
-    queryFn: () =>
-      listRangeFn({ data: { from: range.from, to: range.to, branchId, doctorId } }),
+    queryFn: () => listRangeFn({ data: { from: range.from, to: range.to, branchId, doctorId } }),
   });
 
   const reschedule = useMutation({
-    mutationFn: (v: { id: string; date: string; time: string }) =>
-      rescheduleFn({ data: v }),
+    mutationFn: (v: { id: string; date: string; time: string }) => rescheduleFn({ data: v }),
     onSuccess: () => {
       toast.success("تم إعادة الجدولة");
       qc.invalidateQueries({ queryKey: ["calendar", "appts"] });
@@ -167,8 +162,8 @@ function CalendarPage() {
       view === "month"
         ? { year: "numeric", month: "long" }
         : view === "week"
-        ? { year: "numeric", month: "long" }
-        : { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+          ? { year: "numeric", month: "long" }
+          : { weekday: "long", year: "numeric", month: "long", day: "numeric" };
     if (view === "week") {
       const s = startOfWeek(anchor);
       const e = addDays(s, 6);
@@ -320,12 +315,7 @@ function CalendarPage() {
       )}
 
       {view === "day" && (
-        <DayView
-          date={fmtDate(anchor)}
-          slots={slots}
-          grouped={grouped}
-          onDrop={handleDrop}
-        />
+        <DayView date={fmtDate(anchor)} slots={slots} grouped={grouped} onDrop={handleDrop} />
       )}
       {view === "week" && (
         <WeekView
@@ -336,7 +326,13 @@ function CalendarPage() {
         />
       )}
       {view === "month" && (
-        <MonthView anchor={anchor} byDay={byDay} onDrop={handleDrop} setAnchor={setAnchor} setView={setView} />
+        <MonthView
+          anchor={anchor}
+          byDay={byDay}
+          onDrop={handleDrop}
+          setAnchor={setAnchor}
+          setView={setView}
+        />
       )}
 
       <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
@@ -489,7 +485,10 @@ function WeekView({
   });
   return (
     <div className="overflow-x-auto rounded-lg border border-border bg-card">
-      <div className="grid min-w-[900px]" style={{ gridTemplateColumns: "70px repeat(7, minmax(0, 1fr))" }}>
+      <div
+        className="grid min-w-[900px]"
+        style={{ gridTemplateColumns: "70px repeat(7, minmax(0, 1fr))" }}
+      >
         <div className="border-b border-border bg-muted/40 px-2 py-2 text-xs font-semibold text-muted-foreground">
           الوقت
         </div>
@@ -559,7 +558,10 @@ function MonthView({
     <div className="overflow-hidden rounded-lg border border-border bg-card">
       <div className="grid grid-cols-7 border-b border-border bg-muted/40">
         {headers.map((h, i) => (
-          <div key={i} className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground">
+          <div
+            key={i}
+            className="px-2 py-2 text-center text-xs font-semibold text-muted-foreground"
+          >
             {h}
           </div>
         ))}

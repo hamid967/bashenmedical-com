@@ -3,9 +3,24 @@ import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@ta
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
-  AlertTriangle, CalendarDays, CalendarPlus, CheckCircle2, ChevronLeft,
-  Clock, Filter, Loader2, LogIn, MapPin, Phone, Printer, RefreshCw, Repeat,
-  Search, Stethoscope, User2, XCircle,
+  AlertTriangle,
+  CalendarDays,
+  CalendarPlus,
+  CheckCircle2,
+  ChevronLeft,
+  Clock,
+  Filter,
+  Loader2,
+  LogIn,
+  MapPin,
+  Phone,
+  Printer,
+  RefreshCw,
+  Repeat,
+  Search,
+  Stethoscope,
+  User2,
+  XCircle,
 } from "lucide-react";
 import {
   listMyAppointments,
@@ -18,11 +33,7 @@ import {
 } from "@/lib/portal/appointments.functions";
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
-import {
-  PortalPageHeader,
-  PortalStatCard,
-  PortalEmptyState,
-} from "@/components/portal/ui";
+import { PortalPageHeader, PortalStatCard, PortalEmptyState } from "@/components/portal/ui";
 
 type Scope = "upcoming" | "past";
 type ApptStatus =
@@ -63,7 +74,10 @@ export const Route = createFileRoute("/_authenticated/portal/appointments")({
 const hhmm = (t: string) => String(t).slice(0, 5);
 const fmtDate = (d: string) =>
   new Date(`${d}T00:00:00`).toLocaleDateString("ar-SA-u-nu-latn", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   });
 
 function statusMeta(s: ApptStatus) {
@@ -74,8 +88,14 @@ function statusMeta(s: ApptStatus) {
     cancelled: { label: "ملغى", cls: "bg-red-50 text-red-700 border-red-200" },
     no_show: { label: "لم يحضر", cls: "bg-amber-50 text-amber-700 border-amber-200" },
     held: { label: "محجوز مؤقتًا", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-    pending_verification: { label: "بانتظار التحقق", cls: "bg-blue-50 text-blue-700 border-blue-200" },
-    pending_payment: { label: "بانتظار الدفع", cls: "bg-orange-50 text-orange-700 border-orange-200" },
+    pending_verification: {
+      label: "بانتظار التحقق",
+      cls: "bg-blue-50 text-blue-700 border-blue-200",
+    },
+    pending_payment: {
+      label: "بانتظار الدفع",
+      cls: "bg-orange-50 text-orange-700 border-orange-200",
+    },
     checked_in: { label: "تم الحضور", cls: "bg-cyan-50 text-cyan-700 border-cyan-200" },
     in_progress: { label: "قيد الكشف", cls: "bg-violet-50 text-violet-700 border-violet-200" },
   };
@@ -90,8 +110,18 @@ function MyAppointmentsPage() {
   const [statusFilter, setStatusFilter] = useState<"all" | ApptStatus>("all");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
-  const [reschedFor, setReschedFor] = useState<null | { id: string; date: string; time: string; doctor?: string | null }>(null);
-  const [cancelFor, setCancelFor] = useState<null | { id: string; doctor?: string | null; date: string; time: string }>(null);
+  const [reschedFor, setReschedFor] = useState<null | {
+    id: string;
+    date: string;
+    time: string;
+    doctor?: string | null;
+  }>(null);
+  const [cancelFor, setCancelFor] = useState<null | {
+    id: string;
+    doctor?: string | null;
+    date: string;
+    time: string;
+  }>(null);
   const [followFor, setFollowFor] = useState<null | { id: string; doctor?: string | null }>(null);
   const [checkInResult, setCheckInResult] = useState<null | {
     queue_number: number | null;
@@ -101,13 +131,16 @@ function MyAppointmentsPage() {
     doctor?: string | null;
     branch?: string | null;
   }>(null);
-  const [timelineFor, setTimelineFor] = useState<null | { id: string; doctor?: string | null; date: string; time: string }>(null);
-
+  const [timelineFor, setTimelineFor] = useState<null | {
+    id: string;
+    doctor?: string | null;
+    date: string;
+    time: string;
+  }>(null);
 
   const q = useSuspenseQuery(appointmentsQuery(scope));
   const qc = useQueryClient();
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ["portal", "my-appointments"] });
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["portal", "my-appointments"] });
 
   const confirmMut = useMutation({
     mutationFn: (id: string) => confirmMyAttendance({ data: { id } }),
@@ -119,24 +152,44 @@ function MyAppointmentsPage() {
   });
   const cancelMut = useMutation({
     mutationFn: (v: { id: string; reason?: string }) => cancelMyAppointment({ data: v }),
-    onSuccess: () => { invalidate(); toast.success("تم إلغاء الموعد"); setCancelFor(null); },
+    onSuccess: () => {
+      invalidate();
+      toast.success("تم إلغاء الموعد");
+      setCancelFor(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const reschedMut = useMutation({
     mutationFn: (v: { id: string; date: string; time: string }) =>
       reschedulePatientAppointment({ data: v }),
-    onSuccess: () => { invalidate(); toast.success("تمت إعادة الجدولة"); setReschedFor(null); },
+    onSuccess: () => {
+      invalidate();
+      toast.success("تمت إعادة الجدولة");
+      setReschedFor(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const followMut = useMutation({
-    mutationFn: (v: { fromAppointmentId: string; preferredDate: string; preferredTime: string; reason?: string }) =>
-      requestFollowUp({ data: v }),
-    onSuccess: () => { invalidate(); toast.success("تم إنشاء طلب المتابعة"); setFollowFor(null); },
+    mutationFn: (v: {
+      fromAppointmentId: string;
+      preferredDate: string;
+      preferredTime: string;
+      reason?: string;
+    }) => requestFollowUp({ data: v }),
+    onSuccess: () => {
+      invalidate();
+      toast.success("تم إنشاء طلب المتابعة");
+      setFollowFor(null);
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const checkInMut = useMutation({
     mutationFn: (v: { id: string; doctor?: string | null; branch?: string | null }) =>
-      performSelfCheckIn({ data: { id: v.id } }).then((r) => ({ ...r, doctor: v.doctor, branch: v.branch })),
+      performSelfCheckIn({ data: { id: v.id } }).then((r) => ({
+        ...r,
+        doctor: v.doctor,
+        branch: v.branch,
+      })),
     onSuccess: (r) => {
       invalidate();
       setCheckInResult({
@@ -167,8 +220,7 @@ function MyAppointmentsPage() {
     });
   }, [items, statusFilter, search, dateFrom, dateTo]);
 
-  const hasActiveFilters =
-    !!search.trim() || statusFilter !== "all" || !!dateFrom || !!dateTo;
+  const hasActiveFilters = !!search.trim() || statusFilter !== "all" || !!dateFrom || !!dateTo;
   const clearFilters = () => {
     setSearch("");
     setStatusFilter("all");
@@ -178,10 +230,20 @@ function MyAppointmentsPage() {
 
   const counts = useMemo(() => {
     const c: Record<ApptStatus, number> = {
-      new: 0, confirmed: 0, completed: 0, cancelled: 0, no_show: 0,
-      held: 0, pending_verification: 0, pending_payment: 0, checked_in: 0, in_progress: 0,
+      new: 0,
+      confirmed: 0,
+      completed: 0,
+      cancelled: 0,
+      no_show: 0,
+      held: 0,
+      pending_verification: 0,
+      pending_payment: 0,
+      checked_in: 0,
+      in_progress: 0,
     };
-    items.forEach((a) => { c[a.status as ApptStatus] = (c[a.status as ApptStatus] ?? 0) + 1; });
+    items.forEach((a) => {
+      c[a.status as ApptStatus] = (c[a.status as ApptStatus] ?? 0) + 1;
+    });
     return c;
   }, [items]);
 
@@ -290,7 +352,8 @@ function MyAppointmentsPage() {
       {/* Results summary */}
       {hasActiveFilters && (
         <div className="text-xs text-[color:var(--portal-ink-2)] px-1 print:hidden">
-          عرض <b className="tabular-nums text-[color:var(--portal-ink)]">{filtered.length}</b> من {items.length} موعد
+          عرض <b className="tabular-nums text-[color:var(--portal-ink)]">{filtered.length}</b> من{" "}
+          {items.length} موعد
         </div>
       )}
 
@@ -314,7 +377,13 @@ function MyAppointmentsPage() {
               a={a}
               scope={scope}
               onConfirm={() => confirmMut.mutate(a.id)}
-              onCheckIn={() => checkInMut.mutate({ id: a.id, doctor: a.doctor?.name_ar ?? null, branch: a.branch?.name_ar ?? null })}
+              onCheckIn={() =>
+                checkInMut.mutate({
+                  id: a.id,
+                  doctor: a.doctor?.name_ar ?? null,
+                  branch: a.branch?.name_ar ?? null,
+                })
+              }
               onCancel={() =>
                 setCancelFor({
                   id: a.id,
@@ -331,9 +400,7 @@ function MyAppointmentsPage() {
                   doctor: a.doctor?.name_ar ?? null,
                 })
               }
-              onFollowUp={() =>
-                setFollowFor({ id: a.id, doctor: a.doctor?.name_ar ?? null })
-              }
+              onFollowUp={() => setFollowFor({ id: a.id, doctor: a.doctor?.name_ar ?? null })}
               onTimeline={() =>
                 setTimelineFor({
                   id: a.id,
@@ -342,7 +409,12 @@ function MyAppointmentsPage() {
                   time: hhmm(a.appointment_time),
                 })
               }
-              pending={confirmMut.isPending || cancelMut.isPending || reschedMut.isPending || checkInMut.isPending}
+              pending={
+                confirmMut.isPending ||
+                cancelMut.isPending ||
+                reschedMut.isPending ||
+                checkInMut.isPending
+              }
             />
           ))}
         </ul>
@@ -381,14 +453,9 @@ function MyAppointmentsPage() {
         />
       )}
       {checkInResult && (
-        <CheckInSuccessDialog
-          result={checkInResult}
-          onClose={() => setCheckInResult(null)}
-        />
+        <CheckInSuccessDialog result={checkInResult} onClose={() => setCheckInResult(null)} />
       )}
-      {timelineFor && (
-        <TimelineDialog target={timelineFor} onClose={() => setTimelineFor(null)} />
-      )}
+      {timelineFor && <TimelineDialog target={timelineFor} onClose={() => setTimelineFor(null)} />}
     </div>
   );
 }
@@ -396,8 +463,14 @@ function MyAppointmentsPage() {
 /* ----------------------------- sub components ---------------------------- */
 
 function TabBtn({
-  active, children, onClick,
-}: { active: boolean; children: React.ReactNode; onClick: () => void }) {
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
@@ -414,7 +487,6 @@ function TabBtn({
   );
 }
 
-
 type ApptRow = ReturnType<typeof mapItemType>;
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function mapItemType() {
@@ -427,14 +499,36 @@ function mapItemType() {
     notes: string | null;
     patient_name: string;
     is_demo: boolean;
-    doctor: { name_ar: string; name_en: string | null; title_ar: string | null; photo_url: string | null; slug: string } | null;
-    branch: { name_ar: string; name_en: string; address_ar: string | null; phone: string | null; lat: number | null; lng: number | null; slug: string } | null;
+    doctor: {
+      name_ar: string;
+      name_en: string | null;
+      title_ar: string | null;
+      photo_url: string | null;
+      slug: string;
+    } | null;
+    branch: {
+      name_ar: string;
+      name_en: string;
+      address_ar: string | null;
+      phone: string | null;
+      lat: number | null;
+      lng: number | null;
+      slug: string;
+    } | null;
     specialty: { name_ar: string; name_en: string } | null;
   };
 }
 
 function AppointmentCard({
-  a, scope, onConfirm, onReschedule, onCancel, onFollowUp, onCheckIn, onTimeline, pending,
+  a,
+  scope,
+  onConfirm,
+  onReschedule,
+  onCancel,
+  onFollowUp,
+  onCheckIn,
+  onTimeline,
+  pending,
 }: {
   a: ApptRow;
   scope: Scope;
@@ -474,7 +568,9 @@ function AppointmentCard({
         {/* Date pill */}
         <div className="flex flex-col items-center justify-center min-w-[72px] rounded-xl bg-[color:var(--portal-gradient-soft)] border border-white/70 p-3">
           <div className="text-[10px] font-semibold uppercase tracking-wide text-[color:var(--portal-ink-3)]">
-            {new Date(`${a.appointment_date}T00:00:00`).toLocaleDateString("ar-SA-u-nu-latn", { month: "short" })}
+            {new Date(`${a.appointment_date}T00:00:00`).toLocaleDateString("ar-SA-u-nu-latn", {
+              month: "short",
+            })}
           </div>
           <div className="text-2xl font-bold tabular-nums text-[color:var(--portal-primary)]">
             {new Date(`${a.appointment_date}T00:00:00`).getDate()}
@@ -487,11 +583,15 @@ function AppointmentCard({
         {/* Details */}
         <div className="flex-1 min-w-[220px]">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}>
+            <span
+              className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}
+            >
               {meta.label}
             </span>
             {a.is_demo && (
-              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">DEMO</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">
+                DEMO
+              </span>
             )}
             {a.specialty && (
               <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
@@ -599,8 +699,12 @@ function AppointmentCard({
         <div className="font-bold text-base mb-1">تأكيد موعد — مجمع باعشن الطبي</div>
         <div>المريض: {a.patient_name}</div>
         <div>الطبيب: {a.doctor?.name_ar ?? "-"}</div>
-        <div>الفرع: {a.branch?.name_ar ?? "-"} — {a.branch?.address_ar ?? ""}</div>
-        <div>التاريخ: {fmtDate(a.appointment_date)} — الوقت: {hhmm(a.appointment_time)}</div>
+        <div>
+          الفرع: {a.branch?.name_ar ?? "-"} — {a.branch?.address_ar ?? ""}
+        </div>
+        <div>
+          التاريخ: {fmtDate(a.appointment_date)} — الوقت: {hhmm(a.appointment_time)}
+        </div>
         <div>الحالة: {meta.label}</div>
         {a.reason && <div>سبب الزيارة: {a.reason}</div>}
         <div className="mt-1 text-slate-500">يُرجى الحضور قبل الموعد بـ 15 دقيقة.</div>
@@ -610,7 +714,10 @@ function AppointmentCard({
 }
 
 function ActionButton({
-  onClick, disabled, tone, children,
+  onClick,
+  disabled,
+  tone,
+  children,
 }: {
   onClick: () => void;
   disabled?: boolean;
@@ -637,7 +744,15 @@ function ActionButton({
 
 /* ------------------------------- dialogs --------------------------------- */
 
-function Modal({ children, onClose, title }: { children: React.ReactNode; onClose: () => void; title: string }) {
+function Modal({
+  children,
+  onClose,
+  title,
+}: {
+  children: React.ReactNode;
+  onClose: () => void;
+  title: string;
+}) {
   return (
     <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4" onClick={onClose}>
       <div
@@ -665,7 +780,10 @@ function Modal({ children, onClose, title }: { children: React.ReactNode; onClos
 }
 
 function RescheduleDialog({
-  target, pending, onClose, onSubmit,
+  target,
+  pending,
+  onClose,
+  onSubmit,
 }: {
   target: { id: string; date: string; time: string; doctor?: string | null };
   pending: boolean;
@@ -703,7 +821,11 @@ function RescheduleDialog({
         </p>
       </div>
       <div className="mt-5 flex gap-2 justify-end">
-        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]">
+        <button
+          onClick={onClose}
+          disabled={pending}
+          className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]"
+        >
           إلغاء
         </button>
         <button
@@ -720,7 +842,10 @@ function RescheduleDialog({
 }
 
 function CancelDialog({
-  target, pending, onClose, onSubmit,
+  target,
+  pending,
+  onClose,
+  onSubmit,
 }: {
   target: { id: string; doctor?: string | null; date: string; time: string };
   pending: boolean;
@@ -731,9 +856,11 @@ function CancelDialog({
   return (
     <Modal title="إلغاء الموعد" onClose={onClose}>
       <p className="text-sm text-slate-600 mb-3">
-        هل أنت متأكد من إلغاء موعدك مع{" "}
-        <b>{target.doctor ?? "الطبيب"}</b> في{" "}
-        <b>{fmtDate(target.date)} — {target.time}</b>؟
+        هل أنت متأكد من إلغاء موعدك مع <b>{target.doctor ?? "الطبيب"}</b> في{" "}
+        <b>
+          {fmtDate(target.date)} — {target.time}
+        </b>
+        ؟
       </p>
       <label className="block text-sm">
         <span className="text-slate-700">سبب الإلغاء (اختياري)</span>
@@ -747,7 +874,11 @@ function CancelDialog({
         />
       </label>
       <div className="mt-5 flex gap-2 justify-end">
-        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]">
+        <button
+          onClick={onClose}
+          disabled={pending}
+          className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]"
+        >
           تراجع
         </button>
         <button
@@ -763,7 +894,10 @@ function CancelDialog({
 }
 
 function FollowUpDialog({
-  target, pending, onClose, onSubmit,
+  target,
+  pending,
+  onClose,
+  onSubmit,
 }: {
   target: { id: string; doctor?: string | null };
   pending: boolean;
@@ -771,7 +905,8 @@ function FollowUpDialog({
   onSubmit: (date: string, time: string, reason: string) => void;
 }) {
   const [date, setDate] = useState(() => {
-    const d = new Date(); d.setDate(d.getDate() + 7);
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
     return d.toISOString().slice(0, 10);
   });
   const [time, setTime] = useState("10:00");
@@ -816,7 +951,11 @@ function FollowUpDialog({
         </p>
       </div>
       <div className="mt-5 flex gap-2 justify-end">
-        <button onClick={onClose} disabled={pending} className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]">
+        <button
+          onClick={onClose}
+          disabled={pending}
+          className="h-9 px-4 rounded-full text-sm border border-slate-200 bg-[color:var(--portal-surface)]"
+        >
           إلغاء
         </button>
         <button
@@ -888,7 +1027,8 @@ function ErrorState({ error }: { error: Error }) {
 }
 
 function CheckInSuccessDialog({
-  result, onClose,
+  result,
+  onClose,
 }: {
   result: {
     queue_number: number | null;
@@ -902,7 +1042,8 @@ function CheckInSuccessDialog({
 }) {
   const meta = statusMeta((result.status as ApptStatus) ?? "checked_in");
   const fmtTime = new Date(result.checked_in_at).toLocaleTimeString("ar-SA-u-nu-latn", {
-    hour: "2-digit", minute: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
   });
   return (
     <div
@@ -947,7 +1088,9 @@ function CheckInSuccessDialog({
           <div className="flex items-center justify-between gap-3">
             <dt className="text-[color:var(--portal-ink-3)]">الحالة الحالية</dt>
             <dd>
-              <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}>
+              <span
+                className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}
+              >
                 {meta.label}
               </span>
             </dd>
@@ -957,7 +1100,9 @@ function CheckInSuccessDialog({
               <dt className="text-[color:var(--portal-ink-3)] inline-flex items-center gap-1.5">
                 <Stethoscope className="h-4 w-4" /> الطبيب
               </dt>
-              <dd className="font-semibold text-[color:var(--portal-ink)] truncate">{result.doctor}</dd>
+              <dd className="font-semibold text-[color:var(--portal-ink)] truncate">
+                {result.doctor}
+              </dd>
             </div>
           )}
           {result.branch && (
@@ -965,7 +1110,9 @@ function CheckInSuccessDialog({
               <dt className="text-[color:var(--portal-ink-3)] inline-flex items-center gap-1.5">
                 <MapPin className="h-4 w-4" /> الفرع
               </dt>
-              <dd className="font-semibold text-[color:var(--portal-ink)] truncate">{result.branch}</dd>
+              <dd className="font-semibold text-[color:var(--portal-ink)] truncate">
+                {result.branch}
+              </dd>
             </div>
           )}
         </dl>
@@ -987,8 +1134,11 @@ function CheckInSuccessDialog({
 function fmtDateTime(iso: string) {
   const d = new Date(iso);
   return d.toLocaleString("ar-SA-u-nu-latn", {
-    year: "numeric", month: "short", day: "numeric",
-    hour: "2-digit", minute: "2-digit",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
@@ -1009,7 +1159,8 @@ function stageLabel(status: string): string {
 }
 
 function TimelineDialog({
-  target, onClose,
+  target,
+  onClose,
 }: {
   target: { id: string; doctor?: string | null; date: string; time: string };
   onClose: () => void;
@@ -1023,8 +1174,14 @@ function TimelineDialog({
   return (
     <Modal onClose={onClose} title="سجل حالة الموعد">
       <div className="text-xs text-[color:var(--portal-ink-2)] mb-3">
-        {target.doctor && <div><b>الطبيب:</b> {target.doctor}</div>}
-        <div><b>الموعد:</b> {fmtDate(target.date)} — {target.time}</div>
+        {target.doctor && (
+          <div>
+            <b>الطبيب:</b> {target.doctor}
+          </div>
+        )}
+        <div>
+          <b>الموعد:</b> {fmtDate(target.date)} — {target.time}
+        </div>
       </div>
 
       {q.isLoading && (
@@ -1033,9 +1190,7 @@ function TimelineDialog({
         </div>
       )}
       {q.error && (
-        <div className="text-sm text-red-600 py-4">
-          تعذّر تحميل السجل. حاول مرة أخرى.
-        </div>
+        <div className="text-sm text-red-600 py-4">تعذّر تحميل السجل. حاول مرة أخرى.</div>
       )}
       {q.data && (
         <ol className="relative border-r-2 border-[color:var(--portal-border)] pr-4 space-y-4 max-h-[60vh] overflow-y-auto">
@@ -1056,10 +1211,14 @@ function TimelineDialog({
                       : "bg-white border-[color:var(--portal-border)]"
                   }`}
                 >
-                  {isCurrent && <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--portal-surface)]" />}
+                  {isCurrent && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-[color:var(--portal-surface)]" />
+                  )}
                 </span>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}>
+                  <span
+                    className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border font-semibold ${meta.cls}`}
+                  >
                     {stageLabel(ev.status)}
                   </span>
                   {ev.queue_number != null && (

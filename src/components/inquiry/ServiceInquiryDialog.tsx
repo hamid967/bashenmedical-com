@@ -42,11 +42,7 @@ const PHONE_RE = /^[+0-9\s\-()]+$/;
 const SA_MOBILE_RE = /^(?:\+?966|00966|0)?5\d{8}$/;
 
 const schema = z.object({
-  full_name: z
-    .string()
-    .trim()
-    .min(2, "الاسم قصير جدًا")
-    .max(120, "الاسم طويل جدًا"),
+  full_name: z.string().trim().min(2, "الاسم قصير جدًا").max(120, "الاسم طويل جدًا"),
   mobile_number: z
     .string()
     .trim()
@@ -59,7 +55,11 @@ const schema = z.object({
   preferred_contact_method: z.enum(["whatsapp", "phone", "sms", "email"]),
   email: z.string().trim().email("بريد غير صالح").optional().or(z.literal("")),
   national_id: z.string().trim().max(20, "طويل جدًا").optional().or(z.literal("")),
-  preferred_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "تاريخ غير صالح").optional().or(z.literal("")),
+  preferred_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "تاريخ غير صالح")
+    .optional()
+    .or(z.literal("")),
   notes: z.string().trim().max(1000, "الملاحظات طويلة جدًا").optional().or(z.literal("")),
   consent: z.literal(true, { message: "الموافقة على سياسة الخصوصية مطلوبة" }),
 });
@@ -249,13 +249,18 @@ export function ServiceInquiryDialog({
       if (body.link_token) {
         try {
           const KEY = "bmc:pending_inquiry_links";
-          const prev = JSON.parse(localStorage.getItem(KEY) ?? "[]") as Array<{ request_number: string; link_token: string }>;
+          const prev = JSON.parse(localStorage.getItem(KEY) ?? "[]") as Array<{
+            request_number: string;
+            link_token: string;
+          }>;
           const next = [
             { request_number: body.request_number, link_token: body.link_token },
             ...prev.filter((r) => r.request_number !== body.request_number),
           ].slice(0, 20);
           localStorage.setItem(KEY, JSON.stringify(next));
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
 
       const svc = services.find((s) => s.id === form.service_id);
@@ -290,7 +295,9 @@ export function ServiceInquiryDialog({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ request_number: confirmation.request_number }),
       keepalive: true,
-    }).catch(() => { /* ignore */ });
+    }).catch(() => {
+      /* ignore */
+    });
     setHandoffStatus("opened");
 
     const msg = encodeURIComponent(buildWhatsAppMessage(confirmation));
@@ -325,9 +332,7 @@ export function ServiceInquiryDialog({
         <DrawerContent className="max-h-[92dvh]">
           <DrawerHeader className="text-start">
             <DrawerTitle>استفسر عن خدمات مجمع باعشن</DrawerTitle>
-            <DrawerDescription>
-              أكمل البيانات ليصلك ردّ من فريقنا عبر واتساب.
-            </DrawerDescription>
+            <DrawerDescription>أكمل البيانات ليصلك ردّ من فريقنا عبر واتساب.</DrawerDescription>
           </DrawerHeader>
           <div className="overflow-y-auto px-4 pb-6">{Body}</div>
         </DrawerContent>
@@ -340,9 +345,7 @@ export function ServiceInquiryDialog({
       <DialogContent className="max-w-lg max-h-[90dvh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>استفسر عن خدمات مجمع باعشن</DialogTitle>
-          <DialogDescription>
-            أكمل البيانات ليصلك ردّ من فريقنا عبر واتساب.
-          </DialogDescription>
+          <DialogDescription>أكمل البيانات ليصلك ردّ من فريقنا عبر واتساب.</DialogDescription>
         </DialogHeader>
         {Body}
       </DialogContent>
@@ -382,7 +385,13 @@ function FormBody({
           />
         </Field>
 
-        <Field label="رقم الجوال" error={errors.mobile_number} htmlFor="si-mobile" hint="مثال: 05XXXXXXXX" required>
+        <Field
+          label="رقم الجوال"
+          error={errors.mobile_number}
+          htmlFor="si-mobile"
+          hint="مثال: 05XXXXXXXX"
+          required
+        >
           <input
             id="si-mobile"
             type="tel"
@@ -405,7 +414,9 @@ function FormBody({
           >
             <option value="">— اختر الخدمة —</option>
             {services.map((s) => (
-              <option key={s.id} value={s.id}>{s.name_ar}</option>
+              <option key={s.id} value={s.id}>
+                {s.name_ar}
+              </option>
             ))}
           </select>
         </Field>
@@ -420,7 +431,9 @@ function FormBody({
           >
             <option value="">— اختر الفرع —</option>
             {branches.map((b) => (
-              <option key={b.id} value={b.id}>{b.name_ar}</option>
+              <option key={b.id} value={b.id}>
+                {b.name_ar}
+              </option>
             ))}
           </select>
         </Field>
@@ -429,7 +442,12 @@ function FormBody({
           <select
             id="si-contact"
             value={form.preferred_contact_method}
-            onChange={(e) => onChange("preferred_contact_method", e.target.value as FormState["preferred_contact_method"])}
+            onChange={(e) =>
+              onChange(
+                "preferred_contact_method",
+                e.target.value as FormState["preferred_contact_method"],
+              )
+            }
             className="w-full rounded-md border border-input bg-background px-3 py-2"
           >
             <option value="whatsapp">واتساب</option>
@@ -455,7 +473,11 @@ function FormBody({
               />
             </Field>
 
-            <Field label="التاريخ المفضّل (اختياري)" error={errors.preferred_date} htmlFor="si-date">
+            <Field
+              label="التاريخ المفضّل (اختياري)"
+              error={errors.preferred_date}
+              htmlFor="si-date"
+            >
               <input
                 id="si-date"
                 type="date"
@@ -466,7 +488,12 @@ function FormBody({
               />
             </Field>
 
-            <Field label="الهوية / الإقامة (اختياري)" error={errors.national_id} htmlFor="si-nid" hint="لن تُرسل ضمن رسالة واتساب">
+            <Field
+              label="الهوية / الإقامة (اختياري)"
+              error={errors.national_id}
+              htmlFor="si-nid"
+              hint="لن تُرسل ضمن رسالة واتساب"
+            >
               <input
                 id="si-nid"
                 dir="ltr"
@@ -499,7 +526,12 @@ function FormBody({
           />
           <span>
             أوافق على{" "}
-            <a href="/privacy" className="font-semibold text-primary underline" target="_blank" rel="noreferrer">
+            <a
+              href="/privacy"
+              className="font-semibold text-primary underline"
+              target="_blank"
+              rel="noreferrer"
+            >
               سياسة الخصوصية
             </a>{" "}
             وعلى استخدام بياناتي للتواصل معي بخصوص هذا الاستفسار.
@@ -515,7 +547,11 @@ function FormBody({
         disabled={submitting}
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
-        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <MessageCircle className="h-4 w-4" />}
+        {submitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <MessageCircle className="h-4 w-4" />
+        )}
         {submitting ? "جارٍ الإرسال..." : "إرسال الاستفسار"}
       </button>
       <p className="text-[10px] text-muted-foreground text-center">
@@ -547,9 +583,7 @@ function ConfirmationView({
           </div>
           <div>
             <h3 className="text-base font-bold">تم إنشاء طلبك بنجاح</h3>
-            <p className="text-xs text-muted-foreground">
-              احتفظ برقم الطلب أدناه لمتابعته لاحقًا.
-            </p>
+            <p className="text-xs text-muted-foreground">احتفظ برقم الطلب أدناه لمتابعته لاحقًا.</p>
           </div>
         </div>
         <div className="mt-4 rounded-xl border border-border bg-background/80 p-3">
@@ -568,9 +602,7 @@ function ConfirmationView({
               <Copy className="h-3 w-3" /> نسخ
             </button>
           </div>
-          <div className="mt-1 font-mono text-lg font-bold tracking-wider">
-            {c.request_number}
-          </div>
+          <div className="mt-1 font-mono text-lg font-bold tracking-wider">{c.request_number}</div>
         </div>
         <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
           <Info label="الخدمة" value={c.service_label} />
@@ -578,7 +610,11 @@ function ConfirmationView({
           <Info label="الحالة" value="جديد" />
           <Info
             label="حالة واتساب"
-            value={handoffStatus === "opened" ? "تم فتح واتساب (لم يتم التحقق من التسليم)" : "لم يُفتح بعد"}
+            value={
+              handoffStatus === "opened"
+                ? "تم فتح واتساب (لم يتم التحقق من التسليم)"
+                : "لم يُفتح بعد"
+            }
           />
         </dl>
       </div>
@@ -663,7 +699,9 @@ function Field({
       </label>
       {children}
       {error ? (
-        <p className="mt-1 text-xs text-destructive" role="alert">{error}</p>
+        <p className="mt-1 text-xs text-destructive" role="alert">
+          {error}
+        </p>
       ) : hint ? (
         <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
       ) : null}

@@ -56,7 +56,7 @@ export const getAppointmentsReport = createServerFn({ method: "POST" })
     let q = sb
       .from("appointments")
       .select(
-        "id, appointment_date, appointment_time, patient_name, patient_phone, status, reason, notes, created_at, doctors(name_ar), specialties(name_ar), branches(name_ar)"
+        "id, appointment_date, appointment_time, patient_name, patient_phone, status, reason, notes, created_at, doctors(name_ar), specialties(name_ar), branches(name_ar)",
       )
       .gte("appointment_date", data.from)
       .lte("appointment_date", data.to)

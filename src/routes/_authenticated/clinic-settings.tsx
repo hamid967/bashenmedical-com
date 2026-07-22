@@ -122,8 +122,7 @@ function ClinicSettingsPage() {
   }
   if (!form) return null;
 
-  const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
-    setForm({ ...form, [k]: v });
+  const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setForm({ ...form, [k]: v });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -204,7 +203,10 @@ function ClinicSettingsPage() {
               العنوان، الإحداثيات، ساعات العمل ووسائل التواصل — تُستخدم في JSON-LD وصفحات SEO.
             </p>
           </div>
-          <Link to="/admin" className="flex items-center gap-1 text-sm text-primary hover:underline">
+          <Link
+            to="/admin"
+            className="flex items-center gap-1 text-sm text-primary hover:underline"
+          >
             <ArrowRight className="h-4 w-4" />
             رجوع للإدارة
           </Link>
@@ -212,30 +214,142 @@ function ClinicSettingsPage() {
 
         <form onSubmit={onSubmit} className="space-y-6">
           <Section title="الاسم والتواصل">
-            <Field label="الاسم بالعربية"><input className={input} value={form.name_ar} onChange={(e) => set("name_ar", e.target.value)} /></Field>
-            <Field label="الاسم بالإنجليزية"><input className={input} value={form.name_en} onChange={(e) => set("name_en", e.target.value)} /></Field>
-            <Field label="الهاتف (E.164)"><input className={input} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+9661..." /></Field>
-            <Field label="الهاتف (عرض)"><input className={input} value={form.phone_display} onChange={(e) => set("phone_display", e.target.value)} /></Field>
-            <Field label="الجوال"><input className={input} value={form.mobile} onChange={(e) => set("mobile", e.target.value)} /></Field>
-            <Field label="الجوال (عرض)"><input className={input} value={form.mobile_display} onChange={(e) => set("mobile_display", e.target.value)} /></Field>
-            <Field label="واتساب"><input className={input} value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} /></Field>
-            <Field label="البريد"><input type="email" className={input} value={form.email} onChange={(e) => set("email", e.target.value)} /></Field>
+            <Field label="الاسم بالعربية">
+              <input
+                className={input}
+                value={form.name_ar}
+                onChange={(e) => set("name_ar", e.target.value)}
+              />
+            </Field>
+            <Field label="الاسم بالإنجليزية">
+              <input
+                className={input}
+                value={form.name_en}
+                onChange={(e) => set("name_en", e.target.value)}
+              />
+            </Field>
+            <Field label="الهاتف (E.164)">
+              <input
+                className={input}
+                value={form.phone}
+                onChange={(e) => set("phone", e.target.value)}
+                placeholder="+9661..."
+              />
+            </Field>
+            <Field label="الهاتف (عرض)">
+              <input
+                className={input}
+                value={form.phone_display}
+                onChange={(e) => set("phone_display", e.target.value)}
+              />
+            </Field>
+            <Field label="الجوال">
+              <input
+                className={input}
+                value={form.mobile}
+                onChange={(e) => set("mobile", e.target.value)}
+              />
+            </Field>
+            <Field label="الجوال (عرض)">
+              <input
+                className={input}
+                value={form.mobile_display}
+                onChange={(e) => set("mobile_display", e.target.value)}
+              />
+            </Field>
+            <Field label="واتساب">
+              <input
+                className={input}
+                value={form.whatsapp}
+                onChange={(e) => set("whatsapp", e.target.value)}
+              />
+            </Field>
+            <Field label="البريد">
+              <input
+                type="email"
+                className={input}
+                value={form.email}
+                onChange={(e) => set("email", e.target.value)}
+              />
+            </Field>
           </Section>
 
           <Section title="العنوان">
-            <Field label="العنوان بالعربية" full><input className={input} value={form.address_ar} onChange={(e) => set("address_ar", e.target.value)} /></Field>
-            <Field label="العنوان بالإنجليزية" full><input className={input} value={form.address_en} onChange={(e) => set("address_en", e.target.value)} /></Field>
-            <Field label="الشارع"><input className={input} value={form.street_address} onChange={(e) => set("street_address", e.target.value)} /></Field>
-            <Field label="المدينة"><input className={input} value={form.address_locality} onChange={(e) => set("address_locality", e.target.value)} /></Field>
-            <Field label="المنطقة"><input className={input} value={form.address_region} onChange={(e) => set("address_region", e.target.value)} /></Field>
-            <Field label="الرمز البريدي"><input className={input} value={form.postal_code} onChange={(e) => set("postal_code", e.target.value)} /></Field>
-            <Field label="الدولة (ISO)"><input className={input} value={form.address_country} onChange={(e) => set("address_country", e.target.value)} /></Field>
-            <Field label="رابط الخريطة" full><input className={input} value={form.maps_url} onChange={(e) => set("maps_url", e.target.value)} /></Field>
+            <Field label="العنوان بالعربية" full>
+              <input
+                className={input}
+                value={form.address_ar}
+                onChange={(e) => set("address_ar", e.target.value)}
+              />
+            </Field>
+            <Field label="العنوان بالإنجليزية" full>
+              <input
+                className={input}
+                value={form.address_en}
+                onChange={(e) => set("address_en", e.target.value)}
+              />
+            </Field>
+            <Field label="الشارع">
+              <input
+                className={input}
+                value={form.street_address}
+                onChange={(e) => set("street_address", e.target.value)}
+              />
+            </Field>
+            <Field label="المدينة">
+              <input
+                className={input}
+                value={form.address_locality}
+                onChange={(e) => set("address_locality", e.target.value)}
+              />
+            </Field>
+            <Field label="المنطقة">
+              <input
+                className={input}
+                value={form.address_region}
+                onChange={(e) => set("address_region", e.target.value)}
+              />
+            </Field>
+            <Field label="الرمز البريدي">
+              <input
+                className={input}
+                value={form.postal_code}
+                onChange={(e) => set("postal_code", e.target.value)}
+              />
+            </Field>
+            <Field label="الدولة (ISO)">
+              <input
+                className={input}
+                value={form.address_country}
+                onChange={(e) => set("address_country", e.target.value)}
+              />
+            </Field>
+            <Field label="رابط الخريطة" full>
+              <input
+                className={input}
+                value={form.maps_url}
+                onChange={(e) => set("maps_url", e.target.value)}
+              />
+            </Field>
           </Section>
 
           <Section title="الإحداثيات (geo)">
-            <Field label="خط العرض (lat)"><input className={input} value={form.lat} onChange={(e) => set("lat", e.target.value)} inputMode="decimal" /></Field>
-            <Field label="خط الطول (lng)"><input className={input} value={form.lng} onChange={(e) => set("lng", e.target.value)} inputMode="decimal" /></Field>
+            <Field label="خط العرض (lat)">
+              <input
+                className={input}
+                value={form.lat}
+                onChange={(e) => set("lat", e.target.value)}
+                inputMode="decimal"
+              />
+            </Field>
+            <Field label="خط الطول (lng)">
+              <input
+                className={input}
+                value={form.lng}
+                onChange={(e) => set("lng", e.target.value)}
+                inputMode="decimal"
+              />
+            </Field>
           </Section>
 
           <Section title="ساعات العمل">
@@ -294,14 +408,42 @@ function ClinicSettingsPage() {
           </Section>
 
           <Section title="بيانات إضافية">
-            <Field label="نطاق الأسعار"><input className={input} value={form.price_range} onChange={(e) => set("price_range", e.target.value)} placeholder="$$" /></Field>
-            <Field label="العملات"><input className={input} value={form.currencies_accepted} onChange={(e) => set("currencies_accepted", e.target.value)} /></Field>
-            <Field label="طرق الدفع" full><input className={input} value={form.payment_accepted} onChange={(e) => set("payment_accepted", e.target.value)} /></Field>
+            <Field label="نطاق الأسعار">
+              <input
+                className={input}
+                value={form.price_range}
+                onChange={(e) => set("price_range", e.target.value)}
+                placeholder="$$"
+              />
+            </Field>
+            <Field label="العملات">
+              <input
+                className={input}
+                value={form.currencies_accepted}
+                onChange={(e) => set("currencies_accepted", e.target.value)}
+              />
+            </Field>
+            <Field label="طرق الدفع" full>
+              <input
+                className={input}
+                value={form.payment_accepted}
+                onChange={(e) => set("payment_accepted", e.target.value)}
+              />
+            </Field>
             <Field label="التخصصات الطبية (مفصولة بفاصلة)" full>
-              <input className={input} value={form.medical_specialties} onChange={(e) => set("medical_specialties", e.target.value)} />
+              <input
+                className={input}
+                value={form.medical_specialties}
+                onChange={(e) => set("medical_specialties", e.target.value)}
+              />
             </Field>
             <Field label="روابط التواصل (سطر لكل رابط)" full>
-              <textarea rows={4} className={input} value={form.same_as} onChange={(e) => set("same_as", e.target.value)} />
+              <textarea
+                rows={4}
+                className={input}
+                value={form.same_as}
+                onChange={(e) => set("same_as", e.target.value)}
+              />
             </Field>
           </Section>
 
@@ -311,7 +453,11 @@ function ClinicSettingsPage() {
               disabled={mutation.isPending}
               className="inline-flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90 disabled:opacity-50"
             >
-              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {mutation.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
               حفظ التغييرات
             </button>
           </div>

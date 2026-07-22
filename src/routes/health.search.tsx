@@ -72,7 +72,7 @@ export const Route = createFileRoute("/health/search")({
       "ابحث في مقالات المدونة الصحية بمجمع باعشن الطبي بصبيا، جازان. صفِّ المقالات حسب التصنيف والموسم والكلمات المفتاحية.";
     return {
       meta: [
-      ...bmcOgImageMeta(),
+        ...bmcOgImageMeta(),
         { title },
         { name: "description", content: desc },
         { name: "robots", content: "noindex, follow" },
@@ -92,9 +92,7 @@ export const Route = createFileRoute("/health/search")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="container-app py-20 text-center text-muted-foreground">
-      لا توجد نتائج.
-    </div>
+    <div className="container-app py-20 text-center text-muted-foreground">لا توجد نتائج.</div>
   ),
 });
 
@@ -135,7 +133,10 @@ function HealthSearch() {
     const id = setTimeout(() => {
       if (qLocal !== q) {
         navigate({
-          search: (prev: { q?: string; cat?: string; season?: string }) => ({ ...prev, q: qLocal || undefined }),
+          search: (prev: { q?: string; cat?: string; season?: string }) => ({
+            ...prev,
+            q: qLocal || undefined,
+          }),
           replace: true,
         });
       }
@@ -150,7 +151,12 @@ function HealthSearch() {
       if (season && a.season !== season) return false;
       if (!nq) return true;
       const hay = normalize(
-        [a.title_ar, a.excerpt_ar, (a.keywords ?? []).join(" "), a.health_categories?.name_ar ?? ""].join(" "),
+        [
+          a.title_ar,
+          a.excerpt_ar,
+          (a.keywords ?? []).join(" "),
+          a.health_categories?.name_ar ?? "",
+        ].join(" "),
       );
       return hay.includes(nq);
     });
@@ -165,18 +171,34 @@ function HealthSearch() {
   };
 
   const setCat = (slug: string) =>
-    navigate({ search: (prev: { q?: string; cat?: string; season?: string }) => ({ ...prev, cat: slug || undefined }), replace: true });
+    navigate({
+      search: (prev: { q?: string; cat?: string; season?: string }) => ({
+        ...prev,
+        cat: slug || undefined,
+      }),
+      replace: true,
+    });
   const setSeason = (s: string) =>
-    navigate({ search: (prev: { q?: string; cat?: string; season?: string }) => ({ ...prev, season: s || undefined }), replace: true });
+    navigate({
+      search: (prev: { q?: string; cat?: string; season?: string }) => ({
+        ...prev,
+        season: s || undefined,
+      }),
+      replace: true,
+    });
 
   return (
     <div>
       <section className="hero-gradient-deep text-white py-12">
         <div className="container-app">
           <nav className="text-white/80 text-sm mb-3" aria-label="breadcrumb">
-            <Link to="/" className="hover:underline">الرئيسية</Link>
+            <Link to="/" className="hover:underline">
+              الرئيسية
+            </Link>
             <span className="mx-2">/</span>
-            <Link to="/health" className="hover:underline">المدونة الصحية</Link>
+            <Link to="/health" className="hover:underline">
+              المدونة الصحية
+            </Link>
             <span className="mx-2">/</span>
             <span>البحث</span>
           </nav>
@@ -198,7 +220,11 @@ function HealthSearch() {
               type="search"
               value={qLocal}
               onChange={(e) => setQLocal(e.target.value.slice(0, 100))}
-              placeholder={lang === "ar" ? "ابحث عن مقال، عرض، مرض موسمي..." : "Search articles, symptoms, seasons..."}
+              placeholder={
+                lang === "ar"
+                  ? "ابحث عن مقال، عرض، مرض موسمي..."
+                  : "Search articles, symptoms, seasons..."
+              }
               className="w-full ps-11 pe-11 py-3 rounded-xl border border-border bg-card text-foreground shadow-sm focus:outline-none focus:ring-2 focus:ring-primary"
               aria-label="search articles"
               maxLength={100}
@@ -271,7 +297,10 @@ function HealthSearch() {
                 ? `${results.length} نتيجة${activeCatName ? ` في «${activeCatName.name_ar}»` : ""}`
                 : `${results.length} result(s)`}
             </p>
-            <Link to="/health" className="text-sm text-primary hover:underline inline-flex items-center gap-1">
+            <Link
+              to="/health"
+              className="text-sm text-primary hover:underline inline-flex items-center gap-1"
+            >
               <BookOpen className="h-4 w-4" />
               {lang === "ar" ? "تصفح كل المقالات" : "Browse all articles"}
             </Link>

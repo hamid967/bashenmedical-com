@@ -7,7 +7,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
 const RangeInput = z.object({
-  windowMinutes: z.number().int().min(5).max(60 * 24 * 30).default(60),
+  windowMinutes: z
+    .number()
+    .int()
+    .min(5)
+    .max(60 * 24 * 30)
+    .default(60),
   surface: z.enum(["public", "portal", "admin", "all"]).default("all"),
 });
 
@@ -196,7 +201,12 @@ export const listStreamEvents = createServerFn({ method: "POST" })
   .validator((input: unknown) =>
     z
       .object({
-        windowMinutes: z.number().int().min(5).max(60 * 24 * 30).default(60),
+        windowMinutes: z
+          .number()
+          .int()
+          .min(5)
+          .max(60 * 24 * 30)
+          .default(60),
         surface: z.enum(["public", "portal", "admin", "all"]).default("all"),
         onlyErrors: z.boolean().default(false),
         limit: z.number().int().min(1).max(500).default(100),

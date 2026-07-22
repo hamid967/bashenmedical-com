@@ -98,7 +98,10 @@ const schema = z.object({
     .trim()
     .toUpperCase()
     .regex(/^BAA-[0-9A-F]{8}$/, "رقم الطلب يجب أن يكون بصيغة BAA-XXXXXXXX"),
-  phone_last4: z.string().trim().regex(/^\d{4}$/, "أدخل آخر 4 أرقام من جوالك"),
+  phone_last4: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, "أدخل آخر 4 أرقام من جوالك"),
 });
 
 type Appointment = {
@@ -113,41 +116,39 @@ type Appointment = {
   cancelled_at: string | null;
 };
 
-const STATUS: Record<
-  string,
-  { label: string; cls: string; icon: React.ReactNode; note: string }
-> = {
-  new: {
-    label: "قيد المراجعة",
-    cls: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30",
-    icon: <Clock3 className="h-8 w-8" />,
-    note: "استلمنا طلبك — سيقوم فريق الاستقبال بتأكيده وسنُعلمك بأي مستجدات.",
-  },
-  confirmed: {
-    label: "مؤكّد",
-    cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
-    icon: <CheckCircle2 className="h-8 w-8" />,
-    note: "تم تأكيد موعدك. يُرجى الحضور قبل الوقت المحدد بـ15 دقيقة.",
-  },
-  completed: {
-    label: "مكتمل",
-    cls: "bg-primary/15 text-primary border-primary/30",
-    icon: <CheckCircle2 className="h-8 w-8" />,
-    note: "تمت الزيارة بنجاح. شكرًا لثقتك بنا — يسعدنا تقييمك للخدمة.",
-  },
-  cancelled: {
-    label: "ملغى",
-    cls: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
-    icon: <XCircle className="h-8 w-8" />,
-    note: "تم إلغاء هذا الموعد. يمكنك حجز موعد جديد في أي وقت.",
-  },
-  no_show: {
-    label: "لم يتم الحضور",
-    cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
-    icon: <AlertCircle className="h-8 w-8" />,
-    note: "لم يتم تسجيل حضورك للموعد. يمكنك إعادة الحجز في أي وقت.",
-  },
-};
+const STATUS: Record<string, { label: string; cls: string; icon: React.ReactNode; note: string }> =
+  {
+    new: {
+      label: "قيد المراجعة",
+      cls: "bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30",
+      icon: <Clock3 className="h-8 w-8" />,
+      note: "استلمنا طلبك — سيقوم فريق الاستقبال بتأكيده وسنُعلمك بأي مستجدات.",
+    },
+    confirmed: {
+      label: "مؤكّد",
+      cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/30",
+      icon: <CheckCircle2 className="h-8 w-8" />,
+      note: "تم تأكيد موعدك. يُرجى الحضور قبل الوقت المحدد بـ15 دقيقة.",
+    },
+    completed: {
+      label: "مكتمل",
+      cls: "bg-primary/15 text-primary border-primary/30",
+      icon: <CheckCircle2 className="h-8 w-8" />,
+      note: "تمت الزيارة بنجاح. شكرًا لثقتك بنا — يسعدنا تقييمك للخدمة.",
+    },
+    cancelled: {
+      label: "ملغى",
+      cls: "bg-rose-500/15 text-rose-700 dark:text-rose-300 border-rose-500/30",
+      icon: <XCircle className="h-8 w-8" />,
+      note: "تم إلغاء هذا الموعد. يمكنك حجز موعد جديد في أي وقت.",
+    },
+    no_show: {
+      label: "لم يتم الحضور",
+      cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-500/30",
+      icon: <AlertCircle className="h-8 w-8" />,
+      note: "لم يتم تسجيل حضورك للموعد. يمكنك إعادة الحجز في أي وقت.",
+    },
+  };
 
 function formatArabicDate(iso: string) {
   try {
@@ -268,7 +269,10 @@ function TrackPage() {
     const parsed = schema.safeParse({ reference: initialRef, phone_last4: initialPhone4 });
     if (!parsed.success) {
       setAutoFailed(true);
-      setError({ kind: "validation", message: parsed.error.issues[0]?.message ?? "بيانات غير صالحة في الرابط" });
+      setError({
+        kind: "validation",
+        message: parsed.error.issues[0]?.message ?? "بيانات غير صالحة في الرابط",
+      });
       return;
     }
     lastQueryRef.current = parsed.data;
@@ -281,7 +285,7 @@ function TrackPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRef, initialPhone4]);
 
-  const status = appointment ? STATUS[appointment.status] ?? STATUS.new : null;
+  const status = appointment ? (STATUS[appointment.status] ?? STATUS.new) : null;
   const errorMeta = error ? ERROR_META[error.kind] : null;
 
   return (
@@ -301,57 +305,60 @@ function TrackPage() {
           aria-label="نموذج تتبع طلب الحجز"
         >
           <fieldset disabled={loading} className="space-y-4 border-0 p-0 m-0 disabled:opacity-70">
-          <div>
-            <label htmlFor="tr-ref" className="mb-1 block text-xs font-semibold">
-              رقم الطلب
-            </label>
-            <input
-              id="tr-ref"
-              required
-              value={reference}
-              onChange={(e) => setReference(e.target.value.toUpperCase())}
-              placeholder="BAA-XXXXXXXX"
-              dir="ltr"
-              maxLength={12}
-              className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm font-mono tracking-wider"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              أرسلناه لك برسالة تأكيد بعد الحجز.
-            </p>
-          </div>
+            <div>
+              <label htmlFor="tr-ref" className="mb-1 block text-xs font-semibold">
+                رقم الطلب
+              </label>
+              <input
+                id="tr-ref"
+                required
+                value={reference}
+                onChange={(e) => setReference(e.target.value.toUpperCase())}
+                placeholder="BAA-XXXXXXXX"
+                dir="ltr"
+                maxLength={12}
+                className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm font-mono tracking-wider"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                أرسلناه لك برسالة تأكيد بعد الحجز.
+              </p>
+            </div>
 
-          <div>
-            <label htmlFor="tr-phone" className="mb-1 block text-xs font-semibold">
-              آخر 4 أرقام من جوالك
-            </label>
-            <input
-              id="tr-phone"
-              required
-              value={phone4}
-              onChange={(e) => setPhone4(e.target.value.replace(/\D/g, "").slice(0, 4))}
-              placeholder="1234"
-              dir="ltr"
-              inputMode="numeric"
-              maxLength={4}
-              className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm font-mono tracking-wider"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              للتحقق من هويتك — لن نستخدمها لأي غرض آخر.
-            </p>
-          </div>
+            <div>
+              <label htmlFor="tr-phone" className="mb-1 block text-xs font-semibold">
+                آخر 4 أرقام من جوالك
+              </label>
+              <input
+                id="tr-phone"
+                required
+                value={phone4}
+                onChange={(e) => setPhone4(e.target.value.replace(/\D/g, "").slice(0, 4))}
+                placeholder="1234"
+                dir="ltr"
+                inputMode="numeric"
+                maxLength={4}
+                className="w-full rounded-md border border-input bg-background px-3 py-2.5 text-sm font-mono tracking-wider"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                للتحقق من هويتك — لن نستخدمها لأي غرض آخر.
+              </p>
+            </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            {loading ? "جاري البحث..." : "عرض حالة الطلب"}
-          </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="h-4 w-4" />
+              )}
+              {loading ? "جاري البحث..." : "عرض حالة الطلب"}
+            </button>
           </fieldset>
 
           <p className="text-xs text-muted-foreground text-center pt-2">
-
             هل نسيت رقم الطلب؟{" "}
             <Link to="/lookup" className="text-primary font-semibold hover:underline">
               ابحث برقم الجوال بدلاً من ذلك
@@ -370,7 +377,8 @@ function TrackPage() {
               <div>
                 <div className="font-semibold">جاري فتح طلبك تلقائيًا…</div>
                 <div className="text-xs text-primary/80 mt-0.5">
-                  نبحث عن الطلب <span className="font-mono">{initialRef}</span> باستخدام آخر 4 أرقام من جوالك.
+                  نبحث عن الطلب <span className="font-mono">{initialRef}</span> باستخدام آخر 4 أرقام
+                  من جوالك.
                 </div>
               </div>
             </div>
@@ -434,7 +442,9 @@ function TrackPage() {
               <div className="mx-auto mb-3 grid place-items-center">{errorMeta.icon}</div>
               <p
                 className={`text-base font-bold ${
-                  error.kind === "not_found" ? "text-amber-700 dark:text-amber-300" : "text-destructive"
+                  error.kind === "not_found"
+                    ? "text-amber-700 dark:text-amber-300"
+                    : "text-destructive"
                 }`}
               >
                 {errorMeta.title}
@@ -472,7 +482,6 @@ function TrackPage() {
               </div>
             </div>
           )}
-
 
           {appointment && status && (
             <div className="space-y-4">

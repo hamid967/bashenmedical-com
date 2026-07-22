@@ -181,9 +181,7 @@ function Swatch({ className }: { className: string }) {
 function TokenTable({ title, rows }: { title: string; rows: Row[] }) {
   return (
     <section className="rounded-2xl border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-1)] p-5 shadow-[var(--portal-shadow-sm)]">
-      <h2 className="mb-4 text-lg font-semibold text-[color:var(--portal-ink)]">
-        {title}
-      </h2>
+      <h2 className="mb-4 text-lg font-semibold text-[color:var(--portal-ink)]">{title}</h2>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[720px] text-start text-sm">
           <thead>
@@ -207,18 +205,14 @@ function TokenTable({ title, rows }: { title: string; rows: Row[] }) {
                   </code>
                 </td>
                 <td className="py-3 pe-4">
-                  <code className="text-xs text-[color:var(--portal-ink-2)]">
-                    var({r.token})
-                  </code>
+                  <code className="text-xs text-[color:var(--portal-ink-2)]">var({r.token})</code>
                 </td>
                 <td className="py-3 pe-4">
                   <code className="whitespace-pre-wrap break-all text-xs text-[color:var(--portal-primary)]">
                     {r.className}
                   </code>
                 </td>
-                <td className="py-3 text-xs text-[color:var(--portal-ink-2)]">
-                  {r.note ?? ""}
-                </td>
+                <td className="py-3 text-xs text-[color:var(--portal-ink-2)]">{r.note ?? ""}</td>
               </tr>
             ))}
           </tbody>
@@ -248,12 +242,9 @@ function DesignTokensDocs() {
             .portal-root
           </code>
           . الهدف: منع الألوان الجامدة (Tailwind palettes مثل{" "}
-          <code className="text-[color:var(--portal-error)]">bg-slate-300</code>{" "}
-          و
-          <code className="text-[color:var(--portal-error)]">
-            bg-emerald-500
-          </code>
-          ) واستبدالها بمتغيرات تلتزم بالوضع الفاتح/المظلم وبقواعد التباين.
+          <code className="text-[color:var(--portal-error)]">bg-slate-300</code> و
+          <code className="text-[color:var(--portal-error)]">bg-emerald-500</code>) واستبدالها
+          بمتغيرات تلتزم بالوضع الفاتح/المظلم وبقواعد التباين.
         </p>
         <ul className="mt-4 space-y-1 text-sm text-[color:var(--portal-ink)]">
           <li>
@@ -261,14 +252,13 @@ function DesignTokensDocs() {
             <code>portal-card</code> / <code>portal-chip</code>.
           </li>
           <li>
-            🚫 لا تكتب ألوان hex/rgb في JSX ولا تستخدم{" "}
-            <code>bg-slate-*</code> / <code>text-gray-*</code> /{" "}
-            <code>bg-emerald-*</code> داخل صفحات <code>portal/*</code> أو{" "}
+            🚫 لا تكتب ألوان hex/rgb في JSX ولا تستخدم <code>bg-slate-*</code> /{" "}
+            <code>text-gray-*</code> / <code>bg-emerald-*</code> داخل صفحات <code>portal/*</code> أو{" "}
             <code>admin/*</code>.
           </li>
           <li>
-            ⚠️ الاستثناء الوحيد: صفحات التسويق العامة (خارج{" "}
-            <code>.portal-root</code>) لها نظام tokens منفصل.
+            ⚠️ الاستثناء الوحيد: صفحات التسويق العامة (خارج <code>.portal-root</code>) لها نظام
+            tokens منفصل.
           </li>
         </ul>
       </header>
@@ -284,8 +274,7 @@ function DesignTokensDocs() {
           أنماط جاهزة (Utilities)
         </h2>
         <p className="mb-4 text-sm text-[color:var(--portal-ink-2)]">
-          بدل تجميع classes يدوياً، فضِّل الـutilities المعرّفة في{" "}
-          <code>src/styles.css</code>:
+          بدل تجميع classes يدوياً، فضِّل الـutilities المعرّفة في <code>src/styles.css</code>:
         </p>
         <ul className="grid gap-2 text-sm sm:grid-cols-2">
           {[
@@ -302,12 +291,8 @@ function DesignTokensDocs() {
               key={cls}
               className="flex items-start gap-2 rounded-lg border border-[color:var(--portal-border)] bg-[color:var(--portal-surface-2)] px-3 py-2"
             >
-              <code className="text-xs text-[color:var(--portal-primary)]">
-                .{cls}
-              </code>
-              <span className="text-xs text-[color:var(--portal-ink-2)]">
-                — {desc}
-              </span>
+              <code className="text-xs text-[color:var(--portal-primary)]">.{cls}</code>
+              <span className="text-xs text-[color:var(--portal-ink-2)]">— {desc}</span>
             </li>
           ))}
         </ul>
@@ -319,19 +304,17 @@ function DesignTokensDocs() {
         </h2>
         <ol className="list-inside list-decimal space-y-2 text-sm text-[color:var(--portal-ink)]">
           <li>
-            ابحث عن أي <code>bg-slate-*</code>, <code>bg-gray-*</code>,{" "}
-            <code>bg-emerald-*</code>, <code>bg-red-*</code>,{" "}
-            <code>text-white</code>, <code>text-slate-*</code> داخل الملف.
+            ابحث عن أي <code>bg-slate-*</code>, <code>bg-gray-*</code>, <code>bg-emerald-*</code>,{" "}
+            <code>bg-red-*</code>, <code>text-white</code>, <code>text-slate-*</code> داخل الملف.
           </li>
           <li>استبدلها بالـclass المقابل من الجداول أعلاه.</li>
           <li>
-            إذا كان العنصر بطاقة كاملة، فضّل استبدال الـwrapper بـ{" "}
-            <code>PortalCard</code> من{" "}
+            إذا كان العنصر بطاقة كاملة، فضّل استبدال الـwrapper بـ <code>PortalCard</code> من{" "}
             <code>src/components/portal/ui/</code>.
           </li>
           <li>
-            شغّل <code>bunx tsgo --noEmit</code> ثم افتح الصفحة بصرياً للتأكد
-            من التباين (AA على الأقل).
+            شغّل <code>bunx tsgo --noEmit</code> ثم افتح الصفحة بصرياً للتأكد من التباين (AA على
+            الأقل).
           </li>
         </ol>
       </section>

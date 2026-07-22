@@ -21,12 +21,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, ShieldCheck, ShieldAlert, Wallet, ArrowLeft, History, RefreshCw } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import {
-  verifyMyInsurance,
-  listMyInsuranceVerifications,
-} from "@/lib/portal/insurance.functions";
+  Loader2,
+  ShieldCheck,
+  ShieldAlert,
+  Wallet,
+  ArrowLeft,
+  History,
+  RefreshCw,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { verifyMyInsurance, listMyInsuranceVerifications } from "@/lib/portal/insurance.functions";
 
 type Provider = { id: string; name_ar: string; name_en: string };
 
@@ -68,14 +73,12 @@ export const Route = createFileRoute("/insurance/verify")({
       { title: "التحقق من تغطية التأمين (NPHIES) — باعشن الطبي" },
       {
         name: "description",
-        content:
-          "تحقّق من أهلية تأمينك الصحي وتقدير التكلفة قبل الحجز عبر منصة NPHIES.",
+        content: "تحقّق من أهلية تأمينك الصحي وتقدير التكلفة قبل الحجز عبر منصة NPHIES.",
       },
       { property: "og:title", content: "التحقق من تغطية التأمين (NPHIES) — باعشن الطبي" },
       {
         property: "og:description",
-        content:
-          "تحقّق من أهلية تأمينك الصحي وتقدير التكلفة قبل الحجز عبر منصة NPHIES.",
+        content: "تحقّق من أهلية تأمينك الصحي وتقدير التكلفة قبل الحجز عبر منصة NPHIES.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -104,7 +107,10 @@ function InsuranceVerifyPage() {
     const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
       setUserId(sess?.user?.id ?? null);
     });
-    return () => { alive = false; sub.subscription.unsubscribe(); };
+    return () => {
+      alive = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const { data: providers = [], isLoading: loadingProviders } = useQuery({
@@ -133,11 +139,7 @@ function InsuranceVerifyPage() {
     [doctorId, providerId, loading],
   );
 
-  function reuseSaved(row: {
-    doctor_id: string | null;
-    provider_id: string | null;
-    id: string;
-  }) {
+  function reuseSaved(row: { doctor_id: string | null; provider_id: string | null; id: string }) {
     if (row.doctor_id) setDoctorId(row.doctor_id);
     if (row.provider_id) setProviderId(row.provider_id);
     // policy_hint is masked; leave the field blank to force a fresh entry
@@ -222,8 +224,8 @@ function InsuranceVerifyPage() {
           </Link>
         </div>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          تحقق من أهلية تأمينك الصحي وتقدير حصتك من التكلفة قبل الحجز. النتائج
-          تصدر عبر منصة <span className="font-semibold">NPHIES</span>.
+          تحقق من أهلية تأمينك الصحي وتقدير حصتك من التكلفة قبل الحجز. النتائج تصدر عبر منصة{" "}
+          <span className="font-semibold">NPHIES</span>.
           {userId
             ? " تُحفظ نتائج التحقق تلقائيًا في حسابك وتُربط بملفك الطبي لإعادة استخدامها لاحقًا دون إعادة الإدخال."
             : " سجّل الدخول لحفظ النتائج في حسابك وربطها بملفك الطبي."}
@@ -248,7 +250,10 @@ function InsuranceVerifyPage() {
               {saved.slice(0, 5).map((row) => {
                 const doctor = doctors.find((d) => d.id === row.doctor_id);
                 return (
-                  <li key={row.id} className="py-2 flex flex-wrap items-center justify-between gap-2">
+                  <li
+                    key={row.id}
+                    className="py-2 flex flex-wrap items-center justify-between gap-2"
+                  >
                     <div className="text-xs">
                       <div className="font-medium">
                         {row.provider_name_ar ?? "—"}
@@ -403,9 +408,7 @@ function InsuranceVerifyPage() {
               )}
               {result.eligible ? "التأمين مؤهل" : "الأهلية غير مؤكدة"}
             </div>
-            {result.message && (
-              <p className="text-sm text-muted-foreground">{result.message}</p>
-            )}
+            {result.message && <p className="text-sm text-muted-foreground">{result.message}</p>}
             {result.eligible && (
               <dl className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
                 <Stat label="التغطية" value={fmtPct(result.coverage_percent)} />
@@ -435,23 +438,11 @@ function InsuranceVerifyPage() {
   );
 }
 
-function Stat({
-  label,
-  value,
-  highlight,
-}: {
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) {
+function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
     <div className="rounded-lg bg-background/60 border p-3">
       <div className="text-[11px] text-muted-foreground">{label}</div>
-      <div
-        className={`text-sm font-bold ${highlight ? "text-primary" : ""}`}
-      >
-        {value}
-      </div>
+      <div className={`text-sm font-bold ${highlight ? "text-primary" : ""}`}>{value}</div>
     </div>
   );
 }

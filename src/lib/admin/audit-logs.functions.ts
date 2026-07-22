@@ -76,7 +76,7 @@ export const listAuditFacets = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const actions = new Set<string>();
     const entities = new Set<string>();
-    for (const r of ((data ?? []) as unknown) as Array<{ action: string; entity_type: string }>) {
+    for (const r of (data ?? []) as unknown as Array<{ action: string; entity_type: string }>) {
       if (r.action) actions.add(r.action);
       if (r.entity_type) entities.add(r.entity_type);
     }

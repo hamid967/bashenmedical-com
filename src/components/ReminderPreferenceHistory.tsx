@@ -39,7 +39,9 @@ export function ReminderPreferenceHistoryList({
 }) {
   const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [kindFilter, setKindFilter] = useState<"all" | "reminder_24h" | "reminder_2h">("all");
-  const [sourceFilter, setSourceFilter] = useState<"all" | "self_service" | "staff" | "system">("all");
+  const [sourceFilter, setSourceFilter] = useState<"all" | "self_service" | "staff" | "system">(
+    "all",
+  );
   const [query, setQuery] = useState("");
 
   if (!rows.length) {
@@ -72,8 +74,7 @@ export function ReminderPreferenceHistoryList({
   // the day headers and rows within each day render oldest-first.
   const orderedRows = sortOrder === "asc" ? [...filteredRows].reverse() : filteredRows;
 
-  const hasActiveFilter =
-    kindFilter !== "all" || sourceFilter !== "all" || q.length > 0;
+  const hasActiveFilter = kindFilter !== "all" || sourceFilter !== "all" || q.length > 0;
   const resetFilters = () => {
     setKindFilter("all");
     setSourceFilter("all");
@@ -207,10 +208,7 @@ export function ReminderPreferenceHistoryList({
           </h5>
           <ol className="space-y-2">
             {g.rows.map((r) => (
-              <li
-                key={r.id}
-                className="rounded-lg border border-border bg-card p-3 text-sm"
-              >
+              <li key={r.id} className="rounded-lg border border-border bg-card p-3 text-sm">
                 <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
                   <span>
                     {showActor && r.changed_by_name
@@ -242,7 +240,9 @@ export function ReminderPreferenceHistoryList({
                 </div>
                 <div className="mt-1 text-xs text-muted-foreground">
                   السبب:{" "}
-                  <span className={r.reason ? "text-foreground" : "text-muted-foreground/80 italic"}>
+                  <span
+                    className={r.reason ? "text-foreground" : "text-muted-foreground/80 italic"}
+                  >
                     {r.reason || "غير متوفر"}
                   </span>
                 </div>
@@ -270,10 +270,10 @@ export function ReminderHistoryByRefModal({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc(
-        "list_reminder_preferences_by_ref",
-        { _ref: refValue, _phone: phone },
-      );
+      const { data, error } = await supabase.rpc("list_reminder_preferences_by_ref", {
+        _ref: refValue,
+        _phone: phone,
+      });
       if (cancelled) return;
       if (error) setError(error.message);
       else setRows((data ?? []) as ReminderAuditRow[]);
@@ -298,10 +298,9 @@ export function ReminderHistoryForMyAppointmentModal({
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc(
-        "my_reminder_preference_audit",
-        { _appointment_id: appointmentId },
-      );
+      const { data, error } = await supabase.rpc("my_reminder_preference_audit", {
+        _appointment_id: appointmentId,
+      });
       if (cancelled) return;
       if (error) setError(error.message);
       else setRows((data ?? []) as ReminderAuditRow[]);

@@ -120,7 +120,7 @@ export const Route = createFileRoute("/doctors/")({
 
     return {
       meta: [
-      ...bmcOgImageMeta(),
+        ...bmcOgImageMeta(),
         { title: PAGE_TITLE },
         { name: "description", content: PAGE_DESC },
         { property: "og:title", content: PAGE_TITLE },
@@ -131,7 +131,10 @@ export const Route = createFileRoute("/doctors/")({
       ],
       links: [{ rel: "canonical", href: PAGE_URL }],
       scripts: [
-        { type: "application/ld+json", children: JSON.stringify(buildLocalBusinessSchema({ pageUrl: PAGE_URL })) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify(buildLocalBusinessSchema({ pageUrl: PAGE_URL })),
+        },
         {
           type: "application/ld+json",
           children: JSON.stringify(
@@ -300,8 +303,7 @@ function DoctorsPageBody() {
         <div
           className="absolute inset-0 opacity-[0.04] pointer-events-none"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
+            backgroundImage: "radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)",
             backgroundSize: "24px 24px",
           }}
           aria-hidden
@@ -366,19 +368,25 @@ function DoctorsPageBody() {
                   <>
                     عرض{" "}
                     <span className="font-semibold text-foreground tabular-nums">
-                      {filtered.length === 0 ? 0 : start + 1}–{Math.min(start + perPage, filtered.length)}
+                      {filtered.length === 0 ? 0 : start + 1}–
+                      {Math.min(start + perPage, filtered.length)}
                     </span>{" "}
                     من أصل{" "}
-                    <span className="font-semibold text-foreground tabular-nums">{filtered.length}</span>
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {filtered.length}
+                    </span>
                   </>
                 ) : (
                   <>
                     Showing{" "}
                     <span className="font-semibold text-foreground tabular-nums">
-                      {filtered.length === 0 ? 0 : start + 1}–{Math.min(start + perPage, filtered.length)}
+                      {filtered.length === 0 ? 0 : start + 1}–
+                      {Math.min(start + perPage, filtered.length)}
                     </span>{" "}
                     of{" "}
-                    <span className="font-semibold text-foreground tabular-nums">{filtered.length}</span>
+                    <span className="font-semibold text-foreground tabular-nums">
+                      {filtered.length}
+                    </span>
                   </>
                 )}
               </p>

@@ -193,11 +193,12 @@ export function extractActions(text: string): { body: string; actions: Assistant
           tool: String(parsed.tool),
           label: String(parsed.label ?? parsed.tool),
           summary: parsed.summary ? String(parsed.summary) : undefined,
-          params:
-            parsed.params && typeof parsed.params === "object" ? parsed.params : {},
+          params: parsed.params && typeof parsed.params === "object" ? parsed.params : {},
         });
       }
-    } catch { /* ignore malformed */ }
+    } catch {
+      /* ignore malformed */
+    }
     return ""; // remove fence from visible body
   });
   return { body: stripped.trim(), actions };

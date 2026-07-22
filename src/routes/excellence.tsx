@@ -8,7 +8,11 @@ export const Route = createFileRoute("/excellence")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "مراكز التميز — مجمع باعشن الطبي" },
-      { name: "description", content: "مراكز التميز في مجمع باعشن الطبي: القلب، العظام، العيون، النساء والولادة، طب الأسنان، الأعصاب، الجهاز الهضمي والجراحة التجميلية." },
+      {
+        name: "description",
+        content:
+          "مراكز التميز في مجمع باعشن الطبي: القلب، العظام، العيون، النساء والولادة، طب الأسنان، الأعصاب، الجهاز الهضمي والجراحة التجميلية.",
+      },
       { property: "og:title", content: "مراكز التميز — مجمع باعشن الطبي" },
       { property: "og:description", content: "رعاية متخصصة في ثمانية مجالات طبية." },
       { property: "og:url", content: "https://bashenmedical.com/excellence" },

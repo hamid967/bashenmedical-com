@@ -105,8 +105,7 @@ export const getOrderDetails = createServerFn({ method: "GET" })
 
     // resolve patient (best-effort)
     let patientRow: any = null;
-    const phone: string | null =
-      (order as any).patient_phone ?? (order as any).phone ?? null;
+    const phone: string | null = (order as any).patient_phone ?? (order as any).phone ?? null;
     const patientId: string | null = (order as any).patient_id ?? null;
     if (patientId) {
       const { data: p } = await supabase
@@ -166,10 +165,7 @@ export const getOrderDetails = createServerFn({ method: "GET" })
         for (const p of (profs ?? []) as any[]) nameById.set(p.id, p.full_name ?? "");
       }
       for (const row of (audit ?? []) as any[]) {
-        const actor =
-          (row.changed_by && nameById.get(row.changed_by)) ||
-          row.actor_kind ||
-          null;
+        const actor = (row.changed_by && nameById.get(row.changed_by)) || row.actor_kind || null;
         if (row.old_status || row.new_status) {
           timeline.push({
             at: row.changed_at,
@@ -189,7 +185,10 @@ export const getOrderDetails = createServerFn({ method: "GET" })
           });
         }
       }
-    } else if ((order as any).updated_at && (order as any).updated_at !== (order as any).created_at) {
+    } else if (
+      (order as any).updated_at &&
+      (order as any).updated_at !== (order as any).created_at
+    ) {
       timeline.push({
         at: (order as any).updated_at,
         kind: "updated",

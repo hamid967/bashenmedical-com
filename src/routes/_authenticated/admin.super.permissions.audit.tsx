@@ -48,10 +48,7 @@ const auditQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/admin/super/permissions/audit")({
   loader: ({ context }) => context.queryClient.ensureQueryData(auditQuery),
   head: () => ({
-    meta: [
-      { title: "سجل تدقيق الصلاحيات | Super Admin" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "سجل تدقيق الصلاحيات | Super Admin" }, { name: "robots", content: "noindex" }],
   }),
   component: () => (
     <RequirePermission anyOf="rbac.manage">
@@ -111,7 +108,9 @@ function AuditPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline">{filtered.length} من {rows.length}</Badge>
+          <Badge variant="outline">
+            {filtered.length} من {rows.length}
+          </Badge>
           <Link
             to="/admin/super/permissions"
             className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full border border-border bg-card hover:bg-accent px-3 h-8"
@@ -158,9 +157,7 @@ function AuditPage() {
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-border bg-card p-10 text-center">
           <History className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
-          <p className="text-sm text-muted-foreground">
-            لا توجد أي تغييرات مسجّلة حتى الآن.
-          </p>
+          <p className="text-sm text-muted-foreground">لا توجد أي تغييرات مسجّلة حتى الآن.</p>
         </div>
       ) : (
         <div className="rounded-xl border border-border bg-card overflow-x-auto">
@@ -193,25 +190,20 @@ function AuditRow({ row }: { row: RolePermissionAuditRow }) {
     dateStyle: "medium",
     timeStyle: "short",
   });
-  const permLabel =
-    row.permission_label_ar || row.permission_label_en || row.permission_key || "—";
+  const permLabel = row.permission_label_ar || row.permission_label_en || row.permission_key || "—";
   const prev = row.previous_enabled;
   const next = row.new_enabled;
   const grant = row.action === "role_permission_granted";
   return (
     <tr className="border-t border-border align-top hover:bg-muted/20">
-      <td className="px-3 py-3 whitespace-nowrap text-xs text-muted-foreground">
-        {dateStr}
-      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-xs text-muted-foreground">{dateStr}</td>
       <td className="px-3 py-3">
         <div className="flex items-center gap-2 min-w-0">
           <div className="h-8 w-8 rounded-full bg-primary/10 text-primary grid place-items-center shrink-0">
             <UserRound className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <div className="font-semibold truncate">
-              {row.actor_name ?? "—"}
-            </div>
+            <div className="font-semibold truncate">{row.actor_name ?? "—"}</div>
             <div className="text-[11px] text-muted-foreground truncate" dir="ltr">
               {row.actor_email ?? row.actor_id ?? "—"}
             </div>
@@ -220,7 +212,7 @@ function AuditRow({ row }: { row: RolePermissionAuditRow }) {
       </td>
       <td className="px-3 py-3 whitespace-nowrap">
         <div className="text-sm font-semibold">
-          {row.role_key ? ROLE_LABEL[row.role_key] ?? row.role_key : "—"}
+          {row.role_key ? (ROLE_LABEL[row.role_key] ?? row.role_key) : "—"}
         </div>
         <div className="text-[11px] font-mono text-muted-foreground" dir="ltr">
           {row.role_key ?? ""}
@@ -242,13 +234,7 @@ function AuditRow({ row }: { row: RolePermissionAuditRow }) {
   );
 }
 
-function StateBadge({
-  value,
-  highlight,
-}: {
-  value: boolean | null;
-  highlight?: "on" | "off";
-}) {
+function StateBadge({ value, highlight }: { value: boolean | null; highlight?: "on" | "off" }) {
   if (value === null || value === undefined) {
     return <span className="text-xs text-muted-foreground">—</span>;
   }

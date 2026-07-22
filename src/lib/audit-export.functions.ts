@@ -35,7 +35,9 @@ export type AuditRow = Record<string, any>;
 async function fetchAppointmentAudit(supabase: any, f: z.infer<typeof filterSchema>) {
   let q = supabase
     .from("appointment_audit")
-    .select("id, appointment_id, changed_at, changed_by, old_status, new_status, old_notes, new_notes, reason")
+    .select(
+      "id, appointment_id, changed_at, changed_by, old_status, new_status, old_notes, new_notes, reason",
+    )
     .order("changed_at", { ascending: false })
     .limit(f.limit);
   if (f.from) q = q.gte("changed_at", f.from);
@@ -45,8 +47,12 @@ async function fetchAppointmentAudit(supabase: any, f: z.infer<typeof filterSche
   const { data: rows, error } = await q;
   if (error) throw new Error(error.message);
 
-  const apptIds = Array.from(new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean))) as string[];
-  const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean))) as string[];
+  const apptIds = Array.from(
+    new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean)),
+  ) as string[];
+  const actorIds = Array.from(
+    new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)),
+  ) as string[];
 
   const apptMap = new Map<string, any>();
   if (apptIds.length) {
@@ -59,7 +65,10 @@ async function fetchAppointmentAudit(supabase: any, f: z.infer<typeof filterSche
 
   const actorMap = new Map<string, string>();
   if (actorIds.length) {
-    const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", actorIds);
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", actorIds);
     for (const p of (profs ?? []) as any[]) actorMap.set(p.id, p.full_name ?? p.id);
   }
 
@@ -79,7 +88,7 @@ async function fetchAppointmentAudit(supabase: any, f: z.infer<typeof filterSche
       old_notes: r.old_notes ?? "",
       new_notes: r.new_notes ?? "",
       reason: r.reason ?? "",
-      actor: r.changed_by ? actorMap.get(r.changed_by) ?? r.changed_by : "",
+      actor: r.changed_by ? (actorMap.get(r.changed_by) ?? r.changed_by) : "",
     } as AuditRow;
   });
 }
@@ -100,32 +109,42 @@ async function fetchSecurityAudit(supabase: any, f: z.infer<typeof filterSchema>
   const { data: rows, error } = await q;
   if (error) throw new Error(error.message);
 
-  const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean))) as string[];
+  const actorIds = Array.from(
+    new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)),
+  ) as string[];
   const actorMap = new Map<string, string>();
   if (actorIds.length) {
-    const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", actorIds);
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", actorIds);
     for (const p of (profs ?? []) as any[]) actorMap.set(p.id, p.full_name ?? p.id);
   }
 
-  return (rows ?? []).map((r: any) => ({
-    created_at: r.created_at,
-    action: r.action,
-    actor: r.actor ? actorMap.get(r.actor) ?? r.actor : "",
-    table_name: r.table_name ?? "",
-    record_id: r.record_id ?? "",
-    from_status: r.from_status ?? "",
-    to_status: r.to_status ?? "",
-    reason: r.reason ?? "",
-    ip_address: r.ip_address ?? "",
-    user_agent: r.user_agent ?? "",
-    metadata: r.metadata ? JSON.stringify(r.metadata) : "",
-  } as AuditRow));
+  return (rows ?? []).map(
+    (r: any) =>
+      ({
+        created_at: r.created_at,
+        action: r.action,
+        actor: r.actor ? (actorMap.get(r.actor) ?? r.actor) : "",
+        table_name: r.table_name ?? "",
+        record_id: r.record_id ?? "",
+        from_status: r.from_status ?? "",
+        to_status: r.to_status ?? "",
+        reason: r.reason ?? "",
+        ip_address: r.ip_address ?? "",
+        user_agent: r.user_agent ?? "",
+        metadata: r.metadata ? JSON.stringify(r.metadata) : "",
+      }) as AuditRow,
+  );
 }
 
 async function fetchReminderAudit(supabase: any, f: z.infer<typeof filterSchema>) {
   let q = supabase
     .from("reminder_preference_audit")
-    .select("id, appointment_id, reminder_kind, changed_by, source, old_value, new_value, reason, changed_at")
+    .select(
+      "id, appointment_id, reminder_kind, changed_by, source, old_value, new_value, reason, changed_at",
+    )
     .order("changed_at", { ascending: false })
     .limit(f.limit);
   if (f.from) q = q.gte("changed_at", f.from);
@@ -135,8 +154,12 @@ async function fetchReminderAudit(supabase: any, f: z.infer<typeof filterSchema>
   const { data: rows, error } = await q;
   if (error) throw new Error(error.message);
 
-  const apptIds = Array.from(new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean))) as string[];
-  const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean))) as string[];
+  const apptIds = Array.from(
+    new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean)),
+  ) as string[];
+  const actorIds = Array.from(
+    new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)),
+  ) as string[];
 
   const apptMap = new Map<string, any>();
   if (apptIds.length) {
@@ -149,7 +172,10 @@ async function fetchReminderAudit(supabase: any, f: z.infer<typeof filterSchema>
 
   const actorMap = new Map<string, string>();
   if (actorIds.length) {
-    const { data: profs } = await supabase.from("profiles").select("id, full_name").in("id", actorIds);
+    const { data: profs } = await supabase
+      .from("profiles")
+      .select("id, full_name")
+      .in("id", actorIds);
     for (const p of (profs ?? []) as any[]) actorMap.set(p.id, p.full_name ?? p.id);
   }
 
@@ -169,28 +195,34 @@ async function fetchReminderAudit(supabase: any, f: z.infer<typeof filterSchema>
       new_value: r.new_value === null ? "" : r.new_value ? "مفعّل" : "متوقف",
       source: r.source ?? "",
       reason: r.reason ?? "",
-      actor: r.changed_by ? actorMap.get(r.changed_by) ?? r.changed_by : "",
+      actor: r.changed_by ? (actorMap.get(r.changed_by) ?? r.changed_by) : "",
     } as AuditRow;
   });
 }
 
 async function fetchDashboardRecent(supabase: any, f: z.infer<typeof filterSchema>) {
-  const { data, error } = await supabase.rpc("dashboard_recent_activity" as any, {
-    _branch_id: f.branch_id ?? null,
-    _limit: Math.min(f.limit, 500),
-  } as any);
+  const { data, error } = await supabase.rpc(
+    "dashboard_recent_activity" as any,
+    {
+      _branch_id: f.branch_id ?? null,
+      _limit: Math.min(f.limit, 500),
+    } as any,
+  );
   if (error) throw new Error(error.message);
   let rows = (data ?? []) as any[];
   if (f.from) rows = rows.filter((r) => r.changed_at >= f.from!);
   if (f.to) rows = rows.filter((r) => r.changed_at <= f.to!);
   if (f.event) rows = rows.filter((r) => r.new_status === f.event);
-  return rows.map((r) => ({
-    changed_at: r.changed_at,
-    patient_name: r.patient_name ?? "",
-    old_status: r.old_status ?? "",
-    new_status: r.new_status ?? "",
-    reason: r.reason ?? "",
-  } as AuditRow));
+  return rows.map(
+    (r) =>
+      ({
+        changed_at: r.changed_at,
+        patient_name: r.patient_name ?? "",
+        old_status: r.old_status ?? "",
+        new_status: r.new_status ?? "",
+        reason: r.reason ?? "",
+      }) as AuditRow,
+  );
 }
 
 export const fetchAuditExport = createServerFn({ method: "POST" })
@@ -202,13 +234,17 @@ export const fetchAuditExport = createServerFn({ method: "POST" })
     let rows: AuditRow[] = [];
     switch (data.kind) {
       case "appointment_audit":
-        rows = await fetchAppointmentAudit(supabase, data); break;
+        rows = await fetchAppointmentAudit(supabase, data);
+        break;
       case "security_audit_log":
-        rows = await fetchSecurityAudit(supabase, data); break;
+        rows = await fetchSecurityAudit(supabase, data);
+        break;
       case "reminder_preference_audit":
-        rows = await fetchReminderAudit(supabase, data); break;
+        rows = await fetchReminderAudit(supabase, data);
+        break;
       case "dashboard_recent_activity":
-        rows = await fetchDashboardRecent(supabase, data); break;
+        rows = await fetchDashboardRecent(supabase, data);
+        break;
     }
     await logAppEvent(supabase, "audit.export", {
       kind: data.kind,

@@ -115,9 +115,7 @@ function AboutPage() {
             return (
               <div key={p.id}>
                 {title && (
-                  <h2 className="text-lg font-bold mb-2 text-[color:var(--brand-deep)]">
-                    {title}
-                  </h2>
+                  <h2 className="text-lg font-bold mb-2 text-[color:var(--brand-deep)]">{title}</h2>
                 )}
                 <p>{body}</p>
               </div>

@@ -13,9 +13,16 @@ export default defineTool({
     appointment_id: z.string().uuid().describe("Appointment UUID to update."),
     status: z
       .enum(["cancelled", "confirmed"])
-      .describe("New status. `cancelled` for patients cancelling their own; `confirmed` for staff."),
+      .describe(
+        "New status. `cancelled` for patients cancelling their own; `confirmed` for staff.",
+      ),
   },
-  annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
+  annotations: {
+    readOnlyHint: false,
+    destructiveHint: true,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async ({ appointment_id, status }, ctx: ToolContext) => {
     const startedAt = Date.now();
     const args = { appointment_id, status };

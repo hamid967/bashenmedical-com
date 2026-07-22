@@ -26,8 +26,10 @@ import { friendlyInsertError, FRIENDLY_INSERT_MESSAGES } from "@/lib/insert-erro
 // Single source of truth — shared with the client wizard.
 // See src/lib/booking-limits.ts and src/components/booking/types.ts.
 import {
-  NAME_MIN, NAME_MAX,
-  PHONE_MIN, PHONE_MAX,
+  NAME_MIN,
+  NAME_MAX,
+  PHONE_MIN,
+  PHONE_MAX,
   NID_MAX,
   REASON_MAX,
   PHONE_RE,
@@ -49,10 +51,7 @@ const bookingCreateSchema = z.object({
     .string()
     .trim()
     .max(255, "البريد الإلكتروني طويل جدًا")
-    .refine(
-      (v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v),
-      "بريد إلكتروني غير صالح",
-    )
+    .refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "بريد إلكتروني غير صالح")
     .optional()
     .nullable(),
   national_id: z.string().trim().max(NID_MAX, "رقم الهوية طويل جدًا").optional().nullable(),
@@ -143,7 +142,6 @@ async function buildInsurancePatch(
   return patch;
 }
 
-
 export const Route = createFileRoute("/api/public/book/create")({
   server: {
     handlers: {
@@ -171,9 +169,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         // digits/dash/underscore only; silently ignore anything else so a
         // garbage header can't create keyless rows or break the request.
         const rawKey = request.headers.get("idempotency-key")?.trim() ?? "";
-        const idempotencyKey =
-          /^[A-Za-z0-9_-]{8,128}$/.test(rawKey) ? rawKey : null;
-
+        const idempotencyKey = /^[A-Za-z0-9_-]{8,128}$/.test(rawKey) ? rawKey : null;
 
         const url = process.env.SUPABASE_URL;
         const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
@@ -203,9 +199,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         // 200-that-never-reached-the-client still returns 200.
         if (idempotencyKey) {
           try {
-            const { supabaseAdmin } = await import(
-              "@/integrations/supabase/client.server"
-            );
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             const { data: existing } = await supabaseAdmin
               .from("appointments")
               .select("id")
@@ -227,9 +221,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         // window between check and insert).
         if (parsed.data.doctor_id) {
           try {
-            const { supabaseAdmin } = await import(
-              "@/integrations/supabase/client.server"
-            );
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             const timeHHMM = parsed.data.appointment_time.slice(0, 5);
             const { data: existing } = await supabaseAdmin
               .from("appointments")
@@ -283,24 +275,16 @@ export const Route = createFileRoute("/api/public/book/create")({
 
         if (error) {
           const err = error as { message?: string; code?: string };
-          const isDup =
-            err.code === "23505" ||
-            (err.message ?? "").includes("duplicate key");
+          const isDup = err.code === "23505" || (err.message ?? "").includes("duplicate key");
 
           // Concurrent replay with the same Idempotency-Key: another request
           // won the insert race. Look the row up and return its reference so
           // the client sees the same success it would have seen the first
           // time. This is different from a slot clash (below) — same key
           // means intentionally the same booking.
-          if (
-            isDup &&
-            idempotencyKey &&
-            (err.message ?? "").includes("idempotency_key")
-          ) {
+          if (isDup && idempotencyKey && (err.message ?? "").includes("idempotency_key")) {
             try {
-              const { supabaseAdmin } = await import(
-                "@/integrations/supabase/client.server"
-              );
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
               const { data: existing } = await supabaseAdmin
                 .from("appointments")
                 .select("id")
@@ -312,7 +296,9 @@ export const Route = createFileRoute("/api/public/book/create")({
                   reference: refFromId(existing.id),
                 });
               }
-            } catch {/* fall through to generic conflict */}
+            } catch {
+              /* fall through to generic conflict */
+            }
           }
 
           if (isDup) {
@@ -368,4 +354,3 @@ export const Route = createFileRoute("/api/public/book/create")({
     },
   },
 });
-

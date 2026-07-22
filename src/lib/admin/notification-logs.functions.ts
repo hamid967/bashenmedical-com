@@ -32,7 +32,12 @@ const ListInput = z.object({
   channel: z.enum(CHANNELS).nullish(),
   status: z.enum(STATUSES).nullish(),
   q: z.string().trim().max(120).nullish(),
-  windowHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24 * 7),
   limit: z.number().int().min(1).max(200).default(100),
 });
 
@@ -54,9 +59,10 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
 
     if (data.channel) q = q.eq("channel", data.channel);
     if (data.status) q = q.eq("status", data.status);
-    if (data.q) q = q.or(
-      `recipient.ilike.%${data.q}%,subject.ilike.%${data.q}%,template.ilike.%${data.q}%,error_message.ilike.%${data.q}%`,
-    );
+    if (data.q)
+      q = q.or(
+        `recipient.ilike.%${data.q}%,subject.ilike.%${data.q}%,template.ilike.%${data.q}%,error_message.ilike.%${data.q}%`,
+      );
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -64,7 +70,12 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
   });
 
 const StatsInput = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24 * 7),
 });
 
 export type NotificationDeliveryStats = {

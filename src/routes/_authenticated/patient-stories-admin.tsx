@@ -3,7 +3,15 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeft, CheckCircle2, Clock, ExternalLink, Loader2, RefreshCw, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  Loader2,
+  RefreshCw,
+  XCircle,
+} from "lucide-react";
 import {
   listPatientStoriesAdmin,
   setPatientStoryStatus,
@@ -25,9 +33,7 @@ export const Route = createFileRoute("/_authenticated/patient-stories-admin")({
       </button>
     </div>
   ),
-  notFoundComponent: () => (
-    <div className="container mx-auto p-6">الصفحة غير موجودة</div>
-  ),
+  notFoundComponent: () => <div className="container mx-auto p-6">الصفحة غير موجودة</div>,
   component: PatientStoriesAdminPage,
 });
 
@@ -71,15 +77,14 @@ function PatientStoriesAdminPage() {
   });
 
   const setStatusMut = useMutation({
-    mutationFn: (vars: { id: string; status: PatientStoryStatus }) =>
-      setStatusFn({ data: vars }),
+    mutationFn: (vars: { id: string; status: PatientStoryStatus }) => setStatusFn({ data: vars }),
     onSuccess: (_r, vars) => {
       toast.success(
         vars.status === "published"
           ? "تم نشر القصة"
           : vars.status === "rejected"
-          ? "تم رفض القصة"
-          : "أُعيدت القصة إلى المراجعة",
+            ? "تم رفض القصة"
+            : "أُعيدت القصة إلى المراجعة",
       );
       qc.invalidateQueries({ queryKey: ["patient-stories-admin"] });
     },
@@ -104,23 +109,19 @@ function PatientStoriesAdminPage() {
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
-        {(["all", ...(Object.keys(STATUS_LABELS) as PatientStoryStatus[])] as const).map(
-          (s) => (
-            <button
-              key={s}
-              onClick={() => setFilter(s)}
-              className={`rounded-md border px-3 py-1.5 text-sm ${
-                filter === s ? "bg-primary text-primary-foreground" : "hover:bg-muted"
-              }`}
-            >
-              {s === "all" ? "الكل" : STATUS_LABELS[s]}
-            </button>
-          ),
-        )}
+        {(["all", ...(Object.keys(STATUS_LABELS) as PatientStoryStatus[])] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => setFilter(s)}
+            className={`rounded-md border px-3 py-1.5 text-sm ${
+              filter === s ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+            }`}
+          >
+            {s === "all" ? "الكل" : STATUS_LABELS[s]}
+          </button>
+        ))}
         <button
-          onClick={() =>
-            qc.invalidateQueries({ queryKey: ["patient-stories-admin"] })
-          }
+          onClick={() => qc.invalidateQueries({ queryKey: ["patient-stories-admin"] })}
           className="ms-auto inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
         >
           <RefreshCw className="h-4 w-4" /> تحديث
@@ -132,9 +133,7 @@ function PatientStoriesAdminPage() {
           <Loader2 className="h-4 w-4 animate-spin" /> جاري التحميل...
         </div>
       ) : listQ.isError ? (
-        <p className="text-destructive">
-          تعذّر جلب القصص: {(listQ.error as Error).message}
-        </p>
+        <p className="text-destructive">تعذّر جلب القصص: {(listQ.error as Error).message}</p>
       ) : !listQ.data?.length ? (
         <p className="text-muted-foreground">لا توجد قصص مطابقة.</p>
       ) : (
@@ -177,17 +176,13 @@ function PatientStoriesAdminPage() {
                     )}
                   </div>
                   {row.excerpt && (
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                      {row.excerpt}
-                    </p>
+                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{row.excerpt}</p>
                   )}
                 </div>
                 <div className="flex flex-shrink-0 flex-wrap gap-2">
                   {row.status !== "published" && (
                     <button
-                      onClick={() =>
-                        setStatusMut.mutate({ id: row.id, status: "published" })
-                      }
+                      onClick={() => setStatusMut.mutate({ id: row.id, status: "published" })}
                       disabled={setStatusMut.isPending}
                       className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-sm text-white hover:bg-emerald-700 disabled:opacity-50"
                     >
@@ -196,9 +191,7 @@ function PatientStoriesAdminPage() {
                   )}
                   {row.status !== "pending_review" && (
                     <button
-                      onClick={() =>
-                        setStatusMut.mutate({ id: row.id, status: "pending_review" })
-                      }
+                      onClick={() => setStatusMut.mutate({ id: row.id, status: "pending_review" })}
                       disabled={setStatusMut.isPending}
                       className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
                     >
@@ -207,9 +200,7 @@ function PatientStoriesAdminPage() {
                   )}
                   {row.status !== "rejected" && (
                     <button
-                      onClick={() =>
-                        setStatusMut.mutate({ id: row.id, status: "rejected" })
-                      }
+                      onClick={() => setStatusMut.mutate({ id: row.id, status: "rejected" })}
                       disabled={setStatusMut.isPending}
                       className="inline-flex items-center gap-1 rounded-md border border-rose-300 px-3 py-1.5 text-sm text-rose-700 hover:bg-rose-50 disabled:opacity-50"
                     >

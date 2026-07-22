@@ -76,7 +76,9 @@ export const listRatings = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     let q = context.supabase
       .from("patient_ratings" as never)
-      .select("id, branch_id, doctor_id, patient_name, patient_phone, rating, comment, source, created_at, staff_reply, staff_reply_at, staff_reply_by")
+      .select(
+        "id, branch_id, doctor_id, patient_name, patient_phone, rating, comment, source, created_at, staff_reply, staff_reply_at, staff_reply_by",
+      )
       .order("created_at", { ascending: false })
       .limit(data.limit ?? 100);
     if (data.branchId) q = q.eq("branch_id", data.branchId);
@@ -92,18 +94,28 @@ export const listRatings = createServerFn({ method: "GET" })
     const doctorIds = [...new Set(list.map((r) => r.doctor_id).filter(Boolean) as string[])];
     const [branches, doctors] = await Promise.all([
       branchIds.length
-        ? context.supabase.from("branches" as never).select("id, name_ar").in("id", branchIds)
+        ? context.supabase
+            .from("branches" as never)
+            .select("id, name_ar")
+            .in("id", branchIds)
         : Promise.resolve({ data: [] as { id: string; name_ar: string }[] }),
       doctorIds.length
-        ? context.supabase.from("doctors" as never).select("id, name_ar").in("id", doctorIds)
+        ? context.supabase
+            .from("doctors" as never)
+            .select("id, name_ar")
+            .in("id", doctorIds)
         : Promise.resolve({ data: [] as { id: string; name_ar: string }[] }),
     ]);
-    const bMap = new Map((branches.data ?? []).map((b: { id: string; name_ar: string }) => [b.id, b.name_ar]));
-    const dMap = new Map((doctors.data ?? []).map((d: { id: string; name_ar: string }) => [d.id, d.name_ar]));
+    const bMap = new Map(
+      (branches.data ?? []).map((b: { id: string; name_ar: string }) => [b.id, b.name_ar]),
+    );
+    const dMap = new Map(
+      (doctors.data ?? []).map((d: { id: string; name_ar: string }) => [d.id, d.name_ar]),
+    );
     return list.map((r) => ({
       ...r,
-      branch_name: r.branch_id ? bMap.get(r.branch_id) ?? null : null,
-      doctor_name: r.doctor_id ? dMap.get(r.doctor_id) ?? null : null,
+      branch_name: r.branch_id ? (bMap.get(r.branch_id) ?? null) : null,
+      doctor_name: r.doctor_id ? (dMap.get(r.doctor_id) ?? null) : null,
       // Mask phone: show last 4 digits only
       patient_phone: r.patient_phone
         ? r.patient_phone.length > 4
@@ -137,8 +149,6 @@ export const replyToRating = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
-
-
 // For QR cards & staff pickers
 export const listBranchesForRatings = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -148,7 +158,12 @@ export const listBranchesForRatings = createServerFn({ method: "GET" })
       .select("id, name_ar, name_en, slug")
       .order("name_ar");
     if (error) throw new Error(error.message);
-    return (data ?? []) as { id: string; name_ar: string; name_en: string | null; slug: string | null }[];
+    return (data ?? []) as {
+      id: string;
+      name_ar: string;
+      name_en: string | null;
+      slug: string | null;
+    }[];
   });
 
 export const listDoctorsForRatings = createServerFn({ method: "GET" })

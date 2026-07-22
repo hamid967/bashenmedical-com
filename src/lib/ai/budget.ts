@@ -61,14 +61,10 @@ export function resetSessionCredits(surface: BudgetSurface) {
   window.sessionStorage.removeItem(storageKey(surface));
 }
 
-export type BudgetBlockReason =
-  | "per_request"
-  | "per_session"
-  | "available_credits";
+export type BudgetBlockReason = "per_request" | "per_session" | "available_credits";
 
 export type BudgetCheckResult =
-  | { ok: true }
-  | { ok: false; reason: BudgetBlockReason; cap: number; wouldSpend: number };
+  { ok: true } | { ok: false; reason: BudgetBlockReason; cap: number; wouldSpend: number };
 
 /**
  * Pre-flight check before starting a request. Uses an estimate of the

@@ -89,7 +89,6 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
       metadata,
     });
 
-
     const results: DeliveryResult[] = [];
     const staleEndpoints: string[] = [];
 

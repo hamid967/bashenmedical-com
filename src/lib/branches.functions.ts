@@ -51,11 +51,9 @@ export type BranchDetail = {
 };
 
 function serverClient() {
-  return createClient<Database>(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    { auth: { persistSession: false, autoRefreshToken: false } },
-  );
+  return createClient<Database>(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
 }
 
 export const listPublicBranches = createServerFn({ method: "GET" }).handler(
@@ -98,7 +96,8 @@ export const getBranchDetail = createServerFn({ method: "GET" })
     return {
       branch,
       centers: (centers ?? []) as ExcellenceCenter[],
-      specialties: Array.from(specMap.values()).sort((a, b) => a.name_ar.localeCompare(b.name_ar, "ar")),
+      specialties: Array.from(specMap.values()).sort((a, b) =>
+        a.name_ar.localeCompare(b.name_ar, "ar"),
+      ),
     };
   });
-

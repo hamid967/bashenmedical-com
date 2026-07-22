@@ -3,12 +3,7 @@
  * Zero dependencies — uses Blob for CSV and a new-window HTML document for PDF.
  * Distinguishes input/output token usage and reports pre/live/post estimates.
  */
-import {
-  estimateCredits,
-  estimateTokens,
-  formatCredits,
-  getRate,
-} from "@/lib/ai/pricing";
+import { estimateCredits, estimateTokens, formatCredits, getRate } from "@/lib/ai/pricing";
 import type { MessageCostMeta } from "@/components/assistant/MessageCostBadge";
 
 export type ExportMsg = {
@@ -45,15 +40,19 @@ type Row = {
 function computeRows(messages: ExportMsg[]): Row[] {
   return messages.map((m, i) => {
     const model = m.meta?.model ?? "";
-    const inTok = m.meta?.usage?.prompt ?? estimateTokens(m.meta?.promptText ?? (m.role === "user" ? m.content : ""));
-    const outTok = m.meta?.usage?.completion ?? estimateTokens(m.role === "assistant" ? m.content : "");
+    const inTok =
+      m.meta?.usage?.prompt ??
+      estimateTokens(m.meta?.promptText ?? (m.role === "user" ? m.content : ""));
+    const outTok =
+      m.meta?.usage?.completion ?? estimateTokens(m.role === "assistant" ? m.content : "");
     const total = m.meta?.usage?.total ?? inTok + outTok;
     const credits = estimateCredits(inTok, outTok, model || undefined);
-    const elapsedMs = m.meta && "elapsedMs" in (m.meta as Record<string, unknown>)
-      ? (m.meta as unknown as { elapsedMs: number }).elapsedMs
-      : m.meta?.endedAt && m.meta?.startedAt
-        ? Math.max(0, m.meta.endedAt - m.meta.startedAt)
-        : 0;
+    const elapsedMs =
+      m.meta && "elapsedMs" in (m.meta as Record<string, unknown>)
+        ? (m.meta as unknown as { elapsedMs: number }).elapsedMs
+        : m.meta?.endedAt && m.meta?.startedAt
+          ? Math.max(0, m.meta.endedAt - m.meta.startedAt)
+          : 0;
     return {
       index: i + 1,
       role: m.role,
@@ -106,8 +105,32 @@ export function exportSessionCSV(opts: SessionExportOptions) {
   );
   const isAr = opts.lang === "ar";
   const header = isAr
-    ? ["#", "الدور", "النموذج", "توكن مدخل", "توكن مخرج", "الإجمالي", "الرصيد", "الزمن(ث)", "المصدر", "الوقت", "المحتوى"]
-    : ["#", "role", "model", "input_tokens", "output_tokens", "total_tokens", "credits", "elapsed_s", "source", "timestamp", "content"];
+    ? [
+        "#",
+        "الدور",
+        "النموذج",
+        "توكن مدخل",
+        "توكن مخرج",
+        "الإجمالي",
+        "الرصيد",
+        "الزمن(ث)",
+        "المصدر",
+        "الوقت",
+        "المحتوى",
+      ]
+    : [
+        "#",
+        "role",
+        "model",
+        "input_tokens",
+        "output_tokens",
+        "total_tokens",
+        "credits",
+        "elapsed_s",
+        "source",
+        "timestamp",
+        "content",
+      ];
 
   const dataLines = rows.map((r) =>
     [
@@ -122,28 +145,48 @@ export function exportSessionCSV(opts: SessionExportOptions) {
       r.source,
       r.timestamp,
       r.content.replace(/\s+/g, " ").trim(),
-    ].map(csvEscape).join(","),
+    ]
+      .map(csvEscape)
+      .join(","),
   );
 
   const summary = [
     "",
     csvEscape(isAr ? "— ملخص الجلسة —" : "-- session summary --"),
     [csvEscape(isAr ? "إجمالي الرسائل" : "messages"), csvEscape(rows.length)].join(","),
-    [csvEscape(isAr ? "إجمالي المدخلات" : "total_input_tokens"), csvEscape(totals.inTokens)].join(","),
-    [csvEscape(isAr ? "إجمالي المخرجات" : "total_output_tokens"), csvEscape(totals.outTokens)].join(","),
+    [csvEscape(isAr ? "إجمالي المدخلات" : "total_input_tokens"), csvEscape(totals.inTokens)].join(
+      ",",
+    ),
+    [csvEscape(isAr ? "إجمالي المخرجات" : "total_output_tokens"), csvEscape(totals.outTokens)].join(
+      ",",
+    ),
     [csvEscape(isAr ? "إجمالي التوكنات" : "total_tokens"), csvEscape(totals.totalTokens)].join(","),
-    [csvEscape(isAr ? "الرصيد المقدر" : "estimated_credits"), csvEscape(totals.credits.toFixed(4))].join(","),
-    [csvEscape(isAr ? "رصيد الجلسة (مسجل)" : "session_credits_tracked"), csvEscape(opts.sessionCredits.toFixed(4))].join(","),
-    [csvEscape(isAr ? "تقدير المسودة الحالي" : "pre_estimate_tokens_pending"), csvEscape(opts.preEstimateTokens ?? 0)].join(","),
+    [
+      csvEscape(isAr ? "الرصيد المقدر" : "estimated_credits"),
+      csvEscape(totals.credits.toFixed(4)),
+    ].join(","),
+    [
+      csvEscape(isAr ? "رصيد الجلسة (مسجل)" : "session_credits_tracked"),
+      csvEscape(opts.sessionCredits.toFixed(4)),
+    ].join(","),
+    [
+      csvEscape(isAr ? "تقدير المسودة الحالي" : "pre_estimate_tokens_pending"),
+      csvEscape(opts.preEstimateTokens ?? 0),
+    ].join(","),
     [csvEscape(isAr ? "النموذج النشط" : "active_model"), csvEscape(opts.model ?? "")].join(","),
-    [csvEscape(isAr ? "المحادثة" : "conversation_id"), csvEscape(opts.conversationId ?? "")].join(","),
+    [csvEscape(isAr ? "المحادثة" : "conversation_id"), csvEscape(opts.conversationId ?? "")].join(
+      ",",
+    ),
     [csvEscape(isAr ? "الواجهة" : "surface"), csvEscape(opts.surface ?? "")].join(","),
     [csvEscape(isAr ? "تم التصدير" : "exported_at"), csvEscape(new Date().toISOString())].join(","),
   ].join("\n");
 
   // Prepend UTF-8 BOM so Excel opens Arabic correctly.
   const csv = "\uFEFF" + [header.map(csvEscape).join(","), ...dataLines, summary].join("\n");
-  downloadBlob(new Blob([csv], { type: "text/csv;charset=utf-8" }), `baeshen-ai-session-${tsSlug()}.csv`);
+  downloadBlob(
+    new Blob([csv], { type: "text/csv;charset=utf-8" }),
+    `baeshen-ai-session-${tsSlug()}.csv`,
+  );
 }
 
 function esc(s: string): string {
@@ -285,7 +328,10 @@ export function exportSessionPDF(opts: SessionExportOptions) {
   const w = window.open("", "_blank", "noopener,noreferrer,width=1024,height=768");
   if (!w) {
     // Popup blocked — fall back to download.
-    downloadBlob(new Blob([html], { type: "text/html;charset=utf-8" }), `baeshen-ai-session-${tsSlug()}.html`);
+    downloadBlob(
+      new Blob([html], { type: "text/html;charset=utf-8" }),
+      `baeshen-ai-session-${tsSlug()}.html`,
+    );
     return;
   }
   w.document.open();

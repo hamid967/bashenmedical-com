@@ -33,7 +33,10 @@ const schema = z.object({
     .min(6, "رقم الهاتف قصير جدًا")
     .max(32, "رقم الهاتف طويل جدًا")
     .regex(PHONE_RE, "الهاتف يحتوي على أحرف غير مسموحة")
-    .refine((v) => SA_MOBILE_RE.test(v.replace(/[\s\-()]/g, "")), "أدخل رقم جوال سعودي صحيح (05XXXXXXXX)"),
+    .refine(
+      (v) => SA_MOBILE_RE.test(v.replace(/[\s\-()]/g, "")),
+      "أدخل رقم جوال سعودي صحيح (05XXXXXXXX)",
+    ),
   service: z.string().trim().min(1, "اختر نوع الخدمة"),
   appointment_date: z
     .string()
@@ -68,9 +71,6 @@ const EMPTY: FormState = {
   extra: "",
 };
 
-
-
-
 export function ServiceRequestForm({
   tag,
   title,
@@ -98,14 +98,14 @@ export function ServiceRequestForm({
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [confirmation, setConfirmation] = useState<
-    | (FormState & { reference: string | null })
-    | null
+    (FormState & { reference: string | null }) | null
   >(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<FieldErrors>({});
-  const [submitError, setSubmitError] = useState<
-    { kind: Exclude<BookingSubmitKind, "success">; message: string } | null
-  >(null);
+  const [submitError, setSubmitError] = useState<{
+    kind: Exclude<BookingSubmitKind, "success">;
+    message: string;
+  } | null>(null);
   const lastPayloadRef = useRef<FormState | null>(null);
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -143,7 +143,9 @@ export function ServiceRequestForm({
     setSubmitError(null);
     const toastId = toast.loading("جاري إرسال طلبك...");
     try {
-      const reason = [`[${tag}]`, `الخدمة: ${d.service}`, d.extra?.trim()].filter(Boolean).join(" — ");
+      const reason = [`[${tag}]`, `الخدمة: ${d.service}`, d.extra?.trim()]
+        .filter(Boolean)
+        .join(" — ");
       const result = await submitBooking({
         patient_name: d.patient_name,
         patient_phone: d.patient_phone,
@@ -190,7 +192,7 @@ export function ServiceRequestForm({
       const summary =
         count > 1
           ? `يرجى تصحيح ${count} حقول قبل الإرسال — راجع الرسائل الحمراء أسفل كل حقل.`
-          : Object.values(fe)[0] ?? "يرجى مراجعة الحقول";
+          : (Object.values(fe)[0] ?? "يرجى مراجعة الحقول");
       setSubmitError({ kind: "validation", message: summary });
       toast.error(summary);
       const firstKey = Object.keys(fe)[0] as keyof FormState | undefined;
@@ -240,7 +242,9 @@ export function ServiceRequestForm({
           </div>
           <div>
             <h3 className="text-lg font-bold">تم استلام طلبك بنجاح</h3>
-            <p className="text-xs text-muted-foreground">سيتواصل معك فريقنا للتأكيد وترتيب التفاصيل.</p>
+            <p className="text-xs text-muted-foreground">
+              سيتواصل معك فريقنا للتأكيد وترتيب التفاصيل.
+            </p>
           </div>
         </div>
         {confirmation.reference ? (
@@ -261,12 +265,14 @@ export function ServiceRequestForm({
                 نسخ
               </button>
             </div>
-            <div className="mt-1 text-lg font-mono font-bold tracking-wider">{confirmation.reference}</div>
+            <div className="mt-1 text-lg font-mono font-bold tracking-wider">
+              {confirmation.reference}
+            </div>
           </div>
         ) : (
           <div className="mt-5 rounded-xl border border-dashed border-border bg-background/60 p-4 text-xs text-muted-foreground">
-            سيصلك رقم الطلب في رسالة التأكيد على جوالك خلال دقائق، وستتمكن حينها من تحميل تأكيد الحجز من صفحة{" "}
-            <span className="font-semibold">"تتبّع طلبك"</span>.
+            سيصلك رقم الطلب في رسالة التأكيد على جوالك خلال دقائق، وستتمكن حينها من تحميل تأكيد
+            الحجز من صفحة <span className="font-semibold">"تتبّع طلبك"</span>.
           </div>
         )}
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -325,8 +331,10 @@ export function ServiceRequestForm({
         />
       )}
 
-      <fieldset disabled={submitting} className="space-y-3 text-sm border-0 p-0 m-0 disabled:opacity-70">
-
+      <fieldset
+        disabled={submitting}
+        className="space-y-3 text-sm border-0 p-0 m-0 disabled:opacity-70"
+      >
         <Field label="الاسم الكامل" error={errors.patient_name} htmlFor="srf-name">
           <input
             id="srf-name"
@@ -340,7 +348,12 @@ export function ServiceRequestForm({
           />
         </Field>
 
-        <Field label="رقم الجوال" error={errors.patient_phone} htmlFor="srf-phone" hint="مثال: 05XXXXXXXX">
+        <Field
+          label="رقم الجوال"
+          error={errors.patient_phone}
+          htmlFor="srf-phone"
+          hint="مثال: 05XXXXXXXX"
+        >
           <input
             id="srf-phone"
             required
@@ -429,7 +442,11 @@ export function ServiceRequestForm({
         disabled={submitting}
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
-        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarPlus className="h-4 w-4" />}
+        {submitting ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <CalendarPlus className="h-4 w-4" />
+        )}
         {submitting ? "جاري الإرسال..." : submitLabel}
       </button>
     </form>

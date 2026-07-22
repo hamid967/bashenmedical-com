@@ -34,20 +34,25 @@ function AccountsPage() {
 
   const q = useQuery({
     queryKey: ["owner-accounts", page, search, status, role],
-    queryFn: () =>
-      listAccounts({ data: { page, perPage: 50, search, status, role: role as any } }),
+    queryFn: () => listAccounts({ data: { page, perPage: 50, search, status, role: role as any } }),
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["owner-accounts"] });
 
   const mGrant = useMutation({
     mutationFn: (v: { user_id: string; role: any }) => grantRole({ data: v }),
-    onSuccess: () => { toast.success("تم تعيين الدور"); invalidate(); },
+    onSuccess: () => {
+      toast.success("تم تعيين الدور");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const mRevoke = useMutation({
     mutationFn: (v: { user_id: string; role: any }) => revokeRole({ data: v }),
-    onSuccess: () => { toast.success("تم إزالة الدور"); invalidate(); },
+    onSuccess: () => {
+      toast.success("تم إزالة الدور");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const mReset = useMutation({
@@ -57,12 +62,18 @@ function AccountsPage() {
   });
   const mBan = useMutation({
     mutationFn: (v: { user_id: string; disable: boolean }) => setUserBan({ data: v }),
-    onSuccess: (_d, v) => { toast.success(v.disable ? "تم التعطيل" : "تم التفعيل"); invalidate(); },
+    onSuccess: (_d, v) => {
+      toast.success(v.disable ? "تم التعطيل" : "تم التفعيل");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const mDelete = useMutation({
     mutationFn: (v: { user_id: string; confirm_email: string }) => deleteAccount({ data: v }),
-    onSuccess: () => { toast.success("تم حذف الحساب"); invalidate(); },
+    onSuccess: () => {
+      toast.success("تم حذف الحساب");
+      invalidate();
+    },
     onError: (e: Error) => toast.error(e.message),
   });
   const mSetPwd = useMutation({
@@ -95,14 +106,20 @@ function AccountsPage() {
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
               placeholder="بحث بالاسم أو البريد أو الجوال أو المعرف…"
               className="w-full pr-10 pl-3 py-2 border border-slate-300 rounded-lg text-sm"
             />
           </div>
           <select
             value={status}
-            onChange={(e) => { setStatus(e.target.value as any); setPage(1); }}
+            onChange={(e) => {
+              setStatus(e.target.value as any);
+              setPage(1);
+            }}
             className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
             aria-label="تصفية بالحالة"
           >
@@ -113,14 +130,19 @@ function AccountsPage() {
           </select>
           <select
             value={role}
-            onChange={(e) => { setRole(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setRole(e.target.value);
+              setPage(1);
+            }}
             className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"
             aria-label="تصفية بالدور"
           >
             <option value="all">كل الأدوار</option>
             <option value="none">بدون دور</option>
             {roles.map((r) => (
-              <option key={r} value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </select>
           {hasFilter && (
@@ -143,7 +165,9 @@ function AccountsPage() {
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {q.isLoading && (
-          <div className="p-8 flex justify-center"><Loader2 className="h-6 w-6 animate-spin text-slate-400" /></div>
+          <div className="p-8 flex justify-center">
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+          </div>
         )}
         {q.error && <div className="p-4 text-sm text-red-600">{(q.error as Error).message}</div>}
         {q.data && (
@@ -165,14 +189,22 @@ function AccountsPage() {
                     <tr key={u.id} className="hover:bg-slate-50">
                       <td className="px-4 py-3">
                         <div className="font-medium text-slate-900">{u.full_name || "—"}</div>
-                        <div className="text-xs text-slate-500 font-mono">{u.email || u.phone || u.id.slice(0, 8)}</div>
+                        <div className="text-xs text-slate-500 font-mono">
+                          {u.email || u.phone || u.id.slice(0, 8)}
+                        </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex flex-wrap gap-1">
-                          {u.roles.length === 0 && <span className="text-xs text-slate-400">—</span>}
+                          {u.roles.length === 0 && (
+                            <span className="text-xs text-slate-400">—</span>
+                          )}
                           {u.roles.map((r) => (
-                            <span key={r} className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-blue-50 text-blue-700 border border-blue-100">
-                              <Shield className="h-3 w-3" />{r}
+                            <span
+                              key={r}
+                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-blue-50 text-blue-700 border border-blue-100"
+                            >
+                              <Shield className="h-3 w-3" />
+                              {r}
                             </span>
                           ))}
                         </div>
@@ -203,7 +235,9 @@ function AccountsPage() {
                         <td colSpan={5} className="px-4 py-4">
                           <div className="grid gap-4 md:grid-cols-2">
                             <div>
-                              <div className="text-xs font-semibold text-slate-700 mb-2">الأدوار</div>
+                              <div className="text-xs font-semibold text-slate-700 mb-2">
+                                الأدوار
+                              </div>
                               <div className="flex flex-wrap gap-1.5">
                                 {roles.map((r) => {
                                   const has = u.roles.includes(r);
@@ -229,19 +263,25 @@ function AccountsPage() {
                               </div>
                             </div>
                             <div className="space-y-2">
-                              <div className="text-xs font-semibold text-slate-700 mb-2">إجراءات</div>
+                              <div className="text-xs font-semibold text-slate-700 mb-2">
+                                إجراءات
+                              </div>
                               {u.email && (
                                 <button
                                   onClick={() => mReset.mutate(u.email!)}
                                   className="w-full text-right px-3 py-2 rounded border border-slate-200 hover:bg-white text-xs flex items-center gap-2"
                                 >
-                                  <Mail className="h-3.5 w-3.5" /> إرسال رابط إعادة تعيين كلمة المرور
+                                  <Mail className="h-3.5 w-3.5" /> إرسال رابط إعادة تعيين كلمة
+                                  المرور
                                 </button>
                               )}
                               <button
                                 onClick={() => {
-                                  const pwd = window.prompt("كلمة المرور الجديدة (8 حروف على الأقل):");
-                                  if (pwd && pwd.length >= 8) mSetPwd.mutate({ user_id: u.id, password: pwd });
+                                  const pwd = window.prompt(
+                                    "كلمة المرور الجديدة (8 حروف على الأقل):",
+                                  );
+                                  if (pwd && pwd.length >= 8)
+                                    mSetPwd.mutate({ user_id: u.id, password: pwd });
                                 }}
                                 className="w-full text-right px-3 py-2 rounded border border-slate-200 hover:bg-white text-xs flex items-center gap-2"
                               >
@@ -257,7 +297,8 @@ function AccountsPage() {
                               ) : (
                                 <button
                                   onClick={() => {
-                                    if (window.confirm("تعطيل هذا الحساب؟")) mBan.mutate({ user_id: u.id, disable: true });
+                                    if (window.confirm("تعطيل هذا الحساب؟"))
+                                      mBan.mutate({ user_id: u.id, disable: true });
                                   }}
                                   className="w-full text-right px-3 py-2 rounded border border-amber-200 text-amber-700 hover:bg-amber-50 text-xs flex items-center gap-2"
                                 >
@@ -266,8 +307,11 @@ function AccountsPage() {
                               )}
                               <button
                                 onClick={() => {
-                                  const email = window.prompt(`للتأكيد، أدخل بريد المستخدم (${u.email ?? "—"}):`);
-                                  if (email) mDelete.mutate({ user_id: u.id, confirm_email: email });
+                                  const email = window.prompt(
+                                    `للتأكيد، أدخل بريد المستخدم (${u.email ?? "—"}):`,
+                                  );
+                                  if (email)
+                                    mDelete.mutate({ user_id: u.id, confirm_email: email });
                                 }}
                                 className="w-full text-right px-3 py-2 rounded border border-red-200 text-red-700 hover:bg-red-50 text-xs flex items-center gap-2"
                               >
@@ -294,13 +338,17 @@ function AccountsPage() {
           disabled={page <= 1}
           onClick={() => setPage((p) => Math.max(1, p - 1))}
           className="px-3 py-1.5 rounded border border-slate-300 disabled:opacity-40"
-        >السابق</button>
+        >
+          السابق
+        </button>
         <span className="text-slate-500 text-xs">صفحة {page}</span>
         <button
           disabled={!q.data || q.data.users.length < q.data.perPage}
           onClick={() => setPage((p) => p + 1)}
           className="px-3 py-1.5 rounded border border-slate-300 disabled:opacity-40"
-        >التالي</button>
+        >
+          التالي
+        </button>
       </div>
     </div>
   );

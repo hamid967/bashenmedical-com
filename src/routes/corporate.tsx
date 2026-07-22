@@ -2,7 +2,14 @@ import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Building2, CheckCircle2, Loader2, HeartHandshake, Users, BadgePercent } from "lucide-react";
+import {
+  Building2,
+  CheckCircle2,
+  Loader2,
+  HeartHandshake,
+  Users,
+  BadgePercent,
+} from "lucide-react";
 import { PageHero } from "@/components/PageShell";
 import { supabase } from "@/integrations/supabase/client";
 import { bmcOgImageMeta } from "@/lib/og-meta";
@@ -45,12 +52,21 @@ export const Route = createFileRoute("/corporate")({
   component: CorporatePage,
 });
 
-const SERVICES = ["فحوصات ما قبل التوظيف", "رعاية طبية للموظفين", "باقات فحص سنوية", "تطعيمات جماعية", "أخرى"];
+const SERVICES = [
+  "فحوصات ما قبل التوظيف",
+  "رعاية طبية للموظفين",
+  "باقات فحص سنوية",
+  "تطعيمات جماعية",
+  "أخرى",
+];
 
 const schema = z.object({
   company_name: z.string().trim().min(2, "اسم الشركة قصير").max(200),
   contact_name: z.string().trim().min(2, "الاسم قصير").max(120),
-  phone: z.string().trim().regex(/^(?:\+?966|00966|0)?5\d{8}$/, "أدخل جوال سعودي صحيح"),
+  phone: z
+    .string()
+    .trim()
+    .regex(/^(?:\+?966|00966|0)?5\d{8}$/, "أدخل جوال سعودي صحيح"),
   email: z.string().trim().email("بريد غير صالح").optional().or(z.literal("")),
   employee_count: z.coerce.number().int().min(1, "عدد الموظفين مطلوب").max(1_000_000).optional(),
   service_type: z.string().optional(),
@@ -71,10 +87,12 @@ function CorporatePage() {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
-  const update = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setForm((s) => ({ ...s, [k]: e.target.value }));
-    setErrors((prev) => ({ ...prev, [k]: undefined }));
-  };
+  const update =
+    (k: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+      setForm((s) => ({ ...s, [k]: e.target.value }));
+      setErrors((prev) => ({ ...prev, [k]: undefined }));
+    };
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -323,4 +341,3 @@ function Field({
     </div>
   );
 }
-

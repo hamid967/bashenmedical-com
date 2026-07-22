@@ -25,7 +25,10 @@ export const listHomeCareRequests = createServerFn({ method: "GET" })
     if (data.status) query = query.eq("status", data.status);
     if (data.search) {
       const s = data.search.trim();
-      if (s) query = query.or(`patient_name.ilike.%${s}%,patient_phone.ilike.%${s}%,service.ilike.%${s}%`);
+      if (s)
+        query = query.or(
+          `patient_name.ilike.%${s}%,patient_phone.ilike.%${s}%,service.ilike.%${s}%`,
+        );
     }
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
@@ -38,7 +41,17 @@ export const updateHomeCareRequest = createServerFn({ method: "POST" })
     z
       .object({
         id: z.string().uuid(),
-        status: z.enum(["new", "reviewed", "contacted", "waiting_patient", "scheduled", "completed", "cancelled"]).optional(),
+        status: z
+          .enum([
+            "new",
+            "reviewed",
+            "contacted",
+            "waiting_patient",
+            "scheduled",
+            "completed",
+            "cancelled",
+          ])
+          .optional(),
         notes: z.string().max(2000).optional(),
       })
       .parse(input),

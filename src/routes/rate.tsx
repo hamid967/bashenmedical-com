@@ -27,7 +27,13 @@ export const Route = createFileRoute("/rate")({
 });
 
 type Branch = { id: string; name_ar: string; name_en: string | null };
-type Doctor = { id: string; name_ar: string; name_en: string | null; branch_id: string | null; specialty_name_ar: string | null };
+type Doctor = {
+  id: string;
+  name_ar: string;
+  name_en: string | null;
+  branch_id: string | null;
+  specialty_name_ar: string | null;
+};
 
 function RatePage() {
   const search = Route.useSearch();
@@ -107,13 +113,18 @@ function RatePage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center p-4" dir="rtl">
+      <div
+        className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center p-4"
+        dir="rtl"
+      >
         <div className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
           <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-emerald-500/10 grid place-items-center">
             <CheckCircle2 className="h-10 w-10 text-emerald-600" />
           </div>
           <h1 className="text-2xl font-bold mb-2">شكرًا لك!</h1>
-          <p className="text-muted-foreground mb-6">تم استلام تقييمك بنجاح، وسيساعدنا في تحسين خدماتنا.</p>
+          <p className="text-muted-foreground mb-6">
+            تم استلام تقييمك بنجاح، وسيساعدنا في تحسين خدماتنا.
+          </p>
           <button
             onClick={() => {
               setSubmitted(false);
@@ -156,7 +167,9 @@ function RatePage() {
             >
               <option value="">اختر الفرع…</option>
               {(branchesQ.data ?? []).map((b) => (
-                <option key={b.id} value={b.id}>{b.name_ar}</option>
+                <option key={b.id} value={b.id}>
+                  {b.name_ar}
+                </option>
               ))}
             </select>
           </div>
@@ -175,7 +188,8 @@ function RatePage() {
               <option value="">لا أخصص طبيبًا</option>
               {(doctorsQ.data ?? []).map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name_ar}{d.specialty_name_ar ? ` — ${d.specialty_name_ar}` : ""}
+                  {d.name_ar}
+                  {d.specialty_name_ar ? ` — ${d.specialty_name_ar}` : ""}
                 </option>
               ))}
             </select>

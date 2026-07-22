@@ -20,10 +20,7 @@ export const Route = createFileRoute("/accreditations/$id")({
     const a = (loaderData ?? null) as Accreditation | null;
     if (!a) {
       return {
-        meta: [
-          { title: "اعتماد غير موجود — مجمع باعشن" },
-          { name: "robots", content: "noindex" },
-        ],
+        meta: [{ title: "اعتماد غير موجود — مجمع باعشن" }, { name: "robots", content: "noindex" }],
       };
     }
     const url = `${SITE_URL}/accreditations/${params.id}`;
@@ -44,7 +41,10 @@ export const Route = createFileRoute("/accreditations/$id")({
   errorComponent: ({ error, reset }) => (
     <div className="container-app py-16 text-center">
       <p className="text-destructive">تعذّر التحميل: {error.message}</p>
-      <button onClick={reset} className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+      <button
+        onClick={reset}
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+      >
         إعادة المحاولة
       </button>
     </div>
@@ -52,7 +52,10 @@ export const Route = createFileRoute("/accreditations/$id")({
   notFoundComponent: () => (
     <div className="container-app py-16 text-center">
       <h1 className="text-2xl font-bold mb-2">الاعتماد غير موجود</h1>
-      <Link to="/accreditations" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+      <Link
+        to="/accreditations"
+        className="inline-flex items-center gap-1 text-primary font-semibold hover:underline"
+      >
         <ArrowRight className="h-4 w-4" /> الرجوع للاعتمادات
       </Link>
     </div>
@@ -131,7 +134,8 @@ function AccreditationDetail() {
       <section className="mt-8">
         <h2 className="text-lg font-bold mb-3">عن هذا الاعتماد</h2>
         <p className="text-muted-foreground leading-8 whitespace-pre-line">
-          {desc ?? "هذا الاعتماد جزء من التزام مجمع باعشن الطبي بأعلى معايير الجودة والسلامة العالمية."}
+          {desc ??
+            "هذا الاعتماد جزء من التزام مجمع باعشن الطبي بأعلى معايير الجودة والسلامة العالمية."}
         </p>
       </section>
 

@@ -94,7 +94,10 @@ function RolePermissionsMatrixPage() {
 
   // permissions grouped by category
   const grouped = useMemo(() => {
-    const g: Record<string, typeof permsQ.data extends undefined ? never : NonNullable<typeof permsQ.data>> = {};
+    const g: Record<
+      string,
+      typeof permsQ.data extends undefined ? never : NonNullable<typeof permsQ.data>
+    > = {};
     for (const p of permsQ.data ?? []) {
       (g[p.category] ||= [] as any).push(p);
     }

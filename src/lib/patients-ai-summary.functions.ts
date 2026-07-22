@@ -104,7 +104,12 @@ export const getPatientsAiSummary = createServerFn({ method: "POST" })
     }
 
     function aggregate(rows: unknown[]) {
-      const perTarget: Record<string, number> = { active: 0, inactive: 0, archived: 0, deceased: 0 };
+      const perTarget: Record<string, number> = {
+        active: 0,
+        inactive: 0,
+        archived: 0,
+        deceased: 0,
+      };
       const perTransition = new Map<string, number>();
       let total = 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

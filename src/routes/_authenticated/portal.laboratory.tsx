@@ -63,7 +63,8 @@ export const Route = createFileRoute("/_authenticated/portal/laboratory")({
       { title: "نتائج المختبر | بوابة المريض" },
       {
         name: "description",
-        content: "عرض نتائج التحاليل بألوان ونطاقات طبيعية ورسوم بيانية مع تنزيل ومشاركة مع الطبيب.",
+        content:
+          "عرض نتائج التحاليل بألوان ونطاقات طبيعية ورسوم بيانية مع تنزيل ومشاركة مع الطبيب.",
       },
       { name: "robots", content: "noindex" },
     ],
@@ -85,7 +86,10 @@ function LabsError({ error, reset }: { error: Error; reset: () => void }) {
         {error.message || "خطأ غير متوقع."}
       </p>
       <button
-        onClick={() => { router.invalidate(); reset(); }}
+        onClick={() => {
+          router.invalidate();
+          reset();
+        }}
         className="mt-5 inline-flex items-center gap-2 rounded-full px-4 h-10 text-sm font-semibold text-[color:var(--portal-on-primary)]"
         style={{ background: "var(--portal-gradient)" }}
       >
@@ -120,8 +124,7 @@ function parseSummary(summary: string | null | undefined): ParsedResult[] {
     const low = Number(m[4]);
     const high = Number(m[5]);
     if (!Number.isFinite(value) || !Number.isFinite(low) || !Number.isFinite(high)) continue;
-    const flag: ParsedResult["flag"] =
-      value < low ? "low" : value > high ? "high" : "normal";
+    const flag: ParsedResult["flag"] = value < low ? "low" : value > high ? "high" : "normal";
     out.push({
       name: m[1].trim(),
       value,
@@ -137,21 +140,67 @@ function parseSummary(summary: string | null | undefined): ParsedResult[] {
 /* ------------------------ category colors ------------------------ */
 
 const CATEGORY_STYLES: Record<string, { bg: string; ring: string; icon: string; label: string }> = {
-  hematology: { bg: "from-rose-50 to-rose-100/50", ring: "ring-rose-200", icon: "text-rose-600", label: "أمراض الدم" },
-  chemistry:  { bg: "from-teal-50 to-teal-100/50",  ring: "ring-teal-200",  icon: "text-teal-600",  label: "الكيمياء الحيوية" },
-  hormones:   { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200", icon: "text-teal-600", label: "الهرمونات" },
-  urine:      { bg: "from-amber-50 to-amber-100/50", ring: "ring-amber-200", icon: "text-amber-700", label: "تحليل البول" },
-  microbiology:{bg: "from-emerald-50 to-emerald-100/50", ring: "ring-emerald-200", icon: "text-emerald-600", label: "الأحياء الدقيقة" },
-  serology:   { bg: "from-teal-50 to-teal-100/50", ring: "ring-teal-200", icon: "text-teal-600", label: "المصلية" },
-  lipid:      { bg: "from-orange-50 to-orange-100/50", ring: "ring-orange-200", icon: "text-orange-600", label: "الدهون" },
-  other:      { bg: "from-slate-50 to-slate-100/50", ring: "ring-slate-200", icon: "text-slate-600", label: "أخرى" },
+  hematology: {
+    bg: "from-rose-50 to-rose-100/50",
+    ring: "ring-rose-200",
+    icon: "text-rose-600",
+    label: "أمراض الدم",
+  },
+  chemistry: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "الكيمياء الحيوية",
+  },
+  hormones: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "الهرمونات",
+  },
+  urine: {
+    bg: "from-amber-50 to-amber-100/50",
+    ring: "ring-amber-200",
+    icon: "text-amber-700",
+    label: "تحليل البول",
+  },
+  microbiology: {
+    bg: "from-emerald-50 to-emerald-100/50",
+    ring: "ring-emerald-200",
+    icon: "text-emerald-600",
+    label: "الأحياء الدقيقة",
+  },
+  serology: {
+    bg: "from-teal-50 to-teal-100/50",
+    ring: "ring-teal-200",
+    icon: "text-teal-600",
+    label: "المصلية",
+  },
+  lipid: {
+    bg: "from-orange-50 to-orange-100/50",
+    ring: "ring-orange-200",
+    icon: "text-orange-600",
+    label: "الدهون",
+  },
+  other: {
+    bg: "from-slate-50 to-slate-100/50",
+    ring: "ring-slate-200",
+    icon: "text-slate-600",
+    label: "أخرى",
+  },
 };
 
 function categoryOf(report: LabReport): keyof typeof CATEGORY_STYLES {
   const t = `${report.test_type ?? ""} ${report.title ?? ""}`.toLowerCase();
   if (/cbc|hemo|hgb|hct|platelet|wbc|rbc|hema|دم/.test(t)) return "hematology";
-  if (/hba1c|glucose|creatinin|urea|alt|ast|liver|kidney|electrolyt|na|potassium|كيمياء|سكر|كلى|كبد/.test(t)) return "chemistry";
-  if (/tsh|t3|t4|thyroid|cortisol|estrogen|testosteron|hormone|هرمون|درقية/.test(t)) return "hormones";
+  if (
+    /hba1c|glucose|creatinin|urea|alt|ast|liver|kidney|electrolyt|na|potassium|كيمياء|سكر|كلى|كبد/.test(
+      t,
+    )
+  )
+    return "chemistry";
+  if (/tsh|t3|t4|thyroid|cortisol|estrogen|testosteron|hormone|هرمون|درقية/.test(t))
+    return "hormones";
   if (/urine|بول/.test(t)) return "urine";
   if (/culture|micro|bacteri|زرع|جرث/.test(t)) return "microbiology";
   if (/hiv|hepatit|antibody|antigen|serolog|مصل/.test(t)) return "serology";
@@ -197,12 +246,15 @@ function LaboratoryPage() {
 
   // KPIs
   const kpi = useMemo(() => {
-    let normal = 0, abnormal = 0, total = 0;
-    for (const r of enriched) for (const p of r._parsed) {
-      total++;
-      if (p.flag === "normal") normal++;
-      else abnormal++;
-    }
+    let normal = 0,
+      abnormal = 0,
+      total = 0;
+    for (const r of enriched)
+      for (const p of r._parsed) {
+        total++;
+        if (p.flag === "normal") normal++;
+        else abnormal++;
+      }
     return { normal, abnormal, total };
   }, [enriched]);
 
@@ -210,7 +262,10 @@ function LaboratoryPage() {
   const trendSeries = useMemo(() => {
     if (!selectedForChart) return { series: [], low: 0, high: 0, unit: "", name: "" };
     const points: { date: string; value: number; ts: number }[] = [];
-    let low = NaN, high = NaN, unit = "", name = "";
+    let low = NaN,
+      high = NaN,
+      unit = "",
+      name = "";
     for (const r of enriched) {
       if (!r.report_date) continue;
       for (const p of r._parsed) {
@@ -220,7 +275,10 @@ function LaboratoryPage() {
           value: p.value,
           ts: new Date(r.report_date).getTime(),
         });
-        low = p.low; high = p.high; unit = p.unit; name = p.name;
+        low = p.low;
+        high = p.high;
+        unit = p.unit;
+        name = p.name;
       }
     }
     points.sort((a, b) => a.ts - b.ts);
@@ -260,7 +318,12 @@ function LaboratoryPage() {
             />
           </div>
           <div className="flex flex-wrap gap-2">
-            <CatChip active={activeCat === "all"} onClick={() => setActiveCat("all")} label="الكل" count={enriched.length} />
+            <CatChip
+              active={activeCat === "all"}
+              onClick={() => setActiveCat("all")}
+              label="الكل"
+              count={enriched.length}
+            />
             {categories.map(([cat, n]) => (
               <CatChip
                 key={cat}
@@ -303,13 +366,23 @@ function LaboratoryPage() {
                 <YAxis
                   stroke="#64748b"
                   fontSize={12}
-                  label={{ value: trendSeries.unit, angle: -90, position: "insideLeft", fontSize: 11 }}
+                  label={{
+                    value: trendSeries.unit,
+                    angle: -90,
+                    position: "insideLeft",
+                    fontSize: 11,
+                  }}
                 />
                 <Tooltip
                   formatter={(v: number) => [`${v} ${trendSeries.unit}`, trendSeries.name]}
                   labelFormatter={(d) => format(parseISO(String(d)), "PPP", { locale: arLocale })}
                 />
-                <ReferenceArea y1={trendSeries.low} y2={trendSeries.high} fill="#10b981" fillOpacity={0.08} />
+                <ReferenceArea
+                  y1={trendSeries.low}
+                  y2={trendSeries.high}
+                  fill="#10b981"
+                  fillOpacity={0.08}
+                />
                 <Line
                   type="monotone"
                   dataKey="value"
@@ -322,7 +395,8 @@ function LaboratoryPage() {
             </ResponsiveContainer>
           </div>
           <p className="text-xs text-[color:var(--portal-ink-2)] mt-2">
-            المنطقة الخضراء تمثل النطاق الطبيعي ({trendSeries.low}–{trendSeries.high} {trendSeries.unit}).
+            المنطقة الخضراء تمثل النطاق الطبيعي ({trendSeries.low}–{trendSeries.high}{" "}
+            {trendSeries.unit}).
           </p>
         </div>
       )}
@@ -346,14 +420,20 @@ function LaboratoryPage() {
               >
                 <header className="flex items-start justify-between gap-3 mb-4">
                   <div className="flex items-center gap-3">
-                    <div className={`h-11 w-11 rounded-2xl bg-white grid place-items-center shadow-sm ${style.icon}`}>
+                    <div
+                      className={`h-11 w-11 rounded-2xl bg-white grid place-items-center shadow-sm ${style.icon}`}
+                    >
                       <FlaskConical className="h-5 w-5" />
                     </div>
                     <div>
-                      <h3 className="font-bold leading-tight">{r.title ?? r.test_type ?? "تقرير مختبر"}</h3>
+                      <h3 className="font-bold leading-tight">
+                        {r.title ?? r.test_type ?? "تقرير مختبر"}
+                      </h3>
                       <p className="text-xs text-[color:var(--portal-ink-2)] mt-0.5">
                         {r.test_type ?? style.label}
-                        {r.report_date ? ` • ${format(parseISO(r.report_date), "PPP", { locale: arLocale })}` : ""}
+                        {r.report_date
+                          ? ` • ${format(parseISO(r.report_date), "PPP", { locale: arLocale })}`
+                          : ""}
                       </p>
                     </div>
                   </div>
@@ -431,23 +511,28 @@ function LaboratoryPage() {
         </p>
       </div>
 
-      <ShareDialog
-        report={shareOpen}
-        onClose={() => setShareOpen(null)}
-      />
+      <ShareDialog report={shareOpen} onClose={() => setShareOpen(null)} />
     </div>
   );
 }
 
 /* ------------------------ subcomponents ------------------------ */
 
-function KpiPill({ label, value, tone }: { label: string; value: number; tone: "ok" | "warn" | "neutral" }) {
+function KpiPill({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "ok" | "warn" | "neutral";
+}) {
   const cls =
     tone === "ok"
       ? "bg-emerald-50 text-emerald-700 ring-emerald-200"
       : tone === "warn"
-      ? "bg-rose-50 text-rose-700 ring-rose-200"
-      : "bg-slate-50 text-slate-700 ring-slate-200";
+        ? "bg-rose-50 text-rose-700 ring-rose-200"
+        : "bg-slate-50 text-slate-700 ring-slate-200";
   return (
     <div className={`rounded-2xl px-4 py-2 ring-1 ${cls}`}>
       <div className="text-xs">{label}</div>
@@ -457,8 +542,18 @@ function KpiPill({ label, value, tone }: { label: string; value: number; tone: "
 }
 
 function CatChip({
-  active, onClick, label, count, tone,
-}: { active: boolean; onClick: () => void; label: string; count: number; tone?: string }) {
+  active,
+  onClick,
+  label,
+  count,
+  tone,
+}: {
+  active: boolean;
+  onClick: () => void;
+  label: string;
+  count: number;
+  tone?: string;
+}) {
   const style = tone ? CATEGORY_STYLES[tone] : undefined;
   return (
     <button
@@ -470,12 +565,22 @@ function CatChip({
       }`}
     >
       {label}
-      <span className={`text-xs ${active ? "opacity-80" : "text-[color:var(--portal-ink-2)]"}`}>{count}</span>
+      <span className={`text-xs ${active ? "opacity-80" : "text-[color:var(--portal-ink-2)]"}`}>
+        {count}
+      </span>
     </button>
   );
 }
 
-function StatusBadge({ status, abnormal, total }: { status: string | null; abnormal: number; total: number }) {
+function StatusBadge({
+  status,
+  abnormal,
+  total,
+}: {
+  status: string | null;
+  abnormal: number;
+  total: number;
+}) {
   if (total > 0 && abnormal > 0) {
     return (
       <Badge className="bg-rose-100 text-rose-700 hover:bg-rose-100 border-0">
@@ -507,7 +612,11 @@ function ResultRow({ p }: { p: ParsedResult }) {
   const normalWidth = ((p.high - p.low) / (max - min)) * 100;
 
   const flagColor =
-    p.flag === "normal" ? "text-emerald-700" : p.flag === "low" ? "text-amber-700" : "text-rose-700";
+    p.flag === "normal"
+      ? "text-emerald-700"
+      : p.flag === "low"
+        ? "text-amber-700"
+        : "text-rose-700";
   const dotColor =
     p.flag === "normal" ? "bg-emerald-500" : p.flag === "low" ? "bg-amber-500" : "bg-rose-500";
 
@@ -515,7 +624,9 @@ function ResultRow({ p }: { p: ParsedResult }) {
     <div className="rounded-xl bg-white/70 hover:bg-[color:var(--portal-surface)] transition-colors px-3 py-2 ring-1 ring-white/60">
       <div className="flex items-center justify-between mb-1.5">
         <span className="text-sm font-medium truncate">{p.name}</span>
-        <span className={`text-sm font-bold tabular-nums inline-flex items-center gap-1 ${flagColor}`}>
+        <span
+          className={`text-sm font-bold tabular-nums inline-flex items-center gap-1 ${flagColor}`}
+        >
           {p.flag === "high" && <ArrowUp className="h-3.5 w-3.5" />}
           {p.flag === "low" && <ArrowDown className="h-3.5 w-3.5" />}
           {p.value}
@@ -570,7 +681,9 @@ function ShareDialog({ report, onClose }: { report: LabReport | null; onClose: (
         {report && (
           <div className="space-y-4">
             <div className="rounded-2xl bg-slate-50 p-3 text-sm">
-              <div className="font-semibold">{report.title ?? report.test_type ?? "تقرير مختبر"}</div>
+              <div className="font-semibold">
+                {report.title ?? report.test_type ?? "تقرير مختبر"}
+              </div>
               <div className="text-xs text-slate-500 mt-1">
                 {report.report_date
                   ? format(parseISO(report.report_date), "PPP", { locale: arLocale })
@@ -588,7 +701,8 @@ function ShareDialog({ report, onClose }: { report: LabReport | null; onClose: (
                 <option value="">اختر الطبيب…</option>
                 {(doctors.data?.doctors ?? []).map((d) => (
                   <option key={d.id} value={d.id}>
-                    {d.title_ar ? `${d.title_ar} ` : ""}{d.name_ar}
+                    {d.title_ar ? `${d.title_ar} ` : ""}
+                    {d.name_ar}
                     {d.specialty ? ` — ${d.specialty}` : ""}
                   </option>
                 ))}
@@ -628,7 +742,11 @@ function ShareDialog({ report, onClose }: { report: LabReport | null; onClose: (
             className="h-10 rounded-full px-5 text-sm font-semibold text-[color:var(--portal-on-primary)] inline-flex items-center gap-2 disabled:opacity-50"
             style={{ background: "var(--portal-gradient)" }}
           >
-            {mut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Share2 className="h-4 w-4" />}
+            {mut.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Share2 className="h-4 w-4" />
+            )}
             مشاركة الآن
           </button>
         </DialogFooter>

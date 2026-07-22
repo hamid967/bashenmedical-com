@@ -26,7 +26,7 @@ type State = {
   holdId: string | null;
   expiresAt: number | null; // ms epoch
   createdAt: number | null; // ms epoch — anchor for the visual progress ring
-  durationMs: number;       // total hold window at issue time, for the ring denominator
+  durationMs: number; // total hold window at issue time, for the ring denominator
   secondsLeft: number;
   expired: boolean;
   conflict: boolean;
@@ -35,7 +35,13 @@ type State = {
 
 const REFRESH_LEAD_MS = 45_000;
 
-export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): State & { refresh: () => void } {
+export function useSlotHold({
+  enabled,
+  doctorId,
+  branchId,
+  date,
+  time,
+}: Args): State & { refresh: () => void } {
   const [state, setState] = useState<State>({
     holdId: null,
     expiresAt: null,
@@ -63,44 +69,57 @@ export function useSlotHold({ enabled, doctorId, branchId, date, time }: Args): 
     keyRef.current = key;
 
     if (!enabled || !doctorId || !date || !time) {
-      setState({ holdId: null, expiresAt: null, createdAt: null, durationMs: 0, secondsLeft: 0, expired: false, conflict: false, error: null });
+      setState({
+        holdId: null,
+        expiresAt: null,
+        createdAt: null,
+        durationMs: 0,
+        secondsLeft: 0,
+        expired: false,
+        conflict: false,
+        error: null,
+      });
       return;
     }
 
     let cancelled = false;
     setState((s) => ({ ...s, expired: false, conflict: false, error: null }));
 
-    holdSlot({ doctor_id: doctorId, branch_id: branchId ?? null, appointment_date: date, appointment_time: time })
-      .then((res: HoldResult) => {
-        if (cancelled) return;
-        if (!res.ok) {
-          setState({
-            holdId: null,
-            expiresAt: null,
-            createdAt: null,
-            durationMs: 0,
-            secondsLeft: 0,
-            expired: false,
-            conflict: res.kind === "conflict",
-            error: res.message,
-          });
-          activeIdRef.current = null;
-          return;
-        }
-        activeIdRef.current = res.id;
-        const expMs = new Date(res.expires_at).getTime();
-        const nowMs = Date.now();
+    holdSlot({
+      doctor_id: doctorId,
+      branch_id: branchId ?? null,
+      appointment_date: date,
+      appointment_time: time,
+    }).then((res: HoldResult) => {
+      if (cancelled) return;
+      if (!res.ok) {
         setState({
-          holdId: res.id,
-          expiresAt: expMs,
-          createdAt: nowMs,
-          durationMs: Math.max(1_000, expMs - nowMs),
-          secondsLeft: Math.max(0, Math.floor((expMs - nowMs) / 1000)),
+          holdId: null,
+          expiresAt: null,
+          createdAt: null,
+          durationMs: 0,
+          secondsLeft: 0,
           expired: false,
-          conflict: false,
-          error: null,
+          conflict: res.kind === "conflict",
+          error: res.message,
         });
+        activeIdRef.current = null;
+        return;
+      }
+      activeIdRef.current = res.id;
+      const expMs = new Date(res.expires_at).getTime();
+      const nowMs = Date.now();
+      setState({
+        holdId: res.id,
+        expiresAt: expMs,
+        createdAt: nowMs,
+        durationMs: Math.max(1_000, expMs - nowMs),
+        secondsLeft: Math.max(0, Math.floor((expMs - nowMs) / 1000)),
+        expired: false,
+        conflict: false,
+        error: null,
       });
+    });
 
     return () => {
       cancelled = true;

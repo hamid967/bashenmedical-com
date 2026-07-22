@@ -16,10 +16,16 @@ const w = typeof window !== "undefined" ? window : undefined;
 
 const scheduleIdle = (cb: (d: IdleDeadline) => void): IdleHandle => {
   if (!w) return 0;
-  const ric = (w as unknown as { requestIdleCallback?: (cb: (d: IdleDeadline) => void, o?: { timeout: number }) => number })
-    .requestIdleCallback;
+  const ric = (
+    w as unknown as {
+      requestIdleCallback?: (cb: (d: IdleDeadline) => void, o?: { timeout: number }) => number;
+    }
+  ).requestIdleCallback;
   if (typeof ric === "function") return ric(cb, { timeout: 800 });
-  return w.setTimeout(() => cb({ didTimeout: true, timeRemaining: () => 0 }), 100) as unknown as number;
+  return w.setTimeout(
+    () => cb({ didTimeout: true, timeRemaining: () => 0 }),
+    100,
+  ) as unknown as number;
 };
 
 const prefetched = new Set<string>();
@@ -110,5 +116,3 @@ export function prefetchMedia(urls: Array<{ url: string; kind: "image" | "video"
     for (const u of filtered) prefetchOne(u.url, u.kind);
   });
 }
-
-

@@ -132,4 +132,3 @@ export function DoctorFilters({ specialties, branches, languages, counts, show }
     </div>
   );
 }
-

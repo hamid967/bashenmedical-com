@@ -26,10 +26,8 @@ function humanize(err: any, fallback = "تعذّر تنفيذ الطلب.") {
   const msg = String(err.message ?? "");
   if (/forbidden|42501|permission denied/i.test(msg))
     return "ليست لديك الصلاحية لتنفيذ هذا الإجراء.";
-  if (/only super_admin/i.test(msg))
-    return "هذا الدور يتطلب صلاحية المسؤول الأعلى (super_admin).";
-  if (/last super_admin/i.test(msg))
-    return "لا يمكن حذف آخر مستخدم بصلاحية المسؤول الأعلى.";
+  if (/only super_admin/i.test(msg)) return "هذا الدور يتطلب صلاحية المسؤول الأعلى (super_admin).";
+  if (/last super_admin/i.test(msg)) return "لا يمكن حذف آخر مستخدم بصلاحية المسؤول الأعلى.";
   return msg || fallback;
 }
 
@@ -50,7 +48,7 @@ function getClientMeta() {
       const fwd = getRequestHeader("x-forwarded-for");
       const real = getRequestHeader("x-real-ip");
       const cf = getRequestHeader("cf-connecting-ip");
-      ip = (cf ?? real ?? (fwd ? fwd.split(",")[0]?.trim() : null)) ?? null;
+      ip = cf ?? real ?? (fwd ? fwd.split(",")[0]?.trim() : null) ?? null;
     }
   } catch {}
   return { ip, ua };
@@ -84,30 +82,34 @@ export const assignRole = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { ip, ua } = getClientMeta();
-    const { error } = await context.supabase.rpc("assign_user_role" as any, {
-      _user_id: data.user_id,
-      _role: data.role,
-      _branch_id: data.branch_id ?? null,
-      _ip: ip,
-      _ua: ua,
-    } as any);
+    const { error } = await context.supabase.rpc(
+      "assign_user_role" as any,
+      {
+        _user_id: data.user_id,
+        _role: data.role,
+        _branch_id: data.branch_id ?? null,
+        _ip: ip,
+        _ua: ua,
+      } as any,
+    );
     if (error) throw new Error(humanize(error));
     return { ok: true };
   });
 
 export const revokeRole = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d) =>
-    z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d),
-  )
+  .validator((d) => z.object({ user_id: z.string().uuid(), role: z.enum(ROLES) }).parse(d))
   .handler(async ({ data, context }) => {
     const { ip, ua } = getClientMeta();
-    const { error } = await context.supabase.rpc("revoke_user_role" as any, {
-      _user_id: data.user_id,
-      _role: data.role,
-      _ip: ip,
-      _ua: ua,
-    } as any);
+    const { error } = await context.supabase.rpc(
+      "revoke_user_role" as any,
+      {
+        _user_id: data.user_id,
+        _role: data.role,
+        _ip: ip,
+        _ua: ua,
+      } as any,
+    );
     if (error) throw new Error(humanize(error));
     return { ok: true };
   });
@@ -158,11 +160,14 @@ export const setRolePermission = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.rpc("set_role_permission" as any, {
-      _role: data.role,
-      _permission_key: data.permission_key,
-      _enabled: data.enabled,
-    } as any);
+    const { error } = await context.supabase.rpc(
+      "set_role_permission" as any,
+      {
+        _role: data.role,
+        _permission_key: data.permission_key,
+        _enabled: data.enabled,
+      } as any,
+    );
     if (error) throw new Error(humanize(error));
     return { ok: true };
   });
@@ -258,7 +263,7 @@ export const importRolePermissions = createServerFn({ method: "POST" })
     // Current matrix
     const { data: current } = await supabase.rpc("list_role_permissions_matrix" as any);
     const currentByRole = new Map<string, Set<string>>();
-    for (const r of ((current ?? []) as any[])) {
+    for (const r of (current ?? []) as any[]) {
       const s = currentByRole.get(r.role) ?? new Set<string>();
       s.add(r.permission_key);
       currentByRole.set(r.role, s);
@@ -300,11 +305,14 @@ export const importRolePermissions = createServerFn({ method: "POST" })
       // Add missing
       for (const k of desired) {
         if (existing.has(k)) continue;
-        const { error } = await supabase.rpc("set_role_permission" as any, {
-          _role: role,
-          _permission_key: k,
-          _enabled: true,
-        } as any);
+        const { error } = await supabase.rpc(
+          "set_role_permission" as any,
+          {
+            _role: role,
+            _permission_key: k,
+            _enabled: true,
+          } as any,
+        );
         if (error) stats.errors.push(`+${role}:${k}: ${error.message}`);
         else stats.added++;
       }
@@ -313,11 +321,14 @@ export const importRolePermissions = createServerFn({ method: "POST" })
       if (data.mode === "replace") {
         for (const k of existing) {
           if (desired.has(k)) continue;
-          const { error } = await supabase.rpc("set_role_permission" as any, {
-            _role: role,
-            _permission_key: k,
-            _enabled: false,
-          } as any);
+          const { error } = await supabase.rpc(
+            "set_role_permission" as any,
+            {
+              _role: role,
+              _permission_key: k,
+              _enabled: false,
+            } as any,
+          );
           if (error) stats.errors.push(`-${role}:${k}: ${error.message}`);
           else stats.removed++;
         }
@@ -349,9 +360,7 @@ export const getMyPermissions = createServerFn({ method: "GET" })
       .from("role_permissions")
       .select("permission_key")
       .in("role", roles as any);
-    const perms = Array.from(
-      new Set((data ?? []).map((r: any) => r.permission_key as string)),
-    );
+    const perms = Array.from(new Set((data ?? []).map((r: any) => r.permission_key as string)));
     return { userId, roles, isSuper: false, permissions: perms };
   });
 
@@ -393,7 +402,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
     const actorIds = Array.from(
       new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)),
     ) as string[];
-    let actorMap = new Map<string, { name: string | null; phone: string | null }>();
+    const actorMap = new Map<string, { name: string | null; phone: string | null }>();
     if (actorIds.length) {
       const { data: profs } = await supabase
         .from("profiles")
@@ -407,7 +416,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
     const branchIds = Array.from(
       new Set((rows ?? []).map((r: any) => r.branch_id).filter(Boolean)),
     ) as string[];
-    let branchMap = new Map<string, string>();
+    const branchMap = new Map<string, string>();
     if (branchIds.length) {
       const { data: brs } = await supabase
         .from("branches")
@@ -422,8 +431,8 @@ export const listAuditLog = createServerFn({ method: "POST" })
       id: r.id as string,
       action: r.action as string,
       actor: r.actor as string | null,
-      actor_name: r.actor ? actorMap.get(r.actor)?.name ?? null : null,
-      actor_phone: r.actor ? actorMap.get(r.actor)?.phone ?? null : null,
+      actor_name: r.actor ? (actorMap.get(r.actor)?.name ?? null) : null,
+      actor_phone: r.actor ? (actorMap.get(r.actor)?.phone ?? null) : null,
       appointment_id: r.appointment_id as string | null,
       from_status: r.from_status as string | null,
       to_status: r.to_status as string | null,
@@ -433,7 +442,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
       user_agent: r.user_agent as string | null,
       created_at: r.created_at as string,
       branch_id: (r.branch_id as string | null) ?? null,
-      branch_name: r.branch_id ? branchMap.get(r.branch_id) ?? null : null,
+      branch_name: r.branch_id ? (branchMap.get(r.branch_id) ?? null) : null,
       table_name: (r.table_name as string | null) ?? null,
       record_id: (r.record_id as string | null) ?? null,
     }));
@@ -479,8 +488,7 @@ function extractTargets(row: any): {
   const meta = row.metadata ?? {};
   const src = meta.new ?? meta.old ?? {};
   const changes = meta.changes ?? {};
-  const pick = (k: string) =>
-    src?.[k] ?? changes?.[k]?.new ?? changes?.[k]?.old ?? null;
+  const pick = (k: string) => src?.[k] ?? changes?.[k]?.new ?? changes?.[k]?.old ?? null;
   return {
     target_user_id: pick("user_id"),
     role: pick("role"),
@@ -499,8 +507,7 @@ export const listRbacAuditLog = createServerFn({ method: "POST" })
       throw new Error("ليست لديك الصلاحية لعرض سجل التدقيق.");
     }
 
-    const tables =
-      data.table === "all" ? (RBAC_TABLES as unknown as string[]) : [data.table];
+    const tables = data.table === "all" ? (RBAC_TABLES as unknown as string[]) : [data.table];
 
     let q = supabase
       .from("security_audit_log")
@@ -525,10 +532,7 @@ export const listRbacAuditLog = createServerFn({ method: "POST" })
         const t = extractTargets(r);
         if (data.target_user && t.target_user_id !== data.target_user) return false;
         if (data.role && String(t.role ?? "") !== data.role) return false;
-        if (
-          data.permission_key &&
-          String(t.permission_key ?? "") !== data.permission_key
-        )
+        if (data.permission_key && String(t.permission_key ?? "") !== data.permission_key)
           return false;
         if (needle) {
           const hay = JSON.stringify(r.metadata ?? {}).toLowerCase();
@@ -571,14 +575,14 @@ export const listRbacAuditLog = createServerFn({ method: "POST" })
         record_id: (r.record_id as string | null) ?? null,
         created_at: r.created_at as string,
         actor: r.actor as string | null,
-        actor_name: r.actor ? profileMap.get(r.actor)?.name ?? null : null,
-        actor_phone: r.actor ? profileMap.get(r.actor)?.phone ?? null : null,
+        actor_name: r.actor ? (profileMap.get(r.actor)?.name ?? null) : null,
+        actor_phone: r.actor ? (profileMap.get(r.actor)?.phone ?? null) : null,
         target_user_id: t.target_user_id,
         target_user_name: t.target_user_id
-          ? profileMap.get(t.target_user_id)?.name ?? null
+          ? (profileMap.get(t.target_user_id)?.name ?? null)
           : null,
         target_user_phone: t.target_user_id
-          ? profileMap.get(t.target_user_id)?.phone ?? null
+          ? (profileMap.get(t.target_user_id)?.phone ?? null)
           : null,
         role: t.role,
         permission_key: t.permission_key,

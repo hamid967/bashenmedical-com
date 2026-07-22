@@ -94,11 +94,7 @@ export function NewDoctorsSection() {
         ) : isPending ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="glass-fut h-52 animate-pulse"
-                aria-hidden="true"
-              />
+              <div key={i} className="glass-fut h-52 animate-pulse" aria-hidden="true" />
             ))}
           </div>
         ) : (
@@ -106,7 +102,11 @@ export function NewDoctorsSection() {
             {list.map((d) => {
               const name = isAr ? d.name_ar : d.name_en;
               const title = isAr ? d.title_ar : d.title_en;
-              const spec = d.specialties ? (isAr ? d.specialties.name_ar : d.specialties.name_en) : null;
+              const spec = d.specialties
+                ? isAr
+                  ? d.specialties.name_ar
+                  : d.specialties.name_en
+                : null;
               const br = d.branches ? (isAr ? d.branches.name_ar : d.branches.name_en) : null;
               const isNew = Date.now() - new Date(d.created_at).getTime() < THIRTY_DAYS_MS;
               const profileHref = d.slug ? `/doctors/${d.slug}` : null;
@@ -159,9 +159,7 @@ export function NewDoctorsSection() {
                         to="/doctors/$slug"
                         params={{ slug: d.slug as string }}
                         className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[color:var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/60 px-3 py-2 text-xs font-semibold text-[color:var(--jazan-teal)] hover:bg-[var(--jazan-ivory)] transition"
-                        aria-label={
-                          isAr ? `فتح ملف الطبيب ${name}` : `Open profile of ${name}`
-                        }
+                        aria-label={isAr ? `فتح ملف الطبيب ${name}` : `Open profile of ${name}`}
                       >
                         {isAr ? "الملف" : "Profile"}
                       </Link>

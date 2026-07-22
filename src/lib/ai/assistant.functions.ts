@@ -12,11 +12,9 @@ export interface AssistantStatus {
 /** Public status for the floating assistant (safe for anonymous). */
 export const getAssistantStatus = createServerFn({ method: "GET" }).handler(
   async (): Promise<AssistantStatus> => {
-    const sb = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      { auth: { persistSession: false, autoRefreshToken: false } },
-    );
+    const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
     const [flags, routes] = await Promise.all([
       sb.from("ai_feature_flags").select("key, enabled"),
       sb.from("ai_model_routes").select("route_name, model_id, enabled"),

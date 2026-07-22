@@ -62,7 +62,10 @@ export const listNurses = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: { branchId?: string | null } | undefined) => d ?? {})
   .handler(async ({ data, context }) => {
-    let q = context.supabase.from("nurses" as never).select("*").order("full_name");
+    let q = context.supabase
+      .from("nurses" as never)
+      .select("*")
+      .order("full_name");
     if (data.branchId) q = q.eq("branch_id", data.branchId);
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
@@ -87,7 +90,10 @@ export const upsertNurse = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { id, ...rest } = data;
     if (id) {
-      const { error } = await context.supabase.from("nurses" as never).update(rest as never).eq("id", id);
+      const { error } = await context.supabase
+        .from("nurses" as never)
+        .update(rest as never)
+        .eq("id", id);
       if (error) throw new Error(error.message);
       return { ok: true, id };
     }
@@ -104,7 +110,10 @@ export const deleteNurse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("nurses" as never).delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("nurses" as never)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -171,7 +180,10 @@ export const deleteShift = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { error } = await context.supabase.from("nurse_shifts" as never).delete().eq("id", data.id);
+    const { error } = await context.supabase
+      .from("nurse_shifts" as never)
+      .delete()
+      .eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });
@@ -180,7 +192,10 @@ export const deleteShift = createServerFn({ method: "POST" })
 const CallListInput = z
   .object({
     branchId: z.string().uuid().nullable().optional(),
-    status: z.enum(["pending", "in_progress", "completed", "cancelled", "active"]).nullable().optional(),
+    status: z
+      .enum(["pending", "in_progress", "completed", "cancelled", "active"])
+      .nullable()
+      .optional(),
   })
   .default({});
 
@@ -236,7 +251,8 @@ export const updateCallStatus = createServerFn({ method: "POST" })
     const patch: Record<string, unknown> = { status: data.status };
     if (data.assigned_nurse_id !== undefined) patch.assigned_nurse_id = data.assigned_nurse_id;
     if (data.status === "in_progress") patch.accepted_at = new Date().toISOString();
-    if (data.status === "completed" || data.status === "cancelled") patch.completed_at = new Date().toISOString();
+    if (data.status === "completed" || data.status === "cancelled")
+      patch.completed_at = new Date().toISOString();
     const { error } = await context.supabase
       .from("nurse_calls" as never)
       .update(patch as never)

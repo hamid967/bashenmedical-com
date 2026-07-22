@@ -29,9 +29,24 @@ export function HeroComplex() {
       {/* Art-directed background: portrait crop on mobile, wide crop on desktop */}
       <picture>
         {/* Mobile-first: vertical composition */}
-        <source type="image/avif" media={MOBILE_MEDIA} srcSet={heroMobileAvif} sizes={MOBILE_SIZES} />
-        <source type="image/webp" media={MOBILE_MEDIA} srcSet={heroMobileWebp} sizes={MOBILE_SIZES} />
-        <source type="image/jpeg" media={MOBILE_MEDIA} srcSet={heroMobileJpg} sizes={MOBILE_SIZES} />
+        <source
+          type="image/avif"
+          media={MOBILE_MEDIA}
+          srcSet={heroMobileAvif}
+          sizes={MOBILE_SIZES}
+        />
+        <source
+          type="image/webp"
+          media={MOBILE_MEDIA}
+          srcSet={heroMobileWebp}
+          sizes={MOBILE_SIZES}
+        />
+        <source
+          type="image/jpeg"
+          media={MOBILE_MEDIA}
+          srcSet={heroMobileJpg}
+          sizes={MOBILE_SIZES}
+        />
         {/* Desktop / tablet: wide composition */}
         <source type="image/avif" srcSet={heroAvif} sizes={DESKTOP_SIZES} />
         <source type="image/webp" srcSet={heroWebp} sizes={DESKTOP_SIZES} />
@@ -46,11 +61,11 @@ export function HeroComplex() {
         />
       </picture>
 
-
-
       {/* Medical color overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a2540]/70 via-[#0f766e]/35 to-[#06b6d4]/25" />
-      <div className={`absolute inset-0 ${isAr ? "bg-gradient-to-l" : "bg-gradient-to-r"} from-[#0a2540]/85 via-[#0a2540]/40 to-transparent`} />
+      <div
+        className={`absolute inset-0 ${isAr ? "bg-gradient-to-l" : "bg-gradient-to-r"} from-[#0a2540]/85 via-[#0a2540]/40 to-transparent`}
+      />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_20%,rgba(6,12,25,0.55)_100%)]" />
 
       {/* Floating medical motifs (DNA / ECG / cross) */}
@@ -93,7 +108,9 @@ export function HeroComplex() {
             >
               <CalendarCheck className="h-5 w-5" />
               {isAr ? "احجز موعدك الآن" : "Book your appointment"}
-              <span className={`transition-transform ${isAr ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"}`}>
+              <span
+                className={`transition-transform ${isAr ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"}`}
+              >
                 {isAr ? "←" : "→"}
               </span>
             </Link>
@@ -107,7 +124,9 @@ export function HeroComplex() {
           </div>
 
           {/* Trust chips */}
-          <div className={`mt-10 flex flex-wrap gap-x-6 gap-y-3 text-xs md:text-sm text-white/70 ${isAr ? "flex-row-reverse justify-end" : ""}`}>
+          <div
+            className={`mt-10 flex flex-wrap gap-x-6 gap-y-3 text-xs md:text-sm text-white/70 ${isAr ? "flex-row-reverse justify-end" : ""}`}
+          >
             <div className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-cyan-300" />
               {isAr ? "أطباء استشاريون" : "Consultant specialists"}

@@ -282,10 +282,7 @@ function SettingsPage() {
         {active.length > 0 && (
           <div className="space-y-4">
             {active.map((row) => (
-              <div
-                key={row.id}
-                className="rounded-xl border border-border bg-card p-5 shadow-sm"
-              >
+              <div key={row.id} className="rounded-xl border border-border bg-card p-5 shadow-sm">
                 <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
                   <div>
                     <div className="flex items-center gap-2 text-sm font-semibold">
@@ -311,12 +308,10 @@ function SettingsPage() {
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-3">
-                  {(
-                    [
-                      { key: "24h" as const, label: "تذكير قبل 24 ساعة", value: row.reminder_24h },
-                      { key: "2h" as const, label: "تذكير قبل ساعتين", value: row.reminder_2h },
-                    ]
-                  ).map((r) => {
+                  {[
+                    { key: "24h" as const, label: "تذكير قبل 24 ساعة", value: row.reminder_24h },
+                    { key: "2h" as const, label: "تذكير قبل ساعتين", value: row.reminder_2h },
+                  ].map((r) => {
                     const k = `${row.id}:${r.key}`;
                     const st = status[k] ?? { kind: "idle" as const };
                     const saving = st.kind === "saving";

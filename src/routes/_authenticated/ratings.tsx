@@ -31,10 +31,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export const Route = createFileRoute("/_authenticated/ratings")({
   head: () => ({
-    meta: [
-      { title: "تقييمات المرضى | مجمع باعشن الطبي" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تقييمات المرضى | مجمع باعشن الطبي" }, { name: "robots", content: "noindex" }],
   }),
   component: RatingsPage,
 });
@@ -53,8 +50,16 @@ function RatingsPage() {
   const branchesFn = useServerFn(listBranchesForRatings);
   const doctorsFn = useServerFn(listDoctorsForRatings);
 
-  const branchesQ = useQuery({ queryKey: ["ratings-branches"], queryFn: () => branchesFn(), staleTime: 60_000 });
-  const doctorsQ = useQuery({ queryKey: ["ratings-doctors"], queryFn: () => doctorsFn(), staleTime: 60_000 });
+  const branchesQ = useQuery({
+    queryKey: ["ratings-branches"],
+    queryFn: () => branchesFn(),
+    staleTime: 60_000,
+  });
+  const doctorsQ = useQuery({
+    queryKey: ["ratings-doctors"],
+    queryFn: () => doctorsFn(),
+    staleTime: 60_000,
+  });
 
   const summaryQ = useQuery({
     queryKey: ["ratings-summary", branchId, doctorId, days],
@@ -89,7 +94,6 @@ function RatingsPage() {
     },
     onError: (e: Error) => toast.error(e.message),
   });
-
 
   const overall = useMemo(() => {
     const rows = summaryQ.data ?? [];
@@ -127,7 +131,10 @@ function RatingsPage() {
           >
             <QrCode className="h-4 w-4" /> بطاقات QR
           </Link>
-          <Link to="/admin" className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted">
+          <Link
+            to="/admin"
+            className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
+          >
             <ArrowLeft className="h-4 w-4" /> لوحة التحكم
           </Link>
         </div>
@@ -135,10 +142,30 @@ function RatingsPage() {
 
       {/* KPI Strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <KpiCard label="المتوسط العام" value={overall.avg.toFixed(2)} icon={<Star className="h-5 w-5 fill-amber-400 text-amber-400" />} tone="amber" />
-        <KpiCard label="إجمالي التقييمات" value={String(overall.count)} icon={<MessageSquare className="h-5 w-5" />} tone="blue" />
-        <KpiCard label="تقييمات سلبية (≤ 2)" value={String(listStats.negative)} icon={<Star className="h-5 w-5" />} tone="red" />
-        <KpiCard label="معدل الرد" value={`${listStats.replyRate.toFixed(0)}%`} icon={<Reply className="h-5 w-5" />} tone="green" />
+        <KpiCard
+          label="المتوسط العام"
+          value={overall.avg.toFixed(2)}
+          icon={<Star className="h-5 w-5 fill-amber-400 text-amber-400" />}
+          tone="amber"
+        />
+        <KpiCard
+          label="إجمالي التقييمات"
+          value={String(overall.count)}
+          icon={<MessageSquare className="h-5 w-5" />}
+          tone="blue"
+        />
+        <KpiCard
+          label="تقييمات سلبية (≤ 2)"
+          value={String(listStats.negative)}
+          icon={<Star className="h-5 w-5" />}
+          tone="red"
+        />
+        <KpiCard
+          label="معدل الرد"
+          value={`${listStats.replyRate.toFixed(0)}%`}
+          icon={<Reply className="h-5 w-5" />}
+          tone="green"
+        />
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5">
@@ -149,24 +176,44 @@ function RatingsPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">الفرع</label>
-            <select value={branchId ?? ""} onChange={(e) => { setBranchId(e.target.value || null); setDoctorId(null); }}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select
+              value={branchId ?? ""}
+              onChange={(e) => {
+                setBranchId(e.target.value || null);
+                setDoctorId(null);
+              }}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
               <option value="">كل الفروع</option>
-              {(branchesQ.data ?? []).map((b) => <option key={b.id} value={b.id}>{b.name_ar}</option>)}
+              {(branchesQ.data ?? []).map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name_ar}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">الطبيب</label>
-            <select value={doctorId ?? ""} onChange={(e) => setDoctorId(e.target.value || null)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select
+              value={doctorId ?? ""}
+              onChange={(e) => setDoctorId(e.target.value || null)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
               <option value="">كل الأطباء</option>
-              {filteredDoctors.map((d) => <option key={d.id} value={d.id}>{d.name_ar}</option>)}
+              {filteredDoctors.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name_ar}
+                </option>
+              ))}
             </select>
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">الحد الأدنى للتقييم</label>
-            <select value={minRating ?? ""} onChange={(e) => setMinRating(e.target.value ? Number(e.target.value) : null)}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+            <select
+              value={minRating ?? ""}
+              onChange={(e) => setMinRating(e.target.value ? Number(e.target.value) : null)}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
               <option value="">الكل</option>
               <option value="4">4 نجوم فأكثر</option>
               <option value="3">3 نجوم فأكثر</option>
@@ -175,9 +222,16 @@ function RatingsPage() {
           </div>
           <div>
             <label className="text-xs text-muted-foreground mb-1 block">الفترة</label>
-            <select value={days} onChange={(e) => setDays(Number(e.target.value))}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
-              {[30, 90, 180, 365].map((d) => <option key={d} value={d}>آخر {d} يوم</option>)}
+            <select
+              value={days}
+              onChange={(e) => setDays(Number(e.target.value))}
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            >
+              {[30, 90, 180, 365].map((d) => (
+                <option key={d} value={d}>
+                  آخر {d} يوم
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -219,7 +273,9 @@ function RatingsPage() {
                 <RatingCard
                   key={r.id}
                   r={r}
-                  onDelete={() => { if (confirm("حذف هذا التقييم؟")) deleteM.mutate(r.id); }}
+                  onDelete={() => {
+                    if (confirm("حذف هذا التقييم؟")) deleteM.mutate(r.id);
+                  }}
                   onReply={(reply) => replyM.mutate({ id: r.id, reply })}
                   isReplying={replyM.isPending}
                 />
@@ -262,7 +318,11 @@ function SummaryCard({ row }: { row: import("@/lib/ratings.functions").RatingSum
             {row.scope === "doctor" ? "طبيب" : "فرع"}
           </p>
           <p className="text-sm font-bold truncate flex items-center gap-1.5">
-            {row.scope === "doctor" ? <Stethoscope className="h-3.5 w-3.5 text-primary shrink-0" /> : <Building2 className="h-3.5 w-3.5 text-primary shrink-0" />}
+            {row.scope === "doctor" ? (
+              <Stethoscope className="h-3.5 w-3.5 text-primary shrink-0" />
+            ) : (
+              <Building2 className="h-3.5 w-3.5 text-primary shrink-0" />
+            )}
             {row.entity_name}
           </p>
         </div>
@@ -330,7 +390,10 @@ function StaffAddRating({
     },
     onSuccess: () => {
       toast.success("تم تسجيل التقييم");
-      setRating(0); setComment(""); setName(""); setPhone("");
+      setRating(0);
+      setComment("");
+      setName("");
+      setPhone("");
       onSubmitted();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -346,18 +409,35 @@ function StaffAddRating({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">الفرع</label>
-          <select value={branchId ?? ""} onChange={(e) => { setBranchId(e.target.value || null); setDoctorId(null); }}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select
+            value={branchId ?? ""}
+            onChange={(e) => {
+              setBranchId(e.target.value || null);
+              setDoctorId(null);
+            }}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
             <option value="">—</option>
-            {branches.map((b) => <option key={b.id} value={b.id}>{b.name_ar}</option>)}
+            {branches.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.name_ar}
+              </option>
+            ))}
           </select>
         </div>
         <div>
           <label className="text-xs text-muted-foreground mb-1 block">الطبيب</label>
-          <select value={doctorId ?? ""} onChange={(e) => setDoctorId(e.target.value || null)}
-            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+          <select
+            value={doctorId ?? ""}
+            onChange={(e) => setDoctorId(e.target.value || null)}
+            className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          >
             <option value="">—</option>
-            {filtered.map((d) => <option key={d.id} value={d.id}>{d.name_ar}</option>)}
+            {filtered.map((d) => (
+              <option key={d.id} value={d.id}>
+                {d.name_ar}
+              </option>
+            ))}
           </select>
         </div>
       </div>
@@ -365,26 +445,48 @@ function StaffAddRating({
         <label className="text-xs text-muted-foreground mb-1 block">التقييم</label>
         <div className="flex gap-1" dir="ltr">
           {[1, 2, 3, 4, 5].map((n) => (
-            <button key={n} type="button" onClick={() => setRating(n)}
-              className="p-1 hover:scale-110 transition-transform">
-              <Star className={`h-8 w-8 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`} />
+            <button
+              key={n}
+              type="button"
+              onClick={() => setRating(n)}
+              className="p-1 hover:scale-110 transition-transform"
+            >
+              <Star
+                className={`h-8 w-8 ${n <= rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`}
+              />
             </button>
           ))}
         </div>
       </div>
       <div>
         <label className="text-xs text-muted-foreground mb-1 block">تعليق</label>
-        <textarea value={comment} onChange={(e) => setComment(e.target.value.slice(0, 1000))} rows={3}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none" />
+        <textarea
+          value={comment}
+          onChange={(e) => setComment(e.target.value.slice(0, 1000))}
+          rows={3}
+          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+        />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <input value={name} onChange={(e) => setName(e.target.value.slice(0, 100))} placeholder="اسم المريض (اختياري)"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
-        <input value={phone} onChange={(e) => setPhone(e.target.value.slice(0, 20))} placeholder="الجوال (اختياري)" dir="ltr"
-          className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value.slice(0, 100))}
+          placeholder="اسم المريض (اختياري)"
+          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+        />
+        <input
+          value={phone}
+          onChange={(e) => setPhone(e.target.value.slice(0, 20))}
+          placeholder="الجوال (اختياري)"
+          dir="ltr"
+          className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+        />
       </div>
-      <button onClick={() => submit.mutate()} disabled={!canSubmit}
-        className="inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-40">
+      <button
+        onClick={() => submit.mutate()}
+        disabled={!canSubmit}
+        className="inline-flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-semibold hover:opacity-90 disabled:opacity-40"
+      >
         <Plus className="h-4 w-4" />
         {submit.isPending ? "جارٍ الحفظ…" : "حفظ التقييم"}
       </button>
@@ -408,7 +510,9 @@ function exportRatingsCsv(rows: Awaited<ReturnType<typeof listRatings>>) {
       r.patient_name ?? "",
       r.patient_phone ?? "",
       r.comment ?? "",
-    ].map(esc).join(","),
+    ]
+      .map(esc)
+      .join(","),
   );
   const csv = "\uFEFF" + [headers.map(esc).join(","), ...body].join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
@@ -480,9 +584,14 @@ function RatingCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
             {[1, 2, 3, 4, 5].map((n) => (
-              <Star key={n} className={`h-4 w-4 ${n <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`} />
+              <Star
+                key={n}
+                className={`h-4 w-4 ${n <= r.rating ? "fill-amber-400 text-amber-400" : "text-muted-foreground/30"}`}
+              />
             ))}
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${r.source === "public" ? "bg-teal-500/10 text-teal-700 border-teal-500/30" : "bg-teal-500/10 text-teal-700 border-teal-500/30"}`}>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full font-semibold border ${r.source === "public" ? "bg-teal-500/10 text-teal-700 border-teal-500/30" : "bg-teal-500/10 text-teal-700 border-teal-500/30"}`}
+            >
               {r.source === "public" ? "عام" : "داخلي"}
             </span>
             {r.staff_reply && !editing && (
@@ -493,9 +602,17 @@ function RatingCard({
           </div>
           {(r.doctor_name || r.branch_name) && (
             <p className="text-xs text-muted-foreground">
-              {r.doctor_name && <>الطبيب: <span className="font-medium text-foreground">{r.doctor_name}</span></>}
+              {r.doctor_name && (
+                <>
+                  الطبيب: <span className="font-medium text-foreground">{r.doctor_name}</span>
+                </>
+              )}
               {r.doctor_name && r.branch_name && " · "}
-              {r.branch_name && <>الفرع: <span className="font-medium text-foreground">{r.branch_name}</span></>}
+              {r.branch_name && (
+                <>
+                  الفرع: <span className="font-medium text-foreground">{r.branch_name}</span>
+                </>
+              )}
             </p>
           )}
           {r.comment && (
@@ -506,15 +623,28 @@ function RatingCard({
           )}
           <p className="mt-2 text-[11px] text-muted-foreground">
             {r.patient_name || "مجهول"}
-            {r.patient_phone && <> · <span dir="ltr">{r.patient_phone}</span></>}
+            {r.patient_phone && (
+              <>
+                {" "}
+                · <span dir="ltr">{r.patient_phone}</span>
+              </>
+            )}
             {" · "}
-            <span dir="ltr">{new Date(r.created_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}</span>
+            <span dir="ltr">
+              {new Date(r.created_at).toLocaleString("ar-SA", {
+                dateStyle: "short",
+                timeStyle: "short",
+              })}
+            </span>
           </p>
         </div>
         <div className="flex items-center gap-1.5">
           {!editing && (
             <button
-              onClick={() => { setDraft(r.staff_reply ?? ""); setEditing(true); }}
+              onClick={() => {
+                setDraft(r.staff_reply ?? "");
+                setEditing(true);
+              }}
               title={r.staff_reply ? "تعديل الرد" : "الرد"}
               className="rounded-md border border-border p-2 hover:bg-primary/10 text-primary"
             >
@@ -540,7 +670,10 @@ function RatingCard({
             </span>
             {r.staff_reply_at && (
               <span className="text-[10px] text-muted-foreground" dir="ltr">
-                {new Date(r.staff_reply_at).toLocaleString("ar-SA", { dateStyle: "short", timeStyle: "short" })}
+                {new Date(r.staff_reply_at).toLocaleString("ar-SA", {
+                  dateStyle: "short",
+                  timeStyle: "short",
+                })}
               </span>
             )}
           </div>
@@ -563,7 +696,10 @@ function RatingCard({
             <div className="flex items-center gap-1.5">
               {r.staff_reply && (
                 <button
-                  onClick={() => { onReply(null); setEditing(false); }}
+                  onClick={() => {
+                    onReply(null);
+                    setEditing(false);
+                  }}
                   disabled={isReplying}
                   className="inline-flex items-center gap-1 rounded-md border border-destructive/30 bg-destructive/5 text-destructive px-3 py-1.5 text-xs hover:bg-destructive/10 disabled:opacity-40"
                 >

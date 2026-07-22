@@ -1,5 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useSuspenseQuery,
+  useMutation,
+  useQueryClient,
+  useQuery,
+} from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState, useMemo } from "react";
 import { toast } from "sonner";
@@ -23,11 +29,7 @@ import {
   Loader2,
   Info,
 } from "lucide-react";
-import {
-  PortalPageHeader,
-  PortalStatCard,
-  PortalEmptyState,
-} from "@/components/portal/ui";
+import { PortalPageHeader, PortalStatCard, PortalEmptyState } from "@/components/portal/ui";
 
 const invoicesQuery = (status: "all" | "outstanding" | "paid") =>
   queryOptions({
@@ -37,13 +39,9 @@ const invoicesQuery = (status: "all" | "outstanding" | "paid") =>
   });
 
 export const Route = createFileRoute("/_authenticated/portal/invoices")({
-  loader: async ({ context }) =>
-    context.queryClient.ensureQueryData(invoicesQuery("all")),
+  loader: async ({ context }) => context.queryClient.ensureQueryData(invoicesQuery("all")),
   head: () => ({
-    meta: [
-      { title: "الفواتير | بوابة المريض" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "الفواتير | بوابة المريض" }, { name: "robots", content: "noindex" }],
   }),
   component: PortalInvoicesPage,
 });
@@ -52,7 +50,11 @@ export const Route = createFileRoute("/_authenticated/portal/invoices")({
 
 function fmtSAR(n: number, currency = "SAR") {
   try {
-    return new Intl.NumberFormat("ar-SA", { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+    return new Intl.NumberFormat("ar-SA", {
+      style: "currency",
+      currency,
+      maximumFractionDigits: 2,
+    }).format(n);
   } catch {
     return `${n.toFixed(2)} ${currency}`;
   }
@@ -60,7 +62,11 @@ function fmtSAR(n: number, currency = "SAR") {
 function fmtDate(iso: string | null) {
   if (!iso) return "—";
   try {
-    return new Intl.DateTimeFormat("ar-SA", { year: "numeric", month: "short", day: "numeric" }).format(new Date(iso));
+    return new Intl.DateTimeFormat("ar-SA", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    }).format(new Date(iso));
   } catch {
     return iso.slice(0, 10);
   }
@@ -197,8 +203,8 @@ function KpiCard({
     tone === "success"
       ? "bg-emerald-50 text-emerald-700"
       : tone === "danger"
-      ? "bg-red-50 text-[color:var(--mag-danger)]"
-      : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]";
+        ? "bg-red-50 text-[color:var(--mag-danger)]"
+        : "bg-[color:var(--mag-subtle)] text-[color:var(--mag-ink-2)]";
   return (
     <div className="mag-card p-5">
       <div className="flex items-center justify-between">
@@ -273,8 +279,8 @@ function EmptyState({ filter }: { filter: "all" | "outstanding" | "paid" }) {
     filter === "outstanding"
       ? "لا توجد فواتير مستحقة. جميع مدفوعاتك محدّثة."
       : filter === "paid"
-      ? "لا توجد فواتير مسددة بعد."
-      : "لا توجد فواتير حتى الآن.";
+        ? "لا توجد فواتير مسددة بعد."
+        : "لا توجد فواتير حتى الآن.";
   return (
     <div className="mag-card p-10 text-center">
       <div className="mx-auto h-14 w-14 rounded-2xl bg-[color:var(--mag-subtle)] grid place-items-center text-[color:var(--mag-ink-3)] mb-3">
@@ -303,7 +309,11 @@ function InvoiceDrawer({ id, onClose }: { id: string; onClose: () => void }) {
       <div className="relative ms-auto h-full w-full max-w-lg bg-[color:var(--portal-surface)] shadow-xl flex flex-col">
         <div className="h-14 px-5 flex items-center justify-between border-b border-[color:var(--mag-line)]">
           <div className="font-bold">تفاصيل الفاتورة</div>
-          <button onClick={onClose} className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]" aria-label="إغلاق">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-md hover:bg-[color:var(--mag-subtle)]"
+            aria-label="إغلاق"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -345,7 +355,9 @@ function InvoiceDetails({
   const isPaid = invoice.status === "paid" || invoice.status === "settled";
   const qc = useQueryClient();
   const payFn = useServerFn(createDemoInvoicePayment);
-  const [method, setMethod] = useState<"card" | "mada" | "apple_pay" | "bank_transfer" | "counter">("mada");
+  const [method, setMethod] = useState<"card" | "mada" | "apple_pay" | "bank_transfer" | "counter">(
+    "mada",
+  );
 
   const mutation = useMutation({
     mutationFn: () => payFn({ data: { invoice_id: invoice.id, method } }),
@@ -369,14 +381,22 @@ function InvoiceDetails({
           {invoice.invoice_number ? `#${invoice.invoice_number}` : invoice.id.slice(0, 8)}
         </div>
         <div className="mt-1 flex items-center gap-2">
-          <span className={`mag-chip ${statusStyle(invoice.status)}`}>{statusLabel(invoice.status)}</span>
-          <span className="text-xs text-[color:var(--mag-ink-3)]">صدرت في {fmtDate(invoice.issued_at)}</span>
+          <span className={`mag-chip ${statusStyle(invoice.status)}`}>
+            {statusLabel(invoice.status)}
+          </span>
+          <span className="text-xs text-[color:var(--mag-ink-3)]">
+            صدرت في {fmtDate(invoice.issued_at)}
+          </span>
         </div>
       </div>
 
       <div className="mag-card p-4">
         <SummaryRow label="الإجمالي" value={fmtSAR(invoice.total, invoice.currency)} />
-        <SummaryRow label="المسدد" value={fmtSAR(invoice.paid_amount, invoice.currency)} tone="success" />
+        <SummaryRow
+          label="المسدد"
+          value={fmtSAR(invoice.paid_amount, invoice.currency)}
+          tone="success"
+        />
         <SummaryRow
           label="المتبقي"
           value={fmtSAR(invoice.due_amount, invoice.currency)}
@@ -439,7 +459,11 @@ function InvoiceDetails({
             disabled={mutation.isPending}
             className="w-full h-12 rounded-full text-sm font-semibold text-[color:var(--portal-on-primary)] bg-[color:var(--mag-accent)] hover:bg-[color:var(--mag-accent-ink)] disabled:opacity-60 flex items-center justify-center gap-2"
           >
-            {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wallet className="h-4 w-4" />}
+            {mutation.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Wallet className="h-4 w-4" />
+            )}
             دفع {fmtSAR(invoice.due_amount, invoice.currency)}
           </button>
           <p className="text-[11px] text-[color:var(--mag-ink-3)] text-center">
@@ -454,19 +478,25 @@ function InvoiceDetails({
           <div className="text-sm font-semibold mb-2">سجل الدفعات</div>
           <ul className="space-y-2">
             {payments.map((p) => {
-              const succeeded = ["succeeded", "paid", "completed", "partially_refunded"].includes(p.status);
+              const succeeded = ["succeeded", "paid", "completed", "partially_refunded"].includes(
+                p.status,
+              );
               const refundable = succeeded && !p.is_mock;
               return (
                 <li key={p.id} className="mag-card p-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
-                    <div className="text-sm font-semibold">{fmtSAR(Number(p.amount), p.currency)}</div>
+                    <div className="text-sm font-semibold">
+                      {fmtSAR(Number(p.amount), p.currency)}
+                    </div>
                     <div className="text-xs text-[color:var(--mag-ink-3)]">
                       {p.method} · {fmtDate(p.paid_at ?? p.created_at)}
                       {p.is_mock && <span className="ms-2 text-amber-700">(محاكاة)</span>}
                     </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`mag-chip ${succeeded ? "bg-emerald-50 text-emerald-700" : p.status === "refunded" ? "bg-slate-100 text-slate-600" : "bg-amber-50 text-amber-700"}`}>
+                    <span
+                      className={`mag-chip ${succeeded ? "bg-emerald-50 text-emerald-700" : p.status === "refunded" ? "bg-slate-100 text-slate-600" : "bg-amber-50 text-amber-700"}`}
+                    >
                       {p.status}
                     </span>
                     {refundable && (
@@ -503,12 +533,14 @@ function SummaryRow({
     tone === "success"
       ? "text-emerald-700"
       : tone === "danger"
-      ? "text-[color:var(--mag-danger)]"
-      : "text-[color:var(--mag-ink)]";
+        ? "text-[color:var(--mag-danger)]"
+        : "text-[color:var(--mag-ink)]";
   return (
     <div className="flex items-center justify-between py-1.5">
       <span className="text-sm text-[color:var(--mag-ink-3)]">{label}</span>
-      <span className={`${cls} ${strong ? "text-lg font-bold" : "text-sm font-semibold"}`}>{value}</span>
+      <span className={`${cls} ${strong ? "text-lg font-bold" : "text-sm font-semibold"}`}>
+        {value}
+      </span>
     </div>
   );
 }

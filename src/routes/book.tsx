@@ -31,7 +31,12 @@ import { Button } from "@/components/ui/button";
 
 import { fallback } from "@tanstack/zod-adapter";
 import {
-  loadDraft, reducer, STORAGE_KEY, validatePatient, maxReachableStep, type AvailResp,
+  loadDraft,
+  reducer,
+  STORAGE_KEY,
+  validatePatient,
+  maxReachableStep,
+  type AvailResp,
 } from "@/components/booking/types";
 import { Stepper } from "@/components/booking/Stepper";
 import { StepService } from "@/components/booking/StepService";
@@ -66,7 +71,10 @@ export const Route = createFileRoute("/book")({
     meta: [
       ...bmcOgImageMeta(),
       { title: "احجز موعدًا | مجمع باعشن الطبي" },
-      { name: "description", content: "احجز موعدك مع أطبائنا خطوة بخطوة: اختر الفرع، التخصص، الطبيب، ثم الموعد المناسب." },
+      {
+        name: "description",
+        content: "احجز موعدك مع أطبائنا خطوة بخطوة: اختر الفرع، التخصص، الطبيب، ثم الموعد المناسب.",
+      },
       { property: "og:title", content: "احجز موعدًا — مجمع باعشن الطبي" },
       { property: "og:description", content: "نظام حجز سريع وسهل عبر خطوات واضحة." },
       { property: "og:type", content: "website" },
@@ -93,14 +101,21 @@ async function fetchSpecialties() {
 }
 async function fetchDoctors(specialtyId: string | null, branchId: string | null) {
   const { data, error } = await supabase.rpc("list_public_doctors", {
-    _limit: 200, _offset: 0, _branch_id: branchId ?? undefined,
+    _limit: 200,
+    _offset: 0,
+    _branch_id: branchId ?? undefined,
   });
   if (error) return [];
   const list = (data ?? []) as any[];
   return specialtyId ? list.filter((d) => d.specialty_id === specialtyId) : list;
 }
 
-async function fetchAvailability(date: string, doctorId: string | null, specialtyId: string | null, branchId: string | null): Promise<AvailResp> {
+async function fetchAvailability(
+  date: string,
+  doctorId: string | null,
+  specialtyId: string | null,
+  branchId: string | null,
+): Promise<AvailResp> {
   const p = new URLSearchParams({ date });
   if (doctorId) p.set("doctor_id", doctorId);
   else if (specialtyId) p.set("specialty_id", specialtyId);
@@ -132,23 +147,26 @@ function BookPage() {
       date: searchParams.date ?? null,
       time: searchParams.time ?? null,
       // Prefer explicit ?step= (browser back/forward, refresh). Otherwise derive from deep-link.
-      step: searchParams.step && searchParams.step >= 1 && searchParams.step <= 9
-        ? searchParams.step
-        : searchParams.doctor && searchParams.date && searchParams.time
-        ? 8
-        : searchParams.doctor && searchParams.date
-        ? 6
-        : searchParams.doctor
-        ? 5
-        : searchParams.specialty
-        ? 4
-        : 1,
+      step:
+        searchParams.step && searchParams.step >= 1 && searchParams.step <= 9
+          ? searchParams.step
+          : searchParams.doctor && searchParams.date && searchParams.time
+            ? 8
+            : searchParams.doctor && searchParams.date
+              ? 6
+              : searchParams.doctor
+                ? 5
+                : searchParams.specialty
+                  ? 4
+                  : 1,
     }),
   );
 
   // Persist draft to sessionStorage.
   useEffect(() => {
-    try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch {}
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch {}
   }, [state]);
 
   // Explicit step→URL sync helper: bumps state and pushes an entry so the
@@ -163,9 +181,6 @@ function BookPage() {
       search: (prev: Record<string, unknown>) => ({ ...prev, step }),
     });
   };
-
-
-
 
   // Deep-link fill-in: when the URL has no explicit step (schema default 0)
   // but state derived a step (e.g. 5 from ?doctor=&specialty=), REPLACE the
@@ -192,17 +207,10 @@ function BookPage() {
       const params = new URLSearchParams(window.location.search);
       const s = parseInt(params.get("step") ?? "0", 10);
       if (s >= 1 && s <= 9) dispatch({ t: "goto", step: s });
-
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
-
-
-
-
-
-
 
   // Scroll to top of the wizard card whenever the step changes.
   useEffect(() => {
@@ -220,7 +228,12 @@ function BookPage() {
   const [errorKind, setErrorKind] = useState<
     "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
   >("unknown");
-  const [suggestion, setSuggestion] = useState<{ doctorId: string; doctorName: string; time: string; date: string } | null>(null);
+  const [suggestion, setSuggestion] = useState<{
+    doctorId: string;
+    doctorName: string;
+    time: string;
+    date: string;
+  } | null>(null);
   const [sameDoctorTimes, setSameDoctorTimes] = useState<string[]>([]);
   const [findingAlt, setFindingAlt] = useState(false);
   // Success result survives reload — booking reference lives in
@@ -234,21 +247,36 @@ function BookPage() {
     try {
       const raw = sessionStorage.getItem(RESULT_KEY);
       return raw ? (JSON.parse(raw) as BookingResult) : null;
-    } catch { return null; }
+    } catch {
+      return null;
+    }
   });
   useEffect(() => {
     if (typeof window === "undefined") return;
     try {
       if (result) sessionStorage.setItem(RESULT_KEY, JSON.stringify(result));
       else sessionStorage.removeItem(RESULT_KEY);
-    } catch {/* ignore */}
+    } catch {
+      /* ignore */
+    }
   }, [result]);
 
   // Realtime: refresh availability when other users book/cancel
-  useRealtimePublicSlots({ doctorId: state.doctorId ?? undefined, branchId: state.branchId ?? undefined });
+  useRealtimePublicSlots({
+    doctorId: state.doctorId ?? undefined,
+    branchId: state.branchId ?? undefined,
+  });
 
-  const { data: branches = [] }    = useQuery({ queryKey: ["branches"], queryFn: fetchBranches, staleTime: 30 * 60_000 });
-  const { data: specialties = [] } = useQuery({ queryKey: ["specialties-active"], queryFn: fetchSpecialties, staleTime: 30 * 60_000 });
+  const { data: branches = [] } = useQuery({
+    queryKey: ["branches"],
+    queryFn: fetchBranches,
+    staleTime: 30 * 60_000,
+  });
+  const { data: specialties = [] } = useQuery({
+    queryKey: ["specialties-active"],
+    queryFn: fetchSpecialties,
+    staleTime: 30 * 60_000,
+  });
   const { data: doctors = [] } = useQuery({
     queryKey: ["doctors-for-book", state.specialtyId, state.branchId],
     queryFn: () => fetchDoctors(state.specialtyId, state.branchId),
@@ -260,13 +288,18 @@ function BookPage() {
   useEffect(() => {
     if (state.doctorId && !state.specialtyId && doctors.length) {
       const d = doctors.find((x: any) => x.id === state.doctorId);
-      if (d) dispatch({ t: "set", p: { specialtyId: d.specialty_id, branchId: d.branch_id ?? state.branchId } });
+      if (d)
+        dispatch({
+          t: "set",
+          p: { specialtyId: d.specialty_id, branchId: d.branch_id ?? state.branchId },
+        });
     }
   }, [state.doctorId, state.specialtyId, doctors]);
 
   const { data: avail } = useQuery({
     queryKey: ["avail", state.date, state.doctorId, state.specialtyId, state.branchId],
-    queryFn: () => fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId),
+    queryFn: () =>
+      fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId),
     enabled: !!state.date && state.step >= 6,
     staleTime: 20_000,
   });
@@ -277,7 +310,8 @@ function BookPage() {
     queryKey: ["week-avail", state.doctorId, state.branchId],
     queryFn: async () => {
       const today = new Date();
-      const y = today.getFullYear(); const m = today.getMonth() + 1;
+      const y = today.getFullYear();
+      const m = today.getMonth() + 1;
       const p = new URLSearchParams({ year: String(y), month: String(m) });
       if (state.doctorId) p.set("doctor_id", state.doctorId);
       if (state.branchId) p.set("branch_id", state.branchId);
@@ -295,10 +329,10 @@ function BookPage() {
     const today = new Date();
     const in7 = new Date(today.getTime() + 7 * 86400_000);
     const iso = (d: Date) => d.toISOString().slice(0, 10);
-    const from = iso(today), to = iso(in7);
+    const from = iso(today),
+      to = iso(in7);
     return !weekDates.some((d) => d >= from && d <= to);
   }, [weekDates]);
-
 
   const patientValidation = useMemo(() => validatePatient(state.patient), [state.patient]);
 
@@ -324,13 +358,16 @@ function BookPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slotHold.expired, state.step]);
 
-
   // Warn before losing an unsent draft: any patient input on step ≥ 4 counts.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const hasDraft =
-      state.step >= 4 && state.step < 9 &&
-      (state.patient.name.trim() !== "" || state.patient.phone.trim() !== "" || state.patient.nationalId.trim() !== "" || state.patient.reason.trim() !== "");
+      state.step >= 4 &&
+      state.step < 9 &&
+      (state.patient.name.trim() !== "" ||
+        state.patient.phone.trim() !== "" ||
+        state.patient.nationalId.trim() !== "" ||
+        state.patient.reason.trim() !== "");
     if (!hasDraft) return;
     const onBeforeUnload = (e: BeforeUnloadEvent) => {
       e.preventDefault();
@@ -338,7 +375,13 @@ function BookPage() {
     };
     window.addEventListener("beforeunload", onBeforeUnload);
     return () => window.removeEventListener("beforeunload", onBeforeUnload);
-  }, [state.step, state.patient.name, state.patient.phone, state.patient.nationalId, state.patient.reason]);
+  }, [
+    state.step,
+    state.patient.name,
+    state.patient.phone,
+    state.patient.nationalId,
+    state.patient.reason,
+  ]);
 
   // Prefetch today's availability the moment a doctor is picked, so StepTime
   // renders instantly when the user reaches step 6.
@@ -375,14 +418,22 @@ function BookPage() {
 
   const canNext = useMemo(() => {
     switch (state.step) {
-      case 1: return !!state.serviceType;
-      case 2: return !!state.branchId;
-      case 3: return !!state.specialtyId;
-      case 4: return !!state.doctorId;
-      case 5: return !!state.date;
-      case 6: return !!state.time;
-      case 7: return patientValidation.ok;
-      default: return true;
+      case 1:
+        return !!state.serviceType;
+      case 2:
+        return !!state.branchId;
+      case 3:
+        return !!state.specialtyId;
+      case 4:
+        return !!state.doctorId;
+      case 5:
+        return !!state.date;
+      case 6:
+        return !!state.time;
+      case 7:
+        return patientValidation.ok;
+      default:
+        return true;
     }
   }, [state, patientValidation]);
 
@@ -409,12 +460,23 @@ function BookPage() {
     if (!found.length) return null;
     found.sort((a, b) => a.time.localeCompare(b.time));
     const best = found[0];
-    const name = lang === "ar" ? (best.doctor.name_ar || best.doctor.name_en) : (best.doctor.name_en || best.doctor.name_ar);
-    return { doctorId: best.doctor.id as string, doctorName: name as string, time: best.time, date };
+    const name =
+      lang === "ar"
+        ? best.doctor.name_ar || best.doctor.name_en
+        : best.doctor.name_en || best.doctor.name_ar;
+    return {
+      doctorId: best.doctor.id as string,
+      doctorName: name as string,
+      time: best.time,
+      date,
+    };
   }
 
   // Find nearest same-doctor free times on the same date (up to 3, prefer >= preferredTime).
-  async function findAlternativeSameDoctorTimes(date: string, preferredTime: string | null): Promise<string[]> {
+  async function findAlternativeSameDoctorTimes(
+    date: string,
+    preferredTime: string | null,
+  ): Promise<string[]> {
     if (!state.doctorId) return [];
     try {
       const a = await fetchAvailability(date, state.doctorId, state.specialtyId, state.branchId);
@@ -425,7 +487,9 @@ function BookPage() {
       const after = preferredTime ? free.filter((t) => t >= preferredTime) : free;
       const before = preferredTime ? free.filter((t) => t < preferredTime).reverse() : [];
       return [...after, ...before].slice(0, 3);
-    } catch { return []; }
+    } catch {
+      return [];
+    }
   }
 
   async function runAlternativesSearch(date: string, preferredTime: string | null) {
@@ -437,12 +501,17 @@ function BookPage() {
       ]);
       setSameDoctorTimes(sameTimes);
       if (altDoc) setSuggestion(altDoc);
-    } finally { setFindingAlt(false); }
+    } finally {
+      setFindingAlt(false);
+    }
   }
 
   function acceptSuggestion() {
     if (!suggestion) return;
-    dispatch({ t: "set", p: { doctorId: suggestion.doctorId, date: suggestion.date, time: suggestion.time } });
+    dispatch({
+      t: "set",
+      p: { doctorId: suggestion.doctorId, date: suggestion.date, time: suggestion.time },
+    });
     setSuggestion(null);
     setSameDoctorTimes([]);
     setErrorMsg(null);
@@ -475,20 +544,30 @@ function BookPage() {
     // slot got booked between step 6 and step 8. Cheaper than a full round-trip
     // to /create + friendly Arabic conflict message.
     try {
-      const fresh = await fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId);
+      const fresh = await fetchAvailability(
+        state.date!,
+        state.doctorId,
+        state.specialtyId,
+        state.branchId,
+      );
       if (fresh.ok && fresh.booked?.includes(state.time!)) {
         setSubmitting(false);
         setErrorMsg(t("page.conflictReason"));
         setErrorKind("conflict");
         // Refresh the availability query so StepTime shows the updated state.
-        queryClient.setQueryData(["avail", state.date, state.doctorId, state.specialtyId, state.branchId], fresh);
+        queryClient.setQueryData(
+          ["avail", state.date, state.doctorId, state.specialtyId, state.branchId],
+          fresh,
+        );
         const prevTime = state.time;
         dispatch({ t: "set", p: { time: null } });
         goto(6);
         void runAlternativesSearch(state.date!, prevTime);
         return;
       }
-    } catch {/* network hiccup — let the real submit surface the error */}
+    } catch {
+      /* network hiccup — let the real submit surface the error */
+    }
     const p = state.patient;
     const isInsurance = p.payerType === "insurance";
     const res = await submitBooking({
@@ -512,9 +591,15 @@ function BookPage() {
     if (res.ok) {
       // Release our short-lived hold — the appointment row now owns the slot.
       if (slotHold.holdId) void releaseHold(slotHold.holdId);
-      try { sessionStorage.removeItem(STORAGE_KEY); } catch {}
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {}
       toast.success(t("page.created"));
-      setResult({ reference: res.reference, phone: p.phone.trim(), email: p.email.trim().toLowerCase() || null });
+      setResult({
+        reference: res.reference,
+        phone: p.phone.trim(),
+        email: p.email.trim().toLowerCase() || null,
+      });
       goto(9);
     } else {
       setErrorMsg(res.kind === "conflict" ? t("page.conflictReason") : res.message);
@@ -525,7 +610,9 @@ function BookPage() {
       if (res.kind === "conflict") {
         const prevTime = state.time;
         // Invalidate availability so StepTime re-fetches and drops the taken slot.
-        queryClient.invalidateQueries({ queryKey: ["avail", state.date, state.doctorId, state.specialtyId, state.branchId] });
+        queryClient.invalidateQueries({
+          queryKey: ["avail", state.date, state.doctorId, state.specialtyId, state.branchId],
+        });
         dispatch({ t: "set", p: { time: null } });
         goto(6);
         void runAlternativesSearch(state.date!, prevTime);
@@ -552,8 +639,15 @@ function BookPage() {
   }
 
   const STEPS = [
-    t("steps.service"), t("steps.branch"), t("steps.specialty"), t("steps.doctor"),
-    t("steps.date"), t("steps.time"), t("steps.yourInfo"), t("steps.review"), t("steps.confirmed"),
+    t("steps.service"),
+    t("steps.branch"),
+    t("steps.specialty"),
+    t("steps.doctor"),
+    t("steps.date"),
+    t("steps.time"),
+    t("steps.yourInfo"),
+    t("steps.review"),
+    t("steps.confirmed"),
   ];
 
   // Displayed step for the indicator/progress bar — never allowed to exceed
@@ -561,15 +655,17 @@ function BookPage() {
   // where the URL/state briefly asks for step N but doctor/specialty/branch
   // are missing. The clamp effect further up rewrites state + URL to match;
   // this memo keeps the visual indicator honest until it runs.
-  const displayedStep = state.step === 9
-    ? 9
-    : Math.min(state.step, maxReachableStep(state, patientValidation.ok));
+  const displayedStep =
+    state.step === 9 ? 9 : Math.min(state.step, maxReachableStep(state, patientValidation.ok));
 
-  const stepAnnounce = state.step === 9
-    ? STEPS[8]
-    : t("a11y.stepAnnounce", "الخطوة {{current}} من {{total}}: {{title}}", {
-        current: displayedStep, total: 8, title: STEPS[displayedStep - 1] ?? "",
-      });
+  const stepAnnounce =
+    state.step === 9
+      ? STEPS[8]
+      : t("a11y.stepAnnounce", "الخطوة {{current}} من {{total}}: {{title}}", {
+          current: displayedStep,
+          total: 8,
+          title: STEPS[displayedStep - 1] ?? "",
+        });
 
   return (
     <div className="min-h-screen bg-muted/30">
@@ -584,11 +680,14 @@ function BookPage() {
           <p className="mt-2 text-sm md:text-base text-muted-foreground">{t("page.subtitle")}</p>
         </header>
 
-
-        <Stepper steps={STEPS} current={displayedStep} onJump={(i) => {
-          if (state.step === 9) return;
-          if (i + 1 < state.step) goto(i + 1);
-        }}/>
+        <Stepper
+          steps={STEPS}
+          current={displayedStep}
+          onJump={(i) => {
+            if (state.step === 9) return;
+            if (i + 1 < state.step) goto(i + 1);
+          }}
+        />
 
         {state.step < 9 && (
           <div className="mt-3">
@@ -604,33 +703,101 @@ function BookPage() {
           </div>
         )}
 
-        <div className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}>
+        <div
+          className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}
+        >
           <div className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px]">
-            {state.step >= 6 && state.step <= 8 && state.time && (slotHold.holdId || slotHold.conflict || slotHold.expired) && (
-              <SlotHoldBanner
-                secondsLeft={slotHold.secondsLeft}
-                totalSeconds={slotHold.durationMs ? Math.round(slotHold.durationMs / 1000) : undefined}
-                expired={slotHold.expired}
-                conflict={slotHold.conflict}
-                onRefresh={slotHold.refresh}
-                onChangeTime={() => { dispatch({ t: "set", p: { time: null } }); goto(6); }}
+            {state.step >= 6 &&
+              state.step <= 8 &&
+              state.time &&
+              (slotHold.holdId || slotHold.conflict || slotHold.expired) && (
+                <SlotHoldBanner
+                  secondsLeft={slotHold.secondsLeft}
+                  totalSeconds={
+                    slotHold.durationMs ? Math.round(slotHold.durationMs / 1000) : undefined
+                  }
+                  expired={slotHold.expired}
+                  conflict={slotHold.conflict}
+                  onRefresh={slotHold.refresh}
+                  onChangeTime={() => {
+                    dispatch({ t: "set", p: { time: null } });
+                    goto(6);
+                  }}
+                />
+              )}
+            {state.step === 1 && (
+              <StepService
+                lang={lang}
+                value={state.serviceType}
+                onPick={(v) => {
+                  dispatch({ t: "set", p: { serviceType: v } });
+                  goto(2);
+                }}
               />
             )}
-            {state.step === 1 && <StepService lang={lang} value={state.serviceType} onPick={(v) => { dispatch({ t: "set", p: { serviceType: v } }); goto(2); }}/>}
-            {state.step === 2 && <StepBranch lang={lang} branches={branches} value={state.branchId} onPick={(v) => { dispatch({ t: "set", p: { branchId: v } }); goto(3); }}/>}
-            {state.step === 3 && <StepSpecialty lang={lang} specialties={specialties} value={state.specialtyId} onPick={(v) => { dispatch({ t: "set", p: { specialtyId: v, doctorId: null } }); goto(4); }}/>}
-            {state.step === 4 && <StepDoctor lang={lang} doctors={doctors} value={state.doctorId} onPick={(v) => { dispatch({ t: "set", p: { doctorId: v, date: null, time: null } }); goto(5); }}/>}
-            {state.step === 5 && <StepDate lang={lang} value={state.date} onPick={(v) => { dispatch({ t: "set", p: { date: v, time: null } }); goto(6); }} doctorId={state.doctorId} specialtyId={state.specialtyId} branchId={state.branchId} onChangeDoctor={() => goto(4)} onChangeBranch={() => goto(2)}/>}
+            {state.step === 2 && (
+              <StepBranch
+                lang={lang}
+                branches={branches}
+                value={state.branchId}
+                onPick={(v) => {
+                  dispatch({ t: "set", p: { branchId: v } });
+                  goto(3);
+                }}
+              />
+            )}
+            {state.step === 3 && (
+              <StepSpecialty
+                lang={lang}
+                specialties={specialties}
+                value={state.specialtyId}
+                onPick={(v) => {
+                  dispatch({ t: "set", p: { specialtyId: v, doctorId: null } });
+                  goto(4);
+                }}
+              />
+            )}
+            {state.step === 4 && (
+              <StepDoctor
+                lang={lang}
+                doctors={doctors}
+                value={state.doctorId}
+                onPick={(v) => {
+                  dispatch({ t: "set", p: { doctorId: v, date: null, time: null } });
+                  goto(5);
+                }}
+              />
+            )}
+            {state.step === 5 && (
+              <StepDate
+                lang={lang}
+                value={state.date}
+                onPick={(v) => {
+                  dispatch({ t: "set", p: { date: v, time: null } });
+                  goto(6);
+                }}
+                doctorId={state.doctorId}
+                specialtyId={state.specialtyId}
+                branchId={state.branchId}
+                onChangeDoctor={() => goto(4)}
+                onChangeBranch={() => goto(2)}
+              />
+            )}
             {state.step === 6 && (
               <>
-                {(errorKind === "conflict" || findingAlt || suggestion || sameDoctorTimes.length > 0) && (
+                {(errorKind === "conflict" ||
+                  findingAlt ||
+                  suggestion ||
+                  sameDoctorTimes.length > 0) && (
                   <div className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-3 md:p-4 text-sm space-y-3">
                     {errorKind === "conflict" && (
                       <div className="flex items-start gap-2">
                         <Clock className="h-5 w-5 text-destructive shrink-0 mt-0.5" aria-hidden />
                         <div>
                           <div className="font-bold text-destructive">{t("page.slotTaken")}</div>
-                          <p className="mt-0.5 text-xs text-destructive/90 leading-5">{t("page.conflictReason")}</p>
+                          <p className="mt-0.5 text-xs text-destructive/90 leading-5">
+                            {t("page.conflictReason")}
+                          </p>
                         </div>
                       </div>
                     )}
@@ -642,7 +809,12 @@ function BookPage() {
                         <div className="font-medium mb-1.5">{t("page.nearestSlotsSameDoctor")}</div>
                         <div className="flex flex-wrap gap-2">
                           {sameDoctorTimes.map((tm) => (
-                            <Button key={tm} size="sm" variant="secondary" onClick={() => pickSameDoctorTime(tm)}>
+                            <Button
+                              key={tm}
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => pickSameDoctorTime(tm)}
+                            >
                               {tm}
                             </Button>
                           ))}
@@ -652,23 +824,51 @@ function BookPage() {
                     {suggestion && (
                       <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between border-t border-destructive/20 pt-3">
                         <div>
-                          <div className="font-medium">{t("page.altAvailable")} {suggestion.doctorName}</div>
-                          <div className="text-muted-foreground">{t("page.earliestSlot")}: {suggestion.time}</div>
+                          <div className="font-medium">
+                            {t("page.altAvailable")} {suggestion.doctorName}
+                          </div>
+                          <div className="text-muted-foreground">
+                            {t("page.earliestSlot")}: {suggestion.time}
+                          </div>
                         </div>
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={acceptSuggestion}>{t("page.bookAlt")}</Button>
-                          <Button size="sm" variant="ghost" onClick={() => { setSuggestion(null); setSameDoctorTimes([]); setErrorKind("unknown"); setErrorMsg(null); }}>
+                          <Button size="sm" onClick={acceptSuggestion}>
+                            {t("page.bookAlt")}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              setSuggestion(null);
+                              setSameDoctorTimes([]);
+                              setErrorKind("unknown");
+                              setErrorMsg(null);
+                            }}
+                          >
                             {t("page.dismiss")}
                           </Button>
                         </div>
                       </div>
                     )}
-                    {!findingAlt && !suggestion && sameDoctorTimes.length === 0 && errorKind === "conflict" && (
-                      <div className="text-xs text-muted-foreground">{t("page.noAlternatives")}</div>
-                    )}
+                    {!findingAlt &&
+                      !suggestion &&
+                      sameDoctorTimes.length === 0 &&
+                      errorKind === "conflict" && (
+                        <div className="text-xs text-muted-foreground">
+                          {t("page.noAlternatives")}
+                        </div>
+                      )}
                   </div>
                 )}
-                <StepTime lang={lang} value={state.time} avail={avail} onPick={(v) => { dispatch({ t: "set", p: { time: v } }); goto(7); }}/>
+                <StepTime
+                  lang={lang}
+                  value={state.time}
+                  avail={avail}
+                  onPick={(v) => {
+                    dispatch({ t: "set", p: { time: v } });
+                    goto(7);
+                  }}
+                />
                 <div className="mt-4">
                   <WaitlistCTA
                     lang={lang}
@@ -682,9 +882,43 @@ function BookPage() {
                 </div>
               </>
             )}
-            {state.step === 7 && <StepPatient lang={lang} doctorId={state.doctorId} value={state.patient} errors={patientValidation.errors} onChange={(p) => dispatch({ t: "setPatient", p })}/>}
-            {state.step === 8 && <StepReview lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} errorMsg={errorMsg} errorKind={errorKind} submitting={submitting} onSubmit={handleSubmit} patientValid={patientValidation.ok} onEditPatient={() => goto(7)}/>}
-            {state.step === 9 && result && <StepSuccess lang={lang} state={state} branches={branches} specialties={specialties} doctors={doctors} reference={result.reference} phone={result.phone} email={result.email ?? null} onNewBooking={handleReset}/>}
+            {state.step === 7 && (
+              <StepPatient
+                lang={lang}
+                doctorId={state.doctorId}
+                value={state.patient}
+                errors={patientValidation.errors}
+                onChange={(p) => dispatch({ t: "setPatient", p })}
+              />
+            )}
+            {state.step === 8 && (
+              <StepReview
+                lang={lang}
+                state={state}
+                branches={branches}
+                specialties={specialties}
+                doctors={doctors}
+                errorMsg={errorMsg}
+                errorKind={errorKind}
+                submitting={submitting}
+                onSubmit={handleSubmit}
+                patientValid={patientValidation.ok}
+                onEditPatient={() => goto(7)}
+              />
+            )}
+            {state.step === 9 && result && (
+              <StepSuccess
+                lang={lang}
+                state={state}
+                branches={branches}
+                specialties={specialties}
+                doctors={doctors}
+                reference={result.reference}
+                phone={result.phone}
+                email={result.email ?? null}
+                onNewBooking={handleReset}
+              />
+            )}
           </div>
 
           {state.step >= 2 && state.step <= 8 && (
@@ -707,16 +941,32 @@ function BookPage() {
               onClick={() => goto(state.step - 1)}
               className="gap-1"
             >
-              {lang === "ar" ? <><ChevronRight className="h-4 w-4"/>{t("page.back")}</> : <><ChevronLeft className="h-4 w-4"/>{t("page.back")}</>}
+              {lang === "ar" ? (
+                <>
+                  <ChevronRight className="h-4 w-4" />
+                  {t("page.back")}
+                </>
+              ) : (
+                <>
+                  <ChevronLeft className="h-4 w-4" />
+                  {t("page.back")}
+                </>
+              )}
             </Button>
 
             {state.step < 8 && (
-              <Button
-                disabled={!canNext}
-                onClick={() => goto(state.step + 1)}
-                className="gap-1"
-              >
-                {lang === "ar" ? <>{t("page.next")}<ChevronLeft className="h-4 w-4"/></> : <>{t("page.next")}<ChevronRight className="h-4 w-4"/></>}
+              <Button disabled={!canNext} onClick={() => goto(state.step + 1)} className="gap-1">
+                {lang === "ar" ? (
+                  <>
+                    {t("page.next")}
+                    <ChevronLeft className="h-4 w-4" />
+                  </>
+                ) : (
+                  <>
+                    {t("page.next")}
+                    <ChevronRight className="h-4 w-4" />
+                  </>
+                )}
               </Button>
             )}
           </div>
@@ -724,7 +974,11 @@ function BookPage() {
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
           {t("page.alreadyBooked")}{" "}
-          <Link to="/track" search={{ ref: undefined, phone4: undefined }} className="text-primary underline underline-offset-2 hover:no-underline">
+          <Link
+            to="/track"
+            search={{ ref: undefined, phone4: undefined }}
+            className="text-primary underline underline-offset-2 hover:no-underline"
+          >
             {t("page.trackBooking")}
           </Link>
         </p>

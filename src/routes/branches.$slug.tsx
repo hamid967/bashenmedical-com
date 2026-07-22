@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { createFileRoute, Link, notFound, ErrorComponent, type ErrorComponentProps, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  ErrorComponent,
+  type ErrorComponentProps,
+  useRouter,
+} from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { MapPin, Phone, Clock, Siren, Building2, ArrowLeft, CalendarPlus } from "lucide-react";
 import { PageHero } from "@/components/PageShell";
@@ -15,7 +22,8 @@ const branchQuery = (slug: string) =>
 
 export const Route = createFileRoute("/branches/$slug")({
   validateSearch: (search: Record<string, unknown>) => ({
-    service: typeof search.service === "string" && search.service.length > 0 ? search.service : undefined,
+    service:
+      typeof search.service === "string" && search.service.length > 0 ? search.service : undefined,
   }),
   loader: async ({ context, params }) => {
     const detail = await context.queryClient.ensureQueryData(branchQuery(params.slug));
@@ -111,7 +119,11 @@ export const Route = createFileRoute("/branches/$slug")({
 
 function BranchDetailPending() {
   return (
-    <div className="container-app py-8 grid gap-6 lg:grid-cols-3" aria-busy="true" aria-label="جاري تحميل بيانات الفرع">
+    <div
+      className="container-app py-8 grid gap-6 lg:grid-cols-3"
+      aria-busy="true"
+      aria-label="جاري تحميل بيانات الفرع"
+    >
       <aside className="lg:col-span-1 space-y-4">
         <div className="rounded-2xl border border-border bg-card overflow-hidden">
           <div className="aspect-[16/9] bg-muted animate-pulse" />
@@ -153,7 +165,10 @@ function BranchError({ error, reset }: ErrorComponentProps) {
       <ErrorComponent error={error} />
       <button
         className="mt-4 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm"
-        onClick={() => { reset(); router.invalidate(); }}
+        onClick={() => {
+          reset();
+          router.invalidate();
+        }}
       >
         إعادة المحاولة
       </button>
@@ -165,7 +180,10 @@ function BranchNotFound() {
   return (
     <div className="container-app py-16 text-center">
       <h1 className="text-2xl font-bold">هذا الفرع غير موجود</h1>
-      <Link to="/branches" className="mt-4 inline-flex items-center gap-2 text-primary hover:underline">
+      <Link
+        to="/branches"
+        className="mt-4 inline-flex items-center gap-2 text-primary hover:underline"
+      >
         <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> العودة إلى قائمة الفروع
       </Link>
     </div>
@@ -173,8 +191,13 @@ function BranchNotFound() {
 }
 
 const DAY_LABELS: Record<string, string> = {
-  sat: "السبت", sun: "الأحد", mon: "الاثنين", tue: "الثلاثاء",
-  wed: "الأربعاء", thu: "الخميس", fri: "الجمعة",
+  sat: "السبت",
+  sun: "الأحد",
+  mon: "الاثنين",
+  tue: "الثلاثاء",
+  wed: "الأربعاء",
+  thu: "الخميس",
+  fri: "الجمعة",
 };
 
 function formatHours(hours: PublicBranch["working_hours"]) {
@@ -204,8 +227,6 @@ function BranchDetailPage() {
     setPreselectToken((n: number) => n + 1);
   };
 
-
-
   return (
     <>
       <PageHero
@@ -220,7 +241,11 @@ function BranchDetailPage() {
           <div className="rounded-2xl border border-border bg-card overflow-hidden">
             <div className="aspect-[16/9] bg-gradient-to-br from-primary/20 to-accent/20">
               {b.hero_image_url ? (
-                <img src={b.hero_image_url} alt={b.name_ar} className="h-full w-full object-cover" />
+                <img
+                  src={b.hero_image_url}
+                  alt={b.name_ar}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <div className="h-full w-full grid place-items-center">
                   <Building2 className="h-14 w-14 text-primary/60" />
@@ -237,13 +262,19 @@ function BranchDetailPage() {
               {b.phone && (
                 <div className="flex items-start gap-2">
                   <Phone className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                  <a href={`tel:${b.phone}`} className="hover:text-primary" dir="ltr">{b.phone}</a>
+                  <a href={`tel:${b.phone}`} className="hover:text-primary" dir="ltr">
+                    {b.phone}
+                  </a>
                 </div>
               )}
               {b.emergency_phone && (
                 <div className="flex items-start gap-2">
                   <Siren className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
-                  <a href={`tel:${b.emergency_phone}`} className="text-destructive font-semibold" dir="ltr">
+                  <a
+                    href={`tel:${b.emergency_phone}`}
+                    className="text-destructive font-semibold"
+                    dir="ltr"
+                  >
                     طوارئ: {b.emergency_phone}
                   </a>
                 </div>
@@ -310,7 +341,6 @@ function BranchDetailPage() {
             />
           )}
 
-
           <section id="book">
             <BranchBookingForm
               branchId={b.id}
@@ -322,7 +352,10 @@ function BranchDetailPage() {
           </section>
 
           <div>
-            <Link to="/branches" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
+            <Link
+              to="/branches"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
+            >
               <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> جميع الفروع
             </Link>
           </div>

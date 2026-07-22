@@ -82,8 +82,7 @@ function Playground({
             style={{
               background: "var(--ds-ink-900)",
               color: "#e5f2ef",
-              fontFamily:
-                "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
+              fontFamily: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
             }}
           >
             <code>{code}</code>
@@ -414,9 +413,7 @@ function PortalPrimitivesDocsPage() {
                   description="الأربعاء 22 يوليو · 10:30 ص"
                   action={<PortalBadge tone="success">مؤكّد</PortalBadge>}
                 />
-                <PortalCardBody>
-                  د. سارة العتيبي — طب الأسرة · فرع صبيا الرئيسي.
-                </PortalCardBody>
+                <PortalCardBody>د. سارة العتيبي — طب الأسرة · فرع صبيا الرئيسي.</PortalCardBody>
                 <PortalCardFooter>
                   <PortalButton variant="ghost">إلغاء</PortalButton>
                   <PortalButton>تأكيد</PortalButton>
@@ -429,10 +426,9 @@ function PortalPrimitivesDocsPage() {
         <PortalCard variant="outline">
           <PortalCardBody>
             <div className="text-sm" style={{ color: "var(--ds-ink-600)" }}>
-              للمرجع الكامل والقواعد الذهبية (منع Tailwind الخام، خريطة التوكنات،
-              anti-patterns) راجع <code>docs/design-system/portal-primitives.md</code>.
-              يتم فرض القواعد تلقائيًا عبر <code>bun run lint:portal-tokens</code>{" "}
-              و<code>portal_visual_regression.py</code>.
+              للمرجع الكامل والقواعد الذهبية (منع Tailwind الخام، خريطة التوكنات، anti-patterns)
+              راجع <code>docs/design-system/portal-primitives.md</code>. يتم فرض القواعد تلقائيًا
+              عبر <code>bun run lint:portal-tokens</code> و<code>portal_visual_regression.py</code>.
             </div>
           </PortalCardBody>
         </PortalCard>

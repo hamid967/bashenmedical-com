@@ -168,7 +168,6 @@ export function ServicesBento() {
           </Link>
         </div>
 
-
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 auto-rows-[minmax(140px,auto)]">
           {SERVICES.map((s) => {
             const Icon = s.icon;
