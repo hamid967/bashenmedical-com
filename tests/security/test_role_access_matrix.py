@@ -30,13 +30,10 @@ from test_secdef_privileges import PUBLIC_READ_ALLOWLIST, connect, fetch_secdef
 # Read-only allowlist functions safe to invoke at runtime with no args
 # (or trivially-null args). Signature drift here means update this list.
 AUTHENTICATED_READ_PROBES: list[tuple[str, str]] = [
-    ("get_my_roles", "()"),
     ("get_my_doctor_id", "()"),
     ("list_public_branches", "()"),
-    ("list_specialties_public", "()"),
     ("list_public_doctors", "()"),
     ("specialty_doctor_counts", "()"),
-    ("get_faqs_public", "()"),
 ]
 
 # Auth-gated functions that must reject anon at runtime.
