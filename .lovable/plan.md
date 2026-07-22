@@ -1,94 +1,141 @@
-# خطة تحويل i18n للملفات الأعلى مخالفات
+# ترقية نظام الحجوزات — Reservations Next Gen (خارطة طريق فريق حامد)
 
-## البنية الحالية (مؤكّدة)
+خطة من 4 محاور × 4 مراحل. كل مرحلة لها Definition of Done (DoD) واختبارات قبول. المراحل تُنفَّذ بالترتيب؛ كل موافقة منك = ننفّذ مرحلة واحدة ثم نعرض عليك الحصيلة قبل الانتقال.
 
-- `i18next` + `react-i18next` جاهز في `src/lib/i18n/config.ts`
-- Namespaces حالياً: `common`, `booking` (ar/en/ur)
-- اللغة الافتراضية: `ar` (SSR-safe، بدون كشف تلقائي)
-- **0 من أعلى 8 ملفات مخالفة تستخدم `useTranslation`** — كلها نص عربي مباشر
+---
 
-## المبدأ
+## المحور 1 — تجربة المريض (UX)
 
-- **الأولوية للصفحات العامة / SEO** (فهرسة Google، مشاركة روابط) — هنا تُفيد الترجمة فعلاً
-- **تأجيل الصفحات الإدارية الداخلية** — تخدم موظفين عرب، والترجمة فيها جهد بلا ROI
-- **استثناء `admin.classic.tsx`** — مرشح للإخماد أصلاً (M3)، لا نترجمه
+### المرحلة 1.1 — Wizard مبسّط + Deep Links ذكية
+- تقليص خطوات `/book` من 9 إلى 5 خطوات (specialty → doctor → slot → patient → confirm)
+- شريط تقدّم مرئي + إمكانية القفز للخلف بدون فقد البيانات
+- Deep link واحد `/book?doctor=X&date=Y` يفتح مباشرة على الخطوة الصحيحة
+- حفظ تلقائي في `sessionStorage` كل خطوة (استعادة عند refresh)
 
-## قائمة الأولويات المعاد ترتيبها
+**DoD:** الاختبارات الحالية (`book-back-forward-*`, `book-deep-link-params`) تمرّ + اختبار جديد "5 clicks to done".
 
-| # | ملف | أسطر | عام؟ | القرار |
-|---|---|---|---|---|
-| 1 | `doctors.$slug.tsx` | 111 | ✅ SEO | **ترجمة كاملة** |
-| 2 | `programs.tsx` | 92 | ✅ SEO | **ترجمة كاملة** |
-| 3 | `reservations.manage.tsx` | 82 | ✅ عام | **ترجمة كاملة** |
-| 4 | `orders.$ref.tsx` | 73 | ✅ عام | **ترجمة كاملة** |
-| 5 | `complex.tsx` | 71 | ✅ SEO | **ترجمة كاملة** |
-| 6 | `portal.appointments.tsx` | 121 | 🔒 مريض | **ترجمة (يستخدمها المرضى)** |
-| 7 | `portal.prescriptions.tsx` | 130 | 🔒 مريض | **ترجمة** |
-| 8 | `portal.refunds.tsx` | 170 | 🔒 مريض | **ترجمة** |
-| 9 | `portal.index.tsx` | 96 | 🔒 مريض | **ترجمة** |
-| — | `admin.classic.tsx` (492) | 🔧 إداري | **تُستثنى — مرشحة للحذف** |
-| — | `patients-analytics.tsx` (199), `patients.$patientId.tsx` (160), `rbac.tsx`, `hr-management.tsx`, `pharmacy-management.tsx`, `reports.tsx`, `admin.super.permissions.tsx`, `audit-export.tsx`، `nurses.tsx`, `admin.no-show-stats.tsx` | 🔧 إداري داخلي | **تأجيل** (طاقم عربي، ROI منخفض) |
+### المرحلة 1.2 — Mobile-First + PWA offline
+- Bottom-sheet لاختيار الوقت على الجوال
+- زر "احجز مجدداً" في `/my-orders` (نسخ الحجز السابق بضغطة)
+- Service Worker يخزّن قائمة الأطباء والتخصصات للعرض offline
+- Add-to-home-screen prompt بعد أول حجز ناجح
 
-**9 ملفات في النطاق — إجمالي ~946 سطر عربي.**
+**DoD:** Lighthouse Mobile ≥ 90، PWA installable، اختبار offline يعرض آخر بيانات مكتشفة.
 
-## البنية المقترحة للـ Namespaces
+### المرحلة 1.3 — Digital Companion (بعد الحجز)
+- صفحة `/reservations/:ref` تعرض: OR-code + خريطة الفرع + وقت الوصول المقترح (بناءً على المسافة)
+- تذكير قابل للتخصيص (يوم، ساعة، 15 دقيقة قبل)
+- زر "أنا في الطريق" + "أنا وصلت" (يفعّل check-in)
 
-إضافة namespaces جديدة لتفادي تضخّم `common.json`:
+**DoD:** E2E: حجز → استلام رابط → check-in → تحديث حالة `patient_check_ins`.
+
+---
+
+## المحور 2 — الذكاء الاصطناعي
+
+### المرحلة 2.1 — مساعد حجز ذكي (Symptom Triage)
+- زر "ما التخصص المناسب؟" داخل `/book`
+- LLM (google/gemini-3.6-flash) يقرأ الأعراض ويقترح: تخصص + طبيب + مدة موعد
+- Streaming response داخل `BaeshenAssistant` مع أزرار "احجز هذا"
+- Guard rails: لا تشخيص، إعادة توجيه للطوارئ عند كلمات حرجة (ألم صدر، فقدان وعي...)
+
+**DoD:** 20 حالة اختبار (JSON fixtures) → دقة تصنيف ≥ 85%، zero false-negatives للطوارئ.
+
+### المرحلة 2.2 — Smart Reschedule
+- إشعار استباقي عندما يتغيّب طبيب: "متاح موعد أقرب يوم X؟"
+- خوارزمية nearest-slot تراعي: تفضيل الفرع، وقت اليوم المعتاد، تاريخ زيارات المريض
+- زر "قبول" ينفّذ reschedule ذرّياً (transaction) عبر `book_slot` الحالي
+
+**DoD:** simulation لـ100 حجز → 60%+ يقبلون العرض المقترح تلقائياً.
+
+### المرحلة 2.3 — Waitlist ذكية (Auto-Promote)
+- عند إلغاء موعد → LLM يرتّب waitlist حسب: أولوية طبية، مدة الانتظار، مطابقة الطبيب
+- Push/WhatsApp للأول في القائمة مع نافذة قبول 15 دقيقة
+- Fallback للثاني/الثالث تلقائياً
+
+**DoD:** اختبار concurrency: 50 مستفيد على موعد واحد → واحد فقط يفوز.
+
+---
+
+## المحور 3 — موثوقية وأداء
+
+### المرحلة 3.1 — تقوية Concurrency (Advisory Locks + Idempotency)
+- توسيع `_assert_slot_free` ليغطّي: reschedule، waitlist promote، admin manual booking
+- Idempotency-Key إلزامي على كل POST بحجز (منع double-submit من الشبكة السيئة)
+- جدول `idempotency_keys` (TTL 24h) + retention job
+
+**DoD:** `concurrency_book_slot.py` و `concurrency_direct_insert.py` مع PARALLEL=100 → PASS.
+
+### المرحلة 3.2 — Realtime عالي المستوى
+- استبدال polling في dashboards بـ Supabase Realtime broadcast
+- Presence channel لكل عيادة (كم مريض في الانتظار الآن)
+- عدّاد "أشخاص ينظرون هذا الموعد" على `/book` (شفافية + FOMO خفيف)
+
+**DoD:** RTT < 500ms في 95th percentile، test load 200 concurrent viewers.
+
+### المرحلة 3.3 — Observability كاملة
+- Web Vitals per-route (موجود) + Custom booking funnel events
+- Dashboard جديد `admin.booking-funnel`: drop-off لكل خطوة، Time-to-book متوسط، معدل الفشل
+- Sentry-lite: التقاط أخطاء JS/API في `web_vitals` كسجل موحّد
+- تنبيهات Slack/Email عند تجاوز عتبات (error rate > 2%، booking success < 90%)
+
+**DoD:** لوحة جديدة تعمل + 3 تنبيهات مختبرة يدوياً.
+
+---
+
+## المحور 4 — تكاملات خارجية
+
+### المرحلة 4.1 — NPHIES Verify مباشر داخل /book
+- عند إدخال هوية المريض → استدعاء NPHIES eligibility (real-time)
+- عرض: التغطية، نسبة التحمّل، الحد المتبقّي — قبل تأكيد الحجز
+- Fallback عند 5xx: يستمر الحجز مع علامة "قيد التحقّق"
+- Cache 24h لكل هوية (تقليل الاستدعاءات)
+
+**DoD:** integration test مع NPHIES sandbox → 3 سيناريوهات (مغطّى/مرفوض/timeout).
+
+### المرحلة 4.2 — Wallet Passes + Calendar Sync
+- توليد Apple Wallet `.pkpass` + Google Wallet JWT عند تأكيد الحجز
+- زر "أضف للتقويم" → يولّد `.ics` مع تنبيه تلقائي
+- OAuth اختياري لـGoogle Calendar → sync ثنائي الاتجاه (تعديل من التقويم = تعديل الحجز)
+
+**DoD:** فتح الـ.pkpass على iOS + `.ics` يعمل على Outlook/Apple Calendar/Gmail.
+
+### المرحلة 4.3 — WhatsApp Business API (تأكيد + إعادة جدولة تفاعلية)
+- تأكيد فوري عبر WhatsApp مع Quick Reply buttons: "تأكيد" / "إعادة جدولة" / "إلغاء"
+- Webhook `/api/public/webhooks/whatsapp` يستقبل الرد ويطبّقه فوراً
+- HMAC signature verification + rate limit
+
+**DoD:** رحلة كاملة: حجز → رسالة → ضغط "إلغاء" → حالة الحجز `cancelled` في < 5 ثوانٍ.
+
+### المرحلة 4.4 — Google/Apple/Meta Analytics (Conversion Tracking)
+- GA4 events: `booking_started`, `slot_selected`, `booking_completed` (+ value)
+- Meta Pixel + TikTok Pixel اختيارياً
+- Consent Mode v2 (يحترم كوكيز الموافقة الموجودة)
+
+**DoD:** أحداث تظهر في GA4 DebugView + لا تسجّل PII.
+
+---
+
+## ترتيب التنفيذ المقترح (11 أسبوع)
 
 ```text
-src/locales/{ar,en,ur}/
-├── common.json         (موجود)
-├── booking.json        (موجود)
-├── doctors.json        (جديد — doctors.$slug + programs)
-├── reservations.json   (جديد — reservations.manage + orders.$ref)
-├── complex.json        (جديد — complex.tsx)
-└── portal.json         (جديد — 4 ملفات portal.*)
+أسبوع 1-2  : 3.1 concurrency + 3.3 observability   ← أساس صلب
+أسبوع 3-4  : 1.1 wizard + 1.2 mobile PWA           ← أثر مباشر للمستخدم
+أسبوع 5-6  : 2.1 symptom AI + 1.3 companion        ← تمييز تنافسي
+أسبوع 7-8  : 4.1 NPHIES + 4.2 wallet               ← تكاملات محلية
+أسبوع 9    : 3.2 realtime + 2.2 smart reschedule
+أسبوع 10   : 4.3 WhatsApp + 2.3 smart waitlist
+أسبوع 11   : 4.4 analytics + استقرار + توثيق
 ```
 
-تحديث `src/lib/i18n/config.ts` لتسجيل الـ namespaces الجديدة.
+## Definition of Done للمشروع الكامل
+- Booking success rate ≥ 95%
+- Average time-to-book ≤ 90s (mobile)
+- Zero double-booking incidents في concurrency test بـ200
+- NPHIES coverage displayed لـ80% من الحجوزات
+- Lighthouse mobile ≥ 90 على `/book`
+- كل الاختبارات الموجودة (RLS + E2E + unit) تمرّ
 
-## سير العمل — دفعة واحدة لكل ملف
+---
 
-لكل ملف من الـ 9:
-1. **استخراج** كل نص عربي إلى مفاتيح ذات معنى (`doctors.detail.book_cta` بدلاً من `key_1`)
-2. **إضافة** المفاتيح إلى `ar/*.json` + ترجمة `en/*.json` + `ur/*.json` (Urdu = fallback من ar عند غياب المفتاح)
-3. **تعديل** الملف: `import { useTranslation } from "react-i18next"` + `const { t } = useTranslation("<ns>")` + استبدال النصوص بـ `{t("key")}`
-4. **الحفاظ على SEO**: نصوص `head()` (title/description/og) تظل تستخدم `t()` أيضاً — لكن مع fallback ثابت لضمان SSR الآمن
-5. **التحقق**: build يمرّ + قراءة الملف بعد التعديل لتأكيد صحة JSX
-
-## الترتيب الزمني للتسليم
-
-| مرحلة | الملفات | ملاحظة |
-|---|---|---|
-| **P1** | تحديث `config.ts` + إضافة 4 ملفات namespace فارغة (ar/en/ur) | تحضير |
-| **P2** | `doctors.$slug.tsx` (SEO — الأهم) | يُسلَّم للمراجعة |
-| **P3** | `programs.tsx` + `complex.tsx` | SEO |
-| **P4** | `reservations.manage.tsx` + `orders.$ref.tsx` | صفحات ضيوف |
-| **P5** | `portal.index.tsx` + `portal.appointments.tsx` | بوابة المريض |
-| **P6** | `portal.prescriptions.tsx` + `portal.refunds.tsx` | بوابة المريض |
-
-بعد كل مرحلة أتوقف لتأكيد الجودة (خصوصاً ترجمات EN) قبل الانتقال للتالية.
-
-## ما لن أفعله في هذه الخطة
-
-- ❌ لن أترجم `admin.classic.tsx` (مرشح للحذف)
-- ❌ لن أترجم صفحات الإدارة الداخلية (10 ملفات، طاقم عربي)
-- ❌ لن أضيف كشف لغة تلقائي عبر `navigator.language` (يكسر SSR)
-- ❌ لن أغيّر منطق التوجيه/RTL/LTR (يعمل حالياً)
-
-## تفاصيل تقنية
-
-- `useTranslation("doctors")` مع `defaultNS` = `common` يبقى كما هو
-- كل ملف JSON بصيغة flat keys بنقاط: `"detail.book_cta": "احجز الآن"`
-- ترجمات EN دقيقة (ليست Google Translate) لكل مفتاح
-- ترجمات UR: نُضيف الملفات فارغة أو نسخة من AR — i18next سيُرجع fallback لـ AR تلقائياً عبر `fallbackLng`
-- SSR-safe: `initImmediate: false` مضبوط أصلاً — `t()` تُرجع الترجمة الصحيحة أثناء render السيرفر
-- لا تعديل على شيفرة الأعمال (business logic) — تحويل نصوص فقط
-
-## المطلوب منك
-
-اختر إحدى:
-- **(أ) نفّذ P1+P2 الآن** (البنية + أول صفحة SEO) وأعرض النتيجة للمراجعة قبل التالي
-- **(ب) نفّذ P1→P4 دفعة واحدة** (كل الصفحات العامة/SEO)
-- **(ج) نفّذ الخطة كاملة P1→P6** بلا توقف
-- **(د) عدّل الخطة** (استبعاد ملف، ضم ملف إداري، إلخ)
+**السؤال:** هل نبدأ بالمرحلة **3.1 (concurrency + idempotency)** كأساس، أم تفضّل مرحلة أخرى أولاً؟ اذكر رقم المرحلة (مثلاً "ابدأ 1.1") لأنطلق فوراً.
