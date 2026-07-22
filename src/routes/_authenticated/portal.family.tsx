@@ -1393,8 +1393,8 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
   const docLang =
     typeof document !== "undefined" ? document.documentElement.lang : "ar";
   const lang: Lang = ((cached?.preferred_language as Lang | undefined) ??
-  const isAr = lang === "ar";
     (docLang === "en" ? "en" : "ar")) as Lang;
+  const isAr = lang === "ar";
   return (
     <div className="glass-card max-w-md mx-auto p-8 text-center" dir={(isAr ? "rtl" : "ltr")}>
       <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
