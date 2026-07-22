@@ -49,6 +49,7 @@ export const DEFAULT_JAZAN_SETTINGS: JazanSettings = {
     taglineAr: "من جازان… نعتني بصحتكم",
     taglineEn: "From Jazan… we care for your health",
     logoUrl: "",
+    debug: false,
   },
   patternIntensity: "standard",
   heritageAreas: {
