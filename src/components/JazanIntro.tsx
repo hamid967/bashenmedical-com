@@ -192,7 +192,7 @@ export function JazanIntro() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        dismiss();
+        endIntro("escape");
         return;
       }
       if (e.key === "Tab") {
