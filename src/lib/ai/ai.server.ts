@@ -3,6 +3,7 @@
  * NEVER import this from client code.
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export interface ModelRoute {
   route_name: string;
