@@ -21,8 +21,14 @@ const STORAGE_KEY = "bmc_jazan_intro_last_v1";
 const DISABLED_KEY = "bmc_jazan_intro_disabled_v1";
 const DEBUG_KEY = "bmc_jazan_intro_debug";
 
-/** Debug logging gated on Vite DEV or a manual localStorage flag (`bmc_jazan_intro_debug=1`). */
-function isDebugEnabled(): boolean {
+/**
+ * Debug logging is enabled when ANY of these is true:
+ *   1. The `intro.debug` flag on Jazan settings (managed from the admin settings page).
+ *   2. `localStorage.bmc_jazan_intro_debug === "1"` (manual override, useful in prod).
+ *   3. Vite DEV mode (`import.meta.env.DEV`).
+ */
+function isDebugEnabled(settingsDebug: boolean): boolean {
+  if (settingsDebug) return true;
   try {
     if (typeof window === "undefined") return false;
     if (localStorage.getItem(DEBUG_KEY) === "1") return true;
@@ -32,8 +38,12 @@ function isDebugEnabled(): boolean {
   }
 }
 
-function debugLog(event: string, payload: Record<string, unknown>): void {
-  if (!isDebugEnabled()) return;
+function debugLog(
+  enabled: boolean,
+  event: string,
+  payload: Record<string, unknown>,
+): void {
+  if (!enabled) return;
   const stamp = new Date().toISOString().slice(11, 23);
   // eslint-disable-next-line no-console
   console.groupCollapsed(
