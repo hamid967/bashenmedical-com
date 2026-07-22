@@ -149,13 +149,15 @@ export function JazanIntro() {
     } else {
       markSeen();
     }
-    trackEvent("jazan_intro_ended", {
+    const endedPayload = {
       reason,
       duration_ms: shownAtRef.current ? Date.now() - shownAtRef.current : 0,
       lang,
       reduced_motion: reduced,
       disabled_forever: reason === "disabled",
-    });
+    };
+    trackEvent("jazan_intro_ended", endedPayload);
+    debugLog("jazan_intro_ended", endedPayload);
     setVisible(false);
     window.setTimeout(() => setMounted(false), 500);
   };
