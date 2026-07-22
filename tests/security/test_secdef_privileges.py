@@ -23,18 +23,10 @@ import psycopg2.extras
 # behind their own logic). Everything else callable by `anon` is a leak
 # if it starts with `_` or is a privileged writer.
 PUBLIC_READ_ALLOWLIST = {
-    "search_doctors",
-    "get_public_doctor",
     "get_public_doctor_rating_summary",
-    "get_available_slots",
-    "check_slot_hold",
     "list_public_branches",
-    "list_branches_public",
-    "list_specialties_public",
     "list_doctors_next_slot",
     "doctor_next_available_date",
-    "get_health_articles_public",
-    "get_faqs_public",
     "estimate_appointment_cost",   # public price estimator
     "track_orders_by_phone",       # OTP-guarded internally
     "get_order_by_ref",            # OTP-guarded internally
@@ -47,7 +39,6 @@ PUBLIC_READ_ALLOWLIST = {
     "book_appointment_atomic",     # guest booking path
     "has_active_consent",
     "has_role",                    # RPC used by front-end during hydration
-    "get_my_roles",
     "get_my_doctor_id",
     "is_inquiry_staff",
     # Public listings/counters used by home & doctor pages
