@@ -969,6 +969,7 @@ function initials(name: string | null | undefined): string {
 }
 
 function formatMoney(n: number, lang: Lang): string {
+  const isAr = lang === "ar";
   return n.toLocaleString(isAr ? "ar-SA-u-nu-latn" : "en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,

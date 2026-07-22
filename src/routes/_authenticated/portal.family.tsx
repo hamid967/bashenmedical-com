@@ -298,6 +298,7 @@ function FamilyPage() {
   const { data: profile } = useSuspenseQuery(profileQuery);
   const { data: rows } = useSuspenseQuery(dependentsQuery);
   const lang: Lang = (profile?.preferred_language as Lang) ?? "ar";
+  const isAr = lang === "ar";
   const qc = useQueryClient();
 
   const [dialog, setDialog] = useState<{ mode: "add" } | { mode: "edit"; row: Dependent } | null>(
@@ -430,6 +431,7 @@ function DependentCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const isAr = lang === "ar";
   const initials = row.full_name
     .split(" ")
     .slice(0, 2)
@@ -733,6 +735,7 @@ function DependentAppointmentsSection({
 }
 
 function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }) {
+  const isAr = lang === "ar";
   const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
   const { cls, Icon } = statusVisual(row.status);
   const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA-u-ca-gregory" : "en-GB",
@@ -818,6 +821,7 @@ function DependentDialog({
   initial: Dependent | null;
   onClose: () => void;
 }) {
+  const isAr = lang === "ar";
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState>(
     initial
@@ -1051,6 +1055,7 @@ function DeleteDialog({
   row: Dependent | null;
   onClose: () => void;
 }) {
+  const isAr = lang === "ar";
   const qc = useQueryClient();
   const [confirmCancel, setConfirmCancel] = useState(false);
 
@@ -1388,6 +1393,7 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
   const docLang =
     typeof document !== "undefined" ? document.documentElement.lang : "ar";
   const lang: Lang = ((cached?.preferred_language as Lang | undefined) ??
+  const isAr = lang === "ar";
     (docLang === "en" ? "en" : "ar")) as Lang;
   return (
     <div className="glass-card max-w-md mx-auto p-8 text-center" dir={(isAr ? "rtl" : "ltr")}>
