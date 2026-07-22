@@ -268,9 +268,9 @@ function OrderDetailCard({
         </div>
 
         <div className="mt-6 grid gap-3 text-sm">
-          <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "تاريخ الإنشاء" : "Created")} value={fmt(order.created_at,(isAr ? "ar" : "en")} />
+          <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "تاريخ الإنشاء" : "Created")} value={fmt(order.created_at,(isAr ? "ar" : "en"))} />
           {order.scheduled_at && (
-            <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "الموعد المفضّل" : "Scheduled")} value={fmt(order.scheduled_at,(isAr ? "ar" : "en")} />
+            <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "الموعد المفضّل" : "Scheduled")} value={fmt(order.scheduled_at,(isAr ? "ar" : "en"))} />
           )}
           <Row icon={<Phone className="h-4 w-4" />} label={(isAr ? "الجوال" : "Phone")} value={phone} />
         </div>

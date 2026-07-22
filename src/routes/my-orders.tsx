@@ -328,12 +328,12 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
       <div className="text-xs text-muted-foreground space-y-1">
         <div className="flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5" />
-          <span>{(isAr ? "تم الإنشاء: " : "Created: ")}{fmt(order.created_at,(isAr ? "ar" : "en")}</span>
+          <span>{(isAr ? "تم الإنشاء: " : "Created: ")}{fmt(order.created_at,(isAr ? "ar" : "en"))}</span>
         </div>
         {order.scheduled_at && (
           <div className="flex items-center gap-1.5">
             <CalendarCheck className="h-3.5 w-3.5" />
-            <span>{(isAr ? "الموعد: " : "Scheduled: ")}{fmt(order.scheduled_at,(isAr ? "ar" : "en")}</span>
+            <span>{(isAr ? "الموعد: " : "Scheduled: ")}{fmt(order.scheduled_at,(isAr ? "ar" : "en"))}</span>
           </div>
         )}
       </div>
