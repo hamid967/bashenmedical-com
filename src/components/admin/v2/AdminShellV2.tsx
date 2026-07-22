@@ -198,6 +198,7 @@ const NAV: NavGroup[] = [
       { to: "/admin/notification-logs", label: "الإشعارات", icon: Bell, roles: ["admin"] },
       { to: "/admin/no-show-risk", label: "توقّع الغياب", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/realtime-monitor", label: "مراقبة Realtime", icon: Gauge, roles: ["admin"] },
+      { to: "/admin/booking-funnel", label: "قمع الحجوزات", icon: FileBarChart, roles: ["admin"] },
       { to: "/admin/ai-streaming", label: "AI Streaming", icon: Sparkles, roles: ["admin"] },
       { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام", icon: Gauge, roles: ["admin"] },
