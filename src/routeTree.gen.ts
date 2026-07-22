@@ -113,6 +113,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
 import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
+import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_authenticated/admin.booking-funnel'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
@@ -758,6 +759,12 @@ const AuthenticatedAdminAuditLogsRoute =
   AuthenticatedAdminAuditLogsRouteImport.update({
     id: '/audit-logs',
     path: '/audit-logs',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminBookingFunnelRoute =
+  AuthenticatedAdminBookingFunnelRouteImport.update({
+    id: '/booking-funnel',
+    path: '/booking-funnel',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminClassicRoute =
@@ -1417,6 +1424,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
+  '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -1614,6 +1622,7 @@ export interface FileRoutesByTo {
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
+  '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -1816,6 +1825,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
+  '/_authenticated/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -2018,6 +2028,7 @@ export interface FileRouteTypes {
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/audit-logs'
+    | '/admin/booking-funnel'
     | '/admin/classic'
     | '/admin/design-tokens'
     | '/admin/inbox'
@@ -2215,6 +2226,7 @@ export interface FileRouteTypes {
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/audit-logs'
+    | '/admin/booking-funnel'
     | '/admin/classic'
     | '/admin/design-tokens'
     | '/admin/inbox'
@@ -2416,6 +2428,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/ai-usage'
     | '/_authenticated/admin/audit-logs'
+    | '/_authenticated/admin/booking-funnel'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/inbox'
@@ -3329,6 +3342,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAuditLogsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/booking-funnel': {
+      id: '/_authenticated/admin/booking-funnel'
+      path: '/booking-funnel'
+      fullPath: '/admin/booking-funnel'
+      preLoaderRoute: typeof AuthenticatedAdminBookingFunnelRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/classic': {
       id: '/_authenticated/admin/classic'
       path: '/classic'
@@ -4016,6 +4036,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
   AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
+  AuthenticatedAdminBookingFunnelRoute: typeof AuthenticatedAdminBookingFunnelRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
@@ -4043,6 +4064,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
   AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
   AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
+  AuthenticatedAdminBookingFunnelRoute: AuthenticatedAdminBookingFunnelRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
