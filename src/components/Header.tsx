@@ -14,6 +14,7 @@ import {
   Clock,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
 import { SITE } from "@/lib/site";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ type NavItem = {
 
 export function Header() {
   const { t, lang, setLang } = useI18n();
+  const { t: th } = useTranslation("header");
   const [open, setOpen] = useState(false);
   const [signedIn, setSignedIn] = useState(false);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -45,39 +47,40 @@ export function Header() {
   }, []);
 
   const isAr = lang === "ar";
+  const brandName = isAr ? SITE.nameAr : SITE.nameEn;
 
   const nav: NavItem[] = [
     { to: "/", label: t("nav_home") },
     { to: "/about", label: t("nav_about") },
-    { to: "/branches", label:(isAr ? "مستشفياتنا" : "Our Hospitals") },
-    { to: "/excellence", label:(isAr ? "مراكز التميز" : "Excellence Centers") },
+    { to: "/branches", label: th("ourHospitals") },
+    { to: "/excellence", label: th("excellenceCenters") },
     { to: "/specialties", label: t("nav_specialties") },
     { to: "/doctors", label: t("nav_doctors") },
     {
       to: "/services",
-      label:(isAr ? "الخدمات" : "Services"),
+      label: th("services"),
       children: [
-        { to: "/services", label:(isAr ? "كل الخدمات الإلكترونية" : "All E-Services"), desc:(isAr ? "دليل موحّد لكل خدماتنا" : "Unified directory of all services") },
-        { to: "/packages", label:(isAr ? "الباقات والفحوصات" : "Checkup Packages"), desc:(isAr ? "باقات فحص شاملة" : "Comprehensive packages") },
-        { to: "/telemedicine", label:(isAr ? "استشارة عن بُعد" : "Telemedicine"), desc:(isAr ? "طبيبك أونلاين" : "Doctor online") },
-        { to: "/home-care", label:(isAr ? "الرعاية المنزلية" : "Home Care"), desc:(isAr ? "خدمات طبية بالمنزل" : "Medical at home") },
-        { to: "/pharmacy", label: t("nav_pharmacy"), desc:(isAr ? "توصيل دواء" : "Delivery") },
-        { to: "/insurance", label:(isAr ? "شركات التأمين" : "Insurance"), desc:(isAr ? "التغطيات المعتمدة" : "Approved networks") },
-        { to: "/second-opinion", label:(isAr ? "الرأي الطبي الثاني" : "Second Opinion"), desc:(isAr ? "استشارة مستقلة" : "Independent review") },
-        { to: "/corporate", label:(isAr ? "خدمات الشركات" : "Corporate"), desc:(isAr ? "اتفاقيات مؤسسية" : "Enterprise partnerships") },
-        { to: "/international-patients", label:(isAr ? "المرضى الدوليون" : "International Patients") },
+        { to: "/services", label: th("allEServices"), desc: th("allEServicesDesc") },
+        { to: "/packages", label: th("packages"), desc: th("packagesDesc") },
+        { to: "/telemedicine", label: th("telemedicine"), desc: th("telemedicineDesc") },
+        { to: "/home-care", label: th("homeCare"), desc: th("homeCareDesc") },
+        { to: "/pharmacy", label: t("nav_pharmacy"), desc: th("pharmacyDesc") },
+        { to: "/insurance", label: th("insurance"), desc: th("insuranceDesc") },
+        { to: "/second-opinion", label: th("secondOpinion"), desc: th("secondOpinionDesc") },
+        { to: "/corporate", label: th("corporate"), desc: th("corporateDesc") },
+        { to: "/international-patients", label: th("internationalPatients") },
       ],
     },
     {
       to: "/media/news",
-      label:(isAr ? "المركز الإعلامي" : "Media Center"),
+      label: th("mediaCenter"),
       children: [
-        { to: "/media/news", label:(isAr ? "الأخبار" : "News") },
-        { to: "/media/stories", label:(isAr ? "قصص المرضى" : "Patient Stories"), desc:(isAr ? "تجارب علاج ملهمة" : "Inspiring cases") },
-        { to: "/health", label: t("nav_health"), desc:(isAr ? "مقالات صحية" : "Health articles") },
+        { to: "/media/news", label: th("news") },
+        { to: "/media/stories", label: th("patientStories"), desc: th("patientStoriesDesc") },
+        { to: "/health", label: t("nav_health"), desc: th("healthDesc") },
         { to: "/faq", label: t("nav_faq") },
-        { to: "/careers", label:(isAr ? "الوظائف" : "Careers") },
-        { to: "/app", label:(isAr ? "تطبيق الجوال" : "Mobile App"), desc:(isAr ? "حمّل التطبيق" : "Download app") },
+        { to: "/careers", label: th("careers") },
+        { to: "/app", label: th("mobileApp"), desc: th("mobileAppDesc") },
       ],
     },
     { to: "/contact", label: t("nav_contact") },
@@ -92,7 +95,7 @@ export function Header() {
           <div className="flex items-center gap-4 opacity-95">
             <span className="inline-flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" />
-              {(isAr ? "السبت–الأربعاء 9ص–9م" : "Sat–Wed 9am–9pm")}
+              {th("topbarHours")}
             </span>
             <span className="hidden lg:inline-flex items-center gap-1">
               <MapPin className="h-3.5 w-3.5" />
@@ -105,7 +108,7 @@ export function Header() {
               className="inline-flex items-center gap-1 rounded-full bg-white/15 px-2.5 py-0.5 font-semibold hover:bg-white/25"
             >
               <Siren className="h-3.5 w-3.5" />
-              {(isAr ? "الطوارئ" : "Emergency")}
+              {th("emergency")}
             </a>
             <a href={`tel:${SITE.phone}`} className="inline-flex items-center gap-1 hover:underline">
               <Phone className="h-3.5 w-3.5" /> {SITE.phoneDisplay}
@@ -126,7 +129,7 @@ export function Header() {
           <JazanIconFrame size="sm" className="shrink-0 h-11 w-11">
             <img
               src={bmcLogo}
-              alt={isAr ? SITE.nameAr : SITE.nameEn}
+              alt={brandName}
               width={36}
               height={36}
               className="h-9 w-9 object-contain"
@@ -135,12 +138,8 @@ export function Header() {
             />
           </JazanIconFrame>
           <div className="leading-tight">
-            <div className="text-sm font-bold text-foreground">
-              {isAr ? SITE.nameAr : SITE.nameEn}
-            </div>
-            <div className="text-[11px] text-muted-foreground">
-              {(isAr ? "صبيا – جازان" : "Sabya – Jazan")}
-            </div>
+            <div className="text-sm font-bold text-foreground">{brandName}</div>
+            <div className="text-[11px] text-muted-foreground">{th("cityRegion")}</div>
           </div>
         </Link>
 
@@ -219,7 +218,7 @@ export function Header() {
                 to="/admin"
                 className="hidden 2xl:inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
               >
-                <LayoutDashboard className="h-3.5 w-3.5" /> {(isAr ? "لوحة" : "Admin")}
+                <LayoutDashboard className="h-3.5 w-3.5" /> {th("admin")}
               </Link>
             </>
           ) : (
@@ -227,7 +226,7 @@ export function Header() {
               to="/auth"
               className="inline-flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted"
             >
-              <LogIn className="h-3.5 w-3.5" /> {(isAr ? "دخول" : "Sign in")}
+              <LogIn className="h-3.5 w-3.5" /> {th("signIn")}
             </Link>
           )}
         </div>

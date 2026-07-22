@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { Search, Loader2, User2, MapPin, Stethoscope } from "lucide-react";
@@ -26,8 +27,12 @@ type Specialty = { id: string; slug: string; name_ar: string; name_en: string };
 
 export function DoctorAutocomplete() {
   const { lang } = useI18n();
+  const { t } = useTranslation("doctorAutocomplete");
   const navigate = useNavigate();
   const isAr = lang === "ar";
+  const dir = isAr ? "rtl" : "ltr";
+  const iconSide = isAr ? "right-3" : "left-3";
+  const inputPad = isAr ? "pr-9" : "pl-9";
   const rootRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -133,17 +138,17 @@ export function DoctorAutocomplete() {
     <div
       ref={rootRef}
       className="glass-fut mx-auto mt-10 max-w-3xl p-3 md:p-4 text-start"
-      dir={(isAr ? "rtl" : "ltr")}
+      dir={dir}
     >
       <div className="grid gap-2 md:grid-cols-[1.6fr_1fr_1fr]">
         {/* Search input */}
         <div className="relative">
           <label htmlFor="home-doctor-ac" className="sr-only">
-            {(isAr ? "ابحث باسم الطبيب" : "Search by doctor name")}
+            {t("searchLabel")}
           </label>
           <span
             aria-hidden="true"
-            className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${(isAr ? "right-3" : "left-3")} text-[color:var(--fut-ink-muted)]`}
+            className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${iconSide} text-[color:var(--fut-ink-muted)]`}
           >
             {isFetching ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -166,27 +171,27 @@ export function DoctorAutocomplete() {
             }}
             onFocus={() => q.trim().length >= 2 && setOpen(true)}
             onKeyDown={onKeyDown}
-            placeholder={(isAr ? "ابحث باسم الطبيب…" : "Search by doctor name…")}
-            className={`input-glow w-full ${(isAr ? "pr-9" : "pl-9")}`}
+            placeholder={t("searchPlaceholder")}
+            className={`input-glow w-full ${inputPad}`}
             autoComplete="off"
           />
         </div>
 
         {/* Branch filter */}
         <label className="block">
-          <span className="sr-only">{(isAr ? "الفرع" : "Branch")}</span>
+          <span className="sr-only">{t("branch")}</span>
           <div className="relative">
             <MapPin
               aria-hidden="true"
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${(isAr ? "right-3" : "left-3")}`}
+              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${iconSide}`}
             />
             <select
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
-              className={`input-glow w-full appearance-none ${(isAr ? "pr-9" : "pl-9")}`}
-              aria-label={(isAr ? "الفرع" : "Branch")}
+              className={`input-glow w-full appearance-none ${inputPad}`}
+              aria-label={t("branch")}
             >
-              <option value="">{(isAr ? "كل الفروع" : "All branches")}</option>
+              <option value="">{t("allBranches")}</option>
               {branches?.map((b) => (
                 <option key={b.id} value={b.id}>
                   {isAr ? b.name_ar : b.name_en}
@@ -198,19 +203,19 @@ export function DoctorAutocomplete() {
 
         {/* Specialty filter */}
         <label className="block">
-          <span className="sr-only">{(isAr ? "العيادة" : "Clinic")}</span>
+          <span className="sr-only">{t("clinic")}</span>
           <div className="relative">
             <Stethoscope
               aria-hidden="true"
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${(isAr ? "right-3" : "left-3")}`}
+              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${iconSide}`}
             />
             <select
               value={specialty}
               onChange={(e) => setSpecialty(e.target.value)}
-              className={`input-glow w-full appearance-none ${(isAr ? "pr-9" : "pl-9")}`}
-              aria-label={(isAr ? "العيادة/التخصص" : "Clinic / Specialty")}
+              className={`input-glow w-full appearance-none ${inputPad}`}
+              aria-label={t("clinicAria")}
             >
-              <option value="">{(isAr ? "كل العيادات" : "All clinics")}</option>
+              <option value="">{t("allClinics")}</option>
               {specialties?.map((s) => (
                 <option key={s.id} value={s.slug}>
                   {isAr ? s.name_ar : s.name_en}
@@ -230,11 +235,11 @@ export function DoctorAutocomplete() {
         >
           {isFetching && list.length === 0 ? (
             <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">
-              {(isAr ? "جارٍ البحث…" : "Searching…")}
+              {t("searching")}
             </div>
           ) : list.length === 0 ? (
             <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">
-              {(isAr ? "لا نتائج مطابقة" : "No matching doctors")}
+              {t("noResults")}
             </div>
           ) : (
             <ul className="divide-y divide-[color:var(--jazan-gold)]/20">
@@ -285,7 +290,7 @@ export function DoctorAutocomplete() {
                         </div>
                       </div>
                       <span className="text-xs font-semibold text-[color:var(--neon-teal)]">
-                        {(isAr ? "احجز" : "Book")}
+                        {t("book")}
                       </span>
                     </button>
                   </li>
@@ -297,7 +302,7 @@ export function DoctorAutocomplete() {
                   onClick={goSearchAll}
                   className="block w-full px-3 py-2 text-center text-xs font-semibold text-[color:var(--jazan-teal)] hover:underline"
                 >
-                  {(isAr ? "عرض كل النتائج في صفحة الأطباء ←" : "See all results on doctors page →")}
+                  {t("seeAll")}
                 </button>
               </li>
             </ul>
@@ -307,7 +312,7 @@ export function DoctorAutocomplete() {
 
       {debounced.length > 0 && debounced.length < 2 && (
         <p className="mt-2 text-xs text-[color:var(--fut-ink-muted)]">
-          {(isAr ? "اكتب حرفين على الأقل…" : "Type at least 2 characters…")}
+          {t("typeAtLeastTwo")}
         </p>
       )}
     </div>

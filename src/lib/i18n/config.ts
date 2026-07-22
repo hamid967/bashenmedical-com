@@ -11,6 +11,12 @@ import urBooking from "@/locales/ur/booking.json";
 import arPrograms from "@/locales/ar/programs.json";
 import enPrograms from "@/locales/en/programs.json";
 import urPrograms from "@/locales/ur/programs.json";
+import arFooter from "@/locales/ar/footer.json";
+import enFooter from "@/locales/en/footer.json";
+import arHeader from "@/locales/ar/header.json";
+import enHeader from "@/locales/en/header.json";
+import arDoctorAutocomplete from "@/locales/ar/doctorAutocomplete.json";
+import enDoctorAutocomplete from "@/locales/en/doctorAutocomplete.json";
 
 // Primary UI languages — surfaced in the language switcher and used across
 // the app to key layout/direction. Adding a code here forces every
@@ -27,8 +33,22 @@ export const EXTRA_LOCALES = ["ur"] as const;
 export const RTL_LOCALES: readonly string[] = ["ar", "ur"] as const;
 
 export const resources = {
-  ar: { common: arCommon, booking: arBooking, programs: arPrograms },
-  en: { common: enCommon, booking: enBooking, programs: enPrograms },
+  ar: {
+    common: arCommon,
+    booking: arBooking,
+    programs: arPrograms,
+    footer: arFooter,
+    header: arHeader,
+    doctorAutocomplete: arDoctorAutocomplete,
+  },
+  en: {
+    common: enCommon,
+    booking: enBooking,
+    programs: enPrograms,
+    footer: enFooter,
+    header: enHeader,
+    doctorAutocomplete: enDoctorAutocomplete,
+  },
   ur: { common: urCommon, booking: urBooking, programs: urPrograms },
 } as const;
 
@@ -45,7 +65,7 @@ if (!i18n.isInitialized) {
     fallbackLng: DEFAULT_LANG,
     supportedLngs: [...SUPPORTED_LANGS, ...EXTRA_LOCALES] as string[],
     defaultNS: "common",
-    ns: ["common", "booking", "programs"],
+    ns: ["common", "booking", "programs", "footer", "header", "doctorAutocomplete"],
     interpolation: { escapeValue: false },
     returnNull: false,
     // Force synchronous init so t() returns real translations during SSR
