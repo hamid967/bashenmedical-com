@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
 import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
+import { trackEvent } from "@/lib/analytics";
 
 const bmcLogo = bmcLogoAsset.url;
 
@@ -101,23 +102,55 @@ export function JazanIntro() {
   const titleId = useId();
   const descId = useId();
 
-  const dismiss = () => {
-    markSeen();
+  const shownAtRef = useRef<number>(0);
+  const endedRef = useRef<boolean>(false);
+
+  const endIntro = (reason: "completed" | "skipped" | "escape" | "disabled" | "reduced_motion") => {
+    if (endedRef.current) return;
+    endedRef.current = true;
+    if (reason === "disabled") {
+      markDisabled();
+    } else {
+      markSeen();
+    }
+    trackEvent("jazan_intro_ended", {
+      reason,
+      duration_ms: shownAtRef.current ? Date.now() - shownAtRef.current : 0,
+      lang,
+      reduced_motion: reduced,
+      disabled_forever: reason === "disabled",
+    });
     setVisible(false);
     window.setTimeout(() => setMounted(false), 500);
   };
 
+  const dismiss = () => endIntro("skipped");
+
   useEffect(() => {
     setLang(readLang());
-    if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) return;
+    if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) {
+      trackEvent("jazan_intro_suppressed", {
+        reason: !introCfg.enabled
+          ? "disabled_by_settings"
+          : typeof window !== "undefined" && localStorage.getItem(DISABLED_KEY) === "1"
+            ? "user_opted_out"
+            : "cooldown",
+      });
+      return;
+    }
     setMounted(true);
+    shownAtRef.current = Date.now();
+    trackEvent("jazan_intro_shown", {
+      cooldown_hours: introCfg.cooldownHours,
+      duration_ms: introCfg.durationMs,
+    });
     requestAnimationFrame(() => setVisible(true));
   }, [introCfg.enabled, introCfg.cooldownHours]);
 
   useEffect(() => {
     if (!mounted) return;
     if (reduced) {
-      const t = window.setTimeout(dismiss, 3_000);
+      const t = window.setTimeout(() => endIntro("reduced_motion"), 3_000);
       return () => window.clearTimeout(t);
     }
     const total = Math.max(4_000, introCfg.durationMs);
@@ -128,7 +161,7 @@ export function JazanIntro() {
       { t: Math.round(total * 0.74), phase: 4 },
     ];
     const timers = seq.map(({ t, phase }) => window.setTimeout(() => setPhase(phase), t));
-    const end = window.setTimeout(dismiss, total);
+    const end = window.setTimeout(() => endIntro("completed"), total);
     return () => {
       timers.forEach(window.clearTimeout);
       window.clearTimeout(end);
@@ -159,7 +192,7 @@ export function JazanIntro() {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        dismiss();
+        endIntro("escape");
         return;
       }
       if (e.key === "Tab") {
@@ -236,11 +269,7 @@ export function JazanIntro() {
       <div className="absolute top-4 end-4 flex items-center gap-2">
         <button
           type="button"
-          onClick={() => {
-            markDisabled();
-            setVisible(false);
-            window.setTimeout(() => setMounted(false), 500);
-          }}
+          onClick={() => endIntro("disabled")}
           className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--jazan-hairline)] bg-white/70 backdrop-blur px-4 py-2 text-xs font-medium text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
           aria-label={isAr ? "عدم عرض المقدمة مجددًا" : "Don't show intro again"}
         >
