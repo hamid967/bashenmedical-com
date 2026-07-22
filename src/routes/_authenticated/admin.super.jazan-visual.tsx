@@ -192,6 +192,19 @@ function JazanVisualAdmin() {
               <img src={s.intro.logoUrl} alt="" className="mt-2 h-16 w-16 object-contain rounded border" />
             )}
           </div>
+          <div className="md:col-span-2 flex items-start gap-3 rounded-md border border-dashed p-3">
+            <Switch
+              checked={s.intro.debug}
+              onCheckedChange={(v) => setS({ ...s, intro: { ...s.intro, debug: v } })}
+              aria-label="تفعيل وضع تصحيح المقدمة"
+            />
+            <div className="flex-1">
+              <Label>وضع تصحيح المقدمة (Debug)</Label>
+              <p className="text-xs text-muted-foreground mt-1">
+                يطبع أحداث <code>shown</code> و<code>skipped</code> و<code>completed</code> في كونسول المتصفح مع <code>reason</code> و<code>duration_ms</code>. للمطوّرين فقط — أوقفه في الإنتاج.
+              </p>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
