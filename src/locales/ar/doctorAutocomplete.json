@@ -1,0 +1,14 @@
+{
+  "searchLabel": "ابحث باسم الطبيب",
+  "searchPlaceholder": "ابحث باسم الطبيب…",
+  "branch": "الفرع",
+  "allBranches": "كل الفروع",
+  "clinic": "العيادة",
+  "clinicAria": "العيادة/التخصص",
+  "allClinics": "كل العيادات",
+  "searching": "جارٍ البحث…",
+  "noResults": "لا نتائج مطابقة",
+  "book": "احجز",
+  "seeAll": "عرض كل النتائج في صفحة الأطباء ←",
+  "typeAtLeastTwo": "اكتب حرفين على الأقل…"
+}

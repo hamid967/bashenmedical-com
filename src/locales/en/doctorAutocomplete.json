@@ -1,0 +1,14 @@
+{
+  "searchLabel": "Search by doctor name",
+  "searchPlaceholder": "Search by doctor name…",
+  "branch": "Branch",
+  "allBranches": "All branches",
+  "clinic": "Clinic",
+  "clinicAria": "Clinic / Specialty",
+  "allClinics": "All clinics",
+  "searching": "Searching…",
+  "noResults": "No matching doctors",
+  "book": "Book",
+  "seeAll": "See all results on doctors page →",
+  "typeAtLeastTwo": "Type at least 2 characters…"
+}
