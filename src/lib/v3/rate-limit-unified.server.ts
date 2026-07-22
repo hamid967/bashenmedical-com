@@ -64,6 +64,17 @@ const flagCache: { current?: FlagCache } =
 (globalThis as unknown as { __v3RlFlagCache?: { current?: FlagCache } }).__v3RlFlagCache =
   flagCache;
 
+/**
+ * Invalidate the in-instance flag cache. Called after toggling the
+ * `v3.platform.rate_limit_unified` flag so the next request on this worker
+ * re-reads the DB without waiting for the TTL to expire.
+ * Worker instances are stateless & isolated, so the short TTL below is what
+ * actually guarantees fleet-wide propagation.
+ */
+export function bustRateLimitFlagCache(): void {
+  flagCache.current = undefined;
+}
+
 async function isEnabled(): Promise<boolean> {
   const now = Date.now();
   if (flagCache.current && flagCache.current.expires > now) {
@@ -81,7 +92,9 @@ async function isEnabled(): Promise<boolean> {
   } catch {
     /* keep fail-safe default */
   }
-  flagCache.current = { value, expires: now + 60_000 };
+  // Short TTL so admin toggles propagate across worker instances within a
+  // few seconds without a redeploy, while avoiding a DB hit per request.
+  flagCache.current = { value, expires: now + 5_000 };
   return value;
 }
 
