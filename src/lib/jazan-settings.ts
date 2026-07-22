@@ -27,6 +27,8 @@ export type JazanSettings = {
     taglineEn: string;
     /** Optional licensed logo override; empty falls back to bundled BMC logo. */
     logoUrl: string;
+    /** When true, JazanIntro logs analytics events to the browser console. */
+    debug: boolean;
   };
   patternIntensity: JazanIntensity;
   heritageAreas: JazanHeritageAreas;
