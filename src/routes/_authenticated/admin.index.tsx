@@ -29,6 +29,8 @@ import {
   Inbox,
   ArrowLeft,
   Sparkles,
+  Command as CommandIcon,
+  Palette,
 } from "lucide-react";
 
 const statsQuery = queryOptions({
@@ -67,6 +69,7 @@ type QuickLink = {
 };
 
 const PRIMARY_LINKS: QuickLink[] = [
+  { to: "/command-center", label: "مركز التحكم الذكي", icon: CommandIcon, roles: ["admin", "super_admin"] },
   { to: "/appointments-queue", label: "طابور المواعيد", icon: CalendarCheck, roles: ["admin", "reception", "doctor"] },
   { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
   { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
@@ -76,6 +79,7 @@ const PRIMARY_LINKS: QuickLink[] = [
 ];
 
 const SECONDARY_LINKS: QuickLink[] = [
+  { to: "/owner", label: "منشئ الموقع", icon: Palette, roles: ["super_admin"] },
   { to: "/corporate-admin", label: "الشركات", icon: Building2, roles: ["admin"] },
   { to: "/complaints-admin", label: "الشكاوى", icon: MessageSquare, roles: ["admin", "reception"] },
   { to: "/inventory-management", label: "المخزون", icon: ArchiveRestore, roles: ["admin", "pharmacy"] },

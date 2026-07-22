@@ -167,7 +167,14 @@ function OwnerLayout() {
           })}
         </nav>
 
-        <div className="p-3 border-t border-slate-800">
+        <div className="p-3 border-t border-slate-800 space-y-1">
+          <Link
+            to="/admin"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-emerald-300 hover:text-white hover:bg-slate-800"
+          >
+            <LayoutDashboard className="h-3.5 w-3.5" />
+            لوحة الإدارة الموحدة
+          </Link>
           <Link
             to="/"
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-slate-800"
