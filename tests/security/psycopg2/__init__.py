@@ -17,15 +17,42 @@ from . import extras  # noqa: F401
 
 
 
+import re as _re
+
+_PLACEHOLDER_RE = _re.compile(r"%(?:\([^)]+\))?[sbt%]")
+
+
+def _escape_stray_percent(sql: str) -> str:
+    """Double any '%' char that isn't a valid psycopg3 placeholder."""
+    out = []
+    i = 0
+    while i < len(sql):
+        if sql[i] == "%":
+            m = _PLACEHOLDER_RE.match(sql, i)
+            if m:
+                out.append(m.group(0))
+                i = m.end()
+                continue
+            out.append("%%")
+            i += 1
+        else:
+            out.append(sql[i])
+            i += 1
+    return "".join(out)
+
+
 class _CursorWrap:
     def __init__(self, cur):
         self._cur = cur
 
     def execute(self, sql, params=None):
+        if params is not None:
+            sql = _escape_stray_percent(sql)
         return self._cur.execute(sql, params)
 
     def fetchall(self):
         return self._cur.fetchall()
+
 
     def fetchone(self):
         return self._cur.fetchone()
