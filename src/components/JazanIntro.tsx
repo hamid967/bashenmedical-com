@@ -19,6 +19,42 @@ const bmcLogo = bmcLogoAsset.url;
 
 const STORAGE_KEY = "bmc_jazan_intro_last_v1";
 const DISABLED_KEY = "bmc_jazan_intro_disabled_v1";
+const DEBUG_KEY = "bmc_jazan_intro_debug";
+
+/** Debug logging gated on Vite DEV or a manual localStorage flag (`bmc_jazan_intro_debug=1`). */
+function isDebugEnabled(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    if (localStorage.getItem(DEBUG_KEY) === "1") return true;
+    return Boolean((import.meta as { env?: { DEV?: boolean } }).env?.DEV);
+  } catch {
+    return false;
+  }
+}
+
+function debugLog(event: string, payload: Record<string, unknown>): void {
+  if (!isDebugEnabled()) return;
+  const stamp = new Date().toISOString().slice(11, 23);
+  // eslint-disable-next-line no-console
+  console.groupCollapsed(
+    `%c[JazanIntro]%c ${event} %c${stamp}`,
+    "color:#075E63;font-weight:bold",
+    "color:inherit;font-weight:600",
+    "color:#9AA0A6;font-weight:normal",
+  );
+  if ("reason" in payload) {
+    // eslint-disable-next-line no-console
+    console.log("reason:", payload.reason);
+  }
+  if ("duration_ms" in payload) {
+    // eslint-disable-next-line no-console
+    console.log("duration_ms:", payload.duration_ms);
+  }
+  // eslint-disable-next-line no-console
+  console.log("payload:", payload);
+  // eslint-disable-next-line no-console
+  console.groupEnd();
+}
 
 /** Fallback defaults; live values come from JazanSettingsProvider. */
 export const INTRO_CONFIG = {
@@ -113,13 +149,15 @@ export function JazanIntro() {
     } else {
       markSeen();
     }
-    trackEvent("jazan_intro_ended", {
+    const endedPayload = {
       reason,
       duration_ms: shownAtRef.current ? Date.now() - shownAtRef.current : 0,
       lang,
       reduced_motion: reduced,
       disabled_forever: reason === "disabled",
-    });
+    };
+    trackEvent("jazan_intro_ended", endedPayload);
+    debugLog("jazan_intro_ended", endedPayload);
     setVisible(false);
     window.setTimeout(() => setMounted(false), 500);
   };
@@ -129,21 +167,25 @@ export function JazanIntro() {
   useEffect(() => {
     setLang(readLang());
     if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) {
-      trackEvent("jazan_intro_suppressed", {
+      const suppressedPayload = {
         reason: !introCfg.enabled
           ? "disabled_by_settings"
           : typeof window !== "undefined" && localStorage.getItem(DISABLED_KEY) === "1"
             ? "user_opted_out"
             : "cooldown",
-      });
+      };
+      trackEvent("jazan_intro_suppressed", suppressedPayload);
+      debugLog("jazan_intro_suppressed", suppressedPayload);
       return;
     }
     setMounted(true);
     shownAtRef.current = Date.now();
-    trackEvent("jazan_intro_shown", {
+    const shownPayload = {
       cooldown_hours: introCfg.cooldownHours,
       duration_ms: introCfg.durationMs,
-    });
+    };
+    trackEvent("jazan_intro_shown", shownPayload);
+    debugLog("jazan_intro_shown", shownPayload);
     requestAnimationFrame(() => setVisible(true));
   }, [introCfg.enabled, introCfg.cooldownHours]);
 
