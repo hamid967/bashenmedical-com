@@ -98,8 +98,10 @@
    ============================================================ */
 :root {
   --jazan-teal: #075E63;       /* deep medical teal */
+  --jazan-teal-light: #0B8585; /* lighter teal for accents/reflections */
   --jazan-palm: #24745E;       /* palm green */
   --jazan-ivory: #FCF9F2;      /* warm ivory */
+  --jazan-sand-warm: #F6E9D2;  /* warm sand highlight */
   --jazan-terracotta: #B85C3C; /* Jazan terracotta */
   --jazan-sand: #E6D4B7;       /* sand */
   --jazan-gold: #C7A46B;       /* muted gold */

@@ -17,6 +17,7 @@ import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
 const bmcLogo = bmcLogoAsset.url;
 
 const STORAGE_KEY = "bmc_jazan_intro_last_v1";
+const DISABLED_KEY = "bmc_jazan_intro_disabled_v1";
 
 /** Fallback defaults; live values come from JazanSettingsProvider. */
 export const INTRO_CONFIG = {
@@ -36,6 +37,7 @@ export const INTRO_CONFIG = {
 function shouldShow(enabled: boolean, cooldownHours: number): boolean {
   if (!enabled) return false;
   try {
+    if (localStorage.getItem(DISABLED_KEY) === "1") return false;
     const last = localStorage.getItem(STORAGE_KEY);
     if (!last) return true;
     const ageMs = Date.now() - Number(last);
@@ -47,6 +49,15 @@ function shouldShow(enabled: boolean, cooldownHours: number): boolean {
 
 function markSeen() {
   try {
+    localStorage.setItem(STORAGE_KEY, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+}
+
+function markDisabled() {
+  try {
+    localStorage.setItem(DISABLED_KEY, "1");
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
   } catch {
     /* ignore */
@@ -203,7 +214,7 @@ export function JazanIntro() {
       style={{
         opacity: visible ? 1 : 0,
         background:
-          "radial-gradient(60% 60% at 50% 40%, #FFFFFF 0%, #FCF9F2 55%, #F6E9D2 100%)",
+          "radial-gradient(60% 60% at 50% 40%, #FFFFFF 0%, var(--jazan-ivory) 55%, var(--jazan-sand-warm) 100%)",
         pointerEvents: visible ? "auto" : "none",
       }}
     >
@@ -221,17 +232,31 @@ export function JazanIntro() {
         <JazanPattern variant="standard" />
       </div>
 
-      {/* Skip button — 44×44 min target */}
-      <button
-        ref={skipBtnRef}
-        type="button"
-        onClick={dismiss}
-        className="absolute top-4 end-4 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[var(--jazan-gold)]/60 bg-white/80 backdrop-blur px-4 py-2 text-sm font-semibold text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
-        aria-label={isAr ? "تخطي المقدمة" : "Skip intro"}
-      >
-        <span>{isAr ? "تخطي" : "Skip"}</span>
-        <X className="h-4 w-4" aria-hidden="true" />
-      </button>
+      {/* Controls — Skip + Don't show again, both 44×44 min */}
+      <div className="absolute top-4 end-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            markDisabled();
+            setVisible(false);
+            window.setTimeout(() => setMounted(false), 500);
+          }}
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--jazan-hairline)] bg-white/70 backdrop-blur px-4 py-2 text-xs font-medium text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
+          aria-label={isAr ? "عدم عرض المقدمة مجددًا" : "Don't show intro again"}
+        >
+          {isAr ? "لا تُظهرها مجددًا" : "Don't show again"}
+        </button>
+        <button
+          ref={skipBtnRef}
+          type="button"
+          onClick={dismiss}
+          className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[var(--jazan-hairline-strong)] bg-white/80 backdrop-blur px-4 py-2 text-sm font-semibold text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
+          aria-label={isAr ? "تخطي المقدمة" : "Skip intro"}
+        >
+          <span>{isAr ? "تخطي" : "Skip"}</span>
+          <X className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
 
       {/* Reduced-motion static poster */}
       {reduced ? (
@@ -282,16 +307,16 @@ function CinematicStage({
       >
         <defs>
           <linearGradient id="j-int-mtn" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#075E63" stopOpacity="0" />
-            <stop offset="100%" stopColor="#075E63" stopOpacity="0.28" />
+            <stop offset="0%" style={{ stopColor: "var(--jazan-teal)" }} stopOpacity="0" />
+            <stop offset="100%" style={{ stopColor: "var(--jazan-teal)" }} stopOpacity="0.28" />
           </linearGradient>
           <linearGradient id="j-int-mtn2" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#24745E" stopOpacity="0" />
-            <stop offset="100%" stopColor="#24745E" stopOpacity="0.32" />
+            <stop offset="0%" style={{ stopColor: "var(--jazan-palm)" }} stopOpacity="0" />
+            <stop offset="100%" style={{ stopColor: "var(--jazan-palm)" }} stopOpacity="0.32" />
           </linearGradient>
           <linearGradient id="j-int-terr" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#B85C3C" stopOpacity="0" />
-            <stop offset="100%" stopColor="#B85C3C" stopOpacity="0.22" />
+            <stop offset="0%" style={{ stopColor: "var(--jazan-terracotta)" }} stopOpacity="0" />
+            <stop offset="100%" style={{ stopColor: "var(--jazan-terracotta)" }} stopOpacity="0.22" />
           </linearGradient>
         </defs>
 
@@ -300,15 +325,15 @@ function CinematicStage({
           style={{
             opacity: phase >= 1 ? 1 : 0,
             transition: "opacity 900ms ease-out",
+            stroke: "var(--jazan-gold)",
           }}
-          stroke="#C7A46B"
           strokeWidth="0.8"
           fill="none"
         >
           <path d="M100 250 L400 100 L700 250 L400 400 Z" opacity="0.55" />
           <path d="M180 250 L400 160 L620 250 L400 340 Z" opacity="0.7" />
           <path d="M260 250 L400 210 L540 250 L400 290 Z" />
-          <circle cx="400" cy="250" r="4" fill="#B85C3C" stroke="none" />
+          <circle cx="400" cy="250" r="4" style={{ fill: "var(--jazan-terracotta)" }} stroke="none" />
         </g>
 
         {/* Mountain/coast landscape (phase >= 2) */}
@@ -337,14 +362,14 @@ function CinematicStage({
             y1="478"
             x2="800"
             y2="478"
-            stroke="#0B8585"
+            style={{ stroke: "var(--jazan-teal-light)" }}
             strokeOpacity="0.4"
             strokeWidth="1"
             strokeDasharray="4 8"
           />
           {/* palm frond, corner */}
           <g
-            stroke="#24745E"
+            style={{ stroke: "var(--jazan-palm)" }}
             strokeWidth="1"
             fill="none"
             opacity="0.55"
@@ -420,12 +445,12 @@ function CinematicStage({
               y1="6"
               x2="36"
               y2="6"
-              stroke="#C7A46B"
+              style={{ stroke: "var(--jazan-gold)" }}
               strokeWidth="1"
             />
             <path
               d="M48 1 L58 6 L48 11 L38 6 Z"
-              fill="#C7A46B"
+              style={{ fill: "var(--jazan-gold)" }}
               opacity="0.8"
             />
             <line
@@ -433,7 +458,7 @@ function CinematicStage({
               y1="6"
               x2="96"
               y2="6"
-              stroke="#C7A46B"
+              style={{ stroke: "var(--jazan-gold)" }}
               strokeWidth="1"
             />
           </svg>
