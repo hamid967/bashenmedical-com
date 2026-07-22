@@ -17,6 +17,7 @@ import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
 const bmcLogo = bmcLogoAsset.url;
 
 const STORAGE_KEY = "bmc_jazan_intro_last_v1";
+const DISABLED_KEY = "bmc_jazan_intro_disabled_v1";
 
 /** Fallback defaults; live values come from JazanSettingsProvider. */
 export const INTRO_CONFIG = {
@@ -36,6 +37,7 @@ export const INTRO_CONFIG = {
 function shouldShow(enabled: boolean, cooldownHours: number): boolean {
   if (!enabled) return false;
   try {
+    if (localStorage.getItem(DISABLED_KEY) === "1") return false;
     const last = localStorage.getItem(STORAGE_KEY);
     if (!last) return true;
     const ageMs = Date.now() - Number(last);
@@ -47,6 +49,15 @@ function shouldShow(enabled: boolean, cooldownHours: number): boolean {
 
 function markSeen() {
   try {
+    localStorage.setItem(STORAGE_KEY, String(Date.now()));
+  } catch {
+    /* ignore */
+  }
+}
+
+function markDisabled() {
+  try {
+    localStorage.setItem(DISABLED_KEY, "1");
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
   } catch {
     /* ignore */
