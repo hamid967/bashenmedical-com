@@ -96,14 +96,22 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, roles: ["super_admin"] },
       { to: "/owner/pages", label: "الصفحات", icon: FileText, roles: ["super_admin"] },
-      { to: "/owner/content", label: "المحتوى", icon: Palette, roles: ["super_admin"] },
-      { to: "/owner/media", label: "الوسائط", icon: ImageIcon, roles: ["super_admin"] },
-      { to: "/owner/navigation", label: "القوائم", icon: MenuIcon, roles: ["super_admin"] },
       { to: "/owner/services", label: "الخدمات", icon: Stethoscope, roles: ["super_admin"] },
       { to: "/owner/accounts", label: "الحسابات", icon: Users, roles: ["super_admin"] },
       { to: "/owner/settings", label: "إعدادات الموقع", icon: Settings, roles: ["super_admin"] },
       { to: "/owner/security", label: "الأمان (MFA)", icon: KeyRound, roles: ["super_admin"] },
       { to: "/owner/audit", label: "سجل النشاط", icon: ScrollText, roles: ["super_admin"] },
+    ],
+  },
+  {
+    title: "أدوات",
+    items: [
+      { to: "/admin/ai/overview", label: "نظرة AI الشاملة", icon: Sparkles, roles: ["admin"] },
+      { to: "/admin/design-tokens", label: "Design Tokens", icon: Palette, roles: ["admin", "super_admin"] },
+      { to: "/messaging-settings", label: "إعدادات الرسائل", icon: MessageSquare, roles: ["admin"] },
+      { to: "/intro-settings", label: "إعدادات الانترو", icon: Settings, roles: ["admin", "super_admin"] },
+      { to: "/mcp-status", label: "حالة MCP", icon: Activity, roles: ["admin", "super_admin"] },
+      { to: "/report-downloads-audit", label: "تدقيق تنزيلات التقارير", icon: ScrollText, roles: ["admin"] },
     ],
   },
   {
