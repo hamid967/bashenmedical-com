@@ -275,6 +275,14 @@ function NavList({ collapsed }: { collapsed: boolean }) {
 function Topbar({ onOpenPalette }: { onOpenPalette: () => void }) {
   return (
     <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-[color:var(--cc-border)] bg-[color:var(--cc-bg-1)]/60 backdrop-blur-xl px-4 md:px-6 py-3">
+      <Link
+        to="/admin"
+        className="inline-flex items-center gap-1.5 rounded-full border border-[color:var(--cc-border)] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-[color:var(--cc-fg-muted)] hover:border-[color:var(--cc-border-strong)] hover:text-white"
+        title="العودة إلى لوحة الإدارة الموحدة"
+      >
+        <LayoutDashboard className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">لوحة الإدارة</span>
+      </Link>
       <button
         onClick={onOpenPalette}
         className="group flex flex-1 max-w-xl items-center gap-2 rounded-2xl border border-[color:var(--cc-border)] bg-white/[0.03] px-4 py-2 text-sm text-[color:var(--cc-fg-muted)] hover:border-[color:var(--cc-border-strong)] hover:bg-white/[0.06]"
