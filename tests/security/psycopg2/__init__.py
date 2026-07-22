@@ -9,10 +9,12 @@ security tests use through it.
 from __future__ import annotations
 
 import psycopg as _pg
+from psycopg import ClientCursor as _ClientCursor
 from psycopg import errors  # re-export module
 from psycopg.rows import dict_row as _dict_row
 
-from . import extras  # noqa: F401  (populated below)
+from . import extras  # noqa: F401
+
 
 
 class _CursorWrap:
