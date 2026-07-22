@@ -95,7 +95,7 @@ const NOT_CANCELLABLE: Record<Order["kind"], string[]> = {
 function fmt(iso: string | null, lang: "ar" | "en") {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US", { dateStyle: "medium", timeStyle: "short" });
+    return new Date(iso).toLocaleString(lang === "ar" ? "ar-SA" : "en-US", { dateStyle: "medium", timeStyle: "short" });
   } catch { return iso; }
 }
 
