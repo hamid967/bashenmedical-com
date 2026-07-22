@@ -214,7 +214,7 @@ export function JazanIntro() {
       style={{
         opacity: visible ? 1 : 0,
         background:
-          "radial-gradient(60% 60% at 50% 40%, #FFFFFF 0%, #FCF9F2 55%, #F6E9D2 100%)",
+          "radial-gradient(60% 60% at 50% 40%, #FFFFFF 0%, var(--jazan-ivory) 55%, var(--jazan-sand-warm) 100%)",
         pointerEvents: visible ? "auto" : "none",
       }}
     >
@@ -232,17 +232,31 @@ export function JazanIntro() {
         <JazanPattern variant="standard" />
       </div>
 
-      {/* Skip button — 44×44 min target */}
-      <button
-        ref={skipBtnRef}
-        type="button"
-        onClick={dismiss}
-        className="absolute top-4 end-4 inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[var(--jazan-gold)]/60 bg-white/80 backdrop-blur px-4 py-2 text-sm font-semibold text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
-        aria-label={isAr ? "تخطي المقدمة" : "Skip intro"}
-      >
-        <span>{isAr ? "تخطي" : "Skip"}</span>
-        <X className="h-4 w-4" aria-hidden="true" />
-      </button>
+      {/* Controls — Skip + Don't show again, both 44×44 min */}
+      <div className="absolute top-4 end-4 flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => {
+            markDisabled();
+            setVisible(false);
+            window.setTimeout(() => setMounted(false), 500);
+          }}
+          className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--jazan-hairline)] bg-white/70 backdrop-blur px-4 py-2 text-xs font-medium text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
+          aria-label={isAr ? "عدم عرض المقدمة مجددًا" : "Don't show intro again"}
+        >
+          {isAr ? "لا تُظهرها مجددًا" : "Don't show again"}
+        </button>
+        <button
+          ref={skipBtnRef}
+          type="button"
+          onClick={dismiss}
+          className="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 rounded-full border border-[var(--jazan-hairline-strong)] bg-white/80 backdrop-blur px-4 py-2 text-sm font-semibold text-[var(--jazan-teal)] shadow-sm hover:bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--jazan-teal)]"
+          aria-label={isAr ? "تخطي المقدمة" : "Skip intro"}
+        >
+          <span>{isAr ? "تخطي" : "Skip"}</span>
+          <X className="h-4 w-4" aria-hidden="true" />
+        </button>
+      </div>
 
       {/* Reduced-motion static poster */}
       {reduced ? (
