@@ -12,6 +12,7 @@
  * assistant markdown as suggestions requiring explicit user confirmation.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { createClient } from "@supabase/supabase-js";
 import {
   classifyUserMessage,
@@ -22,7 +23,6 @@ import {
   maskSensitive,
 } from "@/lib/ai/safety";
 import {
-import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
   getFeatureFlag,
   getModel,
   recordSafetyIncident,

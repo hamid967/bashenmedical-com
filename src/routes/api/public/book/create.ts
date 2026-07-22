@@ -20,13 +20,13 @@
  * error.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { friendlyInsertError, FRIENDLY_INSERT_MESSAGES } from "@/lib/insert-errors";
 // Single source of truth — shared with the client wizard.
 // See src/lib/booking-limits.ts and src/components/booking/types.ts.
 import {
-import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
   NAME_MIN,
   NAME_MAX,
   PHONE_MIN,

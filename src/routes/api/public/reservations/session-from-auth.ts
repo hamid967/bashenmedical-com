@@ -16,9 +16,9 @@
  * cancel/reschedule endpoints work with no change.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { createClient } from "@supabase/supabase-js";
 import {
-import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
   SESSION_TTL_MS,
   generateSessionToken,
   jsonResponse,
