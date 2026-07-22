@@ -66,7 +66,7 @@ export async function recordSafetyIncident(params: {
       kind: params.kind,
       severity: params.severity ?? "warn",
       action_taken: params.action ?? null,
-      details: params.details ?? {},
+      details: (params.details ?? {}) as never,
     });
   } catch { /* best-effort */ }
 }
