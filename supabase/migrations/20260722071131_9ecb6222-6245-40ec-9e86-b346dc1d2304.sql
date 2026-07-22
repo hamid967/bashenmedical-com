@@ -1,0 +1,2 @@
+REVOKE SELECT ON public.slot_holds FROM anon, authenticated;
+GRANT SELECT (id, doctor_id, branch_id, appointment_date, appointment_time, expires_at, released_at, created_at) ON public.slot_holds TO anon, authenticated;
