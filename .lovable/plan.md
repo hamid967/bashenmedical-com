@@ -1,59 +1,94 @@
-# خطة ترقية النظام الشاملة
+# خطة تحويل i18n للملفات الأعلى مخالفات
 
-نطاق واسع، أقترح تنفيذها على 4 موجات متتالية حتى نتمكن من التحقق بعد كل موجة قبل الانتقال للتالية.
+## البنية الحالية (مؤكّدة)
 
----
+- `i18next` + `react-i18next` جاهز في `src/lib/i18n/config.ts`
+- Namespaces حالياً: `common`, `booking` (ar/en/ur)
+- اللغة الافتراضية: `ar` (SSR-safe، بدون كشف تلقائي)
+- **0 من أعلى 8 ملفات مخالفة تستخدم `useTranslation`** — كلها نص عربي مباشر
 
-## Wave 1 — الأمان والصلاحيات (Batch A4)
+## المبدأ
 
-- تصفية بقية تحذيرات `SECURITY DEFINER` (108 تحذير) عبر:
-  - سحب `EXECUTE` من `PUBLIC/anon` للدوال غير المخصصة للعموم
-  - تحويل الدوال المؤهلة إلى `SECURITY INVOKER`
-  - تحديث `docs/security/public_read_allowlist.md`
-- تفعيل `Leaked Password Protection (HIBP)` عبر `configure_auth`
-- إضافة اختبارات في `tests/security/test_secdef_privileges.py` لتغطية الدوال الجديدة
-- إعادة تشغيل `supabase--linter` والهدف: خفض التحذيرات إلى أقل من 20
+- **الأولوية للصفحات العامة / SEO** (فهرسة Google، مشاركة روابط) — هنا تُفيد الترجمة فعلاً
+- **تأجيل الصفحات الإدارية الداخلية** — تخدم موظفين عرب، والترجمة فيها جهد بلا ROI
+- **استثناء `admin.classic.tsx`** — مرشح للإخماد أصلاً (M3)، لا نترجمه
 
-## Wave 2 — الأداء والبنية التحتية
+## قائمة الأولويات المعاد ترتيبها
 
-بناءً على `slow_queries`:
-- **web_vitals inserts** (2029 استدعاء، 4.5 ثانية إجمالي): إضافة batching عميل + فهرس على `(created_at, metric)`
-- **clinic_settings** (8974 استدعاء): إضافة in-memory cache عبر React Query مع `staleTime: 5min` بدل الاستعلام في كل صفحة
-- **notifications unread**: فهرس مركب على `(user_id, audience, channel, read_at) WHERE read_at IS NULL`
-- **list_public_branches / specialties**: تفعيل PostgREST cache headers + فهرس على `is_active`
-- تفعيل preload للـ LCP على `/` و `/book` عبر `head().links`
-- تفعيل `vite-imagetools` لتحويل الصور تلقائيًا إلى AVIF/WebP
+| # | ملف | أسطر | عام؟ | القرار |
+|---|---|---|---|---|
+| 1 | `doctors.$slug.tsx` | 111 | ✅ SEO | **ترجمة كاملة** |
+| 2 | `programs.tsx` | 92 | ✅ SEO | **ترجمة كاملة** |
+| 3 | `reservations.manage.tsx` | 82 | ✅ عام | **ترجمة كاملة** |
+| 4 | `orders.$ref.tsx` | 73 | ✅ عام | **ترجمة كاملة** |
+| 5 | `complex.tsx` | 71 | ✅ SEO | **ترجمة كاملة** |
+| 6 | `portal.appointments.tsx` | 121 | 🔒 مريض | **ترجمة (يستخدمها المرضى)** |
+| 7 | `portal.prescriptions.tsx` | 130 | 🔒 مريض | **ترجمة** |
+| 8 | `portal.refunds.tsx` | 170 | 🔒 مريض | **ترجمة** |
+| 9 | `portal.index.tsx` | 96 | 🔒 مريض | **ترجمة** |
+| — | `admin.classic.tsx` (492) | 🔧 إداري | **تُستثنى — مرشحة للحذف** |
+| — | `patients-analytics.tsx` (199), `patients.$patientId.tsx` (160), `rbac.tsx`, `hr-management.tsx`, `pharmacy-management.tsx`, `reports.tsx`, `admin.super.permissions.tsx`, `audit-export.tsx`، `nurses.tsx`, `admin.no-show-stats.tsx` | 🔧 إداري داخلي | **تأجيل** (طاقم عربي، ROI منخفض) |
 
-## Wave 3 — التبعيات (Dependencies)
+**9 ملفات في النطاق — إجمالي ~946 سطر عربي.**
 
-- `bun outdated` لعرض الحزم القديمة
-- تحديث الحزم الآمنة (minor/patch) دفعة واحدة
-- تحديث major محدد: React Query, TanStack Router, Vite (بعد فحص breaking changes)
-- إعادة توليد `bun.lock` وتشغيل اختبارات E2E الكاملة للتأكد من عدم الكسر
-- ملاحظة: `code--dependency_scan` أفاد بعدم وجود ثغرات حالياً
+## البنية المقترحة للـ Namespaces
 
-## Wave 4 — الميزات والوظائف
+إضافة namespaces جديدة لتفادي تضخّم `common.json`:
 
-- **AI Assistant Phase C**: streaming responses + memory persistence عبر جلسات
-- **Reservations 2030 - NPHIES**: ربط طلبات التأمين بـ `insurance_verifications` + retry queue
-- **Cost Transparency**: عرض تقديري للتكلفة قبل الحجز في `/book` بناءً على `service_catalog` + `insurance_approvals`
-- **Real-time slots**: subscription على `availability_slots` عبر Supabase Realtime لتحديث المواعيد لحظياً في `SlotPicker`
+```text
+src/locales/{ar,en,ur}/
+├── common.json         (موجود)
+├── booking.json        (موجود)
+├── doctors.json        (جديد — doctors.$slug + programs)
+├── reservations.json   (جديد — reservations.manage + orders.$ref)
+├── complex.json        (جديد — complex.tsx)
+└── portal.json         (جديد — 4 ملفات portal.*)
+```
 
----
+تحديث `src/lib/i18n/config.ts` لتسجيل الـ namespaces الجديدة.
+
+## سير العمل — دفعة واحدة لكل ملف
+
+لكل ملف من الـ 9:
+1. **استخراج** كل نص عربي إلى مفاتيح ذات معنى (`doctors.detail.book_cta` بدلاً من `key_1`)
+2. **إضافة** المفاتيح إلى `ar/*.json` + ترجمة `en/*.json` + `ur/*.json` (Urdu = fallback من ar عند غياب المفتاح)
+3. **تعديل** الملف: `import { useTranslation } from "react-i18next"` + `const { t } = useTranslation("<ns>")` + استبدال النصوص بـ `{t("key")}`
+4. **الحفاظ على SEO**: نصوص `head()` (title/description/og) تظل تستخدم `t()` أيضاً — لكن مع fallback ثابت لضمان SSR الآمن
+5. **التحقق**: build يمرّ + قراءة الملف بعد التعديل لتأكيد صحة JSX
+
+## الترتيب الزمني للتسليم
+
+| مرحلة | الملفات | ملاحظة |
+|---|---|---|
+| **P1** | تحديث `config.ts` + إضافة 4 ملفات namespace فارغة (ar/en/ur) | تحضير |
+| **P2** | `doctors.$slug.tsx` (SEO — الأهم) | يُسلَّم للمراجعة |
+| **P3** | `programs.tsx` + `complex.tsx` | SEO |
+| **P4** | `reservations.manage.tsx` + `orders.$ref.tsx` | صفحات ضيوف |
+| **P5** | `portal.index.tsx` + `portal.appointments.tsx` | بوابة المريض |
+| **P6** | `portal.prescriptions.tsx` + `portal.refunds.tsx` | بوابة المريض |
+
+بعد كل مرحلة أتوقف لتأكيد الجودة (خصوصاً ترجمات EN) قبل الانتقال للتالية.
+
+## ما لن أفعله في هذه الخطة
+
+- ❌ لن أترجم `admin.classic.tsx` (مرشح للحذف)
+- ❌ لن أترجم صفحات الإدارة الداخلية (10 ملفات، طاقم عربي)
+- ❌ لن أضيف كشف لغة تلقائي عبر `navigator.language` (يكسر SSR)
+- ❌ لن أغيّر منطق التوجيه/RTL/LTR (يعمل حالياً)
 
 ## تفاصيل تقنية
 
-| الموجة | ملفات رئيسية | زمن متوقع |
-|--------|--------------|-----------|
-| W1 Security | `supabase migration` + `docs/security/*` + `tests/security/*` | 1-2 خطوة |
-| W2 Perf | `src/lib/queries/*`, `vite.config.ts`, `src/routes/index.tsx`, migration للفهارس | 2-3 خطوات |
-| W3 Deps | `package.json`, `bun.lock` + CI verification | 1-2 خطوة |
-| W4 Features | `src/lib/ai/*`, `src/lib/nphies/*`, `src/routes/book.tsx` | 3-5 خطوات |
+- `useTranslation("doctors")` مع `defaultNS` = `common` يبقى كما هو
+- كل ملف JSON بصيغة flat keys بنقاط: `"detail.book_cta": "احجز الآن"`
+- ترجمات EN دقيقة (ليست Google Translate) لكل مفتاح
+- ترجمات UR: نُضيف الملفات فارغة أو نسخة من AR — i18next سيُرجع fallback لـ AR تلقائياً عبر `fallbackLng`
+- SSR-safe: `initImmediate: false` مضبوط أصلاً — `t()` تُرجع الترجمة الصحيحة أثناء render السيرفر
+- لا تعديل على شيفرة الأعمال (business logic) — تحويل نصوص فقط
 
----
+## المطلوب منك
 
-## ترتيب التنفيذ
-
-سأبدأ بـ **Wave 1** فور موافقتك، ثم أعود للتحقق قبل الانتقال إلى Wave 2. هذا يضمن أن الأمان جاهز قبل إضافة أي ميزات جديدة.
-
-هل توافق على البدء بهذا الترتيب، أم تفضل ترتيباً مختلفاً (مثلاً البدء بالميزات أولاً)؟
+اختر إحدى:
+- **(أ) نفّذ P1+P2 الآن** (البنية + أول صفحة SEO) وأعرض النتيجة للمراجعة قبل التالي
+- **(ب) نفّذ P1→P4 دفعة واحدة** (كل الصفحات العامة/SEO)
+- **(ج) نفّذ الخطة كاملة P1→P6** بلا توقف
+- **(د) عدّل الخطة** (استبعاد ملف، ضم ملف إداري، إلخ)
