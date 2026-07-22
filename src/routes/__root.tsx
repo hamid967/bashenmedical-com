@@ -23,6 +23,7 @@ const JazanIntro = lazy(() =>
 import { BaeshenAssistant } from "@/components/assistant/BaeshenAssistant";
 import { FloatingWhatsAppButton } from "@/components/inquiry/FloatingWhatsAppButton";
 import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
+import { CommandPaletteProvider } from "@/components/v3/CommandPaletteProvider";
 
 function NotFoundComponent() {
   return (
@@ -231,6 +232,7 @@ function RootComponent() {
             <BaeshenAssistant />
             <FloatingWhatsAppButton />
             <PwaUpdatePrompt />
+            <CommandPaletteProvider />
           </div>
         </JazanSettingsProvider>
       </I18nProvider>
