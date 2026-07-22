@@ -13,6 +13,7 @@ const LABELS: Record<string, string> = {
   "service-catalog": "كتالوج الخدمات",
   "visual-analytics": "تحليلات بصرية",
   "reservations-usage": "استخدام الحجوزات",
+  "booking-funnel": "قمع الحجوزات",
   "no-show-risk": "توقّع الغياب",
   "no-show-stats": "إحصاءات الغياب",
   "no-show-detail": "المواعيد عالية المخاطرة",
