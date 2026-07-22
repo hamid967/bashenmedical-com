@@ -232,5 +232,11 @@ export const setV3Flag = createServerFn({ method: "POST" })
         { onConflict: "key" },
       );
     if (error) throw new Error(error.message);
+    // Bust in-instance caches so the toggle takes effect on the next request
+    // without waiting for TTL (other workers pick it up within their own TTL).
+    if (data.key === "v3.platform.rate_limit_unified") {
+      const { bustRateLimitFlagCache } = await import("./rate-limit-unified.server");
+      bustRateLimitFlagCache();
+    }
     return { ok: true };
   });

@@ -195,6 +195,7 @@ import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/p
 import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
 import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
+import { Route as ApiPublicHooksV3RollbackWatchdogRouteImport } from './routes/api/public/hooks/v3-rollback-watchdog'
 import { Route as ApiPublicHooksWebVitalsRouteImport } from './routes/api/public/hooks/web-vitals'
 import { Route as ApiPublicInquiriesCreateRouteImport } from './routes/api/public/inquiries/create'
 import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './routes/api/public/inquiries/mark-whatsapp-opened'
@@ -1239,6 +1240,12 @@ const ApiPublicHooksSendRemindersRoute =
     path: '/api/public/hooks/send-reminders',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicHooksV3RollbackWatchdogRoute =
+  ApiPublicHooksV3RollbackWatchdogRouteImport.update({
+    id: '/api/public/hooks/v3-rollback-watchdog',
+    path: '/api/public/hooks/v3-rollback-watchdog',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksWebVitalsRoute = ApiPublicHooksWebVitalsRouteImport.update({
   id: '/api/public/hooks/web-vitals',
   path: '/api/public/hooks/web-vitals',
@@ -1511,6 +1518,7 @@ export interface FileRoutesByFullPath {
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/hooks/v3-rollback-watchdog': typeof ApiPublicHooksV3RollbackWatchdogRoute
   '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -1710,6 +1718,7 @@ export interface FileRoutesByTo {
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/hooks/v3-rollback-watchdog': typeof ApiPublicHooksV3RollbackWatchdogRoute
   '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -1914,6 +1923,7 @@ export interface FileRoutesById {
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
+  '/api/public/hooks/v3-rollback-watchdog': typeof ApiPublicHooksV3RollbackWatchdogRoute
   '/api/public/hooks/web-vitals': typeof ApiPublicHooksWebVitalsRoute
   '/api/public/inquiries/create': typeof ApiPublicInquiriesCreateRoute
   '/api/public/inquiries/mark-whatsapp-opened': typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -2118,6 +2128,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/hooks/v3-rollback-watchdog'
     | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
@@ -2317,6 +2328,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/hooks/v3-rollback-watchdog'
     | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
@@ -2520,6 +2532,7 @@ export interface FileRouteTypes {
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
+    | '/api/public/hooks/v3-rollback-watchdog'
     | '/api/public/hooks/web-vitals'
     | '/api/public/inquiries/create'
     | '/api/public/inquiries/mark-whatsapp-opened'
@@ -2610,6 +2623,7 @@ export interface RootRouteChildren {
   ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
   ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
+  ApiPublicHooksV3RollbackWatchdogRoute: typeof ApiPublicHooksV3RollbackWatchdogRoute
   ApiPublicHooksWebVitalsRoute: typeof ApiPublicHooksWebVitalsRoute
   ApiPublicInquiriesCreateRoute: typeof ApiPublicInquiriesCreateRoute
   ApiPublicInquiriesMarkWhatsappOpenedRoute: typeof ApiPublicInquiriesMarkWhatsappOpenedRoute
@@ -3928,6 +3942,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksSendRemindersRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/v3-rollback-watchdog': {
+      id: '/api/public/hooks/v3-rollback-watchdog'
+      path: '/api/public/hooks/v3-rollback-watchdog'
+      fullPath: '/api/public/hooks/v3-rollback-watchdog'
+      preLoaderRoute: typeof ApiPublicHooksV3RollbackWatchdogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/web-vitals': {
       id: '/api/public/hooks/web-vitals'
       path: '/api/public/hooks/web-vitals'
@@ -4527,6 +4548,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
   ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
+  ApiPublicHooksV3RollbackWatchdogRoute: ApiPublicHooksV3RollbackWatchdogRoute,
   ApiPublicHooksWebVitalsRoute: ApiPublicHooksWebVitalsRoute,
   ApiPublicInquiriesCreateRoute: ApiPublicInquiriesCreateRoute,
   ApiPublicInquiriesMarkWhatsappOpenedRoute:
