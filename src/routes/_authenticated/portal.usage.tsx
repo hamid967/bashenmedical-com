@@ -64,7 +64,7 @@ function UsagePage() {
 
   const dateFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(isAr ? "ar-SA" : "en-GB", {
+      new Intl.DateTimeFormat(isAr ? "ar-SA" : "en-GB"), {
         month: "short",
         day: "numeric",
         hour: "2-digit",
@@ -74,13 +74,10 @@ function UsagePage() {
   );
 
   return (
-    <div className="space-y-6" dir={isAr ? "rtl" : "ltr"}>
+    <div className="space-y-6" dir={(isAr ? "rtl" : "ltr")}>
       <PortalPageHeader
-        title={isAr ? "سجل الاستخدام" : "AI Usage History"}
-        description={
-          isAr
-            ? "التكلفة والزمن والتوكنات والطراز لكل رسالة."
-            : "Cost, latency, tokens and model for each message."
+        title={(isAr ? "سجل الاستخدام" : "AI Usage History")}
+        description={(isAr ? "التكلفة والزمن والتوكنات والطراز لكل رسالة." : "Cost, latency, tokens and model for each message.")
         }
         isAr={isAr}
       />
@@ -105,7 +102,7 @@ function UsagePage() {
       {loading && (
         <div className="flex items-center gap-2 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" />
-          {isAr ? "جارٍ التحميل…" : "Loading…"}
+          {(isAr ? "جارٍ التحميل…" : "Loading…")}
         </div>
       )}
 
@@ -120,12 +117,12 @@ function UsagePage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <StatCard
               icon={Activity}
-              label={isAr ? "الرسائل" : "Messages"}
+              label={(isAr ? "الرسائل" : "Messages")}
               value={String(data.summary.totalMessages)}
             />
             <StatCard
               icon={Cpu}
-              label={isAr ? "إجمالي التوكنات" : "Total tokens"}
+              label={(isAr ? "إجمالي التوكنات" : "Total tokens")}
               value={formatTokens(data.summary.totalTokens)}
               sub={
                 isAr
@@ -135,12 +132,12 @@ function UsagePage() {
             />
             <StatCard
               icon={Coins}
-              label={isAr ? "الائتمانات" : "Credits"}
+              label={(isAr ? "الائتمانات" : "Credits")}
               value={formatCredits(data.summary.totalCredits)}
             />
             <StatCard
               icon={Clock}
-              label={isAr ? "متوسط الزمن" : "Avg latency"}
+              label={(isAr ? "متوسط الزمن" : "Avg latency")}
               value={
                 data.summary.avgLatencyMs != null ? `${data.summary.avgLatencyMs} ms` : "—"
               }
@@ -150,7 +147,7 @@ function UsagePage() {
           {data.summary.byModel.length > 0 && (
             <PortalCard>
               <h3 className="text-sm font-semibold mb-3">
-                {isAr ? "حسب الطراز" : "By model"}
+                {(isAr ? "حسب الطراز" : "By model")}
               </h3>
               <div className="space-y-1 text-sm">
                 {data.summary.byModel.map((m) => (
@@ -170,19 +167,19 @@ function UsagePage() {
 
           <PortalCard className="overflow-x-auto">
             <h3 className="text-sm font-semibold mb-3">
-              {isAr ? "أحدث الرسائل" : "Recent messages"}
+              {(isAr ? "أحدث الرسائل" : "Recent messages")}
             </h3>
             <table className="w-full text-sm min-w-[720px]">
               <thead className="text-xs text-muted-foreground text-start">
                 <tr className="border-b border-border/60">
-                  <th className="py-2 text-start">{isAr ? "التاريخ" : "Date"}</th>
-                  <th className="py-2 text-start">{isAr ? "الواجهة" : "Surface"}</th>
-                  <th className="py-2 text-start">{isAr ? "الطراز" : "Model"}</th>
-                  <th className="py-2 text-end">{isAr ? "مدخل" : "In"}</th>
-                  <th className="py-2 text-end">{isAr ? "مخرج" : "Out"}</th>
-                  <th className="py-2 text-end">{isAr ? "الزمن" : "Latency"}</th>
-                  <th className="py-2 text-end">{isAr ? "التكلفة" : "Credits"}</th>
-                  <th className="py-2 text-start">{isAr ? "الحالة" : "Status"}</th>
+                  <th className="py-2 text-start">{(isAr ? "التاريخ" : "Date")}</th>
+                  <th className="py-2 text-start">{(isAr ? "الواجهة" : "Surface")}</th>
+                  <th className="py-2 text-start">{(isAr ? "الطراز" : "Model")}</th>
+                  <th className="py-2 text-end">{(isAr ? "مدخل" : "In")}</th>
+                  <th className="py-2 text-end">{(isAr ? "مخرج" : "Out")}</th>
+                  <th className="py-2 text-end">{(isAr ? "الزمن" : "Latency")}</th>
+                  <th className="py-2 text-end">{(isAr ? "التكلفة" : "Credits")}</th>
+                  <th className="py-2 text-start">{(isAr ? "الحالة" : "Status")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -209,7 +206,7 @@ function UsagePage() {
                 {data.rows.length === 0 && (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-muted-foreground text-sm">
-                      {isAr ? "لا توجد رسائل خلال هذه الفترة." : "No messages in this window."}
+                      {(isAr ? "لا توجد رسائل خلال هذه الفترة." : "No messages in this window.")}
                     </td>
                   </tr>
                 )}
@@ -217,9 +214,7 @@ function UsagePage() {
             </table>
             {data.hasMore && (
               <p className="mt-3 text-xs text-muted-foreground">
-                {isAr
-                  ? "تُعرض أحدث ٢٠٠ رسالة. قلّل الفترة لعرض تفاصيل أدق."
-                  : "Showing latest 200. Narrow the window to see more detail."}
+                {(isAr ? "تُعرض أحدث ٢٠٠ رسالة. قلّل الفترة لعرض تفاصيل أدق." : "Showing latest 200. Narrow the window to see more detail.")}
               </p>
             )}
           </PortalCard>
@@ -262,27 +257,27 @@ function StatusPill({
   if (row.error_type) {
     return (
       <span className="text-[11px] rounded-full px-2 py-0.5 bg-destructive/10 text-destructive">
-        {isAr ? "خطأ" : "error"}
+        {(isAr ? "خطأ" : "error")}
       </span>
     );
   }
   if (row.aborted) {
     return (
       <span className="text-[11px] rounded-full px-2 py-0.5 bg-muted text-muted-foreground">
-        {isAr ? "أُوقف" : "aborted"}
+        {(isAr ? "أُوقف" : "aborted")}
       </span>
     );
   }
   if (row.completed) {
     return (
       <span className="text-[11px] rounded-full px-2 py-0.5 bg-emerald-500/10 text-emerald-600">
-        {isAr ? "مكتمل" : "done"}
+        {(isAr ? "مكتمل" : "done")}
       </span>
     );
   }
   return (
     <span className="text-[11px] rounded-full px-2 py-0.5 bg-amber-500/10 text-amber-600">
-      {isAr ? "جزئي" : "partial"}
+      {(isAr ? "جزئي" : "partial")}
     </span>
   );
 }

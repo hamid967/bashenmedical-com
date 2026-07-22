@@ -74,7 +74,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 function fmt(iso: string, lang: "ar" | "en") {
   try {
-    return new Date(iso).toLocaleString(lang === "ar" ? "ar-SA" : "en-US", {
+    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US"), {
       dateStyle: "medium",
       timeStyle: "short",
     });
@@ -172,15 +172,13 @@ function MyOrdersPage() {
         <div className="container-app py-10 md:py-14">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-              {isAr ? "تتبع الطلبات" : "Track orders"}
+              {(isAr ? "تتبع الطلبات" : "Track orders")}
             </div>
             <h1 className="text-3xl md:text-5xl font-bold">
-              {isAr ? "طلباتي" : "My Orders"}
+              {(isAr ? "طلباتي" : "My Orders")}
             </h1>
             <p className="mt-3 text-primary-foreground/85">
-              {isAr
-                ? "أدخل رقم جوالك ورمز مرجع الطلب (الظاهر في رسالة التأكيد) لعرض تفاصيل الطلب."
-                : "Enter your phone and the order reference code from your confirmation to view details."}
+              {(isAr ? "أدخل رقم جوالك ورمز مرجع الطلب (الظاهر في رسالة التأكيد) لعرض تفاصيل الطلب." : "Enter your phone and the order reference code from your confirmation to view details.")}
             </p>
           </div>
 
@@ -188,7 +186,7 @@ function MyOrdersPage() {
           <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-2xl flex-col gap-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label htmlFor="phone" className="sr-only">{isAr ? "رقم الجوال" : "Phone"}</Label>
+                <Label htmlFor="phone" className="sr-only">{(isAr ? "رقم الجوال" : "Phone")}</Label>
                 <div className="relative">
                   <Phone className="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted-foreground" />
                   <Input
@@ -196,7 +194,7 @@ function MyOrdersPage() {
                     type="tel"
                     inputMode="tel"
                     autoComplete="tel"
-                    placeholder={isAr ? "05XXXXXXXX" : "05XXXXXXXX"}
+                    placeholder={(isAr ? "05XXXXXXXX" : "05XXXXXXXX")}
                     value={phoneInput}
                     onChange={(e) => setPhoneInput(e.target.value)}
                     className="ps-9 bg-background text-foreground h-12"
@@ -205,14 +203,14 @@ function MyOrdersPage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="ref" className="sr-only">{isAr ? "رمز مرجع الطلب" : "Order reference"}</Label>
+                <Label htmlFor="ref" className="sr-only">{(isAr ? "رمز مرجع الطلب" : "Order reference")}</Label>
                 <Input
                   id="ref"
                   type="text"
                   inputMode="text"
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder={isAr ? "رمز المرجع (٨ خانات)" : "Reference code (8 chars)"}
+                  placeholder={(isAr ? "رمز المرجع (٨ خانات)" : "Reference code (8 chars)")}
                   value={refInput}
                   onChange={(e) => setRefInput(e.target.value)}
                   className="bg-background text-foreground h-12 font-mono tracking-wider"
@@ -223,7 +221,7 @@ function MyOrdersPage() {
             </div>
             <Button type="submit" variant="premium" size="xl" disabled={isFetching} className="w-full sm:w-auto sm:self-end">
               {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              {isAr ? "عرض طلبي" : "Show my order"}
+              {(isAr ? "عرض طلبي" : "Show my order")}
             </Button>
           </form>
         </div>
@@ -236,11 +234,11 @@ function MyOrdersPage() {
           <>
             <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
               <div className="text-sm text-muted-foreground">
-                {isAr ? "نتائج البحث برقم " : "Results for "}
+                {(isAr ? "نتائج البحث برقم " : "Results for ")}
                 <span className="font-semibold text-foreground" dir="ltr">{queryPhone}</span>
               </div>
               <Button variant="outline" size="sm" onClick={clear}>
-                {isAr ? "بحث جديد" : "New search"}
+                {(isAr ? "بحث جديد" : "New search")}
               </Button>
             </div>
 
@@ -253,7 +251,7 @@ function MyOrdersPage() {
               </div>
             ) : error ? (
               <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-destructive">
-                {isAr ? "تعذّر تحميل الطلبات — حاول مجددًا." : "Failed to load orders."}
+                {(isAr ? "تعذّر تحميل الطلبات — حاول مجددًا." : "Failed to load orders.")}
               </div>
             ) : (orders?.length ?? 0) === 0 ? (
               <div className="rounded-2xl border border-border bg-card p-8 md:p-10">
@@ -262,7 +260,7 @@ function MyOrdersPage() {
                     <Search className="h-7 w-7 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold">
-                    {isAr ? "لا توجد طلبات مرتبطة بهذا الرقم" : "No orders found for this number"}
+                    {(isAr ? "لا توجد طلبات مرتبطة بهذا الرقم" : "No orders found for this number")}
                   </h3>
                   <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                     {isAr ? (
@@ -272,9 +270,9 @@ function MyOrdersPage() {
                     )}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-                    <Link to="/book"><Button variant="premium" size="lg"><CalendarCheck className="h-4 w-4" />{isAr ? "احجز موعدًا الآن" : "Book an appointment"}</Button></Link>
-                    <Link to="/services"><Button variant="outline" size="lg">{isAr ? "استعرض كل الخدمات" : "Browse all services"}</Button></Link>
-                    <Button variant="ghost" size="lg" onClick={clear}>{isAr ? "تغيير الرقم" : "Change number"}</Button>
+                    <Link to="/book"><Button variant="premium" size="lg"><CalendarCheck className="h-4 w-4" />{(isAr ? "احجز موعدًا الآن" : "Book an appointment")}</Button></Link>
+                    <Link to="/services"><Button variant="outline" size="lg">{(isAr ? "استعرض كل الخدمات" : "Browse all services")}</Button></Link>
+                    <Button variant="ghost" size="lg" onClick={clear}>{(isAr ? "تغيير الرقم" : "Change number")}</Button>
                   </div>
                 </div>
                 <div className="mt-8 border-t border-border pt-6">
@@ -330,12 +328,12 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
       <div className="text-xs text-muted-foreground space-y-1">
         <div className="flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5" />
-          <span>{isAr ? "تم الإنشاء: " : "Created: "}{fmt(order.created_at, isAr ? "ar" : "en")}</span>
+          <span>{(isAr ? "تم الإنشاء: " : "Created: ")}{fmt(order.created_at,isAr ? "ar" : "en")}</span>
         </div>
         {order.scheduled_at && (
           <div className="flex items-center gap-1.5">
             <CalendarCheck className="h-3.5 w-3.5" />
-            <span>{isAr ? "الموعد: " : "Scheduled: "}{fmt(order.scheduled_at, isAr ? "ar" : "en")}</span>
+            <span>{(isAr ? "الموعد: " : "Scheduled: ")}{fmt(order.scheduled_at,isAr ? "ar" : "en")}</span>
           </div>
         )}
       </div>
@@ -343,7 +341,7 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
       <div className="mt-auto flex items-center justify-between pt-2 border-t border-border">
         <span className="font-mono text-[11px] text-muted-foreground">#{order.reference}</span>
         <Link to={detailHref} className="text-primary text-sm font-semibold inline-flex items-center gap-1 hover:underline">
-          {isAr ? "التفاصيل" : "Details"}
+          {(isAr ? "التفاصيل" : "Details")}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -361,7 +359,7 @@ function QuickLinks({ isAr }: { isAr: boolean }) {
   return (
     <div>
       <h2 className="mb-4 text-xl font-bold">
-        {isAr ? "أو ابدأ طلبًا جديدًا" : "Or start a new request"}
+        {(isAr ? "أو ابدأ طلبًا جديدًا" : "Or start a new request")}
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {links.map((l) => (

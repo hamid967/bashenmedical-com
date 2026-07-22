@@ -95,7 +95,7 @@ const NOT_CANCELLABLE: Record<Order["kind"], string[]> = {
 function fmt(iso: string | null, lang: "ar" | "en") {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(lang === "ar" ? "ar-SA" : "en-US", { dateStyle: "medium", timeStyle: "short" });
+    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US"), { dateStyle: "medium", timeStyle: "short" });
   } catch { return iso; }
 }
 
@@ -135,8 +135,7 @@ function OrderDetailPage() {
     if (!data) return;
     if (previousStatus.current && previousStatus.current !== data.status) {
       const label = STATUS_AR[data.status] ?? data.status;
-      toast.success(
-        isAr ? "تحديث الحالة" : "Status updated",
+      toast.success(isAr ? "تحديث الحالة" : "Status updated"),
         { description: isAr ? `طلبك أصبح: ${label}` : `Your order is now: ${data.status}` }
       );
     }
@@ -148,7 +147,7 @@ function OrderDetailPage() {
       <div className="container-app py-8 md:py-12 max-w-3xl">
         <Link to="/my-orders" className="mb-6 inline-flex items-center gap-2 text-sm text-primary hover:underline print:hidden">
           <ArrowLeft className="h-4 w-4" />
-          {isAr ? "العودة إلى طلباتي" : "Back to my orders"}
+          {(isAr ? "العودة إلى طلباتي" : "Back to my orders")}
         </Link>
 
         {isLoading ? (
@@ -158,15 +157,13 @@ function OrderDetailPage() {
         ) : error || !data ? (
           <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-8 text-center">
             <h1 className="text-xl font-bold text-destructive">
-              {isAr ? "لم نجد الطلب" : "Order not found"}
+              {(isAr ? "لم نجد الطلب" : "Order not found")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              {isAr
-                ? "تأكّد من رقم الطلب ورقم الجوال المرتبط به."
-                : "Check the reference and phone associated with this order."}
+              {(isAr ? "تأكّد من رقم الطلب ورقم الجوال المرتبط به." : "Check the reference and phone associated with this order.")}
             </p>
             <Link to="/my-orders" className="inline-block mt-4">
-              <Button variant="outline">{isAr ? "العودة" : "Back"}</Button>
+              <Button variant="outline">{(isAr ? "العودة" : "Back")}</Button>
             </Link>
           </div>
         ) : (
@@ -233,11 +230,11 @@ function OrderDetailCard({
     },
     onError: (err: Error) => {
       const map: Record<string, string> = {
-        not_found: isAr ? "لم يُعثر على الطلب" : "Order not found",
-        not_cancellable: isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled",
-        invalid_phone: isAr ? "رقم الجوال غير صحيح" : "Invalid phone",
+        not_found:(isAr ? "لم يُعثر على الطلب" : "Order not found"),
+        not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled"),
+        invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone"),
       };
-      toast.error(map[err.message] ?? (isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
+      toast.error(map[err.message] ?? isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
     },
   });
 
@@ -263,7 +260,7 @@ function OrderDetailCard({
             {qrDataUrl && (
               <img
                 src={qrDataUrl}
-                alt={isAr ? "رمز تتبع الطلب" : "Tracking QR"}
+                alt={(isAr ? "رمز تتبع الطلب" : "Tracking QR")}
                 className="h-20 w-20 rounded-md border border-border bg-white p-1"
               />
             )}
@@ -271,11 +268,11 @@ function OrderDetailCard({
         </div>
 
         <div className="mt-6 grid gap-3 text-sm">
-          <Row icon={<Clock className="h-4 w-4" />} label={isAr ? "تاريخ الإنشاء" : "Created"} value={fmt(order.created_at, isAr ? "ar" : "en")} />
+          <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "تاريخ الإنشاء" : "Created")} value={fmt(order.created_at,isAr ? "ar" : "en")} />
           {order.scheduled_at && (
-            <Row icon={<Clock className="h-4 w-4" />} label={isAr ? "الموعد المفضّل" : "Scheduled"} value={fmt(order.scheduled_at, isAr ? "ar" : "en")} />
+            <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "الموعد المفضّل" : "Scheduled")} value={fmt(order.scheduled_at,isAr ? "ar" : "en")} />
           )}
-          <Row icon={<Phone className="h-4 w-4" />} label={isAr ? "الجوال" : "Phone"} value={phone} />
+          <Row icon={<Phone className="h-4 w-4" />} label={(isAr ? "الجوال" : "Phone")} value={phone} />
         </div>
       </div>
 
@@ -292,29 +289,27 @@ function OrderDetailCard({
 
       {/* Actions */}
       <div className="rounded-2xl border border-border bg-card p-6 print:hidden">
-        <h3 className="font-bold mb-2">{isAr ? "إجراءات على الطلب" : "Actions"}</h3>
+        <h3 className="font-bold mb-2">{(isAr ? "إجراءات على الطلب" : "Actions")}</h3>
         <p className="text-sm text-muted-foreground">
-          {isAr
-            ? "يمكنك طباعة إيصال الطلب، أو إلغاؤه إن لم يبدأ التنفيذ بعد."
-            : "You can print the receipt, or cancel if execution has not started."}
+          {(isAr ? "يمكنك طباعة إيصال الطلب، أو إلغاؤه إن لم يبدأ التنفيذ بعد." : "You can print the receipt, or cancel if execution has not started.")}
         </p>
         <div className="mt-3 flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="h-4 w-4" />
-            {isAr ? "طباعة" : "Print"}
+            {(isAr ? "طباعة" : "Print")}
           </Button>
           {canCancel ? (
             <Button variant="destructive" onClick={() => setCancelOpen(true)}>
               <XCircle className="h-4 w-4" />
-              {isAr ? "إلغاء الطلب" : "Cancel order"}
+              {(isAr ? "إلغاء الطلب" : "Cancel order")}
             </Button>
           ) : order.status !== "cancelled" ? (
             <span className="inline-flex items-center rounded-md bg-muted px-3 py-1.5 text-xs text-muted-foreground">
-              {isAr ? "لا يمكن الإلغاء في هذه المرحلة" : "Cannot cancel at this stage"}
+              {(isAr ? "لا يمكن الإلغاء في هذه المرحلة" : "Cannot cancel at this stage")}
             </span>
           ) : null}
-          <Link to="/contact"><Button variant="premium">{isAr ? "تواصل معنا" : "Contact us"}</Button></Link>
-          <Link to="/my-orders"><Button variant="ghost">{isAr ? "كل طلباتي" : "All my orders"}</Button></Link>
+          <Link to="/contact"><Button variant="premium">{(isAr ? "تواصل معنا" : "Contact us")}</Button></Link>
+          <Link to="/my-orders"><Button variant="ghost">{(isAr ? "كل طلباتي" : "All my orders")}</Button></Link>
         </div>
       </div>
 
@@ -322,7 +317,7 @@ function OrderDetailCard({
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{isAr ? "تأكيد إلغاء الطلب" : "Cancel order"}</DialogTitle>
+            <DialogTitle>{(isAr ? "تأكيد إلغاء الطلب" : "Cancel order")}</DialogTitle>
             <DialogDescription>
               {isAr
                 ? `سيتم إلغاء الطلب #${order.reference}. لا يمكن التراجع عن هذا الإجراء.`
@@ -331,18 +326,18 @@ function OrderDetailCard({
           </DialogHeader>
           <div className="space-y-2">
             <label className="text-sm font-semibold">
-              {isAr ? "سبب الإلغاء (اختياري)" : "Reason (optional)"}
+              {(isAr ? "سبب الإلغاء (اختياري)" : "Reason (optional)")}
             </label>
             <Textarea
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              placeholder={isAr ? "مثال: تغيّر الموعد، الحصول على الخدمة في مكان آخر…" : "e.g. schedule changed…"}
+              placeholder={(isAr ? "مثال: تغيّر الموعد، الحصول على الخدمة في مكان آخر…" : "e.g. schedule changed…")}
               rows={3}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelMutation.isPending}>
-              {isAr ? "تراجع" : "Keep order"}
+              {(isAr ? "تراجع" : "Keep order")}
             </Button>
             <Button
               variant="destructive"
@@ -350,7 +345,7 @@ function OrderDetailCard({
               disabled={cancelMutation.isPending}
             >
               {cancelMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isAr ? "تأكيد الإلغاء" : "Confirm cancel"}
+              {(isAr ? "تأكيد الإلغاء" : "Confirm cancel")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -376,11 +371,11 @@ function ServiceDetailsSection({
     const district = s("district");
     const notes = s("notes");
     return (
-      <DetailsShell title={isAr ? "تفاصيل طلب الصيدلية" : "Pharmacy details"} icon={<Package className="h-4 w-4" />}>
+      <DetailsShell title={(isAr ? "تفاصيل طلب الصيدلية" : "Pharmacy details")} icon={<Package className="h-4 w-4" />}>
         <DetailGrid>
-          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={isAr ? "طريقة الاستلام" : "Delivery"} value={delivery === "delivery" ? (isAr ? "توصيل للمنزل" : "Home delivery") : (isAr ? "استلام من الفرع" : "Pickup")} />}
-          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={isAr ? "عنوان التوصيل" : "Address"} value={address} />}
-          {district && <Cell icon={<MapPin className="h-4 w-4" />} label={isAr ? "الحي" : "District"} value={district} />}
+          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={(isAr ? "طريقة الاستلام" : "Delivery")} value={delivery === "delivery" ? isAr ? "توصيل للمنزل" : "Home delivery") : isAr ? "استلام من الفرع" : "Pickup")} />}
+          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "عنوان التوصيل" : "Address")} value={address} />}
+          {district && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "الحي" : "District")} value={district} />}
         </DetailGrid>
         {notes && <Notes text={notes} isAr={isAr} />}
         <ResultBanner
@@ -398,16 +393,16 @@ function ServiceDetailsSection({
     const email = s("email");
     const answer = s("answer") || s("reply");
     return (
-      <DetailsShell title={isAr ? "تفاصيل الرأي الطبي الثاني" : "Second opinion details"} icon={<ClipboardList className="h-4 w-4" />}>
+      <DetailsShell title={(isAr ? "تفاصيل الرأي الطبي الثاني" : "Second opinion details")} icon={<ClipboardList className="h-4 w-4" />}>
         <DetailGrid>
-          {specialty && <Cell icon={<Stethoscope className="h-4 w-4" />} label={isAr ? "التخصص" : "Specialty"} value={specialty} />}
-          {email && <Cell icon={<User className="h-4 w-4" />} label={isAr ? "بريد الرد" : "Reply email"} value={email} />}
+          {specialty && <Cell icon={<Stethoscope className="h-4 w-4" />} label={(isAr ? "التخصص" : "Specialty")} value={specialty} />}
+          {email && <Cell icon={<User className="h-4 w-4" />} label={(isAr ? "بريد الرد" : "Reply email")} value={email} />}
         </DetailGrid>
         {answer ? (
           <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
               <MessageCircle className="h-4 w-4" />
-              {isAr ? "رد الطبيب الاستشاري" : "Consultant reply"}
+              {(isAr ? "رد الطبيب الاستشاري" : "Consultant reply")}
             </div>
             <p className="whitespace-pre-line text-sm text-foreground">{answer}</p>
           </div>
@@ -427,9 +422,9 @@ function ServiceDetailsSection({
     const address = s("address");
     const notes = s("notes");
     return (
-      <DetailsShell title={isAr ? "تفاصيل الرعاية المنزلية" : "Home care details"} icon={<HomeIcon className="h-4 w-4" />}>
+      <DetailsShell title={(isAr ? "تفاصيل الرعاية المنزلية" : "Home care details")} icon={<HomeIcon className="h-4 w-4" />}>
         <DetailGrid>
-          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={isAr ? "عنوان الزيارة" : "Visit address"} value={address} />}
+          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "عنوان الزيارة" : "Visit address")} value={address} />}
         </DetailGrid>
         {notes && <Notes text={notes} isAr={isAr} />}
         <ResultBanner
@@ -478,7 +473,7 @@ function Notes({ text, isAr }: { text: string; isAr: boolean }) {
     <div className="mt-3 rounded-xl bg-muted/50 p-3">
       <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold">
         <FileText className="h-3.5 w-3.5" />
-        {isAr ? "ملاحظات" : "Notes"}
+        {(isAr ? "ملاحظات" : "Notes")}
       </div>
       <p className="text-sm text-muted-foreground whitespace-pre-line">{text}</p>
     </div>
