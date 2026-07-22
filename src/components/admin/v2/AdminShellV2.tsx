@@ -33,6 +33,13 @@ import {
   ChevronsRight,
   ChevronsLeft,
   Bell,
+  Command as CommandIcon,
+  FileText,
+  Palette,
+  Image as ImageIcon,
+  Menu as MenuIcon,
+  ScrollText,
+  KeyRound,
 } from "lucide-react";
 
 type NavItem = {
@@ -44,10 +51,15 @@ type NavItem = {
 
 type NavGroup = { title: string; items: NavItem[] };
 
+// Unified navigation covering admin console, command-center, and site-builder.
+// Roles gate each item; super_admin sees everything including Site Builder.
 const NAV: NavGroup[] = [
   {
     title: "عام",
-    items: [{ to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard }],
+    items: [
+      { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard },
+      { to: "/command-center", label: "مركز التحكم الذكي", icon: CommandIcon, roles: ["admin", "super_admin"] },
+    ],
   },
   {
     title: "العمليات",
@@ -80,14 +92,33 @@ const NAV: NavGroup[] = [
     ],
   },
   {
+    title: "منشئ الموقع",
+    items: [
+      { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, roles: ["super_admin"] },
+      { to: "/owner/pages", label: "الصفحات", icon: FileText, roles: ["super_admin"] },
+      { to: "/owner/content", label: "المحتوى", icon: Palette, roles: ["super_admin"] },
+      { to: "/owner/media", label: "الوسائط", icon: ImageIcon, roles: ["super_admin"] },
+      { to: "/owner/navigation", label: "القوائم", icon: MenuIcon, roles: ["super_admin"] },
+      { to: "/owner/services", label: "الخدمات", icon: Stethoscope, roles: ["super_admin"] },
+      { to: "/owner/accounts", label: "الحسابات", icon: Users, roles: ["super_admin"] },
+      { to: "/owner/settings", label: "إعدادات الموقع", icon: Settings, roles: ["super_admin"] },
+      { to: "/owner/security", label: "الأمان (MFA)", icon: KeyRound, roles: ["super_admin"] },
+      { to: "/owner/audit", label: "سجل النشاط", icon: ScrollText, roles: ["super_admin"] },
+    ],
+  },
+  {
     title: "الحوكمة",
     items: [
       { to: "/rbac", label: "الأدوار", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/role-permissions-matrix", label: "مصفوفة الصلاحيات", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/web-vitals", label: "Web Vitals", icon: Gauge, roles: ["admin"] },
       { to: "/admin/visual-analytics", label: "تحليلات بصرية", icon: FileBarChart, roles: ["admin"] },
       { to: "/admin/notification-logs", label: "الإشعارات", icon: Bell, roles: ["admin"] },
       { to: "/admin/no-show-risk", label: "توقّع الغياب", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/realtime-monitor", label: "مراقبة Realtime", icon: Gauge, roles: ["admin"] },
+      { to: "/admin/ai-streaming", label: "AI Streaming", icon: Sparkles, roles: ["admin"] },
+      { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام", icon: Gauge, roles: ["admin"] },
       { to: "/clinic-settings", label: "الإعدادات", icon: Settings, roles: ["admin"] },
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Settings, roles: ["admin"] },
