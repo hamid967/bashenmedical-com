@@ -34,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/admin/services-health")({
 });
 
 function ServicesHealthPage() {
+  const router = useRouter();
   return (
     <div className="container mx-auto max-w-6xl p-4 md:p-6 space-y-4">
       <header className="flex items-center justify-between gap-2">
@@ -43,6 +44,10 @@ function ServicesHealthPage() {
             آخر حالة لكل خدمة داخلية خلال آخر ساعة، مع تفاصيل آخر خطأ إن وُجد.
           </p>
         </div>
+        <Button size="sm" onClick={() => router.invalidate()}>
+          <RefreshCw className="h-4 w-4 me-1" />
+          تحديث الآن
+        </Button>
       </header>
       <Suspense fallback={<GridSkeleton />}>
         <HealthGrid />
