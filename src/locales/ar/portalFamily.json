@@ -1,6 +1,5 @@
 {
   "ltr": "rtl",
-  "ar": "en",
   "home": "الرئيسية",
   "access_updated": "تم تحديث الصلاحيات",
   "update_failed": "تعذّر التحديث",
@@ -13,6 +12,5 @@
   "scopes_take_effect_only_after_the_relati": "الصلاحيات لن تُفعَّل قبل توثيق العلاقة.",
   "relationship_verification_by_reception": "توثيق العلاقة من الاستقبال",
   "enable_the_booking_scope_above": "تفعيل صلاحية الحجز نيابةً من قائمة الصلاحيات أعلاه",
-  "en_gb": "ar-SA-u-ca-gregory",
   "unexpected_server_error": "خطأ غير متوقع أثناء الاتصال بالخادم."
 }

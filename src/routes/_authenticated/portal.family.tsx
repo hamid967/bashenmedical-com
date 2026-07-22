@@ -739,7 +739,7 @@ function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }
   const isAr = lang === "ar";
   const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
   const { cls, Icon } = statusVisual(row.status);
-  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(i18n.t("portalFamily:en_gb"),
+  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA" : "en-GB",
     { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" },
   );
   const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;
