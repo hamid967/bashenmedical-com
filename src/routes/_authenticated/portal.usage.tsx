@@ -64,7 +64,7 @@ function UsagePage() {
 
   const dateFmt = useMemo(
     () =>
-      new Intl.DateTimeFormat(isAr ? "ar-SA" : "en-GB"), {
+      new Intl.DateTimeFormat(isAr ? "ar-SA" : "en-GB", {
         month: "short",
         day: "numeric",
         hour: "2-digit",

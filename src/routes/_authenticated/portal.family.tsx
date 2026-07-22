@@ -335,7 +335,7 @@ function FamilyPage() {
         }
         description={t("subtitle", lang)}
         breadcrumbs={[
-          { label:(isAr ? "الرئيسية" : "Home"), to: "/portal" },
+          { label:(isAr ? "الرئيسية" : "Home", to: "/portal" },
           { label: t("title", lang) },
         ]}
         isAr={lang === "ar"}
@@ -735,7 +735,7 @@ function DependentAppointmentsSection({
 function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }) {
   const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
   const { cls, Icon } = statusVisual(row.status);
-  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA-u-ca-gregory" : "en-GB"),
+  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA-u-ca-gregory" : "en-GB",
     { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" },
   );
   const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;

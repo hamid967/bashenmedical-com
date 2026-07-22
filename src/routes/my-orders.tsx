@@ -74,7 +74,7 @@ const STATUS_COLOR: Record<string, string> = {
 
 function fmt(iso: string, lang: "ar" | "en") {
   try {
-    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US"), {
+    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US", {
       dateStyle: "medium",
       timeStyle: "short",
     });

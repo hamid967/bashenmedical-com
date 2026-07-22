@@ -95,7 +95,7 @@ const NOT_CANCELLABLE: Record<Order["kind"], string[]> = {
 function fmt(iso: string | null, lang: "ar" | "en") {
   if (!iso) return "—";
   try {
-    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US"), { dateStyle: "medium", timeStyle: "short" });
+    return new Date(iso).toLocaleString(isAr ? "ar-SA" : "en-US", { dateStyle: "medium", timeStyle: "short" });
   } catch { return iso; }
 }
 
@@ -135,7 +135,7 @@ function OrderDetailPage() {
     if (!data) return;
     if (previousStatus.current && previousStatus.current !== data.status) {
       const label = STATUS_AR[data.status] ?? data.status;
-      toast.success(isAr ? "تحديث الحالة" : "Status updated"),
+      toast.success(isAr ? "تحديث الحالة" : "Status updated",
         { description: isAr ? `طلبك أصبح: ${label}` : `Your order is now: ${data.status}` }
       );
     }
@@ -230,9 +230,9 @@ function OrderDetailCard({
     },
     onError: (err: Error) => {
       const map: Record<string, string> = {
-        not_found:(isAr ? "لم يُعثر على الطلب" : "Order not found"),
-        not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled"),
-        invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone"),
+        not_found:(isAr ? "لم يُعثر على الطلب" : "Order not found",
+        not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled",
+        invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone",
       };
       toast.error(map[err.message] ?? (isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
     },

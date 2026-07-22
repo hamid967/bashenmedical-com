@@ -175,7 +175,7 @@ function PortalOverview() {
   const greetKey: "hello_am" | "hello_pm" | "hello_night" =
     hour < 12 ? "hello_am" : hour < 18 ? "hello_pm" : "hello_night";
 
-  const today = new Date().toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"), {
+  const today = new Date().toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -323,7 +323,7 @@ function PortalOverview() {
                         <div className="text-xs text-[color:var(--mag-ink-3)] truncate mt-0.5">
                           {l.test_type ?? (isAr ? "تقرير عام" : "Report")} ·{" "}
                           {l.report_date
-                            ? new Date(l.report_date).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"),
+                            ? new Date(l.report_date).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US",
                                 { day: "2-digit", month: "short", year: "numeric" },
                               )
                             : "—"}
@@ -401,7 +401,7 @@ function PortalOverview() {
                             {inv.invoice_number || `#${inv.id.slice(0, 8)}`}
                           </div>
                           <div className="text-xs text-[color:var(--mag-ink-3)] mt-0.5">
-                            {new Date(inv.issued_at).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"),
+                            {new Date(inv.issued_at).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US",
                               { day: "2-digit", month: "short", year: "numeric" },
                             )}{" "}
                             · <InvoiceStatusChip status={inv.status} lang={lang} inline />
@@ -445,7 +445,7 @@ function PortalOverview() {
                         </div>
                         <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
                           {r.submitted_at
-                            ? new Date(r.submitted_at).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"),
+                            ? new Date(r.submitted_at).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US",
                                 { day: "2-digit", month: "short", year: "numeric" },
                               )
                             : "—"}
@@ -624,13 +624,13 @@ function FeatureNextVisit({
           {/* Date block */}
           <div className="w-20 shrink-0 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-center py-3">
             <div className="text-[10px] uppercase tracking-wider text-white/70">
-              {dateObj.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"), { month: "short" })}
+              {dateObj.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", { month: "short" })}
             </div>
             <div className="text-3xl font-extrabold leading-none mt-1 tabular-nums">
               {dateObj.getDate()}
             </div>
             <div className="text-[10px] uppercase tracking-wider text-white/70 mt-1">
-              {dateObj.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"), { weekday: "short" })}
+              {dateObj.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", { weekday: "short" })}
             </div>
           </div>
 
@@ -866,7 +866,7 @@ function MiniDateChip({ iso, lang }: { iso: string; lang: Lang }) {
   return (
     <div className="w-12 shrink-0 rounded-xl bg-[color:var(--mag-subtle)] text-center py-1.5 border border-[color:var(--mag-line)]">
       <div className="text-[9px] uppercase tracking-wider text-[color:var(--mag-ink-3)]">
-        {d.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US"), { month: "short" })}
+        {d.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", { month: "short" })}
       </div>
       <div className="text-base font-bold text-[color:var(--mag-ink)] leading-none tabular-nums">
         {d.getDate()}
@@ -969,7 +969,7 @@ function initials(name: string | null | undefined): string {
 }
 
 function formatMoney(n: number, lang: Lang): string {
-  return n.toLocaleString(isAr ? "ar-SA-u-nu-latn" : "en-US"), {
+  return n.toLocaleString(isAr ? "ar-SA-u-nu-latn" : "en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
