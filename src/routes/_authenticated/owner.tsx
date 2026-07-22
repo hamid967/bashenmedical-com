@@ -5,9 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   LayoutDashboard,
   FileText,
-  Palette,
-  Image as ImageIcon,
-  Menu as MenuIcon,
   Stethoscope,
   Inbox,
   ArrowLeft,
