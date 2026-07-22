@@ -13,6 +13,7 @@ import { X } from "lucide-react";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
 import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
+import { trackEvent } from "@/lib/analytics";
 
 const bmcLogo = bmcLogoAsset.url;
 
