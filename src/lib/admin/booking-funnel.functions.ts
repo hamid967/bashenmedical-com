@@ -112,7 +112,6 @@ export const getBookingFunnel = createServerFn({ method: "GET" })
       context.supabase
         .from("doctors")
         .select("id, name_ar, name_en")
-        .eq("active", true)
         .order("name_ar")
         .limit(500),
     ]);
