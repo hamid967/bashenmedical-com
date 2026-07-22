@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
 // Doctors hero — responsive srcset with per-format quality tuning for smaller payloads.
 // AVIF ~48q / WebP ~68q / JPEG ~72q keep visual fidelity while dropping bytes 40–60%.
@@ -18,13 +19,14 @@ const MOBILE_MEDIA = "(max-width: 767px)";
 
 export function HeroComplex() {
   const { lang } = useI18n();
+  const { t } = useTranslation("homeSections");
   const isAr = lang === "ar";
 
   return (
     <section
       dir={isAr ? "rtl" : "ltr"}
       className="relative isolate overflow-hidden min-h-[78vh] md:min-h-[86vh] flex items-center"
-      aria-label={isAr ? "مجمع باعشن الطبي" : "Baeshen Medical Complex"}
+      aria-label={t("hero.srAlt")}
     >
       {/* Art-directed background: portrait crop on mobile, wide crop on desktop */}
       <picture>
@@ -52,7 +54,7 @@ export function HeroComplex() {
         <source type="image/webp" srcSet={heroWebp} sizes={DESKTOP_SIZES} />
         <img
           src={heroJpg}
-          alt={isAr ? "مجمع باعشن الطبي" : "Baeshen Medical Complex"}
+          alt={t("hero.srAlt")}
           width={1920}
           height={1088}
           fetchPriority="high"
@@ -76,29 +78,21 @@ export function HeroComplex() {
         <div className={`max-w-2xl ${isAr ? "text-right" : "text-left"} text-white`}>
           <span className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-4 py-1.5 text-xs font-medium text-white/90 tracking-wide">
             <span className="w-1.5 h-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_rgba(103,232,249,0.9)]" />
-            {isAr ? "معتمد من CBAHI · صبيا، جازان" : "CBAHI Accredited · Sabya, Jazan"}
+            {t("hero.badge")}
           </span>
 
           <h1 className="mt-6 text-4xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight drop-shadow-[0_2px_20px_rgba(0,0,0,0.4)]">
-            {isAr ? (
+            {t("hero.titleLine1")} <span className="text-cyan-300">{t("hero.titleHighlight")}</span>
+            {t("hero.titleLine2") ? (
               <>
-                رعاية طبية <span className="text-cyan-300">استثنائية</span>
                 <br />
-                في مجمع باعشن الطبي
+                {t("hero.titleLine2")}
               </>
-            ) : (
-              <>
-                Exceptional care at
-                <br />
-                <span className="text-cyan-300">Baeshen Medical Complex</span>
-              </>
-            )}
+            ) : null}
           </h1>
 
           <p className="mt-5 text-base md:text-xl text-white/85 max-w-xl leading-relaxed">
-            {isAr
-              ? "استشاريون معتمدون، تقنيات حديثة، وتجربة مريض راقية — احجز موعدك بلمسة واحدة."
-              : "Board-certified consultants, modern technology, and a premium patient experience — book in one tap."}
+            {t("hero.subtitle")}
           </p>
 
           <div className={`mt-8 flex flex-wrap gap-3 ${isAr ? "justify-start" : ""}`}>
@@ -107,11 +101,11 @@ export function HeroComplex() {
               className="group inline-flex items-center gap-2 rounded-full bg-white text-[#0a2540] px-7 py-3.5 text-sm md:text-base font-semibold shadow-[0_10px_40px_-10px_rgba(6,182,212,0.6)] hover:bg-cyan-50 hover:shadow-[0_10px_40px_-5px_rgba(6,182,212,0.9)] transition-all duration-300"
             >
               <CalendarCheck className="h-5 w-5" />
-              {isAr ? "احجز موعدك الآن" : "Book your appointment"}
+              {t("hero.bookCta")}
               <span
                 className={`transition-transform ${isAr ? "group-hover:-translate-x-1" : "group-hover:translate-x-1"}`}
               >
-                {isAr ? "←" : "→"}
+                {t("hero.arrow")}
               </span>
             </Link>
             <a
@@ -119,7 +113,7 @@ export function HeroComplex() {
               className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/10 backdrop-blur-md text-white px-7 py-3.5 text-sm md:text-base font-semibold hover:bg-white/20 transition-all duration-300"
             >
               <Phone className="h-5 w-5" />
-              {isAr ? "اتصل بنا" : "Call us"}
+              {t("hero.callCta")}
             </a>
           </div>
 
@@ -129,15 +123,15 @@ export function HeroComplex() {
           >
             <div className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-cyan-300" />
-              {isAr ? "أطباء استشاريون" : "Consultant specialists"}
+              {t("hero.trust1")}
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-cyan-300" />
-              {isAr ? "خدمة رعاية منزلية" : "Home care service"}
+              {t("hero.trust2")}
             </div>
             <div className="flex items-center gap-2">
               <span className="w-1 h-1 rounded-full bg-cyan-300" />
-              {isAr ? "صيدلية متكاملة" : "Full pharmacy"}
+              {t("hero.trust3")}
             </div>
           </div>
         </div>
