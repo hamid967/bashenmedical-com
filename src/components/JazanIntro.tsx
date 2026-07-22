@@ -168,7 +168,7 @@ export function JazanIntro() {
       disabled_forever: reason === "disabled",
     };
     trackEvent("jazan_intro_ended", endedPayload);
-    debugLog("jazan_intro_ended", endedPayload);
+    debugLog(debugEnabled, "jazan_intro_ended", endedPayload);
     setVisible(false);
     window.setTimeout(() => setMounted(false), 500);
   };
@@ -186,7 +186,7 @@ export function JazanIntro() {
             : "cooldown",
       };
       trackEvent("jazan_intro_suppressed", suppressedPayload);
-      debugLog("jazan_intro_suppressed", suppressedPayload);
+      debugLog(debugEnabled, "jazan_intro_suppressed", suppressedPayload);
       return;
     }
     setMounted(true);
@@ -196,7 +196,7 @@ export function JazanIntro() {
       duration_ms: introCfg.durationMs,
     };
     trackEvent("jazan_intro_shown", shownPayload);
-    debugLog("jazan_intro_shown", shownPayload);
+    debugLog(debugEnabled, "jazan_intro_shown", shownPayload);
     requestAnimationFrame(() => setVisible(true));
   }, [introCfg.enabled, introCfg.cooldownHours]);
 
