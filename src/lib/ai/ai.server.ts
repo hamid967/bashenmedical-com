@@ -60,8 +60,7 @@ export async function recordSafetyIncident(params: {
   details?: Record<string, unknown>;
 }) {
   try {
-    const sb = serverClient();
-    await sb.from("ai_safety_incidents").insert({
+    await supabaseAdmin.from("ai_safety_incidents").insert({
       conversation_id: params.conversationId ?? null,
       actor: params.actor ?? null,
       kind: params.kind,
