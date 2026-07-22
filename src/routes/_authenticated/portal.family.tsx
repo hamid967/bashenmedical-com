@@ -298,13 +298,14 @@ function FamilyPage() {
   const { data: profile } = useSuspenseQuery(profileQuery);
   const { data: rows } = useSuspenseQuery(dependentsQuery);
   const lang: Lang = (profile?.preferred_language as Lang) ?? "ar";
+  const isAr = lang === "ar";
   const qc = useQueryClient();
 
   const [dialog, setDialog] = useState<{ mode: "add" } | { mode: "edit"; row: Dependent } | null>(
     null,
   );
   const [toDelete, setToDelete] = useState<Dependent | null>(null);
-  const dir = lang === "ar" ? "rtl" : "ltr";
+  const dir =(isAr ? "rtl" : "ltr");
 
   const langMutation = useMutation({
     mutationFn: (next: Lang) => updateMyProfile({ data: { preferred_language: next } }),
@@ -322,7 +323,7 @@ function FamilyPage() {
     onError: () => toast.error(t("lang_error", lang)),
   });
 
-  const nextLang: Lang = lang === "ar" ? "en" : "ar";
+  const nextLang: Lang =(isAr ? "en" : "ar");
 
   return (
     <div className="space-y-6 pb-24 md:pb-6" dir={dir}>
@@ -335,7 +336,7 @@ function FamilyPage() {
         }
         description={t("subtitle", lang)}
         breadcrumbs={[
-          { label: lang === "ar" ? "الرئيسية" : "Home", to: "/portal" },
+          { label:(isAr ? "الرئيسية" : "Home"), to: "/portal" },
           { label: t("title", lang) },
         ]}
         isAr={lang === "ar"}
@@ -430,6 +431,7 @@ function DependentCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const isAr = lang === "ar";
   const initials = row.full_name
     .split(" ")
     .slice(0, 2)
@@ -446,11 +448,11 @@ function DependentCard({
     mutationFn: (patch: Partial<DependentAccessScopes>) =>
       setDependentAccessScopes({ data: { id: row.id, scopes: patch } }),
     onSuccess: () => {
-      toast.success(lang === "ar" ? "تم تحديث الصلاحيات" : "Access updated");
+      toast.success(isAr ? "تم تحديث الصلاحيات" : "Access updated");
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
     },
     onError: (e: any) =>
-      toast.error(e?.message ?? (lang === "ar" ? "تعذّر التحديث" : "Update failed")),
+      toast.error(e?.message ?? (isAr ? "تعذّر التحديث" : "Update failed")),
   });
   const badgeCls = verified
     ? "bg-emerald-50 text-emerald-700"
@@ -460,7 +462,7 @@ function DependentCard({
   const badgeLabel = verified
     ? t("verified", lang)
     : rejected
-      ? (lang === "ar" ? "مرفوض" : "Rejected")
+      ? (isAr ? "مرفوض" : "Rejected")
       : t("pending", lang);
   return (
     <div className="glass-card p-4 flex flex-col gap-3">
@@ -514,15 +516,15 @@ function DependentCard({
         disabled={scopesMut.isPending}
       >
         <legend className="px-1 text-[10px] font-semibold text-[color:var(--portal-ink-2)]">
-          {lang === "ar" ? "صلاحيات الوصول" : "Access scopes"}
+          {(isAr ? "صلاحيات الوصول" : "Access scopes")}
         </legend>
         <div className="grid grid-cols-2 gap-1.5">
           {(
             [
-              ["booking", lang === "ar" ? "الحجز" : "Booking"],
-              ["reports", lang === "ar" ? "التقارير" : "Reports"],
-              ["prescriptions", lang === "ar" ? "الوصفات" : "Prescriptions"],
-              ["billing", lang === "ar" ? "الفواتير" : "Billing"],
+              ["booking",(isAr ? "الحجز" : "Booking")],
+              ["reports",(isAr ? "التقارير" : "Reports")],
+              ["prescriptions",(isAr ? "الوصفات" : "Prescriptions")],
+              ["billing",(isAr ? "الفواتير" : "Billing")],
             ] as const
           ).map(([key, label]) => {
             const active = row.access_scopes?.[key] === true;
@@ -546,9 +548,7 @@ function DependentCard({
         </div>
         {!verified && (
           <div className="mt-1.5 text-[10px] text-amber-700">
-            {lang === "ar"
-              ? "الصلاحيات لن تُفعَّل قبل توثيق العلاقة."
-              : "Scopes take effect only after the relationship is verified."}
+            {(isAr ? "الصلاحيات لن تُفعَّل قبل توثيق العلاقة." : "Scopes take effect only after the relationship is verified.")}
           </div>
         )}
       </fieldset>
@@ -571,16 +571,12 @@ function DependentCard({
                 ))}
                 {!verified && (
                   <li>
-                    {lang === "ar"
-                      ? "توثيق العلاقة من الاستقبال"
-                      : "Relationship verification by reception"}
+                    {(isAr ? "توثيق العلاقة من الاستقبال" : "Relationship verification by reception")}
                   </li>
                 )}
                 {verified && !bookingAllowed && (
                   <li>
-                    {lang === "ar"
-                      ? "تفعيل صلاحية الحجز نيابةً من قائمة الصلاحيات أعلاه"
-                      : "Enable the ‘Booking’ scope above"}
+                    {(isAr ? "تفعيل صلاحية الحجز نيابةً من قائمة الصلاحيات أعلاه" : "Enable the ‘Booking’ scope above")}
                   </li>
                 )}
               </ul>
@@ -739,10 +735,10 @@ function DependentAppointmentsSection({
 }
 
 function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }) {
+  const isAr = lang === "ar";
   const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
   const { cls, Icon } = statusVisual(row.status);
-  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(
-    lang === "ar" ? "ar-SA-u-ca-gregory" : "en-GB",
+  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA-u-ca-gregory" : "en-GB",
     { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" },
   );
   const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;
@@ -825,6 +821,7 @@ function DependentDialog({
   initial: Dependent | null;
   onClose: () => void;
 }) {
+  const isAr = lang === "ar";
   const qc = useQueryClient();
   const [form, setForm] = useState<FormState>(
     initial
@@ -896,7 +893,7 @@ function DependentDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg" dir={lang === "ar" ? "rtl" : "ltr"}>
+      <DialogContent className="sm:max-w-lg" dir={(isAr ? "rtl" : "ltr")}>
         <DialogHeader>
           <DialogTitle>
             {mode === "edit" ? t("form_edit_title", lang) : t("form_add_title", lang)}
@@ -1058,6 +1055,7 @@ function DeleteDialog({
   row: Dependent | null;
   onClose: () => void;
 }) {
+  const isAr = lang === "ar";
   const qc = useQueryClient();
   const [confirmCancel, setConfirmCancel] = useState(false);
 
@@ -1105,9 +1103,7 @@ function DeleteDialog({
       const detail =
         err instanceof Error && err.message
           ? err.message
-          : lang === "ar"
-            ? "خطأ غير متوقع أثناء الاتصال بالخادم."
-            : "Unexpected server error.";
+          :(isAr ? "خطأ غير متوقع أثناء الاتصال بالخادم." : "Unexpected server error.");
       toast.error(T.del_cancel_error[lang], {
         description: detail,
         duration: 8000,
@@ -1136,7 +1132,7 @@ function DeleteDialog({
       }}
     >
       <AlertDialogContent
-        dir={lang === "ar" ? "rtl" : "ltr"}
+        dir={(isAr ? "rtl" : "ltr")}
         aria-busy={busy}
         aria-labelledby="dep-del-title"
         aria-describedby="dep-del-desc"
@@ -1288,7 +1284,7 @@ function DeleteDialog({
         }}
       >
         <AlertDialogContent
-          dir={lang === "ar" ? "rtl" : "ltr"}
+          dir={(isAr ? "rtl" : "ltr")}
           aria-busy={cancelMut.isPending}
           aria-labelledby="dep-cancel-title"
           aria-describedby="dep-cancel-desc"
@@ -1398,8 +1394,9 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
     typeof document !== "undefined" ? document.documentElement.lang : "ar";
   const lang: Lang = ((cached?.preferred_language as Lang | undefined) ??
     (docLang === "en" ? "en" : "ar")) as Lang;
+  const isAr = lang === "ar";
   return (
-    <div className="glass-card max-w-md mx-auto p-8 text-center" dir={lang === "ar" ? "rtl" : "ltr"}>
+    <div className="glass-card max-w-md mx-auto p-8 text-center" dir={(isAr ? "rtl" : "ltr")}>
       <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
         <AlertTriangle className="h-7 w-7" />
       </div>

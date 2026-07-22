@@ -133,17 +133,17 @@ export function DoctorAutocomplete() {
     <div
       ref={rootRef}
       className="glass-fut mx-auto mt-10 max-w-3xl p-3 md:p-4 text-start"
-      dir={isAr ? "rtl" : "ltr"}
+      dir={(isAr ? "rtl" : "ltr")}
     >
       <div className="grid gap-2 md:grid-cols-[1.6fr_1fr_1fr]">
         {/* Search input */}
         <div className="relative">
           <label htmlFor="home-doctor-ac" className="sr-only">
-            {isAr ? "ابحث باسم الطبيب" : "Search by doctor name"}
+            {(isAr ? "ابحث باسم الطبيب" : "Search by doctor name")}
           </label>
           <span
             aria-hidden="true"
-            className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${isAr ? "right-3" : "left-3"} text-[color:var(--fut-ink-muted)]`}
+            className={`pointer-events-none absolute top-1/2 -translate-y-1/2 ${(isAr ? "right-3" : "left-3")} text-[color:var(--fut-ink-muted)]`}
           >
             {isFetching ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -166,27 +166,27 @@ export function DoctorAutocomplete() {
             }}
             onFocus={() => q.trim().length >= 2 && setOpen(true)}
             onKeyDown={onKeyDown}
-            placeholder={isAr ? "ابحث باسم الطبيب…" : "Search by doctor name…"}
-            className={`input-glow w-full ${isAr ? "pr-9" : "pl-9"}`}
+            placeholder={(isAr ? "ابحث باسم الطبيب…" : "Search by doctor name…")}
+            className={`input-glow w-full ${(isAr ? "pr-9" : "pl-9")}`}
             autoComplete="off"
           />
         </div>
 
         {/* Branch filter */}
         <label className="block">
-          <span className="sr-only">{isAr ? "الفرع" : "Branch"}</span>
+          <span className="sr-only">{(isAr ? "الفرع" : "Branch")}</span>
           <div className="relative">
             <MapPin
               aria-hidden="true"
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${isAr ? "right-3" : "left-3"}`}
+              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${(isAr ? "right-3" : "left-3")}`}
             />
             <select
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
-              className={`input-glow w-full appearance-none ${isAr ? "pr-9" : "pl-9"}`}
-              aria-label={isAr ? "الفرع" : "Branch"}
+              className={`input-glow w-full appearance-none ${(isAr ? "pr-9" : "pl-9")}`}
+              aria-label={(isAr ? "الفرع" : "Branch")}
             >
-              <option value="">{isAr ? "كل الفروع" : "All branches"}</option>
+              <option value="">{(isAr ? "كل الفروع" : "All branches")}</option>
               {branches?.map((b) => (
                 <option key={b.id} value={b.id}>
                   {isAr ? b.name_ar : b.name_en}
@@ -198,19 +198,19 @@ export function DoctorAutocomplete() {
 
         {/* Specialty filter */}
         <label className="block">
-          <span className="sr-only">{isAr ? "العيادة" : "Clinic"}</span>
+          <span className="sr-only">{(isAr ? "العيادة" : "Clinic")}</span>
           <div className="relative">
             <Stethoscope
               aria-hidden="true"
-              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${isAr ? "right-3" : "left-3"}`}
+              className={`pointer-events-none absolute top-1/2 -translate-y-1/2 h-4 w-4 text-[color:var(--fut-ink-muted)] ${(isAr ? "right-3" : "left-3")}`}
             />
             <select
               value={specialty}
               onChange={(e) => setSpecialty(e.target.value)}
-              className={`input-glow w-full appearance-none ${isAr ? "pr-9" : "pl-9"}`}
-              aria-label={isAr ? "العيادة/التخصص" : "Clinic / Specialty"}
+              className={`input-glow w-full appearance-none ${(isAr ? "pr-9" : "pl-9")}`}
+              aria-label={(isAr ? "العيادة/التخصص" : "Clinic / Specialty")}
             >
-              <option value="">{isAr ? "كل العيادات" : "All clinics"}</option>
+              <option value="">{(isAr ? "كل العيادات" : "All clinics")}</option>
               {specialties?.map((s) => (
                 <option key={s.id} value={s.slug}>
                   {isAr ? s.name_ar : s.name_en}
@@ -230,11 +230,11 @@ export function DoctorAutocomplete() {
         >
           {isFetching && list.length === 0 ? (
             <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">
-              {isAr ? "جارٍ البحث…" : "Searching…"}
+              {(isAr ? "جارٍ البحث…" : "Searching…")}
             </div>
           ) : list.length === 0 ? (
             <div className="p-4 text-sm text-[color:var(--fut-ink-muted)]">
-              {isAr ? "لا نتائج مطابقة" : "No matching doctors"}
+              {(isAr ? "لا نتائج مطابقة" : "No matching doctors")}
             </div>
           ) : (
             <ul className="divide-y divide-[color:var(--jazan-gold)]/20">
@@ -285,7 +285,7 @@ export function DoctorAutocomplete() {
                         </div>
                       </div>
                       <span className="text-xs font-semibold text-[color:var(--neon-teal)]">
-                        {isAr ? "احجز" : "Book"}
+                        {(isAr ? "احجز" : "Book")}
                       </span>
                     </button>
                   </li>
@@ -297,7 +297,7 @@ export function DoctorAutocomplete() {
                   onClick={goSearchAll}
                   className="block w-full px-3 py-2 text-center text-xs font-semibold text-[color:var(--jazan-teal)] hover:underline"
                 >
-                  {isAr ? "عرض كل النتائج في صفحة الأطباء ←" : "See all results on doctors page →"}
+                  {(isAr ? "عرض كل النتائج في صفحة الأطباء ←" : "See all results on doctors page →")}
                 </button>
               </li>
             </ul>
@@ -307,7 +307,7 @@ export function DoctorAutocomplete() {
 
       {debounced.length > 0 && debounced.length < 2 && (
         <p className="mt-2 text-xs text-[color:var(--fut-ink-muted)]">
-          {isAr ? "اكتب حرفين على الأقل…" : "Type at least 2 characters…"}
+          {(isAr ? "اكتب حرفين على الأقل…" : "Type at least 2 characters…")}
         </p>
       )}
     </div>
