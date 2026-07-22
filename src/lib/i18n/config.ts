@@ -8,6 +8,9 @@ import urCommon from "@/locales/ur/common.json";
 import arBooking from "@/locales/ar/booking.json";
 import enBooking from "@/locales/en/booking.json";
 import urBooking from "@/locales/ur/booking.json";
+import arPrograms from "@/locales/ar/programs.json";
+import enPrograms from "@/locales/en/programs.json";
+import urPrograms from "@/locales/ur/programs.json";
 
 // Primary UI languages — surfaced in the language switcher and used across
 // the app to key layout/direction. Adding a code here forces every
@@ -24,9 +27,9 @@ export const EXTRA_LOCALES = ["ur"] as const;
 export const RTL_LOCALES: readonly string[] = ["ar", "ur"] as const;
 
 export const resources = {
-  ar: { common: arCommon, booking: arBooking },
-  en: { common: enCommon, booking: enBooking },
-  ur: { common: urCommon, booking: urBooking },
+  ar: { common: arCommon, booking: arBooking, programs: arPrograms },
+  en: { common: enCommon, booking: enBooking, programs: enPrograms },
+  ur: { common: urCommon, booking: urBooking, programs: urPrograms },
 } as const;
 
 if (!i18n.isInitialized) {
@@ -42,7 +45,7 @@ if (!i18n.isInitialized) {
     fallbackLng: DEFAULT_LANG,
     supportedLngs: [...SUPPORTED_LANGS, ...EXTRA_LOCALES] as string[],
     defaultNS: "common",
-    ns: ["common", "booking"],
+    ns: ["common", "booking", "programs"],
     interpolation: { escapeValue: false },
     returnNull: false,
     // Force synchronous init so t() returns real translations during SSR
