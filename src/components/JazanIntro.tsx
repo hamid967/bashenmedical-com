@@ -150,6 +150,7 @@ export function JazanIntro() {
 
   const shownAtRef = useRef<number>(0);
   const endedRef = useRef<boolean>(false);
+  const debugEnabled = isDebugEnabled(introCfg.debug);
 
   const endIntro = (reason: "completed" | "skipped" | "escape" | "disabled" | "reduced_motion") => {
     if (endedRef.current) return;
