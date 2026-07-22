@@ -335,7 +335,7 @@ function FamilyPage() {
         }
         description={t("subtitle", lang)}
         breadcrumbs={[
-          { label:(isAr ? "الرئيسية" : "Home", to: "/portal" },
+          { label:(isAr ? "الرئيسية" : "Home"), to: "/portal" },
           { label: t("title", lang) },
         ]}
         isAr={lang === "ar"}

@@ -230,9 +230,9 @@ function OrderDetailCard({
     },
     onError: (err: Error) => {
       const map: Record<string, string> = {
-        not_found:(isAr ? "لم يُعثر على الطلب" : "Order not found",
-        not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled",
-        invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone",
+        not_found:(isAr ? "لم يُعثر على الطلب" : "Order not found"),
+        not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled"),
+        invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone"),
       };
       toast.error(map[err.message] ?? (isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
     },
