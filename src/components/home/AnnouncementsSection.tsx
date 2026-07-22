@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Megaphone, Tag, Sparkles, CalendarDays, ArrowLeft } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
 import { StaggerReveal, RevealItem } from "@/components/motion/StaggerReveal";
 import { SkeletonSwap, AnnouncementsSkeleton } from "@/components/home/HomeSkeletons";
@@ -10,65 +11,17 @@ type Kind = "offer" | "news" | "event";
 
 type Item = {
   id: string;
+  key: "checkup" | "kids" | "homeCare";
   kind: Kind;
-  badgeAr: string;
-  badgeEn: string;
-  titleAr: string;
-  titleEn: string;
-  descAr: string;
-  descEn: string;
-  ctaAr: string;
-  ctaEn: string;
   to: string;
-  dateAr?: string;
-  dateEn?: string;
+  hasDate: boolean;
 };
 
 // Static placeholders; wired to `ads`/`offers` tables in Phase 2 of the plan.
 const ITEMS: Item[] = [
-  {
-    id: "checkup",
-    kind: "offer",
-    badgeAr: "عرض حصري",
-    badgeEn: "Exclusive offer",
-    titleAr: "باقة الفحص الشامل بخصم 25%",
-    titleEn: "Comprehensive checkup — 25% off",
-    descAr: "فحوصات مخبرية، تخطيط قلب، واستشارة استشاري باطنة في زيارة واحدة.",
-    descEn: "Full labs, ECG and an internist consultation — all in one visit.",
-    ctaAr: "احجز الباقة",
-    ctaEn: "Book the package",
-    to: "/packages",
-    dateAr: "لفترة محدودة",
-    dateEn: "Limited time",
-  },
-  {
-    id: "kids",
-    kind: "event",
-    badgeAr: "فعالية",
-    badgeEn: "Event",
-    titleAr: "يوم صحة الطفل — استشارات مجانية",
-    titleEn: "Kids Health Day — free consultations",
-    descAr: "استشارات مع أطباء الأطفال وتقييم النمو مجانًا هذا السبت.",
-    descEn: "Free pediatric consultations and growth screening this Saturday.",
-    ctaAr: "سجّل حضورك",
-    ctaEn: "Reserve a spot",
-    to: "/book",
-    dateAr: "السبت · 10:00 ص",
-    dateEn: "Saturday · 10:00 AM",
-  },
-  {
-    id: "home-care",
-    kind: "news",
-    badgeAr: "جديد",
-    badgeEn: "New",
-    titleAr: "خدمة الرعاية المنزلية الآن في صبيا",
-    titleEn: "Home care now available in Sabya",
-    descAr: "تمريض، فحوصات، وأدوية إلى باب منزلك على مدار الأسبوع.",
-    descEn: "Nursing, labs and medication delivered to your door, 7 days a week.",
-    ctaAr: "اطلب الخدمة",
-    ctaEn: "Request service",
-    to: "/home-care",
-  },
+  { id: "checkup", key: "checkup", kind: "offer", to: "/packages", hasDate: true },
+  { id: "kids", key: "kids", kind: "event", to: "/book", hasDate: true },
+  { id: "home-care", key: "homeCare", kind: "news", to: "/home-care", hasDate: false },
 ];
 
 const KIND_META: Record<Kind, { icon: LucideIcon; color: string; glow: string }> = {
@@ -79,6 +32,7 @@ const KIND_META: Record<Kind, { icon: LucideIcon; color: string; glow: string }>
 
 export function AnnouncementsSection() {
   const { lang } = useI18n();
+  const { t } = useTranslation("homeSections");
   const isAr = lang === "ar";
 
   // Wired to a query so it participates in loading UX consistently with the
@@ -102,22 +56,20 @@ export function AnnouncementsSection() {
           <div className="min-w-0">
             <div className="inline-flex items-center gap-2 text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
               <Megaphone className="h-3.5 w-3.5" />
-              {isAr ? "الإعلانات والمنشورات" : "Announcements"}
+              {t("announcements.badge")}
             </div>
             <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-              {isAr ? "جديدنا · عروضنا · فعالياتنا" : "News · Offers · Events"}
+              {t("announcements.title")}
             </h2>
             <p className="mt-2 max-w-2xl text-[color:var(--fut-ink-muted)]">
-              {isAr
-                ? "تابع آخر ما يقدّمه مجمع باعشن الطبي من عروض وباقات وفعاليات صحية."
-                : "The latest offers, packages and health events from Baeshen Medical."}
+              {t("announcements.subtitle")}
             </p>
           </div>
           <Link
             to="/media/news"
             className="shrink-0 inline-flex items-center gap-1.5 text-sm font-semibold text-[color:var(--neon-teal)] hover:opacity-80"
           >
-            {isAr ? "كل المنشورات" : "All posts"}
+            {t("announcements.all")}
             <ArrowLeft className={`h-4 w-4 ${isAr ? "" : "rotate-180"}`} />
           </Link>
         </div>
@@ -127,6 +79,7 @@ export function AnnouncementsSection() {
             {items.map((it) => {
               const meta = KIND_META[it.kind];
               const Icon = meta.icon;
+              const base = `announcements.items.${it.key}`;
               return (
                 <RevealItem
                   key={it.id}
@@ -147,20 +100,20 @@ export function AnnouncementsSection() {
                       }}
                     >
                       <Icon className="h-3.5 w-3.5" />
-                      {isAr ? it.badgeAr : it.badgeEn}
+                      {t(`${base}.badge`)}
                     </span>
-                    {(it.dateAr || it.dateEn) && (
+                    {it.hasDate && (
                       <span className="text-[11px] text-[color:var(--fut-ink-dim)]">
-                        {isAr ? it.dateAr : it.dateEn}
+                        {t(`${base}.date`)}
                       </span>
                     )}
                   </div>
 
                   <h3 className="relative mt-5 text-xl font-bold leading-snug text-[color:var(--fut-ink)]">
-                    {isAr ? it.titleAr : it.titleEn}
+                    {t(`${base}.title`)}
                   </h3>
                   <p className="relative mt-2 text-sm leading-6 text-[color:var(--fut-ink-muted)]">
-                    {isAr ? it.descAr : it.descEn}
+                    {t(`${base}.desc`)}
                   </p>
 
                   <div className="relative mt-auto pt-6">
@@ -169,7 +122,7 @@ export function AnnouncementsSection() {
                       className="inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/[0.04] px-4 py-2 text-sm font-semibold text-[color:var(--fut-ink)] transition group-hover:border-[var(--neon-teal)]"
                       style={{ boxShadow: "0 0 0 0 transparent" }}
                     >
-                      {isAr ? it.ctaAr : it.ctaEn}
+                      {t(`${base}.cta`)}
                       <ArrowLeft className={`h-4 w-4 ${isAr ? "" : "rotate-180"}`} />
                     </Link>
                   </div>

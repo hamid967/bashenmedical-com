@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { ArrowLeft, ArrowRight, Newspaper } from "lucide-react";
@@ -17,6 +18,7 @@ type Article = {
 
 export function NewsStrip() {
   const { lang } = useI18n();
+  const { t } = useTranslation("homeSections");
   const isAr = lang === "ar";
   const { data } = useQuery({
     queryKey: ["home_news"],
@@ -41,17 +43,15 @@ export function NewsStrip() {
           <div>
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-primary/10 text-primary px-3 py-1 text-xs font-semibold">
               <Newspaper className="h-3.5 w-3.5" />
-              {isAr ? "المركز الإعلامي" : "News & Insights"}
+              {t("newsStrip.badge")}
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold">
-              {isAr ? "أحدث الأخبار والمقالات الصحية" : "Latest news and health insights"}
-            </h2>
+            <h2 className="text-3xl md:text-4xl font-bold">{t("newsStrip.title")}</h2>
           </div>
           <Link
             to="/health"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary hover:underline"
           >
-            {isAr ? "كل المقالات" : "All articles"}
+            {t("newsStrip.all")}
             {isAr ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
           </Link>
         </div>
@@ -95,7 +95,7 @@ export function NewsStrip() {
                   {isAr ? a.excerpt_ar : a.excerpt_en}
                 </p>
                 <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary">
-                  {isAr ? "اقرأ المقال" : "Read article"}
+                  {t("newsStrip.read")}
                   {isAr ? <ArrowLeft className="h-3 w-3" /> : <ArrowRight className="h-3 w-3" />}
                 </span>
               </div>

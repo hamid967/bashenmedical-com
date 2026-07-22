@@ -1,0 +1,81 @@
+{
+  "hero": {
+    "srAlt": "Baeshen Medical Complex",
+    "badge": "CBAHI Accredited · Sabya, Jazan",
+    "titleLine1": "Exceptional care at",
+    "titleHighlight": "Baeshen Medical Complex",
+    "titleLine2": "",
+    "subtitle": "Board-certified consultants, modern technology, and a premium patient experience — book in one tap.",
+    "bookCta": "Book your appointment",
+    "arrow": "→",
+    "callCta": "Call us",
+    "trust1": "Consultant specialists",
+    "trust2": "Home care service",
+    "trust3": "Full pharmacy"
+  },
+  "newDoctors": {
+    "badge": "Newly joined",
+    "title": "Doctors who recently joined the complex",
+    "subtitle": "Meet our newest consultants and book directly.",
+    "allDoctors": "All doctors",
+    "loadError": "Could not load new doctors.",
+    "retry": "Retry",
+    "new": "New",
+    "profile": "Profile",
+    "book": "Book",
+    "openProfileAria": "Open profile of {{name}}",
+    "bookWithAria": "Book with {{name}}"
+  },
+  "newsStrip": {
+    "badge": "News & Insights",
+    "title": "Latest news and health insights",
+    "all": "All articles",
+    "read": "Read article"
+  },
+  "centersStrip": {
+    "badge": "Centers of Excellence",
+    "title": "Specialized care, world-class quality",
+    "subtitle": "Integrated centers led by senior consultants, with modern technology and certified protocols.",
+    "all": "All centers",
+    "details": "Explore {{name}}"
+  },
+  "announcements": {
+    "badge": "Announcements",
+    "title": "News · Offers · Events",
+    "subtitle": "The latest offers, packages and health events from Baeshen Medical.",
+    "all": "All posts",
+    "items": {
+      "checkup": {
+        "badge": "Exclusive offer",
+        "title": "Comprehensive checkup — 25% off",
+        "desc": "Full labs, ECG and an internist consultation — all in one visit.",
+        "cta": "Book the package",
+        "date": "Limited time"
+      },
+      "kids": {
+        "badge": "Event",
+        "title": "Kids Health Day — free consultations",
+        "desc": "Free pediatric consultations and growth screening this Saturday.",
+        "cta": "Reserve a spot",
+        "date": "Saturday · 10:00 AM"
+      },
+      "homeCare": {
+        "badge": "New",
+        "title": "Home care now available in Sabya",
+        "desc": "Nursing, labs and medication delivered to your door, 7 days a week.",
+        "cta": "Request service"
+      }
+    }
+  },
+  "appPromo": {
+    "badge": "Patient Portal",
+    "title": "Your health, in your pocket",
+    "subtitle": "Sign in to see your appointments, lab and radiology reports and prescriptions — with smart reminders.",
+    "f1": "Appointment reminders before your visit",
+    "f2": "QR card for fast reception check-in",
+    "f3": "Works on any device",
+    "openPortal": "Open portal",
+    "trackAppointment": "Track appointment"
+  },
+  "postalCode": "Postal code {{code}}"
+}

@@ -14,6 +14,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { whatsappUrl } from "@/lib/site";
@@ -55,6 +56,7 @@ const SUGGESTIONS_EN = [
 export function BaeshenAssistant() {
   const { lang } = useI18n();
   const isAr = lang === "ar";
+  const { t } = useTranslation("assistant");
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -115,7 +117,6 @@ export function BaeshenAssistant() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
 
-  const t = (ar: string, en: string) => (isAr ? ar : en);
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -219,19 +220,19 @@ export function BaeshenAssistant() {
         },
         onRetry: (phase) => {
           if (phase === "reconnecting")
-            setError(t("انقطع الاتصال — جاري الاستئناف…", "Connection lost — resuming…"));
+            setError(t("errors.connectionLost"));
           else if (phase === "resumed") setError(null);
           else if (phase === "failed")
-            setError(t("تعذّر استئناف الرد.", "Could not resume the response."));
+            setError(t("errors.resumeFailed"));
         },
         mapStatusError: (s) => {
-          if (s === 503) return t("المساعد معطّل مؤقتًا.", "Assistant is temporarily disabled.");
+          if (s === 503) return t("errors.disabled");
           if (s === 429)
-            return t("طلبات كثيرة، حاول بعد قليل.", "Too many requests, try again shortly.");
-          if (s === 402) return t("انتهت أرصدة الذكاء الاصطناعي.", "AI credits exhausted.");
+            return t("errors.rateLimited");
+          if (s === 402) return t("errors.creditsOut");
           if (s === 401)
-            return t("انتهت الجلسة، أعد تسجيل الدخول.", "Session expired, please sign in again.");
-          return t("تعذّر الاتصال بالمساعد.", "Failed to reach the assistant.");
+            return t("errors.sessionExpired");
+          return t("errors.connect");
         },
       });
       const endedAt = performance.now();
@@ -265,7 +266,7 @@ export function BaeshenAssistant() {
           const last = copy[copy.length - 1];
           copy[copy.length - 1] = {
             role: "assistant",
-            content: t("لم أستطع توليد رد الآن.", "No response was generated."),
+            content: t("errors.empty"),
             meta: last?.meta,
           };
           return copy;
@@ -279,7 +280,7 @@ export function BaeshenAssistant() {
       const msg =
         err instanceof StreamHttpError
           ? err.message
-          : (err as Error).message || t("حدث خطأ.", "Something went wrong.");
+          : (err as Error).message || t("errors.generic");
       setError(msg);
       setMessages((prev) => {
         const copy = prev.slice();
@@ -310,7 +311,7 @@ export function BaeshenAssistant() {
       const copy = prev.slice();
       const last = copy[copy.length - 1];
       if (last && last.role === "assistant") {
-        const suffix = t("\n\n_تم الإيقاف._", "\n\n_Stopped._");
+        const suffix = t("stoppedSuffix");
         copy[copy.length - 1] = {
           role: "assistant",
           content: (last.content || "") + suffix,
@@ -335,7 +336,7 @@ export function BaeshenAssistant() {
     <>
       <button
         type="button"
-        aria-label={t("مساعد باعشن الذكي", "Baeshen AI Assistant")}
+        aria-label={t("openAria")}
         onClick={() => setOpen(true)}
         className={cn(
           "fixed bottom-24 z-40 grid h-14 w-14 place-items-center rounded-full shadow-lg transition-transform",
@@ -354,19 +355,16 @@ export function BaeshenAssistant() {
           <SheetHeader className="border-b bg-gradient-to-br from-primary/5 to-transparent p-4">
             <SheetTitle className="flex items-center gap-2 text-base">
               <Bot className="h-5 w-5 text-primary" />
-              {t("مساعد باعشن الذكي", "Baeshen AI Assistant")}
+              {t("title")}
             </SheetTitle>
             <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
               <span className="min-w-0 truncate">
-                {t(
-                  "مساعد آمن للبحث والحجز. لا يقدم تشخيصًا طبيًا.",
-                  "Safe search & booking helper. Not medical advice.",
-                )}
+                {t("subtitle")}
               </span>
               <div className="flex shrink-0 items-center gap-1">
                 <label
                   className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 hover:bg-muted"
-                  title={t("لا تحفظ سجل هذه الجلسة", "Do not save this session")}
+                  title={t("noSaveTooltip")}
                 >
                   <input
                     type="checkbox"
@@ -374,7 +372,7 @@ export function BaeshenAssistant() {
                     checked={noSave}
                     onChange={(e) => toggleNoSave(e.target.checked)}
                   />
-                  {t("لا تحفظ", "Don't save")}
+                  {t("noSave")}
                 </label>
                 <SessionExportButton
                   messages={messages}
@@ -382,7 +380,7 @@ export function BaeshenAssistant() {
                   preEstimateTokens={preEstimate?.inTok}
                   model={meterModel}
                   conversationId={conversationId.current}
-                  surface={isAr ? "المساعد العام" : "Public Assistant"}
+                  surface={t("surfaceLabel")}
                   lang={isAr ? "ar" : "en"}
                 />
                 <button
@@ -391,7 +389,7 @@ export function BaeshenAssistant() {
                   className="inline-flex items-center gap-1 rounded px-2 py-1 hover:bg-muted"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
-                  {t("محادثة جديدة", "New chat")}
+                  {t("newChat")}
                 </button>
               </div>
             </div>
@@ -401,20 +399,17 @@ export function BaeshenAssistant() {
             {showEmergency && (
               <div className="mb-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
                 <div className="font-semibold text-destructive">
-                  {t("تنبيه طوارئ", "Emergency")}
+                  {t("emergencyBadge")}
                 </div>
                 <p className="mt-1 text-foreground/90">
-                  {t(
-                    "اتصل بالإسعاف 997 أو توجه للطوارئ فورًا.",
-                    "Call 997 or go to the nearest ER immediately.",
-                  )}
+                  {t("emergencyText")}
                 </p>
                 <a
                   href="tel:997"
                   className="mt-2 inline-flex items-center gap-1 rounded bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground"
                 >
                   <PhoneCall className="h-3.5 w-3.5" />
-                  {t("اتصل 997", "Call 997")}
+                  {t("call997")}
                 </a>
               </div>
             )}
@@ -422,10 +417,7 @@ export function BaeshenAssistant() {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">
-                  {t(
-                    "أهلًا بك في مجمع باعشن الطبي. كيف أقدر أساعدك اليوم؟",
-                    "Welcome to Baeshen Medical Center. How can I help you today?",
-                  )}
+                  {t("welcome")}
                 </p>
                 <div className="grid gap-2">
                   {suggestions.map((s) => (
@@ -474,7 +466,7 @@ export function BaeshenAssistant() {
                       ) : busy && i === messages.length - 1 && !actions.length ? (
                         <span className="inline-flex items-center gap-2 text-muted-foreground">
                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                          {t("يكتب...", "Thinking...")}
+                          {t("thinking")}
                         </span>
                       ) : null}
                       {actions.map((a, ai) => (
@@ -536,7 +528,7 @@ export function BaeshenAssistant() {
                   }
                 }}
                 rows={2}
-                placeholder={t("اكتب سؤالك هنا...", "Type your question here...")}
+                placeholder={t("placeholder")}
                 className="min-h-[44px] resize-none"
                 disabled={busy}
               />
@@ -545,7 +537,7 @@ export function BaeshenAssistant() {
                 size="icon"
                 onClick={busy ? stopGeneration : undefined}
                 disabled={!busy && !input.trim()}
-                aria-label={busy ? t("إيقاف التوليد", "Stop generating") : t("إرسال", "Send")}
+                aria-label={busy ? t("stopAria") : t("sendAria")}
                 variant={busy ? "destructive" : "default"}
               >
                 {busy ? <Square className="h-4 w-4" /> : <Send className="h-4 w-4" />}
@@ -553,19 +545,16 @@ export function BaeshenAssistant() {
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
               <span>
-                {t(
-                  "لا تشارك بيانات الهوية أو التقارير الحساسة.",
-                  "Do not share IDs or sensitive reports.",
-                )}
+                {t("piiWarning")}
               </span>
               <a
-                href={whatsappUrl(t("أحتاج مساعدة بشرية.", "I need a human agent."))}
+                href={whatsappUrl(t("whatsappPrefill"))}
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex items-center gap-1 hover:text-primary"
               >
                 <MessageCircle className="h-3 w-3" />
-                {t("تحويل لموظف", "Talk to a human")}
+                {t("humanCta")}
               </a>
             </div>
           </form>
@@ -573,7 +562,7 @@ export function BaeshenAssistant() {
             type="button"
             onClick={() => setOpen(false)}
             className="sr-only"
-            aria-label={t("إغلاق", "Close")}
+            aria-label={t("closeAria")}
           >
             <X />
           </button>

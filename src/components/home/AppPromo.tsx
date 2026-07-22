@@ -1,10 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { Smartphone, QrCode, Bell, Sparkles } from "lucide-react";
-import { useI18n } from "@/lib/i18n";
+import { useTranslation } from "react-i18next";
 
 export function AppPromo() {
-  const { lang } = useI18n();
-  const isAr = lang === "ar";
+  const { t } = useTranslation("homeSections");
   return (
     <section className="py-16 md:py-24 bg-secondary/40">
       <div className="container-app">
@@ -17,38 +16,26 @@ export function AppPromo() {
             <div>
               <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                 <Sparkles className="h-3.5 w-3.5" />
-                {isAr ? "بوابة المرضى" : "Patient Portal"}
+                {t("appPromo.badge")}
               </div>
               <h2 className="text-3xl md:text-4xl font-bold leading-tight">
-                {isAr ? "بوابة باعشن الرقمية — كل تقاريرك بين يديك" : "Your health, in your pocket"}
+                {t("appPromo.title")}
               </h2>
-              <p className="mt-3 text-white/80 max-w-lg">
-                {isAr
-                  ? "سجّل الدخول للاطلاع على مواعيدك، تقاريرك المخبرية، الأشعة والوصفات، مع تذكيرات ذكية."
-                  : "Sign in to see your appointments, lab and radiology reports and prescriptions — with smart reminders."}
-              </p>
+              <p className="mt-3 text-white/80 max-w-lg">{t("appPromo.subtitle")}</p>
 
               <ul className="mt-6 space-y-2 text-sm">
                 {[
-                  {
-                    ic: Bell,
-                    ar: "تذكيرات المواعيد قبل الزيارة",
-                    en: "Appointment reminders before your visit",
-                  },
-                  {
-                    ic: QrCode,
-                    ar: "بطاقة QR للوصول السريع في الاستقبال",
-                    en: "QR card for fast reception check-in",
-                  },
-                  { ic: Smartphone, ar: "متوفّر على جميع الأجهزة", en: "Works on any device" },
+                  { ic: Bell, key: "appPromo.f1" },
+                  { ic: QrCode, key: "appPromo.f2" },
+                  { ic: Smartphone, key: "appPromo.f3" },
                 ].map((f) => {
                   const Ic = f.ic;
                   return (
-                    <li key={f.en} className="flex items-center gap-2.5">
+                    <li key={f.key} className="flex items-center gap-2.5">
                       <span className="grid h-7 w-7 place-items-center rounded-lg bg-white/15">
                         <Ic className="h-3.5 w-3.5" />
                       </span>
-                      <span>{isAr ? f.ar : f.en}</span>
+                      <span>{t(f.key)}</span>
                     </li>
                   );
                 })}
@@ -59,13 +46,13 @@ export function AppPromo() {
                   to="/auth"
                   className="inline-flex items-center rounded-full bg-white text-primary px-5 py-2.5 text-sm font-bold hover:bg-white/90 transition"
                 >
-                  {isAr ? "دخول البوابة" : "Open portal"}
+                  {t("appPromo.openPortal")}
                 </Link>
                 <Link
                   to="/lookup"
                   className="inline-flex items-center rounded-full bg-white/10 border border-white/25 px-5 py-2.5 text-sm font-semibold hover:bg-white/20 transition"
                 >
-                  {isAr ? "تتبع موعد" : "Track appointment"}
+                  {t("appPromo.trackAppointment")}
                 </Link>
               </div>
             </div>

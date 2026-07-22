@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
 import { User2, Sparkles, ArrowLeft, MapPin, Stethoscope } from "lucide-react";
@@ -22,6 +23,7 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 export function NewDoctorsSection() {
   const { lang } = useI18n();
+  const { t } = useTranslation("homeSections");
   const isAr = lang === "ar";
 
   const { data, isPending, error, refetch } = useQuery({
@@ -56,39 +58,35 @@ export function NewDoctorsSection() {
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/80 px-3 py-1 text-[11px] tracking-[0.3em] uppercase text-[var(--jazan-teal)]">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
-              {isAr ? "انضم حديثًا" : "Newly joined"}
+              {t("newDoctors.badge")}
             </div>
             <h2
               id="new-doctors-heading"
               className="mt-3 text-2xl md:text-3xl font-bold text-[color:var(--fut-ink)]"
             >
-              {isAr ? "أطباء انضموا حديثًا إلى المجمع" : "Doctors who recently joined the complex"}
+              {t("newDoctors.title")}
             </h2>
             <p className="mt-1 text-sm text-[color:var(--fut-ink-muted)]">
-              {isAr
-                ? "تعرّف على أحدث الاستشاريين واحجز موعدك مباشرة."
-                : "Meet our newest consultants and book directly."}
+              {t("newDoctors.subtitle")}
             </p>
           </div>
           <Link
             to="/doctors"
             className="inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--neon-teal)] hover:opacity-80"
           >
-            {isAr ? "كل الأطباء" : "All doctors"}
+            {t("newDoctors.allDoctors")}
             <ArrowLeft className={`h-4 w-4 ${isAr ? "" : "rotate-180"}`} />
           </Link>
         </div>
 
         {error ? (
           <div className="glass-fut p-6 text-center">
-            <p className="text-sm text-[color:var(--fut-ink-muted)]">
-              {isAr ? "تعذّر تحميل الأطباء الجدد." : "Could not load new doctors."}
-            </p>
+            <p className="text-sm text-[color:var(--fut-ink-muted)]">{t("newDoctors.loadError")}</p>
             <button
               onClick={() => refetch()}
               className="mt-3 text-sm font-semibold text-[color:var(--neon-teal)] hover:underline"
             >
-              {isAr ? "إعادة المحاولة" : "Retry"}
+              {t("newDoctors.retry")}
             </button>
           </div>
         ) : isPending ? (
@@ -115,7 +113,7 @@ export function NewDoctorsSection() {
                 <li key={d.id} className="glass-fut group relative flex flex-col p-5">
                   {isNew && (
                     <span className="absolute top-3 end-3 rounded-full bg-[color:var(--jazan-terracotta)]/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--jazan-terracotta)]">
-                      {isAr ? "جديد" : "New"}
+                      {t("newDoctors.new")}
                     </span>
                   )}
 
@@ -159,9 +157,9 @@ export function NewDoctorsSection() {
                         to="/doctors/$slug"
                         params={{ slug: d.slug as string }}
                         className="inline-flex flex-1 items-center justify-center gap-1 rounded-full border border-[color:var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/60 px-3 py-2 text-xs font-semibold text-[color:var(--jazan-teal)] hover:bg-[var(--jazan-ivory)] transition"
-                        aria-label={isAr ? `فتح ملف الطبيب ${name}` : `Open profile of ${name}`}
+                        aria-label={t("newDoctors.openProfileAria", { name })}
                       >
-                        {isAr ? "الملف" : "Profile"}
+                        {t("newDoctors.profile")}
                       </Link>
                     ) : null}
                     <Link
@@ -172,9 +170,9 @@ export function NewDoctorsSection() {
                         ...(d.branch_id ? { branch: d.branch_id } : {}),
                       }}
                       className="inline-flex flex-1 items-center justify-center gap-1 rounded-full bg-[color:var(--jazan-teal)] px-3 py-2 text-xs font-semibold text-white hover:opacity-90 transition"
-                      aria-label={isAr ? `احجز مع ${name}` : `Book with ${name}`}
+                      aria-label={t("newDoctors.bookWithAria", { name })}
                     >
-                      {isAr ? "احجز" : "Book"}
+                      {t("newDoctors.book")}
                     </Link>
                   </div>
                 </li>
