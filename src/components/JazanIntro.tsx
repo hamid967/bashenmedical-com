@@ -150,7 +150,7 @@ export function JazanIntro() {
   useEffect(() => {
     if (!mounted) return;
     if (reduced) {
-      const t = window.setTimeout(dismiss, 3_000);
+      const t = window.setTimeout(() => endIntro("reduced_motion"), 3_000);
       return () => window.clearTimeout(t);
     }
     const total = Math.max(4_000, introCfg.durationMs);
@@ -161,7 +161,7 @@ export function JazanIntro() {
       { t: Math.round(total * 0.74), phase: 4 },
     ];
     const timers = seq.map(({ t, phase }) => window.setTimeout(() => setPhase(phase), t));
-    const end = window.setTimeout(dismiss, total);
+    const end = window.setTimeout(() => endIntro("completed"), total);
     return () => {
       timers.forEach(window.clearTimeout);
       window.clearTimeout(end);
