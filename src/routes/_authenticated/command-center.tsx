@@ -81,32 +81,32 @@ type NavItem = {
 };
 
 const NAV: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, to: "/_authenticated/command-center" as string },
-  { label: "الأطباء", icon: Stethoscope, to: "/_authenticated/doctors-management" as string, permission: "doctors.manage" },
-  { label: "الممرضون", icon: HeartPulse, to: "/_authenticated/nurses" as string, permission: "nurses.manage" },
-  { label: "المرضى", icon: Users, to: "/_authenticated/patients-management" as string, permission: "patients.view" },
-  { label: "المواعيد", icon: CalendarDays, to: "/_authenticated/appointments-queue" as string, permission: "appointments.view" },
-  { label: "العيادات", icon: Building2, to: "/_authenticated/clinic-settings" as string, permission: "settings.manage" },
+  { label: "Dashboard", icon: LayoutDashboard, to: "/command-center" },
+  { label: "الأطباء", icon: Stethoscope, to: "/doctors-management", permission: "doctors.manage" },
+  { label: "الممرضون", icon: HeartPulse, to: "/nurses", permission: "nurses.manage" },
+  { label: "المرضى", icon: Users, to: "/patients-management", permission: "patients.view" },
+  { label: "المواعيد", icon: CalendarDays, to: "/appointments-queue", permission: "appointments.view" },
+  { label: "العيادات", icon: Building2, to: "/clinic-settings", permission: "settings.manage" },
   { label: "المختبر", icon: FlaskConical, comingSoon: true },
   { label: "الأشعة", icon: Radiation, comingSoon: true },
-  { label: "الصيدلية", icon: Pill, to: "/_authenticated/pharmacy-management" as string, permission: "pharmacy.view" },
-  { label: "السجلات الطبية", icon: ClipboardList, to: "/_authenticated/patients-analytics" as string, permission: "patients.view" },
+  { label: "الصيدلية", icon: Pill, to: "/pharmacy-management", permission: "pharmacy.view" },
+  { label: "السجلات الطبية", icon: ClipboardList, to: "/patients-analytics", permission: "patients.view" },
   { label: "الطوارئ", icon: Ambulance, comingSoon: true },
   { label: "الفوترة", icon: CreditCard, comingSoon: true },
   { label: "التأمين", icon: ShieldCheck, comingSoon: true },
-  { label: "المخزون", icon: Package, to: "/_authenticated/inventory-management" as string, permission: "inventory.manage" },
+  { label: "المخزون", icon: Package, to: "/inventory-management", permission: "inventory.manage" },
   { label: "المستلزمات", icon: Truck, comingSoon: true },
-  { label: "الموظفون", icon: UserCog, to: "/_authenticated/hr-management" as string, permission: "hr.manage" },
-  { label: "الحضور", icon: Clock, to: "/_authenticated/hr-management" as string, permission: "hr.manage" },
-  { label: "الرواتب", icon: Wallet, to: "/_authenticated/hr-management" as string, permission: "hr.manage" },
-  { label: "التقارير", icon: LineIcon, to: "/_authenticated/reports" as string, permission: "reports.view" },
-  { label: "التحليلات", icon: BarChart3, to: "/_authenticated/patients-analytics" as string, permission: "reports.view" },
+  { label: "الموظفون", icon: UserCog, to: "/hr-management", permission: "hr.manage" },
+  { label: "الحضور", icon: Clock, to: "/hr-management", permission: "hr.manage" },
+  { label: "الرواتب", icon: Wallet, to: "/hr-management", permission: "hr.manage" },
+  { label: "التقارير", icon: LineIcon, to: "/reports", permission: "reports.view" },
+  { label: "التحليلات", icon: BarChart3, to: "/patients-analytics", permission: "reports.view" },
   { label: "مساعد AI", icon: Bot, comingSoon: true },
-  { label: "التنبيهات", icon: Bell, to: "/_authenticated/notifications-queue" as string, permission: "notifications.manage" },
-  { label: "الصلاحيات", icon: ShieldCheck, to: "/_authenticated/rbac" as string, permission: "rbac.manage" },
-  { label: "سجل التدقيق", icon: ClipboardList, to: "/_authenticated/audit-log" as string, permission: "audit.view" },
-  { label: "تدقيق الصلاحيات", icon: ShieldAlert, to: "/_authenticated/rbac-audit" as string, permission: "rbac.manage" },
-  { label: "الإعدادات", icon: Settings, to: "/_authenticated/clinic-settings" as string, permission: "settings.manage" },
+  { label: "التنبيهات", icon: Bell, to: "/notifications-queue", permission: "notifications.manage" },
+  { label: "الصلاحيات", icon: ShieldCheck, to: "/rbac", permission: "rbac.manage" },
+  { label: "سجل التدقيق", icon: ClipboardList, to: "/audit-log", permission: "audit.view" },
+  { label: "تدقيق الصلاحيات", icon: ShieldAlert, to: "/rbac-audit", permission: "rbac.manage" },
+  { label: "الإعدادات", icon: Settings, to: "/clinic-settings", permission: "settings.manage" },
 ];
 
 /**
@@ -571,10 +571,10 @@ function QuickActions() {
   const isSuper = !!perms.data?.isSuper;
   const has = (p?: string) => !p || isSuper || allowed.has(p);
   const all = [
-    { label: "حجز موعد جديد", icon: CalendarDays, to: "/_authenticated/quick-add" as string, permission: "appointments.manage" },
-    { label: "بحث عن مريض", icon: Search, to: "/_authenticated/patients-management" as string, permission: "patients.view" },
-    { label: "إدارة الأطباء", icon: Stethoscope, to: "/_authenticated/doctors-management" as string, permission: "doctors.manage" },
-    { label: "قائمة الانتظار", icon: Clock, to: "/_authenticated/appointments-queue" as string, permission: "appointments.view" },
+    { label: "حجز موعد جديد", icon: CalendarDays, to: "/quick-add", permission: "appointments.manage" },
+    { label: "بحث عن مريض", icon: Search, to: "/patients-management", permission: "patients.view" },
+    { label: "إدارة الأطباء", icon: Stethoscope, to: "/doctors-management", permission: "doctors.manage" },
+    { label: "قائمة الانتظار", icon: Clock, to: "/appointments-queue", permission: "appointments.view" },
   ];
   const actions = all.filter((a) => has(a.permission));
   return (
