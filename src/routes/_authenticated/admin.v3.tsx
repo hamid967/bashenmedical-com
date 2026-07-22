@@ -264,3 +264,109 @@ function PillarCard({
     </section>
   );
 }
+
+const SEV_TONE: Record<Severity, { chip: string; label: string; icon: string }> = {
+  ok: { chip: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "طبيعي", icon: "text-emerald-500" },
+  warn: { chip: "bg-amber-50 text-amber-700 border-amber-200", label: "تحذير", icon: "text-amber-500" },
+  rollback: { chip: "bg-rose-50 text-rose-700 border-rose-200", label: "تراجع مقترح", icon: "text-rose-500" },
+  unknown: { chip: "bg-slate-50 text-slate-600 border-slate-200", label: "—", icon: "text-slate-400" },
+};
+
+function HealthPanel({
+  health,
+  busy,
+  onRollback,
+}: {
+  health: { window_minutes: number; flags: FlagHealth[]; summary: Record<Severity, number> };
+  busy: string | null;
+  onRollback: (key: string, reason: string) => void;
+}) {
+  const critical = health.flags.filter((f) => f.severity === "rollback");
+  const warn = health.flags.filter((f) => f.severity === "warn");
+  const visible = [...critical, ...warn];
+
+  return (
+    <section className="ac-card p-4 space-y-3">
+      <header className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2">
+          <div className="h-8 w-8 rounded-lg grid place-items-center bg-gradient-to-br from-rose-500 to-orange-500 text-white">
+            <Activity className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="font-semibold text-sm">صحة الميزات وrollback سريع</div>
+            <div className="text-[11px] text-[color:var(--ac-ink-3)]">
+              نافذة آخر {health.window_minutes} دقيقة · تحديث تلقائي كل دقيقة
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 text-[11px]">
+          <span className={`px-2 py-0.5 rounded-full border ${SEV_TONE.rollback.chip}`}>
+            حرج {health.summary.rollback}
+          </span>
+          <span className={`px-2 py-0.5 rounded-full border ${SEV_TONE.warn.chip}`}>
+            تحذير {health.summary.warn}
+          </span>
+          <span className={`px-2 py-0.5 rounded-full border ${SEV_TONE.ok.chip}`}>
+            طبيعي {health.summary.ok}
+          </span>
+        </div>
+      </header>
+
+      {visible.length === 0 ? (
+        <div className="text-xs text-[color:var(--ac-ink-3)] py-4 text-center">
+          لا توجد ارتفاعات أخطاء حالياً — جميع الميزات المفعّلة ضمن الطبيعي.
+        </div>
+      ) : (
+        <ul className="space-y-2">
+          {visible.map((f) => {
+            const tone = SEV_TONE[f.severity];
+            return (
+              <li
+                key={f.key}
+                className="flex items-start justify-between gap-3 p-3 rounded-lg border border-[color:var(--ac-line)]"
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <AlertTriangle className={`h-4 w-4 ${tone.icon}`} />
+                    <span className="truncate">{f.title}</span>
+                    <span className={`text-[10px] rounded-full border px-1.5 ${tone.chip}`}>
+                      {tone.label}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-[color:var(--ac-ink-3)] mt-1">{f.reason}</p>
+                  <div className="text-[10px] text-slate-400 font-mono mt-1">
+                    {f.key}
+                    {f.observed_per_hour !== null && (
+                      <>
+                        {" · "}
+                        {f.observed_per_hour}/س
+                        {f.baseline_per_hour ? ` (خط أساس ${f.baseline_per_hour}/س)` : ""}
+                        {f.ratio ? ` · ${f.ratio}×` : ""}
+                      </>
+                    )}
+                    {f.sample_size ? ` · عيّنة ${f.sample_size}` : ""}
+                  </div>
+                </div>
+                {f.enabled && (
+                  <button
+                    type="button"
+                    disabled={busy === f.key}
+                    onClick={() => onRollback(f.key, f.reason)}
+                    className={`inline-flex items-center gap-1.5 rounded-full px-3 h-8 text-xs font-medium border transition ${
+                      f.severity === "rollback"
+                        ? "bg-rose-600 text-white border-rose-600 hover:bg-rose-700"
+                        : "bg-white text-rose-700 border-rose-200 hover:bg-rose-50"
+                    } ${busy === f.key ? "opacity-60" : ""}`}
+                  >
+                    <Undo2 className="h-3.5 w-3.5" />
+                    تراجع فوري
+                  </button>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
