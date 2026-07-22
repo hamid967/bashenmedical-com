@@ -14,6 +14,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { z } from "zod";
 import { getFeatureFlag, readAuthUser, serverClient } from "@/lib/ai/ai.server";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 const ToolSchemas = {
   cancel_appointment: z.object({
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/api/ai/action")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "ai_chat" }); if (_rl) return _rl;
         const auth = await readAuthUser(request);
         if (!auth) return json({ error: "unauthenticated" }, 401);
 

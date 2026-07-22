@@ -18,6 +18,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import {
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
   SESSION_TTL_MS,
   generateSessionToken,
   jsonResponse,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/api/public/reservations/session-from-auth
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "auth_otp" }); if (_rl) return _rl;
         const authHeader = request.headers.get("Authorization") ?? "";
         const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
         if (!token) {

@@ -26,6 +26,7 @@ import { friendlyInsertError, FRIENDLY_INSERT_MESSAGES } from "@/lib/insert-erro
 // Single source of truth — shared with the client wizard.
 // See src/lib/booking-limits.ts and src/components/booking/types.ts.
 import {
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
   NAME_MIN,
   NAME_MAX,
   PHONE_MIN,
@@ -146,6 +147,7 @@ export const Route = createFileRoute("/api/public/book/create")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();

@@ -9,6 +9,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 const SYSTEM_PROMPT = `أنت "مساعد باعشن" لمريض مسجّل الدخول في بوابة المريض.
 - أجب بالعربية بلهجة مهنية موجزة (أو الإنجليزية إذا كتب المستخدم بالإنجليزية).
@@ -142,6 +143,7 @@ export const Route = createFileRoute("/api/portal/ai-chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "ai_chat" }); if (_rl) return _rl;
         const auth = await readBearer(request);
         if (!auth) return new Response("Unauthorized", { status: 401 });
 

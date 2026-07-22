@@ -38,6 +38,7 @@ import { createFileRoute } from "@tanstack/react-router";
 // Riyadh-local "today"/"now" helpers shared with cancel.ts and slots.functions.ts
 // so the day boundary is identical across resolver, cancel API, and portal cancel.
 import { riyadhTodayIso, riyadhNowMinutes } from "@/lib/riyadh-date";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 function json(
   status: number,
@@ -108,6 +109,7 @@ export const Route = createFileRoute("/api/public/book/availability")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
         const url = new URL(request.url);
         const date = url.searchParams.get("date");
         const doctorId = url.searchParams.get("doctor_id");

@@ -22,6 +22,7 @@ import {
   maskSensitive,
 } from "@/lib/ai/safety";
 import {
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
   getFeatureFlag,
   getModel,
   recordSafetyIncident,
@@ -166,6 +167,7 @@ export const Route = createFileRoute("/api/ai/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "ai_chat" }); if (_rl) return _rl;
         // Master kill switch
         const enabled = await getFeatureFlag("ai.assistant.enabled");
         if (!enabled) return new Response("assistant_disabled", { status: 503 });
