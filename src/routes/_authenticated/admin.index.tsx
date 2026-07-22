@@ -69,8 +69,8 @@ type QuickLink = {
 };
 
 const PRIMARY_LINKS: QuickLink[] = [
-  { to: "/command-center", label: "مركز التحكم الذكي", icon: CommandIcon, roles: ["admin", "super_admin"] },
   { to: "/appointments-queue", label: "طابور المواعيد", icon: CalendarCheck, roles: ["admin", "reception", "doctor"] },
+
   { to: "/patients-management", label: "المرضى", icon: Users, roles: ["admin", "reception", "doctor", "nurse"] },
   { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
   { to: "/availability-management", label: "التوفر", icon: ClipboardList, roles: ["admin", "hr"] },

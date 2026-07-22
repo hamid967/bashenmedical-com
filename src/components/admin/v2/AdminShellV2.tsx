@@ -52,16 +52,16 @@ type NavItem = {
 
 type NavGroup = { title: string; items: NavItem[] };
 
-// Unified navigation covering admin console, command-center, and site-builder.
+// Unified navigation for the admin console and site-builder.
 // Roles gate each item; super_admin sees everything including Site Builder.
 const NAV: NavGroup[] = [
   {
     title: "عام",
     items: [
       { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard },
-      { to: "/command-center", label: "مركز التحكم الذكي", icon: CommandIcon, roles: ["admin", "super_admin"] },
     ],
   },
+
   {
     title: "العمليات",
     items: [
