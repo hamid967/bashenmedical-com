@@ -5194,6 +5194,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "service_inquiries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "service_inquiries_consent_record_id_fkey"
             columns: ["consent_record_id"]
             isOneToOne: false

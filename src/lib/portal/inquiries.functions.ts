@@ -34,35 +34,22 @@ export const listMyInquiries = createServerFn({ method: "GET" })
         `id, request_number, full_name, mobile_number, service_label,
          branch_id, preferred_date, preferred_contact_method, notes,
          internal_status, whatsapp_handoff_status, whatsapp_opened_at,
-         created_at, linked_at`,
+         created_at, linked_at,
+         branches:branch_id ( name_ar )`,
       )
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(100);
 
     if (error) throw new Error(error.message);
-    const rows = data ?? [];
-
-    const branchIds = Array.from(
-      new Set(rows.map((r: any) => r.branch_id).filter(Boolean)),
-    );
-    const branchMap = new Map<string, string>();
-    if (branchIds.length) {
-      const { data: branches } = await supabase
-        .from("branches")
-        .select("id, name_ar")
-        .in("id", branchIds);
-      for (const b of branches ?? []) branchMap.set(b.id, b.name_ar);
-    }
-
-    return rows.map((r: any) => ({
+    return (data ?? []).map((r: any) => ({
       id: r.id,
       request_number: r.request_number,
       full_name: r.full_name,
       mobile_number: r.mobile_number,
       service_label: r.service_label,
       branch_id: r.branch_id,
-      branch_name: r.branch_id ? branchMap.get(r.branch_id) ?? null : null,
+      branch_name: r.branches?.name_ar ?? null,
       preferred_date: r.preferred_date,
       preferred_contact_method: r.preferred_contact_method,
       notes: r.notes,
@@ -72,6 +59,7 @@ export const listMyInquiries = createServerFn({ method: "GET" })
       created_at: r.created_at,
       linked_at: r.linked_at,
     }));
+
 
   });
 
