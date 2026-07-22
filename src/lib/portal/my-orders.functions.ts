@@ -45,6 +45,7 @@ const KIND_TITLES: Record<MyRecentOrder["kind"], string> = {
 
 export const getMyRecentOrders = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
 

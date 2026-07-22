@@ -25,6 +25,7 @@ type Row = {
  */
 export const getLastMcpInvocations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }): Promise<LastToolInvocation[]> => {
     const { supabase } = context;
     const { data, error } = await (

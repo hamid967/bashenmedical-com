@@ -25,6 +25,7 @@ export type MyDoctor = {
 
 export const listMyDoctors = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }): Promise<MyDoctor[]> => {
     const { supabase, userId } = context;
 

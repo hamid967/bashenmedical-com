@@ -228,6 +228,7 @@ async function aiSafetyHealth(sb: any): Promise<ServiceHealth> {
 
 export const getServicesHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }) => {
     const { supabase, userId } = context;
     await assertHasRole(supabase, userId, "admin");

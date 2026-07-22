@@ -22,6 +22,7 @@ export async function assertOwnerAccess(): Promise<void> {
  */
 export const getMyOwnerStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }) => {
     const [ownerRes, editorRes] = await Promise.all([
       context.supabase.rpc("has_role", { _user_id: context.userId, _role: "super_admin" }),
