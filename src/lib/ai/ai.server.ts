@@ -37,16 +37,14 @@ export async function readAuthUser(request: Request): Promise<{ userId: string; 
 
 export async function getFeatureFlag(key: string): Promise<boolean> {
   try {
-    const sb = serverClient();
-    const { data } = await sb.from("ai_feature_flags").select("enabled").eq("key", key).maybeSingle();
+    const { data } = await supabaseAdmin.from("ai_feature_flags").select("enabled").eq("key", key).maybeSingle();
     return !!data?.enabled;
   } catch { return false; }
 }
 
 export async function getModel(route: "fast" | "deep"): Promise<string> {
   try {
-    const sb = serverClient();
-    const { data } = await sb.from("ai_model_routes").select("model_id, fallback_id, enabled").eq("route_name", route).maybeSingle();
+    const { data } = await supabaseAdmin.from("ai_model_routes").select("model_id, fallback_id, enabled").eq("route_name", route).maybeSingle();
     if (data?.enabled && data.model_id) return data.model_id;
     if (data?.fallback_id) return data.fallback_id;
   } catch { /* fall through */ }
