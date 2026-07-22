@@ -167,21 +167,25 @@ export function JazanIntro() {
   useEffect(() => {
     setLang(readLang());
     if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) {
-      trackEvent("jazan_intro_suppressed", {
+      const suppressedPayload = {
         reason: !introCfg.enabled
           ? "disabled_by_settings"
           : typeof window !== "undefined" && localStorage.getItem(DISABLED_KEY) === "1"
             ? "user_opted_out"
             : "cooldown",
-      });
+      };
+      trackEvent("jazan_intro_suppressed", suppressedPayload);
+      debugLog("jazan_intro_suppressed", suppressedPayload);
       return;
     }
     setMounted(true);
     shownAtRef.current = Date.now();
-    trackEvent("jazan_intro_shown", {
+    const shownPayload = {
       cooldown_hours: introCfg.cooldownHours,
       duration_ms: introCfg.durationMs,
-    });
+    };
+    trackEvent("jazan_intro_shown", shownPayload);
+    debugLog("jazan_intro_shown", shownPayload);
     requestAnimationFrame(() => setVisible(true));
   }, [introCfg.enabled, introCfg.cooldownHours]);
 
