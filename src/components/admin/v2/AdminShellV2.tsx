@@ -40,6 +40,7 @@ import {
   Menu as MenuIcon,
   ScrollText,
   KeyRound,
+  Activity,
 } from "lucide-react";
 
 type NavItem = {
