@@ -16,6 +16,7 @@
  * cancel/reschedule endpoints work with no change.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { createClient } from "@supabase/supabase-js";
 import {
   SESSION_TTL_MS,
@@ -28,6 +29,7 @@ export const Route = createFileRoute("/api/public/reservations/session-from-auth
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "auth_otp" }); if (_rl) return _rl;
         const authHeader = request.headers.get("Authorization") ?? "";
         const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
         if (!token) {

@@ -20,6 +20,7 @@
  * error.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { friendlyInsertError, FRIENDLY_INSERT_MESSAGES } from "@/lib/insert-errors";
@@ -146,6 +147,7 @@ export const Route = createFileRoute("/api/public/book/create")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();

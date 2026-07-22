@@ -11,6 +11,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { NAME_MIN, NAME_MAX, PHONE_MIN, PHONE_MAX, PHONE_RE } from "@/lib/booking-limits";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
@@ -43,6 +44,7 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();
@@ -112,6 +114,7 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
       },
 
       GET: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
         const url = new URL(request.url);
         const ref = (url.searchParams.get("ref") ?? "").trim().toUpperCase();
         const phone4 = (url.searchParams.get("phone4") ?? "").trim();

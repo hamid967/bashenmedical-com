@@ -14,6 +14,7 @@
  *   { ok: true, dates: string[] }   // "YYYY-MM-DD"
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
   server: {
     handlers: {
       GET: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
         const url = new URL(request.url);
         const year = Number(url.searchParams.get("year"));
         const month = Number(url.searchParams.get("month"));

@@ -7,6 +7,7 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 const bodySchema = z.object({
   ref: z
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/api/public/book/waitlist-confirm")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
         let raw: unknown;
         try {
           raw = await request.json();

@@ -14,6 +14,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { checkEligibility } from "@/lib/nphies/adapter.server";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 const schema = z.object({
   doctor_id: z.string().uuid("doctor غير صالح"),
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/api/public/insurance/verify")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "insurance" }); if (_rl) return _rl;
         let raw: unknown;
         try {
           raw = await request.json();

@@ -21,6 +21,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 const schema = z.object({
   reference: z
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/api/public/book/track")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();
