@@ -1,0 +1,23 @@
+{
+  "please_enter_the_order_reference_code": "Please enter the order reference code",
+  "track_orders": "Track orders",
+  "my_orders": "My Orders",
+  "enter_your_phone_and_the_order_reference": "Enter your phone and the order reference code from your confirmation to view details.",
+  "phone": "Phone",
+  "05xxxxxxxx": "05XXXXXXXX",
+  "order_reference": "Order reference",
+  "reference_code_8_chars": "Reference code (8 chars)",
+  "show_my_order": "Show my order",
+  "results_for": "Results for ",
+  "new_search": "New search",
+  "failed_to_load_orders": "Failed to load orders.",
+  "no_orders_found_for_this_number": "No orders found for this number",
+  "book_an_appointment": "Book an appointment",
+  "browse_all_services": "Browse all services",
+  "change_number": "Change number",
+  "created": "Created: ",
+  "en": "en",
+  "scheduled": "Scheduled: ",
+  "details": "Details",
+  "or_start_a_new_request": "Or start a new request"
+}

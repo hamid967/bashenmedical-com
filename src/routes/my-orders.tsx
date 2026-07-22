@@ -38,6 +38,7 @@ export const Route = createFileRoute("/my-orders")({
 import { parseOrderSummaries, OrderParseError, type OrderSummary } from "@/lib/order-types";
 import { toast } from "sonner";
 import { bmcOgImageMeta } from "@/lib/og-meta";
+import i18n from "i18next";
 
 type Order = OrderSummary;
 
@@ -142,7 +143,7 @@ function MyOrdersPage() {
     const trimmedRef = refInput.trim().replace(/[^0-9a-fA-F]/g, "");
     if (trimmedPhone.replace(/\D/g, "").length < 6) return;
     if (trimmedRef.length < 6) {
-      toast.error(isAr ? "الرجاء إدخال رمز مرجع الطلب" : "Please enter the order reference code");
+      toast.error(i18n.t("myOrders:please_enter_the_order_reference_code"));
       return;
     }
     setQueryPhone(trimmedPhone);
@@ -172,13 +173,13 @@ function MyOrdersPage() {
         <div className="container-app py-10 md:py-14">
           <div className="mx-auto max-w-3xl text-center">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-              {(isAr ? "تتبع الطلبات" : "Track orders")}
+              {i18n.t("myOrders:track_orders")}
             </div>
             <h1 className="text-3xl md:text-5xl font-bold">
-              {(isAr ? "طلباتي" : "My Orders")}
+              {i18n.t("myOrders:my_orders")}
             </h1>
             <p className="mt-3 text-primary-foreground/85">
-              {(isAr ? "أدخل رقم جوالك ورمز مرجع الطلب (الظاهر في رسالة التأكيد) لعرض تفاصيل الطلب." : "Enter your phone and the order reference code from your confirmation to view details.")}
+              {i18n.t("myOrders:enter_your_phone_and_the_order_reference")}
             </p>
           </div>
 
@@ -186,7 +187,7 @@ function MyOrdersPage() {
           <form onSubmit={onSubmit} className="mx-auto mt-6 flex max-w-2xl flex-col gap-3">
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
-                <Label htmlFor="phone" className="sr-only">{(isAr ? "رقم الجوال" : "Phone")}</Label>
+                <Label htmlFor="phone" className="sr-only">{i18n.t("myOrders:phone")}</Label>
                 <div className="relative">
                   <Phone className="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted-foreground" />
                   <Input
@@ -194,7 +195,7 @@ function MyOrdersPage() {
                     type="tel"
                     inputMode="tel"
                     autoComplete="tel"
-                    placeholder={(isAr ? "05XXXXXXXX" : "05XXXXXXXX")}
+                    placeholder={i18n.t("myOrders:05xxxxxxxx")}
                     value={phoneInput}
                     onChange={(e) => setPhoneInput(e.target.value)}
                     className="ps-9 bg-background text-foreground h-12"
@@ -203,14 +204,14 @@ function MyOrdersPage() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="ref" className="sr-only">{(isAr ? "رمز مرجع الطلب" : "Order reference")}</Label>
+                <Label htmlFor="ref" className="sr-only">{i18n.t("myOrders:order_reference")}</Label>
                 <Input
                   id="ref"
                   type="text"
                   inputMode="text"
                   autoComplete="off"
                   spellCheck={false}
-                  placeholder={(isAr ? "رمز المرجع (٨ خانات)" : "Reference code (8 chars)")}
+                  placeholder={i18n.t("myOrders:reference_code_8_chars")}
                   value={refInput}
                   onChange={(e) => setRefInput(e.target.value)}
                   className="bg-background text-foreground h-12 font-mono tracking-wider"
@@ -221,7 +222,7 @@ function MyOrdersPage() {
             </div>
             <Button type="submit" variant="premium" size="xl" disabled={isFetching} className="w-full sm:w-auto sm:self-end">
               {isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-              {(isAr ? "عرض طلبي" : "Show my order")}
+              {i18n.t("myOrders:show_my_order")}
             </Button>
           </form>
         </div>
@@ -234,11 +235,11 @@ function MyOrdersPage() {
           <>
             <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
               <div className="text-sm text-muted-foreground">
-                {(isAr ? "نتائج البحث برقم " : "Results for ")}
+                {i18n.t("myOrders:results_for")}
                 <span className="font-semibold text-foreground" dir="ltr">{queryPhone}</span>
               </div>
               <Button variant="outline" size="sm" onClick={clear}>
-                {(isAr ? "بحث جديد" : "New search")}
+                {i18n.t("myOrders:new_search")}
               </Button>
             </div>
 
@@ -251,7 +252,7 @@ function MyOrdersPage() {
               </div>
             ) : error ? (
               <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-6 text-destructive">
-                {(isAr ? "تعذّر تحميل الطلبات — حاول مجددًا." : "Failed to load orders.")}
+                {i18n.t("myOrders:failed_to_load_orders")}
               </div>
             ) : (orders?.length ?? 0) === 0 ? (
               <div className="rounded-2xl border border-border bg-card p-8 md:p-10">
@@ -260,7 +261,7 @@ function MyOrdersPage() {
                     <Search className="h-7 w-7 text-primary" />
                   </div>
                   <h3 className="text-xl font-bold">
-                    {(isAr ? "لا توجد طلبات مرتبطة بهذا الرقم" : "No orders found for this number")}
+                    {i18n.t("myOrders:no_orders_found_for_this_number")}
                   </h3>
                   <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
                     {isAr ? (
@@ -270,9 +271,9 @@ function MyOrdersPage() {
                     )}
                   </p>
                   <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-                    <Link to="/book"><Button variant="premium" size="lg"><CalendarCheck className="h-4 w-4" />{(isAr ? "احجز موعدًا الآن" : "Book an appointment")}</Button></Link>
-                    <Link to="/services"><Button variant="outline" size="lg">{(isAr ? "استعرض كل الخدمات" : "Browse all services")}</Button></Link>
-                    <Button variant="ghost" size="lg" onClick={clear}>{(isAr ? "تغيير الرقم" : "Change number")}</Button>
+                    <Link to="/book"><Button variant="premium" size="lg"><CalendarCheck className="h-4 w-4" />{i18n.t("myOrders:book_an_appointment")}</Button></Link>
+                    <Link to="/services"><Button variant="outline" size="lg">{i18n.t("myOrders:browse_all_services")}</Button></Link>
+                    <Button variant="ghost" size="lg" onClick={clear}>{i18n.t("myOrders:change_number")}</Button>
                   </div>
                 </div>
                 <div className="mt-8 border-t border-border pt-6">
@@ -328,12 +329,12 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
       <div className="text-xs text-muted-foreground space-y-1">
         <div className="flex items-center gap-1.5">
           <Clock className="h-3.5 w-3.5" />
-          <span>{(isAr ? "تم الإنشاء: " : "Created: ")}{fmt(order.created_at,(isAr ? "ar" : "en"))}</span>
+          <span>{i18n.t("myOrders:created")}{fmt(order.created_at,isAr ? "ar" : "en")}</span>
         </div>
         {order.scheduled_at && (
           <div className="flex items-center gap-1.5">
             <CalendarCheck className="h-3.5 w-3.5" />
-            <span>{(isAr ? "الموعد: " : "Scheduled: ")}{fmt(order.scheduled_at,(isAr ? "ar" : "en"))}</span>
+            <span>{i18n.t("myOrders:scheduled")}{fmt(order.scheduled_at,isAr ? "ar" : "en")}</span>
           </div>
         )}
       </div>
@@ -341,7 +342,7 @@ function OrderCard({ order, phone, isAr }: { order: Order; phone: string; isAr: 
       <div className="mt-auto flex items-center justify-between pt-2 border-t border-border">
         <span className="font-mono text-[11px] text-muted-foreground">#{order.reference}</span>
         <Link to={detailHref} className="text-primary text-sm font-semibold inline-flex items-center gap-1 hover:underline">
-          {(isAr ? "التفاصيل" : "Details")}
+          {i18n.t("myOrders:details")}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -359,7 +360,7 @@ function QuickLinks({ isAr }: { isAr: boolean }) {
   return (
     <div>
       <h2 className="mb-4 text-xl font-bold">
-        {(isAr ? "أو ابدأ طلبًا جديدًا" : "Or start a new request")}
+        {i18n.t("myOrders:or_start_a_new_request")}
       </h2>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {links.map((l) => (

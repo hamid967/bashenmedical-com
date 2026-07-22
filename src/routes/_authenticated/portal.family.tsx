@@ -74,6 +74,7 @@ import {
   Languages,
 } from "lucide-react";
 import { PortalPageHeader, PortalEmptyState } from "@/components/portal/ui";
+import i18n from "i18next";
 
 const dependentsQuery = queryOptions({
   queryKey: ["portal", "dependents"],
@@ -305,7 +306,7 @@ function FamilyPage() {
     null,
   );
   const [toDelete, setToDelete] = useState<Dependent | null>(null);
-  const dir =(isAr ? "rtl" : "ltr");
+  const dir =i18n.t("portalFamily:ltr");
 
   const langMutation = useMutation({
     mutationFn: (next: Lang) => updateMyProfile({ data: { preferred_language: next } }),
@@ -323,7 +324,7 @@ function FamilyPage() {
     onError: () => toast.error(t("lang_error", lang)),
   });
 
-  const nextLang: Lang =(isAr ? "en" : "ar");
+  const nextLang: Lang =isAr ? "ar" : "en";
 
   return (
     <div className="space-y-6 pb-24 md:pb-6" dir={dir}>
@@ -336,7 +337,7 @@ function FamilyPage() {
         }
         description={t("subtitle", lang)}
         breadcrumbs={[
-          { label:(isAr ? "الرئيسية" : "Home"), to: "/portal" },
+          { label:i18n.t("portalFamily:home"), to: "/portal" },
           { label: t("title", lang) },
         ]}
         isAr={lang === "ar"}
@@ -448,11 +449,11 @@ function DependentCard({
     mutationFn: (patch: Partial<DependentAccessScopes>) =>
       setDependentAccessScopes({ data: { id: row.id, scopes: patch } }),
     onSuccess: () => {
-      toast.success(isAr ? "تم تحديث الصلاحيات" : "Access updated");
+      toast.success(i18n.t("portalFamily:access_updated"));
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
     },
     onError: (e: any) =>
-      toast.error(e?.message ?? (isAr ? "تعذّر التحديث" : "Update failed")),
+      toast.error(e?.message ?? i18n.t("portalFamily:update_failed")),
   });
   const badgeCls = verified
     ? "bg-emerald-50 text-emerald-700"
@@ -462,7 +463,7 @@ function DependentCard({
   const badgeLabel = verified
     ? t("verified", lang)
     : rejected
-      ? (isAr ? "مرفوض" : "Rejected")
+      ? i18n.t("portalFamily:rejected")
       : t("pending", lang);
   return (
     <div className="glass-card p-4 flex flex-col gap-3">
@@ -516,15 +517,15 @@ function DependentCard({
         disabled={scopesMut.isPending}
       >
         <legend className="px-1 text-[10px] font-semibold text-[color:var(--portal-ink-2)]">
-          {(isAr ? "صلاحيات الوصول" : "Access scopes")}
+          {i18n.t("portalFamily:access_scopes")}
         </legend>
         <div className="grid grid-cols-2 gap-1.5">
           {(
             [
-              ["booking",(isAr ? "الحجز" : "Booking")],
-              ["reports",(isAr ? "التقارير" : "Reports")],
-              ["prescriptions",(isAr ? "الوصفات" : "Prescriptions")],
-              ["billing",(isAr ? "الفواتير" : "Billing")],
+              ["booking",i18n.t("portalFamily:booking")],
+              ["reports",i18n.t("portalFamily:reports")],
+              ["prescriptions",i18n.t("portalFamily:prescriptions")],
+              ["billing",i18n.t("portalFamily:billing")],
             ] as const
           ).map(([key, label]) => {
             const active = row.access_scopes?.[key] === true;
@@ -548,7 +549,7 @@ function DependentCard({
         </div>
         {!verified && (
           <div className="mt-1.5 text-[10px] text-amber-700">
-            {(isAr ? "الصلاحيات لن تُفعَّل قبل توثيق العلاقة." : "Scopes take effect only after the relationship is verified.")}
+            {i18n.t("portalFamily:scopes_take_effect_only_after_the_relati")}
           </div>
         )}
       </fieldset>
@@ -571,12 +572,12 @@ function DependentCard({
                 ))}
                 {!verified && (
                   <li>
-                    {(isAr ? "توثيق العلاقة من الاستقبال" : "Relationship verification by reception")}
+                    {i18n.t("portalFamily:relationship_verification_by_reception")}
                   </li>
                 )}
                 {verified && !bookingAllowed && (
                   <li>
-                    {(isAr ? "تفعيل صلاحية الحجز نيابةً من قائمة الصلاحيات أعلاه" : "Enable the ‘Booking’ scope above")}
+                    {i18n.t("portalFamily:enable_the_booking_scope_above")}
                   </li>
                 )}
               </ul>
@@ -738,7 +739,7 @@ function AppointmentRow({ row, lang }: { row: DependentAppointment; lang: Lang }
   const isAr = lang === "ar";
   const statusKey = (STATUS_LABEL[(row.status || "").toLowerCase()] ?? "st_unknown") as keyof typeof T;
   const { cls, Icon } = statusVisual(row.status);
-  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(isAr ? "ar-SA-u-ca-gregory" : "en-GB",
+  const dateLabel = new Date(`${row.appointment_date}T${row.appointment_time}`).toLocaleString(i18n.t("portalFamily:en_gb"),
     { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" },
   );
   const doctorName = lang === "ar" ? row.doctor_name_ar : row.doctor_name_en ?? row.doctor_name_ar;
@@ -893,7 +894,7 @@ function DependentDialog({
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="sm:max-w-lg" dir={(isAr ? "rtl" : "ltr")}>
+      <DialogContent className="sm:max-w-lg" dir={i18n.t("portalFamily:ltr")}>
         <DialogHeader>
           <DialogTitle>
             {mode === "edit" ? t("form_edit_title", lang) : t("form_add_title", lang)}
@@ -1103,7 +1104,7 @@ function DeleteDialog({
       const detail =
         err instanceof Error && err.message
           ? err.message
-          :(isAr ? "خطأ غير متوقع أثناء الاتصال بالخادم." : "Unexpected server error.");
+          :i18n.t("portalFamily:unexpected_server_error");
       toast.error(T.del_cancel_error[lang], {
         description: detail,
         duration: 8000,
@@ -1132,7 +1133,7 @@ function DeleteDialog({
       }}
     >
       <AlertDialogContent
-        dir={(isAr ? "rtl" : "ltr")}
+        dir={i18n.t("portalFamily:ltr")}
         aria-busy={busy}
         aria-labelledby="dep-del-title"
         aria-describedby="dep-del-desc"
@@ -1284,7 +1285,7 @@ function DeleteDialog({
         }}
       >
         <AlertDialogContent
-          dir={(isAr ? "rtl" : "ltr")}
+          dir={i18n.t("portalFamily:ltr")}
           aria-busy={cancelMut.isPending}
           aria-labelledby="dep-cancel-title"
           aria-describedby="dep-cancel-desc"
@@ -1396,7 +1397,7 @@ function FamilyError({ error, reset }: { error: Error; reset: () => void }) {
     (docLang === "en" ? "en" : "ar")) as Lang;
   const isAr = lang === "ar";
   return (
-    <div className="glass-card max-w-md mx-auto p-8 text-center" dir={(isAr ? "rtl" : "ltr")}>
+    <div className="glass-card max-w-md mx-auto p-8 text-center" dir={i18n.t("portalFamily:ltr")}>
       <div className="mx-auto h-14 w-14 rounded-2xl grid place-items-center bg-red-50 text-red-500 mb-4">
         <AlertTriangle className="h-7 w-7" />
       </div>

@@ -1,0 +1,18 @@
+{
+  "ltr": "ltr",
+  "ar": "ar",
+  "home": "Home",
+  "access_updated": "Access updated",
+  "update_failed": "Update failed",
+  "rejected": "Rejected",
+  "access_scopes": "Access scopes",
+  "booking": "Booking",
+  "reports": "Reports",
+  "prescriptions": "Prescriptions",
+  "billing": "Billing",
+  "scopes_take_effect_only_after_the_relati": "Scopes take effect only after the relationship is verified.",
+  "relationship_verification_by_reception": "Relationship verification by reception",
+  "enable_the_booking_scope_above": "Enable the ‘Booking’ scope above",
+  "en_gb": "en-GB",
+  "unexpected_server_error": "Unexpected server error."
+}

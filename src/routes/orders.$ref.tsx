@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { bmcOgImageMeta } from "@/lib/og-meta";
+import i18n from "i18next";
 
 const search = z.object({
   phone: z.string(),
@@ -135,7 +136,7 @@ function OrderDetailPage() {
     if (!data) return;
     if (previousStatus.current && previousStatus.current !== data.status) {
       const label = STATUS_AR[data.status] ?? data.status;
-      toast.success(isAr ? "تحديث الحالة" : "Status updated",
+      toast.success(i18n.t("ordersDetail:status_updated"),
         { description: isAr ? `طلبك أصبح: ${label}` : `Your order is now: ${data.status}` }
       );
     }
@@ -147,7 +148,7 @@ function OrderDetailPage() {
       <div className="container-app py-8 md:py-12 max-w-3xl">
         <Link to="/my-orders" className="mb-6 inline-flex items-center gap-2 text-sm text-primary hover:underline print:hidden">
           <ArrowLeft className="h-4 w-4" />
-          {(isAr ? "العودة إلى طلباتي" : "Back to my orders")}
+          {i18n.t("ordersDetail:back_to_my_orders")}
         </Link>
 
         {isLoading ? (
@@ -157,13 +158,13 @@ function OrderDetailPage() {
         ) : error || !data ? (
           <div className="rounded-2xl border border-destructive/40 bg-destructive/5 p-8 text-center">
             <h1 className="text-xl font-bold text-destructive">
-              {(isAr ? "لم نجد الطلب" : "Order not found")}
+              {i18n.t("ordersDetail:order_not_found")}
             </h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              {(isAr ? "تأكّد من رقم الطلب ورقم الجوال المرتبط به." : "Check the reference and phone associated with this order.")}
+              {i18n.t("ordersDetail:check_the_reference_and_phone_associated")}
             </p>
             <Link to="/my-orders" className="inline-block mt-4">
-              <Button variant="outline">{(isAr ? "العودة" : "Back")}</Button>
+              <Button variant="outline">{i18n.t("ordersDetail:back")}</Button>
             </Link>
           </div>
         ) : (
@@ -222,7 +223,7 @@ function OrderDetailCard({
       return res;
     },
     onSuccess: () => {
-      toast.success(isAr ? "تم إلغاء الطلب" : "Order cancelled");
+      toast.success(i18n.t("ordersDetail:order_cancelled"));
       setCancelOpen(false);
       setCancelReason("");
       qc.invalidateQueries({ queryKey: ["order-detail", order.reference, phone, order.kind] });
@@ -230,11 +231,11 @@ function OrderDetailCard({
     },
     onError: (err: Error) => {
       const map: Record<string, string> = {
-        not_found:(isAr ? "لم يُعثر على الطلب" : "Order not found"),
-        not_cancellable:(isAr ? "لا يمكن إلغاء الطلب في هذه المرحلة" : "Order can no longer be cancelled"),
-        invalid_phone:(isAr ? "رقم الجوال غير صحيح" : "Invalid phone"),
+        not_found:i18n.t("ordersDetail:order_not_found_2"),
+        not_cancellable:i18n.t("ordersDetail:order_can_no_longer_be_cancelled"),
+        invalid_phone:i18n.t("ordersDetail:invalid_phone"),
       };
-      toast.error(map[err.message] ?? (isAr ? "تعذّر إلغاء الطلب" : "Failed to cancel"));
+      toast.error(map[err.message] ?? i18n.t("ordersDetail:failed_to_cancel"));
     },
   });
 
@@ -260,7 +261,7 @@ function OrderDetailCard({
             {qrDataUrl && (
               <img
                 src={qrDataUrl}
-                alt={(isAr ? "رمز تتبع الطلب" : "Tracking QR")}
+                alt={i18n.t("ordersDetail:tracking_qr")}
                 className="h-20 w-20 rounded-md border border-border bg-white p-1"
               />
             )}
@@ -268,11 +269,11 @@ function OrderDetailCard({
         </div>
 
         <div className="mt-6 grid gap-3 text-sm">
-          <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "تاريخ الإنشاء" : "Created")} value={fmt(order.created_at,(isAr ? "ar" : "en"))} />
+          <Row icon={<Clock className="h-4 w-4" />} label={i18n.t("ordersDetail:created")} value={fmt(order.created_at,isAr ? "ar" : "en")} />
           {order.scheduled_at && (
-            <Row icon={<Clock className="h-4 w-4" />} label={(isAr ? "الموعد المفضّل" : "Scheduled")} value={fmt(order.scheduled_at,(isAr ? "ar" : "en"))} />
+            <Row icon={<Clock className="h-4 w-4" />} label={i18n.t("ordersDetail:scheduled")} value={fmt(order.scheduled_at,isAr ? "ar" : "en")} />
           )}
-          <Row icon={<Phone className="h-4 w-4" />} label={(isAr ? "الجوال" : "Phone")} value={phone} />
+          <Row icon={<Phone className="h-4 w-4" />} label={i18n.t("ordersDetail:phone")} value={phone} />
         </div>
       </div>
 
@@ -289,27 +290,27 @@ function OrderDetailCard({
 
       {/* Actions */}
       <div className="rounded-2xl border border-border bg-card p-6 print:hidden">
-        <h3 className="font-bold mb-2">{(isAr ? "إجراءات على الطلب" : "Actions")}</h3>
+        <h3 className="font-bold mb-2">{i18n.t("ordersDetail:actions")}</h3>
         <p className="text-sm text-muted-foreground">
-          {(isAr ? "يمكنك طباعة إيصال الطلب، أو إلغاؤه إن لم يبدأ التنفيذ بعد." : "You can print the receipt, or cancel if execution has not started.")}
+          {i18n.t("ordersDetail:you_can_print_the_receipt_or_cancel_if_e")}
         </p>
         <div className="mt-3 flex gap-2 flex-wrap">
           <Button variant="outline" onClick={() => window.print()}>
             <Printer className="h-4 w-4" />
-            {(isAr ? "طباعة" : "Print")}
+            {i18n.t("ordersDetail:print")}
           </Button>
           {canCancel ? (
             <Button variant="destructive" onClick={() => setCancelOpen(true)}>
               <XCircle className="h-4 w-4" />
-              {(isAr ? "إلغاء الطلب" : "Cancel order")}
+              {i18n.t("ordersDetail:cancel_order")}
             </Button>
           ) : order.status !== "cancelled" ? (
             <span className="inline-flex items-center rounded-md bg-muted px-3 py-1.5 text-xs text-muted-foreground">
-              {(isAr ? "لا يمكن الإلغاء في هذه المرحلة" : "Cannot cancel at this stage")}
+              {i18n.t("ordersDetail:cannot_cancel_at_this_stage")}
             </span>
           ) : null}
-          <Link to="/contact"><Button variant="premium">{(isAr ? "تواصل معنا" : "Contact us")}</Button></Link>
-          <Link to="/my-orders"><Button variant="ghost">{(isAr ? "كل طلباتي" : "All my orders")}</Button></Link>
+          <Link to="/contact"><Button variant="premium">{i18n.t("ordersDetail:contact_us")}</Button></Link>
+          <Link to="/my-orders"><Button variant="ghost">{i18n.t("ordersDetail:all_my_orders")}</Button></Link>
         </div>
       </div>
 
@@ -317,7 +318,7 @@ function OrderDetailCard({
       <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{(isAr ? "تأكيد إلغاء الطلب" : "Cancel order")}</DialogTitle>
+            <DialogTitle>{i18n.t("ordersDetail:cancel_order_2")}</DialogTitle>
             <DialogDescription>
               {isAr
                 ? `سيتم إلغاء الطلب #${order.reference}. لا يمكن التراجع عن هذا الإجراء.`
@@ -326,18 +327,18 @@ function OrderDetailCard({
           </DialogHeader>
           <div className="space-y-2">
             <label className="text-sm font-semibold">
-              {(isAr ? "سبب الإلغاء (اختياري)" : "Reason (optional)")}
+              {i18n.t("ordersDetail:reason_optional")}
             </label>
             <Textarea
               value={cancelReason}
               onChange={(e) => setCancelReason(e.target.value)}
-              placeholder={(isAr ? "مثال: تغيّر الموعد، الحصول على الخدمة في مكان آخر…" : "e.g. schedule changed…")}
+              placeholder={i18n.t("ordersDetail:e_g_schedule_changed")}
               rows={3}
             />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCancelOpen(false)} disabled={cancelMutation.isPending}>
-              {(isAr ? "تراجع" : "Keep order")}
+              {i18n.t("ordersDetail:keep_order")}
             </Button>
             <Button
               variant="destructive"
@@ -345,7 +346,7 @@ function OrderDetailCard({
               disabled={cancelMutation.isPending}
             >
               {cancelMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              {(isAr ? "تأكيد الإلغاء" : "Confirm cancel")}
+              {i18n.t("ordersDetail:confirm_cancel")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -371,11 +372,11 @@ function ServiceDetailsSection({
     const district = s("district");
     const notes = s("notes");
     return (
-      <DetailsShell title={(isAr ? "تفاصيل طلب الصيدلية" : "Pharmacy details")} icon={<Package className="h-4 w-4" />}>
+      <DetailsShell title={i18n.t("ordersDetail:pharmacy_details")} icon={<Package className="h-4 w-4" />}>
         <DetailGrid>
-          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={(isAr ? "طريقة الاستلام" : "Delivery")} value={delivery === "delivery" ? (isAr ? "توصيل للمنزل" : "Home delivery") : (isAr ? "استلام من الفرع" : "Pickup")} />}
-          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "عنوان التوصيل" : "Address")} value={address} />}
-          {district && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "الحي" : "District")} value={district} />}
+          {delivery && <Cell icon={<Truck className="h-4 w-4" />} label={i18n.t("ordersDetail:delivery")} value={delivery === "delivery" ? i18n.t("ordersDetail:home_delivery") : i18n.t("ordersDetail:pickup")} />}
+          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={i18n.t("ordersDetail:address")} value={address} />}
+          {district && <Cell icon={<MapPin className="h-4 w-4" />} label={i18n.t("ordersDetail:district")} value={district} />}
         </DetailGrid>
         {notes && <Notes text={notes} isAr={isAr} />}
         <ResultBanner
@@ -393,16 +394,16 @@ function ServiceDetailsSection({
     const email = s("email");
     const answer = s("answer") || s("reply");
     return (
-      <DetailsShell title={(isAr ? "تفاصيل الرأي الطبي الثاني" : "Second opinion details")} icon={<ClipboardList className="h-4 w-4" />}>
+      <DetailsShell title={i18n.t("ordersDetail:second_opinion_details")} icon={<ClipboardList className="h-4 w-4" />}>
         <DetailGrid>
-          {specialty && <Cell icon={<Stethoscope className="h-4 w-4" />} label={(isAr ? "التخصص" : "Specialty")} value={specialty} />}
-          {email && <Cell icon={<User className="h-4 w-4" />} label={(isAr ? "بريد الرد" : "Reply email")} value={email} />}
+          {specialty && <Cell icon={<Stethoscope className="h-4 w-4" />} label={i18n.t("ordersDetail:specialty")} value={specialty} />}
+          {email && <Cell icon={<User className="h-4 w-4" />} label={i18n.t("ordersDetail:reply_email")} value={email} />}
         </DetailGrid>
         {answer ? (
           <div className="mt-3 rounded-xl border border-primary/30 bg-primary/5 p-4">
             <div className="mb-1 flex items-center gap-2 text-sm font-semibold text-primary">
               <MessageCircle className="h-4 w-4" />
-              {(isAr ? "رد الطبيب الاستشاري" : "Consultant reply")}
+              {i18n.t("ordersDetail:consultant_reply")}
             </div>
             <p className="whitespace-pre-line text-sm text-foreground">{answer}</p>
           </div>
@@ -422,9 +423,9 @@ function ServiceDetailsSection({
     const address = s("address");
     const notes = s("notes");
     return (
-      <DetailsShell title={(isAr ? "تفاصيل الرعاية المنزلية" : "Home care details")} icon={<HomeIcon className="h-4 w-4" />}>
+      <DetailsShell title={i18n.t("ordersDetail:home_care_details")} icon={<HomeIcon className="h-4 w-4" />}>
         <DetailGrid>
-          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={(isAr ? "عنوان الزيارة" : "Visit address")} value={address} />}
+          {address && <Cell icon={<MapPin className="h-4 w-4" />} label={i18n.t("ordersDetail:visit_address")} value={address} />}
         </DetailGrid>
         {notes && <Notes text={notes} isAr={isAr} />}
         <ResultBanner
@@ -473,7 +474,7 @@ function Notes({ text, isAr }: { text: string; isAr: boolean }) {
     <div className="mt-3 rounded-xl bg-muted/50 p-3">
       <div className="mb-1 flex items-center gap-1.5 text-xs font-semibold">
         <FileText className="h-3.5 w-3.5" />
-        {(isAr ? "ملاحظات" : "Notes")}
+        {i18n.t("ordersDetail:notes")}
       </div>
       <p className="text-sm text-muted-foreground whitespace-pre-line">{text}</p>
     </div>

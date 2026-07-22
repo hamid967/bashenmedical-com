@@ -9,6 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { getDashboardSummary } from "@/lib/portal/portal.functions";
 import { cancelMyAppointment } from "@/lib/slots.functions";
+import i18n from "i18next";
 import {
   ArrowUpRight,
   CalendarCheck,
@@ -166,16 +167,16 @@ function PortalOverview() {
   const { data } = useSuspenseQuery(dashboardQuery);
   const lang: Lang = (data.profile?.preferred_language as string | undefined) === "en" ? "en" : "ar";
   const isAr = lang === "ar";
-  const dir =(isAr ? "rtl" : "ltr");
+  const dir =i18n.t("portalHome:ltr");
 
   const firstName =
-    data.profile?.full_name?.trim().split(/\s+/)[0] ?? (isAr ? "بك" : "there");
+    data.profile?.full_name?.trim().split(/\s+/)[0] ?? i18n.t("portalHome:there");
 
   const hour = new Date().getHours();
   const greetKey: "hello_am" | "hello_pm" | "hello_night" =
     hour < 12 ? "hello_am" : hour < 18 ? "hello_pm" : "hello_night";
 
-  const today = new Date().toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", {
+  const today = new Date().toLocaleDateString(i18n.t("portalHome:en_us"), {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -289,7 +290,7 @@ function PortalOverview() {
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
             <QuickPill lang={lang} to="/portal/book" icon={<CalendarPlus className="h-4 w-4" />} label={tt("s_book", lang)} />
             <QuickPill lang={lang} to="/portal/reports" icon={<FileText className="h-4 w-4" />} label={tt("s_reports", lang)} />
-            <QuickPill lang={lang} to="/portal/laboratory" icon={<FlaskConical className="h-4 w-4" />} label={(isAr ? "المختبر" : "Lab")} />
+            <QuickPill lang={lang} to="/portal/laboratory" icon={<FlaskConical className="h-4 w-4" />} label={i18n.t("portalHome:lab")} />
             <QuickPill lang={lang} to="/portal/prescriptions" icon={<Pill className="h-4 w-4" />} label={tt("s_prescriptions", lang)} />
             <QuickPill lang={lang} to="/portal/invoices" icon={<ReceiptText className="h-4 w-4" />} label={tt("s_invoices", lang)} />
             <QuickPill lang={lang} to="/portal/insurance" icon={<ShieldCheck className="h-4 w-4" />} label={tt("s_insurance", lang)} />
@@ -321,9 +322,9 @@ function PortalOverview() {
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-[color:var(--mag-ink)] truncate">{l.title}</div>
                         <div className="text-xs text-[color:var(--mag-ink-3)] truncate mt-0.5">
-                          {l.test_type ?? (isAr ? "تقرير عام" : "Report")} ·{" "}
+                          {l.test_type ?? i18n.t("portalHome:report")} ·{" "}
                           {l.report_date
-                            ? new Date(l.report_date).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US",
+                            ? new Date(l.report_date).toLocaleDateString(i18n.t("portalHome:en_us"),
                                 { day: "2-digit", month: "short", year: "numeric" },
                               )
                             : "—"}
@@ -401,7 +402,7 @@ function PortalOverview() {
                             {inv.invoice_number || `#${inv.id.slice(0, 8)}`}
                           </div>
                           <div className="text-xs text-[color:var(--mag-ink-3)] mt-0.5">
-                            {new Date(inv.issued_at).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US",
+                            {new Date(inv.issued_at).toLocaleDateString(i18n.t("portalHome:en_us"),
                               { day: "2-digit", month: "short", year: "numeric" },
                             )}{" "}
                             · <InvoiceStatusChip status={inv.status} lang={lang} inline />
@@ -445,7 +446,7 @@ function PortalOverview() {
                         </div>
                         <div className="text-[11px] text-[color:var(--mag-ink-3)] mt-0.5">
                           {r.submitted_at
-                            ? new Date(r.submitted_at).toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US",
+                            ? new Date(r.submitted_at).toLocaleDateString(i18n.t("portalHome:en_us"),
                                 { day: "2-digit", month: "short", year: "numeric" },
                               )
                             : "—"}
@@ -466,7 +467,7 @@ function PortalOverview() {
             <SectionHeader
               lang={lang}
               icon={<CalendarCheck className="h-4 w-4" />}
-              title={(isAr ? "المواعيد التالية" : "Also coming up")}
+              title={i18n.t("portalHome:also_coming_up")}
               to="/portal/orders"
             />
             <ul className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -480,11 +481,11 @@ function PortalOverview() {
                           ? isAr
                             ? a.doctor.name_ar
                             : a.doctor.name_en ?? a.doctor.name_ar
-                          :(isAr ? "طبيب المجمع" : "Doctor")}
+                          :i18n.t("portalHome:doctor")}
                       </div>
                       <div className="text-[11px] text-[color:var(--mag-ink-3)] truncate mt-0.5">
                         {a.appointment_time?.slice(0, 5)} ·{" "}
-                        {a.reason ?? (isAr ? "استشارة عامة" : "Consultation")}
+                        {a.reason ?? i18n.t("portalHome:consultation")}
                       </div>
                     </div>
                     <ApptStatusChip status={a.status} lang={lang} />
@@ -624,13 +625,13 @@ function FeatureNextVisit({
           {/* Date block */}
           <div className="w-20 shrink-0 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/15 text-center py-3">
             <div className="text-[10px] uppercase tracking-wider text-white/70">
-              {dateObj.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", { month: "short" })}
+              {dateObj.toLocaleDateString(i18n.t("portalHome:en_us"), { month: "short" })}
             </div>
             <div className="text-3xl font-extrabold leading-none mt-1 tabular-nums">
               {dateObj.getDate()}
             </div>
             <div className="text-[10px] uppercase tracking-wider text-white/70 mt-1">
-              {dateObj.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", { weekday: "short" })}
+              {dateObj.toLocaleDateString(i18n.t("portalHome:en_us"), { weekday: "short" })}
             </div>
           </div>
 
@@ -641,10 +642,10 @@ function FeatureNextVisit({
                 ? isAr
                   ? appt.doctor.name_ar
                   : appt.doctor.name_en ?? appt.doctor.name_ar
-                :(isAr ? "طبيب مجمع باعشن" : "Baeshen doctor")}
+                :i18n.t("portalHome:baeshen_doctor")}
             </h2>
             <p className="text-sm text-white/80 mt-1 line-clamp-2">
-              {appt.reason ?? (isAr ? "استشارة طبية عامة" : "General consultation")}
+              {appt.reason ?? i18n.t("portalHome:general_consultation")}
             </p>
             <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-white/85">
               <span className="inline-flex items-center gap-1.5">
@@ -653,7 +654,7 @@ function FeatureNextVisit({
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="h-3.5 w-3.5" />
-                {(isAr ? "مجمع باعشن الطبي" : "Baeshen Medical")}
+                {i18n.t("portalHome:baeshen_medical")}
               </span>
               <ApptStatusChip status={appt.status} lang={lang} onDark />
             </div>
@@ -666,7 +667,7 @@ function FeatureNextVisit({
             to="/portal/orders"
             className="inline-flex items-center gap-2 rounded-full bg-white text-[color:var(--mag-ink)] px-4 h-10 text-sm font-semibold hover:bg-white/95 transition"
           >
-            {(isAr ? "التفاصيل" : "Details")}
+            {i18n.t("portalHome:details")}
             <ArrowUpRight className="h-4 w-4" />
           </Link>
           <Link
@@ -704,7 +705,7 @@ function FeatureEmpty({ lang }: { lang: Lang }) {
         {tt("no_next", lang)}
       </h2>
       <p className="mt-2 text-sm text-[color:var(--mag-ink-2)] max-w-md">
-        {(isAr ? "ابدأ رحلتك مع أحد استشاريينا. الحجز يستغرق دقيقة واحدة فقط." : "Start with one of our consultants. Booking takes about a minute.")}
+        {i18n.t("portalHome:start_with_one_of_our_consultants_bookin")}
       </p>
       <div className="mt-5">
         <Link
@@ -866,7 +867,7 @@ function MiniDateChip({ iso, lang }: { iso: string; lang: Lang }) {
   return (
     <div className="w-12 shrink-0 rounded-xl bg-[color:var(--mag-subtle)] text-center py-1.5 border border-[color:var(--mag-line)]">
       <div className="text-[9px] uppercase tracking-wider text-[color:var(--mag-ink-3)]">
-        {d.toLocaleDateString(isAr ? "ar-SA-u-nu-latn" : "en-US", { month: "short" })}
+        {d.toLocaleDateString(i18n.t("portalHome:en_us"), { month: "short" })}
       </div>
       <div className="text-base font-bold text-[color:var(--mag-ink)] leading-none tabular-nums">
         {d.getDate()}
@@ -970,7 +971,7 @@ function initials(name: string | null | undefined): string {
 
 function formatMoney(n: number, lang: Lang): string {
   const isAr = lang === "ar";
-  return n.toLocaleString(isAr ? "ar-SA-u-nu-latn" : "en-US", {
+  return n.toLocaleString(i18n.t("portalHome:en_us"), {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
