@@ -126,6 +126,7 @@ import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './route
 import { Route as AuthenticatedAdminRolePermissionsMatrixRouteImport } from './routes/_authenticated/admin.role-permissions-matrix'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
+import { Route as AuthenticatedAdminServicesHealthRouteImport } from './routes/_authenticated/admin.services-health'
 import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
 import { Route as AuthenticatedMyAiHistoryRouteImport } from './routes/_authenticated/my.ai-history'
@@ -836,6 +837,12 @@ const AuthenticatedAdminServiceInquiriesRoute =
     path: '/service-inquiries',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminServicesHealthRoute =
+  AuthenticatedAdminServicesHealthRouteImport.update({
+    id: '/services-health',
+    path: '/services-health',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminVisualAnalyticsRoute =
   AuthenticatedAdminVisualAnalyticsRouteImport.update({
     id: '/visual-analytics',
@@ -1423,6 +1430,7 @@ export interface FileRoutesByFullPath {
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
+  '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
@@ -1619,6 +1627,7 @@ export interface FileRoutesByTo {
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
+  '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
@@ -1820,6 +1829,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
+  '/_authenticated/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/_authenticated/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
@@ -2021,6 +2031,7 @@ export interface FileRouteTypes {
     | '/admin/role-permissions-matrix'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
+    | '/admin/services-health'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
     | '/my/ai-history'
@@ -2217,6 +2228,7 @@ export interface FileRouteTypes {
     | '/admin/role-permissions-matrix'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
+    | '/admin/services-health'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
     | '/my/ai-history'
@@ -2417,6 +2429,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/role-permissions-matrix'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
+    | '/_authenticated/admin/services-health'
     | '/_authenticated/admin/visual-analytics'
     | '/_authenticated/admin/web-vitals'
     | '/_authenticated/my/ai-history'
@@ -3407,6 +3420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServiceInquiriesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/services-health': {
+      id: '/_authenticated/admin/services-health'
+      path: '/services-health'
+      fullPath: '/admin/services-health'
+      preLoaderRoute: typeof AuthenticatedAdminServicesHealthRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/visual-analytics': {
       id: '/_authenticated/admin/visual-analytics'
       path: '/visual-analytics'
@@ -4009,6 +4029,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminRolePermissionsMatrixRoute: typeof AuthenticatedAdminRolePermissionsMatrixRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
+  AuthenticatedAdminServicesHealthRoute: typeof AuthenticatedAdminServicesHealthRoute
   AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
   AuthenticatedAdminWebVitalsRoute: typeof AuthenticatedAdminWebVitalsRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -4040,6 +4061,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
+  AuthenticatedAdminServicesHealthRoute: AuthenticatedAdminServicesHealthRoute,
   AuthenticatedAdminVisualAnalyticsRoute:
     AuthenticatedAdminVisualAnalyticsRoute,
   AuthenticatedAdminWebVitalsRoute: AuthenticatedAdminWebVitalsRoute,
