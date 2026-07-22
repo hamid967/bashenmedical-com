@@ -63,5 +63,8 @@ class _ConnectionWrap:
 
 
 def connect(**kwargs):
-    # psycopg accepts the same keyword args (host/port/user/password/dbname)
-    return _ConnectionWrap(_pg.connect(**kwargs))
+    # psycopg accepts the same keyword args (host/port/user/password/dbname).
+    # ClientCursor gives psycopg2-compatible %s handling where stray '%'
+    # chars in the SQL body (e.g. LIKE '%X%') are treated as literals.
+    return _ConnectionWrap(_pg.connect(cursor_factory=_ClientCursor, **kwargs))
+
