@@ -26,6 +26,7 @@ interface AiOverview {
 
 const getAiOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }): Promise<AiOverview> => {
     await assertConsoleAccess(context);
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();

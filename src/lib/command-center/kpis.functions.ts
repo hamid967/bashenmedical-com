@@ -37,6 +37,7 @@ type Rpc = (name: string, args?: Record<string, unknown>) => any;
 
 export const getCommandCenterKpis = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }): Promise<CommandCenterKpis> => {
     const rpc = (context.supabase as unknown as { rpc: Rpc }).rpc;
 

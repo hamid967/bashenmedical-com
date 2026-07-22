@@ -22,6 +22,7 @@ export type LinkGuestResult = {
 
 export const linkGuestAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }): Promise<LinkGuestResult> => {
     const { supabase } = context;
     const { data, error } = await supabase.rpc("link_guest_appointments" as never);

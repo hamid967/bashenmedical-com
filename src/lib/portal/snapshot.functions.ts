@@ -54,6 +54,7 @@ export type QuickSnapshot = {
 
 export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
+  .validator(() => ({}))
   .handler(async ({ context }): Promise<QuickSnapshot> => {
     const { supabase, userId } = context;
     const today = new Date().toISOString().slice(0, 10);

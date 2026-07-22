@@ -75,28 +75,28 @@ function AppPage() {
           </div>
 
           <div className="mt-8 grid gap-3 sm:grid-cols-2">
-            <a
-              href="#"
-              aria-label="تحميل من App Store"
-              className="flex items-center gap-3 rounded-xl bg-foreground text-background p-4 hover:opacity-90 transition"
+            <div
+              aria-label="تحميل من App Store — قريبًا"
+              aria-disabled="true"
+              className="flex items-center gap-3 rounded-xl bg-foreground text-background p-4 opacity-70 cursor-not-allowed"
             >
               <Apple className="h-8 w-8" />
               <div className="text-right">
                 <div className="text-[11px] opacity-80">قريبًا على</div>
                 <div className="text-lg font-bold">App Store</div>
               </div>
-            </a>
-            <a
-              href="#"
-              aria-label="تحميل من Google Play"
-              className="flex items-center gap-3 rounded-xl bg-foreground text-background p-4 hover:opacity-90 transition"
+            </div>
+            <div
+              aria-label="تحميل من Google Play — قريبًا"
+              aria-disabled="true"
+              className="flex items-center gap-3 rounded-xl bg-foreground text-background p-4 opacity-70 cursor-not-allowed"
             >
               <Download className="h-8 w-8" />
               <div className="text-right">
                 <div className="text-[11px] opacity-80">قريبًا على</div>
                 <div className="text-lg font-bold">Google Play</div>
               </div>
-            </a>
+            </div>
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             التطبيق قيد الإطلاق — سجّل رقمك في صفحة{" "}
