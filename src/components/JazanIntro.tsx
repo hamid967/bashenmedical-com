@@ -102,16 +102,48 @@ export function JazanIntro() {
   const titleId = useId();
   const descId = useId();
 
-  const dismiss = () => {
-    markSeen();
+  const shownAtRef = useRef<number>(0);
+  const endedRef = useRef<boolean>(false);
+
+  const endIntro = (reason: "completed" | "skipped" | "escape" | "disabled" | "reduced_motion") => {
+    if (endedRef.current) return;
+    endedRef.current = true;
+    if (reason === "disabled") {
+      markDisabled();
+    } else {
+      markSeen();
+    }
+    trackEvent("jazan_intro_ended", {
+      reason,
+      duration_ms: shownAtRef.current ? Date.now() - shownAtRef.current : 0,
+      lang,
+      reduced_motion: reduced,
+      disabled_forever: reason === "disabled",
+    });
     setVisible(false);
     window.setTimeout(() => setMounted(false), 500);
   };
 
+  const dismiss = () => endIntro("skipped");
+
   useEffect(() => {
     setLang(readLang());
-    if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) return;
+    if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) {
+      trackEvent("jazan_intro_suppressed", {
+        reason: !introCfg.enabled
+          ? "disabled_by_settings"
+          : typeof window !== "undefined" && localStorage.getItem(DISABLED_KEY) === "1"
+            ? "user_opted_out"
+            : "cooldown",
+      });
+      return;
+    }
     setMounted(true);
+    shownAtRef.current = Date.now();
+    trackEvent("jazan_intro_shown", {
+      cooldown_hours: introCfg.cooldownHours,
+      duration_ms: introCfg.durationMs,
+    });
     requestAnimationFrame(() => setVisible(true));
   }, [introCfg.enabled, introCfg.cooldownHours]);
 
