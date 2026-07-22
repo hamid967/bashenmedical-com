@@ -49,8 +49,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { to: "/portal/appointments", icon: CalendarClock, label_ar: "مواعيدي", label_en: "My Appointments" },
       { to: "/portal/book", icon: CalendarPlus, label_ar: "حجز موعد", label_en: "Book Appointment" },
-      { to: "/portal/calendar", icon: CalendarClock, label_ar: "التقويم", label_en: "Calendar" },
-      { to: "/portal/schedule", icon: CalendarClock, label_ar: "جدولي (طبيب)", label_en: "My Schedule" },
+      { to: "/portal/schedule", icon: CalendarClock, label_ar: "جدولي وتقويمي", label_en: "Schedule & Calendar" },
       { to: "/portal/family", icon: Users, label_ar: "أفراد العائلة", label_en: "Family" },
     ],
   },
