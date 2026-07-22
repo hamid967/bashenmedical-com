@@ -264,10 +264,12 @@ function CinematicStage({
   phase,
   text,
   logoSrc,
+  titleId,
 }: {
   phase: 0 | 1 | 2 | 3 | 4;
   text: { tagline: string; brand: string };
   logoSrc: string;
+  titleId: string;
 }) {
   return (
     <div className="absolute inset-0 grid place-items-center px-6 overflow-hidden">
