@@ -5,6 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAppEvent } from "./audit-log.server";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 import { z } from "zod";
 
 type Role = "admin" | "super_admin" | "reception" | "doctor" | "pharmacy";

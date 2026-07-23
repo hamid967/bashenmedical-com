@@ -1,6 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAppEvent } from "./audit-log.server";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 import { z } from "zod";
 
 const MAX_ROWS = 10000;
@@ -254,6 +256,22 @@ export const fetchAuditExport = createServerFn({ method: "POST" })
       actor_id: data.actor_id ?? null,
       event: data.event ?? null,
       row_count: rows.length,
+    });
+    await recordSensitiveAccess({
+      supabase,
+      actorId: context.userId,
+      action: `audit.export.${data.kind}`,
+      entityType: data.kind,
+      permission: PERMISSIONS.AuditExport,
+      kind: "export",
+      metadata: {
+        row_count: rows.length,
+        from: data.from ?? null,
+        to: data.to ?? null,
+        branch_id: data.branch_id ?? null,
+        actor_id: data.actor_id ?? null,
+        event: data.event ?? null,
+      },
     });
     return rows;
   });

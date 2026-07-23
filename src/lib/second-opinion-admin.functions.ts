@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAppEvent } from "./audit-log.server";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 import { SIGNED_URL_TTL_SECONDS } from "@/lib/download-error";
 import { z } from "zod";
 
