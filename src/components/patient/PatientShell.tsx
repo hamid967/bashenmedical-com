@@ -19,6 +19,11 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ActiveSubjectProvider } from "@/lib/patient/active-subject";
+import {
+  ActiveSubjectSwitcher,
+  ActiveSubjectBanner,
+} from "@/components/patient/ActiveSubjectSwitcher";
 
 type NavItem = { to: string; label_ar: string; label_en: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -32,12 +37,14 @@ const NAV: NavItem[] = [
 
 export function PatientShell({
   children,
+  userId,
   userName,
   avatarUrl,
   unreadCount = 0,
   lang = "ar",
 }: {
   children: React.ReactNode;
+  userId: string;
   userName?: string | null;
   avatarUrl?: string | null;
   unreadCount?: number;
@@ -78,6 +85,7 @@ export function PatientShell({
   const isActive = (to: string) => (to === "/patient" ? pathname === "/patient" : pathname.startsWith(to));
 
   return (
+    <ActiveSubjectProvider userId={userId} selfName={userName ?? ""}>
     <div className="min-h-dvh bg-background text-foreground">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
@@ -96,6 +104,7 @@ export function PatientShell({
           </Link>
 
           <div className="flex items-center gap-2">
+            <ActiveSubjectSwitcher lang={lang} />
             <Link
               to="/patient/notifications"
               className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border hover:bg-accent"
@@ -157,6 +166,7 @@ export function PatientShell({
 
       {/* Content */}
       <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:pb-8">
+        <ActiveSubjectBanner lang={lang} />
         {!online && (
           <div
             role="status"
@@ -219,5 +229,6 @@ export function PatientShell({
         </ul>
       </nav>
     </div>
+    </ActiveSubjectProvider>
   );
 }

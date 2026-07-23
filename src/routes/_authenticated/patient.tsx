@@ -74,6 +74,7 @@ function PatientLayout() {
   return (
     <PatientShell
       lang={lang}
+      userId={profile?.id ?? ""}
       userName={profile?.full_name ?? null}
       avatarUrl={profile?.avatar_url ?? null}
       unreadCount={unread}
