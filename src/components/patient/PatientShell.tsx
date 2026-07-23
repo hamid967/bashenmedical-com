@@ -85,6 +85,7 @@ export function PatientShell({
   const isActive = (to: string) => (to === "/patient" ? pathname === "/patient" : pathname.startsWith(to));
 
   return (
+    <ActiveSubjectProvider userId={userId} selfName={userName ?? ""}>
     <div className="min-h-dvh bg-background text-foreground">
       {/* Top bar */}
       <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
