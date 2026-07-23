@@ -135,15 +135,15 @@ export async function createPatientSignedUrl(
     .createSignedUrl(path, ttl, opts);
 
   if (error) {
-    await safeAudit(input.audit, { ok: false, reason: error.message ?? "sign_error" });
+    await safeAudit(auditFn, { ok: false, reason: error.message ?? "sign_error" });
     throw new Error(error.message || table.failed);
   }
   if (!data?.signedUrl) {
-    await safeAudit(input.audit, { ok: false, reason: "no_signed_url" });
+    await safeAudit(auditFn, { ok: false, reason: "no_signed_url" });
     throw new Error(table.noUrl);
   }
 
-  await safeAudit(input.audit, { ok: true, expiresIn: ttl });
+  await safeAudit(auditFn, { ok: true, expiresIn: ttl });
 
   return {
     url: data.signedUrl,
