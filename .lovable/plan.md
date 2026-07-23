@@ -1,77 +1,59 @@
-# Phase 5 — Premium Patient Portal (`/patient`)
+# Phase 5 — Completion Plan
 
-The existing portal lives under `/_authenticated/portal.*` with 30+ modules already implemented (appointments, reports, prescriptions, insurance, invoices, family, notifications, profile). Phase 5 wraps and re-designs it under the specified `/patient` URL space with a premium shell, unified UX states, mobile bottom-nav, and a hero dashboard — reusing existing server functions and data instead of duplicating them.
+Most of Phase 5 is already shipped: the `PatientShell` (mobile bottom-nav الرئيسية / مواعيدي / احجز / تقاريري / حسابي), the bento dashboard with all 12 tiles, 9 module routes, unified Loading/Empty/Error/Offline/Forbidden/SessionExpired states, offline cache persistence, per-service `assertPatientAccess` server-side authorization, global session-expiry guard, and exact-path `next` preservation.
 
-## Scope
+Three areas still miss the spec. This plan closes them.
 
-### 1. Route surface (new files under `src/routes/_authenticated/patient*`)
-```text
-patient.tsx                → PatientShell (top bar + mobile bottom-nav + <Outlet />)
-patient.index.tsx          → Premium dashboard (hero cards)
-patient.appointments.tsx   → Tabs: Upcoming | Pending | Previous | Cancelled
-patient.reports.tsx        → Tabs: Lab | Radiology | Visits | Certificates | Referrals
-patient.prescriptions.tsx
-patient.insurance.tsx      → Approvals + verifications
-patient.billing.tsx        → Invoices + payments + refunds
-patient.requests.tsx       → Service inquiries + home care + 2nd opinion
-patient.family.tsx         → Dependents + active profile switcher
-patient.notifications.tsx
-patient.profile.tsx
-patient.security.tsx       → Sessions/devices + auth events + 2FA
-```
-Existing `/portal/*` routes stay for now and add a `redirect` to their `/patient/*` twin after 1 release cycle.
+## 1. Appointments — action toolbar
 
-### 2. Shell (`src/components/patient/PatientShell.tsx`)
-- Top bar: logo, active-profile switcher (self + verified dependents), locale toggle, notifications bell, avatar menu (Profile / Security / Sign out).
-- Desktop: no side nav — page content full width, quick links inside cards.
-- Mobile (≤ md): fixed bottom nav with 5 items — الرئيسية / مواعيدي / احجز (FAB) / تقاريري / حسابي, using `useRouterState` for active state.
-- Layout guards nested `<main>`, aria-labels, RTL/LTR safe.
+`/patient/appointments` currently only lists upcoming / pending / previous / cancelled. Add per-card actions matching the spec:
 
-### 3. Dashboard hero (`patient.index.tsx`)
-Bento grid of cards, each fed by an `ensureQueryData` in the loader. Every card has explicit Loading / Empty / Error via the shared `states/index.tsx`:
-- Next appointment (with check-in / directions / calendar)
-- Required actions (unverified insurance, unsigned consents, unpaid invoice, unconfirmed OTP)
-- New reports (last 30d unread)
-- Active prescriptions
-- Outstanding invoices
-- Insurance approvals status
-- Open service requests
-- Latest notifications
-- Announcements + Offers (public content, cached)
-- Suggested services (from `service_catalog`, filtered by history)
-- Sticky "احجز موعد" CTA → `/book`
+- Confirm attendance (calls a `confirmAttendance` server fn — updates `appointment_status_events` and `appointments.confirmed_at`)
+- Reschedule (opens a slot-picker dialog reusing `/book` slot search for the same doctor+branch; issues a `rescheduleAppointment` server fn that creates a new hold + atomic swap)
+- Cancel (confirm dialog → `cancelAppointment` server fn, respects cancellation window)
+- Digital check-in (only enabled within a ±30 min window; calls `digitalCheckIn`, shows queue number)
+- Directions (opens Google Maps with branch `lat/lng`)
+- Add to Calendar (generates `.ics` client-side from appointment fields)
+- Download confirmation (PDF via existing `/api/public/appointments/verify` reference — signed PDF endpoint)
+- Request follow-up (creates a `service_inquiries` row of type `follow_up` linked to the appointment)
 
-### 4. Unified state components
-Extend `src/components/states/index.tsx` with the six required variants and use them in every module:
-`<LoadingState/>`, `<EmptyState/>`, `<ErrorState/>`, `<OfflineState/>` (navigator.onLine), `<PermissionDenied/>`, `<SessionExpired/>` (redirects to `/auth/login?next=`).
-Wrap every route body with `<FeatureErrorBoundary>` from Phase 1.
+All actions gated by `assertPatientAccess` + row-ownership check on the server. Optimistic UI with rollback on error. Unified error/session states.
 
-### 5. Module details
-- **Appointments** — reuse `listMyAppointments`; tab filter by status; row actions: confirm attendance (existing check-in RPC), reschedule (→ `/book?rescheduleId=`), cancel (existing fn), digital check-in (existing QR flow), directions (Google Maps deep-link from branch coords), add-to-calendar (`.ics` blob), download confirmation PDF, request follow-up (creates `service_inquiries` row of type follow_up).
-- **Reports** — sub-tabs; each card fetches from `lab_reports` / `radiology_reports` / `medical_reports` / `patient_visits`; secure preview through existing `signed-url.server.ts`; every open/download writes to `sensitive-access.server.ts`; new "Access History" tab reads back the same audit rows scoped to `actor_id = auth.uid()`.
-- **Prescriptions** — reuse existing portal query; add refill request + pharmacy dispatch link.
-- **Insurance / Billing / Requests / Notifications / Profile / Security** — thin premium re-skin over existing portal server functions; no schema changes.
-- **Family** — reuse `dependents`; add-dependent flow requires OTP-verified relationship (existing OTP infra); active-profile switcher stored in `sessionStorage` + server context (`x-active-patient` header validated by a new server helper that checks the caller has an approved dependent link); switching updates all module queries via query-key namespace.
+## 2. Reports — secure preview + signed downloads + access history
 
-### 6. Security
-- `_authenticated` gate already enforces auth; add a `beforeLoad` on `patient.tsx` that calls `resolveHome` to bounce staff/admin roles away.
-- All data reads go through existing RLS-scoped server functions (`.middleware([requireSupabaseAuth])`); no direct table reads from the client.
-- Family switching: server derives real patient_id from `dependents` table + auth.uid(); the client-provided active-profile hint is only advisory.
-- Session-expired detection: global fetch wrapper on server-fn errors → `<SessionExpired/>` overlay.
+`/patient/reports` lists lab/radiology/visit summaries but exposes no secure viewer. Add:
 
-### 7. Tests
-- `tests/e2e/patient_dashboard_hero.py` — dashboard cards render for a seeded patient with mixed data.
-- `tests/e2e/patient_family_switch_scope.py` — switching to a dependent scopes appointments/reports and blocks unauthorized dependents.
-- `tests/e2e/patient_reports_access_history.py` — opening a report writes an audit row visible in Access History.
-- `tests/security/test_patient_isolation.py` — patient A cannot fetch patient B's appointments/reports/invoices via any `/patient/*` server fn (IDOR).
+- Category tabs: Laboratory / Radiology / Visit summaries / Medical certificates / Referrals (driven by `report_type`)
+- **Secure preview**: dialog rendering PDF/image via short-lived signed URL (`signed-url.server.ts`, 5 min TTL, watermark with patient name + timestamp)
+- **Signed downloads**: separate `downloadReport` server fn issuing a single-use signed URL, logs to `report_access_log`
+- **Access history** panel: reads `report_access_log` (already indexed on `report_id + accessed_at`) and shows who/when accessed each report
+- All reads go through `assertPatientAccess`; unauthorized attempts audited via `sensitive-access.server.ts`
 
-### 8. Non-goals for this phase
-- No new backend tables. Everything reuses Phase 2/3/4 infra.
-- `/portal/*` routes remain live; deprecation redirects come in Phase 6.
-- No native app; the mobile experience is responsive PWA.
+## 3. Family — in-portal management
+
+`/patient/family` currently deep-links to the legacy `/portal/family`. Bring it in-portal:
+
+- **Add dependent** dialog: full_name, relationship, DOB, national_id — creates via `createDependent`
+- **Verify relationship**: OTP challenge to guardian's phone + doc upload placeholder; sets `dependents.verified_at`
+- **Switch active profile**: header profile-switcher chip; persists selected `dependent_id` in a `patient_active_profile` cookie (30 days) and Zustand store; all subsequent queries include `activeSubjectId`
+- **Book for dependent**: "احجز لهذا التابع" CTA that navigates to `/book?subject=<dependent_id>`; booking flow honors the id and stamps the appointment with the correct `patient_id`
+- **Authorized-records only**: `dependents.access_scopes` controls whether the guardian can see the dependent's reports/prescriptions/invoices — enforced server-side in each `listX` function
+
+Every card retains Loading / Empty / Error / Offline / Forbidden / SessionExpired states.
 
 ## Technical notes
-- Routing follows TanStack file convention (`patient.tsx` = layout, dot-separated children).
-- Loaders use `ensureQueryData` + `useSuspenseQuery` per project default.
-- All new components in `src/components/patient/`.
-- All strings run through the existing i18n JSON files with ar/en/ur locales.
+
+- New server fns live in `src/lib/portal/appointment-actions.functions.ts`, `src/lib/portal/report-viewer.functions.ts`, and extend `src/lib/portal/dependents.functions.ts`.
+- All use `.middleware([requireSupabaseAuth])` + `assertPatientAccess` + row-ownership guards.
+- Signed URLs use existing `signed-url.server.ts` (5 min TTL, path derived from DB).
+- Access-history table (`report_access_log`) already exists; add index on `(report_id, accessed_at desc)` if missing.
+- Active-profile cookie signed with `SESSION_SECRET`; server functions read it from context.
+- e2e tests under `tests/e2e/` for each action (confirm, reschedule, cancel, check-in, download, add dependent, switch profile, book-for-dependent).
+
+## Out of scope
+
+- Payment flow for outstanding invoices (already tracked separately).
+- Deep insurance eligibility checks beyond the existing approvals list.
+- Push notifications channel (existing WhatsApp/SMS/email path covers the spec).
+
+Approve and I'll execute in three batches (Appointments → Reports → Family), each with tests and a typecheck pass before moving to the next.
