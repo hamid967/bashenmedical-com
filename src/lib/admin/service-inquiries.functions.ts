@@ -9,6 +9,11 @@ import { z } from "zod";
 // B4-1: consolidated in `_guard.ts`. Re-exported for back-compat with any
 // external module that still imports `assertHasRole` from this file.
 import { assertHasRole } from "./_guard";
+// Phase 3B: prefer permission-verb enforcement over role gates for
+// mutation endpoints so branch-scoped roles (reception, branch_manager)
+// pick up the right subset without a new role check per action.
+import { assertPermission, assertBranchScope } from "@/lib/rbac/enforce.server";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 export { assertHasRole };
 
 const STATUSES = [
