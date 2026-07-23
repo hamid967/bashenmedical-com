@@ -97,6 +97,19 @@ export const getLabFileUrl = createServerFn({ method: "POST" })
       file_path: data.path,
       bucket: "lab-reports",
     });
+    const { recordSensitiveAccess } = await import(
+      "@/lib/audit/sensitive-access.server"
+    );
+    await recordSensitiveAccess({
+      supabase,
+      actorId: userId,
+      action: "lab_report.download",
+      entityType: "lab_report",
+      entityId: reportId,
+      permission: "portal.self",
+      kind: "download",
+      metadata: { patient_id: patientId, bucket: "lab-reports" },
+    });
 
     return { url: signed.signedUrl, expiresIn: 300 };
   });

@@ -59,6 +59,23 @@ export const getAttachmentSignedUrl = createServerFn({ method: "POST" })
           actor_id: userId,
           bucket: "patient-files",
         });
+        const { recordSensitiveAccess } = await import(
+          "@/lib/audit/sensitive-access.server"
+        );
+        await recordSensitiveAccess({
+          supabase,
+          actorId: userId,
+          action: "patient_attachment.download",
+          entityType: "patient_attachment",
+          entityId: row.id,
+          permission: "portal.self",
+          kind: "download",
+          metadata: {
+            patient_id: row.patient_id,
+            bucket: "patient-files",
+            expires_in: event.expiresIn,
+          },
+        });
       },
     });
     return { url: signed.url, expiresIn: signed.expiresIn, expiresAt: signed.expiresAt };
