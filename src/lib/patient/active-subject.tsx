@@ -99,22 +99,22 @@ export function ActiveSubjectProvider({
   // If the persisted dependent is no longer verified/accessible, fall back to self.
   const subject: ActiveSubject = React.useMemo(() => {
     if (rawSelection.kind === "dependent") {
-      const dep = verifiedDependents.find((d) => d.id === rawSelection.id);
+      const dep = switchableDependents.find((d) => d.id === rawSelection.id);
       if (dep) {
         return { kind: "dependent", id: dep.id, name: dep.full_name, dependent: dep };
       }
     }
     return { kind: "self", id: userId, name: selfName };
-  }, [rawSelection, verifiedDependents, userId, selfName]);
+  }, [rawSelection, switchableDependents, userId, selfName]);
 
   const value = React.useMemo<Ctx>(
     () => ({
       subject,
-      dependents: verifiedDependents,
+      dependents: switchableDependents,
       isLoading: dependentsQuery.isLoading,
       setSubject,
     }),
-    [subject, verifiedDependents, dependentsQuery.isLoading, setSubject],
+    [subject, switchableDependents, dependentsQuery.isLoading, setSubject],
   );
 
   return (
