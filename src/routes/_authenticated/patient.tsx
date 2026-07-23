@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { PatientShell } from "@/components/patient/PatientShell";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { usePatientOfflineCache } from "@/lib/patient/offline-cache";
+import { usePatientSessionGuard } from "@/lib/patient/session-guard";
 import { getMyRoles } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientRouteError, PatientRouteNotFound } from "@/components/states/patient-route-states";
