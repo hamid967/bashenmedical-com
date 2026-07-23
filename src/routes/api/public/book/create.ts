@@ -323,24 +323,32 @@ export const Route = createFileRoute("/api/public/book/create")({
         // (slot uidx or idempotency uidx) — never a partial-state failure.
         // Cast: `confirm_appointment_booking` isn't in the generated Database
         // type until types regenerate after this migration.
+        const rpcStart = Date.now();
+        logBook("rpc.call");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: rows, error } = await (supa as any).rpc("confirm_appointment_booking", {
           p_data: payload,
           p_idempotency_key: idempotencyKey,
         });
+        const rpcMs = Date.now() - rpcStart;
 
         if (error) {
           const err = error as { message?: string; code?: string };
           const isDup =
             err.code === "23505" || (err.message ?? "").includes("duplicate key");
+          const dupOnIdemKey =
+            isDup && !!idempotencyKey && (err.message ?? "").includes("idempotency_key");
+
+          logBook(isDup ? "rpc.conflict" : "rpc.error", {
+            duration_ms: rpcMs,
+            pg_code: err.code ?? null,
+            pg_message: err.message ?? null,
+            dup_on_idempotency_key: dupOnIdemKey,
+          });
 
           // Idempotency-key race: another concurrent request with the same
           // key already inserted — replay its reference.
-          if (
-            isDup &&
-            idempotencyKey &&
-            (err.message ?? "").includes("idempotency_key")
-          ) {
+          if (dupOnIdemKey) {
             try {
               const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
               const { data: existing } = await supabaseAdmin
@@ -349,12 +357,18 @@ export const Route = createFileRoute("/api/public/book/create")({
                 .eq("idempotency_key", idempotencyKey)
                 .maybeSingle();
               if (existing?.id) {
-                return json(200, {
-                  ok: true,
-                  reference: existing.reference_number ?? refFromId(existing.id),
+                const reference = existing.reference_number ?? refFromId(existing.id);
+                logBook("rpc.replay.race", {
+                  appointment_id: existing.id,
+                  reference_number: reference,
+                  replayed: true,
                 });
+                return json(200, { ok: true, reference });
               }
-            } catch {
+            } catch (e) {
+              logBook("rpc.replay.race.error", {
+                error: (e as Error)?.message ?? String(e),
+              });
               /* fall through */
             }
           }
@@ -376,9 +390,17 @@ export const Route = createFileRoute("/api/public/book/create")({
 
         // rows is an array of { id, reference, replayed }.
         const row = Array.isArray(rows) ? rows[0] : rows;
-        const reference =
-          (row && (row as { reference?: string | null }).reference) ??
-          (row && (row as { id?: string }).id ? refFromId((row as { id: string }).id) : null);
+        const rowId = row && (row as { id?: string }).id;
+        const rowRef = row && (row as { reference?: string | null }).reference;
+        const rowReplayed = !!(row && (row as { replayed?: boolean }).replayed);
+        const reference = rowRef ?? (rowId ? refFromId(rowId) : null);
+
+        logBook(rowReplayed ? "rpc.replay.rpc" : "rpc.success", {
+          duration_ms: rpcMs,
+          appointment_id: rowId ?? null,
+          reference_number: reference,
+          replayed: rowReplayed,
+        });
 
         return json(200, { ok: true, reference });
       },
