@@ -1,6 +1,7 @@
 import { Star, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
+import { AlternativesBanner, type AlternativeSuggestion } from "./AlternativesBanner";
 
 /**
  * Sentinel value passed by "Any available doctor" — must match the constant
@@ -15,18 +16,43 @@ export function StepDoctor({
   value,
   onPick,
   onPickAny,
+  alternatives,
 }: {
   lang: "ar" | "en";
   doctors: any[];
   value: string | null;
   onPick: (v: string) => void;
   onPickAny?: () => void;
+  /**
+   * Surfaced when the user hits SLOT_TAKEN / HOLD_EXPIRED and returns to
+   * StepDoctor to swap options without losing the rest of their draft.
+   */
+  alternatives?: {
+    reason: "conflict" | "expired" | null;
+    findingAlt: boolean;
+    sameDoctorTimes: string[];
+    suggestion: AlternativeSuggestion | null;
+    onPickSameDoctorTime?: (time: string) => void;
+    onAcceptSuggestion?: () => void;
+    onDismiss?: () => void;
+  };
 }) {
   const { t } = useTranslation("booking");
   const anyEnabled = doctors.some((d) => d.booking_enabled !== false);
   const anyActive = value === STEP_DOCTOR_ANY_ID;
   return (
     <StepShell lang={lang} title={t("doctor.title")}>
+      {alternatives && (
+        <AlternativesBanner
+          reason={alternatives.reason}
+          findingAlt={alternatives.findingAlt}
+          sameDoctorTimes={alternatives.sameDoctorTimes}
+          suggestion={alternatives.suggestion}
+          onPickSameDoctorTime={alternatives.onPickSameDoctorTime}
+          onAcceptSuggestion={alternatives.onAcceptSuggestion}
+          onDismiss={alternatives.onDismiss}
+        />
+      )}
       {doctors.length === 0 ? (
         <p className="text-muted-foreground text-sm">{t("doctor.empty")}</p>
       ) : (
