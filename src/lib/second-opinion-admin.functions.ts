@@ -90,5 +90,18 @@ export const getSecondOpinionAttachmentUrls = createServerFn({ method: "POST" })
       paths: data.paths,
       count: out.filter((o) => o.url).length,
     });
+    await recordSensitiveAccess({
+      supabase: context.supabase,
+      actorId: context.userId,
+      action: "second_opinion.signed_url_issued",
+      entityType: "second_opinion_attachment",
+      permission: "second_opinion.review",
+      kind: "download",
+      metadata: {
+        requested: data.paths.length,
+        issued: out.filter((o) => o.url).length,
+        bucket: "second-opinion-uploads",
+      },
+    });
     return out;
   });

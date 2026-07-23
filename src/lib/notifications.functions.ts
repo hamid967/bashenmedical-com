@@ -442,6 +442,22 @@ export const exportReminderDeliveriesCsv = createServerFn({ method: "POST" })
       channel: data.channel ?? null,
       status: data.status ?? null,
     });
+    await recordSensitiveAccess({
+      supabase: context.supabase,
+      actorId: context.userId,
+      action: "notifications.export_csv",
+      entityType: "notification",
+      permission: "notifications.export",
+      kind: "export",
+      metadata: {
+        row_count: count,
+        branch_id: data.branchId ?? null,
+        from: data.dateFrom ?? null,
+        to: data.dateTo ?? null,
+        channel: data.channel ?? null,
+        status: data.status ?? null,
+      },
+    });
     return { csv: "\uFEFF" + lines.join("\n") + "\n", count, filename: buildFilename() };
   });
 
