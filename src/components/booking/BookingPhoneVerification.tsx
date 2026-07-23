@@ -130,12 +130,17 @@ export function BookingPhoneVerification({
         <Button
           type="button"
           onClick={send}
-          disabled={disabled || sending || !phone.trim()}
+          disabled={disabled || sending || cooldownActive || !phone.trim()}
           variant="secondary"
           className="w-full gap-2"
         >
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {t("verification.send")}
+          {cooldownActive
+            ? t("verification.sendCooldown", {
+                seconds: cooldownRemaining,
+                defaultValue: `${t("verification.send")} (${cooldownRemaining}s)`,
+              })
+            : t("verification.send")}
         </Button>
       ) : (
         <div className="space-y-2">
@@ -162,13 +167,20 @@ export function BookingPhoneVerification({
           <button
             type="button"
             onClick={send}
-            disabled={sending}
-            className="text-xs text-primary hover:underline"
+            disabled={sending || cooldownActive}
+            className="text-xs text-primary hover:underline disabled:opacity-50 disabled:no-underline"
+            aria-live="polite"
           >
-            {t("verification.resend")}
+            {cooldownActive
+              ? t("verification.resendCooldown", {
+                  seconds: cooldownRemaining,
+                  defaultValue: `${t("verification.resend")} (${cooldownRemaining}s)`,
+                })
+              : t("verification.resend")}
           </button>
         </div>
       )}
+
 
       {err && (
         <p className="mt-2 text-xs text-destructive" role="alert">
