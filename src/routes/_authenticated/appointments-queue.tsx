@@ -610,18 +610,30 @@ function DetailDrawer({
           <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5 p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">رقم الطلب</span>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard?.writeText(ref).then(
-                    () => toast.success("تم نسخ رقم الطلب"),
-                    () => toast.error("تعذّر النسخ"),
-                  );
-                }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                <Copy className="h-3 w-3" /> نسخ
-              </button>
+              <div className="flex items-center gap-3">
+                {canQr && (
+                  <button
+                    type="button"
+                    onClick={() => setQrOpen(true)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                    title="عرض رمز التحقق (QR)"
+                  >
+                    <QrCode className="h-3 w-3" /> QR
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(ref).then(
+                      () => toast.success("تم نسخ رقم الطلب"),
+                      () => toast.error("تعذّر النسخ"),
+                    );
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                >
+                  <Copy className="h-3 w-3" /> نسخ
+                </button>
+              </div>
             </div>
             <div className="mt-1 text-xl font-mono font-black tracking-wider">{ref}</div>
             <div className="mt-2">
