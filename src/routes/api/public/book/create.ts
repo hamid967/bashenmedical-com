@@ -430,7 +430,9 @@ export const Route = createFileRoute("/api/public/book/create")({
             } catch (e) {
               logBook("rpc.replay.race.error", {
                 error: (e as Error)?.message ?? String(e),
+                error_code: "REPLAY_RACE_ERROR",
               });
+
               /* fall through */
             }
           }
