@@ -96,21 +96,51 @@ export function reducer(s: State, a: Action): State {
 export const STORAGE_KEY = "booking:draft";
 
 /* ---------------- Draft versioning + expiry ----------------
- * Bump DRAFT_VERSION whenever the persisted State shape changes so old
- * drafts get discarded instead of hydrating into a broken UI. Drafts also
- * expire after DRAFT_TTL_MS since last save — a 24h stale reservation is
- * more confusing than an empty form.
+ * The persisted draft is wrapped in an envelope with explicit metadata so
+ * loads can validate freshness deterministically instead of guessing:
+ *
+ *   { version, savedAt, expiresAt, state }
+ *
+ * Bump DRAFT_VERSION whenever the State shape changes; older envelopes get
+ * discarded on load. `expiresAt` is stamped at save time (savedAt + TTL);
+ * once the wall clock passes it, the draft is dropped — a 24h stale
+ * reservation is more confusing than an empty form.
  */
-export const DRAFT_VERSION = 2;
+export const DRAFT_VERSION = 3;
 export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
-type PersistedDraft = State & { _v?: number; _savedAt?: number };
+export type DraftEnvelope = {
+  version: number;
+  savedAt: number;   // epoch ms — when the draft was written
+  expiresAt: number; // epoch ms — hard cutoff; ignored after this
+  state: State;
+};
+
+// Legacy envelope written by DRAFT_VERSION=2 (flat state + `_v`/`_savedAt`).
+type LegacyFlatDraft = State & { _v?: number; _savedAt?: number };
+
+function isEnvelope(value: unknown): value is DraftEnvelope {
+  return (
+    !!value &&
+    typeof value === "object" &&
+    "version" in value &&
+    "state" in value &&
+    "savedAt" in value &&
+    "expiresAt" in value
+  );
+}
 
 export function saveDraft(state: State): void {
   if (typeof window === "undefined") return;
   try {
-    const payload: PersistedDraft = { ...state, _v: DRAFT_VERSION, _savedAt: Date.now() };
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    const now = Date.now();
+    const envelope: DraftEnvelope = {
+      version: DRAFT_VERSION,
+      savedAt: now,
+      expiresAt: now + DRAFT_TTL_MS,
+      state,
+    };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(envelope));
   } catch {
     /* quota / private mode */
   }
@@ -130,34 +160,41 @@ export function loadDraft(initial: Partial<State>): State {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     if (!raw) return { ...INITIAL, ...initial };
-    const parsed = JSON.parse(raw) as PersistedDraft;
-    const version = parsed._v ?? 1;
-    const savedAt = parsed._savedAt ?? 0;
-    const expired = savedAt > 0 && Date.now() - savedAt > DRAFT_TTL_MS;
-    if (version !== DRAFT_VERSION || expired) {
-      try {
-        sessionStorage.removeItem(STORAGE_KEY);
-      } catch {
-        /* ignore */
-      }
+
+    const parsed: unknown = JSON.parse(raw);
+    const now = Date.now();
+
+    // Discard anything that doesn't match the current envelope shape/version
+    // or has passed its expiresAt. Legacy flat drafts are dropped too — they
+    // don't carry an explicit expiresAt so we can't trust them.
+    if (!isEnvelope(parsed)) {
+      // Best-effort: peek at legacy `_savedAt` for observability, then drop.
+      const legacy = parsed as LegacyFlatDraft | null;
+      void legacy?._v;
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
       return { ...INITIAL, ...initial };
     }
-    // Strip metadata before merging so it never lands in the reducer state.
-    const { _v: _v, _savedAt: _s, ...clean } = parsed;
-    void _v;
-    void _s;
-    // Success survives reload: if the persisted draft is on step 9,
-    // keep it there and IGNORE the URL step (URL still shows the last
-    // pushed value, typically step=8 from the review step).
+
+    if (parsed.version !== DRAFT_VERSION || now >= parsed.expiresAt) {
+      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+      return { ...INITIAL, ...initial };
+    }
+
+    const clean = parsed.state;
+    // Success survives reload: if the persisted draft is on step 9, keep it
+    // there and IGNORE the URL step (URL still shows the last pushed value,
+    // typically step=8 from the review step).
     if (clean.step === 9) return { ...INITIAL, ...clean };
-    // Merge nested patient explicitly so newly-added fields (e.g. isNewPatient)
-    // pick up their defaults from INITIAL even for drafts persisted before v2.
+    // Merge nested patient explicitly so newly-added fields (e.g.
+    // isNewPatient) pick up their defaults from INITIAL even for drafts
+    // persisted before those fields existed.
     return {
       ...INITIAL,
       ...clean,
       patient: { ...INITIAL.patient, ...(clean.patient ?? {}) },
       ...initial,
     };
+
   } catch {
     return { ...INITIAL, ...initial };
   }
