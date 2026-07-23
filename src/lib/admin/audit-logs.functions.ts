@@ -32,7 +32,7 @@ export const listAdminAuditLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => listSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
-    await assertStaff(context.supabase, context.userId);
+    await assertAuditReader(context.supabase, context.userId);
     const sel = (s: string): string => s;
     let q = context.supabase
       .from("audit_logs")
@@ -65,7 +65,7 @@ export const listAdminAuditLogs = createServerFn({ method: "GET" })
 export const listAuditFacets = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertStaff(context.supabase, context.userId);
+    await assertAuditReader(context.supabase, context.userId);
     const sel = (s: string): string => s;
     const { data, error } = await context.supabase
       .from("audit_logs")
