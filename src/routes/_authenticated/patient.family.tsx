@@ -399,6 +399,13 @@ function FamilyPage() {
               />
             </div>
           </div>
+          {createMut.error || updateMut.error ? (
+            <InlineStateBanner
+              error={createMut.error ?? updateMut.error}
+              onRetry={() => submit()}
+            />
+          ) : null}
+          {busy ? <LoadingState label="جارٍ الحفظ…" className="py-2" /> : null}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogMode("closed")} disabled={busy}>
               إلغاء
@@ -410,6 +417,7 @@ function FamilyPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
       <AlertDialog
         open={!!confirmDelete}
