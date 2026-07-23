@@ -69,10 +69,7 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
           branch_id: url.searchParams.get("branch_id") || undefined,
         });
         if (!parsed.success) {
-          return json(400, {
-            ok: false,
-            error: parsed.error.issues[0]?.message ?? "invalid_query",
-          });
+          return json(400, { ok: false, error: firstZodErrorCode(parsed.error) });
         }
         const {
           year,
