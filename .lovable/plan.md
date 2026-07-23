@@ -1,96 +1,77 @@
-## Context
+# Phase 5 — Premium Patient Portal (`/patient`)
 
-The `/book` route already implements most of Phase 4:
+The existing portal lives under `/_authenticated/portal.*` with 30+ modules already implemented (appointments, reports, prescriptions, insurance, invoices, family, notifications, profile). Phase 5 wraps and re-designs it under the specified `/patient` URL space with a premium shell, unified UX states, mobile bottom-nav, and a hero dashboard — reusing existing server functions and data instead of duplicating them.
 
-- 8-step wizard (service → branch → specialty → doctor → date → time → patient → review → success)
-- Named-step URL sync (`?step=patient`), popstate Back/Forward, deep-link fill
-- Autosaved draft in `sessionStorage`, versioned + timestamped
-- Zod validation, Arabic/English i18n, RTL/LTR
-- Desktop sticky `SummarySidebar`, mobile `MobileSummarySheet`
-- 5-minute server-authoritative slot hold (`useSlotHold`, `/api/public/book/hold`), auto-refresh, realtime cancel via `slot_holds` channel
-- Alternatives banner on `SLOT_TAKEN`/`HOLD_EXPIRED`
-- Atomic booking via `submitBooking` with idempotency key, correlation ID, and friendly errors
-- Public reference `BMC-YYYYMMDD-XXXX` (via `refFromId` / `reference_number`)
-- Realtime availability, "any available doctor" resolution, waitlist CTA
-- Success screen with QR, notification-status chips (no delivery claim without provider confirmation)
-- Appointments surface in `/patient/appointments` and `/admin/appointments`
-- Notifications enqueued separately (booking succeeds even if notify fails)
+## Scope
 
-## Gaps vs. the Phase 4 spec
-
-The requested flow adds a distinct **verification** step (real OTP) and a distinct **insurance** step between review and success. Today:
-
-- Payer type + insurance estimate live inside the patient step (`StepPatient` / `InsuranceSection`)
-- OTP only exists via `EmailOtpLinker` after success, not as a gating step before submit
-- No mid-flow OTP for guest phone verification tied to the booking submit
-
-Also worth tightening:
-
-- Verify the atomic RPC actually takes a row lock + capacity + patient-overlap check in one txn (currently `submitBooking` → RPC); confirm rollback path.
-- Add a race + hold-expiry + duplicate-submit + session-expiry test set explicitly for the new verification step.
-
-## Plan
-
-### 1. Insert Verification step (new step 7)
-
-Renumber to 9 UX steps, keeping URL names stable:
-
+### 1. Route surface (new files under `src/routes/_authenticated/patient*`)
 ```text
-service → branch → specialty → doctor → date → time → patient → verify → insurance → review → success
+patient.tsx                → PatientShell (top bar + mobile bottom-nav + <Outlet />)
+patient.index.tsx          → Premium dashboard (hero cards)
+patient.appointments.tsx   → Tabs: Upcoming | Pending | Previous | Cancelled
+patient.reports.tsx        → Tabs: Lab | Radiology | Visits | Certificates | Referrals
+patient.prescriptions.tsx
+patient.insurance.tsx      → Approvals + verifications
+patient.billing.tsx        → Invoices + payments + refunds
+patient.requests.tsx       → Service inquiries + home care + 2nd opinion
+patient.family.tsx         → Dependents + active profile switcher
+patient.notifications.tsx
+patient.profile.tsx
+patient.security.tsx       → Sessions/devices + auth events + 2FA
 ```
+Existing `/portal/*` routes stay for now and add a `redirect` to their `/patient/*` twin after 1 release cycle.
 
-- Add `StepVerify.tsx`: sends OTP to the patient phone via existing `/api/auth/otp/issue` server-fn (WhatsApp/SMS), verifies via `/api/auth/otp/verify`, stores a short-lived `booking_verification_token` in state.
-- Guard: cannot advance to `review` unless `patient.phone === verified_phone` and token unexpired (10 min).
-- Skip when the user is signed in and their profile phone matches (reuse existing session).
-- Update `STEP_NAMES`, `maxReachableStep`, `Stepper`, sidebar, and popstate handler.
+### 2. Shell (`src/components/patient/PatientShell.tsx`)
+- Top bar: logo, active-profile switcher (self + verified dependents), locale toggle, notifications bell, avatar menu (Profile / Security / Sign out).
+- Desktop: no side nav — page content full width, quick links inside cards.
+- Mobile (≤ md): fixed bottom nav with 5 items — الرئيسية / مواعيدي / احجز (FAB) / تقاريري / حسابي, using `useRouterState` for active state.
+- Layout guards nested `<main>`, aria-labels, RTL/LTR safe.
 
-### 2. Split Insurance into its own step (new step 8)
+### 3. Dashboard hero (`patient.index.tsx`)
+Bento grid of cards, each fed by an `ensureQueryData` in the loader. Every card has explicit Loading / Empty / Error via the shared `states/index.tsx`:
+- Next appointment (with check-in / directions / calendar)
+- Required actions (unverified insurance, unsigned consents, unpaid invoice, unconfirmed OTP)
+- New reports (last 30d unread)
+- Active prescriptions
+- Outstanding invoices
+- Insurance approvals status
+- Open service requests
+- Latest notifications
+- Announcements + Offers (public content, cached)
+- Suggested services (from `service_catalog`, filtered by history)
+- Sticky "احجز موعد" CTA → `/book`
 
-- Move `InsuranceSection` out of `StepPatient` into `StepInsurance.tsx`.
-- Show self-pay fallback CTA when eligibility check fails or is skipped.
-- Persist `insuranceEstimate` in draft as today.
+### 4. Unified state components
+Extend `src/components/states/index.tsx` with the six required variants and use them in every module:
+`<LoadingState/>`, `<EmptyState/>`, `<ErrorState/>`, `<OfflineState/>` (navigator.onLine), `<PermissionDenied/>`, `<SessionExpired/>` (redirects to `/auth/login?next=`).
+Wrap every route body with `<FeatureErrorBoundary>` from Phase 1.
 
-### 3. Server enforcement of verification
+### 5. Module details
+- **Appointments** — reuse `listMyAppointments`; tab filter by status; row actions: confirm attendance (existing check-in RPC), reschedule (→ `/book?rescheduleId=`), cancel (existing fn), digital check-in (existing QR flow), directions (Google Maps deep-link from branch coords), add-to-calendar (`.ics` blob), download confirmation PDF, request follow-up (creates `service_inquiries` row of type follow_up).
+- **Reports** — sub-tabs; each card fetches from `lab_reports` / `radiology_reports` / `medical_reports` / `patient_visits`; secure preview through existing `signed-url.server.ts`; every open/download writes to `sensitive-access.server.ts`; new "Access History" tab reads back the same audit rows scoped to `actor_id = auth.uid()`.
+- **Prescriptions** — reuse existing portal query; add refill request + pharmacy dispatch link.
+- **Insurance / Billing / Requests / Notifications / Profile / Security** — thin premium re-skin over existing portal server functions; no schema changes.
+- **Family** — reuse `dependents`; add-dependent flow requires OTP-verified relationship (existing OTP infra); active-profile switcher stored in `sessionStorage` + server context (`x-active-patient` header validated by a new server helper that checks the caller has an approved dependent link); switching updates all module queries via query-key namespace.
 
-- `/api/public/book/create` requires `verification_token` in body; server validates against `otp_challenges` (consumed once, single-use).
-- Return `VERIFICATION_REQUIRED` / `VERIFICATION_EXPIRED` codes; wire descriptors into `describeBookingError`.
+### 6. Security
+- `_authenticated` gate already enforces auth; add a `beforeLoad` on `patient.tsx` that calls `resolveHome` to bounce staff/admin roles away.
+- All data reads go through existing RLS-scoped server functions (`.middleware([requireSupabaseAuth])`); no direct table reads from the client.
+- Family switching: server derives real patient_id from `dependents` table + auth.uid(); the client-provided active-profile hint is only advisory.
+- Session-expired detection: global fetch wrapper on server-fn errors → `<SessionExpired/>` overlay.
 
-### 4. Confirm atomic booking invariants
+### 7. Tests
+- `tests/e2e/patient_dashboard_hero.py` — dashboard cards render for a seeded patient with mixed data.
+- `tests/e2e/patient_family_switch_scope.py` — switching to a dependent scopes appointments/reports and blocks unauthorized dependents.
+- `tests/e2e/patient_reports_access_history.py` — opening a report writes an audit row visible in Access History.
+- `tests/security/test_patient_isolation.py` — patient A cannot fetch patient B's appointments/reports/invoices via any `/patient/*` server fn (IDOR).
 
-- Audit `book_create_appointment` RPC:
-  - `SELECT ... FOR UPDATE` on the slot / doctor+date+time row
-  - Capacity check inside the txn
-  - Patient-overlap check (same patient, overlapping time) inside the txn
-  - Single insert into `appointments` + immutable `appointment_status_history` row
-  - Rollback on any failure; idempotency-key short-circuit
-- Add a SQL comment documenting the invariants.
+### 8. Non-goals for this phase
+- No new backend tables. Everything reuses Phase 2/3/4 infra.
+- `/portal/*` routes remain live; deprecation redirects come in Phase 6.
+- No native app; the mobile experience is responsive PWA.
 
-### 5. Tests
-
-New tests exercising the added surfaces:
-
-- `tests/e2e/book_verification_flow.py` — new/existing/dependent patient, verify OTP, submit
-- `tests/e2e/book_hold_expiry_during_verify.py` — hold expires while on verify → bounce to time
-- `tests/e2e/book_duplicate_submit.py` — same idempotency key, single row
-- `tests/e2e/book_two_user_race.py` — parallel POSTs, one wins with `SLOT_TAKEN`
-- `tests/e2e/book_session_expiry.py` — verification token expiry
-- `tests/e2e/book_browser_nav.py` — back/forward preserves step + draft
-- `tests/e2e/book_visibility.py` — appears in `/patient/appointments` and `/admin/appointments`
-- `tests/react/booking-verify.test.tsx` — client state transitions
-
-### 6. Docs
-
-- Update `docs/features/booking.md` (or create) with the new flow, verification contract, and reference-number policy (`BMC-YYYYMMDD-XXXX`, no DB IDs exposed anywhere in success/notifications).
-
-### Technical notes
-
-- OTP reuses `src/lib/auth/otp.server.ts` (already HMAC+salt hashed, `MAX_ATTEMPTS=5`, TTL 5 min).
-- Verification token carried in booking state, not URL, to avoid replay via history.
-- Insurance state remains optional; self-pay is the default.
-- No changes to `patient_profiles` schema; verification simply proves phone ownership at submit time.
-- All new steps register their own `head()` title suffix? — no, single route, no head change needed.
-
-### Out of scope
-
-- Payment collection (deferred to Phase 5 unless requested).
-- Nafath ID verification (stub already present, keep as-is).
+## Technical notes
+- Routing follows TanStack file convention (`patient.tsx` = layout, dot-separated children).
+- Loaders use `ensureQueryData` + `useSuspenseQuery` per project default.
+- All new components in `src/components/patient/`.
+- All strings run through the existing i18n JSON files with ar/en/ur locales.

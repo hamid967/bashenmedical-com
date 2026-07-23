@@ -71,6 +71,7 @@ import { Route as AuthenticatedNotificationsQueueRouteImport } from './routes/_a
 import { Route as AuthenticatedNursesRouteImport } from './routes/_authenticated/nurses'
 import { Route as AuthenticatedOrdersUnifiedRouteImport } from './routes/_authenticated/orders-unified'
 import { Route as AuthenticatedOwnerRouteImport } from './routes/_authenticated/owner'
+import { Route as AuthenticatedPatientRouteImport } from './routes/_authenticated/patient'
 import { Route as AuthenticatedPatientStoriesAdminRouteImport } from './routes/_authenticated/patient-stories-admin'
 import { Route as AuthenticatedPatientsAnalyticsRouteImport } from './routes/_authenticated/patients-analytics'
 import { Route as AuthenticatedPatientsManagementRouteImport } from './routes/_authenticated/patients-management'
@@ -148,6 +149,17 @@ import { Route as AuthenticatedOwnerAccountsRouteImport } from './routes/_authen
 import { Route as AuthenticatedOwnerAuditRouteImport } from './routes/_authenticated/owner.audit'
 import { Route as AuthenticatedOwnerSecurityRouteImport } from './routes/_authenticated/owner.security'
 import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
+import { Route as AuthenticatedPatientIndexRouteImport } from './routes/_authenticated/patient.index'
+import { Route as AuthenticatedPatientAppointmentsRouteImport } from './routes/_authenticated/patient.appointments'
+import { Route as AuthenticatedPatientBillingRouteImport } from './routes/_authenticated/patient.billing'
+import { Route as AuthenticatedPatientFamilyRouteImport } from './routes/_authenticated/patient.family'
+import { Route as AuthenticatedPatientInsuranceRouteImport } from './routes/_authenticated/patient.insurance'
+import { Route as AuthenticatedPatientNotificationsRouteImport } from './routes/_authenticated/patient.notifications'
+import { Route as AuthenticatedPatientPrescriptionsRouteImport } from './routes/_authenticated/patient.prescriptions'
+import { Route as AuthenticatedPatientProfileRouteImport } from './routes/_authenticated/patient.profile'
+import { Route as AuthenticatedPatientReportsRouteImport } from './routes/_authenticated/patient.reports'
+import { Route as AuthenticatedPatientRequestsRouteImport } from './routes/_authenticated/patient.requests'
+import { Route as AuthenticatedPatientSecurityRouteImport } from './routes/_authenticated/patient.security'
 import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authenticated/patients.index'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
@@ -553,6 +565,11 @@ const AuthenticatedOrdersUnifiedRoute =
 const AuthenticatedOwnerRoute = AuthenticatedOwnerRouteImport.update({
   id: '/owner',
   path: '/owner',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPatientRoute = AuthenticatedPatientRouteImport.update({
+  id: '/patient',
+  path: '/patient',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedPatientStoriesAdminRoute =
@@ -973,6 +990,72 @@ const AuthenticatedOwnerSettingsRoute =
     id: '/settings',
     path: '/settings',
     getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedPatientIndexRoute =
+  AuthenticatedPatientIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientAppointmentsRoute =
+  AuthenticatedPatientAppointmentsRouteImport.update({
+    id: '/appointments',
+    path: '/appointments',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientBillingRoute =
+  AuthenticatedPatientBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientFamilyRoute =
+  AuthenticatedPatientFamilyRouteImport.update({
+    id: '/family',
+    path: '/family',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientInsuranceRoute =
+  AuthenticatedPatientInsuranceRouteImport.update({
+    id: '/insurance',
+    path: '/insurance',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientNotificationsRoute =
+  AuthenticatedPatientNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientPrescriptionsRoute =
+  AuthenticatedPatientPrescriptionsRouteImport.update({
+    id: '/prescriptions',
+    path: '/prescriptions',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientProfileRoute =
+  AuthenticatedPatientProfileRouteImport.update({
+    id: '/profile',
+    path: '/profile',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientReportsRoute =
+  AuthenticatedPatientReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientRequestsRoute =
+  AuthenticatedPatientRequestsRouteImport.update({
+    id: '/requests',
+    path: '/requests',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
+const AuthenticatedPatientSecurityRoute =
+  AuthenticatedPatientSecurityRouteImport.update({
+    id: '/security',
+    path: '/security',
+    getParentRoute: () => AuthenticatedPatientRoute,
   } as any)
 const AuthenticatedPatientsIndexRoute =
   AuthenticatedPatientsIndexRouteImport.update({
@@ -1485,6 +1568,7 @@ export interface FileRoutesByFullPath {
   '/nurses': typeof AuthenticatedNursesRoute
   '/orders-unified': typeof AuthenticatedOrdersUnifiedRouteWithChildren
   '/owner': typeof AuthenticatedOwnerRouteWithChildren
+  '/patient': typeof AuthenticatedPatientRouteWithChildren
   '/patient-stories-admin': typeof AuthenticatedPatientStoriesAdminRoute
   '/patients-analytics': typeof AuthenticatedPatientsAnalyticsRoute
   '/patients-management': typeof AuthenticatedPatientsManagementRoute
@@ -1560,6 +1644,16 @@ export interface FileRoutesByFullPath {
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
+  '/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
+  '/patient/billing': typeof AuthenticatedPatientBillingRoute
+  '/patient/family': typeof AuthenticatedPatientFamilyRoute
+  '/patient/insurance': typeof AuthenticatedPatientInsuranceRoute
+  '/patient/notifications': typeof AuthenticatedPatientNotificationsRoute
+  '/patient/prescriptions': typeof AuthenticatedPatientPrescriptionsRoute
+  '/patient/profile': typeof AuthenticatedPatientProfileRoute
+  '/patient/reports': typeof AuthenticatedPatientReportsRoute
+  '/patient/requests': typeof AuthenticatedPatientRequestsRoute
+  '/patient/security': typeof AuthenticatedPatientSecurityRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/assistant': typeof AuthenticatedPortalAssistantRoute
@@ -1596,6 +1690,7 @@ export interface FileRoutesByFullPath {
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/owner/': typeof AuthenticatedOwnerIndexRoute
+  '/patient/': typeof AuthenticatedPatientIndexRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
@@ -1773,6 +1868,16 @@ export interface FileRoutesByTo {
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
+  '/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
+  '/patient/billing': typeof AuthenticatedPatientBillingRoute
+  '/patient/family': typeof AuthenticatedPatientFamilyRoute
+  '/patient/insurance': typeof AuthenticatedPatientInsuranceRoute
+  '/patient/notifications': typeof AuthenticatedPatientNotificationsRoute
+  '/patient/prescriptions': typeof AuthenticatedPatientPrescriptionsRoute
+  '/patient/profile': typeof AuthenticatedPatientProfileRoute
+  '/patient/reports': typeof AuthenticatedPatientReportsRoute
+  '/patient/requests': typeof AuthenticatedPatientRequestsRoute
+  '/patient/security': typeof AuthenticatedPatientSecurityRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/assistant': typeof AuthenticatedPortalAssistantRoute
@@ -1809,6 +1914,7 @@ export interface FileRoutesByTo {
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/owner': typeof AuthenticatedOwnerIndexRoute
+  '/patient': typeof AuthenticatedPatientIndexRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
@@ -1917,6 +2023,7 @@ export interface FileRoutesById {
   '/_authenticated/nurses': typeof AuthenticatedNursesRoute
   '/_authenticated/orders-unified': typeof AuthenticatedOrdersUnifiedRouteWithChildren
   '/_authenticated/owner': typeof AuthenticatedOwnerRouteWithChildren
+  '/_authenticated/patient': typeof AuthenticatedPatientRouteWithChildren
   '/_authenticated/patient-stories-admin': typeof AuthenticatedPatientStoriesAdminRoute
   '/_authenticated/patients-analytics': typeof AuthenticatedPatientsAnalyticsRoute
   '/_authenticated/patients-management': typeof AuthenticatedPatientsManagementRoute
@@ -1992,6 +2099,16 @@ export interface FileRoutesById {
   '/_authenticated/owner/audit': typeof AuthenticatedOwnerAuditRoute
   '/_authenticated/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
+  '/_authenticated/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
+  '/_authenticated/patient/billing': typeof AuthenticatedPatientBillingRoute
+  '/_authenticated/patient/family': typeof AuthenticatedPatientFamilyRoute
+  '/_authenticated/patient/insurance': typeof AuthenticatedPatientInsuranceRoute
+  '/_authenticated/patient/notifications': typeof AuthenticatedPatientNotificationsRoute
+  '/_authenticated/patient/prescriptions': typeof AuthenticatedPatientPrescriptionsRoute
+  '/_authenticated/patient/profile': typeof AuthenticatedPatientProfileRoute
+  '/_authenticated/patient/reports': typeof AuthenticatedPatientReportsRoute
+  '/_authenticated/patient/requests': typeof AuthenticatedPatientRequestsRoute
+  '/_authenticated/patient/security': typeof AuthenticatedPatientSecurityRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/_authenticated/portal/assistant': typeof AuthenticatedPortalAssistantRoute
@@ -2028,6 +2145,7 @@ export interface FileRoutesById {
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/owner/': typeof AuthenticatedOwnerIndexRoute
+  '/_authenticated/patient/': typeof AuthenticatedPatientIndexRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
@@ -2136,6 +2254,7 @@ export interface FileRouteTypes {
     | '/nurses'
     | '/orders-unified'
     | '/owner'
+    | '/patient'
     | '/patient-stories-admin'
     | '/patients-analytics'
     | '/patients-management'
@@ -2211,6 +2330,16 @@ export interface FileRouteTypes {
     | '/owner/audit'
     | '/owner/security'
     | '/owner/settings'
+    | '/patient/appointments'
+    | '/patient/billing'
+    | '/patient/family'
+    | '/patient/insurance'
+    | '/patient/notifications'
+    | '/patient/prescriptions'
+    | '/patient/profile'
+    | '/patient/reports'
+    | '/patient/requests'
+    | '/patient/security'
     | '/patients/$patientId'
     | '/portal/appointments'
     | '/portal/assistant'
@@ -2247,6 +2376,7 @@ export interface FileRouteTypes {
     | '/media/stories/$slug'
     | '/admin/'
     | '/owner/'
+    | '/patient/'
     | '/patients/'
     | '/portal/'
     | '/admin/ai/overview'
@@ -2424,6 +2554,16 @@ export interface FileRouteTypes {
     | '/owner/audit'
     | '/owner/security'
     | '/owner/settings'
+    | '/patient/appointments'
+    | '/patient/billing'
+    | '/patient/family'
+    | '/patient/insurance'
+    | '/patient/notifications'
+    | '/patient/prescriptions'
+    | '/patient/profile'
+    | '/patient/reports'
+    | '/patient/requests'
+    | '/patient/security'
     | '/patients/$patientId'
     | '/portal/appointments'
     | '/portal/assistant'
@@ -2460,6 +2600,7 @@ export interface FileRouteTypes {
     | '/media/stories/$slug'
     | '/admin'
     | '/owner'
+    | '/patient'
     | '/patients'
     | '/portal'
     | '/admin/ai/overview'
@@ -2567,6 +2708,7 @@ export interface FileRouteTypes {
     | '/_authenticated/nurses'
     | '/_authenticated/orders-unified'
     | '/_authenticated/owner'
+    | '/_authenticated/patient'
     | '/_authenticated/patient-stories-admin'
     | '/_authenticated/patients-analytics'
     | '/_authenticated/patients-management'
@@ -2642,6 +2784,16 @@ export interface FileRouteTypes {
     | '/_authenticated/owner/audit'
     | '/_authenticated/owner/security'
     | '/_authenticated/owner/settings'
+    | '/_authenticated/patient/appointments'
+    | '/_authenticated/patient/billing'
+    | '/_authenticated/patient/family'
+    | '/_authenticated/patient/insurance'
+    | '/_authenticated/patient/notifications'
+    | '/_authenticated/patient/prescriptions'
+    | '/_authenticated/patient/profile'
+    | '/_authenticated/patient/reports'
+    | '/_authenticated/patient/requests'
+    | '/_authenticated/patient/security'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/portal/appointments'
     | '/_authenticated/portal/assistant'
@@ -2678,6 +2830,7 @@ export interface FileRouteTypes {
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/owner/'
+    | '/_authenticated/patient/'
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/ai/overview'
@@ -3250,6 +3403,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/patient': {
+      id: '/_authenticated/patient'
+      path: '/patient'
+      fullPath: '/patient'
+      preLoaderRoute: typeof AuthenticatedPatientRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/patient-stories-admin': {
       id: '/_authenticated/patient-stories-admin'
       path: '/patient-stories-admin'
@@ -3788,6 +3948,83 @@ declare module '@tanstack/react-router' {
       fullPath: '/owner/settings'
       preLoaderRoute: typeof AuthenticatedOwnerSettingsRouteImport
       parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/patient/': {
+      id: '/_authenticated/patient/'
+      path: '/'
+      fullPath: '/patient/'
+      preLoaderRoute: typeof AuthenticatedPatientIndexRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/appointments': {
+      id: '/_authenticated/patient/appointments'
+      path: '/appointments'
+      fullPath: '/patient/appointments'
+      preLoaderRoute: typeof AuthenticatedPatientAppointmentsRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/billing': {
+      id: '/_authenticated/patient/billing'
+      path: '/billing'
+      fullPath: '/patient/billing'
+      preLoaderRoute: typeof AuthenticatedPatientBillingRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/family': {
+      id: '/_authenticated/patient/family'
+      path: '/family'
+      fullPath: '/patient/family'
+      preLoaderRoute: typeof AuthenticatedPatientFamilyRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/insurance': {
+      id: '/_authenticated/patient/insurance'
+      path: '/insurance'
+      fullPath: '/patient/insurance'
+      preLoaderRoute: typeof AuthenticatedPatientInsuranceRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/notifications': {
+      id: '/_authenticated/patient/notifications'
+      path: '/notifications'
+      fullPath: '/patient/notifications'
+      preLoaderRoute: typeof AuthenticatedPatientNotificationsRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/prescriptions': {
+      id: '/_authenticated/patient/prescriptions'
+      path: '/prescriptions'
+      fullPath: '/patient/prescriptions'
+      preLoaderRoute: typeof AuthenticatedPatientPrescriptionsRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/profile': {
+      id: '/_authenticated/patient/profile'
+      path: '/profile'
+      fullPath: '/patient/profile'
+      preLoaderRoute: typeof AuthenticatedPatientProfileRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/reports': {
+      id: '/_authenticated/patient/reports'
+      path: '/reports'
+      fullPath: '/patient/reports'
+      preLoaderRoute: typeof AuthenticatedPatientReportsRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/requests': {
+      id: '/_authenticated/patient/requests'
+      path: '/requests'
+      fullPath: '/patient/requests'
+      preLoaderRoute: typeof AuthenticatedPatientRequestsRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
+    '/_authenticated/patient/security': {
+      id: '/_authenticated/patient/security'
+      path: '/security'
+      fullPath: '/patient/security'
+      preLoaderRoute: typeof AuthenticatedPatientSecurityRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
     }
     '/_authenticated/patients/': {
       id: '/_authenticated/patients/'
@@ -4474,6 +4711,39 @@ const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
 const AuthenticatedOwnerRouteWithChildren =
   AuthenticatedOwnerRoute._addFileChildren(AuthenticatedOwnerRouteChildren)
 
+interface AuthenticatedPatientRouteChildren {
+  AuthenticatedPatientAppointmentsRoute: typeof AuthenticatedPatientAppointmentsRoute
+  AuthenticatedPatientBillingRoute: typeof AuthenticatedPatientBillingRoute
+  AuthenticatedPatientFamilyRoute: typeof AuthenticatedPatientFamilyRoute
+  AuthenticatedPatientInsuranceRoute: typeof AuthenticatedPatientInsuranceRoute
+  AuthenticatedPatientNotificationsRoute: typeof AuthenticatedPatientNotificationsRoute
+  AuthenticatedPatientPrescriptionsRoute: typeof AuthenticatedPatientPrescriptionsRoute
+  AuthenticatedPatientProfileRoute: typeof AuthenticatedPatientProfileRoute
+  AuthenticatedPatientReportsRoute: typeof AuthenticatedPatientReportsRoute
+  AuthenticatedPatientRequestsRoute: typeof AuthenticatedPatientRequestsRoute
+  AuthenticatedPatientSecurityRoute: typeof AuthenticatedPatientSecurityRoute
+  AuthenticatedPatientIndexRoute: typeof AuthenticatedPatientIndexRoute
+}
+
+const AuthenticatedPatientRouteChildren: AuthenticatedPatientRouteChildren = {
+  AuthenticatedPatientAppointmentsRoute: AuthenticatedPatientAppointmentsRoute,
+  AuthenticatedPatientBillingRoute: AuthenticatedPatientBillingRoute,
+  AuthenticatedPatientFamilyRoute: AuthenticatedPatientFamilyRoute,
+  AuthenticatedPatientInsuranceRoute: AuthenticatedPatientInsuranceRoute,
+  AuthenticatedPatientNotificationsRoute:
+    AuthenticatedPatientNotificationsRoute,
+  AuthenticatedPatientPrescriptionsRoute:
+    AuthenticatedPatientPrescriptionsRoute,
+  AuthenticatedPatientProfileRoute: AuthenticatedPatientProfileRoute,
+  AuthenticatedPatientReportsRoute: AuthenticatedPatientReportsRoute,
+  AuthenticatedPatientRequestsRoute: AuthenticatedPatientRequestsRoute,
+  AuthenticatedPatientSecurityRoute: AuthenticatedPatientSecurityRoute,
+  AuthenticatedPatientIndexRoute: AuthenticatedPatientIndexRoute,
+}
+
+const AuthenticatedPatientRouteWithChildren =
+  AuthenticatedPatientRoute._addFileChildren(AuthenticatedPatientRouteChildren)
+
 interface AuthenticatedPortalOrdersRouteChildren {
   AuthenticatedPortalOrdersKindIdRoute: typeof AuthenticatedPortalOrdersKindIdRoute
 }
@@ -4596,6 +4866,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNursesRoute: typeof AuthenticatedNursesRoute
   AuthenticatedOrdersUnifiedRoute: typeof AuthenticatedOrdersUnifiedRouteWithChildren
   AuthenticatedOwnerRoute: typeof AuthenticatedOwnerRouteWithChildren
+  AuthenticatedPatientRoute: typeof AuthenticatedPatientRouteWithChildren
   AuthenticatedPatientStoriesAdminRoute: typeof AuthenticatedPatientStoriesAdminRoute
   AuthenticatedPatientsAnalyticsRoute: typeof AuthenticatedPatientsAnalyticsRoute
   AuthenticatedPatientsManagementRoute: typeof AuthenticatedPatientsManagementRoute
@@ -4642,6 +4913,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNursesRoute: AuthenticatedNursesRoute,
   AuthenticatedOrdersUnifiedRoute: AuthenticatedOrdersUnifiedRouteWithChildren,
   AuthenticatedOwnerRoute: AuthenticatedOwnerRouteWithChildren,
+  AuthenticatedPatientRoute: AuthenticatedPatientRouteWithChildren,
   AuthenticatedPatientStoriesAdminRoute: AuthenticatedPatientStoriesAdminRoute,
   AuthenticatedPatientsAnalyticsRoute: AuthenticatedPatientsAnalyticsRoute,
   AuthenticatedPatientsManagementRoute: AuthenticatedPatientsManagementRoute,
