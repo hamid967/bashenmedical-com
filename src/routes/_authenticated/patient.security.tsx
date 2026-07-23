@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/patient/security")({
     ],
   }),
   component: SecurityPage,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 3 }),
 });
 
 function SecurityPage() {
