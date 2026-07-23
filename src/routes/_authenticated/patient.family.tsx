@@ -263,13 +263,11 @@ function FamilyPage() {
                       <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => verifyMut.mutate(d.id)}
-                        disabled={verifyMut.isPending && verifyMut.variables === d.id}
+                        onClick={() => setVerifyFor(d)}
                       >
-                        {verifyMut.isPending && verifyMut.variables === d.id ? (
-                          <Loader2 className="me-1 h-4 w-4 animate-spin" aria-hidden />
-                        ) : null}
-                        طلب توثيق
+                        {d.verification_status === "pending"
+                          ? "متابعة طلب التوثيق"
+                          : "طلب توثيق"}
                       </Button>
                     ) : null}
 
