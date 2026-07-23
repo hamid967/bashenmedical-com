@@ -635,9 +635,8 @@ function BookPage() {
     if (res.ok) {
       // Release our short-lived hold — the appointment row now owns the slot.
       if (slotHold.holdId) void releaseHold(slotHold.holdId);
-      try {
-        sessionStorage.removeItem(STORAGE_KEY);
-      } catch {}
+      clearDraft();
+
       toast.success(t("page.created"));
       setResult({
         reference: res.reference,
