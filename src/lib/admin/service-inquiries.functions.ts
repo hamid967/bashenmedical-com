@@ -188,15 +188,26 @@ export const assignInquiry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
+    // Fetch the row FIRST so we can enforce the caller's permission in
+    // the inquiry's own branch scope. Missing rows short-circuit before
+    // any privilege check to avoid leaking existence.
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
-      .select("assigned_to")
+      .select("assigned_to, branch_id")
       .eq("id", data.id)
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
     if (!prev) throw new Error("الاستفسار غير موجود.");
+
+    // `appointments.assign` covers reception/branch_manager/center_admin;
+    // scoped to the inquiry's branch so a reception at branch A cannot
+    // reassign an inquiry from branch B.
+    await assertPermission(
+      { supabase: sb, userId: context.userId },
+      PERMISSIONS.ApptAssign,
+      (prev.branch_id as string | null) ?? null,
+    );
 
     const { error } = await sb
       .from("service_inquiries")
