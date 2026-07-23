@@ -34,7 +34,13 @@ export type BookingSubmitKind =
 
 export type BookingSubmitResult =
   | { ok: true; kind: "success"; reference: string | null }
-  | { ok: false; kind: Exclude<BookingSubmitKind, "success">; message: string };
+  | {
+      ok: false;
+      kind: Exclude<BookingSubmitKind, "success">;
+      message: string;
+      /** Machine-readable error code from the server; `SLOT_TAKEN` on 409 slot clash. */
+      code?: string;
+    };
 
 const TIMEOUT_MS = 20_000;
 
@@ -126,6 +132,7 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
   let body: {
     ok?: boolean;
     kind?: string;
+    code?: string;
     message?: string;
     reference?: string | null;
   } = {};
@@ -144,17 +151,23 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
     return { ok: true, kind: "success", reference: body.reference ?? null };
   }
 
+  // A 409 with code=SLOT_TAKEN is the canonical slot-clash signal from the
+  // server (fast-path check OR the RPC's 23505 on the partial UNIQUE INDEX).
+  // Normalize kind to "conflict" so downstream UI treats it uniformly.
+  const isSlotTaken = res.status === 409 || body.code === "SLOT_TAKEN" || body.kind === "conflict";
+
   // Validation and conflict errors also retire the key: the payload will
   // change before the next attempt (fixed field, new slot), so reusing the
   // same key would incorrectly replay the OLD attempt if it had ever
   // partially succeeded. `network`/`timeout`/`server` KEEP the key so an
   // immediate retry is idempotent against a possibly-persisted row.
-  if (body.kind === "validation" || body.kind === "conflict") {
+  if (body.kind === "validation" || isSlotTaken) {
     clearBookingIdempotencyKey();
   }
 
-  const kind: Exclude<BookingSubmitKind, "success"> =
-    body.kind === "validation" || body.kind === "db" || body.kind === "conflict"
+  const kind: Exclude<BookingSubmitKind, "success"> = isSlotTaken
+    ? "conflict"
+    : body.kind === "validation" || body.kind === "db"
       ? body.kind
       : res.status >= 500
         ? "server"
@@ -163,5 +176,6 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
     ok: false,
     kind,
     message: body.message?.trim() || FALLBACK_MESSAGES[kind],
+    code: body.code,
   };
 }
