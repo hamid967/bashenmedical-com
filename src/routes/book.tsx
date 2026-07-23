@@ -45,6 +45,7 @@ import { StepService } from "@/components/booking/StepService";
 import { StepBranch } from "@/components/booking/StepBranch";
 import { StepSpecialty } from "@/components/booking/StepSpecialty";
 import { StepDoctor } from "@/components/booking/StepDoctor";
+import { AlternativesBanner } from "@/components/booking/AlternativesBanner";
 import { StepDate } from "@/components/booking/StepDate";
 import { StepTime } from "@/components/booking/StepTime";
 import { StepPatient } from "@/components/booking/StepPatient";
