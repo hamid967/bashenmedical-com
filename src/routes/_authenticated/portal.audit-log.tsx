@@ -42,7 +42,9 @@ export const Route = createFileRoute("/_authenticated/portal/audit-log")({
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "سجل النشاط — بوابة المريض" },
       { property: "og:description", content: "تتبع أنشطة حسابك الشخصي بالتفصيل." },
+      { property: "og:url", content: "https://bashenmedical.com/portal/audit-log" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/portal/audit-log" }],
   }),
   component: AuditLogPage,
 });
