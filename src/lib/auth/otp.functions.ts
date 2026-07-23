@@ -22,7 +22,7 @@ import { z } from "zod";
 const IssueSchema = z.object({
   channel: z.enum(["whatsapp", "email"]),
   destination: z.string().min(3).max(120),
-  purpose: z.enum(["login", "register", "recovery", "mobile_change"]),
+  purpose: z.enum(["login", "register", "recovery", "mobile_change", "booking"]),
   locale: z.enum(["ar", "en"]).default("ar"),
 });
 
