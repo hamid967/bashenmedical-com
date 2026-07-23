@@ -192,15 +192,17 @@ function AdminDoctorsPage() {
                     >
                       <Pencil className="h-4 w-4" />
                     </button>
-                    <button
-                      onClick={() => {
-                        if (confirm(`حذف الطبيب ${d.name_ar}؟`)) deleteM.mutate(d.id);
-                      }}
-                      className="rounded-md border border-destructive/40 p-1.5 text-destructive hover:bg-destructive/10"
-                      aria-label="حذف"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                    <Can permission={PERMISSIONS.UsersManage}>
+                      <button
+                        onClick={() => {
+                          if (confirm(`حذف الطبيب ${d.name_ar}؟`)) deleteM.mutate(d.id);
+                        }}
+                        className="rounded-md border border-destructive/40 p-1.5 text-destructive hover:bg-destructive/10"
+                        aria-label="حذف"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </Can>
                   </div>
                 </td>
               </tr>
