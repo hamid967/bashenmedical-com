@@ -1094,6 +1094,9 @@ function BookPage() {
                 onSubmit={handleSubmit}
                 patientValid={patientValidation.ok}
                 onEditPatient={() => goto(7)}
+                onVerified={(challengeId, phone) =>
+                  dispatch({ t: "set", p: { verificationChallengeId: challengeId, verifiedPhone: phone } })
+                }
               />
             )}
             {state.step === 9 && result && (
