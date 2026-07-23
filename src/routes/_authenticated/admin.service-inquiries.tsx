@@ -409,6 +409,10 @@ function InquiryDrawer({
   const inquiry: any = d?.inquiry ?? null;
   const timeline: any[] = d?.timeline ?? [];
   const isClosed = inquiry?.closed_at != null;
+  const { can } = usePermissions();
+  const branchId: string | null = inquiry?.branch_id ?? null;
+  const canAssign = can(PERMISSIONS.ApptAssign, branchId);
+  const canCancel = can(PERMISSIONS.ApptCancel, branchId);
 
   return (
     <div className="fixed inset-0 z-50 flex" dir="rtl">
