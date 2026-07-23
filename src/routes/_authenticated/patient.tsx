@@ -4,14 +4,14 @@
  * admin / super_admin roles to /admin so the patient app stays isolated.
  * Renders PatientShell around <Outlet />.
  */
-import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { PatientShell } from "@/components/patient/PatientShell";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { getMyRoles } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
-import { ErrorState, EmptyState } from "@/components/states";
+import { PatientRouteError, PatientRouteNotFound } from "@/components/states/patient-route-states";
 
 const myProfileQuery = queryOptions({
   queryKey: ["patient", "my-profile"],
