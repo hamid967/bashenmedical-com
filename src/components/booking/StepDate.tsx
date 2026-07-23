@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SITE } from "@/lib/site";
+import { APP_TZ, getAppToday } from "@/lib/datetime";
 import { StepShell } from "./StepShell";
 
 export function StepDate({
@@ -33,8 +34,7 @@ export function StepDate({
   onChangeBranch?: () => void;
 }) {
   const { t } = useTranslation("booking");
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const today = getAppToday();
   const [monthStart, setMonthStart] = useState(
     () => new Date(today.getFullYear(), today.getMonth(), 1),
   );
@@ -49,21 +49,24 @@ export function StepDate({
   const iso = (d: Date) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const locale = lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US";
-  const monthLabel = monthStart.toLocaleDateString(locale, { month: "long", year: "numeric" });
-  const fullDate = (d: Date) =>
-    d.toLocaleDateString(locale, {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+  const monthLabel = new Intl.DateTimeFormat(locale, {
+    timeZone: APP_TZ,
+    month: "long",
+    year: "numeric",
+  }).format(monthStart);
+  const fullDateFmt = new Intl.DateTimeFormat(locale, {
+    timeZone: APP_TZ,
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const fullDate = (d: Date) => fullDateFmt.format(d);
 
   const weekdayNames = t("date.weekdays", { returnObjects: true }) as string[];
 
-  const maxDate = new Date();
-  maxDate.setDate(maxDate.getDate() + 60);
-  const horizonEnd = new Date();
-  horizonEnd.setDate(horizonEnd.getDate() + 30);
+  const maxDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 60);
+  const horizonEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 30);
   const horizonEndIso = iso(horizonEnd);
   const todayIso = iso(today);
 

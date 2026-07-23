@@ -135,13 +135,14 @@ export function maxReachableStep(s: State, patientOk: boolean): number {
 export function formatArDate(iso: string | null, lang: "ar" | "en"): string {
   if (!iso) return "—";
   try {
-    const d = new Date(iso + "T00:00:00");
-    return d.toLocaleDateString(lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US", {
+    const locale = lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US";
+    return new Intl.DateTimeFormat(locale, {
+      timeZone: "Asia/Riyadh",
       weekday: "long",
       year: "numeric",
       month: "long",
       day: "numeric",
-    });
+    }).format(new Date(iso + "T00:00:00+03:00"));
   } catch {
     return iso;
   }
