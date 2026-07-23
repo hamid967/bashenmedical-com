@@ -25,7 +25,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { submitBooking, clearBookingIdempotencyKey } from "@/lib/booking-submit";
+import { submitBooking, clearBookingIdempotencyKey, getBookingCorrelationId } from "@/lib/booking-submit";
 import { getBookingSessionId } from "@/lib/booking-hold";
 import { Button } from "@/components/ui/button";
 
@@ -289,6 +289,11 @@ function BookPage() {
   const [errorKind, setErrorKind] = useState<
     "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
   >("unknown");
+  // Server-provided machine code (e.g. SLOT_TAKEN, HOLD_EXPIRED,
+  // INVALID_IDEMPOTENCY_KEY). Drives descriptor-based copy in
+  // SubmitErrorBanner via `describeBookingError`.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+
   const [suggestion, setSuggestion] = useState<{
     doctorId: string;
     doctorName: string;
@@ -605,6 +610,7 @@ function BookPage() {
     setSameDoctorTimes([]);
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     goto(7);
   }
 
@@ -614,12 +620,14 @@ function BookPage() {
     setSuggestion(null);
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     goto(7);
   }
 
   async function handleSubmit() {
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     setSuggestion(null);
     setSameDoctorTimes([]);
     if (!patientValidation.ok) {
@@ -696,6 +704,7 @@ function BookPage() {
         const msg = t("page.slotTakenClear");
         setErrorMsg(msg);
         setErrorKind("conflict");
+        setErrorCode("SLOT_TAKEN");
         toast.error(msg);
         const prevTime = state.time;
         // Invalidate availability so StepTime re-fetches and drops the taken slot.
@@ -709,14 +718,17 @@ function BookPage() {
         const msg = t("page.invalidIdempotencyKey");
         setErrorMsg(msg);
         setErrorKind("validation");
+        setErrorCode("INVALID_IDEMPOTENCY_KEY");
         toast.error(msg);
         // submitBooking already cleared the stored key; next click gets a fresh one.
       } else {
         setErrorMsg(res.message);
         setErrorKind(res.kind);
+        setErrorCode(res.code ?? null);
       }
     }
   }
+
 
   function handleReset() {
     // Guard against accidental taps that would drop the reference/QR forever.
@@ -726,6 +738,7 @@ function BookPage() {
     setResult(null);
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     dispatch({ t: "reset" });
     clearDraft();
     try {
@@ -946,7 +959,9 @@ function BookPage() {
                               setSuggestion(null);
                               setSameDoctorTimes([]);
                               setErrorKind("unknown");
+                              setErrorCode(null);
                               setErrorMsg(null);
+
                             }}
                           >
                             {t("page.dismiss")}
@@ -1004,6 +1019,9 @@ function BookPage() {
                 doctors={doctors}
                 errorMsg={errorMsg}
                 errorKind={errorKind}
+                errorCode={errorCode}
+                correlationId={getBookingCorrelationId()}
+
                 submitting={submitting}
                 onSubmit={handleSubmit}
                 patientValid={patientValidation.ok}
