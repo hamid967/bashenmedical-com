@@ -34,7 +34,13 @@ export type BookingSubmitKind =
 
 export type BookingSubmitResult =
   | { ok: true; kind: "success"; reference: string | null }
-  | { ok: false; kind: Exclude<BookingSubmitKind, "success">; message: string };
+  | {
+      ok: false;
+      kind: Exclude<BookingSubmitKind, "success">;
+      message: string;
+      /** Machine-readable error code from the server; `SLOT_TAKEN` on 409 slot clash. */
+      code?: string;
+    };
 
 const TIMEOUT_MS = 20_000;
 
