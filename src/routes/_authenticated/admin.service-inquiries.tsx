@@ -28,6 +28,8 @@ import {
   closeInquiry,
 } from "@/lib/admin/service-inquiries.functions";
 import { InquiryAttachments } from "@/components/inquiry/InquiryAttachments";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 
 export const Route = createFileRoute("/_authenticated/admin/service-inquiries")({
   head: () => ({
@@ -407,6 +409,10 @@ function InquiryDrawer({
   const inquiry: any = d?.inquiry ?? null;
   const timeline: any[] = d?.timeline ?? [];
   const isClosed = inquiry?.closed_at != null;
+  const { can } = usePermissions();
+  const branchId: string | null = inquiry?.branch_id ?? null;
+  const canAssign = can(PERMISSIONS.ApptAssign, branchId);
+  const canCancel = can(PERMISSIONS.ApptCancel, branchId);
 
   return (
     <div className="fixed inset-0 z-50 flex" dir="rtl">
@@ -476,7 +482,8 @@ function InquiryDrawer({
                 <label className="text-xs">
                   <span className="block mb-1 text-[color:var(--ac-muted)]">تعيين موظف</span>
                   <select
-                    disabled={isClosed || assignMut.isPending}
+                    disabled={isClosed || assignMut.isPending || !canAssign}
+                    title={!canAssign ? "لا تملك صلاحية تعيين الطلبات لهذا الفرع" : undefined}
                     className="w-full h-10 px-2 rounded-lg border border-[color:var(--ac-line)] bg-transparent text-sm disabled:opacity-60"
                     value={inquiry.assigned_to ?? ""}
                     onChange={(e) => assignMut.mutate(e.target.value || null)}
@@ -620,7 +627,8 @@ function InquiryDrawer({
                 onClick={() =>
                   closeMut.mutate({ outcome: "completed", reason: reason || undefined })
                 }
-                disabled={isClosed || closeMut.isPending}
+                disabled={isClosed || closeMut.isPending || !canCancel}
+                title={!canCancel ? "لا تملك صلاحية إغلاق الطلبات لهذا الفرع" : undefined}
                 className="inline-flex items-center gap-2 px-3 h-10 rounded-lg border border-emerald-500/40 text-emerald-700 text-sm disabled:opacity-50"
               >
                 <CheckCircle2 className="h-4 w-4" /> إغلاق كمكتمل
@@ -629,11 +637,17 @@ function InquiryDrawer({
                 onClick={() =>
                   closeMut.mutate({ outcome: "cancelled", reason: reason || undefined })
                 }
-                disabled={isClosed || closeMut.isPending}
+                disabled={isClosed || closeMut.isPending || !canCancel}
+                title={!canCancel ? "لا تملك صلاحية إغلاق الطلبات لهذا الفرع" : undefined}
                 className="inline-flex items-center gap-2 px-3 h-10 rounded-lg border border-red-500/40 text-red-700 text-sm disabled:opacity-50"
               >
                 <XCircle className="h-4 w-4" /> إغلاق كملغى
               </button>
+              {!canCancel && !isClosed && (
+                <span className="ms-auto text-xs text-[color:var(--ac-muted)] self-center">
+                  لا تملك صلاحية الإغلاق لهذا الفرع.
+                </span>
+              )}
               {isClosed && (
                 <span className="ms-auto text-xs text-[color:var(--ac-muted)] self-center">
                   الطلب مغلق — الإجراءات معطّلة.

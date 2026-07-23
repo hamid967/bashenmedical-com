@@ -6,6 +6,8 @@ import { RefreshCw, Search, X, ChevronLeft, ChevronRight, ShieldAlert } from "lu
 import { listAdminAuditLogs, listAuditFacets } from "@/lib/admin/audit-logs.functions";
 import { getMyRoles } from "@/lib/admin.functions";
 import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 import type { Column } from "@/lib/export-utils";
 
 type AuditSearch = {
@@ -56,6 +58,8 @@ function AuditLogsPage() {
   const rolesFn = useServerFn(getMyRoles);
   const listFn = useServerFn(listAdminAuditLogs);
   const facetsFn = useServerFn(listAuditFacets);
+  const { can } = usePermissions();
+  const canExport = can(PERMISSIONS.AuditExport);
 
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => rolesFn() });
   const isStaff = useMemo(() => {
@@ -228,7 +232,7 @@ function AuditLogsPage() {
             <X className="h-4 w-4" /> مسح الفلاتر
           </button>
           <ExportMenu
-            allowed={isStaff}
+            allowed={isStaff && canExport}
             disabled={list.isLoading}
             filename="audit-logs"
             title="سجل التدقيق (Audit Logs)"
