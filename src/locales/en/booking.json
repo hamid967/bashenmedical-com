@@ -22,7 +22,10 @@
     "noAlternatives": "No alternatives available right now — try another date or join the waitlist.",
     "slotTakenClear": "Sorry — this slot was just booked by another patient. We've listed the nearest available times below; pick one to finish your booking.",
     "invalidIdempotencyKey": "Your booking session expired. A fresh one has been prepared automatically — please tap “Confirm booking” again.",
-    "anyDoctorUnavailable": "No doctor is available for this time — please pick another."
+    "anyDoctorUnavailable": "No doctor is available for this time — please pick another.",
+    "switchDoctor": "Choose another doctor",
+    "holdExpiredTitle": "Reservation hold expired",
+    "holdExpiredHint": "Pick a different time or another doctor — the rest of your details are saved."
   },
   "steps": {
     "service": "Service",
