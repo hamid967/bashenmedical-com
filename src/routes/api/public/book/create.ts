@@ -74,6 +74,11 @@ const bookingCreateSchema = z.object({
   insurance_provider_id: z.string().uuid("جهة تأمين غير صالحة").optional().nullable(),
   insurance_policy_number: z.string().trim().max(64, "رقم البوليصة طويل").optional().nullable(),
   insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
+  verification_challenge_id: z
+    .string()
+    .uuid("رمز التحقق مفقود أو غير صالح")
+    .nullable()
+    .optional(),
 });
 
 function json(status: number, body: Record<string, unknown>, extraHeaders?: Record<string, string>) {
