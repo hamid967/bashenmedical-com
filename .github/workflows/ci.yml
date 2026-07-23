@@ -847,6 +847,9 @@ jobs:
       - name: Run role access matrix (authenticated allowed / anon denied)
         run: |
           cd tests/security && python test_role_access_matrix.py | tee ../../role-matrix-report.txt
+      - name: Run EXECUTE privilege regression (2026-07-23 fix)
+        run: |
+          python tests/security/test_execute_privileges_regression.py | tee execute-privs-report.txt
 
   post-merge-grants-pinned:
     name: Security — A2/A3 grants pinned (post-merge)
