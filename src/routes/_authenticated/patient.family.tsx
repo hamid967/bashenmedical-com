@@ -15,9 +15,9 @@ import {
   createDependent,
   updateDependent,
   deleteDependent,
-  requestDependentVerification,
   type Dependent,
 } from "@/lib/portal/dependents.functions";
+import { DependentVerificationDialog } from "@/components/patient/DependentVerificationDialog";
 import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
