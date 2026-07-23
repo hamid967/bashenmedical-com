@@ -76,10 +76,13 @@ const bookingCreateSchema = z.object({
   insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
 });
 
-function json(status: number, body: Record<string, unknown>) {
+function json(status: number, body: Record<string, unknown>, extraHeaders?: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...(extraHeaders ?? {}),
+    },
   });
 }
 
@@ -156,11 +159,24 @@ export const Route = createFileRoute("/api/public/book/create")({
         const _rl = await applyRateLimit(request, { category: "booking" });
         if (_rl) return _rl;
 
+        // Correlation ID — pulled from the client header first so a single
+        // booking attempt series (including retries) shares one trace ID
+        // across every log record. Falls back to a server-generated UUID
+        // when missing/malformed. Echoed back in `X-Correlation-Id`.
+        const rawCorrId = request.headers.get("x-correlation-id")?.trim() ?? "";
+        const correlationId =
+          rawCorrId && /^[A-Za-z0-9_-]{8,128}$/.test(rawCorrId)
+            ? rawCorrId
+            : (globalThis.crypto?.randomUUID?.() ??
+              `srv-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`);
+        const respond = (status: number, body: Record<string, unknown>) =>
+          json(status, body, { "X-Correlation-Id": correlationId });
+
         let body: unknown;
         try {
           body = await request.json();
         } catch {
-          return json(400, {
+          return respond(400, {
             ok: false,
             kind: "validation",
             message: FRIENDLY_INSERT_MESSAGES.unknown,
@@ -170,7 +186,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         const parsed = bookingCreateSchema.safeParse(body);
         if (!parsed.success) {
           const message = parsed.error.issues[0]?.message ?? "بيانات غير صالحة";
-          return json(400, { ok: false, kind: "validation", message });
+          return respond(400, { ok: false, kind: "validation", message });
         }
 
         // Idempotency-Key: same key → same booking / same reference. Accept
@@ -179,8 +195,10 @@ export const Route = createFileRoute("/api/public/book/create")({
         // INVALID_IDEMPOTENCY_KEY so the client can rotate the key and
         // retry, instead of silently dropping replay protection.
         const rawKey = request.headers.get("idempotency-key")?.trim() ?? "";
+
+
         if (rawKey && !/^[A-Za-z0-9_-]{8,128}$/.test(rawKey)) {
-          return json(400, {
+          return respond(400, {
             ok: false,
             kind: "validation",
             code: "INVALID_IDEMPOTENCY_KEY",
@@ -193,7 +211,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         const url = process.env.SUPABASE_URL;
         const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
         if (!url || !anonKey) {
-          return json(500, {
+          return respond(500, {
             ok: false,
             kind: "db",
             message: FRIENDLY_INSERT_MESSAGES.unknown,
@@ -222,6 +240,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           const record = {
             scope: "book/create",
             event,
+            correlation_id: correlationId,
             idempotency_key: maskKey(idempotencyKey),
             doctor_id: parsed.data.doctor_id ?? null,
             appointment_date: parsed.data.appointment_date,
@@ -254,7 +273,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                 reference_number: reference,
                 replayed: true,
               });
-              return json(200, { ok: true, reference });
+              return respond(200, { ok: true, reference });
             }
           } catch (e) {
             logBook("rpc.replay.fastpath.error", {
@@ -284,7 +303,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                 String(r.appointment_time).slice(0, 5) === timeHHMM,
             );
             if (clash) {
-              return json(409, {
+              return respond(409, {
                 ok: false,
                 kind: "conflict",
                 code: "SLOT_TAKEN",
@@ -363,7 +382,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                   reference_number: reference,
                   replayed: true,
                 });
-                return json(200, { ok: true, reference });
+                return respond(200, { ok: true, reference });
               }
             } catch (e) {
               logBook("rpc.replay.race.error", {
@@ -374,14 +393,14 @@ export const Route = createFileRoute("/api/public/book/create")({
           }
 
           if (isDup) {
-            return json(409, {
+            return respond(409, {
               ok: false,
               kind: "conflict",
               code: "SLOT_TAKEN",
               message: FRIENDLY_INSERT_MESSAGES.duplicate,
             });
           }
-          return json(400, {
+          return respond(400, {
             ok: false,
             kind: "db",
             message: friendlyInsertError(err),
@@ -402,7 +421,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           replayed: rowReplayed,
         });
 
-        return json(200, { ok: true, reference });
+        return respond(200, { ok: true, reference });
       },
     },
   },
