@@ -76,10 +76,13 @@ const bookingCreateSchema = z.object({
   insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
 });
 
-function json(status: number, body: Record<string, unknown>) {
+function json(status: number, body: Record<string, unknown>, extraHeaders?: Record<string, string>) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8" },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      ...(extraHeaders ?? {}),
+    },
   });
 }
 
