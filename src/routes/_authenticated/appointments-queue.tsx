@@ -12,6 +12,7 @@ import {
   Filter,
   Loader2,
   Phone,
+  QrCode,
   RefreshCw,
   Search,
   User,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { listAppointments, updateAppointmentStatus } from "@/lib/admin.functions";
 import { listAppointmentTraces } from "@/lib/admin/booking-trace.functions";
+import { AppointmentQrDialog } from "@/components/booking/AppointmentQrDialog";
 
 
 export const Route = createFileRoute("/_authenticated/appointments-queue")({
@@ -526,6 +528,8 @@ function DetailDrawer({
   onChanged: () => void;
 }) {
   const ref = publicRef(row);
+  const canQr = !!row.reference_number;
+  const [qrOpen, setQrOpen] = useState(false);
 
   const updateStatus = useServerFn(updateAppointmentStatus);
   const qc = useQueryClient();
