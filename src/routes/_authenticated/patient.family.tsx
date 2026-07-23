@@ -164,14 +164,6 @@ function FamilyPage() {
     onError: (e: any) => toast.error(e?.message ?? "تعذر الحذف"),
   });
 
-  const verifyMut = useMutation({
-    mutationFn: (id: string) => requestDependentVerification({ data: { id } }),
-    onSuccess: () => {
-      toast.success("تم إرسال طلب التوثيق — سيتواصل معك الاستقبال");
-      invalidate();
-    },
-    onError: (e: any) => toast.error(e?.message ?? "تعذر إرسال الطلب"),
-  });
 
   const openCreate = () => {
     setEditing(null);
