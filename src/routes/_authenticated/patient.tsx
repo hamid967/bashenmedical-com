@@ -78,16 +78,9 @@ function PatientLayout() {
 }
 
 function PatientLayoutError({ error, reset }: { error: Error; reset: () => void }) {
-  const router = useRouter();
   return (
     <div className="mx-auto max-w-xl p-6">
-      <ErrorState
-        description={error.message}
-        onRetry={() => {
-          router.invalidate();
-          reset();
-        }}
-      />
+      <PatientRouteError error={error} reset={reset} />
     </div>
   );
 }
@@ -95,7 +88,10 @@ function PatientLayoutError({ error, reset }: { error: Error; reset: () => void 
 function PatientLayoutNotFound() {
   return (
     <div className="mx-auto max-w-xl p-6">
-      <EmptyState title="الصفحة غير موجودة" description="لم نعثر على الصفحة المطلوبة داخل البوابة." />
+      <PatientRouteNotFound
+        title="الصفحة غير موجودة"
+        description="لم نعثر على الصفحة المطلوبة داخل البوابة."
+      />
     </div>
   );
 }
