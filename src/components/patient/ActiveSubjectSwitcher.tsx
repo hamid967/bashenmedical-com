@@ -108,6 +108,17 @@ export function ActiveSubjectSwitcher({ lang = "ar" }: { lang?: "ar" | "en" }) {
               ? lang === "ar"
                 ? "جارٍ التحميل…"
                 : "Loading…"
+              : dependents.length === 0
+                ? lang === "ar"
+                  ? "لا يوجد أفراد مخوّلون — أضف/وثّق من هنا"
+                  : "No authorized dependents — add or verify"
+                : lang === "ar"
+                  ? "إدارة أفراد الأسرة والصلاحيات"
+                  : "Manage family and permissions"}
+            {isLoading
+              ? lang === "ar"
+                ? "جارٍ التحميل…"
+                : "Loading…"
               : lang === "ar"
                 ? "إدارة أفراد الأسرة"
                 : "Manage family"}
