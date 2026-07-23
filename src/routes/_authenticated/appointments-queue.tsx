@@ -181,7 +181,7 @@ function AppointmentsQueuePage() {
       return (
         r.patient_name.toLowerCase().includes(query) ||
         r.patient_phone.includes(query) ||
-        shortRef(r.id).toLowerCase().includes(query) ||
+        publicRef(r).toLowerCase().includes(query) ||
         (r.reason ?? "").toLowerCase().includes(query)
       );
     });
@@ -227,7 +227,7 @@ function AppointmentsQueuePage() {
     const lines = filtered.map((r) => {
       const tr = traces[r.id];
       return [
-        shortRef(r.id),
+        publicRef(r),
         r.patient_name,
         r.patient_phone,
         r.appointment_date,
@@ -383,7 +383,7 @@ function AppointmentsQueuePage() {
                     onClick={() => setSelected(r)}
                     className="border-t border-border cursor-pointer hover:bg-muted/40 transition"
                   >
-                    <td className="p-3 font-mono text-xs font-bold">{shortRef(r.id)}</td>
+                    <td className="p-3 font-mono text-xs font-bold">{publicRef(r)}</td>
                     <td className="p-3 font-semibold">{r.patient_name}</td>
                     <td className="p-3 font-mono text-xs" dir="ltr">
                       {r.patient_phone}
@@ -525,7 +525,7 @@ function DetailDrawer({
   onClose: () => void;
   onChanged: () => void;
 }) {
-  const ref = shortRef(row.id);
+  const ref = publicRef(row);
 
   const updateStatus = useServerFn(updateAppointmentStatus);
   const qc = useQueryClient();
