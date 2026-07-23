@@ -221,10 +221,14 @@ export function SessionExpiredState({
 }) {
   const lang = useLang();
   const resolvedNext = React.useMemo(() => {
-    if (next && next.startsWith("/")) return next;
+    if (next && next.startsWith("/") && !next.startsWith("//")) return next;
     if (typeof window === "undefined") return undefined;
-    const path = window.location.pathname + window.location.search;
-    return path.startsWith("/patient") ? path : undefined;
+    // Preserve pathname + query + hash for an exact return-to-screen after re-auth.
+    const path =
+      window.location.pathname + window.location.search + window.location.hash;
+    if (!path.startsWith("/patient") || path.startsWith("//")) return undefined;
+    if (path.length > 2048) return undefined;
+    return path;
   }, [next]);
   const loginSearch = resolvedNext ? { next: resolvedNext } : undefined;
   return (
