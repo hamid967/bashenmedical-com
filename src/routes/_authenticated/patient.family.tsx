@@ -426,6 +426,14 @@ function FamilyPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {verifyFor ? (
+        <DependentVerificationDialog
+          dependent={verifyFor}
+          open={!!verifyFor}
+          onOpenChange={(o) => !o && setVerifyFor(null)}
+        />
+      ) : null}
     </div>
   );
 }
