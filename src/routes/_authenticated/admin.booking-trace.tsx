@@ -355,12 +355,12 @@ function EventsPanel({
                 )}
               </div>
               {r.extra &&
-                typeof r.extra === "object" &&
-                Object.keys(r.extra as Record<string, unknown>).length > 0 && (
-                  <pre className="text-[11px] bg-slate-50 border rounded p-2 overflow-x-auto text-slate-700">
-                    {JSON.stringify(r.extra, null, 2)}
-                  </pre>
-                )}
+              typeof r.extra === "object" &&
+              Object.keys(r.extra as Record<string, unknown>).length > 0 ? (
+                <pre className="text-[11px] bg-slate-50 border rounded p-2 overflow-x-auto text-slate-700">
+                  {JSON.stringify(r.extra, null, 2)}
+                </pre>
+              ) : null}
             </li>
           ))}
         </ol>
