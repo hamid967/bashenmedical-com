@@ -959,8 +959,9 @@ function BookPage() {
                               setSuggestion(null);
                               setSameDoctorTimes([]);
                               setErrorKind("unknown");
-    setErrorCode(null);
+                              setErrorCode(null);
                               setErrorMsg(null);
+
                             }}
                           >
                             {t("page.dismiss")}
