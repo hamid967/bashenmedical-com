@@ -40,15 +40,27 @@ import { createFileRoute } from "@tanstack/react-router";
 import { riyadhTodayIso, riyadhNowMinutes } from "@/lib/riyadh-date";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
+import {
+  BookingErrorCode,
+  BranchId,
+  DoctorId,
+  IsoDate,
+  SessionId,
+  SpecialtyId,
+  firstZodErrorCode,
+} from "@/lib/booking/query-schemas";
 
 const QuerySchema = z
   .object({
-    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "invalid_date"),
-    doctor_id: z.string().uuid("invalid_doctor_id").nullish(),
-    specialty_id: z.string().uuid("invalid_specialty_id").nullish(),
-    branch_id: z.string().uuid("invalid_branch_id").nullish(),
+    date: IsoDate,
+    doctor_id: DoctorId.nullish(),
+    specialty_id: SpecialtyId.nullish(),
+    branch_id: BranchId.nullish(),
+    session: SessionId.nullish(),
   })
-  .refine((v) => v.doctor_id || v.specialty_id, { message: "missing_scope" });
+  .refine((v) => v.doctor_id || v.specialty_id, {
+    message: BookingErrorCode.missing_scope,
+  });
 
 function json(
   status: number,
