@@ -17,11 +17,17 @@ type Role = "admin" | "super_admin" | "editor" | "authenticated" | "guest";
 
 async function loadEnabled(): Promise<boolean> {
   try {
-    const { data } = await supabase
+    // ai_feature_flags RLS restricts SELECT to admin/super_admin; querying as
+    // anon/authenticated-non-admin returns 401 noise. Skip the fetch entirely
+    // for anonymous visitors — the palette is admin-gated anyway.
+    const { data: sess } = await supabase.auth.getSession();
+    if (!sess.session) return false;
+    const { data, error } = await supabase
       .from("ai_feature_flags")
       .select("enabled")
       .eq("key", "v3.admin.command_palette_v3")
       .maybeSingle();
+    if (error) return false;
     return Boolean(data?.enabled);
   } catch {
     return false;
@@ -55,15 +61,18 @@ export function CommandPaletteProvider() {
 
   useEffect(() => {
     let cancelled = false;
-    void loadEnabled().then((v) => {
-      if (!cancelled) setEnabled(v);
-    });
-    void loadRoles().then((v) => {
-      if (!cancelled) setRoles(v);
-    });
+    const refresh = () => {
+      void loadEnabled().then((v) => {
+        if (!cancelled) setEnabled(v);
+      });
+      void loadRoles().then((v) => {
+        if (!cancelled) setRoles(v);
+      });
+    };
+    refresh();
     const { data: sub } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
-        void loadRoles().then((v) => setRoles(v));
+        refresh();
       }
     });
     return () => {
