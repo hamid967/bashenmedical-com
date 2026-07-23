@@ -430,7 +430,17 @@ function FamilyPage() {
               سيتم إزالة {confirmDelete?.full_name} من قائمة أفراد أسرتك. لا يمكن التراجع عن هذه العملية.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleteMut.error ? (
+            <InlineStateBanner
+              error={deleteMut.error}
+              onRetry={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
+            />
+          ) : null}
+          {deleteMut.isPending ? (
+            <LoadingState label="جارٍ الحذف…" className="py-1" />
+          ) : null}
           <AlertDialogFooter>
+
             <AlertDialogCancel disabled={deleteMut.isPending}>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
