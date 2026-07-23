@@ -146,6 +146,9 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
   // server returns the same reference instead of creating a duplicate row.
   // Cleared by the caller (see /book handleSubmit success + handleReset).
   const idempotencyKey = getOrCreateIdempotencyKey();
+  // Correlation ID — echoed by the server in every log line for this
+  // attempt series (fast-path replay, RPC call, RPC replay, conflict).
+  const correlationId = getOrCreateCorrelationId();
 
   let res: Response;
   try {
@@ -154,6 +157,7 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
       headers: {
         "Content-Type": "application/json",
         "Idempotency-Key": idempotencyKey,
+        "X-Correlation-Id": correlationId,
       },
       body: JSON.stringify(payload),
       signal: controller.signal,
