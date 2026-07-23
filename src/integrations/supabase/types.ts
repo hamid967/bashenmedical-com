@@ -898,6 +898,60 @@ export type Database = {
         }
         Relationships: []
       }
+      auth_events: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string | null
+          kind: string
+          meta: Json
+          ua: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          kind: string
+          meta?: Json
+          ua?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          kind?: string
+          meta?: Json
+          ua?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      auth_rate_limits: {
+        Row: {
+          blocked_until: string | null
+          hits: number
+          key: string
+          updated_at: string
+          window_started_at: string
+        }
+        Insert: {
+          blocked_until?: string | null
+          hits?: number
+          key: string
+          updated_at?: string
+          window_started_at?: string
+        }
+        Update: {
+          blocked_until?: string | null
+          hits?: number
+          key?: string
+          updated_at?: string
+          window_started_at?: string
+        }
+        Relationships: []
+      }
       availability: {
         Row: {
           branch_id: string | null
@@ -1655,6 +1709,51 @@ export type Database = {
         }
         Relationships: []
       }
+      device_sessions: {
+        Row: {
+          city: string | null
+          country: string | null
+          first_seen_at: string
+          id: string
+          ip_hash: string | null
+          last_seen_at: string
+          revoke_reason: string | null
+          revoked_at: string | null
+          session_fingerprint: string
+          supabase_session_id: string | null
+          ua: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_seen_at?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          session_fingerprint: string
+          supabase_session_id?: string | null
+          ua?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_hash?: string | null
+          last_seen_at?: string
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          session_fingerprint?: string
+          supabase_session_id?: string | null
+          ua?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       doctor_branches: {
         Row: {
           branch_id: string
@@ -1741,6 +1840,51 @@ export type Database = {
             columns: ["doctor_id"]
             isOneToOne: false
             referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctor_profiles: {
+        Row: {
+          created_at: string
+          doctor_id: string | null
+          is_active: boolean
+          license_no: string | null
+          specialty_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          doctor_id?: string | null
+          is_active?: boolean
+          license_no?: string | null
+          specialty_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          doctor_id?: string | null
+          is_active?: boolean
+          license_no?: string | null
+          specialty_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_profiles_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_profiles_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
             referencedColumns: ["id"]
           },
         ]
@@ -3416,6 +3560,57 @@ export type Database = {
           },
         ]
       }
+      otp_challenges: {
+        Row: {
+          attempts: number
+          channel: string
+          code_hash: string
+          consumed_at: string | null
+          created_at: string
+          destination: string
+          expires_at: string
+          id: string
+          ip: unknown
+          max_attempts: number
+          purpose: string
+          salt: string
+          ua: string | null
+          user_id: string | null
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          code_hash: string
+          consumed_at?: string | null
+          created_at?: string
+          destination: string
+          expires_at: string
+          id?: string
+          ip?: unknown
+          max_attempts?: number
+          purpose: string
+          salt: string
+          ua?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          code_hash?: string
+          consumed_at?: string | null
+          created_at?: string
+          destination?: string
+          expires_at?: string
+          id?: string
+          ip?: unknown
+          max_attempts?: number
+          purpose?: string
+          salt?: string
+          ua?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       patient_allergies: {
         Row: {
           allergen: string
@@ -3741,6 +3936,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      patient_profiles: {
+        Row: {
+          created_at: string
+          date_of_birth: string | null
+          default_branch_id: string | null
+          full_name_ar: string | null
+          full_name_en: string | null
+          gender: string | null
+          iqama: string | null
+          mobile_e164: string | null
+          mobile_verified_at: string | null
+          mrn: string | null
+          national_id: string | null
+          preferred_language: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_of_birth?: string | null
+          default_branch_id?: string | null
+          full_name_ar?: string | null
+          full_name_en?: string | null
+          gender?: string | null
+          iqama?: string | null
+          mobile_e164?: string | null
+          mobile_verified_at?: string | null
+          mrn?: string | null
+          national_id?: string | null
+          preferred_language?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_of_birth?: string | null
+          default_branch_id?: string | null
+          full_name_ar?: string | null
+          full_name_en?: string | null
+          gender?: string | null
+          iqama?: string | null
+          mobile_e164?: string | null
+          mobile_verified_at?: string | null
+          mrn?: string | null
+          national_id?: string | null
+          preferred_language?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       patient_qr_scans: {
         Row: {
@@ -5488,6 +5734,42 @@ export type Database = {
           name_en?: string
           slug?: string
           sort_order?: number
+        }
+        Relationships: []
+      }
+      staff_profiles: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          department: string | null
+          employee_no: string | null
+          hire_date: string | null
+          is_active: boolean
+          job_title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          department?: string | null
+          employee_no?: string | null
+          hire_date?: string | null
+          is_active?: boolean
+          job_title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          department?: string | null
+          employee_no?: string | null
+          hire_date?: string | null
+          is_active?: boolean
+          job_title?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
