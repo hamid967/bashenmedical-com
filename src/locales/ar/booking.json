@@ -233,7 +233,21 @@
     "copiedShort": "نسخ",
     "detailsCopyStamp": "تاريخ النسخ",
     "detailsHeader": "🏥 تأكيد حجز — مجمع باعشن الطبي",
-    "detailsFooter": "احتفظ برقم الحجز لأي استفسار."
+    "detailsFooter": "احتفظ برقم الحجز لأي استفسار.",
+    "notifTitle": "حالة تسليم الإشعارات",
+    "notifAutoRefresh": "تحديث تلقائي",
+    "notifHint": "قد يستغرق تسليم الرسائل حتى دقيقتين. سنستمر بالتحديث تلقائيًا.",
+    "notifChannel": {
+      "sms": "رسالة SMS",
+      "whatsapp": "واتساب",
+      "email": "البريد الإلكتروني"
+    },
+    "notifStatus": {
+      "sent": "تم التسليم",
+      "failed": "فشل التسليم",
+      "pending": "قيد الإرسال",
+      "unknown": "غير متوفر"
+    }
   },
   "summary": {
     "title": "ملخّص الحجز",

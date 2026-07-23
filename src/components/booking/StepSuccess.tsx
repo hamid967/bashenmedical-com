@@ -21,6 +21,7 @@ import { downloadBookingConfirmationPdf } from "@/lib/booking-pdf";
 import { downloadIcs, googleCalendarUrl, type ShareBooking } from "@/lib/booking-share";
 import { formatArDate, type State } from "./types";
 import { EmailOtpLinker } from "./EmailOtpLinker";
+import { NotificationStatusChips } from "./NotificationStatusChips";
 
 export function StepSuccess({
   lang,
@@ -649,6 +650,8 @@ export function StepSuccess({
           {t("success.newBooking")}
         </Button>
       </div>
+
+      {reference && <NotificationStatusChips reference={reference} phone={phone} />}
 
       {reference && <EmailOtpLinker email={email ?? state.patient.email ?? null} lang={lang} />}
     </div>

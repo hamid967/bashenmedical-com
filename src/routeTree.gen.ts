@@ -191,6 +191,7 @@ import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/boo
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
 import { Route as ApiPublicBookHoldRouteImport } from './routes/api/public/book/hold'
 import { Route as ApiPublicBookMonthAvailabilityRouteImport } from './routes/api/public/book/month-availability'
+import { Route as ApiPublicBookNotificationStatusRouteImport } from './routes/api/public/book/notification-status'
 import { Route as ApiPublicBookResolveAnyDoctorRouteImport } from './routes/api/public/book/resolve-any-doctor'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
@@ -1221,6 +1222,12 @@ const ApiPublicBookMonthAvailabilityRoute =
     path: '/api/public/book/month-availability',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBookNotificationStatusRoute =
+  ApiPublicBookNotificationStatusRouteImport.update({
+    id: '/api/public/book/notification-status',
+    path: '/api/public/book/notification-status',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookResolveAnyDoctorRoute =
   ApiPublicBookResolveAnyDoctorRouteImport.update({
     id: '/api/public/book/resolve-any-doctor',
@@ -1535,6 +1542,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
   '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
+  '/api/public/book/notification-status': typeof ApiPublicBookNotificationStatusRoute
   '/api/public/book/resolve-any-doctor': typeof ApiPublicBookResolveAnyDoctorRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
@@ -1738,6 +1746,7 @@ export interface FileRoutesByTo {
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
   '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
+  '/api/public/book/notification-status': typeof ApiPublicBookNotificationStatusRoute
   '/api/public/book/resolve-any-doctor': typeof ApiPublicBookResolveAnyDoctorRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
@@ -1946,6 +1955,7 @@ export interface FileRoutesById {
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
   '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
+  '/api/public/book/notification-status': typeof ApiPublicBookNotificationStatusRoute
   '/api/public/book/resolve-any-doctor': typeof ApiPublicBookResolveAnyDoctorRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
@@ -2154,6 +2164,7 @@ export interface FileRouteTypes {
     | '/api/public/book/create'
     | '/api/public/book/hold'
     | '/api/public/book/month-availability'
+    | '/api/public/book/notification-status'
     | '/api/public/book/resolve-any-doctor'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
@@ -2357,6 +2368,7 @@ export interface FileRouteTypes {
     | '/api/public/book/create'
     | '/api/public/book/hold'
     | '/api/public/book/month-availability'
+    | '/api/public/book/notification-status'
     | '/api/public/book/resolve-any-doctor'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
@@ -2564,6 +2576,7 @@ export interface FileRouteTypes {
     | '/api/public/book/create'
     | '/api/public/book/hold'
     | '/api/public/book/month-availability'
+    | '/api/public/book/notification-status'
     | '/api/public/book/resolve-any-doctor'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
@@ -2656,6 +2669,7 @@ export interface RootRouteChildren {
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
   ApiPublicBookHoldRoute: typeof ApiPublicBookHoldRoute
   ApiPublicBookMonthAvailabilityRoute: typeof ApiPublicBookMonthAvailabilityRoute
+  ApiPublicBookNotificationStatusRoute: typeof ApiPublicBookNotificationStatusRoute
   ApiPublicBookResolveAnyDoctorRoute: typeof ApiPublicBookResolveAnyDoctorRoute
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
@@ -3954,6 +3968,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBookMonthAvailabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/book/notification-status': {
+      id: '/api/public/book/notification-status'
+      path: '/api/public/book/notification-status'
+      fullPath: '/api/public/book/notification-status'
+      preLoaderRoute: typeof ApiPublicBookNotificationStatusRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/resolve-any-doctor': {
       id: '/api/public/book/resolve-any-doctor'
       path: '/api/public/book/resolve-any-doctor'
@@ -4607,6 +4628,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,
   ApiPublicBookHoldRoute: ApiPublicBookHoldRoute,
   ApiPublicBookMonthAvailabilityRoute: ApiPublicBookMonthAvailabilityRoute,
+  ApiPublicBookNotificationStatusRoute: ApiPublicBookNotificationStatusRoute,
   ApiPublicBookResolveAnyDoctorRoute: ApiPublicBookResolveAnyDoctorRoute,
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
