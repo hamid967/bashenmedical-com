@@ -295,7 +295,7 @@ function EventsPanel({
     appointment_time: string | null;
     duration_ms: number | null;
     pg_code: string | null;
-    extra: Record<string, unknown> | null;
+    extra: unknown;
     created_at: string;
   }>;
 }) {
