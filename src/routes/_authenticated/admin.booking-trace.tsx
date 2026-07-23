@@ -309,6 +309,7 @@ function EventsPanel({
     pg_code: string | null;
     extra: unknown;
     created_at: string;
+    error_code: string | null;
   }>;
 }) {
   const ordered = [...rows].sort((a, b) =>
@@ -335,11 +336,17 @@ function EventsPanel({
                     {r.duration_ms}ms
                   </span>
                 )}
+                {r.error_code && (
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-red-50 text-red-800 border border-red-200">
+                    {r.error_code}
+                  </span>
+                )}
                 {r.pg_code && (
                   <span className="text-xs font-mono text-red-700">
                     pg:{r.pg_code}
                   </span>
                 )}
+
                 <button
                   onClick={() => navigator.clipboard?.writeText(r.correlation_id)}
                   className="ml-auto text-xs inline-flex items-center gap-1 text-slate-500 hover:text-slate-800"
