@@ -60,13 +60,38 @@ import { releaseHold } from "@/lib/booking-hold";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
 
+// Named-step mapping — user-visible URLs read like ?step=patient instead of
+// ?step=7. Numeric step remains the source of truth internally; the name is
+// a bidirectional mirror written on every navigation and parsed on load.
+const STEP_NAMES = [
+  "", // 0 (unused)
+  "service",
+  "branch",
+  "specialty",
+  "doctor",
+  "date",
+  "time",
+  "patient",
+  "review",
+  "confirmed",
+] as const;
+type StepName = (typeof STEP_NAMES)[number];
+function stepNameOf(n: number): StepName | undefined {
+  return n >= 1 && n <= 9 ? STEP_NAMES[n] : undefined;
+}
+function stepNumberOf(name: string | undefined): number | null {
+  if (!name) return null;
+  const idx = STEP_NAMES.indexOf(name as StepName);
+  return idx >= 1 ? idx : null;
+}
+
 const search = z.object({
   specialty: z.string().optional(),
   doctor: z.string().optional(),
   branch: z.string().optional(),
   date: z.string().optional(),
   time: z.string().optional(),
-  step: fallback(z.number().int(), 0).default(0),
+  step: fallback(z.union([z.number().int(), z.string()]), 0).default(0),
 });
 
 export const Route = createFileRoute("/book")({
