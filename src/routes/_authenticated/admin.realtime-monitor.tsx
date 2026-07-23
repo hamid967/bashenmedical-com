@@ -28,7 +28,9 @@ export const Route = createFileRoute("/_authenticated/admin/realtime-monitor")({
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "مراقب الأحداث اللحظية — لوحة الإدارة" },
       { property: "og:description", content: "أداة إدارية داخلية لمراقبة أحداث Realtime." },
+      { property: "og:url", content: "https://bashenmedical.com/admin/realtime-monitor" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/admin/realtime-monitor" }],
   }),
   component: RealtimeMonitorPage,
 });
