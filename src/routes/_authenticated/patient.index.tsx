@@ -1,8 +1,9 @@
 /**
  * Phase 5 — Premium patient dashboard.
- * Bento grid of hero cards fed by a single `getPortalQuickSnapshot` call
- * plus lightweight secondary queries. Every card has explicit Loading /
- * Empty / Error via the shared states primitives.
+ * Bento grid fed by a single `getPortalQuickSnapshot` server call that returns
+ * next appointment, required actions, new reports, prescriptions, outstanding
+ * invoices, insurance approvals, service requests, notifications,
+ * announcements, and offers.
  */
 import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -17,17 +18,19 @@ import {
   MessageSquare,
   Bell,
   Sparkles,
+  Megaphone,
+  Tag,
   CalendarPlus,
   ArrowLeft,
   MapPin,
 } from "lucide-react";
 import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
-import { EmptyState, SkeletonCards } from "@/components/states";
+import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 
 const snapshotQuery = queryOptions({
@@ -81,7 +84,9 @@ function PatientDashboard() {
                   <span className="font-medium">
                     {format(new Date(next.date), "EEEE d MMMM yyyy", { locale: ar })}
                   </span>
-                  {next.time && <span className="text-muted-foreground">{next.time.slice(0, 5)}</span>}
+                  {next.time && (
+                    <span className="text-muted-foreground">{next.time.slice(0, 5)}</span>
+                  )}
                 </div>
                 <div className="flex flex-wrap gap-2 pt-2">
                   <Button size="sm" asChild>
@@ -121,7 +126,9 @@ function PatientDashboard() {
             <div>
               <CalendarPlus className="mb-3 h-8 w-8" aria-hidden />
               <h3 className="text-lg font-bold">احجز موعدًا الآن</h3>
-              <p className="mt-1 text-sm opacity-90">اختر التخصص والطبيب والفرع خلال دقائق.</p>
+              <p className="mt-1 text-sm opacity-90">
+                اختر التخصص والطبيب والفرع خلال دقائق.
+              </p>
             </div>
             <Button asChild variant="secondary" className="mt-4 w-full">
               <Link to="/book">
@@ -145,7 +152,10 @@ function PatientDashboard() {
           <CardContent>
             <ul className="space-y-2">
               {data.requiredActions.items.map((a) => (
-                <li key={a.id} className="flex items-center justify-between rounded-lg border bg-background p-3">
+                <li
+                  key={a.id}
+                  className="flex items-center justify-between rounded-lg border bg-background p-3"
+                >
                   <span className="text-sm">{a.label}</span>
                   <Button size="sm" variant="outline" asChild>
                     <a href={a.href}>إجراء</a>
@@ -182,7 +192,8 @@ function PatientDashboard() {
         >
           {data.outstandingPayments.count > 0 && (
             <li className="text-sm font-semibold text-foreground">
-              الإجمالي: {data.outstandingPayments.total.toFixed(2)} {data.outstandingPayments.currency}
+              الإجمالي: {data.outstandingPayments.total.toFixed(2)}{" "}
+              {data.outstandingPayments.currency}
             </li>
           )}
         </TileCard>
@@ -190,57 +201,166 @@ function PatientDashboard() {
         <TileCard
           icon={Pill}
           title="الوصفات الطبية"
-          count={null}
+          count={data.prescriptions.count}
           href="/patient/prescriptions"
-          emptyText="اعرض وصفاتك النشطة"
-        />
+          emptyText="لا توجد وصفات نشطة"
+        >
+          {data.prescriptions.items.slice(0, 3).map((r) => (
+            <li key={r.id} className="truncate text-xs text-muted-foreground">
+              · {r.medication}
+              {r.dosage ? ` — ${r.dosage}` : ""}
+            </li>
+          ))}
+        </TileCard>
 
         <TileCard
           icon={ShieldCheck}
           title="التأمين والموافقات"
-          count={null}
+          count={data.insuranceApprovals.count}
           href="/patient/insurance"
-          emptyText="حالة الاعتمادات التأمينية"
-        />
+          emptyText="لا توجد موافقات تأمينية"
+        >
+          {data.insuranceApprovals.count > 0 && (
+            <li className="flex flex-wrap gap-1 text-xs">
+              {data.insuranceApprovals.approved > 0 && (
+                <Badge variant="secondary">معتمد {data.insuranceApprovals.approved}</Badge>
+              )}
+              {data.insuranceApprovals.pending > 0 && (
+                <Badge variant="outline">قيد المراجعة {data.insuranceApprovals.pending}</Badge>
+              )}
+              {data.insuranceApprovals.needsInfo > 0 && (
+                <Badge variant="destructive">
+                  يحتاج معلومات {data.insuranceApprovals.needsInfo}
+                </Badge>
+              )}
+            </li>
+          )}
+        </TileCard>
 
         <TileCard
           icon={MessageSquare}
           title="طلباتي واستفساراتي"
-          count={null}
+          count={data.serviceRequests.open}
           href="/patient/requests"
-          emptyText="تابع طلباتك المفتوحة"
-        />
+          emptyText="لا توجد طلبات مفتوحة"
+        >
+          {data.serviceRequests.items.slice(0, 3).map((r) => (
+            <li key={r.id} className="truncate text-xs text-muted-foreground">
+              · {r.request_number} — {r.service_label ?? r.internal_status}
+            </li>
+          ))}
+        </TileCard>
 
         <TileCard
           icon={Bell}
           title="الإشعارات"
-          count={null}
+          count={data.notifications.unread}
           href="/patient/notifications"
-          emptyText="آخر التنبيهات والتذكيرات"
-        />
+          emptyText="لا توجد إشعارات جديدة"
+        >
+          {data.notifications.items.slice(0, 3).map((n) => (
+            <li key={n.id} className="truncate text-xs text-muted-foreground">
+              · {n.title ?? n.body ?? "إشعار"}
+            </li>
+          ))}
+        </TileCard>
       </section>
 
-      {/* Announcements / Offers / Suggestions placeholder */}
+      {/* Announcements */}
+      {data.announcements.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Megaphone className="h-4 w-4 text-primary" aria-hidden />
+              إعلانات
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ul className="grid gap-2 sm:grid-cols-2">
+              {data.announcements.map((a) => (
+                <li key={a.id}>
+                  <a
+                    href={`/${a.slug}`}
+                    className="block rounded-lg border p-3 transition-colors hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <div className="font-medium">{a.title_ar}</div>
+                    {a.published_at && (
+                      <div className="mt-1 text-xs text-muted-foreground">
+                        {formatDistanceToNow(new Date(a.published_at), {
+                          addSuffix: true,
+                          locale: ar,
+                        })}
+                      </div>
+                    )}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Offers / Suggestions */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="h-4 w-4 text-primary" aria-hidden />
-            خدمات مقترحة
+            {data.offers.length > 0 ? (
+              <>
+                <Tag className="h-4 w-4 text-primary" aria-hidden />
+                عروض ومقالات صحية
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4 text-primary" aria-hidden />
+                خدمات مقترحة
+              </>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <SuggestionCard
-              title="استشارة عن بُعد"
-              description="تحدث مع طبيبك المفضل من المنزل."
-              href="/book?mode=teleconsult"
-            />
-            <SuggestionCard
-              title="فحوصات مخبرية"
-              description="احجز فحوصاتك في أقرب فرع."
-              href="/services"
-            />
-          </div>
+          {data.offers.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {data.offers.map((o) => (
+                <a
+                  key={o.id}
+                  href={`/health/${o.slug}`}
+                  className="group overflow-hidden rounded-xl border transition-colors hover:border-primary/40"
+                >
+                  {o.cover_image_url && (
+                    <div className="aspect-video overflow-hidden bg-muted">
+                      <img
+                        src={o.cover_image_url}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <div className="font-medium">{o.title_ar}</div>
+                    {o.excerpt_ar && (
+                      <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                        {o.excerpt_ar}
+                      </p>
+                    )}
+                  </div>
+                </a>
+              ))}
+            </div>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <SuggestionCard
+                title="استشارة عن بُعد"
+                description="تحدث مع طبيبك المفضل من المنزل."
+                href="/book?mode=teleconsult"
+              />
+              <SuggestionCard
+                title="فحوصات مخبرية"
+                description="احجز فحوصاتك في أقرب فرع."
+                href="/services"
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
@@ -289,7 +409,15 @@ function TileCard({
   );
 }
 
-function SuggestionCard({ title, description, href }: { title: string; description: string; href: string }) {
+function SuggestionCard({
+  title,
+  description,
+  href,
+}: {
+  title: string;
+  description: string;
+  href: string;
+}) {
   return (
     <a
       href={href}
@@ -300,4 +428,3 @@ function SuggestionCard({ title, description, href }: { title: string; descripti
     </a>
   );
 }
-
