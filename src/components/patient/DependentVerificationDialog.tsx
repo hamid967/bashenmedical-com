@@ -283,9 +283,12 @@ export function DependentVerificationDialog({
         </DialogHeader>
 
         {requestsQ.isLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
-          </div>
+          <LoadingState label="جارٍ تحميل حالة الطلب…" className="py-6" />
+        ) : requestsQ.isError ? (
+          <InlineStateBanner
+            error={requestsQ.error}
+            onRetry={() => requestsQ.refetch()}
+          />
         ) : activeReq ? (
           <ActiveRequestView
             req={activeReq}
@@ -306,6 +309,16 @@ export function DependentVerificationDialog({
             setNotes={setNotes}
           />
         )}
+
+        {submitMut.error || cancelMut.error || deleteDocMut.error ? (
+          <InlineStateBanner
+            error={submitMut.error ?? cancelMut.error ?? deleteDocMut.error}
+            onRetry={() => {
+              if (submitMut.error) submitMut.mutate();
+              else if (cancelMut.error && activeReq) cancelMut.mutate(activeReq.id);
+            }}
+          />
+        ) : null}
 
         {history.length > 0 ? (
           <section className="border-t pt-3">
@@ -330,6 +343,12 @@ export function DependentVerificationDialog({
               ))}
             </ul>
           </section>
+        ) : !requestsQ.isLoading && !activeReq && !requestsQ.isError ? (
+          <EmptyState
+            className="py-4"
+            title="لا يوجد سجل طلبات سابقة"
+            description="سيظهر هنا كل طلب توثيق تُرسله لهذا التابع."
+          />
         ) : null}
 
         <DialogFooter>
@@ -348,7 +367,7 @@ export function DependentVerificationDialog({
               </Button>
               <Button
                 onClick={() => submitMut.mutate()}
-                disabled={submitMut.isPending}
+                disabled={submitMut.isPending || requestsQ.isError}
               >
                 {submitMut.isPending ? (
                   <Loader2 className="me-1 h-4 w-4 animate-spin" aria-hidden />
@@ -358,6 +377,7 @@ export function DependentVerificationDialog({
             </>
           )}
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );
