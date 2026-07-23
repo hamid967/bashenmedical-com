@@ -35,6 +35,15 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/portal/audit-log")({
+  head: () => ({
+    meta: [
+      { title: "سجل النشاط — بوابة المريض | مجمع باعشن الطبي" },
+      { name: "description", content: "سجل تفصيلي لعمليات الدخول والوصول إلى بياناتك الصحية." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "سجل النشاط — بوابة المريض" },
+      { property: "og:description", content: "تتبع أنشطة حسابك الشخصي بالتفصيل." },
+    ],
+  }),
   component: AuditLogPage,
 });
 

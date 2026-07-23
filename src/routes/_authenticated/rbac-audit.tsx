@@ -480,6 +480,15 @@ function Page() {
 }
 
 export const Route = createFileRoute("/_authenticated/rbac-audit")({
+  head: () => ({
+    meta: [
+      { title: "سجل تدقيق الصلاحيات (RBAC) — لوحة الإدارة | مجمع باعشن الطبي" },
+      { name: "description", content: "متابعة تغييرات الأدوار والصلاحيات وكتالوج الصلاحيات لأغراض التدقيق." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "سجل تدقيق الصلاحيات (RBAC)" },
+      { property: "og:description", content: "أداة إدارية لتدقيق تغييرات الأدوار والصلاحيات." },
+    ],
+  }),
   component: () => (
     <RequirePermission anyOf={["rbac.manage", "audit.view"]}>
       <Page />
