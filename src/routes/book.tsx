@@ -903,11 +903,41 @@ function BookPage() {
                 value={state.doctorId}
                 onPick={(v) => {
                   dispatch({ t: "set", p: { doctorId: v, date: null, time: null } });
+                  setSuggestion(null);
+                  setSameDoctorTimes([]);
+                  setErrorKind("unknown");
+                  setErrorCode(null);
+                  setErrorMsg(null);
                   goto(5);
                 }}
                 onPickAny={() => {
                   dispatch({ t: "set", p: { doctorId: ANY_DOCTOR, date: null, time: null } });
+                  setSuggestion(null);
+                  setSameDoctorTimes([]);
+                  setErrorKind("unknown");
+                  setErrorCode(null);
+                  setErrorMsg(null);
                   goto(5);
+                }}
+                alternatives={{
+                  reason:
+                    errorCode === "SLOT_TAKEN" || errorKind === "conflict"
+                      ? "conflict"
+                      : errorCode === "HOLD_EXPIRED"
+                        ? "expired"
+                        : null,
+                  findingAlt,
+                  sameDoctorTimes,
+                  suggestion,
+                  onPickSameDoctorTime: pickSameDoctorTime,
+                  onAcceptSuggestion: acceptSuggestion,
+                  onDismiss: () => {
+                    setSuggestion(null);
+                    setSameDoctorTimes([]);
+                    setErrorKind("unknown");
+                    setErrorCode(null);
+                    setErrorMsg(null);
+                  },
                 }}
               />
             )}
