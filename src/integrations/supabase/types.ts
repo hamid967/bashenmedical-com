@@ -6274,6 +6274,10 @@ export type Database = {
         Args: { _permission_key: string; _user_id: string }
         Returns: boolean
       }
+      has_permission_in_branch: {
+        Args: { _branch_id: string; _permission_key: string; _user_id: string }
+        Returns: boolean
+      }
       has_resource_permission: {
         Args: {
           _kind: Database["public"]["Enums"]["resource_kind"]
@@ -6284,6 +6288,21 @@ export type Database = {
         Returns: boolean
       }
       has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      has_role_in_branch: {
+        Args: {
+          _branch_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_global_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
@@ -6841,6 +6860,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
     }
     Enums: {
       ai_scope: "guest" | "patient" | "admin" | "super_admin"
