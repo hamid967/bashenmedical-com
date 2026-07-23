@@ -109,21 +109,23 @@ export async function createPatientSignedUrl(
   if (!path) throw new Error(table.empty);
 
   // ---- RBAC gate ---------------------------------------------------------
-  if ("assertAuthorized" in input && input.assertAuthorized) {
+  const auditFn = input.audit;
+  const assertFn = (input as { assertAuthorized?: () => Promise<void> | void }).assertAuthorized;
+  const authorizedFlag = (input as { authorized?: unknown }).authorized === true;
+  if (assertFn) {
     try {
-      await input.assertAuthorized();
+      await assertFn();
     } catch (err) {
-      await safeAudit(input.audit, {
+      await safeAudit(auditFn, {
         ok: false,
         reason: err instanceof Error ? err.message : "forbidden",
       });
       // Never leak the underlying reason to the caller.
       throw new ForbiddenSignedUrlError(table.forbidden);
     }
-  } else if (!("authorized" in input) || input.authorized !== true) {
-    // Type system already forbids this, but guard at runtime too — if the
-    // TS check is bypassed we still refuse to sign.
-    await safeAudit(input.audit, { ok: false, reason: "missing_authorization_proof" });
+  } else if (!authorizedFlag) {
+    // Runtime safety net for callers that bypass the TS discriminated union.
+    await safeAudit(auditFn, { ok: false, reason: "missing_authorization_proof" });
     throw new ForbiddenSignedUrlError(table.forbidden);
   }
 
