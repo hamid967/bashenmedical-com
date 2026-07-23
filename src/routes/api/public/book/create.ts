@@ -211,7 +211,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         const url = process.env.SUPABASE_URL;
         const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;
         if (!url || !anonKey) {
-          return json(500, {
+          return respond(500, {
             ok: false,
             kind: "db",
             message: FRIENDLY_INSERT_MESSAGES.unknown,
@@ -272,7 +272,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                 reference_number: reference,
                 replayed: true,
               });
-              return json(200, { ok: true, reference });
+              return respond(200, { ok: true, reference });
             }
           } catch (e) {
             logBook("rpc.replay.fastpath.error", {
@@ -302,7 +302,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                 String(r.appointment_time).slice(0, 5) === timeHHMM,
             );
             if (clash) {
-              return json(409, {
+              return respond(409, {
                 ok: false,
                 kind: "conflict",
                 code: "SLOT_TAKEN",
@@ -381,7 +381,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                   reference_number: reference,
                   replayed: true,
                 });
-                return json(200, { ok: true, reference });
+                return respond(200, { ok: true, reference });
               }
             } catch (e) {
               logBook("rpc.replay.race.error", {
@@ -392,14 +392,14 @@ export const Route = createFileRoute("/api/public/book/create")({
           }
 
           if (isDup) {
-            return json(409, {
+            return respond(409, {
               ok: false,
               kind: "conflict",
               code: "SLOT_TAKEN",
               message: FRIENDLY_INSERT_MESSAGES.duplicate,
             });
           }
-          return json(400, {
+          return respond(400, {
             ok: false,
             kind: "db",
             message: friendlyInsertError(err),
@@ -420,7 +420,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           replayed: rowReplayed,
         });
 
-        return json(200, { ok: true, reference });
+        return respond(200, { ok: true, reference });
       },
     },
   },
