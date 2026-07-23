@@ -127,6 +127,7 @@ function FamilyPage() {
   const [editing, setEditing] = useState<Dependent | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [confirmDelete, setConfirmDelete] = useState<Dependent | null>(null);
+  const [verifyFor, setVerifyFor] = useState<Dependent | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["patient", "family"] });
 
