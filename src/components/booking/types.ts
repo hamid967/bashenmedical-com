@@ -114,6 +114,10 @@ export const STORAGE_KEY = "booking:draft";
  */
 export const DRAFT_VERSION = 5;
 export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+/** Show an expiry-warning banner when the persisted draft has this much or
+ *  less remaining before expiresAt. Long enough for the user to react on
+ *  mobile, short enough that it isn't nagging early in the day. */
+export const DRAFT_EXPIRY_WARN_MS = 30 * 60 * 1000;
 
 export type DraftEnvelope = {
   version: number;
