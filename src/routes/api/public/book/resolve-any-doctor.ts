@@ -71,10 +71,7 @@ export const Route = createFileRoute("/api/public/book/resolve-any-doctor")({
           session: url.searchParams.get("session") || undefined,
         });
         if (!parsed.success) {
-          return json(400, {
-            ok: false,
-            error: parsed.error.issues[0]?.message ?? "invalid_query",
-          });
+          return json(400, { ok: false, error: firstZodErrorCode(parsed.error) });
         }
         const {
           date,
