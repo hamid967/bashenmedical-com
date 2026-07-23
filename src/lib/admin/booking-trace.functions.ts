@@ -11,6 +11,9 @@ import { assertHasRole } from "./service-inquiries.functions";
 const listFilters = z.object({
   correlation_id: z.string().trim().max(160).optional(),
   reference: z.string().trim().max(64).optional(),
+  error_code: z.string().trim().max(64).optional(),
+  doctor_id: z.string().uuid().optional(),
+  patient_name: z.string().trim().max(120).optional(),
   from: z.string().optional(),
   to: z.string().optional(),
   limit: z.number().int().min(1).max(500).default(200),
@@ -45,6 +48,20 @@ export const listBookingTraceEvents = createServerFn({ method: "POST" })
       "@/integrations/supabase/client.server"
     );
 
+    // If filtering by patient name, first look up matching appointment_ids
+    // and constrain the trace query to those. Empty match → no results.
+    let appointmentIdsFilter: string[] | null = null;
+    if (data.patient_name) {
+      const { data: appts, error: apptErr } = await supabaseAdmin
+        .from("appointments")
+        .select("id")
+        .ilike("patient_name", `%${data.patient_name}%`)
+        .limit(500);
+      if (apptErr) throw new Error(apptErr.message);
+      appointmentIdsFilter = (appts ?? []).map((a) => a.id);
+      if (appointmentIdsFilter.length === 0) return { rows: [] };
+    }
+
     let q = supabaseAdmin
       .from("booking_trace_events")
       .select(
@@ -55,17 +72,26 @@ export const listBookingTraceEvents = createServerFn({ method: "POST" })
 
     if (data.correlation_id) q = q.eq("correlation_id", data.correlation_id);
     if (data.reference) q = q.eq("reference_number", data.reference);
+    if (data.doctor_id) q = q.eq("doctor_id", data.doctor_id);
+    if (appointmentIdsFilter) q = q.in("appointment_id", appointmentIdsFilter);
     if (data.from) q = q.gte("created_at", data.from);
     if (data.to) q = q.lte("created_at", data.to);
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    const enriched = (rows ?? []).map((r) => ({
+    let enriched = (rows ?? []).map((r) => ({
       ...r,
       error_code: deriveErrorCode(r.event, r.pg_code, r.extra),
     }));
+    if (data.error_code) {
+      const needle = data.error_code.toUpperCase();
+      enriched = enriched.filter((r) =>
+        (r.error_code ?? "").toUpperCase().includes(needle),
+      );
+    }
     return { rows: enriched };
   });
+
 
 export const listRecentBookingCorrelations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
