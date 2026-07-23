@@ -50,6 +50,34 @@ export function StepPatient({
           onApply={applyPicker}
         />
 
+        {/* New-patient toggle: first-time visitors flag their record so the
+            reception desk can pre-open a fresh file. Purely UI — the reducer
+            stores `isNewPatient` on the patient and it surfaces on the review
+            step and in the booking payload downstream. */}
+        <label
+          className={`sm:col-span-2 flex items-start gap-3 rounded-xl border p-3 cursor-pointer transition ${
+            value.isNewPatient
+              ? "border-primary bg-primary/5"
+              : "border-border bg-card hover:border-primary/40"
+          }`}
+        >
+          <input
+            type="checkbox"
+            checked={value.isNewPatient}
+            onChange={(e) => onChange({ isNewPatient: e.target.checked })}
+            className="mt-0.5 accent-primary"
+            aria-describedby="new-patient-hint"
+          />
+          <span className="flex-1">
+            <span className="block text-sm font-semibold">{t("patient.newPatient")}</span>
+            <span id="new-patient-hint" className="block text-[11px] text-muted-foreground mt-0.5">
+              {t("patient.newPatientHint")}
+            </span>
+          </span>
+        </label>
+
+
+
         <Field label={t("patient.fullName")} required error={show("name")}>
           <input
             value={value.name}

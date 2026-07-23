@@ -94,6 +94,8 @@
     "before24h": "24 hours before",
     "before2h": "2 hours before",
     "hasErrors": "Some fields are missing or invalid. Complete required fields to continue.",
+    "newPatient": "First-time visit (new patient)",
+    "newPatientHint": "We'll open a fresh medical file for you on arrival. Bring your ID and insurance card if you have one.",
     "bookingFor": "Who is the patient?",
     "self": "Myself",
     "rel": {

@@ -33,7 +33,9 @@ import { fallback } from "@tanstack/zod-adapter";
 import {
   loadDraft,
   reducer,
-  STORAGE_KEY,
+  saveDraft,
+  clearDraft,
+
   validatePatient,
   maxReachableStep,
   type AvailResp,
@@ -49,12 +51,14 @@ import { StepPatient } from "@/components/booking/StepPatient";
 import { StepReview } from "@/components/booking/StepReview";
 import { StepSuccess } from "@/components/booking/StepSuccess";
 import { SummarySidebar } from "@/components/booking/SummarySidebar";
+import { MobileSummarySheet } from "@/components/booking/MobileSummarySheet";
 import { WaitlistCTA } from "@/components/booking/WaitlistCTA";
 import { SlotHoldBanner } from "@/components/booking/SlotHoldBanner";
 import { useSlotHold } from "@/hooks/useSlotHold";
 import { useRealtimePublicSlots } from "@/hooks/use-realtime-public-slots";
 import { releaseHold } from "@/lib/booking-hold";
 import { bmcOgImageMeta } from "@/lib/og-meta";
+
 
 const search = z.object({
   specialty: z.string().optional(),
@@ -162,12 +166,17 @@ function BookPage() {
     }),
   );
 
-  // Persist draft to sessionStorage.
+  // Persist draft to sessionStorage with version + timestamp so stale/mismatched
+  // drafts are discarded on next load (see saveDraft / loadDraft).
   useEffect(() => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {}
+    saveDraft(state);
   }, [state]);
+
+  // Focus target: the wizard card container is programmatically focused on
+  // step change so keyboard/AT users start each step at its heading instead
+  // of tabbing all the way from the page header.
+  const stepCardRef = useRef<HTMLDivElement | null>(null);
+
 
   // Explicit step→URL sync helper: bumps state and pushes an entry so the
   // browser Back/Forward buttons walk the wizard naturally. Also called from
@@ -212,11 +221,18 @@ function BookPage() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Scroll to top of the wizard card whenever the step changes.
+  // Scroll to top and move focus to the wizard card on every step change
+  // so keyboard/AT users don't have to tab past the page chrome each time.
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.scrollTo({ top: 0, behavior: "smooth" });
+    // Defer to next frame so the new step markup is mounted before focus.
+    const id = window.requestAnimationFrame(() => {
+      stepCardRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(id);
   }, [state.step]);
+
 
   // Auto-recover expired hold: when the 5-minute reservation lapses while
   // the user is past the time picker (steps 7–8), bounce back to step 6
@@ -384,7 +400,8 @@ function BookPage() {
   ]);
 
   // Prefetch today's availability the moment a doctor is picked, so StepTime
-  // renders instantly when the user reaches step 6.
+  // renders instantly when the user reaches step 6. Also warm the current
+  // month's availability grid so StepDate doesn't flash a loading state.
   useEffect(() => {
     if (!state.doctorId) return;
     const today = new Date().toISOString().slice(0, 10);
@@ -393,7 +410,34 @@ function BookPage() {
       queryFn: () => fetchAvailability(today, state.doctorId, state.specialtyId, state.branchId),
       staleTime: 20_000,
     });
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    queryClient.prefetchQuery({
+      queryKey: ["month-avail", state.doctorId, state.branchId, y, m],
+      queryFn: async () => {
+        const p = new URLSearchParams({ year: String(y), month: String(m) });
+        if (state.doctorId) p.set("doctor_id", state.doctorId);
+        if (state.branchId) p.set("branch_id", state.branchId);
+        const res = await fetch(`/api/public/book/month-availability?${p.toString()}`);
+        if (!res.ok) return { dates: [] as string[] };
+        return (await res.json()) as { dates: string[] };
+      },
+      staleTime: 60_000,
+    });
   }, [state.doctorId, state.specialtyId, state.branchId, queryClient]);
+
+  // Prefetch the doctors list as soon as a specialty is chosen (step 3),
+  // so StepDoctor at step 4 renders without a spinner.
+  useEffect(() => {
+    if (!state.specialtyId || state.step >= 4) return;
+    queryClient.prefetchQuery({
+      queryKey: ["doctors-for-book", state.specialtyId, state.branchId],
+      queryFn: () => fetchDoctors(state.specialtyId, state.branchId),
+      staleTime: 5 * 60_000,
+    });
+  }, [state.specialtyId, state.branchId, state.step, queryClient]);
+
 
   // Consistency guard: clamp state.step to the highest step whose
   // prerequisites are actually met. Runs on every state change so a
@@ -591,9 +635,8 @@ function BookPage() {
     if (res.ok) {
       // Release our short-lived hold — the appointment row now owns the slot.
       if (slotHold.holdId) void releaseHold(slotHold.holdId);
-      try {
-        sessionStorage.removeItem(STORAGE_KEY);
-      } catch {}
+      clearDraft();
+
       toast.success(t("page.created"));
       setResult({
         reference: res.reference,
@@ -629,11 +672,12 @@ function BookPage() {
     setErrorMsg(null);
     setErrorKind("unknown");
     dispatch({ t: "reset" });
+    clearDraft();
     try {
-      sessionStorage.removeItem(STORAGE_KEY);
       sessionStorage.removeItem(RESULT_KEY);
       clearBookingIdempotencyKey();
     } catch {}
+
     // Explicit step=1 — otherwise the zod validator defaults `step` to 0.
     navigate({ to: "/book", search: { step: 1 } });
   }
@@ -669,7 +713,7 @@ function BookPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container-app py-8 md:py-12 max-w-5xl">
+      <div className="container-app py-8 md:py-12 max-w-5xl pb-24 md:pb-12">
         {/* SR-only live region: announces each step change once so screen
             reader users hear "Step N of 8: Title" without extra chatter. */}
         <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
@@ -706,7 +750,12 @@ function BookPage() {
         <div
           className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}
         >
-          <div className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px]">
+          <div
+            ref={stepCardRef}
+            tabIndex={-1}
+            className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+
             {state.step >= 6 &&
               state.step <= 8 &&
               state.time &&
@@ -922,16 +971,30 @@ function BookPage() {
           </div>
 
           {state.step >= 2 && state.step <= 8 && (
-            <SummarySidebar
-              lang={lang}
-              state={state}
-              branches={branches}
-              specialties={specialties}
-              doctors={doctors}
-              onEdit={(step: number) => goto(step)}
-            />
+            <div className="hidden md:block">
+              <SummarySidebar
+                lang={lang}
+                state={state}
+                branches={branches}
+                specialties={specialties}
+                doctors={doctors}
+                onEdit={(step: number) => goto(step)}
+              />
+            </div>
           )}
         </div>
+
+        {state.step >= 2 && state.step <= 8 && (
+          <MobileSummarySheet
+            lang={lang}
+            state={state}
+            branches={branches}
+            specialties={specialties}
+            doctors={doctors}
+            onEdit={(step: number) => goto(step)}
+          />
+        )}
+
 
         {state.step < 9 && (
           <div className="mt-4 flex items-center justify-between">
