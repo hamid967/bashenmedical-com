@@ -27,6 +27,8 @@ export type BookingSubmitPayload = {
   insurance_provider_id?: string | null;
   insurance_policy_number?: string | null;
   insurance_member_id?: string | null;
+  /** UUID of a consumed booking-purpose OTP challenge for patient_phone. */
+  verification_challenge_id?: string | null;
 };
 
 export type BookingSubmitKind =
