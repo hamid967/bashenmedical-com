@@ -252,6 +252,41 @@ export const Route = createFileRoute("/api/public/book/create")({
           } else {
             console.log(JSON.stringify(record));
           }
+          // Persist trace event so admins can search by correlation_id or
+          // reference number from the admin console. Fire-and-forget: never
+          // block the booking response or fail the request on a trace write.
+          void (async () => {
+            try {
+              const { supabaseAdmin } = await import(
+                "@/integrations/supabase/client.server"
+              );
+              const {
+                appointment_id = null,
+                reference_number = null,
+                duration_ms = null,
+                pg_code = null,
+                ...rest
+              } = extra as Record<string, unknown>;
+              await supabaseAdmin.from("booking_trace_events").insert({
+                correlation_id: correlationId,
+                event,
+                idempotency_key_masked: maskKey(idempotencyKey),
+                reference_number:
+                  typeof reference_number === "string" ? reference_number : null,
+                appointment_id:
+                  typeof appointment_id === "string" ? appointment_id : null,
+                doctor_id: parsed.data.doctor_id ?? null,
+                appointment_date: parsed.data.appointment_date,
+                appointment_time: parsed.data.appointment_time,
+                duration_ms:
+                  typeof duration_ms === "number" ? duration_ms : null,
+                pg_code: typeof pg_code === "string" ? pg_code : null,
+                extra: rest,
+              });
+            } catch {
+              /* trace persistence is best-effort */
+            }
+          })();
         };
 
         // Fast-path idempotency replay: fetch existing row's reference so we
