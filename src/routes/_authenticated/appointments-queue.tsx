@@ -128,6 +128,7 @@ function scopePredicate(scope: Scope, r: Row): boolean {
 
 function AppointmentsQueuePage() {
   const list = useServerFn(listAppointments);
+  const tracesFn = useServerFn(listAppointmentTraces);
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["admin", "appointments-queue"],
     queryFn: () => list(),
@@ -140,6 +141,26 @@ function AppointmentsQueuePage() {
   const [selected, setSelected] = useState<Row | null>(null);
 
   const rows = (data ?? []) as Row[];
+
+  const traceQ = useQuery({
+    queryKey: [
+      "admin",
+      "appointments-queue",
+      "traces",
+      rows.map((r) => r.id).sort().join(","),
+    ],
+    queryFn: () =>
+      tracesFn({
+        data: { appointment_ids: rows.slice(0, 200).map((r) => r.id) },
+      }),
+    enabled: rows.length > 0,
+    staleTime: 60_000,
+  });
+  const traces: Record<
+    string,
+    { correlation_id: string; error_code: string | null }
+  > = traceQ.data?.traces ?? {};
+
 
   // Rows filtered by the current scope only — used both for the visible list
   // (after status + query) and for the scope counters.
