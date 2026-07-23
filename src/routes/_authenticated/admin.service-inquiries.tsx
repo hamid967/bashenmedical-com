@@ -627,7 +627,8 @@ function InquiryDrawer({
                 onClick={() =>
                   closeMut.mutate({ outcome: "completed", reason: reason || undefined })
                 }
-                disabled={isClosed || closeMut.isPending}
+                disabled={isClosed || closeMut.isPending || !canCancel}
+                title={!canCancel ? "لا تملك صلاحية إغلاق الطلبات لهذا الفرع" : undefined}
                 className="inline-flex items-center gap-2 px-3 h-10 rounded-lg border border-emerald-500/40 text-emerald-700 text-sm disabled:opacity-50"
               >
                 <CheckCircle2 className="h-4 w-4" /> إغلاق كمكتمل
@@ -636,11 +637,17 @@ function InquiryDrawer({
                 onClick={() =>
                   closeMut.mutate({ outcome: "cancelled", reason: reason || undefined })
                 }
-                disabled={isClosed || closeMut.isPending}
+                disabled={isClosed || closeMut.isPending || !canCancel}
+                title={!canCancel ? "لا تملك صلاحية إغلاق الطلبات لهذا الفرع" : undefined}
                 className="inline-flex items-center gap-2 px-3 h-10 rounded-lg border border-red-500/40 text-red-700 text-sm disabled:opacity-50"
               >
                 <XCircle className="h-4 w-4" /> إغلاق كملغى
               </button>
+              {!canCancel && !isClosed && (
+                <span className="ms-auto text-xs text-[color:var(--ac-muted)] self-center">
+                  لا تملك صلاحية الإغلاق لهذا الفرع.
+                </span>
+              )}
               {isClosed && (
                 <span className="ms-auto text-xs text-[color:var(--ac-muted)] self-center">
                   الطلب مغلق — الإجراءات معطّلة.
