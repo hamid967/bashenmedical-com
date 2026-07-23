@@ -228,5 +228,6 @@ export function PatientShell({
         </ul>
       </nav>
     </div>
+    </ActiveSubjectProvider>
   );
 }
