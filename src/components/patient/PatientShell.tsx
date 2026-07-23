@@ -104,6 +104,7 @@ export function PatientShell({
           </Link>
 
           <div className="flex items-center gap-2">
+            <ActiveSubjectSwitcher lang={lang} />
             <Link
               to="/patient/notifications"
               className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border hover:bg-accent"
