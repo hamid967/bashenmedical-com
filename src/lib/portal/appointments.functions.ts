@@ -55,7 +55,7 @@ export const listMyAppointments = createServerFn({ method: "POST" })
     let q = supabase
       .from("appointments")
       .select(
-        "id, appointment_date, appointment_time, status, reason, notes, doctor_id, branch_id, specialty_id, patient_name, patient_phone, patient_email, insurance_status, is_demo, created_at, cancelled_at",
+        "id, reference_number, appointment_date, appointment_time, status, reason, notes, doctor_id, branch_id, specialty_id, patient_name, patient_phone, patient_email, insurance_status, is_demo, created_at, cancelled_at",
       );
 
     q = applyScope(q, scope);
