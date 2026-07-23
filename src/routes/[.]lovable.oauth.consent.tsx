@@ -86,7 +86,7 @@ function Consent() {
   }
 
   return (
-    <main className="container-app min-h-[70vh] py-16" dir="rtl">
+    <section className="container-app min-h-[70vh] py-16" dir="rtl" aria-label="OAuth authorization">
       <div className="mx-auto max-w-md rounded-2xl border border-border bg-card p-8 shadow-sm">
         <h1 className="text-2xl font-bold mb-2">ربط {clientName} بحسابك</h1>
         <p className="text-muted-foreground mb-6">
@@ -122,6 +122,6 @@ function Consent() {
           </button>
         </div>
       </div>
-    </main>
+    </section>
   );
 }
