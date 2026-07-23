@@ -1084,7 +1084,7 @@ function BookPage() {
             {state.step === 7 && (
               <StepPatient
                 lang={lang}
-                doctorId={state.doctorId}
+                doctorId={asDoctorParam(state.doctorId)}
                 value={state.patient}
                 errors={patientValidation.errors}
                 onChange={(p) => dispatch({ t: "setPatient", p })}
