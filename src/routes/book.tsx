@@ -168,6 +168,21 @@ function BookPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Normalize step from search: accept a number (1..9) OR a named token
+  // ("patient", "review", ...). Anything else falls through to the
+  // deep-link derivation below.
+  const parsedStepFromUrl = (() => {
+    const raw = searchParams.step as number | string | undefined;
+    if (typeof raw === "number" && raw >= 1 && raw <= 9) return raw;
+    if (typeof raw === "string") {
+      const asNum = Number(raw);
+      if (Number.isInteger(asNum) && asNum >= 1 && asNum <= 9) return asNum;
+      const fromName = stepNumberOf(raw);
+      if (fromName) return fromName;
+    }
+    return null;
+  })();
+
   const [state, dispatch] = useReducer(reducer, undefined, () =>
     loadDraft({
       doctorId: searchParams.doctor ?? null,
@@ -175,19 +190,18 @@ function BookPage() {
       branchId: searchParams.branch ?? null,
       date: searchParams.date ?? null,
       time: searchParams.time ?? null,
-      // Prefer explicit ?step= (browser back/forward, refresh). Otherwise derive from deep-link.
+      // Prefer explicit step (number or name). Otherwise derive from deep-link.
       step:
-        searchParams.step && searchParams.step >= 1 && searchParams.step <= 9
-          ? searchParams.step
-          : searchParams.doctor && searchParams.date && searchParams.time
-            ? 8
-            : searchParams.doctor && searchParams.date
-              ? 6
-              : searchParams.doctor
-                ? 5
-                : searchParams.specialty
-                  ? 4
-                  : 1,
+        parsedStepFromUrl ??
+        (searchParams.doctor && searchParams.date && searchParams.time
+          ? 8
+          : searchParams.doctor && searchParams.date
+            ? 6
+            : searchParams.doctor
+              ? 5
+              : searchParams.specialty
+                ? 4
+                : 1),
     }),
   );
 
@@ -203,16 +217,17 @@ function BookPage() {
   const stepCardRef = useRef<HTMLDivElement | null>(null);
 
 
-  // Explicit step→URL sync helper: bumps state and pushes an entry so the
-  // browser Back/Forward buttons walk the wizard naturally. Also called from
-  // popstate below with `pushUrl=false` (browser already moved the URL).
+  // Explicit step→URL sync helper: bumps state and writes the NAMED step
+  // (e.g. ?step=patient) to the URL so links are self-describing. Popstate
+  // below still accepts the legacy numeric form.
   const goto = (step: number) => {
     dispatch({ t: "goto", step });
     if (step === 9) return; // success page: don't push
     if (typeof window === "undefined") return;
+    const name = stepNameOf(step);
     navigate({
       to: "/book",
-      search: (prev: Record<string, unknown>) => ({ ...prev, step }),
+      search: (prev: Record<string, unknown>) => ({ ...prev, step: name ?? step }),
     });
   };
 
@@ -223,24 +238,29 @@ function BookPage() {
   useEffect(() => {
     if (didInitialFillRef.current) return;
     didInitialFillRef.current = true;
-    if (state.step !== 9 && searchParams.step === 0 && state.step >= 1) {
+    if (state.step !== 9 && parsedStepFromUrl === null && state.step >= 1) {
+      const name = stepNameOf(state.step);
       navigate({
         to: "/book",
-        search: (prev: Record<string, unknown>) => ({ ...prev, step: state.step }),
+        search: (prev: Record<string, unknown>) => ({ ...prev, step: name ?? state.step }),
         replace: true,
       });
     }
-  }, [state.step, searchParams.step, navigate]);
+  }, [state.step, parsedStepFromUrl, navigate]);
 
   // Restore state from URL on browser Back/Forward (popstate). URL is
-  // authoritative here — dispatch without re-pushing.
+  // authoritative here — dispatch without re-pushing. Accepts both numeric
+  // and named step tokens.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onPop = () => {
       if (window.location.pathname !== "/book") return;
       const params = new URLSearchParams(window.location.search);
-      const s = parseInt(params.get("step") ?? "0", 10);
-      if (s >= 1 && s <= 9) dispatch({ t: "goto", step: s });
+      const raw = params.get("step");
+      if (!raw) return;
+      const asNum = parseInt(raw, 10);
+      const s = Number.isInteger(asNum) && asNum >= 1 && asNum <= 9 ? asNum : stepNumberOf(raw);
+      if (s && s >= 1 && s <= 9) dispatch({ t: "goto", step: s });
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
