@@ -75,7 +75,7 @@ function riyadhTodayIso(): string {
  *   3. inside acceptance window       → date_out_of_range
  */
 export const IsoDate = z
-  .string({ error: BookingErrorCode.invalid_date })
+  .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, BookingErrorCode.invalid_date)
   .refine(isRealCalendarDate, { message: BookingErrorCode.invalid_calendar_date })
   .refine(
@@ -92,7 +92,7 @@ export const IsoDate = z
  * `time_out_of_range` instead of a shape error.
  */
 export const IsoTime = z
-  .string({ error: BookingErrorCode.invalid_time })
+  .string()
   .regex(/^\d{2}:\d{2}$/, BookingErrorCode.invalid_time)
   .refine(
     (s) => {
