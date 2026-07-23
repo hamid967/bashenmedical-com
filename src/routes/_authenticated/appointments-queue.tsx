@@ -631,6 +631,44 @@ function DetailDrawer({
             <InfoRow label="الطبيب" value={row.doctors?.name_ar ?? "—"} />
           </dl>
 
+          {trace && (
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs font-semibold">تتبع الحجز</div>
+                {trace.error_code && (
+                  <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 border border-rose-500/20">
+                    {trace.error_code}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <code className="font-mono text-[11px] text-muted-foreground break-all" dir="ltr">
+                  {trace.correlation_id}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(trace.correlation_id).then(
+                      () => toast.success("تم نسخ Correlation ID"),
+                      () => toast.error("تعذّر النسخ"),
+                    );
+                  }}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline shrink-0"
+                >
+                  <Copy className="h-3 w-3" /> نسخ
+                </button>
+              </div>
+              <Link
+                to="/admin/booking-trace"
+                search={{ correlation_id: trace.correlation_id }}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+              >
+                فتح مستكشف الأحداث ←
+              </Link>
+            </div>
+          )}
+
+
           {row.reason && (
             <div>
               <div className="text-xs font-semibold mb-1">سبب الزيارة / التصنيف</div>
