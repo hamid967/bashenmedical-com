@@ -42,9 +42,9 @@ function AppointmentsPage() {
 
   const now = new Date().toISOString().slice(0, 10);
   const bucket = {
-    upcoming: items.filter((a) => a.date >= now && !["cancelled", "no_show"].includes(a.status)),
+    upcoming: items.filter((a) => a.appointment_date >= now && !["cancelled", "no_show"].includes(a.status)),
     pending: items.filter((a) => ["pending", "waitlist"].includes(a.status)),
-    previous: items.filter((a) => a.date < now && a.status !== "cancelled"),
+    previous: items.filter((a) => a.appointment_date < now && a.status !== "cancelled"),
     cancelled: items.filter((a) => a.status === "cancelled"),
   };
 
@@ -90,8 +90,8 @@ function AppointmentRow({ apt }: { apt: Awaited<ReturnType<typeof listMyAppointm
           <div>
             <div className="font-semibold">{apt.doctor?.name_ar ?? "طبيب"}</div>
             <div className="text-sm text-muted-foreground">
-              {format(new Date(apt.date), "EEEE d MMMM yyyy", { locale: ar })}
-              {apt.time ? ` · ${apt.time.slice(0, 5)}` : ""}
+              {format(new Date(apt.appointment_date), "EEEE d MMMM yyyy", { locale: ar })}
+              {apt.appointment_time ? ` · ${apt.appointment_time.slice(0, 5)}` : ""}
             </div>
             <div className="text-xs text-muted-foreground">
               {apt.branch?.name_ar ?? ""} {apt.reference_number ? `· ${apt.reference_number}` : ""}
@@ -105,7 +105,7 @@ function AppointmentRow({ apt }: { apt: Awaited<ReturnType<typeof listMyAppointm
             <a
               href={
                 apt.branch?.latitude && apt.branch?.longitude
-                  ? `https://www.google.com/maps/dir/?api=1&destination=${apt.branch.latitude},${apt.branch.longitude}`
+                  ? `https://www.google.com/maps/dir/?api=1&destination=${apt.branch.lat},${apt.branch.lng}`
                   : "#"
               }
               target="_blank"
