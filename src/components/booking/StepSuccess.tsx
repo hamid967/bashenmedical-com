@@ -21,6 +21,7 @@ import { downloadBookingConfirmationPdf } from "@/lib/booking-pdf";
 import { downloadIcs, googleCalendarUrl, type ShareBooking } from "@/lib/booking-share";
 import { formatArDate, type State } from "./types";
 import { EmailOtpLinker } from "./EmailOtpLinker";
+import { NotificationStatusChips } from "./NotificationStatusChips";
 
 export function StepSuccess({
   lang,
