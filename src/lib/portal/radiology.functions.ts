@@ -92,6 +92,19 @@ export const getRadiologyFileUrl = createServerFn({ method: "POST" })
       file_path: data.path,
       bucket: "radiology-reports",
     });
+    const { recordSensitiveAccess } = await import(
+      "@/lib/audit/sensitive-access.server"
+    );
+    await recordSensitiveAccess({
+      supabase,
+      actorId: userId,
+      action: "radiology_report.download",
+      entityType: "radiology_report",
+      entityId: reportId,
+      permission: "portal.self",
+      kind: "download",
+      metadata: { patient_id: patientId, bucket: "radiology-reports" },
+    });
 
     return { url: signed.signedUrl, expiresIn: 300 };
   });

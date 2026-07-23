@@ -9,6 +9,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { assertPermission } from "@/lib/rbac/enforce.server";
 import { PERMISSIONS } from "@/lib/rbac/permissions";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 
 // Phase 3B: audit-log reads are gated on the `audit.export` permission
 // (held globally by `auditor` and `super_admin`). Global-only scope —
@@ -59,6 +60,26 @@ export const listAdminAuditLogs = createServerFn({ method: "GET" })
 
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
+    await recordSensitiveAccess({
+      supabase: context.supabase,
+      actorId: context.userId,
+      action: "audit_logs.viewed",
+      entityType: "audit_log",
+      permission: PERMISSIONS.AuditExport,
+      kind: "read",
+      metadata: {
+        row_count: rows?.length ?? 0,
+        total: count ?? 0,
+        filters: {
+          q: data.q ?? null,
+          entity_type: data.entity_type ?? null,
+          action: data.action ?? null,
+          actor_id: data.actor_id ?? null,
+          from: data.from ?? null,
+          to: data.to ?? null,
+        },
+      },
+    });
     return { rows: rows ?? [], total: count ?? 0 };
   });
 

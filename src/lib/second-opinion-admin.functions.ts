@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAppEvent } from "./audit-log.server";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 import { SIGNED_URL_TTL_SECONDS } from "@/lib/download-error";
 import { z } from "zod";
 
@@ -88,6 +89,19 @@ export const getSecondOpinionAttachmentUrls = createServerFn({ method: "POST" })
     await logAppEvent(context.supabase, "second_opinion.signed_url_issued", {
       paths: data.paths,
       count: out.filter((o) => o.url).length,
+    });
+    await recordSensitiveAccess({
+      supabase: context.supabase,
+      actorId: context.userId,
+      action: "second_opinion.signed_url_issued",
+      entityType: "second_opinion_attachment",
+      permission: "second_opinion.review",
+      kind: "download",
+      metadata: {
+        requested: data.paths.length,
+        issued: out.filter((o) => o.url).length,
+        bucket: "second-opinion-uploads",
+      },
     });
     return out;
   });

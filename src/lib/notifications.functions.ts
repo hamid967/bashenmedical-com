@@ -5,6 +5,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { logAppEvent } from "./audit-log.server";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 import { z } from "zod";
 
 type Role = "admin" | "super_admin" | "reception" | "doctor" | "pharmacy";
@@ -440,6 +441,22 @@ export const exportReminderDeliveriesCsv = createServerFn({ method: "POST" })
       to: data.dateTo ?? null,
       channel: data.channel ?? null,
       status: data.status ?? null,
+    });
+    await recordSensitiveAccess({
+      supabase: context.supabase,
+      actorId: context.userId,
+      action: "notifications.export_csv",
+      entityType: "notification",
+      permission: "notifications.export",
+      kind: "export",
+      metadata: {
+        row_count: count,
+        branch_id: data.branchId ?? null,
+        from: data.dateFrom ?? null,
+        to: data.dateTo ?? null,
+        channel: data.channel ?? null,
+        status: data.status ?? null,
+      },
     });
     return { csv: "\uFEFF" + lines.join("\n") + "\n", count, filename: buildFilename() };
   });
