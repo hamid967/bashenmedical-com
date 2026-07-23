@@ -67,12 +67,29 @@ def check_static(conn) -> list[str]:
     return failures
 
 
+SET_ROLE_UNAVAILABLE = False
+
+
 def _probe(conn, role: str, sql: str, expect_denied: bool) -> str | None:
-    """Run `sql` under SET LOCAL ROLE <role>; return failure message or None."""
+    """Run `sql` under SET LOCAL ROLE <role>; return failure message or None.
+
+    Skips silently when the DB connection role lacks permission to SET ROLE
+    (e.g. Supabase transaction pooler). Static privilege checks still run.
+    """
+    global SET_ROLE_UNAVAILABLE
+    if SET_ROLE_UNAVAILABLE:
+        return None
     with conn.cursor() as cur:
         try:
             cur.execute("BEGIN")
             cur.execute(f"SET LOCAL ROLE {role}")
+        except Exception as e:  # noqa: BLE001
+            conn.rollback()
+            if "permission denied to set role" in str(e).lower():
+                SET_ROLE_UNAVAILABLE = True
+                return None
+            raise
+        try:
             cur.execute(sql)
             conn.rollback()
             if expect_denied:
