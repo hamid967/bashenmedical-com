@@ -105,6 +105,7 @@ const NAV: NavGroup[] = [
     title: "الطاقم الطبي",
     items: [
       { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
+      { to: "/admin/doctors", label: "إضافة/تعديل طبيب", icon: Stethoscope, roles: ["admin"] },
       {
         to: "/availability-management",
         label: "جدولة التوفر",

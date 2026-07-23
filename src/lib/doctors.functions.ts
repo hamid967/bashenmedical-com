@@ -216,3 +216,97 @@ export const listSpecialtiesMini = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+/* -------- Doctor CRUD (admin only) -------- */
+export type DoctorRecord = {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  title_ar: string | null;
+  title_en: string | null;
+  specialty_id: string | null;
+  branch_id: string | null;
+  gender: string | null;
+  years_experience: number | null;
+  languages: string[] | null;
+  photo_url: string | null;
+  slug: string | null;
+  bio_ar: string | null;
+  bio_en: string | null;
+  is_active: boolean;
+  booking_enabled: boolean;
+  sort_order: number;
+  consultation_fee_sar: number | null;
+};
+
+export const listAllDoctors = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<DoctorRecord[]> => {
+    const roles = await getRoles(context.supabase, context.userId);
+    ensureAdmin(roles);
+    const { data, error } = await context.supabase
+      .from("doctors")
+      .select(
+        "id, name_ar, name_en, title_ar, title_en, specialty_id, branch_id, gender, years_experience, languages, photo_url, slug, bio_ar, bio_en, is_active, booking_enabled, sort_order, consultation_fee_sar",
+      )
+      .order("sort_order", { ascending: true })
+      .order("name_ar");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as DoctorRecord[];
+  });
+
+const DoctorUpsert = z.object({
+  id: z.string().uuid().optional(),
+  name_ar: z.string().trim().min(2, "الاسم بالعربية مطلوب"),
+  name_en: z.string().trim().min(2, "Name in English is required"),
+  title_ar: z.string().trim().nullable().optional(),
+  title_en: z.string().trim().nullable().optional(),
+  specialty_id: z.string().uuid().nullable().optional(),
+  branch_id: z.string().uuid().nullable().optional(),
+  gender: z.enum(["male", "female"]).nullable().optional(),
+  years_experience: z.number().int().min(0).max(80).nullable().optional(),
+  languages: z.array(z.string()).optional(),
+  photo_url: z.string().nullable().optional(),
+  slug: z
+    .string()
+    .trim()
+    .regex(/^[a-z0-9-]+$/i)
+    .nullable()
+    .optional(),
+  bio_ar: z.string().nullable().optional(),
+  bio_en: z.string().nullable().optional(),
+  is_active: z.boolean().optional(),
+  booking_enabled: z.boolean().optional(),
+  sort_order: z.number().int().optional(),
+  consultation_fee_sar: z.number().min(0).nullable().optional(),
+});
+
+export const upsertDoctor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => DoctorUpsert.parse(d))
+  .handler(async ({ data, context }) => {
+    const roles = await getRoles(context.supabase, context.userId);
+    ensureAdmin(roles);
+    const payload = {
+      ...data,
+      languages: data.languages && data.languages.length > 0 ? data.languages : ["ar", "en"],
+    };
+    const { data: row, error } = await (context.supabase as any)
+      .from("doctors")
+      .upsert(payload, { onConflict: "id" })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: (row as { id: string }).id };
+  });
+
+export const deleteDoctor = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    const roles = await getRoles(context.supabase, context.userId);
+    ensureAdmin(roles);
+    const { error } = await context.supabase.from("doctors").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
