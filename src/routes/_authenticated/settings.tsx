@@ -16,6 +16,15 @@ import {
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
+  head: () => ({
+    meta: [
+      { title: "الإعدادات — تفضيلات التذكيرات | مجمع باعشن الطبي" },
+      { name: "description", content: "إدارة تفضيلات التذكيرات والإشعارات لمواعيدك الطبية." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "الإعدادات — مجمع باعشن الطبي" },
+      { property: "og:description", content: "تحكم في تفضيلات التذكيرات والإشعارات." },
+    ],
+  }),
   component: SettingsPage,
 });
 
