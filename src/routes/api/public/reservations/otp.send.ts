@@ -95,7 +95,12 @@ export const Route = createFileRoute("/api/public/reservations/otp/send")({
             `[reservations-otp] Sent code to ${phone.replace(/(\d{3})\d+(\d{2})/, "$1***$2")} (dev only log)`,
           );
 
-          const devEcho = process.env.NODE_ENV !== "production" ? { dev_code: code } : {};
+          // SECURITY: never echo the OTP in the response. A real SMS/WhatsApp
+          // provider must deliver the code out-of-band. Local dev can read
+          // the code from the server log above; nothing is returned to the
+          // client in any environment.
+          void code;
+          const devEcho: Record<string, never> = {};
 
           try {
             const { logReservationEvent } = await import("@/lib/reservation-events.server");
