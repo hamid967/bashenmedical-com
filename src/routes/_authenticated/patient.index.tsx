@@ -305,4 +305,3 @@ function SuggestionCard({ title, description, href }: { title: string; descripti
   );
 }
 
-import * as React from "react";
