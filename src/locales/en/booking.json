@@ -21,7 +21,8 @@
     "pickSlot": "Book this time",
     "noAlternatives": "No alternatives available right now — try another date or join the waitlist.",
     "slotTakenClear": "Sorry — this slot was just booked by another patient. We've listed the nearest available times below; pick one to finish your booking.",
-    "invalidIdempotencyKey": "Your booking session expired. A fresh one has been prepared automatically — please tap “Confirm booking” again."
+    "invalidIdempotencyKey": "Your booking session expired. A fresh one has been prepared automatically — please tap “Confirm booking” again.",
+    "anyDoctorUnavailable": "No doctor is available for this time — please pick another."
   },
   "steps": {
     "service": "Service",
@@ -52,7 +53,9 @@
   },
   "doctor": {
     "title": "Choose doctor",
-    "empty": "No doctors available for this specialty/branch."
+    "empty": "No doctors available for this specialty/branch.",
+    "anyAvailable": "First available doctor",
+    "anyAvailableHint": "We'll pick a suitable doctor based on the time you choose"
   },
   "date": {
     "title": "Choose date",
@@ -67,7 +70,15 @@
     "noneThisMonth": "No available days this month — try another.",
     "unavailableAuto": "Unavailable days are disabled",
     "unavailableTip": "Doctor unavailable this day",
-    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    "weekdays": [
+      "Sun",
+      "Mon",
+      "Tue",
+      "Wed",
+      "Thu",
+      "Fri",
+      "Sat"
+    ]
   },
   "time": {
     "title": "Choose time",
@@ -154,7 +165,6 @@
     "confirm": "Confirm booking",
     "terms": "By confirming, you agree to our terms of use.",
     "referenceFormatHint": "You'll receive a booking reference in the format BMC-YYYYMMDD-XXXX for lookup or changes."
-
   },
   "success": {
     "title": "Thank you — your booking request was received",
@@ -163,7 +173,6 @@
     "referenceFormatNew": "Current format",
     "referenceFormatLegacy": "Legacy reference",
     "referenceFormatLegacyHint": "This booking predates the BMC format. The reference is still valid for lookup and edits.",
-
     "copy": "Copy",
     "copied": "Copied",
     "copyRef": "Reference copied",
@@ -345,5 +354,3 @@
     "linkedToast": "Account created and {{count}} booking(s) linked"
   }
 }
-
-
