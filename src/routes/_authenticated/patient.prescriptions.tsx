@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_authenticated/patient/prescriptions")({
 
 function RxPage() {
   const { data } = useSuspenseQuery(rxQuery);
-  const items = data?.items ?? [];
+  const items = data?.active ?? [];
   return (
     <div className="space-y-4">
       <h1 className="text-xl font-bold">وصفاتي الطبية</h1>
@@ -45,7 +45,7 @@ function RxPage() {
                   <Pill className="h-5 w-5" aria-hidden />
                 </div>
                 <div>
-                  <div className="font-semibold">{rx.medication_name ?? "دواء"}</div>
+                  <div className="font-semibold">{rx.medication ?? "دواء"}</div>
                   <div className="text-xs text-muted-foreground">
                     {rx.dosage ?? ""} {rx.frequency ? `· ${rx.frequency}` : ""}
                   </div>
