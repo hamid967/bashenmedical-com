@@ -482,7 +482,8 @@ function InquiryDrawer({
                 <label className="text-xs">
                   <span className="block mb-1 text-[color:var(--ac-muted)]">تعيين موظف</span>
                   <select
-                    disabled={isClosed || assignMut.isPending}
+                    disabled={isClosed || assignMut.isPending || !canAssign}
+                    title={!canAssign ? "لا تملك صلاحية تعيين الطلبات لهذا الفرع" : undefined}
                     className="w-full h-10 px-2 rounded-lg border border-[color:var(--ac-line)] bg-transparent text-sm disabled:opacity-60"
                     value={inquiry.assigned_to ?? ""}
                     onChange={(e) => assignMut.mutate(e.target.value || null)}
