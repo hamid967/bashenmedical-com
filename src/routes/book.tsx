@@ -25,7 +25,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { submitBooking, clearBookingIdempotencyKey } from "@/lib/booking-submit";
+import { submitBooking, clearBookingIdempotencyKey, getBookingCorrelationId } from "@/lib/booking-submit";
 import { getBookingSessionId } from "@/lib/booking-hold";
 import { Button } from "@/components/ui/button";
 
@@ -289,6 +289,11 @@ function BookPage() {
   const [errorKind, setErrorKind] = useState<
     "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown"
   >("unknown");
+  // Server-provided machine code (e.g. SLOT_TAKEN, HOLD_EXPIRED,
+  // INVALID_IDEMPOTENCY_KEY). Drives descriptor-based copy in
+  // SubmitErrorBanner via `describeBookingError`.
+  const [errorCode, setErrorCode] = useState<string | null>(null);
+
   const [suggestion, setSuggestion] = useState<{
     doctorId: string;
     doctorName: string;
@@ -1004,6 +1009,9 @@ function BookPage() {
                 doctors={doctors}
                 errorMsg={errorMsg}
                 errorKind={errorKind}
+                errorCode={errorCode}
+                correlationId={getBookingCorrelationId()}
+
                 submitting={submitting}
                 onSubmit={handleSubmit}
                 patientValid={patientValidation.ok}
