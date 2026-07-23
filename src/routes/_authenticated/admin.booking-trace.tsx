@@ -209,6 +209,7 @@ function RecentPanel({
     had_error: boolean;
     had_conflict: boolean;
     total_ms: number;
+    last_error_code: string | null;
   }>;
   onPick: (id: string) => void;
 }) {
@@ -229,6 +230,7 @@ function RecentPanel({
               <th className="text-right px-3 py-2 font-medium">Correlation</th>
               <th className="text-right px-3 py-2 font-medium">المرجع</th>
               <th className="text-right px-3 py-2 font-medium">آخر حدث</th>
+              <th className="text-right px-3 py-2 font-medium">Error Code</th>
               <th className="text-right px-3 py-2 font-medium">أحداث</th>
               <th className="text-right px-3 py-2 font-medium">الحالة</th>
               <th className="text-right px-3 py-2 font-medium">الوقت</th>
@@ -253,6 +255,15 @@ function RecentPanel({
                   {r.reference_number ?? "—"}
                 </td>
                 <td className="px-3 py-2">{eventBadge(r.last_event)}</td>
+                <td className="px-3 py-2">
+                  {r.last_error_code ? (
+                    <span className="px-2 py-0.5 rounded text-xs font-mono bg-red-50 text-red-800 border border-red-200">
+                      {r.last_error_code}
+                    </span>
+                  ) : (
+                    <span className="text-slate-300 text-xs">—</span>
+                  )}
+                </td>
                 <td className="px-3 py-2 text-slate-600">{r.events}</td>
                 <td className="px-3 py-2">
                   {r.had_error ? (
@@ -277,6 +288,7 @@ function RecentPanel({
     </div>
   );
 }
+
 
 function EventsPanel({
   loading,
