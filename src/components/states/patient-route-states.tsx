@@ -17,7 +17,9 @@ import {
 } from "@/components/states";
 import { signalPatientSessionExpired } from "@/lib/patient/session-guard";
 
-function classify(error: unknown): "offline" | "session" | "forbidden" | "error" {
+export function classifyPatientError(
+  error: unknown,
+): "offline" | "session" | "forbidden" | "error" {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "offline";
   const rawMsg =
     error && typeof error === "object" && "message" in error
@@ -31,13 +33,20 @@ function classify(error: unknown): "offline" | "session" | "forbidden" | "error"
   if (
     status === 401 ||
     m.includes("unauthorized") ||
-    m.includes("session") && (m.includes("expired") || m.includes("invalid")) ||
+    (m.includes("session") && (m.includes("expired") || m.includes("invalid"))) ||
     m.includes("jwt") ||
     m.includes("no authorization header")
   ) {
     return "session";
   }
-  if (status === 403 || m.includes("forbidden") || m.includes("permission") || m.includes("not allowed")) {
+  if (
+    status === 403 ||
+    m.includes("forbidden") ||
+    m.includes("permission") ||
+    m.includes("not allowed") ||
+    m.includes("لا تملك") ||
+    m.includes("لا يمكن الحجز")
+  ) {
     return "forbidden";
   }
   if (m.includes("networkerror") || m.includes("failed to fetch") || m.includes("offline")) {
@@ -45,6 +54,9 @@ function classify(error: unknown): "offline" | "session" | "forbidden" | "error"
   }
   return "error";
 }
+
+const classify = classifyPatientError;
+
 
 export function PatientRouteError({
   error,

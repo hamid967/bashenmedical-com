@@ -18,8 +18,10 @@ import {
   type Dependent,
 } from "@/lib/portal/dependents.functions";
 import { DependentVerificationDialog } from "@/components/patient/DependentVerificationDialog";
-import { EmptyState } from "@/components/states";
+import { EmptyState, LoadingState } from "@/components/states";
+import { InlineStateBanner } from "@/components/states/InlineStateBanner";
 import { patientRouteStates } from "@/components/states/patient-route-states";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -208,6 +210,14 @@ function FamilyPage() {
         </Button>
       </header>
 
+      {deleteMut.error ? (
+        <InlineStateBanner
+          error={deleteMut.error}
+          onRetry={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
+        />
+      ) : null}
+
+
       {items.length === 0 ? (
         <EmptyState
           title="لا يوجد أفراد أسرة مضافون"
@@ -389,6 +399,13 @@ function FamilyPage() {
               />
             </div>
           </div>
+          {createMut.error || updateMut.error ? (
+            <InlineStateBanner
+              error={createMut.error ?? updateMut.error}
+              onRetry={() => submit()}
+            />
+          ) : null}
+          {busy ? <LoadingState label="جارٍ الحفظ…" className="py-2" /> : null}
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogMode("closed")} disabled={busy}>
               إلغاء
@@ -401,6 +418,7 @@ function FamilyPage() {
         </DialogContent>
       </Dialog>
 
+
       <AlertDialog
         open={!!confirmDelete}
         onOpenChange={(o) => !o && setConfirmDelete(null)}
@@ -412,7 +430,17 @@ function FamilyPage() {
               سيتم إزالة {confirmDelete?.full_name} من قائمة أفراد أسرتك. لا يمكن التراجع عن هذه العملية.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {deleteMut.error ? (
+            <InlineStateBanner
+              error={deleteMut.error}
+              onRetry={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
+            />
+          ) : null}
+          {deleteMut.isPending ? (
+            <LoadingState label="جارٍ الحذف…" className="py-1" />
+          ) : null}
           <AlertDialogFooter>
+
             <AlertDialogCancel disabled={deleteMut.isPending}>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
