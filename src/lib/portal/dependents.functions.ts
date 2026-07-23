@@ -240,6 +240,36 @@ export const deleteDependent = createServerFn({ method: "POST" })
     return { ok: true as const };
   });
 
+/* -------------------- requestDependentVerification -------------------- */
+
+/**
+ * Marks a dependent as awaiting relationship verification by clinic
+ * reception. Guardian-scoped. Idempotent: only moves the record into
+ * `pending` when it is not already `verified`.
+ */
+export const requestDependentVerification = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw: unknown) => z.object({ id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { supabase, userId } = context;
+    const { data: row, error } = await supabase
+      .from("dependents")
+      .update({
+        verification_status: "pending",
+        verification_method: "reception",
+      })
+      .eq("id", data.id)
+      .eq("guardian_user_id", userId)
+      .neq("verification_status", "verified")
+      .select(DEPENDENT_COLS)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("Not found or already verified");
+    return normalizeDependent(row);
+  });
+
+
+
 /* -------------------- listDependentAppointments -------------------- */
 
 export type DependentAppointment = {
