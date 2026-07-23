@@ -35,12 +35,12 @@ export const Route = createFileRoute("/_authenticated/patient/reports")({
 
 function ReportsPage() {
   const { data } = useSuspenseQuery(reportsQuery);
-  const items = (data ?? []) as Array<{
-    id: string;
-    title: string | null;
-    report_type: string;
-    published_at: string | null;
-  }>;
+  const items = (data ?? []).map((r) => ({
+    id: r.id,
+    title: r.title_ar ?? r.title_en ?? null,
+    report_type: r.report_type as string,
+    published_at: r.published_at,
+  }));
   const [tab, setTab] = useState("all");
 
   const groups: Record<string, typeof items> = {
