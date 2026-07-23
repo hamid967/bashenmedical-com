@@ -37,12 +37,14 @@ const NAV: NavItem[] = [
 
 export function PatientShell({
   children,
+  userId,
   userName,
   avatarUrl,
   unreadCount = 0,
   lang = "ar",
 }: {
   children: React.ReactNode;
+  userId: string;
   userName?: string | null;
   avatarUrl?: string | null;
   unreadCount?: number;
