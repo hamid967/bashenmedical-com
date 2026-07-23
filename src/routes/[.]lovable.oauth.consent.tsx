@@ -50,10 +50,10 @@ export const Route = createFileRoute("/.lovable/oauth/consent")({
   },
   component: Consent,
   errorComponent: ({ error }) => (
-    <main className="container-app py-16 text-center" dir="rtl">
+    <section className="container-app py-16 text-center" dir="rtl" aria-label="OAuth error">
       <h1 className="text-2xl font-bold mb-2">تعذّر تحميل طلب التفويض</h1>
       <p className="text-muted-foreground">{String((error as Error)?.message ?? error)}</p>
-    </main>
+    </section>
   ),
 });
 

@@ -361,7 +361,7 @@ function DoctorsPageBody() {
             </div>
           </aside>
 
-          <main>
+          <section aria-label="Doctors results">
             <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
               <p className="text-sm text-muted-foreground" aria-live="polite">
                 {ar ? (
@@ -447,7 +447,7 @@ function DoctorsPageBody() {
                 }}
               />
             </div>
-          </main>
+          </section>
         </div>
       </div>
     </div>
