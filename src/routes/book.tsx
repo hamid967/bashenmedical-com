@@ -59,6 +59,16 @@ import { useRealtimePublicSlots } from "@/hooks/use-realtime-public-slots";
 import { releaseHold } from "@/lib/booking-hold";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
+// Sentinel doctorId used when the patient picks "Any available doctor".
+// Kept in state so the UI can highlight the choice, but coerced to `null`
+// before it flows to availability/hold/prefetch queries — those APIs treat
+// null-doctor as "aggregate across the specialty pool".
+const ANY_DOCTOR = "any" as const;
+const isConcreteDoctorId = (v: string | null): v is string =>
+  !!v && v !== ANY_DOCTOR;
+const asDoctorParam = (v: string | null): string | null =>
+  isConcreteDoctorId(v) ? v : null;
+
 
 // Named-step mapping — user-visible URLs read like ?step=patient instead of
 // ?step=7. Numeric step remains the source of truth internally; the name is
@@ -329,7 +339,7 @@ function BookPage() {
 
   // Realtime: refresh availability when other users book/cancel
   useRealtimePublicSlots({
-    doctorId: state.doctorId ?? undefined,
+    doctorId: asDoctorParam(state.doctorId) ?? undefined,
     branchId: state.branchId ?? undefined,
   });
 
@@ -350,9 +360,11 @@ function BookPage() {
     staleTime: 5 * 60_000,
   });
 
-  // If the user picked a doctor via deep link, auto-fill branch & specialty
+  // If the user picked a doctor via deep link, auto-fill branch & specialty.
+  // Skip when the sentinel "any" is chosen — there's no concrete doctor row
+  // to pull specialty/branch from.
   useEffect(() => {
-    if (state.doctorId && !state.specialtyId && doctors.length) {
+    if (isConcreteDoctorId(state.doctorId) && !state.specialtyId && doctors.length) {
       const d = doctors.find((x: any) => x.id === state.doctorId);
       if (d)
         dispatch({
@@ -363,9 +375,9 @@ function BookPage() {
   }, [state.doctorId, state.specialtyId, doctors]);
 
   const { data: avail } = useQuery({
-    queryKey: ["avail", state.date, state.doctorId, state.specialtyId, state.branchId],
+    queryKey: ["avail", state.date, asDoctorParam(state.doctorId), state.specialtyId, state.branchId],
     queryFn: () =>
-      fetchAvailability(state.date!, state.doctorId, state.specialtyId, state.branchId),
+      fetchAvailability(state.date!, asDoctorParam(state.doctorId), state.specialtyId, state.branchId),
     enabled: !!state.date && state.step >= 6,
     staleTime: 20_000,
   });
@@ -373,22 +385,25 @@ function BookPage() {
   // Week-scan for the current doctor — used to decide whether to emphasize
   // the waitlist CTA. Uses the month-availability endpoint so it's one call.
   const { data: weekDates } = useQuery({
-    queryKey: ["week-avail", state.doctorId, state.branchId],
+    queryKey: ["week-avail", asDoctorParam(state.doctorId), state.specialtyId, state.branchId],
     queryFn: async () => {
       const today = new Date();
       const y = today.getFullYear();
       const m = today.getMonth() + 1;
       const p = new URLSearchParams({ year: String(y), month: String(m) });
-      if (state.doctorId) p.set("doctor_id", state.doctorId);
+      const dp = asDoctorParam(state.doctorId);
+      if (dp) p.set("doctor_id", dp);
+      else if (state.specialtyId) p.set("specialty_id", state.specialtyId);
       if (state.branchId) p.set("branch_id", state.branchId);
       const res = await fetch(`/api/public/book/month-availability?${p.toString()}`);
       if (!res.ok) return [] as string[];
       const j = await res.json();
       return (j?.dates ?? []) as string[];
     },
-    enabled: !!state.doctorId && state.step >= 6,
+    enabled: (isConcreteDoctorId(state.doctorId) || !!state.specialtyId) && state.step >= 6,
     staleTime: 60_000,
   });
+
 
   const noWeekAvailability = useMemo(() => {
     if (!weekDates) return false;
@@ -406,8 +421,13 @@ function BookPage() {
   // picker with a doctor+date+time. Released on unmount, on tuple change,
   // and after a successful booking. See useSlotHold.
   const slotHold = useSlotHold({
-    enabled: state.step >= 6 && state.step <= 8 && !!state.doctorId && !!state.date && !!state.time,
-    doctorId: state.doctorId,
+    enabled:
+      state.step >= 6 &&
+      state.step <= 8 &&
+      isConcreteDoctorId(state.doctorId) &&
+      !!state.date &&
+      !!state.time,
+    doctorId: asDoctorParam(state.doctorId),
     branchId: state.branchId,
     date: state.date,
     time: state.time,
@@ -453,21 +473,22 @@ function BookPage() {
   // renders instantly when the user reaches step 6. Also warm the current
   // month's availability grid so StepDate doesn't flash a loading state.
   useEffect(() => {
-    if (!state.doctorId) return;
+    if (!isConcreteDoctorId(state.doctorId)) return;
+    const dp = state.doctorId;
     const today = new Date().toISOString().slice(0, 10);
     queryClient.prefetchQuery({
-      queryKey: ["avail", today, state.doctorId, state.specialtyId, state.branchId],
-      queryFn: () => fetchAvailability(today, state.doctorId, state.specialtyId, state.branchId),
+      queryKey: ["avail", today, dp, state.specialtyId, state.branchId],
+      queryFn: () => fetchAvailability(today, dp, state.specialtyId, state.branchId),
       staleTime: 20_000,
     });
     const now = new Date();
     const y = now.getFullYear();
     const m = now.getMonth() + 1;
     queryClient.prefetchQuery({
-      queryKey: ["month-avail", state.doctorId, state.branchId, y, m],
+      queryKey: ["month-avail", dp, state.branchId, y, m],
       queryFn: async () => {
         const p = new URLSearchParams({ year: String(y), month: String(m) });
-        if (state.doctorId) p.set("doctor_id", state.doctorId);
+        p.set("doctor_id", dp);
         if (state.branchId) p.set("branch_id", state.branchId);
         const res = await fetch(`/api/public/book/month-availability?${p.toString()}`);
         if (!res.ok) return { dates: [] as string[] };
@@ -476,6 +497,7 @@ function BookPage() {
       staleTime: 60_000,
     });
   }, [state.doctorId, state.specialtyId, state.branchId, queryClient]);
+
 
   // Prefetch the doctors list as soon as a specialty is chosen (step 3),
   // so StepDoctor at step 4 renders without a spinner.
@@ -883,6 +905,10 @@ function BookPage() {
                   dispatch({ t: "set", p: { doctorId: v, date: null, time: null } });
                   goto(5);
                 }}
+                onPickAny={() => {
+                  dispatch({ t: "set", p: { doctorId: ANY_DOCTOR, date: null, time: null } });
+                  goto(5);
+                }}
               />
             )}
             {state.step === 5 && (
@@ -893,7 +919,7 @@ function BookPage() {
                   dispatch({ t: "set", p: { date: v, time: null } });
                   goto(6);
                 }}
-                doctorId={state.doctorId}
+                doctorId={asDoctorParam(state.doctorId)}
                 specialtyId={state.specialtyId}
                 branchId={state.branchId}
                 onChangeDoctor={() => goto(4)}
@@ -983,7 +1009,60 @@ function BookPage() {
                   lang={lang}
                   value={state.time}
                   avail={avail}
-                  onPick={(v) => {
+                  onPick={async (v) => {
+                    // "Any available doctor" flow: resolve to a concrete doctor
+                    // for this specific slot before advancing. If none is
+                    // available (a race with another booking), keep the user
+                    // on step 6 and refresh availability so the slot drops.
+                    if (state.doctorId === ANY_DOCTOR) {
+                      try {
+                        const p = new URLSearchParams({
+                          date: state.date!,
+                          time: v,
+                          specialty_id: state.specialtyId!,
+                        });
+                        if (state.branchId) p.set("branch_id", state.branchId);
+                        p.set("session", getBookingSessionId());
+                        const res = await fetch(
+                          `/api/public/book/resolve-any-doctor?${p.toString()}`,
+                        );
+                        const j = (await res.json()) as
+                          | { ok: true; doctor: { id: string; name_ar: string; name_en: string } }
+                          | { ok: false; error?: string };
+                        if (!j.ok) {
+                          toast.error(
+                            t(
+                              "page.anyDoctorUnavailable",
+                              "لا يوجد طبيب متاح لهذا الوقت — اختر وقتًا آخر.",
+                            ),
+                          );
+                          queryClient.invalidateQueries({
+                            queryKey: [
+                              "avail",
+                              state.date,
+                              null,
+                              state.specialtyId,
+                              state.branchId,
+                            ],
+                          });
+                          return;
+                        }
+                        dispatch({
+                          t: "set",
+                          p: { doctorId: j.doctor.id, time: v },
+                        });
+                        goto(7);
+                        return;
+                      } catch {
+                        toast.error(
+                          t(
+                            "page.anyDoctorUnavailable",
+                            "لا يوجد طبيب متاح لهذا الوقت — اختر وقتًا آخر.",
+                          ),
+                        );
+                        return;
+                      }
+                    }
                     dispatch({ t: "set", p: { time: v } });
                     goto(7);
                   }}
@@ -991,7 +1070,7 @@ function BookPage() {
                 <div className="mt-4">
                   <WaitlistCTA
                     lang={lang}
-                    doctorId={state.doctorId}
+                    doctorId={asDoctorParam(state.doctorId)}
                     specialtyId={state.specialtyId}
                     branchId={state.branchId}
                     defaultName={state.patient.name}
@@ -999,6 +1078,7 @@ function BookPage() {
                     emphasized={noWeekAvailability}
                   />
                 </div>
+
               </>
             )}
             {state.step === 7 && (

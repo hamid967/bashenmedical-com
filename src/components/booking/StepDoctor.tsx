@@ -1,25 +1,70 @@
-import { Star } from "lucide-react";
+import { Star, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { StepShell } from "./StepShell";
+
+/**
+ * Sentinel value passed by "Any available doctor" — must match the constant
+ * used in /book (ANY_DOCTOR). Kept as a plain string so the component stays
+ * decoupled from the route module.
+ */
+export const STEP_DOCTOR_ANY_ID = "any";
 
 export function StepDoctor({
   lang,
   doctors,
   value,
   onPick,
+  onPickAny,
 }: {
   lang: "ar" | "en";
   doctors: any[];
   value: string | null;
   onPick: (v: string) => void;
+  onPickAny?: () => void;
 }) {
   const { t } = useTranslation("booking");
+  const anyEnabled = doctors.some((d) => d.booking_enabled !== false);
+  const anyActive = value === STEP_DOCTOR_ANY_ID;
   return (
     <StepShell lang={lang} title={t("doctor.title")}>
       {doctors.length === 0 ? (
         <p className="text-muted-foreground text-sm">{t("doctor.empty")}</p>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t("doctor.title")}>
+          {onPickAny && anyEnabled && (
+            <button
+              type="button"
+              role="radio"
+              aria-checked={anyActive}
+              aria-label={t("doctor.anyAvailable", "أول طبيب متاح")}
+              onClick={() => onPickAny()}
+              className={`text-start rounded-xl border-2 border-dashed p-4 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary sm:col-span-2 ${
+                anyActive
+                  ? "border-primary bg-primary/5"
+                  : "border-primary/40 bg-primary/5 hover:border-primary hover:shadow-sm"
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  aria-hidden="true"
+                  className="h-14 w-14 shrink-0 rounded-full bg-primary/15 text-primary grid place-items-center"
+                >
+                  <Users className="h-6 w-6" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold">
+                    {t("doctor.anyAvailable", "أول طبيب متاح")}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {t(
+                      "doctor.anyAvailableHint",
+                      "نختار لك الطبيب المناسب حسب الوقت الذي تختاره",
+                    )}
+                  </div>
+                </div>
+              </div>
+            </button>
+          )}
           {doctors.map((d) => {
             const active = value === d.id;
             const name = lang === "ar" ? d.name_ar : d.name_en;

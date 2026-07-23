@@ -191,6 +191,7 @@ import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/boo
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
 import { Route as ApiPublicBookHoldRouteImport } from './routes/api/public/book/hold'
 import { Route as ApiPublicBookMonthAvailabilityRouteImport } from './routes/api/public/book/month-availability'
+import { Route as ApiPublicBookResolveAnyDoctorRouteImport } from './routes/api/public/book/resolve-any-doctor'
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
@@ -1220,6 +1221,12 @@ const ApiPublicBookMonthAvailabilityRoute =
     path: '/api/public/book/month-availability',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicBookResolveAnyDoctorRoute =
+  ApiPublicBookResolveAnyDoctorRouteImport.update({
+    id: '/api/public/book/resolve-any-doctor',
+    path: '/api/public/book/resolve-any-doctor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookTrackRoute = ApiPublicBookTrackRouteImport.update({
   id: '/api/public/book/track',
   path: '/api/public/book/track',
@@ -1528,6 +1535,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
   '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
+  '/api/public/book/resolve-any-doctor': typeof ApiPublicBookResolveAnyDoctorRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
@@ -1730,6 +1738,7 @@ export interface FileRoutesByTo {
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
   '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
+  '/api/public/book/resolve-any-doctor': typeof ApiPublicBookResolveAnyDoctorRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
@@ -1937,6 +1946,7 @@ export interface FileRoutesById {
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
   '/api/public/book/hold': typeof ApiPublicBookHoldRoute
   '/api/public/book/month-availability': typeof ApiPublicBookMonthAvailabilityRoute
+  '/api/public/book/resolve-any-doctor': typeof ApiPublicBookResolveAnyDoctorRoute
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
@@ -2144,6 +2154,7 @@ export interface FileRouteTypes {
     | '/api/public/book/create'
     | '/api/public/book/hold'
     | '/api/public/book/month-availability'
+    | '/api/public/book/resolve-any-doctor'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
@@ -2346,6 +2357,7 @@ export interface FileRouteTypes {
     | '/api/public/book/create'
     | '/api/public/book/hold'
     | '/api/public/book/month-availability'
+    | '/api/public/book/resolve-any-doctor'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
@@ -2552,6 +2564,7 @@ export interface FileRouteTypes {
     | '/api/public/book/create'
     | '/api/public/book/hold'
     | '/api/public/book/month-availability'
+    | '/api/public/book/resolve-any-doctor'
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
@@ -2643,6 +2656,7 @@ export interface RootRouteChildren {
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
   ApiPublicBookHoldRoute: typeof ApiPublicBookHoldRoute
   ApiPublicBookMonthAvailabilityRoute: typeof ApiPublicBookMonthAvailabilityRoute
+  ApiPublicBookResolveAnyDoctorRoute: typeof ApiPublicBookResolveAnyDoctorRoute
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
@@ -3940,6 +3954,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBookMonthAvailabilityRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/book/resolve-any-doctor': {
+      id: '/api/public/book/resolve-any-doctor'
+      path: '/api/public/book/resolve-any-doctor'
+      fullPath: '/api/public/book/resolve-any-doctor'
+      preLoaderRoute: typeof ApiPublicBookResolveAnyDoctorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/track': {
       id: '/api/public/book/track'
       path: '/api/public/book/track'
@@ -4586,6 +4607,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,
   ApiPublicBookHoldRoute: ApiPublicBookHoldRoute,
   ApiPublicBookMonthAvailabilityRoute: ApiPublicBookMonthAvailabilityRoute,
+  ApiPublicBookResolveAnyDoctorRoute: ApiPublicBookResolveAnyDoctorRoute,
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
@@ -4612,13 +4634,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
