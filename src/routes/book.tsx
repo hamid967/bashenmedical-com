@@ -701,6 +701,7 @@ function BookPage() {
         const msg = t("page.slotTakenClear");
         setErrorMsg(msg);
         setErrorKind("conflict");
+        setErrorCode("SLOT_TAKEN");
         toast.error(msg);
         const prevTime = state.time;
         // Invalidate availability so StepTime re-fetches and drops the taken slot.
@@ -714,14 +715,17 @@ function BookPage() {
         const msg = t("page.invalidIdempotencyKey");
         setErrorMsg(msg);
         setErrorKind("validation");
+        setErrorCode("INVALID_IDEMPOTENCY_KEY");
         toast.error(msg);
         // submitBooking already cleared the stored key; next click gets a fresh one.
       } else {
         setErrorMsg(res.message);
         setErrorKind(res.kind);
+        setErrorCode(res.code ?? null);
       }
     }
   }
+
 
   function handleReset() {
     // Guard against accidental taps that would drop the reference/QR forever.
