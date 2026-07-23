@@ -796,6 +796,11 @@ function DetailDrawer({
           )}
         </div>
       </div>
+      <AppointmentQrDialog
+        reference={row.reference_number}
+        open={qrOpen}
+        onClose={() => setQrOpen(false)}
+      />
     </div>
   );
 }
