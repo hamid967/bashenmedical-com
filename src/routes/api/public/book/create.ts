@@ -240,6 +240,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           const record = {
             scope: "book/create",
             event,
+            correlation_id: correlationId,
             idempotency_key: maskKey(idempotencyKey),
             doctor_id: parsed.data.doctor_id ?? null,
             appointment_date: parsed.data.appointment_date,
