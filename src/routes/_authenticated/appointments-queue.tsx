@@ -20,6 +20,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { listAppointments, updateAppointmentStatus } from "@/lib/admin.functions";
+import { listAppointmentTraces } from "@/lib/admin/booking-trace.functions";
+
 
 export const Route = createFileRoute("/_authenticated/appointments-queue")({
   head: () => ({
