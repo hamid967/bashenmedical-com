@@ -116,6 +116,16 @@ export function StepReview({
           </div>
         )}
 
+        {patientValid && (
+          <BookingPhoneVerification
+            phone={state.patient.phone}
+            challengeId={state.verificationChallengeId}
+            verifiedPhone={state.verifiedPhone}
+            onVerified={onVerified}
+            disabled={submitting}
+          />
+        )}
+
         {errorMsg && (
           <div className="mt-4">
             <SubmitErrorBanner
@@ -128,22 +138,28 @@ export function StepReview({
           </div>
         )}
 
-
-        <Button
-          onClick={onSubmit}
-          disabled={submitting || !patientValid}
-          className="w-full mt-6 gap-2 h-12 text-base"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> {t("review.submitting")}
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="h-5 w-5" /> {t("review.confirm")}
-            </>
-          )}
-        </Button>
+        {(() => {
+          const phoneVerified =
+            !!state.verificationChallengeId &&
+            state.verifiedPhone === state.patient.phone.trim();
+          return (
+            <Button
+              onClick={onSubmit}
+              disabled={submitting || !patientValid || !phoneVerified}
+              className="w-full mt-6 gap-2 h-12 text-base"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("review.submitting")}
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-5 w-5" /> {t("review.confirm")}
+                </>
+              )}
+            </Button>
+          );
+        })()}
         <p className="mt-3 text-center text-xs text-muted-foreground">{t("review.terms")}</p>
         <p className="mt-1 text-center text-[11px] text-muted-foreground/80">
           {t("review.referenceFormatHint")}
