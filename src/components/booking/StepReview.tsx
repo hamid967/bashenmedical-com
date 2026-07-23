@@ -2,6 +2,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SubmitErrorBanner } from "@/components/SubmitErrorBanner";
+import { BookingPhoneVerification } from "./BookingPhoneVerification";
 import type { BookingSubmitKind } from "@/lib/booking-submit";
 import { StepShell } from "./StepShell";
 import { formatArDate, type State } from "./types";
@@ -20,6 +21,7 @@ export function StepReview({
   onSubmit,
   patientValid,
   onEditPatient,
+  onVerified,
 }: {
   lang: "ar" | "en";
   state: State;
@@ -34,6 +36,7 @@ export function StepReview({
   onSubmit: () => void;
   patientValid: boolean;
   onEditPatient: () => void;
+  onVerified: (challengeId: string, phone: string) => void;
 }) {
 
   const { t } = useTranslation("booking");
