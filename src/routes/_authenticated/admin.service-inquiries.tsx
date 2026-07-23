@@ -28,6 +28,8 @@ import {
   closeInquiry,
 } from "@/lib/admin/service-inquiries.functions";
 import { InquiryAttachments } from "@/components/inquiry/InquiryAttachments";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 
 export const Route = createFileRoute("/_authenticated/admin/service-inquiries")({
   head: () => ({
