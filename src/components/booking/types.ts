@@ -45,6 +45,10 @@ export type State = {
     insuranceEstimate: InsuranceEstimate;
     isNewPatient: boolean; // first-time visitor flag
   };
+  /** Server-issued OTP challenge id from a successful booking-purpose verification. */
+  verificationChallengeId: string | null;
+  /** Phone the user completed OTP verification for. Must match patient.phone at submit time. */
+  verifiedPhone: string | null;
 };
 
 export const INITIAL: State = {
