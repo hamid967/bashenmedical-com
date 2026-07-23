@@ -428,12 +428,14 @@ function AppointmentsQueuePage() {
       {selected && (
         <DetailDrawer
           row={selected}
+          trace={traces[selected.id] ?? null}
           onClose={() => setSelected(null)}
           onChanged={() => {
             void refetch();
           }}
         />
       )}
+
     </div>
   );
 }
