@@ -815,11 +815,20 @@ function BookPage() {
   }
 
 
-  function handleReset() {
+  /**
+   * Clean restart of the wizard. On top of clearing local draft/result state
+   * we also release any active server-side slot hold and drop sensitive OTP
+   * artifacts (verificationChallengeId, verifiedPhone) so a fresh flow can't
+   * inherit a verification that no longer maps to the new patient/phone.
+   * `silent` skips the confirm prompt for programmatic resets (draft expiry).
+   */
+  function handleReset(opts: { silent?: boolean } = {}) {
     // Guard against accidental taps that would drop the reference/QR forever.
-    if (typeof window !== "undefined" && result?.reference) {
+    if (!opts.silent && typeof window !== "undefined" && result?.reference) {
       if (!window.confirm(t("page.resetConfirm"))) return;
     }
+    // Release the server-side hold before we drop its id from state.
+    if (slotHold.holdId) void releaseHold(slotHold.holdId);
     setResult(null);
     setErrorMsg(null);
     setErrorKind("unknown");
@@ -834,6 +843,22 @@ function BookPage() {
     // Explicit step=1 — otherwise the zod validator defaults `step` to 0.
     navigate({ to: "/book", search: { step: "service" } });
   }
+
+  // Auto-purge on draft expiry: strip sensitive OTP state, release hold,
+  // toast the user, and drop them back to step 1 without a confirm prompt.
+  useEffect(() => {
+    if (!draftExpiresAt) return;
+    if (Date.now() < draftExpiresAt) return;
+    toast.info(
+      t(
+        "page.draftExpiredToast",
+        "انتهت صلاحية مسودة الحجز — تم البدء من جديد.",
+      ),
+    );
+    handleReset({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftExpiresAt]);
+
 
   const STEPS = [
     t("steps.service"),
