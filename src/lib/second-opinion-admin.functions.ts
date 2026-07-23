@@ -64,20 +64,30 @@ export const updateSecondOpinionRequest = createServerFn({ method: "POST" })
 export const getSecondOpinionAttachmentUrls = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: { paths: string[] }) =>
-    z.object({ paths: z.array(z.string()).max(50) }).parse(input),
+    z.object({ paths: z.array(z.string().min(1).max(1024)).max(50) }).parse(input),
   )
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
+    const { createPatientSignedUrl } = await import("@/lib/storage/signed-url.server");
     const out: { path: string; url: string | null }[] = [];
     for (const p of data.paths) {
-      const { data: signed } = await context.supabase.storage
-        .from("second-opinion-uploads")
-        .createSignedUrl(p, SIGNED_URL_TTL_SECONDS);
-      out.push({ path: p, url: signed?.signedUrl ?? null });
+      try {
+        const signed = await createPatientSignedUrl({
+          client: context.supabase,
+          bucket: "second-opinion-uploads",
+          path: p,
+          ttlSeconds: SIGNED_URL_TTL_SECONDS,
+          // `assertAdmin` above is the RBAC gate for the whole batch.
+          authorized: true,
+        });
+        out.push({ path: p, url: signed.url });
+      } catch {
+        out.push({ path: p, url: null });
+      }
     }
     await logAppEvent(context.supabase, "second_opinion.signed_url_issued", {
       paths: data.paths,
-      count: out.length,
+      count: out.filter((o) => o.url).length,
     });
     return out;
   });
