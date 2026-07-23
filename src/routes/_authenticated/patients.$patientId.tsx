@@ -1193,9 +1193,9 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
     }
   };
 
-  const download = async (path: string) => {
+  const download = async (attachmentId: string) => {
     try {
-      const { url } = await getSigned({ data: { path } });
+      const { url } = await getSigned({ data: { attachment_id: attachmentId } });
       window.open(url, "_blank", "noopener");
     } catch (err: any) {
       toast.error(err?.message ?? "تعذّر التنزيل");
@@ -1266,7 +1266,7 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
-                  onClick={() => download(a.file_path)}
+                  onClick={() => download(a.id)}
                   className="rounded-md border border-input p-2 hover:bg-muted"
                   title="تنزيل"
                 >
