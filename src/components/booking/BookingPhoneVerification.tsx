@@ -8,7 +8,7 @@
  * The server enforces the same verification independently in
  * /api/public/book/create; this component is just the UI gate.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, ShieldCheck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
