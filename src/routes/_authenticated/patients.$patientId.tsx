@@ -1266,7 +1266,7 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
               </div>
               <div className="flex items-center gap-2 shrink-0">
                 <button
-                  onClick={() => download(a.file_path)}
+                  onClick={() => download(a.id)}
                   className="rounded-md border border-input p-2 hover:bg-muted"
                   title="تنزيل"
                 >
