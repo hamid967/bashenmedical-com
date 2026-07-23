@@ -162,7 +162,7 @@ export function PatientShell({
             <OfflineState onRetry={() => location.reload()} />
           </div>
         )}
-        <FeatureErrorBoundary>{children}</FeatureErrorBoundary>
+        <FeatureErrorBoundary feature="patient-portal">{children}</FeatureErrorBoundary>
       </main>
 
       {/* Mobile bottom nav */}
