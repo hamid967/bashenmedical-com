@@ -691,12 +691,12 @@ function BookPage() {
       goto(9);
     } else {
       const isSlotTaken = res.kind === "conflict" || res.code === "SLOT_TAKEN";
-      setErrorMsg(isSlotTaken ? t("page.conflictReason") : res.message);
-      setErrorKind(isSlotTaken ? "conflict" : res.kind);
-      // On SLOT_TAKEN (409, server-side race or fast-path clash), bounce back
-      // to step 6 and surface nearest alternatives (same doctor + alt doctor)
-      // so the user isn't stuck staring at a red banner.
+      const isInvalidIdemKey = res.code === "INVALID_IDEMPOTENCY_KEY";
       if (isSlotTaken) {
+        const msg = t("page.slotTakenClear");
+        setErrorMsg(msg);
+        setErrorKind("conflict");
+        toast.error(msg);
         const prevTime = state.time;
         // Invalidate availability so StepTime re-fetches and drops the taken slot.
         queryClient.invalidateQueries({
@@ -705,6 +705,15 @@ function BookPage() {
         dispatch({ t: "set", p: { time: null } });
         goto(6);
         void runAlternativesSearch(state.date!, prevTime);
+      } else if (isInvalidIdemKey) {
+        const msg = t("page.invalidIdempotencyKey");
+        setErrorMsg(msg);
+        setErrorKind("validation");
+        toast.error(msg);
+        // submitBooking already cleared the stored key; next click gets a fresh one.
+      } else {
+        setErrorMsg(res.message);
+        setErrorKind(res.kind);
       }
     }
   }
