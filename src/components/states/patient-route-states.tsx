@@ -5,6 +5,7 @@
  */
 import * as React from "react";
 import { useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ErrorState,
   EmptyState,
@@ -14,6 +15,7 @@ import {
   SkeletonList,
   SkeletonCards,
 } from "@/components/states";
+import { signalPatientSessionExpired } from "@/lib/patient/session-guard";
 
 function classify(error: unknown): "offline" | "session" | "forbidden" | "error" {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "offline";
