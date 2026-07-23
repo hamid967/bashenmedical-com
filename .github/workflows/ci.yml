@@ -474,6 +474,14 @@ jobs:
           E2E_PATIENT_PASSWORD: ${{ secrets.E2E_PATIENT_PASSWORD }}
         run: python tests/e2e/admin_doctors_non_admin_blocked.py
 
+      - name: Run admin doctors read-only (non-admin) E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true' && secrets.E2E_PATIENT_EMAIL != '' && secrets.E2E_PATIENT_PASSWORD != ''
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_PATIENT_EMAIL: ${{ secrets.E2E_PATIENT_EMAIL }}
+          E2E_PATIENT_PASSWORD: ${{ secrets.E2E_PATIENT_PASSWORD }}
+        run: python tests/e2e/admin_doctors_non_admin_readonly.py
+
       - name: Verify E2E cancel fixtures (preflight)
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
