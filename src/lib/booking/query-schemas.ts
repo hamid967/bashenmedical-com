@@ -119,14 +119,12 @@ export const SessionId = z
   .max(128, BookingErrorCode.invalid_session)
   .regex(/^[A-Za-z0-9_.:-]+$/, BookingErrorCode.invalid_session);
 
-export const YearField = z.coerce
-  .number({ error: BookingErrorCode.invalid_year })
+export const YearField = z.coerce.number()
   .int(BookingErrorCode.invalid_year)
   .min(2000, BookingErrorCode.invalid_year)
   .max(2100, BookingErrorCode.invalid_year);
 
-export const MonthField = z.coerce
-  .number({ error: BookingErrorCode.invalid_month })
+export const MonthField = z.coerce.number()
   .int(BookingErrorCode.invalid_month)
   .min(1, BookingErrorCode.invalid_month)
   .max(12, BookingErrorCode.invalid_month);
