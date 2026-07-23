@@ -166,6 +166,7 @@ export function PatientShell({
 
       {/* Content */}
       <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:pb-8">
+        <ActiveSubjectBanner lang={lang} />
         {!online && (
           <div
             role="status"
