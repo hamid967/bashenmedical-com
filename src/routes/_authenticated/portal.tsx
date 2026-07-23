@@ -1,8 +1,9 @@
-import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { PortalShell } from "@/components/portal/PortalShell";
 import { PortalCard } from "@/components/portal/ui";
 import { getMyProfile } from "@/lib/portal/portal.functions";
+import { getMyRoles } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
 import { AlertTriangle, Home, RefreshCw } from "lucide-react";
@@ -14,6 +15,19 @@ const myProfileQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/portal")({
+  beforeLoad: async () => {
+    // Admin accounts are separated from the patient portal — redirect to /admin.
+    try {
+      const data = await getMyRoles();
+      const roles = (data?.roles ?? []) as string[];
+      if (roles.some((r) => r === "admin" || r === "super_admin")) {
+        throw redirect({ to: "/admin" });
+      }
+    } catch (e) {
+      if (e && typeof e === "object" && "to" in (e as Record<string, unknown>)) throw e;
+      // Ignore role-fetch failure; let the loader run.
+    }
+  },
   loader: async ({ context }) => context.queryClient.ensureQueryData(myProfileQuery),
   head: () => ({
     meta: [
