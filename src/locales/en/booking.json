@@ -169,6 +169,28 @@
     "terms": "By confirming, you agree to our terms of use.",
     "referenceFormatHint": "You'll receive a booking reference in the format BMC-YYYYMMDD-XXXX for lookup or changes."
   },
+  "verification": {
+    "title": "Verify your phone number",
+    "hint": "We'll send a 6-digit code via WhatsApp to {{phone}}.",
+    "send": "Send verification code",
+    "resend": "Resend",
+    "confirm": "Verify",
+    "codeLabel": "Verification code",
+    "verified": "Phone number verified.",
+    "errors": {
+      "invalid_code": "Incorrect code.",
+      "invalid_destination": "Invalid phone number.",
+      "invalid_challenge": "Code expired, please resend.",
+      "expired": "Code expired, please resend.",
+      "already_used": "This code has already been used.",
+      "too_many_attempts": "Too many attempts, please resend.",
+      "cooldown_active": "Please wait before requesting another code.",
+      "rate_limited": "Rate limit reached, try again later.",
+      "provider_unavailable": "SMS service is currently unavailable.",
+      "storage_failed": "Couldn't send the code, please try again.",
+      "generic": "Verification failed, please try again."
+    }
+  },
   "success": {
     "title": "Thank you — your booking request was received",
     "subtitle": "Our reception team will contact you within minutes to confirm. You'll also receive a WhatsApp reminder one day before your appointment. Keep the reference below for any inquiry or change.",
