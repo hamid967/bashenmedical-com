@@ -19,6 +19,11 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { ActiveSubjectProvider } from "@/lib/patient/active-subject";
+import {
+  ActiveSubjectSwitcher,
+  ActiveSubjectBanner,
+} from "@/components/patient/ActiveSubjectSwitcher";
 
 type NavItem = { to: string; label_ar: string; label_en: string; icon: React.ComponentType<{ className?: string }> };
 
