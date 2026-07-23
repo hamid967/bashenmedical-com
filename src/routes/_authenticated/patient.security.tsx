@@ -2,7 +2,7 @@
  * Phase 5 — /patient/security — sessions/devices + auth events.
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { ErrorState } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Shield, Smartphone, Key, ArrowLeft } from "lucide-react";
