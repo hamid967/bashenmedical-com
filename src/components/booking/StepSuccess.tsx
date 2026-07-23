@@ -231,20 +231,49 @@ export function StepSuccess({
       </div>
       <p className="mt-2 text-xs text-muted-foreground">{t("success.statusHint")}</p>
 
-      {reference && (
-        <div className="mt-6 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-4">
-          <div className="text-xs text-muted-foreground mb-1">{t("success.reference")}</div>
-          <div className="flex items-center justify-center gap-3">
-            <span className="text-2xl md:text-3xl font-mono font-bold tracking-wider text-primary">
-              {reference}
-            </span>
-            <Button variant="outline" size="sm" onClick={copyRef} className="gap-1">
-              <ClipboardList className="h-4 w-4" />
-              {t("success.copy")}
-            </Button>
+      {reference && (() => {
+        // Two reference formats can reach this screen:
+        //   • BMC-YYYYMMDD-XXXX — new atomic RPC output, the format we hand
+        //     out for every new booking.
+        //   • BAA-XXXX          — legacy fallback derived from the row UUID
+        //     for pre-BMC rows (or a very old replay). Still valid for lookup
+        //     via /booking-confirmation, but we mark it so reception knows
+        //     it's not the current sequence.
+        const isBmc = /^BMC-\d{8}-\d{4}$/.test(reference);
+        return (
+          <div className="mt-6 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-4">
+            <div className="text-xs text-muted-foreground mb-1">{t("success.reference")}</div>
+            <div className="flex items-center justify-center gap-3">
+              <span
+                data-testid="booking-reference"
+                data-ref-format={isBmc ? "bmc" : "legacy"}
+                className="text-2xl md:text-3xl font-mono font-bold tracking-wider text-primary"
+              >
+                {reference}
+              </span>
+              <Button variant="outline" size="sm" onClick={copyRef} className="gap-1">
+                <ClipboardList className="h-4 w-4" />
+                {t("success.copy")}
+              </Button>
+            </div>
+            <div className="mt-2 flex items-center justify-center">
+              {isBmc ? (
+                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/60 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-700/60 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:text-emerald-200">
+                  {t("success.referenceFormatNew")}
+                </span>
+              ) : (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/60 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200"
+                  title={t("success.referenceFormatLegacyHint")}
+                >
+                  {t("success.referenceFormatLegacy")}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
+
 
       {reference && trackUrl && (
         <div
