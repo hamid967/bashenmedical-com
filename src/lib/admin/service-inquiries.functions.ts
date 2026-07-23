@@ -347,15 +347,24 @@ export const closeInquiry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
-      .select("internal_status, closed_at")
+      .select("internal_status, closed_at, branch_id")
       .eq("id", data.id)
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
     if (!prev) throw new Error("الاستفسار غير موجود.");
+
+    // Closing an inquiry cancels the pending intent → gate on
+    // `appointments.cancel` in the inquiry's branch. Branch scope is
+    // enforced explicitly so a caller cannot pass a hand-crafted branch
+    // hint — the branch is read from the persisted row.
+    await assertPermission(
+      { supabase: sb, userId: context.userId },
+      PERMISSIONS.ApptCancel,
+      (prev.branch_id as string | null) ?? null,
+    );
 
     const now = new Date().toISOString();
     const { error } = await sb
@@ -373,3 +382,6 @@ export const closeInquiry = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+// Silence unused-import warnings when only some verbs consume the helper.
+void assertBranchScope;
