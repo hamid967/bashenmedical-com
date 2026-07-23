@@ -877,6 +877,9 @@ jobs:
       - name: Run doctors admin CRUD authorization regression
         run: |
           python tests/security/test_doctors_admin_crud.py | tee doctors-crud-report.txt
+      - name: Run authorization boundary suite (IDOR / escalation / exports / cross-patient)
+        run: |
+          python tests/security/test_authz_boundaries.py | tee authz-boundaries-report.txt
 
   post-merge-grants-pinned:
     name: Security — A2/A3 grants pinned (post-merge)
