@@ -214,18 +214,26 @@ function AppointmentsQueuePage() {
       "التخصص",
       "الطبيب",
       "الحالة",
+      "Correlation ID",
+      "Error Code",
     ];
-    const lines = filtered.map((r) => [
-      shortRef(r.id),
-      r.patient_name,
-      r.patient_phone,
-      r.appointment_date,
-      r.appointment_time?.slice(0, 5),
-      r.specialties?.name_ar,
-      r.doctors?.name_ar,
-      STATUS_META[r.status].label,
-    ]);
+    const lines = filtered.map((r) => {
+      const tr = traces[r.id];
+      return [
+        shortRef(r.id),
+        r.patient_name,
+        r.patient_phone,
+        r.appointment_date,
+        r.appointment_time?.slice(0, 5),
+        r.specialties?.name_ar,
+        r.doctors?.name_ar,
+        STATUS_META[r.status].label,
+        tr?.correlation_id ?? "",
+        tr?.error_code ?? "",
+      ];
+    });
     const csv = "\uFEFF" + [header, ...lines].map((line) => line.map(quote).join(",")).join("\n");
+
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");
     link.href = url;
