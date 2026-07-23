@@ -54,6 +54,9 @@ import {
   ExternalLink,
   History,
 } from "lucide-react";
+import { InlineStateBanner } from "@/components/states/InlineStateBanner";
+import { LoadingState, EmptyState } from "@/components/states";
+
 
 const RELATION_LABEL: Record<string, string> = {
   child: "ابن/ابنة",
