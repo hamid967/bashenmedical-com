@@ -19,13 +19,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
+import {
+  BranchId,
+  IsoDate,
+  IsoTime,
+  SessionId,
+  SpecialtyId,
+  firstZodErrorCode,
+} from "@/lib/booking/query-schemas";
 
 const QuerySchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "invalid_date"),
-  time: z.string().regex(/^\d{2}:\d{2}$/, "invalid_time"),
-  specialty_id: z.string().uuid("missing_scope"),
-  branch_id: z.string().uuid("invalid_branch_id").nullish(),
-  session: z.string().max(128).nullish(),
+  date: IsoDate,
+  time: IsoTime,
+  specialty_id: SpecialtyId,
+  branch_id: BranchId.nullish(),
+  session: SessionId.nullish(),
 });
 
 function json(status: number, body: Record<string, unknown>) {
@@ -63,10 +71,7 @@ export const Route = createFileRoute("/api/public/book/resolve-any-doctor")({
           session: url.searchParams.get("session") || undefined,
         });
         if (!parsed.success) {
-          return json(400, {
-            ok: false,
-            error: parsed.error.issues[0]?.message ?? "invalid_query",
-          });
+          return json(400, { ok: false, error: firstZodErrorCode(parsed.error) });
         }
         const {
           date,

@@ -16,16 +16,27 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
+import {
+  BookingErrorCode,
+  BranchId,
+  DoctorId,
+  MonthField,
+  SpecialtyId,
+  YearField,
+  firstZodErrorCode,
+} from "@/lib/booking/query-schemas";
 
 const QuerySchema = z
   .object({
-    year: z.coerce.number().int().min(2000).max(2100),
-    month: z.coerce.number().int().min(1).max(12),
-    doctor_id: z.string().uuid().nullish(),
-    specialty_id: z.string().uuid().nullish(),
-    branch_id: z.string().uuid().nullish(),
+    year: YearField,
+    month: MonthField,
+    doctor_id: DoctorId.nullish(),
+    specialty_id: SpecialtyId.nullish(),
+    branch_id: BranchId.nullish(),
   })
-  .refine((v) => v.doctor_id || v.specialty_id, { message: "missing_scope" });
+  .refine((v) => v.doctor_id || v.specialty_id, {
+    message: BookingErrorCode.missing_scope,
+  });
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -58,10 +69,7 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
           branch_id: url.searchParams.get("branch_id") || undefined,
         });
         if (!parsed.success) {
-          return json(400, {
-            ok: false,
-            error: parsed.error.issues[0]?.message ?? "invalid_query",
-          });
+          return json(400, { ok: false, error: firstZodErrorCode(parsed.error) });
         }
         const {
           year,
