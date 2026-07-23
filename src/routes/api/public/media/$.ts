@@ -9,15 +9,27 @@
  * flow, it will not be publicly reachable through this route).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
+
+const PathSchema = z
+  .string()
+  .min(1)
+  .max(400)
+  .regex(/^[^\s]+$/, "invalid_path")
+  .refine((p) => !p.includes(".."), { message: "invalid_path" });
 
 export const Route = createFileRoute("/api/public/media/$")({
   server: {
     handlers: {
-      GET: async ({ params }) => {
-        const path = (params as any)._splat as string | undefined;
-        if (!path || path.includes("..") || path.length > 400) {
-          return new Response("Not found", { status: 404 });
-        }
+      GET: async ({ params, request }) => {
+        const limited = await applyRateLimit(request, { category: "reads" });
+        if (limited) return limited;
+
+        const rawPath = (params as { _splat?: string })._splat;
+        const parsed = PathSchema.safeParse(rawPath);
+        if (!parsed.success) return new Response("Not found", { status: 404 });
+        const path = parsed.data;
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

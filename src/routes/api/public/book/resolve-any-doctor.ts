@@ -18,10 +18,15 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
+import { z } from "zod";
 
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const TIME_RE = /^\d{2}:\d{2}$/;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const QuerySchema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "invalid_date"),
+  time: z.string().regex(/^\d{2}:\d{2}$/, "invalid_time"),
+  specialty_id: z.string().uuid("missing_scope"),
+  branch_id: z.string().uuid("invalid_branch_id").nullish(),
+  session: z.string().max(128).nullish(),
+});
 
 function json(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
@@ -50,18 +55,26 @@ export const Route = createFileRoute("/api/public/book/resolve-any-doctor")({
         if (_rl) return _rl;
 
         const url = new URL(request.url);
-        const date = url.searchParams.get("date");
-        const time = url.searchParams.get("time");
-        const specialtyId = url.searchParams.get("specialty_id");
-        const branchId = url.searchParams.get("branch_id");
-        const sessionId = url.searchParams.get("session") ?? "";
-
-        if (!date || !DATE_RE.test(date)) return json(400, { ok: false, error: "invalid_date" });
-        if (!time || !TIME_RE.test(time)) return json(400, { ok: false, error: "invalid_time" });
-        if (!specialtyId || !UUID_RE.test(specialtyId))
-          return json(400, { ok: false, error: "missing_scope" });
-        if (branchId && !UUID_RE.test(branchId))
-          return json(400, { ok: false, error: "invalid_branch_id" });
+        const parsed = QuerySchema.safeParse({
+          date: url.searchParams.get("date"),
+          time: url.searchParams.get("time"),
+          specialty_id: url.searchParams.get("specialty_id"),
+          branch_id: url.searchParams.get("branch_id") || undefined,
+          session: url.searchParams.get("session") || undefined,
+        });
+        if (!parsed.success) {
+          return json(400, {
+            ok: false,
+            error: parsed.error.issues[0]?.message ?? "invalid_query",
+          });
+        }
+        const {
+          date,
+          time,
+          specialty_id: specialtyId,
+          branch_id: branchId,
+          session: sessionId,
+        } = parsed.data;
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

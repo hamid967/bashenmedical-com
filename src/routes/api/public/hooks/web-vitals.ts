@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
+import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 
 /**
  * Web-vitals collector — public, low-security endpoint.
@@ -29,6 +30,12 @@ export const Route = createFileRoute("/api/public/hooks/web-vitals")({
     handlers: {
       OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
+        const limited = await applyRateLimit(request, { category: "reads" });
+        if (limited) {
+          const h = new Headers(limited.headers);
+          for (const [k, v] of Object.entries(CORS_HEADERS)) h.set(k, v);
+          return new Response(limited.body, { status: limited.status, headers: h });
+        }
         let raw: unknown;
         try {
           raw = await request.json();

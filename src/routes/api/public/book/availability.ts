@@ -39,6 +39,16 @@ import { createFileRoute } from "@tanstack/react-router";
 // so the day boundary is identical across resolver, cancel API, and portal cancel.
 import { riyadhTodayIso, riyadhNowMinutes } from "@/lib/riyadh-date";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
+import { z } from "zod";
+
+const QuerySchema = z
+  .object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "invalid_date"),
+    doctor_id: z.string().uuid("invalid_doctor_id").nullish(),
+    specialty_id: z.string().uuid("invalid_specialty_id").nullish(),
+    branch_id: z.string().uuid("invalid_branch_id").nullish(),
+  })
+  .refine((v) => v.doctor_id || v.specialty_id, { message: "missing_scope" });
 
 function json(
   status: number,
@@ -80,8 +90,6 @@ function memoSet(key: string, body: Record<string, unknown>) {
   memo.set(key, { at: Date.now(), body });
 }
 
-const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -111,28 +119,24 @@ export const Route = createFileRoute("/api/public/book/availability")({
       GET: async ({ request }) => {
         const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
         const url = new URL(request.url);
-        const date = url.searchParams.get("date");
-        const doctorId = url.searchParams.get("doctor_id");
-        const specialtyId = url.searchParams.get("specialty_id");
-        const branchId = url.searchParams.get("branch_id");
-
-        if (!date || !DATE_RE.test(date)) {
-          return json(400, { ok: false, error: "invalid_date" });
+        const parsed = QuerySchema.safeParse({
+          date: url.searchParams.get("date"),
+          doctor_id: url.searchParams.get("doctor_id") || undefined,
+          specialty_id: url.searchParams.get("specialty_id") || undefined,
+          branch_id: url.searchParams.get("branch_id") || undefined,
+        });
+        if (!parsed.success) {
+          return json(400, {
+            ok: false,
+            error: parsed.error.issues[0]?.message ?? "invalid_query",
+          });
         }
-        if (doctorId && !UUID_RE.test(doctorId)) {
-          return json(400, { ok: false, error: "invalid_doctor_id" });
-        }
-        if (specialtyId && !UUID_RE.test(specialtyId)) {
-          return json(400, { ok: false, error: "invalid_specialty_id" });
-        }
-        if (branchId && !UUID_RE.test(branchId)) {
-          return json(400, { ok: false, error: "invalid_branch_id" });
-        }
-        // At least one narrowing dimension is required, otherwise we would
-        // aggregate the entire clinic and return a meaningless union.
-        if (!doctorId && !specialtyId) {
-          return json(400, { ok: false, error: "missing_scope" });
-        }
+        const {
+          date,
+          doctor_id: doctorId,
+          specialty_id: specialtyId,
+          branch_id: branchId,
+        } = parsed.data;
 
         // Cache key includes every parameter that changes the result. `date`
         // is bucketed only per full day (safe) but same-day results include
