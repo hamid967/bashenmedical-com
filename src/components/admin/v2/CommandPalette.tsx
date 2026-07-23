@@ -46,6 +46,7 @@ const ROUTES: RouteItem[] = [
   { to: "/corporate-admin", label: "الشركات", icon: Building2, group: "التنقل" },
   { to: "/rbac", label: "الأدوار والصلاحيات", icon: ShieldCheck, group: "الحوكمة" },
   { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, group: "الحوكمة" },
+  { to: "/admin/booking-trace", label: "تتبع الحجوزات (Correlation ID)", icon: ShieldCheck, group: "الحوكمة" },
   { to: "/admin/web-vitals", label: "Web Vitals", icon: FileBarChart, group: "الحوكمة" },
   { to: "/admin/notification-logs", label: "سجلات الإشعارات", icon: Bell, group: "الحوكمة" },
   { to: "/admin/visual-analytics", label: "تحليلات بصرية", icon: FileBarChart, group: "الحوكمة" },

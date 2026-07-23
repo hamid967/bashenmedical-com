@@ -189,6 +189,7 @@ const NAV: NavGroup[] = [
         roles: ["admin"],
       },
       { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/booking-trace", label: "تتبع الحجوزات", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/web-vitals", label: "Web Vitals", icon: Gauge, roles: ["admin"] },
       {
         to: "/admin/visual-analytics",
