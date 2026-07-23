@@ -501,14 +501,17 @@ const ACTIONS: Record<
 
 function DetailDrawer({
   row,
+  trace,
   onClose,
   onChanged,
 }: {
   row: Row;
+  trace: { correlation_id: string; error_code: string | null } | null;
   onClose: () => void;
   onChanged: () => void;
 }) {
   const ref = shortRef(row.id);
+
   const updateStatus = useServerFn(updateAppointmentStatus);
   const qc = useQueryClient();
   const [pendingAction, setPendingAction] = useState<ActionKey | null>(null);
