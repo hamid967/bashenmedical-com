@@ -713,7 +713,7 @@ function BookPage() {
 
   return (
     <div className="min-h-screen bg-muted/30">
-      <div className="container-app py-8 md:py-12 max-w-5xl">
+      <div className="container-app py-8 md:py-12 max-w-5xl pb-24 md:pb-12">
         {/* SR-only live region: announces each step change once so screen
             reader users hear "Step N of 8: Title" without extra chatter. */}
         <div role="status" aria-live="polite" aria-atomic="true" className="sr-only">
