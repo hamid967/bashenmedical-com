@@ -1611,6 +1611,100 @@ export type Database = {
         }
         Relationships: []
       }
+      dependent_verification_documents: {
+        Row: {
+          content_type: string
+          created_at: string
+          file_name: string
+          guardian_user_id: string
+          id: string
+          request_id: string
+          size_bytes: number
+          storage_path: string
+        }
+        Insert: {
+          content_type: string
+          created_at?: string
+          file_name: string
+          guardian_user_id: string
+          id?: string
+          request_id: string
+          size_bytes: number
+          storage_path: string
+        }
+        Update: {
+          content_type?: string
+          created_at?: string
+          file_name?: string
+          guardian_user_id?: string
+          id?: string
+          request_id?: string
+          size_bytes?: number
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dependent_verification_documents_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "dependent_verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dependent_verification_requests: {
+        Row: {
+          created_at: string
+          decision_notes: string | null
+          dependent_id: string
+          guardian_notes: string | null
+          guardian_user_id: string
+          id: string
+          national_id_last4: string | null
+          relationship_claimed: string
+          reviewed_at: string | null
+          reviewer_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          decision_notes?: string | null
+          dependent_id: string
+          guardian_notes?: string | null
+          guardian_user_id: string
+          id?: string
+          national_id_last4?: string | null
+          relationship_claimed: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          decision_notes?: string | null
+          dependent_id?: string
+          guardian_notes?: string | null
+          guardian_user_id?: string
+          id?: string
+          national_id_last4?: string | null
+          relationship_claimed?: string
+          reviewed_at?: string | null
+          reviewer_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dependent_verification_requests_dependent_id_fkey"
+            columns: ["dependent_id"]
+            isOneToOne: false
+            referencedRelation: "dependents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dependents: {
         Row: {
           access_scopes: Json

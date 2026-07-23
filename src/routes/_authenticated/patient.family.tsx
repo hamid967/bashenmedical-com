@@ -15,9 +15,9 @@ import {
   createDependent,
   updateDependent,
   deleteDependent,
-  requestDependentVerification,
   type Dependent,
 } from "@/lib/portal/dependents.functions";
+import { DependentVerificationDialog } from "@/components/patient/DependentVerificationDialog";
 import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
@@ -127,6 +127,7 @@ function FamilyPage() {
   const [editing, setEditing] = useState<Dependent | null>(null);
   const [form, setForm] = useState<FormState>(emptyForm);
   const [confirmDelete, setConfirmDelete] = useState<Dependent | null>(null);
+  const [verifyFor, setVerifyFor] = useState<Dependent | null>(null);
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["patient", "family"] });
 
@@ -163,14 +164,6 @@ function FamilyPage() {
     onError: (e: any) => toast.error(e?.message ?? "تعذر الحذف"),
   });
 
-  const verifyMut = useMutation({
-    mutationFn: (id: string) => requestDependentVerification({ data: { id } }),
-    onSuccess: () => {
-      toast.success("تم إرسال طلب التوثيق — سيتواصل معك الاستقبال");
-      invalidate();
-    },
-    onError: (e: any) => toast.error(e?.message ?? "تعذر إرسال الطلب"),
-  });
 
   const openCreate = () => {
     setEditing(null);
@@ -270,13 +263,11 @@ function FamilyPage() {
                       <Button
                         size="sm"
                         variant="secondary"
-                        onClick={() => verifyMut.mutate(d.id)}
-                        disabled={verifyMut.isPending && verifyMut.variables === d.id}
+                        onClick={() => setVerifyFor(d)}
                       >
-                        {verifyMut.isPending && verifyMut.variables === d.id ? (
-                          <Loader2 className="me-1 h-4 w-4 animate-spin" aria-hidden />
-                        ) : null}
-                        طلب توثيق
+                        {d.verification_status === "pending"
+                          ? "متابعة طلب التوثيق"
+                          : "طلب توثيق"}
                       </Button>
                     ) : null}
 
@@ -435,6 +426,14 @@ function FamilyPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {verifyFor ? (
+        <DependentVerificationDialog
+          dependent={verifyFor}
+          open={!!verifyFor}
+          onOpenChange={(o) => !o && setVerifyFor(null)}
+        />
+      ) : null}
     </div>
   );
 }
