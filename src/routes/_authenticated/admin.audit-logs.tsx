@@ -6,6 +6,8 @@ import { RefreshCw, Search, X, ChevronLeft, ChevronRight, ShieldAlert } from "lu
 import { listAdminAuditLogs, listAuditFacets } from "@/lib/admin/audit-logs.functions";
 import { getMyRoles } from "@/lib/admin.functions";
 import { ExportMenu } from "@/components/admin/v2/ExportMenu";
+import { usePermissions } from "@/hooks/usePermissions";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 import type { Column } from "@/lib/export-utils";
 
 type AuditSearch = {
