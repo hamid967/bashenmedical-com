@@ -12,6 +12,9 @@ import { getMyRoles } from "@/lib/admin.functions";
 type TraceSearch = {
   correlation_id?: string;
   reference?: string;
+  error_code?: string;
+  doctor_id?: string;
+  patient_name?: string;
   from?: string;
   to?: string;
 };
@@ -32,11 +35,17 @@ export const Route = createFileRoute("/_authenticated/admin/booking-trace")({
     correlation_id:
       typeof raw.correlation_id === "string" ? raw.correlation_id : undefined,
     reference: typeof raw.reference === "string" ? raw.reference : undefined,
+    error_code:
+      typeof raw.error_code === "string" ? raw.error_code : undefined,
+    doctor_id: typeof raw.doctor_id === "string" ? raw.doctor_id : undefined,
+    patient_name:
+      typeof raw.patient_name === "string" ? raw.patient_name : undefined,
     from: typeof raw.from === "string" ? raw.from : undefined,
     to: typeof raw.to === "string" ? raw.to : undefined,
   }),
   component: BookingTracePage,
 });
+
 
 function fmt(ts: string) {
   try {
