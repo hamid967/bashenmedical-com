@@ -48,7 +48,9 @@ export const Route = createFileRoute("/_authenticated/patient")({
 
 function PatientLayout() {
   const queryClient = useQueryClient();
+  const router = useRouter();
   usePatientOfflineCache(queryClient);
+  usePatientSessionGuard(router, queryClient);
   const { data: profile } = useSuspenseQuery(myProfileQuery);
   const [unread, setUnread] = useState<number>(0);
   const lang = (profile?.preferred_language as "ar" | "en" | undefined) ?? "ar";
