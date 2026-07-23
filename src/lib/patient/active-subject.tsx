@@ -47,8 +47,17 @@ export function ActiveSubjectProvider({
     staleTime: 60_000,
   });
 
-  const verifiedDependents = React.useMemo(
-    () => (dependentsQuery.data ?? []).filter((d) => d.verified),
+  // A dependent is switchable only when the guardian is both (a) verified
+  // as their proxy and (b) actually authorized on at least one record
+  // scope (booking / reports / prescriptions / billing). Unauthorized or
+  // unverified dependents are surfaced as disabled hints in the UI.
+  const switchableDependents = React.useMemo(
+    () =>
+      (dependentsQuery.data ?? []).filter((d) => {
+        if (!d.verified) return false;
+        const s = d.access_scopes;
+        return Boolean(s?.booking || s?.reports || s?.prescriptions || s?.billing);
+      }),
     [dependentsQuery.data],
   );
 
@@ -56,11 +65,13 @@ export function ActiveSubjectProvider({
     { kind: "self" } | { kind: "dependent"; id: string }
   >({ kind: "self" });
 
-  // Hydrate from localStorage after mount (avoids SSR mismatch).
+  // Session-only: hydrate from sessionStorage after mount so the choice
+  // resets on browser close but survives navigation and reloads within
+  // the current tab. Avoids SSR mismatch.
   React.useEffect(() => {
     if (typeof window === "undefined") return;
     try {
-      const raw = window.localStorage.getItem(storageKey(userId));
+      const raw = window.sessionStorage.getItem(storageKey(userId));
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (parsed?.kind === "dependent" && typeof parsed.id === "string") {
@@ -76,7 +87,7 @@ export function ActiveSubjectProvider({
       setRawSelection(next);
       if (typeof window !== "undefined") {
         try {
-          window.localStorage.setItem(storageKey(userId), JSON.stringify(next));
+          window.sessionStorage.setItem(storageKey(userId), JSON.stringify(next));
         } catch {
           /* ignore */
         }
