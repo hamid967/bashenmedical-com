@@ -39,7 +39,7 @@ export function usePatientOfflineCache(queryClient: QueryClient) {
       throttleTime: 1000,
     });
     const [unsubscribe] = persistQueryClient({
-      queryClient,
+      queryClient: queryClient as unknown as Parameters<typeof persistQueryClient>[0]["queryClient"],
       persister,
       maxAge: MAX_AGE,
       buster: "v1",
