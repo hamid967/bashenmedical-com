@@ -63,9 +63,13 @@ const ITEMS: Item[] = [
 ];
 
 function matchesRole(item: Item, roles: Set<Role>): boolean {
+  // Admin accounts are unlinked from the patient portal — hide portal items.
+  const isAdmin = roles.has("admin") || roles.has("super_admin");
+  if (isAdmin && item.to.startsWith("/portal")) return false;
   if (!item.roles || item.roles.length === 0) return true;
   return item.roles.some((r) => roles.has(r));
 }
+
 
 export function CommandPaletteV3({
   open,
