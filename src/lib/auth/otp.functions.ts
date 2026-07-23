@@ -273,6 +273,7 @@ export const verifyOtp = createServerFn({ method: "POST" })
       ok: true as const,
       destination: row.destination as string,
       channel: row.channel as "whatsapp" | "email" | "sms",
-      purpose: row.purpose as "login" | "register" | "recovery" | "mobile_change",
+      purpose: row.purpose as "login" | "register" | "recovery" | "mobile_change" | "booking",
+      challengeId: row.id as string,
     };
   });
