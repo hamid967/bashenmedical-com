@@ -971,16 +971,30 @@ function BookPage() {
           </div>
 
           {state.step >= 2 && state.step <= 8 && (
-            <SummarySidebar
-              lang={lang}
-              state={state}
-              branches={branches}
-              specialties={specialties}
-              doctors={doctors}
-              onEdit={(step: number) => goto(step)}
-            />
+            <div className="hidden md:block">
+              <SummarySidebar
+                lang={lang}
+                state={state}
+                branches={branches}
+                specialties={specialties}
+                doctors={doctors}
+                onEdit={(step: number) => goto(step)}
+              />
+            </div>
           )}
         </div>
+
+        {state.step >= 2 && state.step <= 8 && (
+          <MobileSummarySheet
+            lang={lang}
+            state={state}
+            branches={branches}
+            specialties={specialties}
+            doctors={doctors}
+            onEdit={(step: number) => goto(step)}
+          />
+        )}
+
 
         {state.step < 9 && (
           <div className="mt-4 flex items-center justify-between">
