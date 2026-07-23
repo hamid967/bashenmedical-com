@@ -189,7 +189,9 @@
       "provider_unavailable": "خدمة الرسائل غير متاحة حاليًا.",
       "storage_failed": "تعذّر إرسال الرمز، حاول مجددًا.",
       "generic": "تعذّر التحقق، حاول مجددًا."
-    }
+    },
+    "sendCooldown": "إرسال رمز التحقق ({{seconds}} ث)",
+    "resendCooldown": "إعادة الإرسال ({{seconds}} ث)"
   },
   "success": {
     "title": "شكرًا لك، تم استلام طلب الحجز بنجاح",

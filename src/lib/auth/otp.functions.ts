@@ -35,7 +35,10 @@ const RATE_WINDOW_MINUTES = 60;
 const MAX_PER_DESTINATION = 5;
 const MAX_PER_IP = 20;
 
-async function bumpRateLimit(key: string, max: number): Promise<boolean> {
+async function bumpRateLimit(
+  key: string,
+  max: number,
+): Promise<{ ok: boolean; retryAfterSeconds: number }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const now = new Date();
   const windowMs = RATE_WINDOW_MINUTES * 60 * 1000;
@@ -44,20 +47,30 @@ async function bumpRateLimit(key: string, max: number): Promise<boolean> {
     .select("hits, window_started_at, blocked_until")
     .eq("key", key)
     .maybeSingle();
-  if (data?.blocked_until && new Date(data.blocked_until) > now) return false;
+  if (data?.blocked_until && new Date(data.blocked_until) > now) {
+    const retry = Math.max(
+      1,
+      Math.ceil((new Date(data.blocked_until).getTime() - now.getTime()) / 1000),
+    );
+    return { ok: false, retryAfterSeconds: retry };
+  }
   const windowStart = data?.window_started_at ? new Date(data.window_started_at) : now;
   const withinWindow = now.getTime() - windowStart.getTime() < windowMs;
   const hits = withinWindow ? (data?.hits ?? 0) + 1 : 1;
   const newWindow = withinWindow ? windowStart : now;
   if (hits > max) {
+    const blockedUntil = new Date(now.getTime() + windowMs);
     await supabaseAdmin.from("auth_rate_limits").upsert({
       key,
       hits,
       window_started_at: newWindow.toISOString(),
-      blocked_until: new Date(now.getTime() + windowMs).toISOString(),
+      blocked_until: blockedUntil.toISOString(),
       updated_at: now.toISOString(),
     });
-    return false;
+    return {
+      ok: false,
+      retryAfterSeconds: Math.ceil((blockedUntil.getTime() - now.getTime()) / 1000),
+    };
   }
   await supabaseAdmin.from("auth_rate_limits").upsert({
     key,
@@ -66,8 +79,9 @@ async function bumpRateLimit(key: string, max: number): Promise<boolean> {
     blocked_until: null,
     updated_at: now.toISOString(),
   });
-  return true;
+  return { ok: true, retryAfterSeconds: 0 };
 }
+
 
 export const issueOtp = createServerFn({ method: "POST" })
   .validator((input: unknown) => IssueSchema.parse(input))
@@ -105,7 +119,8 @@ export const issueOtp = createServerFn({ method: "POST" })
     const ipHash = hashIp(ip);
 
     // Resend cooldown: reject if a live challenge for the same destination
-    // and purpose was created less than N seconds ago.
+    // and purpose was created less than N seconds ago. Return the exact
+    // remaining seconds so the client can render an accurate countdown.
     const cooldownIso = new Date(Date.now() - OTP_RESEND_COOLDOWN_SECONDS * 1000).toISOString();
     const { data: recent } = await supabaseAdmin
       .from("otp_challenges")
@@ -114,23 +129,39 @@ export const issueOtp = createServerFn({ method: "POST" })
       .eq("purpose", data.purpose)
       .gte("created_at", cooldownIso)
       .is("consumed_at", null)
+      .order("created_at", { ascending: false })
       .limit(1);
     if (recent && recent.length > 0) {
-      return { ok: false as const, error: "cooldown_active" };
+      const createdAt = new Date(recent[0].created_at as string).getTime();
+      const retry = Math.max(
+        1,
+        Math.ceil((createdAt + OTP_RESEND_COOLDOWN_SECONDS * 1000 - Date.now()) / 1000),
+      );
+      return { ok: false as const, error: "cooldown_active", retryAfterSeconds: retry };
     }
 
-    // Rate limits: destination and IP.
-    const okDest = await bumpRateLimit(`otp:dest:${destination}:${data.purpose}`, MAX_PER_DESTINATION);
-    const okIp = await bumpRateLimit(`otp:ip:${ipHash}`, MAX_PER_IP);
-    if (!okDest || !okIp) {
+    // Rate limits: per patient phone / email (destination+purpose) and per IP.
+    const destResult = await bumpRateLimit(
+      `otp:dest:${destination}:${data.purpose}`,
+      MAX_PER_DESTINATION,
+    );
+    const ipResult = await bumpRateLimit(`otp:ip:${ipHash}`, MAX_PER_IP);
+    if (!destResult.ok || !ipResult.ok) {
+      const retry = Math.max(destResult.retryAfterSeconds, ipResult.retryAfterSeconds);
       await supabaseAdmin.from("auth_events").insert({
         kind: "rate_limited",
         ip_hash: ipHash,
         ua,
-        meta: { destination_hash: hashIp(destination), purpose: data.purpose },
+        meta: {
+          destination_hash: hashIp(destination),
+          purpose: data.purpose,
+          scope: !destResult.ok ? "destination" : "ip",
+          retry_after_seconds: retry,
+        },
       });
-      return { ok: false as const, error: "rate_limited" };
+      return { ok: false as const, error: "rate_limited", retryAfterSeconds: retry };
     }
+
 
     // Mint & hash code.
     const code = mintCode();

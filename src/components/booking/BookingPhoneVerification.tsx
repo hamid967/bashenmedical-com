@@ -8,7 +8,7 @@
  * The server enforces the same verification independently in
  * /api/public/book/create; this component is just the UI gate.
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, ShieldCheck, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,10 +39,24 @@ export function BookingPhoneVerification({
   const [sentId, setSentId] = useState<string | null>(challengeId);
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [cooldownUntil, setCooldownUntil] = useState<number>(0);
+  const [now, setNow] = useState<number>(() => Date.now());
+
+  // Tick every second while a cooldown is active so the button label
+  // reflects the remaining seconds. Stops as soon as the cooldown ends.
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
+
+  const cooldownRemaining = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
+  const cooldownActive = cooldownRemaining > 0;
 
   const alreadyVerified = !!verifiedPhone && verifiedPhone === phone.trim();
 
   async function send() {
+    if (cooldownActive) return;
     setErr(null);
     setSending(true);
     try {
@@ -50,9 +64,19 @@ export function BookingPhoneVerification({
         data: { channel: "whatsapp", destination: phone.trim(), purpose: "booking", locale: "ar" },
       });
       if (!res.ok) {
+        // Honour the server-enforced cooldown / rate-limit windows.
+        const retry =
+          (res as { retryAfterSeconds?: number }).retryAfterSeconds ?? 0;
+        if (retry > 0) {
+          setCooldownUntil(Date.now() + retry * 1000);
+          setNow(Date.now());
+        }
         setErr(t(`verification.errors.${res.error}`, { defaultValue: t("verification.errors.generic") }));
       } else {
         setSentId(res.challengeId);
+        const wait = res.resendAfterSeconds ?? 60;
+        setCooldownUntil(Date.now() + wait * 1000);
+        setNow(Date.now());
       }
     } catch {
       setErr(t("verification.errors.generic"));
@@ -60,6 +84,7 @@ export function BookingPhoneVerification({
       setSending(false);
     }
   }
+
 
   async function check() {
     if (!sentId || !/^\d{6}$/.test(code)) {
@@ -105,12 +130,17 @@ export function BookingPhoneVerification({
         <Button
           type="button"
           onClick={send}
-          disabled={disabled || sending || !phone.trim()}
+          disabled={disabled || sending || cooldownActive || !phone.trim()}
           variant="secondary"
           className="w-full gap-2"
         >
           {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-          {t("verification.send")}
+          {cooldownActive
+            ? t("verification.sendCooldown", {
+                seconds: cooldownRemaining,
+                defaultValue: `${t("verification.send")} (${cooldownRemaining}s)`,
+              })
+            : t("verification.send")}
         </Button>
       ) : (
         <div className="space-y-2">
@@ -137,13 +167,20 @@ export function BookingPhoneVerification({
           <button
             type="button"
             onClick={send}
-            disabled={sending}
-            className="text-xs text-primary hover:underline"
+            disabled={sending || cooldownActive}
+            className="text-xs text-primary hover:underline disabled:opacity-50 disabled:no-underline"
+            aria-live="polite"
           >
-            {t("verification.resend")}
+            {cooldownActive
+              ? t("verification.resendCooldown", {
+                  seconds: cooldownRemaining,
+                  defaultValue: `${t("verification.resend")} (${cooldownRemaining}s)`,
+                })
+              : t("verification.resend")}
           </button>
         </div>
       )}
+
 
       {err && (
         <p className="mt-2 text-xs text-destructive" role="alert">
