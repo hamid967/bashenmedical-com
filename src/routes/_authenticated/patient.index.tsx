@@ -46,12 +46,7 @@ export const Route = createFileRoute("/_authenticated/patient/")({
     ],
   }),
   component: PatientDashboard,
-  errorComponent: ({ error, reset }) => (
-    <div className="p-4">
-      <ErrorState description={error.message} onRetry={reset} />
-    </div>
-  ),
-  pendingComponent: () => <SkeletonCards count={6} />,
+  ...patientRouteStates({ skeleton: "cards", count: 6 }),
 });
 
 function PatientDashboard() {
