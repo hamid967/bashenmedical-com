@@ -15,8 +15,17 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
+import { z } from "zod";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const QuerySchema = z
+  .object({
+    year: z.coerce.number().int().min(2000).max(2100),
+    month: z.coerce.number().int().min(1).max(12),
+    doctor_id: z.string().uuid().nullish(),
+    specialty_id: z.string().uuid().nullish(),
+    branch_id: z.string().uuid().nullish(),
+  })
+  .refine((v) => v.doctor_id || v.specialty_id, { message: "missing_scope" });
 
 function pad2(n: number) {
   return String(n).padStart(2, "0");
@@ -41,22 +50,26 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
       GET: async ({ request }) => {
         const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
         const url = new URL(request.url);
-        const year = Number(url.searchParams.get("year"));
-        const month = Number(url.searchParams.get("month"));
-        const doctorId = url.searchParams.get("doctor_id");
-        const specialtyId = url.searchParams.get("specialty_id");
-        const branchId = url.searchParams.get("branch_id");
-
-        if (!year || !month || month < 1 || month > 12) {
-          return json(400, { ok: false, error: "invalid_month" });
+        const parsed = QuerySchema.safeParse({
+          year: url.searchParams.get("year"),
+          month: url.searchParams.get("month"),
+          doctor_id: url.searchParams.get("doctor_id") || undefined,
+          specialty_id: url.searchParams.get("specialty_id") || undefined,
+          branch_id: url.searchParams.get("branch_id") || undefined,
+        });
+        if (!parsed.success) {
+          return json(400, {
+            ok: false,
+            error: parsed.error.issues[0]?.message ?? "invalid_query",
+          });
         }
-        if (doctorId && !UUID_RE.test(doctorId))
-          return json(400, { ok: false, error: "invalid_doctor_id" });
-        if (specialtyId && !UUID_RE.test(specialtyId))
-          return json(400, { ok: false, error: "invalid_specialty_id" });
-        if (branchId && !UUID_RE.test(branchId))
-          return json(400, { ok: false, error: "invalid_branch_id" });
-        if (!doctorId && !specialtyId) return json(400, { ok: false, error: "missing_scope" });
+        const {
+          year,
+          month,
+          doctor_id: doctorId,
+          specialty_id: specialtyId,
+          branch_id: branchId,
+        } = parsed.data;
 
         const empty = { ok: true, dates: [] as string[] };
 
