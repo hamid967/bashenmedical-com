@@ -438,10 +438,16 @@ function BookPage() {
   // reservation lapses beyond the time picker so the user picks fresh.
   useEffect(() => {
     if (!slotHold.expired) return;
-    if (state.step < 7 || state.step > 8) return;
+    if (state.step < 6 || state.step > 8) return;
+    const prevTime = state.time;
     dispatch({ t: "set", p: { time: null } });
+    setErrorCode("HOLD_EXPIRED");
+    setErrorKind("conflict");
     goto(6);
     toast.info(t("hold.autoRecover", "انتهى وقت الحجز المؤقت — اختر وقتًا جديدًا."));
+    // Auto-surface alternatives so the user can swap doctor/time without
+    // rebuilding the rest of their draft.
+    if (state.date) void runAlternativesSearch(state.date, prevTime);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slotHold.expired, state.step]);
 
