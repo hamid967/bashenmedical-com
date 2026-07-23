@@ -458,6 +458,22 @@ jobs:
           E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
         run: python tests/e2e/admin_opens_for_admin_user.py
 
+      - name: Run admin doctors CRUD (admin) E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true' && secrets.E2E_ADMIN_EMAIL != '' && secrets.E2E_ADMIN_PASSWORD != ''
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASSWORD: ${{ secrets.E2E_ADMIN_PASSWORD }}
+        run: python tests/e2e/admin_doctors_crud_admin.py
+
+      - name: Run admin doctors blocked (non-admin) E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true' && secrets.E2E_PATIENT_EMAIL != '' && secrets.E2E_PATIENT_PASSWORD != ''
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8080
+          E2E_PATIENT_EMAIL: ${{ secrets.E2E_PATIENT_EMAIL }}
+          E2E_PATIENT_PASSWORD: ${{ secrets.E2E_PATIENT_PASSWORD }}
+        run: python tests/e2e/admin_doctors_non_admin_blocked.py
+
       - name: Verify E2E cancel fixtures (preflight)
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
