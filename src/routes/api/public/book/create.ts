@@ -276,7 +276,10 @@ export const Route = createFileRoute("/api/public/book/create")({
 
         // Atomic confirmation. Any 23505 from here means a real conflict
         // (slot uidx or idempotency uidx) — never a partial-state failure.
-        const { data: rows, error } = await supa.rpc("confirm_appointment_booking", {
+        // Cast: `confirm_appointment_booking` isn't in the generated Database
+        // type until types regenerate after this migration.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: rows, error } = await (supa as any).rpc("confirm_appointment_booking", {
           p_data: payload,
           p_idempotency_key: idempotencyKey,
         });
