@@ -21,6 +21,15 @@ import { supabase } from "@/integrations/supabase/client";
 import type { RealtimeChannel } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/_authenticated/admin/realtime-monitor")({
+  head: () => ({
+    meta: [
+      { title: "مراقب الأحداث اللحظية — لوحة الإدارة | مجمع باعشن الطبي" },
+      { name: "description", content: "مراقبة أحداث Realtime للمواعيد والحجوزات المؤقتة بزمن استجابة لحظي." },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "مراقب الأحداث اللحظية — لوحة الإدارة" },
+      { property: "og:description", content: "أداة إدارية داخلية لمراقبة أحداث Realtime." },
+    ],
+  }),
   component: RealtimeMonitorPage,
 });
 
