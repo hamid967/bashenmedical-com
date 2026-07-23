@@ -1,128 +1,60 @@
-# Phase 2 — Secure Unified Authentication (Slice 2A)
+# Phase 3 — RBAC, RLS, and Data Security
 
-Deliver a single unified auth surface for patients, staff, and doctors on top of the existing Supabase (localStorage) session. HttpOnly-cookie migration is deferred; every other Phase 2 requirement lands in this slice.
+## What already exists (survey)
 
-## Scope of this slice
+- `app_role` enum has all 12 requested roles (super_admin, admin/center_admin, branch_manager, reception, doctor, reports_officer, billing_officer, insurance_officer, support_agent, content_manager, auditor, patient) + `pharmacy`.
+- `permissions` (key/category/description) and `role_permissions` (role, permission_key) already exist with 30+ mapped entries.
+- `has_role` and `has_permission` are `SECURITY DEFINER STABLE` and route `super_admin` as super-role automatically.
+- `user_roles` carries `branch_id uuid` and `is_global boolean` — branch-scope groundwork is present.
+- `audit_logs` exists with actor/entity/before/after/ip/ua.
+- All 12 storage buckets are private. Every `public` table has RLS enabled.
 
-In:
-- New `/auth/*` route family + guarded redirect flow
-- WhatsApp OTP via existing project provider (real send, real verify, no plaintext at rest)
-- Split profile tables + backfill from `profiles`
-- RBAC-driven post-login redirect, forbidden page, redirect-back
-- Device/session records + "sign out from all devices"
-- Suspicious-login detection, audit logs, rate limit + CAPTCHA-after-abuse
-- Nafath adapter stub (interface only, clearly `not_configured`)
-- Test suite (unit + e2e) covering auth, session, RBAC, RLS
+Phase 3 is finishing the wiring, not rebuilding it.
 
-Out (documented, not built here):
-- `@supabase/ssr` HttpOnly cookies (kept on localStorage per your choice)
-- Real Nafath integration
-- Any redesign of `/patient`, `/admin`, doctor workspace themselves
+## Gaps to close
 
-## Routes
+1. **Permission catalog** — add missing verbs: `.approve`, `.cancel`, `.assign`, `.export`, `.archive` variants for each domain; `users.manage`, `ai.tools.use`, `ai.actions.execute`. Backfill `role_permissions` for each role per the spec.
+2. **Scope helpers** — `has_role_in_branch(uid, role, branch)`, `user_branch_ids(uid) returns setof uuid`, `is_global_role(uid, role)`, `has_permission_in_branch(uid, key, branch)`. All `SECURITY DEFINER STABLE` on `user_roles`.
+3. **Branch-scope RLS** — tighten policies on `appointments`, `patient_check_ins`, `patient_visits`, `doctor_leaves`, `nurse_calls`, `inventory_items`, `stock_movements`, `payments`, `invoices`, `refunds`, `insurance_approvals`, `insurance_verifications` so a `reception`/`branch_manager` sees only rows tied to their branch.
+4. **Ownership rules** — patients: `patient_id in (own || approved_dependents)`; doctors: rows where they are the assigned doctor OR published to them; auditors: read-only across their scope.
+5. **Column-level hardening** — `billing_officer` sees financial columns; `insurance_officer` sees insurance columns; `content_manager` gets `false` SELECT on medical tables. Use restrictive policies + `security_invoker` views where sensitive columns must be hidden.
+6. **Immutable audit** — `audit_logs`: add UPDATE/DELETE deny policies, revoke UPDATE/DELETE from all roles, event trigger to prevent DDL drop, monthly partition suggestion documented (not enforced this phase).
+7. **Sensitive-read logging** — `log_sensitive_read(entity, entity_id)` server-side helper called from every server fn that returns medical/financial data.
+8. **Private storage + signed URLs** — one server route `/api/public/*` NO. Instead a **protected server fn** `mintSignedUrl({ bucket, path })` that: (a) checks `has_permission` + ownership, (b) audit-logs the read, (c) issues a 60-second signed URL via admin client. Never expose bucket names to the client from RLS-bypass paths.
+9. **Server-side enforcement layer** — `src/lib/rbac/guard.server.ts`: `assertHasPermission(ctx, key)`, `assertBranchScope(ctx, branchId)`, `assertOwnsPatient(ctx, patientId)`. Every mutating server fn calls one of these before doing work.
+10. **Client UI gating** — `src/hooks/use-permissions.ts` (fetches once via a new `getMyPermissions` server fn using `requireSupabaseAuth`, caches in TanStack Query, exposes `can(key)`, `canAny(...)`, `inBranch(id)`). All admin/content buttons wrap in a `<Can permission="…">` component. UI gating never grants access — it only hides controls the server would already reject.
+11. **Automated security tests** —
+    - `tests/security/test_idor_appointments.py` — Reception A tries to read Reception B's branch rows.
+    - `tests/security/test_privilege_escalation.py` — `content_manager` tries to write `medical_reports`.
+    - `tests/security/test_export_denied.py` — `support_agent` tries CSV exports.
+    - `tests/security/test_cross_patient.py` — Patient X tries to read Patient Y appointments/reports.
+    - `tests/security/test_audit_immutability.py` — any role tries UPDATE/DELETE on `audit_logs`.
+    - `tests/security/test_signed_url_scope.py` — patient signs URL for another patient's `medical-reports` path → denied.
 
-| Route | Purpose |
-|---|---|
-| `/auth/login` | Phone/NationalID/email tabs; issues OTP or password flow |
-| `/auth/register` | Patient self-registration + phone verification |
-| `/auth/verify` | OTP entry — expiry, resend countdown, max attempts |
-| `/auth/recovery` | Password reset + phone recovery |
-| `/auth/update-mobile` | Signed-in mobile change with OTP on new number |
-| `/auth/session-expired` | Landing when middleware detects expired/rotated session |
-| `/forbidden` | Accessible 403 with role hint + "return to safe area" |
+## Execution — 4 batches, each is one migration + code slice
 
-Existing `/auth` becomes a redirect to `/auth/login` so old links keep working (`_authenticated/route.tsx` currently redirects there).
+### Batch 3A — Catalog & scope helpers (DB only, this turn)
+- Migration inserts missing permissions, backfills `role_permissions`, creates `user_branch_ids`, `has_role_in_branch`, `has_permission_in_branch`, `is_global_role`. GRANTs preserved. `audit_logs` immutability policies + revokes.
 
-## Redirect matrix
+### Batch 3B — Server enforcement + hook (code)
+- `src/lib/rbac/guard.server.ts`, `src/lib/rbac/permissions.functions.ts` (getMyPermissions), `src/lib/rbac/log.server.ts` (`logSensitiveRead`, `logMutation`), `src/hooks/use-permissions.ts`, `src/components/rbac/Can.tsx`. Refactor 2-3 existing server fns as reference implementations (`admin/service-inquiries.functions.ts`, `medical-reports.functions.ts`) to demonstrate the pattern.
 
-```text
-patient        → /patient
-staff/admin    → /admin
-doctor         → /doctor/workspace (existing route if present, else /admin)
-super_admin    → /admin
-unknown/none   → /forbidden
-```
+### Batch 3C — Branch-scoped RLS + storage signed URLs
+- Migration tightens branch policies on the 12 clinical/financial tables listed above; `content_manager` denied on medical tables; auditor read-only.
+- `src/lib/storage/signed-url.functions.ts` — protected mint function with ownership + permission check + audit.
 
-- All protected routes push `?next=<sanitized same-origin path>` to `/auth/login`.
-- After login, we validate `next` (same-origin, not `/auth/*`) then `navigate({ to: next, replace: true })`.
-- `_authenticated/route.tsx` already gates the subtree; we only extend its redirect target with `next` and add role-based redirect on `/` post-login.
+### Batch 3D — Test suite + linter run
+- 6 test files under `tests/security/`. Run `supabase--linter`, fix warnings from batches 3A-3C only, report the rest.
 
-## Data model
+## Deliverable this turn
 
-New tables (all with GRANTs + RLS in same migration):
+**Batch 3A only** — the DB foundation must land before anything else can use it. I'll come back for 3B/3C/3D in follow-up turns. Batch 3A is a single migration; nothing else changes.
 
-- `patient_profiles(user_id PK→auth.users, national_id, iqama, mobile_e164, mobile_verified_at, full_name_ar/en, dob, gender, preferred_language, mrn, …)`
-- `staff_profiles(user_id PK, employee_no, department, job_title, hire_date, active)`
-- `doctor_profiles(user_id PK, doctor_id→doctors.id, license_no, specialty_id, active)`
-- `otp_challenges(id, user_id nullable, channel {whatsapp,email}, destination, code_hash, salt, purpose {login,register,recovery,mobile_change}, attempts, max_attempts, expires_at, consumed_at, ip inet, ua)` — never stores plaintext
-- `device_sessions(id, user_id, session_fingerprint, ua, ip, city, first_seen_at, last_seen_at, revoked_at, revoke_reason)`
-- `auth_events(id, user_id nullable, kind {login_ok,login_fail,otp_send,otp_fail,rate_limited,suspicious,logout,logout_all,role_denied}, ip, ua, meta jsonb, created_at)`
-- `auth_rate_limits(key text PK, window_started_at, hits)` — server-side counter for phone/IP
+## Confirmation before I run the migration
 
-Backfill: one-shot migration copies matching columns from `profiles` into `patient_profiles` for every user without a staff/doctor role. `profiles` is kept (used by many surfaces) and a DB trigger keeps `full_name` in sync during transition.
+Two questions the plan currently assumes; correct me if wrong:
 
-RLS:
-- Owner-only SELECT/UPDATE on all three `*_profiles` (`auth.uid() = user_id`)
-- `staff_profiles` / `doctor_profiles` additionally readable by `admin`/`super_admin` via `has_role`
-- `otp_challenges`, `device_sessions`, `auth_events`, `auth_rate_limits`: no anon/authenticated grants; only `service_role`. All access via server functions.
+1. **Branch scope on `user_roles.branch_id`**: a NULL `branch_id` on a non-`is_global` role means "not tied to any branch, sees nothing" (safe default). `is_global=true` overrides branch scope. OK?
+2. **Content manager on medical tables**: hard SELECT deny (not "view-only, no edit"). OK?
 
-## OTP (WhatsApp, real)
-
-Reuses the notifications pipeline that already writes to `notification_delivery_logs` and integrates with the project's WhatsApp provider.
-
-- `otp.issueChallenge`: mint 6-digit code, store **HMAC-SHA256(code+salt)** with per-row salt using server secret `AUTH_OTP_PEPPER` (generated via `generate_secret`), send via WhatsApp helper, log delivery, insert `otp_challenges` row with `expires_at = now()+5m`, `max_attempts=5`.
-- `otp.verify`: constant-time compare, increment attempts, atomic consume; on success create Supabase session (magic link exchange for known email) or sign in via existing custom flow.
-- Resend: server-side 60s cooldown per destination.
-- Rate limit: per-phone 5/hour, per-IP 20/hour; on breach → `rate_limited` + require CAPTCHA (hCaptcha invisible; secret `HCAPTCHA_SECRET` requested only if you approve).
-- CAPTCHA required after 3 failed attempts within 15m for that destination or IP.
-- No plaintext OTP anywhere: logs record only the last-2 digits + hash prefix for support.
-
-## Nafath adapter (stub)
-
-`src/lib/auth/nafath.ts` exposes `initiate()` / `poll()` returning `{ status: "not_configured" }` and the login UI shows Nafath as "قريبًا" (disabled). No fake success paths.
-
-## Sessions & devices (on localStorage session)
-
-- Every successful login inserts `device_sessions` keyed by a fingerprint (UA + salted-IP hash) and `access_token`'s `session_id` claim.
-- Root `onAuthStateChange` subscriber updates `last_seen_at` on `TOKEN_REFRESHED`.
-- `Sign out everywhere`: server fn calls `auth.admin.signOut(userId, { scope: 'global' })` and marks all `device_sessions` revoked. Current tab receives `SIGNED_OUT` via the existing subscriber.
-- Suspicious-login detection: new IP country **or** new UA family within 24h → row in `auth_events(kind='suspicious')` + WhatsApp notification to owner + forces re-OTP on next privileged action.
-- `session-expired` route: shown when router catches a 401 from a protected server fn (add error boundary hook in `_authenticated/route.tsx`).
-
-## RBAC
-
-- `user_roles` stays authoritative (`app_role` enum extended if needed: `patient`, `doctor`, `staff`, `admin`, `super_admin`, `content_manager`).
-- Auth context in root route exposes `hasRole` / `hasAnyRole` (already partly wired). Post-login redirect uses server fn `resolveHomeForUser()` — never trusts the client role claim.
-- `/forbidden` shows the denied role, the required role, and links back.
-
-## Files to add / change
-
-- New: 7 route files under `src/routes/auth.*.tsx` + `src/routes/forbidden.tsx`
-- New: `src/lib/auth/otp.functions.ts`, `session.functions.ts`, `devices.functions.ts`, `redirect.ts`, `nafath.ts`, `captcha.server.ts`
-- New: `src/components/auth/*` (PhoneField, OtpInput, ResendCountdown, DeviceList, LoginTabs)
-- Change: `src/routes/auth.tsx` → thin redirect to `/auth/login`
-- Change: `src/routes/_authenticated/route.tsx` — add `next` param, keep `ssr:false`
-- Change: `src/routes/__root.tsx` — hook `SIGNED_OUT` → `/auth/session-expired`
-- One migration for the 4 new tables + backfill + RLS + grants
-- Secret: `AUTH_OTP_PEPPER` via `generate_secret`; `HCAPTCHA_SECRET` via `add_secret` only after you confirm
-
-## Tests
-
-- Unit: OTP issue/verify (expiry, max attempts, constant-time), rate limiter, redirect sanitizer, `resolveHomeForUser`
-- E2E (Playwright): patient WhatsApp OTP happy path, wrong-code lockout, resend cooldown, staff email/password → `/admin`, doctor → workspace, unknown-role → `/forbidden`, redirect-back to originally requested URL, session-expired flow, logout-all
-- RLS: `test_role_access_matrix` extended for the 3 new profile tables + `otp_challenges` (must be inaccessible to anon/authenticated)
-- Security: OTP row must never contain plaintext (schema+test); no server fn logs the code
-
-## Rollout order (single turn, in this order)
-
-1. Migration (tables + RLS + backfill) — awaits your approval before running
-2. Server fns for OTP / sessions / devices / redirect resolver
-3. Route files + components
-4. Wire existing `/auth` redirect + `_authenticated` `next` param
-5. Add tests, run typecheck + tests
-6. Deliver a change manifest and remaining blockers (WhatsApp provider env, HCAPTCHA opt-in, HttpOnly-cookie follow-up)
-
-## Assumptions to confirm implicitly
-
-- WhatsApp provider is reachable from server fns today (used by notifications). If not, OTP send returns `provider_unavailable` and the UI shows an error — never a fake success.
-- Doctor workspace route path — I'll pick `/doctor/workspace` and add a minimal placeholder if it doesn't exist; you can rename later.
+If both are yes, I proceed with Batch 3A on the next turn.
