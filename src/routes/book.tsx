@@ -610,6 +610,7 @@ function BookPage() {
     setSameDoctorTimes([]);
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     goto(7);
   }
 
@@ -619,12 +620,14 @@ function BookPage() {
     setSuggestion(null);
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     goto(7);
   }
 
   async function handleSubmit() {
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     setSuggestion(null);
     setSameDoctorTimes([]);
     if (!patientValidation.ok) {
@@ -735,6 +738,7 @@ function BookPage() {
     setResult(null);
     setErrorMsg(null);
     setErrorKind("unknown");
+    setErrorCode(null);
     dispatch({ t: "reset" });
     clearDraft();
     try {
@@ -955,6 +959,7 @@ function BookPage() {
                               setSuggestion(null);
                               setSameDoctorTimes([]);
                               setErrorKind("unknown");
+    setErrorCode(null);
                               setErrorMsg(null);
                             }}
                           >
