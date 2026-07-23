@@ -5,22 +5,19 @@
  * across enabled V3 flags and auto-disables any flag with severity=rollback.
  * Records each auto-rollback in `audit_logs` with metadata.triggered_by='auto'.
  *
- * Auth: apikey header must match the Supabase publishable key.
+ * Auth: server-only CRON_SECRET (via `x-cron-secret` or `Authorization: Bearer`).
+ * The Supabase publishable/anon key is NOT accepted — it is not a secret.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { computeV3Health } from "@/lib/v3/rollback.functions";
 import { V3_FLAGS } from "@/lib/v3/flags.functions";
+import { verifyCronSecret, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/v3-rollback-watchdog")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apikey = request.headers.get("apikey");
-        const expected =
-          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        if (!apikey || (expected && apikey !== expected)) {
-          return json({ error: "unauthorized" }, 401);
-        }
+        if (!verifyCronSecret(request)) return unauthorizedCronResponse();
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

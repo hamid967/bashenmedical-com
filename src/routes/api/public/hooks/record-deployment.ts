@@ -2,21 +2,18 @@
  * Registers a deployment marker right after a migration is merged.
  * Called by CI (post-merge job) with the migration filename as `ref`.
  *
- * Auth: apikey (Supabase anon) — read of api_permission_errors happens with
- * service role inside the handler to compute the 7-day baseline.
+ * Auth: server-only CRON_SECRET (via `x-cron-secret` or `Authorization: Bearer`).
+ * The Supabase publishable/anon key is NOT accepted — it ships in every
+ * browser bundle and is not a secret.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/record-deployment")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apikey = request.headers.get("apikey");
-        const expected =
-          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        if (!apikey || (expected && apikey !== expected)) {
-          return json({ error: "unauthorized" }, 401);
-        }
+        if (!verifyCronSecret(request)) return unauthorizedCronResponse();
         let body: { ref?: string; notes?: string } = {};
         try {
           body = await request.json();

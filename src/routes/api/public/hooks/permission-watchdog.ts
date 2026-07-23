@@ -5,10 +5,11 @@
  * merged in the last 24h. Emits `rollback_recommendations` rows when the
  * 403/permission_denied rate exceeds baseline. Optionally notifies Slack.
  *
- * Auth: apikey (Supabase anon) — the route is under /api/public and is safe
- * because it only performs a bounded read + upsert via SECURITY DEFINER RPCs.
+ * Auth: server-only CRON_SECRET (via `x-cron-secret` or `Authorization: Bearer`).
+ * The Supabase publishable/anon key is NOT accepted — it is not a secret.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyCronSecret, unauthorizedCronResponse } from "@/lib/cron-auth.server";
 
 type SpikeRow = {
   deployment_id: string;
@@ -25,12 +26,7 @@ export const Route = createFileRoute("/api/public/hooks/permission-watchdog")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const apikey = request.headers.get("apikey");
-        const expected =
-          process.env.SUPABASE_PUBLISHABLE_KEY ?? process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-        if (!apikey || (expected && apikey !== expected)) {
-          return json({ error: "unauthorized" }, 401);
-        }
+        if (!verifyCronSecret(request)) return unauthorizedCronResponse();
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
