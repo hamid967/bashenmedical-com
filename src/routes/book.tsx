@@ -645,12 +645,13 @@ function BookPage() {
       });
       goto(9);
     } else {
-      setErrorMsg(res.kind === "conflict" ? t("page.conflictReason") : res.message);
-      setErrorKind(res.kind);
-      // On conflict (server-side race, HTTP 409), bounce back to step 6 and
-      // surface nearest alternatives (same doctor + alt doctor) so the user
-      // isn't stuck staring at a red banner.
-      if (res.kind === "conflict") {
+      const isSlotTaken = res.kind === "conflict" || res.code === "SLOT_TAKEN";
+      setErrorMsg(isSlotTaken ? t("page.conflictReason") : res.message);
+      setErrorKind(isSlotTaken ? "conflict" : res.kind);
+      // On SLOT_TAKEN (409, server-side race or fast-path clash), bounce back
+      // to step 6 and surface nearest alternatives (same doctor + alt doctor)
+      // so the user isn't stuck staring at a red banner.
+      if (isSlotTaken) {
         const prevTime = state.time;
         // Invalidate availability so StepTime re-fetches and drops the taken slot.
         queryClient.invalidateQueries({
