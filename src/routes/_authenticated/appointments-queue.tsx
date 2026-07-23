@@ -356,10 +356,13 @@ function AppointmentsQueuePage() {
                   <th className="text-start p-3 font-semibold">الموعد</th>
                   <th className="text-start p-3 font-semibold">التخصص/الطبيب</th>
                   <th className="text-start p-3 font-semibold">الحالة</th>
+                  <th className="text-start p-3 font-semibold">التتبع</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r) => (
+                {filtered.map((r) => {
+                  const tr = traces[r.id];
+                  return (
                   <tr
                     key={r.id}
                     onClick={() => setSelected(r)}
@@ -387,8 +390,35 @@ function AppointmentsQueuePage() {
                         {STATUS_META[r.status].label}
                       </span>
                     </td>
+                    <td className="p-3 text-xs" onClick={(e) => e.stopPropagation()}>
+                      {tr ? (
+                        <div className="flex flex-col gap-1 items-start">
+                          <Link
+                            to="/admin/booking-trace"
+                            search={{ correlation_id: tr.correlation_id }}
+                            className="font-mono text-[11px] text-primary hover:underline"
+                            title={tr.correlation_id}
+                            dir="ltr"
+                          >
+                            {tr.correlation_id.slice(0, 8)}…
+                          </Link>
+                          {tr.error_code && (
+                            <span
+                              className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 border border-rose-500/20"
+                              title="آخر رمز خطأ لوحظ خلال هذه المحاولة"
+                            >
+                              {tr.error_code}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground/60">—</span>
+                      )}
+                    </td>
                   </tr>
-                ))}
+                  );
+                })}
+
               </tbody>
             </table>
           </div>
