@@ -650,6 +650,8 @@ export function StepSuccess({
         </Button>
       </div>
 
+      {reference && <NotificationStatusChips reference={reference} phone={phone} />}
+
       {reference && <EmailOtpLinker email={email ?? state.patient.email ?? null} lang={lang} />}
     </div>
   );
