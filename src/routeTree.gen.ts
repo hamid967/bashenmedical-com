@@ -116,6 +116,7 @@ import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_authenticated/admin.booking-funnel'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
+import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
 import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_authenticated/admin.no-show-detail'
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
@@ -781,6 +782,12 @@ const AuthenticatedAdminDesignTokensRoute =
     path: '/design-tokens',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminDoctorsRoute =
+  AuthenticatedAdminDoctorsRouteImport.update({
+    id: '/doctors',
+    path: '/doctors',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminInboxRoute = AuthenticatedAdminInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
@@ -1440,6 +1447,7 @@ export interface FileRoutesByFullPath {
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
@@ -1640,6 +1648,7 @@ export interface FileRoutesByTo {
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
@@ -1845,6 +1854,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/_authenticated/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
@@ -2050,6 +2060,7 @@ export interface FileRouteTypes {
     | '/admin/booking-funnel'
     | '/admin/classic'
     | '/admin/design-tokens'
+    | '/admin/doctors'
     | '/admin/inbox'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
@@ -2250,6 +2261,7 @@ export interface FileRouteTypes {
     | '/admin/booking-funnel'
     | '/admin/classic'
     | '/admin/design-tokens'
+    | '/admin/doctors'
     | '/admin/inbox'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
@@ -2454,6 +2466,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/booking-funnel'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/design-tokens'
+    | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/inbox'
     | '/_authenticated/admin/no-show-detail'
     | '/_authenticated/admin/no-show-risk'
@@ -3389,6 +3402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDesignTokensRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/doctors': {
+      id: '/_authenticated/admin/doctors'
+      path: '/doctors'
+      fullPath: '/admin/doctors'
+      preLoaderRoute: typeof AuthenticatedAdminDoctorsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/inbox': {
       id: '/_authenticated/admin/inbox'
       path: '/inbox'
@@ -4079,6 +4099,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBookingFunnelRoute: typeof AuthenticatedAdminBookingFunnelRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
+  AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
   AuthenticatedAdminNoShowDetailRoute: typeof AuthenticatedAdminNoShowDetailRoute
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
@@ -4108,6 +4129,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBookingFunnelRoute: AuthenticatedAdminBookingFunnelRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
+  AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
   AuthenticatedAdminNoShowDetailRoute: AuthenticatedAdminNoShowDetailRoute,
   AuthenticatedAdminNoShowRiskRoute: AuthenticatedAdminNoShowRiskRoute,
