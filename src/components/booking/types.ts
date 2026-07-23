@@ -93,7 +93,7 @@ export function reducer(s: State, a: Action): State {
     case "setPatient":
       return { ...s, patient: { ...s.patient, ...a.p } };
     case "goto":
-      return { ...s, step: Math.max(1, Math.min(9, a.step)) };
+      return { ...s, step: Math.max(1, Math.min(10, a.step)) };
     case "reset":
       return { ...INITIAL };
   }
@@ -112,7 +112,7 @@ export const STORAGE_KEY = "booking:draft";
  * once the wall clock passes it, the draft is dropped — a 24h stale
  * reservation is more confusing than an empty form.
  */
-export const DRAFT_VERSION = 4;
+export const DRAFT_VERSION = 5;
 export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type DraftEnvelope = {
@@ -187,10 +187,10 @@ export function loadDraft(initial: Partial<State>): State {
     }
 
     const clean = parsed.state;
-    // Success survives reload: if the persisted draft is on step 9, keep it
+    // Success survives reload: if the persisted draft is on step 10, keep it
     // there and IGNORE the URL step (URL still shows the last pushed value,
-    // typically step=8 from the review step).
-    if (clean.step === 9) return { ...INITIAL, ...clean };
+    // typically step=9 from the review step).
+    if (clean.step === 10) return { ...INITIAL, ...clean };
     // Merge nested patient explicitly so newly-added fields (e.g.
     // isNewPatient) pick up their defaults from INITIAL even for drafts
     // persisted before those fields existed.
@@ -213,10 +213,14 @@ export type AvailResp = { ok: boolean; times: string[]; booked: string[] };
 /* ---------------- Step reachability ----------------
  * Highest step whose prerequisites are satisfied by the current state.
  * Used to clamp a URL-supplied `?step=` that outruns the real data
- * (e.g. a shared link with ?step=8 but no doctor). Step 9 (success) is
+ * (e.g. a shared link with ?step=9 but no doctor). Step 10 (success) is
  * intentionally excluded — it's only reachable through a successful submit.
  */
-export function maxReachableStep(s: State, patientOk: boolean): number {
+export function maxReachableStep(
+  s: State,
+  patientOk: boolean,
+  insuranceOk: boolean = false,
+): number {
   let r = 1;
   if (s.serviceType || s.branchId || s.specialtyId || s.doctorId) r = 2;
   if (s.branchId || s.specialtyId || s.doctorId) r = 3;
@@ -225,6 +229,7 @@ export function maxReachableStep(s: State, patientOk: boolean): number {
   if (s.doctorId && s.date) r = 6;
   if (s.doctorId && s.date && s.time) r = 7;
   if (s.doctorId && s.date && s.time && patientOk) r = 8;
+  if (s.doctorId && s.date && s.time && patientOk && insuranceOk) r = 9;
   return r;
 }
 
@@ -321,6 +326,71 @@ export function validatePatient(p: State["patient"]): { ok: boolean; errors: Pat
   const errors: PatientErrors = {};
   for (const issue of r.error.issues) {
     const k = issue.path[0] as keyof PatientErrors;
+    if (k && !errors[k]) errors[k] = issue.message;
+  }
+  return { ok: false, errors };
+}
+
+/* ---------------- Insurance validation ----------------
+ * The insurance step gates the wizard: a booking may only progress to review
+ * when the payer decision is unambiguous — either "self-pay" (no coverage
+ * expected) OR an insurance provider has been selected AND eligibility has
+ * been verified. If verification comes back not-eligible, the user must
+ * either fix the coverage details or switch to self-pay before continuing.
+ */
+export const insuranceSchema = z
+  .object({
+    payerType: z.enum(["self", "insurance"], { message: "insurance.errors.payerRequired" }),
+    insuranceProviderId: z.string().nullable(),
+    insuranceEstimate: z
+      .object({ eligible: z.boolean() })
+      .passthrough()
+      .nullable(),
+  })
+  .superRefine((v, ctx) => {
+    if (v.payerType === "self") return;
+    if (!v.insuranceProviderId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["insuranceProviderId"],
+        message: "insurance.errors.providerRequired",
+      });
+      return;
+    }
+    if (!v.insuranceEstimate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["insuranceEstimate"],
+        message: "insurance.errors.notVerified",
+      });
+      return;
+    }
+    if (!v.insuranceEstimate.eligible) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["insuranceEstimate"],
+        message: "insurance.errors.notEligible",
+      });
+    }
+  });
+
+export type InsuranceErrors = Partial<
+  Record<"payerType" | "insuranceProviderId" | "insuranceEstimate", string>
+>;
+
+export function validateInsurance(p: State["patient"]): {
+  ok: boolean;
+  errors: InsuranceErrors;
+} {
+  const r = insuranceSchema.safeParse({
+    payerType: p.payerType,
+    insuranceProviderId: p.insuranceProviderId,
+    insuranceEstimate: p.insuranceEstimate,
+  });
+  if (r.success) return { ok: true, errors: {} };
+  const errors: InsuranceErrors = {};
+  for (const issue of r.error.issues) {
+    const k = issue.path[0] as keyof InsuranceErrors;
     if (k && !errors[k]) errors[k] = issue.message;
   }
   return { ok: false, errors };

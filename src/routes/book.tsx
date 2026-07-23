@@ -37,6 +37,7 @@ import {
   clearDraft,
 
   validatePatient,
+  validateInsurance,
   maxReachableStep,
   type AvailResp,
 } from "@/components/booking/types";
@@ -49,6 +50,7 @@ import { AlternativesBanner } from "@/components/booking/AlternativesBanner";
 import { StepDate } from "@/components/booking/StepDate";
 import { StepTime } from "@/components/booking/StepTime";
 import { StepPatient } from "@/components/booking/StepPatient";
+import { StepInsurance } from "@/components/booking/StepInsurance";
 import { StepReview } from "@/components/booking/StepReview";
 import { StepSuccess } from "@/components/booking/StepSuccess";
 import { SummarySidebar } from "@/components/booking/SummarySidebar";
@@ -83,12 +85,15 @@ const STEP_NAMES = [
   "date",
   "time",
   "patient",
+  "insurance",
   "review",
   "confirmed",
 ] as const;
 type StepName = (typeof STEP_NAMES)[number];
+const MAX_STEP = 10;
+const SUCCESS_STEP = 10;
 function stepNameOf(n: number): StepName | undefined {
-  return n >= 1 && n <= 9 ? STEP_NAMES[n] : undefined;
+  return n >= 1 && n <= MAX_STEP ? STEP_NAMES[n] : undefined;
 }
 function stepNumberOf(name: string | undefined): number | null {
   if (!name) return null;
@@ -179,15 +184,15 @@ function BookPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Normalize step from search: accept a number (1..9) OR a named token
-  // ("patient", "review", ...). Anything else falls through to the
-  // deep-link derivation below.
+  // Normalize step from search: accept a number (1..10) OR a named token
+  // ("patient", "insurance", "review", ...). Anything else falls through to
+  // the deep-link derivation below.
   const parsedStepFromUrl = (() => {
     const raw = searchParams.step as number | string | undefined;
-    if (typeof raw === "number" && raw >= 1 && raw <= 9) return raw;
+    if (typeof raw === "number" && raw >= 1 && raw <= MAX_STEP) return raw;
     if (typeof raw === "string") {
       const asNum = Number(raw);
-      if (Number.isInteger(asNum) && asNum >= 1 && asNum <= 9) return asNum;
+      if (Number.isInteger(asNum) && asNum >= 1 && asNum <= MAX_STEP) return asNum;
       const fromName = stepNumberOf(raw);
       if (fromName) return fromName;
     }
@@ -205,7 +210,7 @@ function BookPage() {
       step:
         parsedStepFromUrl ??
         (searchParams.doctor && searchParams.date && searchParams.time
-          ? 8
+          ? 7
           : searchParams.doctor && searchParams.date
             ? 6
             : searchParams.doctor
@@ -233,7 +238,7 @@ function BookPage() {
   // below still accepts the legacy numeric form.
   const goto = (step: number) => {
     dispatch({ t: "goto", step });
-    if (step === 9) return; // success page: don't push
+    if (step === SUCCESS_STEP) return; // success page: don't push
     if (typeof window === "undefined") return;
     const name = stepNameOf(step);
     navigate({
@@ -249,7 +254,7 @@ function BookPage() {
   useEffect(() => {
     if (didInitialFillRef.current) return;
     didInitialFillRef.current = true;
-    if (state.step !== 9 && parsedStepFromUrl === null && state.step >= 1) {
+    if (state.step !== SUCCESS_STEP && parsedStepFromUrl === null && state.step >= 1) {
       const name = stepNameOf(state.step);
       navigate({
         to: "/book",
@@ -270,8 +275,11 @@ function BookPage() {
       const raw = params.get("step");
       if (!raw) return;
       const asNum = parseInt(raw, 10);
-      const s = Number.isInteger(asNum) && asNum >= 1 && asNum <= 9 ? asNum : stepNumberOf(raw);
-      if (s && s >= 1 && s <= 9) dispatch({ t: "goto", step: s });
+      const s =
+        Number.isInteger(asNum) && asNum >= 1 && asNum <= MAX_STEP
+          ? asNum
+          : stepNumberOf(raw);
+      if (s && s >= 1 && s <= MAX_STEP) dispatch({ t: "goto", step: s });
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
@@ -417,6 +425,10 @@ function BookPage() {
   }, [weekDates]);
 
   const patientValidation = useMemo(() => validatePatient(state.patient), [state.patient]);
+  const insuranceValidation = useMemo(
+    () => validateInsurance(state.patient),
+    [state.patient],
+  );
 
   // 5-minute slot hold: activates as soon as the patient reaches the time
   // picker with a doctor+date+time. Released on unmount, on tuple change,
@@ -424,7 +436,7 @@ function BookPage() {
   const slotHold = useSlotHold({
     enabled:
       state.step >= 6 &&
-      state.step <= 8 &&
+      state.step <= 9 &&
       isConcreteDoctorId(state.doctorId) &&
       !!state.date &&
       !!state.time,
@@ -438,7 +450,7 @@ function BookPage() {
   // reservation lapses beyond the time picker so the user picks fresh.
   useEffect(() => {
     if (!slotHold.expired) return;
-    if (state.step < 6 || state.step > 8) return;
+    if (state.step < 6 || state.step > 9) return;
     const prevTime = state.time;
     dispatch({ t: "set", p: { time: null } });
     setErrorCode("HOLD_EXPIRED");
@@ -456,7 +468,7 @@ function BookPage() {
     if (typeof window === "undefined") return;
     const hasDraft =
       state.step >= 4 &&
-      state.step < 9 &&
+      state.step < SUCCESS_STEP &&
       (state.patient.name.trim() !== "" ||
         state.patient.phone.trim() !== "" ||
         state.patient.nationalId.trim() !== "" ||
@@ -520,24 +532,36 @@ function BookPage() {
 
   // Consistency guard: clamp state.step to the highest step whose
   // prerequisites are actually met. Runs on every state change so a
-  // deep link (?step=8 with no doctor), a stale sessionStorage draft, or
+  // deep link (?step=review with no doctor), a stale sessionStorage draft, or
   // a manual URL edit always renders a valid step and the URL is
-  // rewritten to match. Step 9 (success) is preserved — it's set only
+  // rewritten to match. Step 10 (success) is preserved — it's set only
   // after a real submit and never inferred from the URL.
   useEffect(() => {
-    if (state.step === 9) return;
-    const max = maxReachableStep(state, patientValidation.ok);
+    if (state.step === SUCCESS_STEP) return;
+    const max = maxReachableStep(state, patientValidation.ok, insuranceValidation.ok);
     if (state.step > max) {
       dispatch({ t: "goto", step: max });
       if (typeof window !== "undefined") {
         navigate({
           to: "/book",
-          search: (prev: Record<string, unknown>) => ({ ...prev, step: max }),
+          search: (prev: Record<string, unknown>) => ({
+            ...prev,
+            step: stepNameOf(max) ?? max,
+          }),
           replace: true,
         });
       }
     }
-  }, [state, patientValidation.ok, navigate]);
+  }, [state, patientValidation.ok, insuranceValidation.ok, navigate]);
+
+  // Insurance-step gating: track whether the user has attempted to advance so
+  // the validation summary appears only after that intent (avoids showing
+  // errors on first render).
+  const [insuranceAttempted, setInsuranceAttempted] = useState(false);
+  // Clearing the summary the moment errors resolve keeps the affordance honest.
+  useEffect(() => {
+    if (insuranceValidation.ok && insuranceAttempted) setInsuranceAttempted(false);
+  }, [insuranceValidation.ok, insuranceAttempted]);
 
   const canNext = useMemo(() => {
     switch (state.step) {
@@ -555,10 +579,12 @@ function BookPage() {
         return !!state.time;
       case 7:
         return patientValidation.ok;
+      case 8:
+        return insuranceValidation.ok;
       default:
         return true;
     }
-  }, [state, patientValidation]);
+  }, [state, patientValidation, insuranceValidation]);
 
   // Find an alternative doctor in the same specialty/branch with the earliest
   // slot on the same date (>= originally requested time when possible).
@@ -726,7 +752,7 @@ function BookPage() {
         phone: p.phone.trim(),
         email: p.email.trim().toLowerCase() || null,
       });
-      goto(9);
+      goto(SUCCESS_STEP);
     } else {
       const isSlotTaken = res.kind === "conflict" || res.code === "SLOT_TAKEN";
       const isInvalidIdemKey = res.code === "INVALID_IDEMPOTENCY_KEY";
@@ -788,6 +814,7 @@ function BookPage() {
     t("steps.date"),
     t("steps.time"),
     t("steps.yourInfo"),
+    t("steps.insurance"),
     t("steps.review"),
     t("steps.confirmed"),
   ];
@@ -798,7 +825,12 @@ function BookPage() {
   // are missing. The clamp effect further up rewrites state + URL to match;
   // this memo keeps the visual indicator honest until it runs.
   const displayedStep =
-    state.step === 9 ? 9 : Math.min(state.step, maxReachableStep(state, patientValidation.ok));
+    state.step === SUCCESS_STEP
+      ? SUCCESS_STEP
+      : Math.min(
+          state.step,
+          maxReachableStep(state, patientValidation.ok, insuranceValidation.ok),
+        );
 
   const stepAnnounce =
     state.step === 9
@@ -1073,13 +1105,22 @@ function BookPage() {
             {state.step === 7 && (
               <StepPatient
                 lang={lang}
-                doctorId={asDoctorParam(state.doctorId)}
                 value={state.patient}
                 errors={patientValidation.errors}
                 onChange={(p) => dispatch({ t: "setPatient", p })}
               />
             )}
             {state.step === 8 && (
+              <StepInsurance
+                lang={lang}
+                doctorId={asDoctorParam(state.doctorId)}
+                value={state.patient}
+                errors={insuranceValidation.errors}
+                showErrors={insuranceAttempted}
+                onChange={(p) => dispatch({ t: "setPatient", p })}
+              />
+            )}
+            {state.step === 9 && (
               <StepReview
                 lang={lang}
                 state={state}
@@ -1090,7 +1131,6 @@ function BookPage() {
                 errorKind={errorKind}
                 errorCode={errorCode}
                 correlationId={getBookingCorrelationId()}
-
                 submitting={submitting}
                 onSubmit={handleSubmit}
                 patientValid={patientValidation.ok}
@@ -1100,7 +1140,7 @@ function BookPage() {
                 }
               />
             )}
-            {state.step === 9 && result && (
+            {state.step === SUCCESS_STEP && result && (
               <StepSuccess
                 lang={lang}
                 state={state}
@@ -1115,7 +1155,7 @@ function BookPage() {
             )}
           </div>
 
-          {state.step >= 2 && state.step <= 8 && (
+          {state.step >= 2 && state.step <= 9 && (
             <div className="hidden md:block">
               <SummarySidebar
                 lang={lang}
@@ -1129,7 +1169,7 @@ function BookPage() {
           )}
         </div>
 
-        {state.step >= 2 && state.step <= 8 && (
+        {state.step >= 2 && state.step <= 9 && (
           <MobileSummarySheet
             lang={lang}
             state={state}
@@ -1141,7 +1181,7 @@ function BookPage() {
         )}
 
 
-        {state.step < 9 && (
+        {state.step < SUCCESS_STEP && (
           <div className="mt-4 flex items-center justify-between">
             <Button
               variant="outline"
@@ -1162,8 +1202,18 @@ function BookPage() {
               )}
             </Button>
 
-            {state.step < 8 && (
-              <Button disabled={!canNext} onClick={() => goto(state.step + 1)} className="gap-1">
+            {state.step < 9 && (
+              <Button
+                disabled={!canNext}
+                onClick={() => {
+                  if (state.step === 8 && !insuranceValidation.ok) {
+                    setInsuranceAttempted(true);
+                    return;
+                  }
+                  goto(state.step + 1);
+                }}
+                className="gap-1"
+              >
                 {lang === "ar" ? (
                   <>
                     {t("page.next")}
