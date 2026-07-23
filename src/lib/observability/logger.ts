@@ -66,8 +66,8 @@ function shouldEmit(level: Level): boolean {
   if (level === "error" || level === "warn") return true;
   if (typeof window === "undefined") return true;
   try {
-    // @ts-expect-error - Vite injects this at build time
-    return import.meta.env?.MODE !== "production" || import.meta.env?.VITE_LOG_LEVEL === "info";
+    const env = (import.meta as unknown as { env?: Record<string, string> }).env ?? {};
+    return env.MODE !== "production" || env.VITE_LOG_LEVEL === "info";
   } catch {
     return false;
   }
