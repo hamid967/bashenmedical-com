@@ -3,6 +3,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertPatientAccess } from "@/lib/patient/authz.server";
 import type { Database } from "@/integrations/supabase/types";
 import { z } from "zod";
 
@@ -57,6 +58,7 @@ export type PrescriptionsPayload = {
 export const getMyPrescriptions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<PrescriptionsPayload> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const { supabase, userId } = context;
 
     const patientRes = await supabase
@@ -212,6 +214,7 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => PlanInput.parse(i ?? {}))
   .handler(async ({ context, data }): Promise<ReminderPlan> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("مفتاح الذكاء الاصطناعي غير مهيأ.");
     const { supabase, userId } = context;
@@ -419,6 +422,7 @@ export type ReminderLogEntry = {
 export const getMedicationReminderLog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ReminderLogEntry[]> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const { supabase, userId } = context;
     const res = await supabase
       .from("notifications")
@@ -457,6 +461,7 @@ export const confirmMedicationReminder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => ConfirmInput.parse(i))
   .handler(async ({ context, data }): Promise<{ ok: true; taken_at: string | null }> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const { supabase, userId } = context;
     const takenAt = data.taken ? new Date().toISOString() : null;
     const { error } = await supabase
@@ -490,6 +495,7 @@ export type AdherenceStats = {
 export const getAdherenceStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdherenceStats> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const { supabase, userId } = context;
     const since = new Date();
     since.setDate(since.getDate() - 6);
@@ -567,6 +573,7 @@ export const DEFAULT_REMINDER_PREFS: ReminderPreferences = {
 export const getReminderPreferences = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<ReminderPreferences> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const { supabase, userId } = context;
     const { data, error } = await supabase
       .from("reminder_preferences")
@@ -591,6 +598,7 @@ export const saveReminderPreferences = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => PrefsInput.parse(i))
   .handler(async ({ context, data }): Promise<ReminderPreferences> => {
+    await assertPatientAccess(context.supabase, context.userId, "prescriptions");
     const { supabase, userId } = context;
     const { data: row, error } = await supabase
       .from("reminder_preferences")

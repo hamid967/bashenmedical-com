@@ -4,6 +4,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertPatientAccess } from "@/lib/patient/authz.server";
 import { SIGNED_URL_TTL_SECONDS } from "@/lib/download-error";
 import { z } from "zod";
 
@@ -34,6 +35,7 @@ export type MyMedicalReport = {
 export const listMyMedicalReports = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<MyMedicalReport[]> => {
+    await assertPatientAccess(context.supabase, context.userId, "reports");
     const { supabase, userId } = context;
 
     const patientRes = await supabase
@@ -75,6 +77,7 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => FileInput.parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "reports");
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -165,6 +168,7 @@ export const getMyMedicalReportDetail = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => FileInput.parse(i))
   .handler(async ({ context, data }): Promise<MyMedicalReportDetail> => {
+    await assertPatientAccess(context.supabase, context.userId, "reports");
     const { supabase, userId } = context;
 
     const patientRes = await supabase
@@ -228,6 +232,7 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => VersionInput.parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "reports");
     const { supabase, userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -329,6 +334,7 @@ export const listMyReportDownloads = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => DownloadsInput.parse(i ?? {}))
   .handler(async ({ context, data }): Promise<MyReportDownloadEntry[]> => {
+    await assertPatientAccess(context.supabase, context.userId, "reports");
     const { userId } = context;
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

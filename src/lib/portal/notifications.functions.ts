@@ -11,6 +11,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertPatientAccess } from "@/lib/patient/authz.server";
 import { z } from "zod";
 import type { Json } from "@/integrations/supabase/types";
 
@@ -48,6 +49,7 @@ export const listMyNotifications = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<PatientNotification[]> => {
+    await assertPatientAccess(context.supabase, context.userId, "notifications");
     const { data: rows, error } = await context.supabase.rpc("my_notifications", {
       _limit: data.limit ?? 100,
     });
@@ -107,6 +109,7 @@ export const markMyNotificationsRead = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }): Promise<{ updated: number }> => {
+    await assertPatientAccess(context.supabase, context.userId, "notifications");
     const { data: n, error } = await context.supabase.rpc("mark_notifications_read", {
       _ids: data.ids && data.ids.length > 0 ? data.ids : undefined,
     });
