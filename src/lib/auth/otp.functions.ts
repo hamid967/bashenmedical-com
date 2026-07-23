@@ -35,7 +35,10 @@ const RATE_WINDOW_MINUTES = 60;
 const MAX_PER_DESTINATION = 5;
 const MAX_PER_IP = 20;
 
-async function bumpRateLimit(key: string, max: number): Promise<boolean> {
+async function bumpRateLimit(
+  key: string,
+  max: number,
+): Promise<{ ok: boolean; retryAfterSeconds: number }> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const now = new Date();
   const windowMs = RATE_WINDOW_MINUTES * 60 * 1000;
@@ -44,20 +47,30 @@ async function bumpRateLimit(key: string, max: number): Promise<boolean> {
     .select("hits, window_started_at, blocked_until")
     .eq("key", key)
     .maybeSingle();
-  if (data?.blocked_until && new Date(data.blocked_until) > now) return false;
+  if (data?.blocked_until && new Date(data.blocked_until) > now) {
+    const retry = Math.max(
+      1,
+      Math.ceil((new Date(data.blocked_until).getTime() - now.getTime()) / 1000),
+    );
+    return { ok: false, retryAfterSeconds: retry };
+  }
   const windowStart = data?.window_started_at ? new Date(data.window_started_at) : now;
   const withinWindow = now.getTime() - windowStart.getTime() < windowMs;
   const hits = withinWindow ? (data?.hits ?? 0) + 1 : 1;
   const newWindow = withinWindow ? windowStart : now;
   if (hits > max) {
+    const blockedUntil = new Date(now.getTime() + windowMs);
     await supabaseAdmin.from("auth_rate_limits").upsert({
       key,
       hits,
       window_started_at: newWindow.toISOString(),
-      blocked_until: new Date(now.getTime() + windowMs).toISOString(),
+      blocked_until: blockedUntil.toISOString(),
       updated_at: now.toISOString(),
     });
-    return false;
+    return {
+      ok: false,
+      retryAfterSeconds: Math.ceil((blockedUntil.getTime() - now.getTime()) / 1000),
+    };
   }
   await supabaseAdmin.from("auth_rate_limits").upsert({
     key,
@@ -66,8 +79,9 @@ async function bumpRateLimit(key: string, max: number): Promise<boolean> {
     blocked_until: null,
     updated_at: now.toISOString(),
   });
-  return true;
+  return { ok: true, retryAfterSeconds: 0 };
 }
+
 
 export const issueOtp = createServerFn({ method: "POST" })
   .validator((input: unknown) => IssueSchema.parse(input))
