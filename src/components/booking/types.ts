@@ -43,6 +43,7 @@ export type State = {
     insurancePolicyNumber: string;
     insuranceMemberId: string;
     insuranceEstimate: InsuranceEstimate;
+    isNewPatient: boolean; // first-time visitor flag
   };
 };
 
@@ -68,8 +69,10 @@ export const INITIAL: State = {
     insurancePolicyNumber: "",
     insuranceMemberId: "",
     insuranceEstimate: null,
+    isNewPatient: false,
   },
 };
+
 
 export type Action =
   | { t: "set"; p: Partial<State> }
