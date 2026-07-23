@@ -931,6 +931,41 @@ function BookPage() {
           </div>
         )}
 
+        {/* Draft-expiry warning: only visible when a draft is close to its
+            24h cutoff AND the user is mid-flow. Restart releases the hold
+            and clears sensitive OTP state; Extend re-saves to reset the TTL. */}
+        {state.step > 1 &&
+          state.step < SUCCESS_STEP &&
+          draftExpiresAt !== null &&
+          draftExpiresAt - Date.now() <= DRAFT_EXPIRY_WARN_MS &&
+          draftExpiresAt - Date.now() > 0 && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex flex-wrap items-center gap-3 justify-between"
+            >
+              <span>
+                {t(
+                  "page.draftExpiringSoon",
+                  "ستنتهي صلاحية مسودة الحجز خلال {{minutes}} دقيقة.",
+                  { minutes: Math.max(1, Math.round((draftExpiresAt - Date.now()) / 60_000)) },
+                )}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => saveDraft(state) /* stamps a fresh expiresAt */}
+                >
+                  {t("page.draftExtend", "تمديد")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => handleReset({ silent: true })}>
+                  {t("page.restartClean", "إعادة البدء")}
+                </Button>
+              </div>
+            </div>
+          )}
+
         <div
           className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}
         >
