@@ -14,6 +14,8 @@ export function StepReview({
   doctors,
   errorMsg,
   errorKind = "unknown",
+  errorCode = null,
+  correlationId = null,
   submitting,
   onSubmit,
   patientValid,
@@ -26,11 +28,14 @@ export function StepReview({
   doctors: any[];
   errorMsg: string | null;
   errorKind?: Exclude<BookingSubmitKind, "success">;
+  errorCode?: string | null;
+  correlationId?: string | null;
   submitting: boolean;
   onSubmit: () => void;
   patientValid: boolean;
   onEditPatient: () => void;
 }) {
+
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
   const spec = specialties.find((s) => s.id === state.specialtyId);
@@ -110,9 +115,16 @@ export function StepReview({
 
         {errorMsg && (
           <div className="mt-4">
-            <SubmitErrorBanner kind={errorKind} message={errorMsg} />
+            <SubmitErrorBanner
+              kind={errorKind}
+              message={errorMsg}
+              serverCode={errorCode}
+              correlationId={correlationId}
+              lang={lang}
+            />
           </div>
         )}
+
 
         <Button
           onClick={onSubmit}
