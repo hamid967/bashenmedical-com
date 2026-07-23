@@ -53,7 +53,7 @@ function ProfilePage() {
         <CardContent className="space-y-3 text-sm">
           <Row label="الاسم" value={p.full_name ?? "—"} icon={User} />
           <Row label="الجوال" value={p.phone ?? "—"} icon={Phone} />
-          <Row label="البريد" value={p.email ?? "—"} icon={Mail} />
+          <Row label="البريد" value={(p as { email?: string | null }).email ?? "—"} icon={Mail} />
           <Row label="الهوية / الإقامة" value={p.national_id ?? "—"} icon={IdCard} />
         </CardContent>
       </Card>

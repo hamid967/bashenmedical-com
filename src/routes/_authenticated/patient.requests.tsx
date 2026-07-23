@@ -54,14 +54,14 @@ function RequestsPage() {
                   <MessageSquare className="h-5 w-5" aria-hidden />
                 </div>
                 <div>
-                  <div className="font-semibold">{it.subject ?? "طلب"}</div>
+                  <div className="font-semibold">{it.service_label ?? "طلب"}</div>
                   <div className="text-xs text-muted-foreground">
-                    {it.reference_number ?? it.id.slice(0, 8)}
+                    {it.request_number}
                   </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <Badge variant="outline">{it.status}</Badge>
+                <Badge variant="outline">{it.internal_status}</Badge>
                 <Button size="sm" variant="outline" asChild>
                   <a href="/portal/inquiries">
                     التفاصيل
