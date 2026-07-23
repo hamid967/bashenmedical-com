@@ -228,6 +228,34 @@ function BookPage() {
     saveDraft(state);
   }, [state]);
 
+  /* ---------------- Draft expiry: warn early, purge sensitive state on hit ----
+   * The draft envelope carries an `expiresAt`. We poll it every 30s so the UI
+   * can surface a warning before the cutoff, and — the moment it lapses —
+   * strip sensitive OTP state, release any active hold, and route the user
+   * back to step 1. Polling instead of a single setTimeout keeps the warning
+   * accurate across sleep/wake and tab-focus resumes.                    */
+  const [draftExpiresAt, setDraftExpiresAt] = useState<number | null>(() =>
+    getDraftExpiresAt(),
+  );
+  useEffect(() => {
+    // Refresh the cached expiresAt on every state change (save just ran).
+    setDraftExpiresAt(getDraftExpiresAt());
+  }, [state]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const tick = () => setDraftExpiresAt(getDraftExpiresAt());
+    const id = window.setInterval(tick, 30_000);
+    const onFocus = () => tick();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, []);
+
+
   // Focus target: the wizard card container is programmatically focused on
   // step change so keyboard/AT users start each step at its heading instead
   // of tabbing all the way from the page header.
