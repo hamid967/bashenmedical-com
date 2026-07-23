@@ -12,6 +12,9 @@ import { getMyRoles } from "@/lib/admin.functions";
 type TraceSearch = {
   correlation_id?: string;
   reference?: string;
+  error_code?: string;
+  doctor_id?: string;
+  patient_name?: string;
   from?: string;
   to?: string;
 };
@@ -32,11 +35,17 @@ export const Route = createFileRoute("/_authenticated/admin/booking-trace")({
     correlation_id:
       typeof raw.correlation_id === "string" ? raw.correlation_id : undefined,
     reference: typeof raw.reference === "string" ? raw.reference : undefined,
+    error_code:
+      typeof raw.error_code === "string" ? raw.error_code : undefined,
+    doctor_id: typeof raw.doctor_id === "string" ? raw.doctor_id : undefined,
+    patient_name:
+      typeof raw.patient_name === "string" ? raw.patient_name : undefined,
     from: typeof raw.from === "string" ? raw.from : undefined,
     to: typeof raw.to === "string" ? raw.to : undefined,
   }),
   component: BookingTracePage,
 });
+
 
 function fmt(ts: string) {
   try {
@@ -76,18 +85,41 @@ function BookingTracePage() {
 
   const [corr, setCorr] = useState(search.correlation_id ?? "");
   const [ref, setRef] = useState(search.reference ?? "");
+  const [errCode, setErrCode] = useState(search.error_code ?? "");
+  const [doctorId, setDoctorId] = useState(search.doctor_id ?? "");
+  const [patientName, setPatientName] = useState(search.patient_name ?? "");
   const [from, setFrom] = useState(search.from ?? "");
   const [to, setTo] = useState(search.to ?? "");
 
-  const hasFilter = !!(corr || ref || from || to);
+  const hasFilter = !!(
+    corr ||
+    ref ||
+    errCode ||
+    doctorId ||
+    patientName ||
+    from ||
+    to
+  );
 
   const events = useQuery({
-    queryKey: ["booking-trace-events", corr, ref, from, to],
+    queryKey: [
+      "booking-trace-events",
+      corr,
+      ref,
+      errCode,
+      doctorId,
+      patientName,
+      from,
+      to,
+    ],
     queryFn: () =>
       listFn({
         data: {
           correlation_id: corr || undefined,
           reference: ref || undefined,
+          error_code: errCode || undefined,
+          doctor_id: doctorId || undefined,
+          patient_name: patientName || undefined,
           from: from || undefined,
           to: to || undefined,
           limit: 300,
@@ -132,7 +164,7 @@ function BookingTracePage() {
         </Link>
       </header>
 
-      <div className="rounded border bg-white p-3 grid grid-cols-1 md:grid-cols-5 gap-2">
+      <div className="rounded border bg-white p-3 grid grid-cols-1 md:grid-cols-6 gap-2">
         <input
           value={corr}
           onChange={(e) => setCorr(e.target.value.trim())}
@@ -143,25 +175,47 @@ function BookingTracePage() {
           value={ref}
           onChange={(e) => setRef(e.target.value.trim())}
           placeholder="BMC-YYYYMMDD-XXXX"
-          className="border rounded px-2 py-1.5 text-sm font-mono"
+          className="border rounded px-2 py-1.5 text-sm font-mono md:col-span-2"
         />
+        <input
+          value={errCode}
+          onChange={(e) => setErrCode(e.target.value.trim())}
+          placeholder="Error code (SLOT_TAKEN…)"
+          className="border rounded px-2 py-1.5 text-sm font-mono md:col-span-2"
+        />
+        <input
+          value={patientName}
+          onChange={(e) => setPatientName(e.target.value)}
+          placeholder="اسم المريض"
+          className="border rounded px-2 py-1.5 text-sm md:col-span-2"
+        />
+        <input
+          value={doctorId}
+          onChange={(e) => setDoctorId(e.target.value.trim())}
+          placeholder="Doctor ID (UUID)"
+          className="border rounded px-2 py-1.5 text-sm font-mono md:col-span-2"
+        />
+        <div className="md:col-span-2" />
         <input
           type="datetime-local"
           value={from}
           onChange={(e) => setFrom(e.target.value)}
-          className="border rounded px-2 py-1.5 text-sm"
+          className="border rounded px-2 py-1.5 text-sm md:col-span-3"
         />
         <input
           type="datetime-local"
           value={to}
           onChange={(e) => setTo(e.target.value)}
-          className="border rounded px-2 py-1.5 text-sm"
+          className="border rounded px-2 py-1.5 text-sm md:col-span-3"
         />
-        <div className="md:col-span-5 flex gap-2 justify-end">
+        <div className="md:col-span-6 flex gap-2 justify-end">
           <button
             onClick={() => {
               setCorr("");
               setRef("");
+              setErrCode("");
+              setDoctorId("");
+              setPatientName("");
               setFrom("");
               setTo("");
             }}
@@ -177,6 +231,7 @@ function BookingTracePage() {
           </button>
         </div>
       </div>
+
 
       {!hasFilter ? (
         <RecentPanel
