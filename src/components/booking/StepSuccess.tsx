@@ -240,36 +240,71 @@ export function StepSuccess({
         //     via /booking-confirmation, but we mark it so reception knows
         //     it's not the current sequence.
         const isBmc = /^BMC-\d{8}-\d{4}$/.test(reference);
+        // Split BMC into visual segments for legibility: BMC · 20260723 · 0001.
+        const bmcParts = isBmc ? reference.split("-") : null;
         return (
-          <div className="mt-6 rounded-xl border border-dashed border-primary/40 bg-primary/5 px-4 py-4">
-            <div className="text-xs text-muted-foreground mb-1">{t("success.reference")}</div>
-            <div className="flex items-center justify-center gap-3">
-              <span
-                data-testid="booking-reference"
-                data-ref-format={isBmc ? "bmc" : "legacy"}
-                className="text-2xl md:text-3xl font-mono font-bold tracking-wider text-primary"
-              >
-                {reference}
-              </span>
-              <Button variant="outline" size="sm" onClick={copyRef} className="gap-1">
-                <ClipboardList className="h-4 w-4" />
-                {t("success.copy")}
-              </Button>
+          <div
+            className={`mt-6 rounded-2xl border-2 px-6 py-6 shadow-lg ${
+              isBmc
+                ? "border-primary/50 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent"
+                : "border-dashed border-primary/40 bg-primary/5"
+            }`}
+            role="region"
+            aria-label={t("success.reference")}
+          >
+            <div className="text-xs font-semibold uppercase tracking-widest text-primary/80 mb-3">
+              {t("success.reference")}
             </div>
-            <div className="mt-2 flex items-center justify-center">
-              {isBmc ? (
-                <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/60 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-700/60 px-2 py-0.5 text-[10px] font-medium text-emerald-800 dark:text-emerald-200">
-                  {t("success.referenceFormatNew")}
-                </span>
-              ) : (
-                <span
-                  className="inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/60 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200"
-                  title={t("success.referenceFormatLegacyHint")}
+            {isBmc && bmcParts ? (
+              <div className="flex flex-col items-center gap-3">
+                <div
+                  data-testid="booking-reference"
+                  data-ref-format="bmc"
+                  className="flex items-baseline justify-center gap-1.5 font-mono font-black tracking-tight text-primary select-all"
+                  aria-label={reference}
                 >
-                  {t("success.referenceFormatLegacy")}
-                </span>
-              )}
-            </div>
+                  <span className="text-2xl md:text-3xl opacity-70">{bmcParts[0]}</span>
+                  <span className="text-2xl md:text-3xl opacity-50">-</span>
+                  <span className="text-3xl md:text-5xl">{bmcParts[1]}</span>
+                  <span className="text-2xl md:text-3xl opacity-50">-</span>
+                  <span className="text-3xl md:text-5xl">{bmcParts[2]}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-300/60 bg-emerald-50 dark:bg-emerald-900/20 dark:border-emerald-700/60 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-800 dark:text-emerald-200">
+                    <CheckCircle2 className="h-3 w-3" />
+                    {t("success.referenceFormatNew")}
+                  </span>
+                  <Button variant="default" size="sm" onClick={copyRef} className="h-7 gap-1">
+                    <ClipboardList className="h-4 w-4" />
+                    {t("success.copy")}
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-center gap-3">
+                  <span
+                    data-testid="booking-reference"
+                    data-ref-format="legacy"
+                    className="text-2xl md:text-3xl font-mono font-bold tracking-wider text-primary select-all"
+                  >
+                    {reference}
+                  </span>
+                  <Button variant="outline" size="sm" onClick={copyRef} className="gap-1">
+                    <ClipboardList className="h-4 w-4" />
+                    {t("success.copy")}
+                  </Button>
+                </div>
+                <div className="mt-2 flex items-center justify-center">
+                  <span
+                    className="inline-flex items-center gap-1 rounded-full border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/60 px-2 py-0.5 text-[10px] font-medium text-amber-800 dark:text-amber-200"
+                    title={t("success.referenceFormatLegacyHint")}
+                  >
+                    {t("success.referenceFormatLegacy")}
+                  </span>
+                </div>
+              </>
+            )}
           </div>
         );
       })()}
