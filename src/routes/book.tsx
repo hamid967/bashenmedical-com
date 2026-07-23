@@ -750,7 +750,12 @@ function BookPage() {
         <div
           className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}
         >
-          <div className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px]">
+          <div
+            ref={stepCardRef}
+            tabIndex={-1}
+            className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+          >
+
             {state.step >= 6 &&
               state.step <= 8 &&
               state.time &&
