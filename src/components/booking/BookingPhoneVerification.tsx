@@ -39,10 +39,24 @@ export function BookingPhoneVerification({
   const [sentId, setSentId] = useState<string | null>(challengeId);
   const [code, setCode] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const [cooldownUntil, setCooldownUntil] = useState<number>(0);
+  const [now, setNow] = useState<number>(() => Date.now());
+
+  // Tick every second while a cooldown is active so the button label
+  // reflects the remaining seconds. Stops as soon as the cooldown ends.
+  useEffect(() => {
+    if (cooldownUntil <= Date.now()) return;
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [cooldownUntil]);
+
+  const cooldownRemaining = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
+  const cooldownActive = cooldownRemaining > 0;
 
   const alreadyVerified = !!verifiedPhone && verifiedPhone === phone.trim();
 
   async function send() {
+    if (cooldownActive) return;
     setErr(null);
     setSending(true);
     try {
@@ -50,9 +64,19 @@ export function BookingPhoneVerification({
         data: { channel: "whatsapp", destination: phone.trim(), purpose: "booking", locale: "ar" },
       });
       if (!res.ok) {
+        // Honour the server-enforced cooldown / rate-limit windows.
+        const retry =
+          (res as { retryAfterSeconds?: number }).retryAfterSeconds ?? 0;
+        if (retry > 0) {
+          setCooldownUntil(Date.now() + retry * 1000);
+          setNow(Date.now());
+        }
         setErr(t(`verification.errors.${res.error}`, { defaultValue: t("verification.errors.generic") }));
       } else {
         setSentId(res.challengeId);
+        const wait = res.resendAfterSeconds ?? 60;
+        setCooldownUntil(Date.now() + wait * 1000);
+        setNow(Date.now());
       }
     } catch {
       setErr(t("verification.errors.generic"));
@@ -60,6 +84,7 @@ export function BookingPhoneVerification({
       setSending(false);
     }
   }
+
 
   async function check() {
     if (!sentId || !/^\d{6}$/.test(code)) {
