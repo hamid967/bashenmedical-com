@@ -78,7 +78,9 @@ export const Route = createFileRoute("/_authenticated/my")({
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "حسابي — مجمع باعشن الطبي" },
       { property: "og:description", content: "لوحة المريض الخاصة بمتابعة المواعيد والتقارير." },
+      { property: "og:url", content: "https://bashenmedical.com/my" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/my" }],
   }),
   component: MyPortal,
 });

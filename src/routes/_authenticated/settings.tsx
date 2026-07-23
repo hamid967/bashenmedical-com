@@ -23,7 +23,9 @@ export const Route = createFileRoute("/_authenticated/settings")({
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "الإعدادات — مجمع باعشن الطبي" },
       { property: "og:description", content: "تحكم في تفضيلات التذكيرات والإشعارات." },
+      { property: "og:url", content: "https://bashenmedical.com/settings" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/settings" }],
   }),
   component: SettingsPage,
 });

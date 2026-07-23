@@ -409,7 +409,9 @@ export const Route = createFileRoute("/_authenticated/report-downloads-audit")({
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "سجل تنزيلات التقارير" },
       { property: "og:description", content: "أداة إدارية لتدقيق تنزيلات التقارير الطبية." },
+      { property: "og:url", content: "https://bashenmedical.com/report-downloads-audit" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/report-downloads-audit" }],
   }),
   component: () => (
     <RequirePermission anyOf={["audit.view", "rbac.manage"]}>

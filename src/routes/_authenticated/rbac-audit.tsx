@@ -487,7 +487,9 @@ export const Route = createFileRoute("/_authenticated/rbac-audit")({
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "سجل تدقيق الصلاحيات (RBAC)" },
       { property: "og:description", content: "أداة إدارية لتدقيق تغييرات الأدوار والصلاحيات." },
+      { property: "og:url", content: "https://bashenmedical.com/rbac-audit" },
     ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/rbac-audit" }],
   }),
   component: () => (
     <RequirePermission anyOf={["rbac.manage", "audit.view"]}>
