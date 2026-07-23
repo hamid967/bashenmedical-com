@@ -5,7 +5,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listMyMedicalReports } from "@/lib/portal/reports.functions";
-import { ErrorState, EmptyState, SkeletonList } from "@/components/states";
+import { EmptyState, SkeletonList } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -29,8 +30,7 @@ export const Route = createFileRoute("/_authenticated/patient/reports")({
     ],
   }),
   component: ReportsPage,
-  pendingComponent: () => <SkeletonList rows={5} />,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 5 }),
 });
 
 function ReportsPage() {

@@ -6,7 +6,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listMyAppointments } from "@/lib/portal/appointments.functions";
-import { ErrorState, EmptyState, SkeletonList } from "@/components/states";
+import { EmptyState, SkeletonList } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -31,8 +32,7 @@ export const Route = createFileRoute("/_authenticated/patient/appointments")({
     ],
   }),
   component: AppointmentsPage,
-  pendingComponent: () => <SkeletonList rows={6} />,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 6 }),
 });
 
 function AppointmentsPage() {

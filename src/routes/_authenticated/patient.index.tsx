@@ -22,7 +22,8 @@ import {
   MapPin,
 } from "lucide-react";
 import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
-import { ErrorState, EmptyState, SkeletonCards } from "@/components/states";
+import { EmptyState, SkeletonCards } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,12 +46,7 @@ export const Route = createFileRoute("/_authenticated/patient/")({
     ],
   }),
   component: PatientDashboard,
-  errorComponent: ({ error, reset }) => (
-    <div className="p-4">
-      <ErrorState description={error.message} onRetry={reset} />
-    </div>
-  ),
-  pendingComponent: () => <SkeletonCards count={6} />,
+  ...patientRouteStates({ skeleton: "cards", count: 6 }),
 });
 
 function PatientDashboard() {

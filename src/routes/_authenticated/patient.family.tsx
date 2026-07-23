@@ -4,7 +4,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listDependents } from "@/lib/portal/dependents.functions";
-import { ErrorState, EmptyState, SkeletonList } from "@/components/states";
+import { EmptyState, SkeletonList } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -25,8 +26,7 @@ export const Route = createFileRoute("/_authenticated/patient/family")({
     ],
   }),
   component: FamilyPage,
-  pendingComponent: () => <SkeletonList rows={3} />,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 3 }),
 });
 
 function FamilyPage() {

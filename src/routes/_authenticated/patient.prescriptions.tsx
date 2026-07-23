@@ -4,7 +4,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getMyPrescriptions } from "@/lib/portal/prescriptions.functions";
-import { ErrorState, EmptyState, SkeletonList } from "@/components/states";
+import { EmptyState, SkeletonList } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pill, ArrowLeft } from "lucide-react";
@@ -24,8 +25,7 @@ export const Route = createFileRoute("/_authenticated/patient/prescriptions")({
     ],
   }),
   component: RxPage,
-  pendingComponent: () => <SkeletonList rows={4} />,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 4 }),
 });
 
 function RxPage() {
