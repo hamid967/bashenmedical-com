@@ -211,8 +211,22 @@ export function ForbiddenState({ className }: { className?: string }) {
 }
 
 /* ----------------------------- SessionExpired ---------------------------- */
-export function SessionExpiredState({ className }: { className?: string }) {
+export function SessionExpiredState({
+  className,
+  next,
+}: {
+  className?: string;
+  /** Same-origin path to return to after re-authentication. */
+  next?: string;
+}) {
   const lang = useLang();
+  const resolvedNext = React.useMemo(() => {
+    if (next && next.startsWith("/")) return next;
+    if (typeof window === "undefined") return undefined;
+    const path = window.location.pathname + window.location.search;
+    return path.startsWith("/patient") ? path : undefined;
+  }, [next]);
+  const loginSearch = resolvedNext ? { next: resolvedNext } : undefined;
   return (
     <StateShell
       tone="warning"
@@ -220,15 +234,23 @@ export function SessionExpiredState({ className }: { className?: string }) {
       title={lang === "ar" ? "انتهت جلستك" : "Your session has expired"}
       description={
         lang === "ar"
-          ? "الرجاء تسجيل الدخول مرة أخرى للمتابعة."
-          : "Please sign in again to continue."
+          ? "لأسباب أمنية تم إنهاء جلستك. سجّل الدخول مجددًا للعودة إلى نفس الصفحة."
+          : "For security reasons your session has ended. Sign in again to return to the same page."
       }
       action={
-        <Button asChild size="sm">
-          <Link to="/auth">{lang === "ar" ? "تسجيل الدخول" : "Sign in"}</Link>
+        <Button asChild size="lg" className="min-w-[12rem]">
+          <Link
+            to="/auth/login"
+            search={loginSearch as never}
+            aria-label={lang === "ar" ? "إعادة تسجيل الدخول" : "Re-authenticate"}
+          >
+            <RefreshCw className="h-4 w-4" aria-hidden />
+            {lang === "ar" ? "إعادة تسجيل الدخول" : "Re-authenticate"}
+          </Link>
         </Button>
       }
       className={className}
     />
   );
 }
+
