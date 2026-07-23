@@ -1,31 +1,32 @@
 /**
  * Public API — POST /api/public/book/create
  *
- * Server-side alternative to the client-only insert in /book. Both paths
- * MUST return the same Arabic strings for both Zod validation failures and
- * PostgREST/RLS failures, so external callers, e2e harnesses, and the UI
- * see one consistent user-facing error surface.
+ * Server-side booking endpoint. Since the atomic `confirm_appointment_booking`
+ * migration, all persistence goes through ONE Postgres transaction:
  *
- * Rules:
- *   - Validation errors → HTTP 400 { ok:false, kind:'validation', message }
- *     where `message` is the FIRST Zod issue's Arabic message.
- *   - DB / RLS errors    → HTTP 400 { ok:false, kind:'db', message }
- *     where `message` is `friendlyInsertError(error)` (from
- *     src/lib/insert-errors.ts) — NEVER the raw PostgREST text.
- *   - Success            → HTTP 200 { ok:true }.
+ *   1. Validate the JSON body with Zod (same Arabic messages as /book UI).
+ *   2. Compute insurance estimate (best-effort, non-blocking).
+ *   3. Call rpc('confirm_appointment_booking', { p_data, p_idempotency_key }):
+ *        - Replay same reference when the idempotency key matches.
+ *        - Otherwise INSERT + generate BMC-YYYYMMDD-XXXX + return, atomically.
+ *   4. Slot conflicts propagate as SQLSTATE 23505 from the existing partial
+ *      UNIQUE INDEX and surface as HTTP 409 { kind:'conflict' }.
  *
- * The endpoint uses the publishable (anon) Supabase key so DB triggers and
- * RLS behave exactly as they do for the public /book UI. Bad JSON is folded
- * into the generic `unknown` friendly message rather than leaking a parser
- * error.
+ * Response contract:
+ *   - Validation  → 400 { ok:false, kind:'validation', message }
+ *   - Slot clash  → 409 { ok:false, kind:'conflict', message }
+ *   - DB / RLS    → 400 { ok:false, kind:'db', message } (friendlyInsertError)
+ *   - Success     → 200 { ok:true, reference:'BMC-YYYYMMDD-XXXX' | null }
+ *
+ * The RPC uses SECURITY DEFINER; the anon publishable key is enough to call
+ * it. `supabaseAdmin` is only used for the pre-flight fast-path conflict
+ * hint so the user sees a friendly 409 before hitting the RPC.
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { friendlyInsertError, FRIENDLY_INSERT_MESSAGES } from "@/lib/insert-errors";
-// Single source of truth — shared with the client wizard.
-// See src/lib/booking-limits.ts and src/components/booking/types.ts.
 import {
   NAME_MIN,
   NAME_MAX,
@@ -59,6 +60,7 @@ const bookingCreateSchema = z.object({
   gender: z.enum(["male", "female"], { message: "الجنس غير صالح" }).optional(),
   specialty_id: z.string().uuid("قيمة غير صالحة").optional().nullable(),
   doctor_id: z.string().uuid("قيمة غير صالحة").optional().nullable(),
+  branch_id: z.string().uuid("قيمة غير صالحة").optional().nullable(),
   appointment_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "تاريخ غير صالح"),
   appointment_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, "وقت غير صالح"),
   reason: z
@@ -81,6 +83,12 @@ function json(status: number, body: Record<string, unknown>) {
   });
 }
 
+// Legacy tracking reference derived from a UUID. Kept for pre-BMC bookings
+// looked up by /booking-confirmation. New bookings return the BMC reference
+// generated inside confirm_appointment_booking.
+const refFromId = (id: string) =>
+  "BAA-" + String(id).replace(/-/g, "").slice(0, 8).toUpperCase();
+
 type InsuranceInput = {
   doctor_id?: string | null;
   insurance_provider_id?: string | null;
@@ -88,23 +96,18 @@ type InsuranceInput = {
   insurance_member_id?: string | null;
 };
 
-// Estimate cost using the same DB function the /verify endpoint uses so the
-// stored numbers on the appointment stay consistent with what the wizard
-// showed the patient. Failure to estimate must not block the booking — we
-// just persist the provider selection with `insurance_status = 'pending'`.
+// Compute insurance patch (estimate cost via existing RPC). Result is merged
+// into the JSONB payload passed to confirm_appointment_booking. Failure to
+// estimate must not block the booking — we persist `pending` status.
 async function buildInsurancePatch(
-  supa: any,
+  supa: ReturnType<typeof createClient>,
   data: InsuranceInput,
 ): Promise<Record<string, unknown>> {
   const providerId = data.insurance_provider_id ?? null;
   const policy = (data.insurance_policy_number ?? "").trim() || null;
   const member = (data.insurance_member_id ?? "").trim() || null;
 
-  if (!providerId) {
-    return {
-      insurance_status: "none",
-    };
-  }
+  if (!providerId) return { insurance_status: "none" };
 
   const patch: Record<string, unknown> = {
     insurance_provider_id: providerId,
@@ -147,7 +150,9 @@ export const Route = createFileRoute("/api/public/book/create")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "booking" });
+        if (_rl) return _rl;
+
         let body: unknown;
         try {
           body = await request.json();
@@ -165,11 +170,9 @@ export const Route = createFileRoute("/api/public/book/create")({
           return json(400, { ok: false, kind: "validation", message });
         }
 
-        // Optional Idempotency-Key: same key → same result. Guards against
-        // duplicate bookings from double-clicks, retries after a timeout,
-        // or navigation-triggered resends. Accept 8–128 chars, letters/
-        // digits/dash/underscore only; silently ignore anything else so a
-        // garbage header can't create keyless rows or break the request.
+        // Idempotency-Key: same key → same booking / same reference. Accept
+        // 8–128 chars, letters/digits/dash/underscore only; garbage headers
+        // become NULL so a bad client can't corrupt the replay lookup.
         const rawKey = request.headers.get("idempotency-key")?.trim() ?? "";
         const idempotencyKey = /^[A-Za-z0-9_-]{8,128}$/.test(rawKey) ? rawKey : null;
 
@@ -191,36 +194,33 @@ export const Route = createFileRoute("/api/public/book/create")({
           },
         });
 
-        // Helper: derive the tracking reference from a UUID.
-        const refFromId = (id: string) =>
-          "BAA-" + String(id).replace(/-/g, "").slice(0, 8).toUpperCase();
-
-        // Idempotent replay: same key already produced a row → return the
-        // same success response. Guards against double-clicks and network
-        // retries. Runs BEFORE the slot conflict check so a retry after a
-        // 200-that-never-reached-the-client still returns 200.
+        // Fast-path idempotency replay: fetch existing row's reference so we
+        // don't even enter the RPC when the client is just retrying. The RPC
+        // also handles replay internally, but doing it here saves a call and
+        // lets us respond in a single query.
         if (idempotencyKey) {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
             const { data: existing } = await supabaseAdmin
               .from("appointments")
-              .select("id")
+              .select("id, reference_number")
               .eq("idempotency_key", idempotencyKey)
               .maybeSingle();
             if (existing?.id) {
-              return json(200, { ok: true, reference: refFromId(existing.id) });
+              return json(200, {
+                ok: true,
+                reference: existing.reference_number ?? refFromId(existing.id),
+              });
             }
           } catch {
-            // Fall through — worst case the unique index below catches it.
+            /* Fall through — the RPC will handle replay authoritatively. */
           }
         }
 
-        // Fast-path conflict check: same-doctor slot already taken by a
-        // non-cancelled appointment. This is just for a nice 409 message —
-        // the authoritative guard is the partial UNIQUE INDEX
-        // `appointments_doctor_slot_unique_active` which runs inside the
-        // INSERT's own transaction and makes the check atomic (no TOCTOU
-        // window between check and insert).
+        // Optional fast-path conflict message: same doctor+date+time already
+        // booked by an active appointment. Purely for a friendlier 409 — the
+        // authoritative guard remains the partial UNIQUE INDEX inside the
+        // RPC's transaction.
         if (parsed.data.doctor_id) {
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -244,62 +244,67 @@ export const Route = createFileRoute("/api/public/book/create")({
               });
             }
           } catch {
-            // Fall through — DB unique index still guards atomically.
+            /* Fall through — RPC UNIQUE INDEX still guards atomically. */
           }
         }
 
-        // Keep the anon insert path exactly as before so triggers + RLS
-        // behave identically to the /book UI. Anon has no SELECT policy, so
-        // we cannot use .select() here. If two requests race past the
-        // fast-path check above, the partial UNIQUE INDEX rejects the
-        // second insert with SQLSTATE 23505 which we surface as 409.
+        // Build the JSONB payload for the RPC. All non-provided fields are
+        // omitted so the function's NULLIF/COALESCE branches apply.
         const cleanEmail = (parsed.data.patient_email ?? "").trim().toLowerCase() || null;
-        const { error } = await supa.from("appointments").insert({
+        const insurancePatch = await buildInsurancePatch(supa, parsed.data);
+
+        const payload: Record<string, unknown> = {
           patient_name: parsed.data.patient_name,
           patient_phone: parsed.data.patient_phone,
           patient_email: cleanEmail,
           national_id: parsed.data.national_id ?? null,
-          gender: parsed.data.gender,
+          gender: parsed.data.gender ?? null,
           specialty_id: parsed.data.specialty_id ?? null,
           doctor_id: parsed.data.doctor_id ?? null,
+          branch_id: parsed.data.branch_id ?? null,
           appointment_date: parsed.data.appointment_date,
           appointment_time: parsed.data.appointment_time,
           reason: parsed.data.reason ?? null,
-          ...(idempotencyKey ? { idempotency_key: idempotencyKey } : {}),
-          ...(parsed.data.reminder_24h !== undefined
-            ? { reminder_24h: parsed.data.reminder_24h }
-            : {}),
-          ...(parsed.data.reminder_2h !== undefined
-            ? { reminder_2h: parsed.data.reminder_2h }
-            : {}),
-          ...(await buildInsurancePatch(supa, parsed.data)),
+          reminder_24h: parsed.data.reminder_24h,
+          reminder_2h: parsed.data.reminder_2h,
+          idempotency_key: idempotencyKey,
+          ...insurancePatch,
+        };
+
+        // Atomic confirmation. Any 23505 from here means a real conflict
+        // (slot uidx or idempotency uidx) — never a partial-state failure.
+        const { data: rows, error } = await supa.rpc("confirm_appointment_booking", {
+          p_data: payload,
+          p_idempotency_key: idempotencyKey,
         });
 
         if (error) {
           const err = error as { message?: string; code?: string };
-          const isDup = err.code === "23505" || (err.message ?? "").includes("duplicate key");
+          const isDup =
+            err.code === "23505" || (err.message ?? "").includes("duplicate key");
 
-          // Concurrent replay with the same Idempotency-Key: another request
-          // won the insert race. Look the row up and return its reference so
-          // the client sees the same success it would have seen the first
-          // time. This is different from a slot clash (below) — same key
-          // means intentionally the same booking.
-          if (isDup && idempotencyKey && (err.message ?? "").includes("idempotency_key")) {
+          // Idempotency-key race: another concurrent request with the same
+          // key already inserted — replay its reference.
+          if (
+            isDup &&
+            idempotencyKey &&
+            (err.message ?? "").includes("idempotency_key")
+          ) {
             try {
               const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
               const { data: existing } = await supabaseAdmin
                 .from("appointments")
-                .select("id")
+                .select("id, reference_number")
                 .eq("idempotency_key", idempotencyKey)
                 .maybeSingle();
               if (existing?.id) {
                 return json(200, {
                   ok: true,
-                  reference: refFromId(existing.id),
+                  reference: existing.reference_number ?? refFromId(existing.id),
                 });
               }
             } catch {
-              /* fall through to generic conflict */
+              /* fall through */
             }
           }
 
@@ -317,39 +322,11 @@ export const Route = createFileRoute("/api/public/book/create")({
           });
         }
 
-        // Follow-up admin read to derive the tracking reference from the
-        // just-inserted row. Prefer the idempotency key (exact match); fall
-        // back to phone+date+time when the client didn't send a key. Failure
-        // here must not fail the whole request — the booking is already
-        // persisted; the reference is a convenience.
-        let reference: string | null = null;
-        try {
-          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          let foundId: string | undefined;
-          if (idempotencyKey) {
-            const { data } = await supabaseAdmin
-              .from("appointments")
-              .select("id")
-              .eq("idempotency_key", idempotencyKey)
-              .maybeSingle();
-            foundId = data?.id;
-          }
-          if (!foundId) {
-            const { data } = await supabaseAdmin
-              .from("appointments")
-              .select("id")
-              .eq("patient_phone", parsed.data.patient_phone)
-              .eq("appointment_date", parsed.data.appointment_date)
-              .eq("appointment_time", parsed.data.appointment_time)
-              .order("created_at", { ascending: false })
-              .limit(1)
-              .maybeSingle();
-            foundId = data?.id;
-          }
-          if (foundId) reference = refFromId(foundId);
-        } catch {
-          // Ignore — booking is already saved; reference simply won't be returned.
-        }
+        // rows is an array of { id, reference, replayed }.
+        const row = Array.isArray(rows) ? rows[0] : rows;
+        const reference =
+          (row && (row as { reference?: string | null }).reference) ??
+          (row && (row as { id?: string }).id ? refFromId((row as { id: string }).id) : null);
 
         return json(200, { ok: true, reference });
       },
