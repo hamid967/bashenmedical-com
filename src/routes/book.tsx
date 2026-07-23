@@ -33,6 +33,8 @@ import { fallback } from "@tanstack/zod-adapter";
 import {
   loadDraft,
   reducer,
+  saveDraft,
+  clearDraft,
   STORAGE_KEY,
   validatePatient,
   maxReachableStep,
@@ -49,12 +51,14 @@ import { StepPatient } from "@/components/booking/StepPatient";
 import { StepReview } from "@/components/booking/StepReview";
 import { StepSuccess } from "@/components/booking/StepSuccess";
 import { SummarySidebar } from "@/components/booking/SummarySidebar";
+import { MobileSummarySheet } from "@/components/booking/MobileSummarySheet";
 import { WaitlistCTA } from "@/components/booking/WaitlistCTA";
 import { SlotHoldBanner } from "@/components/booking/SlotHoldBanner";
 import { useSlotHold } from "@/hooks/useSlotHold";
 import { useRealtimePublicSlots } from "@/hooks/use-realtime-public-slots";
 import { releaseHold } from "@/lib/booking-hold";
 import { bmcOgImageMeta } from "@/lib/og-meta";
+
 
 const search = z.object({
   specialty: z.string().optional(),
