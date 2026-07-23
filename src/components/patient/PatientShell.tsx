@@ -9,7 +9,7 @@ import { Bell, User, LogOut, Home, CalendarDays, FileText, CalendarPlus } from "
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { OfflineState } from "@/components/states";
-import { FeatureErrorBoundary } from "@/components/FeatureErrorBoundary";
+import { FeatureErrorBoundary } from "@/components/states/FeatureErrorBoundary";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
