@@ -492,6 +492,7 @@ type ApptRow = ReturnType<typeof mapItemType>;
 function mapItemType() {
   return {} as {
     id: string;
+    reference_number: string | null;
     appointment_date: string;
     appointment_time: string;
     status: ApptStatus;
