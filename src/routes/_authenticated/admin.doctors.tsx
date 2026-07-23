@@ -13,6 +13,8 @@ import {
 } from "@/lib/doctors.functions";
 import { listBranches } from "@/lib/dashboard.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
+import { Can } from "@/components/rbac/Can";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 
 export const Route = createFileRoute("/_authenticated/admin/doctors")({
   head: () => ({
