@@ -66,18 +66,35 @@ export function ActiveSubjectSwitcher({ lang = "ar" }: { lang?: "ar" | "en" }) {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground">
-              {lang === "ar" ? "أفراد الأسرة الموثّقون" : "Verified family"}
+              {lang === "ar" ? "أفراد الأسرة المخوّلون" : "Authorized dependents"}
             </DropdownMenuLabel>
             {dependents.map((dep) => {
               const active = subject.kind === "dependent" && subject.id === dep.id;
+              const s = dep.access_scopes;
+              const scopes = [
+                s.booking && (lang === "ar" ? "حجز" : "Booking"),
+                s.reports && (lang === "ar" ? "تقارير" : "Reports"),
+                s.prescriptions && (lang === "ar" ? "وصفات" : "Rx"),
+                s.billing && (lang === "ar" ? "فواتير" : "Billing"),
+              ].filter(Boolean) as string[];
               return (
                 <DropdownMenuItem
                   key={dep.id}
                   onSelect={() => setSubject({ kind: "dependent", id: dep.id })}
+                  className="flex-col items-start gap-1"
                 >
-                  <BadgeCheck className="me-2 h-4 w-4 text-emerald-600" aria-hidden />
-                  <span className="flex-1 truncate">{dep.full_name}</span>
-                  {active && <Check className="h-4 w-4 text-primary" aria-hidden />}
+                  <div className="flex w-full items-center gap-2">
+                    <BadgeCheck className="h-4 w-4 text-emerald-600" aria-hidden />
+                    <span className="flex-1 truncate">{dep.full_name}</span>
+                    {active && <Check className="h-4 w-4 text-primary" aria-hidden />}
+                  </div>
+                  <div className="flex flex-wrap gap-1 ps-6">
+                    {scopes.map((label) => (
+                      <Badge key={label} variant="secondary" className="h-4 px-1 text-[10px]">
+                        {label}
+                      </Badge>
+                    ))}
+                  </div>
                 </DropdownMenuItem>
               );
             })}
@@ -91,9 +108,13 @@ export function ActiveSubjectSwitcher({ lang = "ar" }: { lang?: "ar" | "en" }) {
               ? lang === "ar"
                 ? "جارٍ التحميل…"
                 : "Loading…"
-              : lang === "ar"
-                ? "إدارة أفراد الأسرة"
-                : "Manage family"}
+              : dependents.length === 0
+                ? lang === "ar"
+                  ? "لا يوجد أفراد مخوّلون — أضف/وثّق من هنا"
+                  : "No authorized dependents — add or verify"
+                : lang === "ar"
+                  ? "إدارة أفراد الأسرة والصلاحيات"
+                  : "Manage family and permissions"}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
