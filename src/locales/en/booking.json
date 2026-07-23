@@ -35,6 +35,7 @@
     "date": "Date",
     "time": "Time",
     "yourInfo": "Your info",
+    "insurance": "Insurance",
     "review": "Review",
     "confirmed": "Confirmed"
   },
@@ -141,7 +142,16 @@
     "coverage": "Coverage",
     "coveredAmount": "Insurance covers",
     "patientShare": "Patient share",
-    "costBreakdown": "Cost breakdown"
+    "costBreakdown": "Cost breakdown",
+    "stepTitle": "Insurance & Payment",
+    "stepHint": "Choose your payment method and verify insurance eligibility, or continue as self-pay.",
+    "selfPayNotice": "Self-pay selected — you can proceed to review.",
+    "errors": {
+      "summary": "Complete insurance details before continuing:",
+      "providerRequired": "Select an insurance provider.",
+      "verificationRequired": "Insurance eligibility must be verified before continuing.",
+      "notEligible": "Eligibility not confirmed — choose another provider or self-pay."
+    }
   },
   "hold": {
     "holding": "This slot is held for you",
