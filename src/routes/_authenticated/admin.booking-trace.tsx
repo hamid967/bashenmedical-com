@@ -240,11 +240,15 @@ function BookingTracePage() {
           onPick={(id) => setCorr(id)}
         />
       ) : (
-        <EventsPanel
-          loading={events.isLoading}
-          rows={events.data?.rows ?? []}
-        />
+        <>
+          <SummaryPanel rows={events.data?.rows ?? []} />
+          <EventsPanel
+            loading={events.isLoading}
+            rows={events.data?.rows ?? []}
+          />
+        </>
       )}
+
     </div>
   );
 }
