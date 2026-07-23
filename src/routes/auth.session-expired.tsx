@@ -4,18 +4,30 @@
  * device, token expired past refresh window, etc.).
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock } from "lucide-react";
 
+const searchSchema = z.object({
+  next: z.string().startsWith("/").optional().catch(undefined),
+});
+
 export const Route = createFileRoute("/auth/session-expired")({
+  validateSearch: (input) => searchSchema.parse(input),
   head: () => ({
     meta: [
       { title: "انتهت الجلسة — باعشن الطبي" },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
-  component: () => (
+  component: SessionExpiredPage,
+});
+
+function SessionExpiredPage() {
+  const { next } = Route.useSearch();
+  const loginSearch = next ? { next } : undefined;
+  return (
     <Card>
       <CardHeader className="text-center">
         <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-muted flex items-center justify-center">
@@ -23,14 +35,17 @@ export const Route = createFileRoute("/auth/session-expired")({
         </div>
         <CardTitle>انتهت الجلسة</CardTitle>
         <CardDescription>
-          تم إنهاء جلستك لأسباب أمنية. الرجاء تسجيل الدخول مرة أخرى.
+          تم إنهاء جلستك لأسباب أمنية. الرجاء تسجيل الدخول مرة أخرى للمتابعة.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Button asChild className="w-full">
-          <Link to="/auth/login">تسجيل الدخول</Link>
+          <Link to="/auth/login" search={loginSearch as never}>
+            تسجيل الدخول
+          </Link>
         </Button>
       </CardContent>
     </Card>
-  ),
-});
+  );
+}
+

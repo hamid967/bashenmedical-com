@@ -5,6 +5,7 @@
  */
 import * as React from "react";
 import { useRouter } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ErrorState,
   EmptyState,
@@ -14,6 +15,7 @@ import {
   SkeletonList,
   SkeletonCards,
 } from "@/components/states";
+import { signalPatientSessionExpired } from "@/lib/patient/session-guard";
 
 function classify(error: unknown): "offline" | "session" | "forbidden" | "error" {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "offline";
@@ -52,11 +54,19 @@ export function PatientRouteError({
   reset: () => void;
 }) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const kind = classify(error);
   const retry = () => {
     router.invalidate();
     reset();
   };
+  // Auto-redirect on session expiry: show the state briefly, then route
+  // the user to /auth/session-expired preserving `next` so they can return
+  // after re-authentication.
+  React.useEffect(() => {
+    if (kind !== "session") return;
+    void signalPatientSessionExpired(router, queryClient);
+  }, [kind, router, queryClient]);
   if (kind === "session") return <SessionExpiredState className="m-4" />;
   if (kind === "forbidden") return <ForbiddenState className="m-4" />;
   if (kind === "offline") return <OfflineState className="m-4" onRetry={retry} />;
