@@ -18,8 +18,10 @@ import {
   type Dependent,
 } from "@/lib/portal/dependents.functions";
 import { DependentVerificationDialog } from "@/components/patient/DependentVerificationDialog";
-import { EmptyState } from "@/components/states";
+import { EmptyState, LoadingState } from "@/components/states";
+import { InlineStateBanner } from "@/components/states/InlineStateBanner";
 import { patientRouteStates } from "@/components/states/patient-route-states";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
