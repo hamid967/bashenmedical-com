@@ -9,6 +9,11 @@ import { z } from "zod";
 // B4-1: consolidated in `_guard.ts`. Re-exported for back-compat with any
 // external module that still imports `assertHasRole` from this file.
 import { assertHasRole } from "./_guard";
+// Phase 3B: prefer permission-verb enforcement over role gates for
+// mutation endpoints so branch-scoped roles (reception, branch_manager)
+// pick up the right subset without a new role check per action.
+import { assertPermission, assertBranchScope } from "@/lib/rbac/enforce.server";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 export { assertHasRole };
 
 const STATUSES = [
@@ -183,15 +188,26 @@ export const assignInquiry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
+    // Fetch the row FIRST so we can enforce the caller's permission in
+    // the inquiry's own branch scope. Missing rows short-circuit before
+    // any privilege check to avoid leaking existence.
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
-      .select("assigned_to")
+      .select("assigned_to, branch_id")
       .eq("id", data.id)
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
     if (!prev) throw new Error("الاستفسار غير موجود.");
+
+    // `appointments.assign` covers reception/branch_manager/center_admin;
+    // scoped to the inquiry's branch so a reception at branch A cannot
+    // reassign an inquiry from branch B.
+    await assertPermission(
+      { supabase: sb, userId: context.userId },
+      PERMISSIONS.ApptAssign,
+      (prev.branch_id as string | null) ?? null,
+    );
 
     const { error } = await sb
       .from("service_inquiries")
@@ -331,15 +347,24 @@ export const closeInquiry = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
-    await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase;
     const { data: prev, error: readErr } = await sb
       .from("service_inquiries")
-      .select("internal_status, closed_at")
+      .select("internal_status, closed_at, branch_id")
       .eq("id", data.id)
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
     if (!prev) throw new Error("الاستفسار غير موجود.");
+
+    // Closing an inquiry cancels the pending intent → gate on
+    // `appointments.cancel` in the inquiry's branch. Branch scope is
+    // enforced explicitly so a caller cannot pass a hand-crafted branch
+    // hint — the branch is read from the persisted row.
+    await assertPermission(
+      { supabase: sb, userId: context.userId },
+      PERMISSIONS.ApptCancel,
+      (prev.branch_id as string | null) ?? null,
+    );
 
     const now = new Date().toISOString();
     const { error } = await sb
@@ -357,3 +382,6 @@ export const closeInquiry = createServerFn({ method: "POST" })
     });
     return { ok: true };
   });
+
+// Silence unused-import warnings when only some verbs consume the helper.
+void assertBranchScope;

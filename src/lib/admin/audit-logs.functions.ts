@@ -7,15 +7,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { assertPermission } from "@/lib/rbac/enforce.server";
+import { PERMISSIONS } from "@/lib/rbac/permissions";
 
-type Role = "admin" | "super_admin";
-
-async function assertStaff(supabase: any, userId: string) {
-  for (const role of ["admin", "super_admin"] as Role[]) {
-    const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: role });
-    if (data) return true;
-  }
-  throw new Error("ليست لديك صلاحية عرض سجل التدقيق.");
+// Phase 3B: audit-log reads are gated on the `audit.export` permission
+// (held globally by `auditor` and `super_admin`). Global-only scope —
+// audit visibility spans all branches.
+async function assertAuditReader(supabase: any, userId: string) {
+  await assertPermission({ supabase, userId }, PERMISSIONS.AuditExport);
 }
 
 const listSchema = z.object({
@@ -33,7 +32,7 @@ export const listAdminAuditLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => listSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
-    await assertStaff(context.supabase, context.userId);
+    await assertAuditReader(context.supabase, context.userId);
     const sel = (s: string): string => s;
     let q = context.supabase
       .from("audit_logs")
@@ -66,7 +65,7 @@ export const listAdminAuditLogs = createServerFn({ method: "GET" })
 export const listAuditFacets = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertStaff(context.supabase, context.userId);
+    await assertAuditReader(context.supabase, context.userId);
     const sel = (s: string): string => s;
     const { data, error } = await context.supabase
       .from("audit_logs")
