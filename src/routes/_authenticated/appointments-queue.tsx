@@ -42,6 +42,7 @@ type Status = "new" | "confirmed" | "completed" | "cancelled" | "no_show";
 
 type Row = {
   id: string;
+  reference_number: string | null;
   patient_name: string;
   patient_phone: string;
   appointment_date: string;
@@ -83,8 +84,14 @@ const SCOPE_META: Record<Scope, { label: string; desc: string }> = {
 
 const SCOPES: Scope[] = ["upcoming", "pending", "today", "past", "all"];
 
-function shortRef(id: string) {
-  return "BAA-" + id.replace(/-/g, "").slice(0, 8).toUpperCase();
+/**
+ * Public-facing reference used in QR codes and staff communication.
+ * Prefers the persisted `reference_number` (BMC-YYYYMMDD-XXXX). Falls
+ * back to a legacy short code derived from the row id only when the
+ * database column is empty for older rows.
+ */
+function publicRef(row: { id: string; reference_number: string | null }) {
+  return row.reference_number ?? "BAA-" + row.id.replace(/-/g, "").slice(0, 8).toUpperCase();
 }
 
 function todayIso() {
