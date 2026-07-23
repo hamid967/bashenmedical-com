@@ -7,6 +7,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { assertPatientAccess } from "@/lib/patient/authz.server";
 import { z } from "zod";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -48,6 +49,7 @@ export const listMyAppointments = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => ListSchema.parse(i ?? {}))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const scope = await resolveScope(supabase, userId);
 
@@ -168,6 +170,7 @@ export const confirmMyAttendance = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
     if (appt.status === "cancelled" || appt.status === "completed") {
@@ -195,6 +198,7 @@ export const cancelMyAppointment = createServerFn({ method: "POST" })
       .parse(i),
   )
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
     if (appt.status === "cancelled") return { ok: true };
@@ -223,6 +227,7 @@ export const reschedulePatientAppointment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => RescheduleSchema.parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
     if (appt.status === "cancelled" || appt.status === "completed") {
@@ -276,6 +281,7 @@ export const requestFollowUp = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => FollowUpSchema.parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const { appt, scope } = await loadOwnedAppointment(supabase, userId, data.fromAppointmentId);
 
@@ -328,6 +334,7 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const { appt, scope } = await loadOwnedAppointment(supabase, userId, data.id);
 
@@ -507,6 +514,7 @@ export const getAppointmentTimeline = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: unknown) => z.object({ id: z.string().uuid() }).parse(i))
   .handler(async ({ context, data }) => {
+    await assertPatientAccess(context.supabase, context.userId, "appointments");
     const { supabase, userId } = context;
     const { appt } = await loadOwnedAppointment(supabase, userId, data.id);
 
