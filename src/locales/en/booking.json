@@ -19,7 +19,9 @@
     "conflictReason": "This slot was just booked by another patient (concurrent conflict). To avoid double-booking, we picked nearby alternatives for you below:",
     "nearestSlotsSameDoctor": "Nearest available slots with the same doctor:",
     "pickSlot": "Book this time",
-    "noAlternatives": "No alternatives available right now — try another date or join the waitlist."
+    "noAlternatives": "No alternatives available right now — try another date or join the waitlist.",
+    "slotTakenClear": "Sorry — this slot was just booked by another patient. We've listed the nearest available times below; pick one to finish your booking.",
+    "invalidIdempotencyKey": "Your booking session expired. A fresh one has been prepared automatically — please tap “Confirm booking” again."
   },
   "steps": {
     "service": "Service",

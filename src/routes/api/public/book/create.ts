@@ -174,10 +174,21 @@ export const Route = createFileRoute("/api/public/book/create")({
         }
 
         // Idempotency-Key: same key → same booking / same reference. Accept
-        // 8–128 chars, letters/digits/dash/underscore only; garbage headers
-        // become NULL so a bad client can't corrupt the replay lookup.
+        // 8–128 chars, letters/digits/dash/underscore only. When the header
+        // is PRESENT but malformed we reject with an explicit
+        // INVALID_IDEMPOTENCY_KEY so the client can rotate the key and
+        // retry, instead of silently dropping replay protection.
         const rawKey = request.headers.get("idempotency-key")?.trim() ?? "";
-        const idempotencyKey = /^[A-Za-z0-9_-]{8,128}$/.test(rawKey) ? rawKey : null;
+        if (rawKey && !/^[A-Za-z0-9_-]{8,128}$/.test(rawKey)) {
+          return json(400, {
+            ok: false,
+            kind: "validation",
+            code: "INVALID_IDEMPOTENCY_KEY",
+            message:
+              "مفتاح إعادة الإرسال (Idempotency-Key) غير صالح. تم توليد مفتاح جديد — أعد المحاولة.",
+          });
+        }
+        const idempotencyKey = rawKey || null;
 
         const url = process.env.SUPABASE_URL;
         const anonKey = process.env.SUPABASE_PUBLISHABLE_KEY;

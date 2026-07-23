@@ -156,6 +156,14 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
   // Normalize kind to "conflict" so downstream UI treats it uniformly.
   const isSlotTaken = res.status === 409 || body.code === "SLOT_TAKEN" || body.kind === "conflict";
 
+  // Malformed Idempotency-Key: rotate the stored key so an immediate retry
+  // uses a fresh, well-formed one. Surfaced to the UI as `validation`
+  // with an explicit code so the message can be specific.
+  const isInvalidIdemKey = body.code === "INVALID_IDEMPOTENCY_KEY";
+  if (isInvalidIdemKey) {
+    clearBookingIdempotencyKey();
+  }
+
   // Validation and conflict errors also retire the key: the payload will
   // change before the next attempt (fixed field, new slot), so reusing the
   // same key would incorrectly replay the OLD attempt if it had ever
