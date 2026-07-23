@@ -15,6 +15,7 @@ import {
   MapPin,
   Phone,
   Printer,
+  QrCode,
   RefreshCw,
   Repeat,
   Search,
@@ -34,6 +35,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { History } from "lucide-react";
 import { PortalPageHeader, PortalStatCard, PortalEmptyState } from "@/components/portal/ui";
+import { AppointmentQrDialog } from "@/components/booking/AppointmentQrDialog";
 
 type Scope = "upcoming" | "past";
 type ApptStatus =
@@ -542,6 +544,8 @@ function AppointmentCard({
   pending: boolean;
 }) {
   const meta = statusMeta(a.status);
+  const [qrOpen, setQrOpen] = useState(false);
+  const canQr = !!a.reference_number;
   const canConfirm = scope === "upcoming" && a.status === "new";
   const canModify = scope === "upcoming" && (a.status === "new" || a.status === "confirmed");
   const canFollow = scope === "past" && (a.status === "completed" || a.status === "no_show");
@@ -693,7 +697,22 @@ function AppointmentCard({
         >
           <Printer className="h-4 w-4" /> طباعة التأكيد
         </button>
+        {canQr && (
+          <button
+            type="button"
+            onClick={() => setQrOpen(true)}
+            className="inline-flex items-center gap-2 h-9 px-3 rounded-full text-xs font-semibold bg-[color:var(--portal-surface)] border border-[color:var(--portal-border)] hover:bg-slate-50"
+            title="عرض رمز التحقق (QR)"
+          >
+            <QrCode className="h-4 w-4" /> QR / تحقق
+          </button>
+        )}
       </div>
+      <AppointmentQrDialog
+        reference={a.reference_number}
+        open={qrOpen}
+        onClose={() => setQrOpen(false)}
+      />
 
       {/* Printable summary — visible only when printing */}
       <div className="hidden print:block mt-3 border-t pt-3 text-xs text-slate-700">
