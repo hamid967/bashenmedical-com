@@ -1,141 +1,97 @@
-# ترقية نظام الحجوزات — Reservations Next Gen (خارطة طريق فريق حامد)
+# Change Manifest — نظام حجز أحادي الصفحة على `/book`
 
-خطة من 4 محاور × 4 مراحل. كل مرحلة لها Definition of Done (DoD) واختبارات قبول. المراحل تُنفَّذ بالترتيب؛ كل موافقة منك = ننفّذ مرحلة واحدة ثم نعرض عليك الحصيلة قبل الانتقال.
+> ⚠️ **ملاحظة تقنية مهمة قبل البدء**
+> الأمر مكتوب لـ Next.js 15 App Router، لكن هذا المشروع يعمل على **TanStack Start + React 19 + Vite**، وليس Next.js. لا يمكن التحويل إلى Next.js دون إعادة بناء كامل. سأنفّذ نفس التصميم والمنطق بالكامل باستخدام TanStack Start (نفس React 19 / TypeScript strict / Tailwind / shadcn / Framer Motion / TanStack Query / RHF+Zod / Supabase / date-fns). التنقل بين المراحل عبر `router.navigate({ search })` بدون Full Reload يتحقق بنفس السلوك تمامًا.
 
----
+## 1. الوضع الحالي (فحص)
 
-## المحور 1 — تجربة المريض (UX)
+نظام الحجز موجود ويغطي جزءًا كبيرًا من المطلوب — لن أنشئ نظامًا موازيًا:
 
-### المرحلة 1.1 — Wizard مبسّط + Deep Links ذكية
-- تقليص خطوات `/book` من 9 إلى 5 خطوات (specialty → doctor → slot → patient → confirm)
-- شريط تقدّم مرئي + إمكانية القفز للخلف بدون فقد البيانات
-- Deep link واحد `/book?doctor=X&date=Y` يفتح مباشرة على الخطوة الصحيحة
-- حفظ تلقائي في `sessionStorage` كل خطوة (استعادة عند refresh)
+| موجود | الملف/الجدول |
+|---|---|
+| صفحة أحادية بـ 9 مراحل | `src/routes/book.tsx` (988 سطر) + `src/components/booking/Step*.tsx` |
+| Slot Hold + مؤقت 5 دقائق | `src/lib/booking-hold.ts`, `src/routes/api/public/book/hold.ts`, جدول `slot_holds`, `SlotHoldBanner.tsx` |
+| Idempotency Key + Submit | `src/lib/booking-submit.ts`, `src/routes/api/public/book/create.ts` |
+| Availability APIs | `book/availability.ts`, `book/month-availability.ts` |
+| Waitlist + Cancel + Track | `book/waitlist*.ts`, `cancel.ts`, `track.ts` |
+| جداول DB | `appointments`, `appointment_slots`, `slot_holds`, `appointment_status_history`, `appointment_waitlist`, `appointment_audit` |
+| Dependents / OTP / Insurance | `DependentPicker.tsx`, `EmailOtpLinker.tsx`, `InsuranceSection.tsx` |
+| لوحة الإدارة للحجوزات | `/admin/appointments` + Audit Logs |
 
-**DoD:** الاختبارات الحالية (`book-back-forward-*`, `book-deep-link-params`) تمرّ + اختبار جديد "5 clicks to done".
+## 2. الفجوات مقارنة بالمواصفات
 
-### المرحلة 1.2 — Mobile-First + PWA offline
-- Bottom-sheet لاختيار الوقت على الجوال
-- زر "احجز مجدداً" في `/my-orders` (نسخ الحجز السابق بضغطة)
-- Service Worker يخزّن قائمة الأطباء والتخصصات للعرض offline
-- Add-to-home-screen prompt بعد أول حجز ناجح
+1. **تنقّل المراحل**: يعتمد state داخلي فقط — لا يعكس المرحلة في URL (`?step=…`)، فزر رجوع المتصفح لا يتنقّل بين المراحل.
+2. **`booking-confirmation` صفحة منفصلة**: يخالف شرط "كل شيء داخل `/book`". يجب دمجها كـ `step=success`.
+3. **رقم الحجز**: صيغة `BMC-YYYYMMDD-XXXX` غير مُطبَّقة (يستخدم UUID/reference موجود بصيغة مختلفة).
+4. **الدالة الذرية `confirm_appointment_booking`**: التأكيد الحالي يستخدم عدة عمليات — يجب لفّها في Postgres function واحدة مع `SELECT … FOR UPDATE` وإعادة معالجة idempotency على الخادم.
+5. **حالة عامة موحّدة**: `useReducer` داخل `book.tsx` (988 سطر) — أفصل إلى `features/booking/store/` مع Actions المذكورة (`RESET_AFTER_BRANCH`…).
+6. **Focus / A11y / Live regions** عند تغيير المرحلة غير مكتملة.
+7. **Bottom Sheet ملخص الحجز على الجوال** — الحالي Sidebar فقط.
+8. **Prefetch للمرحلة التالية** غير مطبّق.
+9. **PatientType = new_patient** كخيار مستقل (زائر) غير مفصول عن `self`.
+10. **Draft version + expiresAt** غير مُطبَّق في sessionStorage.
 
-**DoD:** Lighthouse Mobile ≥ 90، PWA installable، اختبار offline يعرض آخر بيانات مكتشفة.
+## 3. الخطة (تدريجية، بدون كسر ما يعمل)
 
-### المرحلة 1.3 — Digital Companion (بعد الحجز)
-- صفحة `/reservations/:ref` تعرض: OR-code + خريطة الفرع + وقت الوصول المقترح (بناءً على المسافة)
-- تذكير قابل للتخصيص (يوم، ساعة، 15 دقيقة قبل)
-- زر "أنا في الطريق" + "أنا وصلت" (يفعّل check-in)
+### المرحلة 1 — تصدير المرحلة إلى URL وإلغاء الصفحة المنفصلة
+- إضافة `validateSearch` لـ `/book` مع `step` enum (patient/branch/service/doctor/slot/verification/insurance/review/success) + `ref` للحجز الناجح.
+- استخدام `router.navigate({ search, replace: true })` لتحديث المرحلة.
+- دعم زر رجوع المتصفح عبر `useSearch` كمصدر حقيقة للمرحلة.
+- دمج `booking-confirmation.tsx` كـ `step=success&ref=BMC-…` — إعادة توجيه القديم للحفاظ على الروابط الخارجية.
 
-**DoD:** E2E: حجز → استلام رابط → check-in → تحديث حالة `patient_check_ins`.
+### المرحلة 2 — إعادة تنظيم بنية الملفات (بدون نسخ منطق)
+إنشاء `src/features/booking/` كنقطة تجميع مع:
+- `store/booking.store.ts` (Zustand أو نقل reducer الحالي)
+- `types/booking.types.ts` (BookingDraft + BookingStep + PatientType)
+- `schemas/*.schema.ts` (Zod لكل مرحلة)
+- `hooks/useBookingFlow.ts`, `useBookingDraft.ts` (نقل من `book.tsx`)
+- `utils/booking-steps.ts` (mapping + navigation)
+- المكوّنات الحالية `src/components/booking/Step*.tsx` تبقى مكانها وتستورد من `features/booking`.
+- تقليص `book.tsx` من 988 سطر إلى ~200 سطر orchestrator.
 
----
+### المرحلة 3 — رقم الحجز + Atomic function
+- Migration: دالة `public.confirm_appointment_booking(p_hold_id, p_idempotency_key, p_patient_payload jsonb)` في transaction واحد مع `FOR UPDATE`، تُرجع `reference_number` بصيغة `BMC-YYYYMMDD-XXXX` (sequence يومي per date).
+- تحديث `book/create.ts` لاستدعاء الدالة فقط بدل التسلسل الحالي.
+- إعادة استخدام `idempotency_key` على الخادم: إن وُجد سجل بنفس المفتاح، إرجاع نفس النتيجة.
 
-## المحور 2 — الذكاء الاصطناعي
+### المرحلة 4 — Draft + Bottom Sheet + A11y + Motion
+- Draft schema versioned `{ version:1, data, savedAt, expiresAt }` في sessionStorage للزائر، وفي جدول `booking_drafts` (جديد) للمسجّل.
+- `SummarySheet` جوّال (shadcn `Sheet`) + شريط أزرار ثابت أسفل مع Safe Area.
+- Focus management: التركيز على H1 المرحلة الجديدة + `aria-current="step"` + `aria-live="polite"` للأخطاء/النجاح.
+- Framer Motion enter/exit مع احترام `prefers-reduced-motion` واتجاه RTL.
 
-### المرحلة 2.1 — مساعد حجز ذكي (Symptom Triage)
-- زر "ما التخصص المناسب؟" داخل `/book`
-- LLM (google/gemini-3.6-flash) يقرأ الأعراض ويقترح: تخصص + طبيب + مدة موعد
-- Streaming response داخل `BaeshenAssistant` مع أزرار "احجز هذا"
-- Guard rails: لا تشخيص، إعادة توجيه للطوارئ عند كلمات حرجة (ألم صدر، فقدان وعي...)
+### المرحلة 5 — Prefetch + PatientType.new_patient + اختبارات
+- Prefetch للمرحلة التالية فقط عبر `queryClient.prefetchQuery`.
+- فصل `new_patient` (زائر) عن `self` (حساب موجود) في `StepPatient.tsx`.
+- E2E: `booking-slot-race.spec.ts`, `booking-hold-expiry.spec.ts`, `booking-idempotency.spec.ts`, `booking-back-button.spec.ts`, `booking-rtl.spec.ts`.
 
-**DoD:** 20 حالة اختبار (JSON fixtures) → دقة تصنيف ≥ 85%، zero false-negatives للطوارئ.
+## 4. Migrations المطلوبة (سأعرضها قبل التنفيذ)
 
-### المرحلة 2.2 — Smart Reschedule
-- إشعار استباقي عندما يتغيّب طبيب: "متاح موعد أقرب يوم X؟"
-- خوارزمية nearest-slot تراعي: تفضيل الفرع، وقت اليوم المعتاد، تاريخ زيارات المريض
-- زر "قبول" ينفّذ reschedule ذرّياً (transaction) عبر `book_slot` الحالي
+1. `confirm_appointment_booking(...)` — function + sequence لـ `BMC-YYYYMMDD-XXXX`.
+2. `booking_drafts` — جدول للمسوّدات المسجَّلة (اختياري، أطلب موافقتك أولًا).
 
-**DoD:** simulation لـ100 حجز → 60%+ يقبلون العرض المقترح تلقائياً.
+لن أعدّل جداول `appointments`/`appointment_slots`/`slot_holds` القائمة — فقط أضيف الدالة.
 
-### المرحلة 2.3 — Waitlist ذكية (Auto-Promote)
-- عند إلغاء موعد → LLM يرتّب waitlist حسب: أولوية طبية، مدة الانتظار، مطابقة الطبيب
-- Push/WhatsApp للأول في القائمة مع نافذة قبول 15 دقيقة
-- Fallback للثاني/الثالث تلقائياً
+## 5. ما لن يُلمس
 
-**DoD:** اختبار concurrency: 50 مستفيد على موعد واحد → واحد فقط يفوز.
+- API endpoints العامة `/api/public/book/*` — نفس العقود، فقط تعديل داخلي.
+- RLS و RBAC الحالية.
+- لوحة إدارة `/admin/appointments` (تعمل بالفعل).
+- OTP / التأمين / Waitlist — يبقون كما هم.
 
----
+## 6. شروط القبول (نفس شروطك)
 
-## المحور 3 — موثوقية وأداء
-
-### المرحلة 3.1 — تقوية Concurrency (Advisory Locks + Idempotency)
-- توسيع `_assert_slot_free` ليغطّي: reschedule، waitlist promote، admin manual booking
-- Idempotency-Key إلزامي على كل POST بحجز (منع double-submit من الشبكة السيئة)
-- جدول `idempotency_keys` (TTL 24h) + retention job
-
-**DoD:** `concurrency_book_slot.py` و `concurrency_direct_insert.py` مع PARALLEL=100 → PASS.
-
-### المرحلة 3.2 — Realtime عالي المستوى
-- استبدال polling في dashboards بـ Supabase Realtime broadcast
-- Presence channel لكل عيادة (كم مريض في الانتظار الآن)
-- عدّاد "أشخاص ينظرون هذا الموعد" على `/book` (شفافية + FOMO خفيف)
-
-**DoD:** RTT < 500ms في 95th percentile، test load 200 concurrent viewers.
-
-### المرحلة 3.3 — Observability كاملة
-- Web Vitals per-route (موجود) + Custom booking funnel events
-- Dashboard جديد `admin.booking-funnel`: drop-off لكل خطوة، Time-to-book متوسط، معدل الفشل
-- Sentry-lite: التقاط أخطاء JS/API في `web_vitals` كسجل موحّد
-- تنبيهات Slack/Email عند تجاوز عتبات (error rate > 2%، booking success < 90%)
-
-**DoD:** لوحة جديدة تعمل + 3 تنبيهات مختبرة يدوياً.
-
----
-
-## المحور 4 — تكاملات خارجية
-
-### المرحلة 4.1 — NPHIES Verify مباشر داخل /book
-- عند إدخال هوية المريض → استدعاء NPHIES eligibility (real-time)
-- عرض: التغطية، نسبة التحمّل، الحد المتبقّي — قبل تأكيد الحجز
-- Fallback عند 5xx: يستمر الحجز مع علامة "قيد التحقّق"
-- Cache 24h لكل هوية (تقليل الاستدعاءات)
-
-**DoD:** integration test مع NPHIES sandbox → 3 سيناريوهات (مغطّى/مرفوض/timeout).
-
-### المرحلة 4.2 — Wallet Passes + Calendar Sync
-- توليد Apple Wallet `.pkpass` + Google Wallet JWT عند تأكيد الحجز
-- زر "أضف للتقويم" → يولّد `.ics` مع تنبيه تلقائي
-- OAuth اختياري لـGoogle Calendar → sync ثنائي الاتجاه (تعديل من التقويم = تعديل الحجز)
-
-**DoD:** فتح الـ.pkpass على iOS + `.ics` يعمل على Outlook/Apple Calendar/Gmail.
-
-### المرحلة 4.3 — WhatsApp Business API (تأكيد + إعادة جدولة تفاعلية)
-- تأكيد فوري عبر WhatsApp مع Quick Reply buttons: "تأكيد" / "إعادة جدولة" / "إلغاء"
-- Webhook `/api/public/webhooks/whatsapp` يستقبل الرد ويطبّقه فوراً
-- HMAC signature verification + rate limit
-
-**DoD:** رحلة كاملة: حجز → رسالة → ضغط "إلغاء" → حالة الحجز `cancelled` في < 5 ثوانٍ.
-
-### المرحلة 4.4 — Google/Apple/Meta Analytics (Conversion Tracking)
-- GA4 events: `booking_started`, `slot_selected`, `booking_completed` (+ value)
-- Meta Pixel + TikTok Pixel اختيارياً
-- Consent Mode v2 (يحترم كوكيز الموافقة الموجودة)
-
-**DoD:** أحداث تظهر في GA4 DebugView + لا تسجّل PII.
+- الحجز كامل داخل `/book` — لا Full Reload.
+- زر رجوع المتصفح يتنقّل بين المراحل ويحفظ البيانات.
+- منع الحجز المزدوج مضمون على مستوى Postgres transaction.
+- Idempotency تُعاد نفس النتيجة عند تكرار الطلب.
+- رقم الحجز بصيغة `BMC-YYYYMMDD-XXXX`.
+- عربي/إنجليزي، RTL/LTR، جوال/سطح مكتب.
+- `tsgo --noEmit` نظيف + build ناجح + Playwright الجديد أخضر.
 
 ---
 
-## ترتيب التنفيذ المقترح (11 أسبوع)
-
-```text
-أسبوع 1-2  : 3.1 concurrency + 3.3 observability   ← أساس صلب
-أسبوع 3-4  : 1.1 wizard + 1.2 mobile PWA           ← أثر مباشر للمستخدم
-أسبوع 5-6  : 2.1 symptom AI + 1.3 companion        ← تمييز تنافسي
-أسبوع 7-8  : 4.1 NPHIES + 4.2 wallet               ← تكاملات محلية
-أسبوع 9    : 3.2 realtime + 2.2 smart reschedule
-أسبوع 10   : 4.3 WhatsApp + 2.3 smart waitlist
-أسبوع 11   : 4.4 analytics + استقرار + توثيق
-```
-
-## Definition of Done للمشروع الكامل
-- Booking success rate ≥ 95%
-- Average time-to-book ≤ 90s (mobile)
-- Zero double-booking incidents في concurrency test بـ200
-- NPHIES coverage displayed لـ80% من الحجوزات
-- Lighthouse mobile ≥ 90 على `/book`
-- كل الاختبارات الموجودة (RLS + E2E + unit) تمرّ
-
----
-
-**السؤال:** هل نبدأ بالمرحلة **3.1 (concurrency + idempotency)** كأساس، أم تفضّل مرحلة أخرى أولاً؟ اذكر رقم المرحلة (مثلاً "ابدأ 1.1") لأنطلق فوراً.
+**تنبيه**: هذه خطة كبيرة (≈ 4 دُفعات تنفيذ + migration واحدة على الأقل). أطلب إذنك:
+1. المضي بالمرحلة 1+2 أولًا (URL sync + إعادة هيكلة) بدون migrations؟
+2. أم البدء بالمرحلة 3 (Atomic function + BMC reference) لأنها الأعلى قيمة أمنيًا؟
+3. أم تنفيذ كل الأربعة بالتتابع في جلسات متتالية؟
