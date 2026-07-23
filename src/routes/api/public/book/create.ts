@@ -338,6 +338,9 @@ export const Route = createFileRoute("/api/public/book/create")({
                 String(r.appointment_time).slice(0, 5) === timeHHMM,
             );
             if (clash) {
+              logBook("fastpath.conflict", {
+                error_code: "SLOT_TAKEN",
+              });
               return respond(409, {
                 ok: false,
                 kind: "conflict",
@@ -349,6 +352,7 @@ export const Route = createFileRoute("/api/public/book/create")({
             /* Fall through — RPC UNIQUE INDEX still guards atomically. */
           }
         }
+
 
         // Build the JSONB payload for the RPC. All non-provided fields are
         // omitted so the function's NULLIF/COALESCE branches apply.
