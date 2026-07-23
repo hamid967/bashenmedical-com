@@ -159,11 +159,24 @@ export const Route = createFileRoute("/api/public/book/create")({
         const _rl = await applyRateLimit(request, { category: "booking" });
         if (_rl) return _rl;
 
+        // Correlation ID — pulled from the client header first so a single
+        // booking attempt series (including retries) shares one trace ID
+        // across every log record. Falls back to a server-generated UUID
+        // when missing/malformed. Echoed back in `X-Correlation-Id`.
+        const rawCorrId = request.headers.get("x-correlation-id")?.trim() ?? "";
+        const correlationId =
+          rawCorrId && /^[A-Za-z0-9_-]{8,128}$/.test(rawCorrId)
+            ? rawCorrId
+            : (globalThis.crypto?.randomUUID?.() ??
+              `srv-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`);
+        const respond = (status: number, body: Record<string, unknown>) =>
+          json(status, body, { "X-Correlation-Id": correlationId });
+
         let body: unknown;
         try {
           body = await request.json();
         } catch {
-          return json(400, {
+          return respond(400, {
             ok: false,
             kind: "validation",
             message: FRIENDLY_INSERT_MESSAGES.unknown,
@@ -173,7 +186,7 @@ export const Route = createFileRoute("/api/public/book/create")({
         const parsed = bookingCreateSchema.safeParse(body);
         if (!parsed.success) {
           const message = parsed.error.issues[0]?.message ?? "بيانات غير صالحة";
-          return json(400, { ok: false, kind: "validation", message });
+          return respond(400, { ok: false, kind: "validation", message });
         }
 
         // Idempotency-Key: same key → same booking / same reference. Accept
