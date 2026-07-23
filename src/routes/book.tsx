@@ -221,11 +221,18 @@ function BookPage() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  // Scroll to top of the wizard card whenever the step changes.
+  // Scroll to top and move focus to the wizard card on every step change
+  // so keyboard/AT users don't have to tab past the page chrome each time.
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.scrollTo({ top: 0, behavior: "smooth" });
+    // Defer to next frame so the new step markup is mounted before focus.
+    const id = window.requestAnimationFrame(() => {
+      stepCardRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(id);
   }, [state.step]);
+
 
   // Auto-recover expired hold: when the 5-minute reservation lapses while
   // the user is past the time picker (steps 7–8), bounce back to step 6
