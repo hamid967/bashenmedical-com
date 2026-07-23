@@ -4,7 +4,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listMyNotifications } from "@/lib/portal/notifications.functions";
-import { ErrorState, EmptyState, SkeletonList } from "@/components/states";
+import { EmptyState, SkeletonList } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Bell } from "lucide-react";
 
@@ -23,8 +24,7 @@ export const Route = createFileRoute("/_authenticated/patient/notifications")({
     ],
   }),
   component: NotifsPage,
-  pendingComponent: () => <SkeletonList rows={5} />,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 5 }),
 });
 
 function NotifsPage() {

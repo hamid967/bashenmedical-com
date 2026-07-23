@@ -4,7 +4,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getMyProfile } from "@/lib/portal/portal.functions";
-import { ErrorState, SkeletonList } from "@/components/states";
+import { SkeletonList } from "@/components/states";
+import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Phone, Mail, IdCard, ArrowLeft } from "lucide-react";
@@ -24,8 +25,7 @@ export const Route = createFileRoute("/_authenticated/patient/profile")({
     ],
   }),
   component: ProfilePage,
-  pendingComponent: () => <SkeletonList rows={3} />,
-  errorComponent: ({ error, reset }) => <ErrorState description={error.message} onRetry={reset} />,
+  ...patientRouteStates({ skeleton: "list", rows: 3 }),
 });
 
 function ProfilePage() {
