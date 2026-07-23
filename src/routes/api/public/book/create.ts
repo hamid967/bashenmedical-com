@@ -319,6 +319,7 @@ export const Route = createFileRoute("/api/public/book/create")({
             return json(409, {
               ok: false,
               kind: "conflict",
+              code: "SLOT_TAKEN",
               message: FRIENDLY_INSERT_MESSAGES.duplicate,
             });
           }
