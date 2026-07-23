@@ -62,6 +62,7 @@ export function NotificationStatusChips({
 
     const poll = async () => {
       attempt += 1;
+      let latest: ChannelStatus[] | null = null;
       try {
         const res = await fetch("/api/public/book/notification-status", {
           method: "POST",
@@ -75,6 +76,7 @@ export function NotificationStatusChips({
             | { ok: true; channels: ChannelStatus[] }
             | { ok: false; message?: string };
           if (!cancelled && j.ok) {
+            latest = j.channels;
             setItems(j.channels);
             setError(null);
           }
@@ -85,11 +87,8 @@ export function NotificationStatusChips({
 
       if (cancelled) return;
       const allDone =
-        items !== null &&
-        items.length > 0 &&
-        items.every((c) => TERMINAL.includes(c.status) || c.status === "unknown");
+        !!latest && latest.length > 0 && latest.every((c) => TERMINAL.includes(c.status));
       if (attempt < MAX_ATTEMPTS && !allDone) {
-        // Backoff: 3s, 3s, 5s, 5s, 8s, 8s, then 10s.
         const delay = attempt <= 2 ? 3000 : attempt <= 4 ? 5000 : attempt <= 6 ? 8000 : 10000;
         timer = setTimeout(poll, delay);
       }
