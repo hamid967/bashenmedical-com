@@ -5,10 +5,11 @@
  * Renders PatientShell around <Outlet />.
  */
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+import { queryOptions, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { PatientShell } from "@/components/patient/PatientShell";
 import { getMyProfile } from "@/lib/portal/portal.functions";
+import { usePatientOfflineCache } from "@/lib/patient/offline-cache";
 import { getMyRoles } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PatientRouteError, PatientRouteNotFound } from "@/components/states/patient-route-states";
