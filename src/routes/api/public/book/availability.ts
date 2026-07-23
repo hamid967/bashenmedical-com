@@ -136,12 +136,10 @@ export const Route = createFileRoute("/api/public/book/availability")({
           doctor_id: url.searchParams.get("doctor_id") || undefined,
           specialty_id: url.searchParams.get("specialty_id") || undefined,
           branch_id: url.searchParams.get("branch_id") || undefined,
+          session: url.searchParams.get("session") || undefined,
         });
         if (!parsed.success) {
-          return json(400, {
-            ok: false,
-            error: parsed.error.issues[0]?.message ?? "invalid_query",
-          });
+          return json(400, { ok: false, error: firstZodErrorCode(parsed.error) });
         }
         const {
           date,
