@@ -60,6 +60,26 @@ export const listAdminAuditLogs = createServerFn({ method: "GET" })
 
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
+    await recordSensitiveAccess({
+      supabase: context.supabase,
+      actorId: context.userId,
+      action: "audit_logs.viewed",
+      entityType: "audit_log",
+      permission: PERMISSIONS.AuditExport,
+      kind: "read",
+      metadata: {
+        row_count: rows?.length ?? 0,
+        total: count ?? 0,
+        filters: {
+          q: data.q ?? null,
+          entity_type: data.entity_type ?? null,
+          action: data.action ?? null,
+          actor_id: data.actor_id ?? null,
+          from: data.from ?? null,
+          to: data.to ?? null,
+        },
+      },
+    });
     return { rows: rows ?? [], total: count ?? 0 };
   });
 
