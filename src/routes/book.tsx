@@ -166,12 +166,17 @@ function BookPage() {
     }),
   );
 
-  // Persist draft to sessionStorage.
+  // Persist draft to sessionStorage with version + timestamp so stale/mismatched
+  // drafts are discarded on next load (see saveDraft / loadDraft).
   useEffect(() => {
-    try {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {}
+    saveDraft(state);
   }, [state]);
+
+  // Focus target: the wizard card container is programmatically focused on
+  // step change so keyboard/AT users start each step at its heading instead
+  // of tabbing all the way from the page header.
+  const stepCardRef = useRef<HTMLDivElement | null>(null);
+
 
   // Explicit step→URL sync helper: bumps state and pushes an entry so the
   // browser Back/Forward buttons walk the wizard naturally. Also called from
