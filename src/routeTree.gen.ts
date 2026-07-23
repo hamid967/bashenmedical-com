@@ -26,6 +26,7 @@ import { Route as CorporateRouteImport } from './routes/corporate'
 import { Route as EmergencyRouteImport } from './routes/emergency'
 import { Route as ExcellenceRouteImport } from './routes/excellence'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as ForbiddenRouteImport } from './routes/forbidden'
 import { Route as HomeCareRouteImport } from './routes/home-care'
 import { Route as InsuranceRouteImport } from './routes/insurance'
 import { Route as InternationalPatientsRouteImport } from './routes/international-patients'
@@ -86,6 +87,13 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedTransitionAlertsRouteImport } from './routes/_authenticated/transition-alerts'
 import { Route as AuthenticatedTransitionsStatsRouteImport } from './routes/_authenticated/transitions-stats'
 import { Route as AccreditationsIdRouteImport } from './routes/accreditations.$id'
+import { Route as AuthIndexRouteImport } from './routes/auth.index'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthRecoveryRouteImport } from './routes/auth.recovery'
+import { Route as AuthRegisterRouteImport } from './routes/auth.register'
+import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
+import { Route as AuthUpdateMobileRouteImport } from './routes/auth.update-mobile'
+import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
 import { Route as BranchesSlugRouteImport } from './routes/branches.$slug'
 import { Route as DesignPortalPrimitivesRouteImport } from './routes/design.portal-primitives'
 import { Route as DesignStorybookRouteImport } from './routes/design.storybook'
@@ -298,6 +306,11 @@ const ExcellenceRoute = ExcellenceRouteImport.update({
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForbiddenRoute = ForbiddenRouteImport.update({
+  id: '/forbidden',
+  path: '/forbidden',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HomeCareRoute = HomeCareRouteImport.update({
@@ -627,6 +640,41 @@ const AccreditationsIdRoute = AccreditationsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AccreditationsRoute,
+} as any)
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthRecoveryRoute = AuthRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSessionExpiredRoute = AuthSessionExpiredRouteImport.update({
+  id: '/session-expired',
+  path: '/session-expired',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthUpdateMobileRoute = AuthUpdateMobileRouteImport.update({
+  id: '/update-mobile',
+  path: '/update-mobile',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthVerifyRoute = AuthVerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
+  getParentRoute: () => AuthRoute,
 } as any)
 const BranchesSlugRoute = BranchesSlugRouteImport.update({
   id: '/$slug',
@@ -1367,7 +1415,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/accreditations': typeof AccreditationsRouteWithChildren
   '/app': typeof AppRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/book': typeof BookRoute
   '/booking-confirmation': typeof BookingConfirmationRoute
   '/branches': typeof BranchesRouteWithChildren
@@ -1379,6 +1427,7 @@ export interface FileRoutesByFullPath {
   '/emergency': typeof EmergencyRoute
   '/excellence': typeof ExcellenceRouteWithChildren
   '/faq': typeof FaqRoute
+  '/forbidden': typeof ForbiddenRoute
   '/home-care': typeof HomeCareRoute
   '/insurance': typeof InsuranceRouteWithChildren
   '/international-patients': typeof InternationalPatientsRoute
@@ -1439,6 +1488,12 @@ export interface FileRoutesByFullPath {
   '/transition-alerts': typeof AuthenticatedTransitionAlertsRoute
   '/transitions-stats': typeof AuthenticatedTransitionsStatsRoute
   '/accreditations/$id': typeof AccreditationsIdRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/recovery': typeof AuthRecoveryRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/auth/session-expired': typeof AuthSessionExpiredRoute
+  '/auth/update-mobile': typeof AuthUpdateMobileRoute
+  '/auth/verify': typeof AuthVerifyRoute
   '/branches/$slug': typeof BranchesSlugRoute
   '/design/portal-primitives': typeof DesignPortalPrimitivesRoute
   '/design/storybook': typeof DesignStorybookRoute
@@ -1457,6 +1512,7 @@ export interface FileRoutesByFullPath {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/auth/': typeof AuthIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
   '/health/': typeof HealthIndexRoute
   '/specialties/': typeof SpecialtiesIndexRoute
@@ -1574,7 +1630,6 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/accreditations': typeof AccreditationsRouteWithChildren
   '/app': typeof AppRoute
-  '/auth': typeof AuthRoute
   '/book': typeof BookRoute
   '/booking-confirmation': typeof BookingConfirmationRoute
   '/branches': typeof BranchesRouteWithChildren
@@ -1586,6 +1641,7 @@ export interface FileRoutesByTo {
   '/emergency': typeof EmergencyRoute
   '/excellence': typeof ExcellenceRouteWithChildren
   '/faq': typeof FaqRoute
+  '/forbidden': typeof ForbiddenRoute
   '/home-care': typeof HomeCareRoute
   '/insurance': typeof InsuranceRouteWithChildren
   '/international-patients': typeof InternationalPatientsRoute
@@ -1643,6 +1699,12 @@ export interface FileRoutesByTo {
   '/transition-alerts': typeof AuthenticatedTransitionAlertsRoute
   '/transitions-stats': typeof AuthenticatedTransitionsStatsRoute
   '/accreditations/$id': typeof AccreditationsIdRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/recovery': typeof AuthRecoveryRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/auth/session-expired': typeof AuthSessionExpiredRoute
+  '/auth/update-mobile': typeof AuthUpdateMobileRoute
+  '/auth/verify': typeof AuthVerifyRoute
   '/branches/$slug': typeof BranchesSlugRoute
   '/design/portal-primitives': typeof DesignPortalPrimitivesRoute
   '/design/storybook': typeof DesignStorybookRoute
@@ -1661,6 +1723,7 @@ export interface FileRoutesByTo {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/auth': typeof AuthIndexRoute
   '/doctors': typeof DoctorsIndexRoute
   '/health': typeof HealthIndexRoute
   '/specialties': typeof SpecialtiesIndexRoute
@@ -1780,7 +1843,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/accreditations': typeof AccreditationsRouteWithChildren
   '/app': typeof AppRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/book': typeof BookRoute
   '/booking-confirmation': typeof BookingConfirmationRoute
   '/branches': typeof BranchesRouteWithChildren
@@ -1792,6 +1855,7 @@ export interface FileRoutesById {
   '/emergency': typeof EmergencyRoute
   '/excellence': typeof ExcellenceRouteWithChildren
   '/faq': typeof FaqRoute
+  '/forbidden': typeof ForbiddenRoute
   '/home-care': typeof HomeCareRoute
   '/insurance': typeof InsuranceRouteWithChildren
   '/international-patients': typeof InternationalPatientsRoute
@@ -1852,6 +1916,12 @@ export interface FileRoutesById {
   '/_authenticated/transition-alerts': typeof AuthenticatedTransitionAlertsRoute
   '/_authenticated/transitions-stats': typeof AuthenticatedTransitionsStatsRoute
   '/accreditations/$id': typeof AccreditationsIdRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/recovery': typeof AuthRecoveryRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/auth/session-expired': typeof AuthSessionExpiredRoute
+  '/auth/update-mobile': typeof AuthUpdateMobileRoute
+  '/auth/verify': typeof AuthVerifyRoute
   '/branches/$slug': typeof BranchesSlugRoute
   '/design/portal-primitives': typeof DesignPortalPrimitivesRoute
   '/design/storybook': typeof DesignStorybookRoute
@@ -1870,6 +1940,7 @@ export interface FileRoutesById {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/auth/': typeof AuthIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
   '/health/': typeof HealthIndexRoute
   '/specialties/': typeof SpecialtiesIndexRoute
@@ -2001,6 +2072,7 @@ export interface FileRouteTypes {
     | '/emergency'
     | '/excellence'
     | '/faq'
+    | '/forbidden'
     | '/home-care'
     | '/insurance'
     | '/international-patients'
@@ -2061,6 +2133,12 @@ export interface FileRouteTypes {
     | '/transition-alerts'
     | '/transitions-stats'
     | '/accreditations/$id'
+    | '/auth/login'
+    | '/auth/recovery'
+    | '/auth/register'
+    | '/auth/session-expired'
+    | '/auth/update-mobile'
+    | '/auth/verify'
     | '/branches/$slug'
     | '/design/portal-primitives'
     | '/design/storybook'
@@ -2079,6 +2157,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/auth/'
     | '/doctors/'
     | '/health/'
     | '/specialties/'
@@ -2196,7 +2275,6 @@ export interface FileRouteTypes {
     | '/about'
     | '/accreditations'
     | '/app'
-    | '/auth'
     | '/book'
     | '/booking-confirmation'
     | '/branches'
@@ -2208,6 +2286,7 @@ export interface FileRouteTypes {
     | '/emergency'
     | '/excellence'
     | '/faq'
+    | '/forbidden'
     | '/home-care'
     | '/insurance'
     | '/international-patients'
@@ -2265,6 +2344,12 @@ export interface FileRouteTypes {
     | '/transition-alerts'
     | '/transitions-stats'
     | '/accreditations/$id'
+    | '/auth/login'
+    | '/auth/recovery'
+    | '/auth/register'
+    | '/auth/session-expired'
+    | '/auth/update-mobile'
+    | '/auth/verify'
     | '/branches/$slug'
     | '/design/portal-primitives'
     | '/design/storybook'
@@ -2283,6 +2368,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/auth'
     | '/doctors'
     | '/health'
     | '/specialties'
@@ -2413,6 +2499,7 @@ export interface FileRouteTypes {
     | '/emergency'
     | '/excellence'
     | '/faq'
+    | '/forbidden'
     | '/home-care'
     | '/insurance'
     | '/international-patients'
@@ -2473,6 +2560,12 @@ export interface FileRouteTypes {
     | '/_authenticated/transition-alerts'
     | '/_authenticated/transitions-stats'
     | '/accreditations/$id'
+    | '/auth/login'
+    | '/auth/recovery'
+    | '/auth/register'
+    | '/auth/session-expired'
+    | '/auth/update-mobile'
+    | '/auth/verify'
     | '/branches/$slug'
     | '/design/portal-primitives'
     | '/design/storybook'
@@ -2491,6 +2584,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/auth/'
     | '/doctors/'
     | '/health/'
     | '/specialties/'
@@ -2610,7 +2704,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccreditationsRoute: typeof AccreditationsRouteWithChildren
   AppRoute: typeof AppRoute
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   BookRoute: typeof BookRoute
   BookingConfirmationRoute: typeof BookingConfirmationRoute
   BranchesRoute: typeof BranchesRouteWithChildren
@@ -2622,6 +2716,7 @@ export interface RootRouteChildren {
   EmergencyRoute: typeof EmergencyRoute
   ExcellenceRoute: typeof ExcellenceRouteWithChildren
   FaqRoute: typeof FaqRoute
+  ForbiddenRoute: typeof ForbiddenRoute
   HomeCareRoute: typeof HomeCareRoute
   InsuranceRoute: typeof InsuranceRouteWithChildren
   InternationalPatientsRoute: typeof InternationalPatientsRoute
@@ -2811,6 +2906,13 @@ declare module '@tanstack/react-router' {
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forbidden': {
+      id: '/forbidden'
+      path: '/forbidden'
+      fullPath: '/forbidden'
+      preLoaderRoute: typeof ForbiddenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/home-care': {
@@ -3232,6 +3334,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/accreditations/$id'
       preLoaderRoute: typeof AccreditationsIdRouteImport
       parentRoute: typeof AccreditationsRoute
+    }
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/recovery': {
+      id: '/auth/recovery'
+      path: '/recovery'
+      fullPath: '/auth/recovery'
+      preLoaderRoute: typeof AuthRecoveryRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/session-expired': {
+      id: '/auth/session-expired'
+      path: '/session-expired'
+      fullPath: '/auth/session-expired'
+      preLoaderRoute: typeof AuthSessionExpiredRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/update-mobile': {
+      id: '/auth/update-mobile'
+      path: '/update-mobile'
+      fullPath: '/auth/update-mobile'
+      preLoaderRoute: typeof AuthUpdateMobileRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/auth/verify': {
+      id: '/auth/verify'
+      path: '/verify'
+      fullPath: '/auth/verify'
+      preLoaderRoute: typeof AuthVerifyRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/branches/$slug': {
       id: '/branches/$slug'
@@ -4486,6 +4637,28 @@ const AccreditationsRouteWithChildren = AccreditationsRoute._addFileChildren(
   AccreditationsRouteChildren,
 )
 
+interface AuthRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRecoveryRoute: typeof AuthRecoveryRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+  AuthSessionExpiredRoute: typeof AuthSessionExpiredRoute
+  AuthUpdateMobileRoute: typeof AuthUpdateMobileRoute
+  AuthVerifyRoute: typeof AuthVerifyRoute
+  AuthIndexRoute: typeof AuthIndexRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRecoveryRoute: AuthRecoveryRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+  AuthSessionExpiredRoute: AuthSessionExpiredRoute,
+  AuthUpdateMobileRoute: AuthUpdateMobileRoute,
+  AuthVerifyRoute: AuthVerifyRoute,
+  AuthIndexRoute: AuthIndexRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 interface BranchesRouteChildren {
   BranchesSlugRoute: typeof BranchesSlugRoute
 }
@@ -4568,7 +4741,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccreditationsRoute: AccreditationsRouteWithChildren,
   AppRoute: AppRoute,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   BookRoute: BookRoute,
   BookingConfirmationRoute: BookingConfirmationRoute,
   BranchesRoute: BranchesRouteWithChildren,
@@ -4580,6 +4753,7 @@ const rootRouteChildren: RootRouteChildren = {
   EmergencyRoute: EmergencyRoute,
   ExcellenceRoute: ExcellenceRouteWithChildren,
   FaqRoute: FaqRoute,
+  ForbiddenRoute: ForbiddenRoute,
   HomeCareRoute: HomeCareRoute,
   InsuranceRoute: InsuranceRouteWithChildren,
   InternationalPatientsRoute: InternationalPatientsRoute,
