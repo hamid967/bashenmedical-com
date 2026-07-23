@@ -58,6 +58,8 @@ function AuditLogsPage() {
   const rolesFn = useServerFn(getMyRoles);
   const listFn = useServerFn(listAdminAuditLogs);
   const facetsFn = useServerFn(listAuditFacets);
+  const { can } = usePermissions();
+  const canExport = can(PERMISSIONS.AuditExport);
 
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => rolesFn() });
   const isStaff = useMemo(() => {
