@@ -233,7 +233,21 @@
     "copiedShort": "Copied",
     "detailsCopyStamp": "Copied at",
     "detailsHeader": "🏥 Booking confirmation — Baeshen Medical Complex",
-    "detailsFooter": "Keep the reference for any inquiry."
+    "detailsFooter": "Keep the reference for any inquiry.",
+    "notifTitle": "Notification delivery status",
+    "notifAutoRefresh": "Auto-refreshing",
+    "notifHint": "Delivery can take up to two minutes. We'll keep refreshing automatically.",
+    "notifChannel": {
+      "sms": "SMS",
+      "whatsapp": "WhatsApp",
+      "email": "Email"
+    },
+    "notifStatus": {
+      "sent": "Delivered",
+      "failed": "Failed",
+      "pending": "Sending",
+      "unknown": "Unavailable"
+    }
   },
   "summary": {
     "title": "Booking summary",

@@ -159,5 +159,21 @@
   "a11y": {
     "stepAnnounce": "قدم {{current}} از {{total}}: {{title}}",
     "charsCount": "{{count}} از {{max}} حروف"
+  },
+  "success": {
+    "notifTitle": "اطلاعات کی ترسیل کی حیثیت",
+    "notifAutoRefresh": "خودکار تازہ کاری",
+    "notifHint": "ترسیل میں دو منٹ لگ سکتے ہیں۔ ہم خودکار طور پر تازہ کرتے رہیں گے۔",
+    "notifChannel": {
+      "sms": "ایس ایم ایس",
+      "whatsapp": "واٹس ایپ",
+      "email": "ای میل"
+    },
+    "notifStatus": {
+      "sent": "پہنچ گیا",
+      "failed": "ناکام",
+      "pending": "بھیجا جا رہا ہے",
+      "unknown": "دستیاب نہیں"
+    }
   }
 }
