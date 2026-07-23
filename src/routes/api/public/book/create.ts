@@ -313,7 +313,9 @@ export const Route = createFileRoute("/api/public/book/create")({
           } catch (e) {
             logBook("rpc.replay.fastpath.error", {
               error: (e as Error)?.message ?? String(e),
+              error_code: "FASTPATH_LOOKUP_ERROR",
             });
+
             /* Fall through — the RPC will handle replay authoritatively. */
           }
         }
