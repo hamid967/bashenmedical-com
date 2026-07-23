@@ -115,13 +115,6 @@ export function ActiveSubjectSwitcher({ lang = "ar" }: { lang?: "ar" | "en" }) {
                 : lang === "ar"
                   ? "إدارة أفراد الأسرة والصلاحيات"
                   : "Manage family and permissions"}
-            {isLoading
-              ? lang === "ar"
-                ? "جارٍ التحميل…"
-                : "Loading…"
-              : lang === "ar"
-                ? "إدارة أفراد الأسرة"
-                : "Manage family"}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
