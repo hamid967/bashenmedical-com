@@ -25,13 +25,13 @@ import type { PermissionKey } from "./permissions";
 // The client type is intentionally loose so this file can be imported by
 // both `.functions.ts` server fns and `.server.ts` helpers without pulling
 // in Supabase's generated types at compile time.
-type Sb = {
-  rpc: (
-    fn: string,
-    args: Record<string, unknown>,
-  ) => Promise<{ data: unknown; error: { message: string } | null }>;
-  from: (table: string) => any;
-};
+// The client type is intentionally `any` so this file can be imported by
+// both `.functions.ts` server fns (which receive Supabase's fully-typed
+// client from `requireSupabaseAuth`) and `.server.ts` helpers, without
+// pulling in the generated `Database` type or fighting its literal
+// `rpc<FnName extends ...>` overloads.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Sb = any;
 
 export type EnforceCtx = { supabase: Sb; userId: string };
 
