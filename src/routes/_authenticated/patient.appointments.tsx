@@ -1,12 +1,13 @@
 /**
- * Phase 5 — /patient/appointments — Upcoming / Pending / Previous / Cancelled.
- * Reuses existing portal server functions.
+ * Phase 5 — /patient/appointments — Upcoming / Pending / Previous / Cancelled
+ * with full action toolbar (confirm, reschedule, cancel, digital check-in,
+ * directions, add-to-calendar, download confirmation, request follow-up).
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { listMyAppointments } from "@/lib/portal/appointments.functions";
-import { EmptyState, SkeletonList } from "@/components/states";
+import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
-import { Calendar, MapPin, Download, RefreshCw, XCircle, CheckCircle2, ArrowLeft } from "lucide-react";
+import { Calendar } from "lucide-react";
+import {
+  AppointmentActions,
+  type AppointmentActionsRow,
+} from "@/components/patient/AppointmentActions";
 
 const appointmentsQuery = queryOptions({
   queryKey: ["patient", "appointments"],
@@ -35,16 +40,30 @@ export const Route = createFileRoute("/_authenticated/patient/appointments")({
   ...patientRouteStates({ skeleton: "list", rows: 6 }),
 });
 
+const STATUS_LABEL: Record<string, string> = {
+  new: "جديد",
+  confirmed: "مؤكد",
+  pending: "قيد الانتظار",
+  waitlist: "قائمة انتظار",
+  completed: "منتهي",
+  cancelled: "ملغى",
+  no_show: "لم يحضر",
+};
+
 function AppointmentsPage() {
   const { data } = useSuspenseQuery(appointmentsQuery);
-  const items = data?.items ?? [];
+  const items = (data?.items ?? []) as AppointmentActionsRow[];
   const [tab, setTab] = useState("upcoming");
 
   const now = new Date().toISOString().slice(0, 10);
   const bucket = {
-    upcoming: items.filter((a) => a.appointment_date >= now && !["cancelled", "no_show"].includes(a.status)),
+    upcoming: items.filter(
+      (a) => a.appointment_date >= now && !["cancelled", "no_show", "completed"].includes(a.status),
+    ),
     pending: items.filter((a) => ["pending", "waitlist"].includes(a.status)),
-    previous: items.filter((a) => a.appointment_date < now && a.status !== "cancelled"),
+    previous: items.filter(
+      (a) => a.appointment_date < now && a.status !== "cancelled",
+    ),
     cancelled: items.filter((a) => a.status === "cancelled"),
   };
 
@@ -79,49 +98,31 @@ function AppointmentsPage() {
   );
 }
 
-function AppointmentRow({ apt }: { apt: Awaited<ReturnType<typeof listMyAppointments>>["items"][number] }) {
+function AppointmentRow({ apt }: { apt: AppointmentActionsRow }) {
   return (
     <Card>
-      <CardContent className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between">
+      <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start gap-3">
           <div className="rounded-lg bg-primary/10 p-2 text-primary">
             <Calendar className="h-5 w-5" aria-hidden />
           </div>
-          <div>
-            <div className="font-semibold">{apt.doctor?.name_ar ?? "طبيب"}</div>
+          <div className="flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="font-semibold">{apt.doctor?.name_ar ?? "طبيب"}</div>
+              <Badge variant="outline">{STATUS_LABEL[apt.status] ?? apt.status}</Badge>
+            </div>
             <div className="text-sm text-muted-foreground">
               {format(new Date(apt.appointment_date), "EEEE d MMMM yyyy", { locale: ar })}
               {apt.appointment_time ? ` · ${apt.appointment_time.slice(0, 5)}` : ""}
             </div>
             <div className="text-xs text-muted-foreground">
-              {apt.branch?.name_ar ?? ""} {apt.reference_number ? `· ${apt.reference_number}` : ""}
+              {apt.branch?.name_ar ?? ""}
+              {apt.reference_number ? ` · ${apt.reference_number}` : ""}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{apt.status}</Badge>
-          <Button size="sm" variant="outline" asChild>
-            <a
-              href={
-                apt.branch?.latitude && apt.branch?.longitude
-                  ? `https://www.google.com/maps/dir/?api=1&destination=${apt.branch.lat},${apt.branch.lng}`
-                  : "#"
-              }
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <MapPin className="me-1 h-3 w-3" aria-hidden />
-              اتجاهات
-            </a>
-          </Button>
-          <Button size="sm" variant="outline" asChild>
-            <a href={`/portal/orders/appointment/${apt.id}`}>
-              التفاصيل
-              <ArrowLeft className="ms-1 h-3 w-3" aria-hidden />
-            </a>
-          </Button>
-        </div>
+        <AppointmentActions apt={apt} />
       </CardContent>
     </Card>
   );
