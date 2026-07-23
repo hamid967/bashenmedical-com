@@ -210,6 +210,14 @@ function FamilyPage() {
         </Button>
       </header>
 
+      {deleteMut.error ? (
+        <InlineStateBanner
+          error={deleteMut.error}
+          onRetry={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
+        />
+      ) : null}
+
+
       {items.length === 0 ? (
         <EmptyState
           title="لا يوجد أفراد أسرة مضافون"
