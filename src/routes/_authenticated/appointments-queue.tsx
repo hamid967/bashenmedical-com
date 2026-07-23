@@ -12,6 +12,7 @@ import {
   Filter,
   Loader2,
   Phone,
+  QrCode,
   RefreshCw,
   Search,
   User,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 import { listAppointments, updateAppointmentStatus } from "@/lib/admin.functions";
 import { listAppointmentTraces } from "@/lib/admin/booking-trace.functions";
+import { AppointmentQrDialog } from "@/components/booking/AppointmentQrDialog";
 
 
 export const Route = createFileRoute("/_authenticated/appointments-queue")({
@@ -42,6 +44,7 @@ type Status = "new" | "confirmed" | "completed" | "cancelled" | "no_show";
 
 type Row = {
   id: string;
+  reference_number: string | null;
   patient_name: string;
   patient_phone: string;
   appointment_date: string;
@@ -83,8 +86,14 @@ const SCOPE_META: Record<Scope, { label: string; desc: string }> = {
 
 const SCOPES: Scope[] = ["upcoming", "pending", "today", "past", "all"];
 
-function shortRef(id: string) {
-  return "BAA-" + id.replace(/-/g, "").slice(0, 8).toUpperCase();
+/**
+ * Public-facing reference used in QR codes and staff communication.
+ * Prefers the persisted `reference_number` (BMC-YYYYMMDD-XXXX). Falls
+ * back to a legacy short code derived from the row id only when the
+ * database column is empty for older rows.
+ */
+function publicRef(row: { id: string; reference_number: string | null }) {
+  return row.reference_number ?? "BAA-" + row.id.replace(/-/g, "").slice(0, 8).toUpperCase();
 }
 
 function todayIso() {
@@ -174,7 +183,7 @@ function AppointmentsQueuePage() {
       return (
         r.patient_name.toLowerCase().includes(query) ||
         r.patient_phone.includes(query) ||
-        shortRef(r.id).toLowerCase().includes(query) ||
+        publicRef(r).toLowerCase().includes(query) ||
         (r.reason ?? "").toLowerCase().includes(query)
       );
     });
@@ -220,7 +229,7 @@ function AppointmentsQueuePage() {
     const lines = filtered.map((r) => {
       const tr = traces[r.id];
       return [
-        shortRef(r.id),
+        publicRef(r),
         r.patient_name,
         r.patient_phone,
         r.appointment_date,
@@ -376,7 +385,7 @@ function AppointmentsQueuePage() {
                     onClick={() => setSelected(r)}
                     className="border-t border-border cursor-pointer hover:bg-muted/40 transition"
                   >
-                    <td className="p-3 font-mono text-xs font-bold">{shortRef(r.id)}</td>
+                    <td className="p-3 font-mono text-xs font-bold">{publicRef(r)}</td>
                     <td className="p-3 font-semibold">{r.patient_name}</td>
                     <td className="p-3 font-mono text-xs" dir="ltr">
                       {r.patient_phone}
@@ -518,7 +527,9 @@ function DetailDrawer({
   onClose: () => void;
   onChanged: () => void;
 }) {
-  const ref = shortRef(row.id);
+  const ref = publicRef(row);
+  const canQr = !!row.reference_number;
+  const [qrOpen, setQrOpen] = useState(false);
 
   const updateStatus = useServerFn(updateAppointmentStatus);
   const qc = useQueryClient();
@@ -599,18 +610,30 @@ function DetailDrawer({
           <div className="rounded-xl border-2 border-primary/30 bg-gradient-to-br from-primary/10 to-accent/5 p-4">
             <div className="flex items-center justify-between">
               <span className="text-xs text-muted-foreground">رقم الطلب</span>
-              <button
-                type="button"
-                onClick={() => {
-                  navigator.clipboard?.writeText(ref).then(
-                    () => toast.success("تم نسخ رقم الطلب"),
-                    () => toast.error("تعذّر النسخ"),
-                  );
-                }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
-              >
-                <Copy className="h-3 w-3" /> نسخ
-              </button>
+              <div className="flex items-center gap-3">
+                {canQr && (
+                  <button
+                    type="button"
+                    onClick={() => setQrOpen(true)}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                    title="عرض رمز التحقق (QR)"
+                  >
+                    <QrCode className="h-3 w-3" /> QR
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(ref).then(
+                      () => toast.success("تم نسخ رقم الطلب"),
+                      () => toast.error("تعذّر النسخ"),
+                    );
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
+                >
+                  <Copy className="h-3 w-3" /> نسخ
+                </button>
+              </div>
             </div>
             <div className="mt-1 text-xl font-mono font-black tracking-wider">{ref}</div>
             <div className="mt-2">
@@ -773,6 +796,11 @@ function DetailDrawer({
           )}
         </div>
       </div>
+      <AppointmentQrDialog
+        reference={row.reference_number}
+        open={qrOpen}
+        onClose={() => setQrOpen(false)}
+      />
     </div>
   );
 }

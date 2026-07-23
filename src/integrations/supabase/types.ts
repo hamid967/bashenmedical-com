@@ -6861,6 +6861,21 @@ export type Database = {
         Returns: boolean
       }
       user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
+      verify_appointment_by_reference: {
+        Args: { _phone_last4: string; _reference: string }
+        Returns: {
+          appointment_date: string
+          appointment_time: string
+          branch_name_ar: string
+          branch_name_en: string
+          doctor_name_ar: string
+          doctor_name_en: string
+          reference: string
+          specialty_name_ar: string
+          specialty_name_en: string
+          status: string
+        }[]
+      }
     }
     Enums: {
       ai_scope: "guest" | "patient" | "admin" | "super_admin"

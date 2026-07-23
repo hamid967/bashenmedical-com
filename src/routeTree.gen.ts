@@ -43,6 +43,7 @@ import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TelemedicineRouteImport } from './routes/telemedicine'
 import { Route as TrackRouteImport } from './routes/track'
+import { Route as VerifyRouteImport } from './routes/verify'
 import { Route as WaitlistRouteImport } from './routes/waitlist'
 import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
@@ -194,6 +195,7 @@ import { Route as AuthenticatedOwnerServicesIndexRouteImport } from './routes/_a
 import { Route as AuthenticatedOwnerServicesIdRouteImport } from './routes/_authenticated/owner.services.$id'
 import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './routes/_authenticated/portal.reports.downloads'
 import { Route as ApiPublicAiStreamMetricsRouteImport } from './routes/api/public/ai/stream-metrics'
+import { Route as ApiPublicAppointmentsVerifyRouteImport } from './routes/api/public/appointments/verify'
 import { Route as ApiPublicBookAvailabilityRouteImport } from './routes/api/public/book/availability'
 import { Route as ApiPublicBookCancelRouteImport } from './routes/api/public/book/cancel'
 import { Route as ApiPublicBookCreateRouteImport } from './routes/api/public/book/create'
@@ -391,6 +393,11 @@ const TelemedicineRoute = TelemedicineRouteImport.update({
 const TrackRoute = TrackRouteImport.update({
   id: '/track',
   path: '/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VerifyRoute = VerifyRouteImport.update({
+  id: '/verify',
+  path: '/verify',
   getParentRoute: () => rootRouteImport,
 } as any)
 const WaitlistRoute = WaitlistRouteImport.update({
@@ -1243,6 +1250,12 @@ const ApiPublicAiStreamMetricsRoute =
     path: '/api/public/ai/stream-metrics',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicAppointmentsVerifyRoute =
+  ApiPublicAppointmentsVerifyRouteImport.update({
+    id: '/api/public/appointments/verify',
+    path: '/api/public/appointments/verify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicBookAvailabilityRoute =
   ApiPublicBookAvailabilityRouteImport.update({
     id: '/api/public/book/availability',
@@ -1444,6 +1457,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
+  '/verify': typeof VerifyRoute
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -1593,6 +1607,7 @@ export interface FileRoutesByFullPath {
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
+  '/api/public/appointments/verify': typeof ApiPublicAppointmentsVerifyRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1658,6 +1673,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
+  '/verify': typeof VerifyRoute
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -1804,6 +1820,7 @@ export interface FileRoutesByTo {
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
+  '/api/public/appointments/verify': typeof ApiPublicAppointmentsVerifyRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -1872,6 +1889,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
+  '/verify': typeof VerifyRoute
   '/waitlist': typeof WaitlistRoute
   '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
   '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -2021,6 +2039,7 @@ export interface FileRoutesById {
   '/_authenticated/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
   '/_authenticated/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
+  '/api/public/appointments/verify': typeof ApiPublicAppointmentsVerifyRoute
   '/api/public/book/availability': typeof ApiPublicBookAvailabilityRoute
   '/api/public/book/cancel': typeof ApiPublicBookCancelRoute
   '/api/public/book/create': typeof ApiPublicBookCreateRoute
@@ -2089,6 +2108,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/telemedicine'
     | '/track'
+    | '/verify'
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -2238,6 +2258,7 @@ export interface FileRouteTypes {
     | '/owner/services/$id'
     | '/portal/reports/downloads'
     | '/api/public/ai/stream-metrics'
+    | '/api/public/appointments/verify'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2303,6 +2324,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/telemedicine'
     | '/track'
+    | '/verify'
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -2449,6 +2471,7 @@ export interface FileRouteTypes {
     | '/owner/services/$id'
     | '/portal/reports/downloads'
     | '/api/public/ai/stream-metrics'
+    | '/api/public/appointments/verify'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2516,6 +2539,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/telemedicine'
     | '/track'
+    | '/verify'
     | '/waitlist'
     | '/.mcp/list-tools'
     | '/.well-known/oauth-protected-resource'
@@ -2665,6 +2689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner/services/$id'
     | '/_authenticated/portal/reports/downloads'
     | '/api/public/ai/stream-metrics'
+    | '/api/public/appointments/verify'
     | '/api/public/book/availability'
     | '/api/public/book/cancel'
     | '/api/public/book/create'
@@ -2733,6 +2758,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TelemedicineRoute: typeof TelemedicineRoute
   TrackRoute: typeof TrackRoute
+  VerifyRoute: typeof VerifyRoute
   WaitlistRoute: typeof WaitlistRoute
   Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
   Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
@@ -2759,6 +2785,7 @@ export interface RootRouteChildren {
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
   ApiPublicAiStreamMetricsRoute: typeof ApiPublicAiStreamMetricsRoute
+  ApiPublicAppointmentsVerifyRoute: typeof ApiPublicAppointmentsVerifyRoute
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
   ApiPublicBookCancelRoute: typeof ApiPublicBookCancelRoute
   ApiPublicBookCreateRoute: typeof ApiPublicBookCreateRoute
@@ -3025,6 +3052,13 @@ declare module '@tanstack/react-router' {
       path: '/track'
       fullPath: '/track'
       preLoaderRoute: typeof TrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/verify': {
+      id: '/verify'
+      path: '/verify'
+      fullPath: '/verify'
+      preLoaderRoute: typeof VerifyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/waitlist': {
@@ -4084,6 +4118,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicAiStreamMetricsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/appointments/verify': {
+      id: '/api/public/appointments/verify'
+      path: '/api/public/appointments/verify'
+      fullPath: '/api/public/appointments/verify'
+      preLoaderRoute: typeof ApiPublicAppointmentsVerifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/book/availability': {
       id: '/api/public/book/availability'
       path: '/api/public/book/availability'
@@ -4770,6 +4811,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TelemedicineRoute: TelemedicineRoute,
   TrackRoute: TrackRoute,
+  VerifyRoute: VerifyRoute,
   WaitlistRoute: WaitlistRoute,
   Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
   Char91DotwellKnownChar93OauthProtectedResourceRoute:
@@ -4797,6 +4839,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiChatRoute: ApiAiChatRoute,
   ApiPortalAiChatRoute: ApiPortalAiChatRoute,
   ApiPublicAiStreamMetricsRoute: ApiPublicAiStreamMetricsRoute,
+  ApiPublicAppointmentsVerifyRoute: ApiPublicAppointmentsVerifyRoute,
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
   ApiPublicBookCancelRoute: ApiPublicBookCancelRoute,
   ApiPublicBookCreateRoute: ApiPublicBookCreateRoute,
