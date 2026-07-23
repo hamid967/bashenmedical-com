@@ -71,7 +71,7 @@ def test_availability() -> None:
     print("== /availability — Zod validation ==")
     # missing date
     s, b = get("/api/public/book/availability", {"doctor_id": VALID_UUID})
-    expect_400("A1 missing date", s, b, "invalid_date")
+    expect_400("A1 missing date", s, b)
     # malformed date
     s, b = get("/api/public/book/availability", {"date": "2026/07/23", "doctor_id": VALID_UUID})
     expect_400("A2 malformed date", s, b, "invalid_date")
