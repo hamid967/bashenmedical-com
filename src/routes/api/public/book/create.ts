@@ -99,8 +99,11 @@ type InsuranceInput = {
 // Compute insurance patch (estimate cost via existing RPC). Result is merged
 // into the JSONB payload passed to confirm_appointment_booking. Failure to
 // estimate must not block the booking — we persist `pending` status.
+// `supa` is typed loosely: some RPCs used here aren't in the generated Database
+// type until types regenerate after this migration.
 async function buildInsurancePatch(
-  supa: ReturnType<typeof createClient>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  supa: any,
   data: InsuranceInput,
 ): Promise<Record<string, unknown>> {
   const providerId = data.insurance_provider_id ?? null;
