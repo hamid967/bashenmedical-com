@@ -33,7 +33,10 @@ const CSP = [
   `img-src 'self' data: blob: https:`,
   `media-src 'self' data: blob: https:`,
   `connect-src 'self' ${SUPABASE_ORIGIN} ${SUPABASE_WSS} https://accounts.google.com https://www.google-analytics.com https://*.lovable.app https://*.lovable.dev`,
-  `frame-src 'self' https://accounts.google.com https://www.google.com`,
+  // frame-src is origin-based (paths aren't enforceable); www.google.com covers
+  // /maps/embed, and maps.google.com is added because Google Maps embeds may
+  // redirect between the two hosts.
+  `frame-src 'self' https://accounts.google.com https://www.google.com https://maps.google.com`,
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",
