@@ -17,17 +17,15 @@ import {
 
 function classify(error: unknown): "offline" | "session" | "forbidden" | "error" {
   if (typeof navigator !== "undefined" && navigator.onLine === false) return "offline";
-  const msg =
-    (error &&
-      typeof error === "object" &&
-      "message" in error &&
-      String((error as { message?: unknown }).message ?? "")) ||
-    String(error ?? "");
+  const rawMsg =
+    error && typeof error === "object" && "message" in error
+      ? String((error as { message?: unknown }).message ?? "")
+      : String(error ?? "");
   const status =
-    (error && typeof error === "object" && "status" in error
+    error && typeof error === "object" && "status" in error
       ? Number((error as { status?: unknown }).status)
-      : undefined) ?? undefined;
-  const m = msg.toLowerCase();
+      : undefined;
+  const m = rawMsg.toLowerCase();
   if (
     status === 401 ||
     m.includes("unauthorized") ||
