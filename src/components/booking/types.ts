@@ -114,6 +114,10 @@ export const STORAGE_KEY = "booking:draft";
  */
 export const DRAFT_VERSION = 5;
 export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+/** Show an expiry-warning banner when the persisted draft has this much or
+ *  less remaining before expiresAt. Long enough for the user to react on
+ *  mobile, short enough that it isn't nagging early in the day. */
+export const DRAFT_EXPIRY_WARN_MS = 30 * 60 * 1000;
 
 export type DraftEnvelope = {
   version: number;
@@ -158,6 +162,23 @@ export function clearDraft(): void {
     sessionStorage.removeItem(STORAGE_KEY);
   } catch {
     /* ignore */
+  }
+}
+
+/** Read the current draft's expiresAt (epoch ms), or null when no valid
+ *  envelope exists. Used to drive the "your draft is about to expire" UI
+ *  without duplicating the parse/validation in loadDraft. */
+export function getDraftExpiresAt(): number | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isEnvelope(parsed)) return null;
+    if (parsed.version !== DRAFT_VERSION) return null;
+    return parsed.expiresAt;
+  } catch {
+    return null;
   }
 }
 

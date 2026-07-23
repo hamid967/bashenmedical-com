@@ -35,7 +35,8 @@ import {
   reducer,
   saveDraft,
   clearDraft,
-
+  getDraftExpiresAt,
+  DRAFT_EXPIRY_WARN_MS,
   validatePatient,
   validateInsurance,
   maxReachableStep,
@@ -226,6 +227,34 @@ function BookPage() {
   useEffect(() => {
     saveDraft(state);
   }, [state]);
+
+  /* ---------------- Draft expiry: warn early, purge sensitive state on hit ----
+   * The draft envelope carries an `expiresAt`. We poll it every 30s so the UI
+   * can surface a warning before the cutoff, and — the moment it lapses —
+   * strip sensitive OTP state, release any active hold, and route the user
+   * back to step 1. Polling instead of a single setTimeout keeps the warning
+   * accurate across sleep/wake and tab-focus resumes.                    */
+  const [draftExpiresAt, setDraftExpiresAt] = useState<number | null>(() =>
+    getDraftExpiresAt(),
+  );
+  useEffect(() => {
+    // Refresh the cached expiresAt on every state change (save just ran).
+    setDraftExpiresAt(getDraftExpiresAt());
+  }, [state]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const tick = () => setDraftExpiresAt(getDraftExpiresAt());
+    const id = window.setInterval(tick, 30_000);
+    const onFocus = () => tick();
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      window.clearInterval(id);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
+  }, []);
+
 
   // Focus target: the wizard card container is programmatically focused on
   // step change so keyboard/AT users start each step at its heading instead
@@ -786,11 +815,20 @@ function BookPage() {
   }
 
 
-  function handleReset() {
+  /**
+   * Clean restart of the wizard. On top of clearing local draft/result state
+   * we also release any active server-side slot hold and drop sensitive OTP
+   * artifacts (verificationChallengeId, verifiedPhone) so a fresh flow can't
+   * inherit a verification that no longer maps to the new patient/phone.
+   * `silent` skips the confirm prompt for programmatic resets (draft expiry).
+   */
+  function handleReset(opts: { silent?: boolean } = {}) {
     // Guard against accidental taps that would drop the reference/QR forever.
-    if (typeof window !== "undefined" && result?.reference) {
+    if (!opts.silent && typeof window !== "undefined" && result?.reference) {
       if (!window.confirm(t("page.resetConfirm"))) return;
     }
+    // Release the server-side hold before we drop its id from state.
+    if (slotHold.holdId) void releaseHold(slotHold.holdId);
     setResult(null);
     setErrorMsg(null);
     setErrorKind("unknown");
@@ -805,6 +843,22 @@ function BookPage() {
     // Explicit step=1 — otherwise the zod validator defaults `step` to 0.
     navigate({ to: "/book", search: { step: "service" } });
   }
+
+  // Auto-purge on draft expiry: strip sensitive OTP state, release hold,
+  // toast the user, and drop them back to step 1 without a confirm prompt.
+  useEffect(() => {
+    if (!draftExpiresAt) return;
+    if (Date.now() < draftExpiresAt) return;
+    toast.info(
+      t(
+        "page.draftExpiredToast",
+        "انتهت صلاحية مسودة الحجز — تم البدء من جديد.",
+      ),
+    );
+    handleReset({ silent: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draftExpiresAt]);
+
 
   const STEPS = [
     t("steps.service"),
@@ -876,6 +930,41 @@ function BookPage() {
             </div>
           </div>
         )}
+
+        {/* Draft-expiry warning: only visible when a draft is close to its
+            24h cutoff AND the user is mid-flow. Restart releases the hold
+            and clears sensitive OTP state; Extend re-saves to reset the TTL. */}
+        {state.step > 1 &&
+          state.step < SUCCESS_STEP &&
+          draftExpiresAt !== null &&
+          draftExpiresAt - Date.now() <= DRAFT_EXPIRY_WARN_MS &&
+          draftExpiresAt - Date.now() > 0 && (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex flex-wrap items-center gap-3 justify-between"
+            >
+              <span>
+                {t(
+                  "page.draftExpiringSoon",
+                  "ستنتهي صلاحية مسودة الحجز خلال {{minutes}} دقيقة.",
+                  { minutes: Math.max(1, Math.round((draftExpiresAt - Date.now()) / 60_000)) },
+                )}
+              </span>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => saveDraft(state) /* stamps a fresh expiresAt */}
+                >
+                  {t("page.draftExtend", "تمديد")}
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => handleReset({ silent: true })}>
+                  {t("page.restartClean", "إعادة البدء")}
+                </Button>
+              </div>
+            </div>
+          )}
 
         <div
           className={`mt-6 grid gap-6 ${state.step >= 2 && state.step <= 8 ? "md:grid-cols-[1fr,300px]" : ""}`}
