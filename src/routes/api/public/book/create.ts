@@ -313,7 +313,9 @@ export const Route = createFileRoute("/api/public/book/create")({
           } catch (e) {
             logBook("rpc.replay.fastpath.error", {
               error: (e as Error)?.message ?? String(e),
+              error_code: "FASTPATH_LOOKUP_ERROR",
             });
+
             /* Fall through — the RPC will handle replay authoritatively. */
           }
         }
@@ -338,6 +340,9 @@ export const Route = createFileRoute("/api/public/book/create")({
                 String(r.appointment_time).slice(0, 5) === timeHHMM,
             );
             if (clash) {
+              logBook("fastpath.conflict", {
+                error_code: "SLOT_TAKEN",
+              });
               return respond(409, {
                 ok: false,
                 kind: "conflict",
@@ -349,6 +354,7 @@ export const Route = createFileRoute("/api/public/book/create")({
             /* Fall through — RPC UNIQUE INDEX still guards atomically. */
           }
         }
+
 
         // Build the JSONB payload for the RPC. All non-provided fields are
         // omitted so the function's NULLIF/COALESCE branches apply.
@@ -398,7 +404,9 @@ export const Route = createFileRoute("/api/public/book/create")({
             pg_code: err.code ?? null,
             pg_message: err.message ?? null,
             dup_on_idempotency_key: dupOnIdemKey,
+            error_code: isDup ? "SLOT_TAKEN" : `DB_ERROR${err.code ? `:${err.code}` : ""}`,
           });
+
 
           // Idempotency-key race: another concurrent request with the same
           // key already inserted — replay its reference.
@@ -422,7 +430,9 @@ export const Route = createFileRoute("/api/public/book/create")({
             } catch (e) {
               logBook("rpc.replay.race.error", {
                 error: (e as Error)?.message ?? String(e),
+                error_code: "REPLAY_RACE_ERROR",
               });
+
               /* fall through */
             }
           }

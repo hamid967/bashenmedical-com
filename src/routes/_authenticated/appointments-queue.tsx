@@ -20,6 +20,8 @@ import {
   XCircle,
 } from "lucide-react";
 import { listAppointments, updateAppointmentStatus } from "@/lib/admin.functions";
+import { listAppointmentTraces } from "@/lib/admin/booking-trace.functions";
+
 
 export const Route = createFileRoute("/_authenticated/appointments-queue")({
   head: () => ({
@@ -126,6 +128,7 @@ function scopePredicate(scope: Scope, r: Row): boolean {
 
 function AppointmentsQueuePage() {
   const list = useServerFn(listAppointments);
+  const tracesFn = useServerFn(listAppointmentTraces);
   const { data, isLoading, isFetching, refetch, error } = useQuery({
     queryKey: ["admin", "appointments-queue"],
     queryFn: () => list(),
@@ -138,6 +141,26 @@ function AppointmentsQueuePage() {
   const [selected, setSelected] = useState<Row | null>(null);
 
   const rows = (data ?? []) as Row[];
+
+  const traceQ = useQuery({
+    queryKey: [
+      "admin",
+      "appointments-queue",
+      "traces",
+      rows.map((r) => r.id).sort().join(","),
+    ],
+    queryFn: () =>
+      tracesFn({
+        data: { appointment_ids: rows.slice(0, 200).map((r) => r.id) },
+      }),
+    enabled: rows.length > 0,
+    staleTime: 60_000,
+  });
+  const traces: Record<
+    string,
+    { correlation_id: string; error_code: string | null }
+  > = traceQ.data?.traces ?? {};
+
 
   // Rows filtered by the current scope only — used both for the visible list
   // (after status + query) and for the scope counters.
@@ -333,10 +356,13 @@ function AppointmentsQueuePage() {
                   <th className="text-start p-3 font-semibold">الموعد</th>
                   <th className="text-start p-3 font-semibold">التخصص/الطبيب</th>
                   <th className="text-start p-3 font-semibold">الحالة</th>
+                  <th className="text-start p-3 font-semibold">التتبع</th>
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((r) => (
+                {filtered.map((r) => {
+                  const tr = traces[r.id];
+                  return (
                   <tr
                     key={r.id}
                     onClick={() => setSelected(r)}
@@ -364,8 +390,35 @@ function AppointmentsQueuePage() {
                         {STATUS_META[r.status].label}
                       </span>
                     </td>
+                    <td className="p-3 text-xs" onClick={(e) => e.stopPropagation()}>
+                      {tr ? (
+                        <div className="flex flex-col gap-1 items-start">
+                          <Link
+                            to="/admin/booking-trace"
+                            search={{ correlation_id: tr.correlation_id }}
+                            className="font-mono text-[11px] text-primary hover:underline"
+                            title={tr.correlation_id}
+                            dir="ltr"
+                          >
+                            {tr.correlation_id.slice(0, 8)}…
+                          </Link>
+                          {tr.error_code && (
+                            <span
+                              className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 border border-rose-500/20"
+                              title="آخر رمز خطأ لوحظ خلال هذه المحاولة"
+                            >
+                              {tr.error_code}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground/60">—</span>
+                      )}
+                    </td>
                   </tr>
-                ))}
+                  );
+                })}
+
               </tbody>
             </table>
           </div>
@@ -375,12 +428,14 @@ function AppointmentsQueuePage() {
       {selected && (
         <DetailDrawer
           row={selected}
+          trace={traces[selected.id] ?? null}
           onClose={() => setSelected(null)}
           onChanged={() => {
             void refetch();
           }}
         />
       )}
+
     </div>
   );
 }
@@ -446,14 +501,17 @@ const ACTIONS: Record<
 
 function DetailDrawer({
   row,
+  trace,
   onClose,
   onChanged,
 }: {
   row: Row;
+  trace: { correlation_id: string; error_code: string | null } | null;
   onClose: () => void;
   onChanged: () => void;
 }) {
   const ref = shortRef(row.id);
+
   const updateStatus = useServerFn(updateAppointmentStatus);
   const qc = useQueryClient();
   const [pendingAction, setPendingAction] = useState<ActionKey | null>(null);
@@ -572,6 +630,44 @@ function DetailDrawer({
             <InfoRow label="التخصص" value={row.specialties?.name_ar ?? "—"} />
             <InfoRow label="الطبيب" value={row.doctors?.name_ar ?? "—"} />
           </dl>
+
+          {trace && (
+            <div className="rounded-xl border border-border bg-muted/30 p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-xs font-semibold">تتبع الحجز</div>
+                {trace.error_code && (
+                  <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 border border-rose-500/20">
+                    {trace.error_code}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <code className="font-mono text-[11px] text-muted-foreground break-all" dir="ltr">
+                  {trace.correlation_id}
+                </code>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard?.writeText(trace.correlation_id).then(
+                      () => toast.success("تم نسخ Correlation ID"),
+                      () => toast.error("تعذّر النسخ"),
+                    );
+                  }}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline shrink-0"
+                >
+                  <Copy className="h-3 w-3" /> نسخ
+                </button>
+              </div>
+              <Link
+                to="/admin/booking-trace"
+                search={{ correlation_id: trace.correlation_id }}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-primary hover:underline"
+              >
+                فتح مستكشف الأحداث ←
+              </Link>
+            </div>
+          )}
+
 
           {row.reason && (
             <div>

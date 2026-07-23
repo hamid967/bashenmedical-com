@@ -209,6 +209,7 @@ function RecentPanel({
     had_error: boolean;
     had_conflict: boolean;
     total_ms: number;
+    last_error_code: string | null;
   }>;
   onPick: (id: string) => void;
 }) {
@@ -229,6 +230,7 @@ function RecentPanel({
               <th className="text-right px-3 py-2 font-medium">Correlation</th>
               <th className="text-right px-3 py-2 font-medium">المرجع</th>
               <th className="text-right px-3 py-2 font-medium">آخر حدث</th>
+              <th className="text-right px-3 py-2 font-medium">Error Code</th>
               <th className="text-right px-3 py-2 font-medium">أحداث</th>
               <th className="text-right px-3 py-2 font-medium">الحالة</th>
               <th className="text-right px-3 py-2 font-medium">الوقت</th>
@@ -253,6 +255,15 @@ function RecentPanel({
                   {r.reference_number ?? "—"}
                 </td>
                 <td className="px-3 py-2">{eventBadge(r.last_event)}</td>
+                <td className="px-3 py-2">
+                  {r.last_error_code ? (
+                    <span className="px-2 py-0.5 rounded text-xs font-mono bg-red-50 text-red-800 border border-red-200">
+                      {r.last_error_code}
+                    </span>
+                  ) : (
+                    <span className="text-slate-300 text-xs">—</span>
+                  )}
+                </td>
                 <td className="px-3 py-2 text-slate-600">{r.events}</td>
                 <td className="px-3 py-2">
                   {r.had_error ? (
@@ -278,6 +289,7 @@ function RecentPanel({
   );
 }
 
+
 function EventsPanel({
   loading,
   rows,
@@ -297,6 +309,7 @@ function EventsPanel({
     pg_code: string | null;
     extra: unknown;
     created_at: string;
+    error_code: string | null;
   }>;
 }) {
   const ordered = [...rows].sort((a, b) =>
@@ -323,11 +336,17 @@ function EventsPanel({
                     {r.duration_ms}ms
                   </span>
                 )}
+                {r.error_code && (
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-red-50 text-red-800 border border-red-200">
+                    {r.error_code}
+                  </span>
+                )}
                 {r.pg_code && (
                   <span className="text-xs font-mono text-red-700">
                     pg:{r.pg_code}
                   </span>
                 )}
+
                 <button
                   onClick={() => navigator.clipboard?.writeText(r.correlation_id)}
                   className="ml-auto text-xs inline-flex items-center gap-1 text-slate-500 hover:text-slate-800"
