@@ -232,7 +232,7 @@ function AuditLogsPage() {
             <X className="h-4 w-4" /> مسح الفلاتر
           </button>
           <ExportMenu
-            allowed={isStaff}
+            allowed={isStaff && canExport}
             disabled={list.isLoading}
             filename="audit-logs"
             title="سجل التدقيق (Audit Logs)"
