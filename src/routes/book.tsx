@@ -35,7 +35,7 @@ import {
   reducer,
   saveDraft,
   clearDraft,
-  STORAGE_KEY,
+  clearDraft,
   validatePatient,
   maxReachableStep,
   type AvailResp,
