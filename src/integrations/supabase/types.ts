@@ -514,6 +514,21 @@ export type Database = {
           },
         ]
       }
+      appointment_ref_daily_counter: {
+        Row: {
+          day: string
+          seq: number
+        }
+        Insert: {
+          day: string
+          seq?: number
+        }
+        Update: {
+          day?: string
+          seq?: number
+        }
+        Relationships: []
+      }
       appointment_status_history: {
         Row: {
           appointment_id: string
@@ -668,6 +683,7 @@ export type Database = {
           patient_phone: string
           patient_share_sar: number | null
           reason: string | null
+          reference_number: string | null
           reminder_24h: boolean
           reminder_2h: boolean
           reminder_offsets_minutes: number[]
@@ -703,6 +719,7 @@ export type Database = {
           patient_phone: string
           patient_share_sar?: number | null
           reason?: string | null
+          reference_number?: string | null
           reminder_24h?: boolean
           reminder_2h?: boolean
           reminder_offsets_minutes?: number[]
@@ -738,6 +755,7 @@ export type Database = {
           patient_phone?: string
           patient_share_sar?: number | null
           reason?: string | null
+          reference_number?: string | null
           reminder_24h?: boolean
           reminder_2h?: boolean
           reminder_offsets_minutes?: number[]
@@ -5666,6 +5684,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      _next_booking_reference: { Args: never; Returns: string }
       _purge_old_permission_errors: { Args: never; Returns: undefined }
       assign_user_role: {
         Args: {
@@ -5751,6 +5770,14 @@ export type Database = {
         Returns: {
           id: string
           request_number: string
+        }[]
+      }
+      confirm_appointment_booking: {
+        Args: { p_data: Json; p_idempotency_key?: string }
+        Returns: {
+          id: string
+          reference: string
+          replayed: boolean
         }[]
       }
       confirm_waitlist_offer: {
