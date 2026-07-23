@@ -6,7 +6,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import { assertHasRole } from "./service-inquiries.functions";
+import { assertHasRole } from "./_guard";
 
 const listFilters = z.object({
   correlation_id: z.string().trim().max(160).optional(),

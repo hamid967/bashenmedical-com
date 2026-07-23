@@ -5,7 +5,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-import { assertHasRole } from "./service-inquiries.functions";
+import { assertHasRole } from "./_guard";
 
 export type ServiceHealthStatus = "ok" | "degraded" | "down" | "idle" | "unknown";
 
