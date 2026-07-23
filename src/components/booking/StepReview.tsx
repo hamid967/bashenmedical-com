@@ -130,6 +130,10 @@ export function StepReview({
           )}
         </Button>
         <p className="mt-3 text-center text-xs text-muted-foreground">{t("review.terms")}</p>
+        <p className="mt-1 text-center text-[11px] text-muted-foreground/80">
+          {t("review.referenceFormatHint")}
+        </p>
+
       </div>
     </StepShell>
   );
