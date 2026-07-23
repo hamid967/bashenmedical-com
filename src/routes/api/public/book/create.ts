@@ -208,6 +208,33 @@ export const Route = createFileRoute("/api/public/book/create")({
           },
         });
 
+        // Structured logging helper. We log to stdout (captured by the
+        // worker log tail + `stack_modern--server-function-logs`) so an
+        // operator can grep by idempotency key or reference number when
+        // triaging a duplicate/lost booking report.
+        //
+        // Idempotency keys are opaque client-generated tokens (crypto.randomUUID
+        // in the browser), not PII, but we still mask everything except the
+        // last 6 chars so raw keys never sit in log storage indefinitely.
+        const maskKey = (k: string | null): string =>
+          !k ? "none" : k.length <= 6 ? `***${k}` : `***${k.slice(-6)}`;
+        const logBook = (event: string, extra: Record<string, unknown> = {}) => {
+          const record = {
+            scope: "book/create",
+            event,
+            idempotency_key: maskKey(idempotencyKey),
+            doctor_id: parsed.data.doctor_id ?? null,
+            appointment_date: parsed.data.appointment_date,
+            appointment_time: parsed.data.appointment_time,
+            ...extra,
+          };
+          if (event.endsWith(".error") || event.endsWith(".conflict")) {
+            console.warn(JSON.stringify(record));
+          } else {
+            console.log(JSON.stringify(record));
+          }
+        };
+
         // Fast-path idempotency replay: fetch existing row's reference so we
         // don't even enter the RPC when the client is just retrying. The RPC
         // also handles replay internally, but doing it here saves a call and
@@ -221,12 +248,18 @@ export const Route = createFileRoute("/api/public/book/create")({
               .eq("idempotency_key", idempotencyKey)
               .maybeSingle();
             if (existing?.id) {
-              return json(200, {
-                ok: true,
-                reference: existing.reference_number ?? refFromId(existing.id),
+              const reference = existing.reference_number ?? refFromId(existing.id);
+              logBook("rpc.replay.fastpath", {
+                appointment_id: existing.id,
+                reference_number: reference,
+                replayed: true,
               });
+              return json(200, { ok: true, reference });
             }
-          } catch {
+          } catch (e) {
+            logBook("rpc.replay.fastpath.error", {
+              error: (e as Error)?.message ?? String(e),
+            });
             /* Fall through — the RPC will handle replay authoritatively. */
           }
         }
