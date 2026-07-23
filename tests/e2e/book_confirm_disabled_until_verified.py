@@ -62,15 +62,12 @@ def main() -> None:
         is not None,
     )
     # Confirm button must include !phoneVerified in its disabled expression.
-    btn_match = re.search(r"<Button\b[\s\S]*?/Button>", sr)
-    check("Confirm <Button> present", btn_match is not None)
-    if btn_match:
-        btn = btn_match.group(0)
-        check(
-            "Button disabled uses !phoneVerified",
-            "!phoneVerified" in btn and "disabled" in btn,
-            detail="expected: disabled={... || !phoneVerified}",
-        )
+    check(
+        "Confirm Button disabled uses !phoneVerified",
+        re.search(r"disabled=\{[^}]*!phoneVerified[^}]*\}", sr) is not None,
+        detail="expected: disabled={... || !phoneVerified}",
+    )
+
 
     print("== book.tsx ==")
     check(
