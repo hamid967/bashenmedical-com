@@ -8,7 +8,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Bell, User, LogOut, Home, CalendarDays, FileText, CalendarPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { OfflineState } from "@/components/states";
+
 import { FeatureErrorBoundary } from "@/components/states/FeatureErrorBoundary";
 import {
   DropdownMenu,
@@ -158,8 +158,23 @@ export function PatientShell({
       {/* Content */}
       <main className="mx-auto max-w-6xl px-4 pb-28 pt-4 md:pb-8">
         {!online && (
-          <div className="mb-4">
-            <OfflineState onRetry={() => location.reload()} />
+          <div
+            role="status"
+            aria-live="polite"
+            className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-900 dark:text-amber-200"
+          >
+            <span>
+              {lang === "ar"
+                ? "أنت غير متصل — نعرض آخر بيانات محفوظة."
+                : "You are offline — showing the latest cached data."}
+            </span>
+            <button
+              type="button"
+              onClick={() => location.reload()}
+              className="rounded-md border border-amber-500/40 px-2 py-1 text-[11px] font-medium hover:bg-amber-500/20"
+            >
+              {lang === "ar" ? "إعادة المحاولة" : "Retry"}
+            </button>
           </div>
         )}
         <FeatureErrorBoundary feature="patient-portal">{children}</FeatureErrorBoundary>
