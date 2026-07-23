@@ -95,23 +95,74 @@ export function reducer(s: State, a: Action): State {
 
 export const STORAGE_KEY = "booking:draft";
 
+/* ---------------- Draft versioning + expiry ----------------
+ * Bump DRAFT_VERSION whenever the persisted State shape changes so old
+ * drafts get discarded instead of hydrating into a broken UI. Drafts also
+ * expire after DRAFT_TTL_MS since last save — a 24h stale reservation is
+ * more confusing than an empty form.
+ */
+export const DRAFT_VERSION = 2;
+export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+
+type PersistedDraft = State & { _v?: number; _savedAt?: number };
+
+export function saveDraft(state: State): void {
+  if (typeof window === "undefined") return;
+  try {
+    const payload: PersistedDraft = { ...state, _v: DRAFT_VERSION, _savedAt: Date.now() };
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch {
+    /* quota / private mode */
+  }
+}
+
+export function clearDraft(): void {
+  if (typeof window === "undefined") return;
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function loadDraft(initial: Partial<State>): State {
   if (typeof window === "undefined") return { ...INITIAL, ...initial };
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as State;
-      // Success survives reload: if the persisted draft is on step 9,
-      // keep it there and IGNORE the URL step (URL still shows the last
-      // pushed value, typically step=8 from the review step).
-      if (parsed.step === 9) return { ...INITIAL, ...parsed };
-      return { ...INITIAL, ...parsed, ...initial };
+    if (!raw) return { ...INITIAL, ...initial };
+    const parsed = JSON.parse(raw) as PersistedDraft;
+    const version = parsed._v ?? 1;
+    const savedAt = parsed._savedAt ?? 0;
+    const expired = savedAt > 0 && Date.now() - savedAt > DRAFT_TTL_MS;
+    if (version !== DRAFT_VERSION || expired) {
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
+      return { ...INITIAL, ...initial };
     }
+    // Strip metadata before merging so it never lands in the reducer state.
+    const { _v: _v, _savedAt: _s, ...clean } = parsed;
+    void _v;
+    void _s;
+    // Success survives reload: if the persisted draft is on step 9,
+    // keep it there and IGNORE the URL step (URL still shows the last
+    // pushed value, typically step=8 from the review step).
+    if (clean.step === 9) return { ...INITIAL, ...clean };
+    // Merge nested patient explicitly so newly-added fields (e.g. isNewPatient)
+    // pick up their defaults from INITIAL even for drafts persisted before v2.
+    return {
+      ...INITIAL,
+      ...clean,
+      patient: { ...INITIAL.patient, ...(clean.patient ?? {}) },
+      ...initial,
+    };
   } catch {
-    /* ignore */
+    return { ...INITIAL, ...initial };
   }
-  return { ...INITIAL, ...initial };
 }
+
 
 /* ---------------- Availability response ---------------- */
 export type AvailResp = { ok: boolean; times: string[]; booked: string[] };
