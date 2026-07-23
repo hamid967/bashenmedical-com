@@ -1007,6 +1007,54 @@ export type Database = {
           },
         ]
       }
+      booking_trace_events: {
+        Row: {
+          appointment_date: string | null
+          appointment_id: string | null
+          appointment_time: string | null
+          correlation_id: string
+          created_at: string
+          doctor_id: string | null
+          duration_ms: number | null
+          event: string
+          extra: Json
+          id: string
+          idempotency_key_masked: string | null
+          pg_code: string | null
+          reference_number: string | null
+        }
+        Insert: {
+          appointment_date?: string | null
+          appointment_id?: string | null
+          appointment_time?: string | null
+          correlation_id: string
+          created_at?: string
+          doctor_id?: string | null
+          duration_ms?: number | null
+          event: string
+          extra?: Json
+          id?: string
+          idempotency_key_masked?: string | null
+          pg_code?: string | null
+          reference_number?: string | null
+        }
+        Update: {
+          appointment_date?: string | null
+          appointment_id?: string | null
+          appointment_time?: string | null
+          correlation_id?: string
+          created_at?: string
+          doctor_id?: string | null
+          duration_ms?: number | null
+          event?: string
+          extra?: Json
+          id?: string
+          idempotency_key_masked?: string | null
+          pg_code?: string | null
+          reference_number?: string | null
+        }
+        Relationships: []
+      }
       branch_excellence_centers: {
         Row: {
           branch_id: string
