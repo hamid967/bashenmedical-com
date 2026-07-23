@@ -446,3 +446,245 @@ function EventsPanel({
     </div>
   );
 }
+
+type EventRow = {
+  id: string;
+  correlation_id: string;
+  event: string;
+  reference_number: string | null;
+  appointment_id: string | null;
+  duration_ms: number | null;
+  created_at: string;
+  error_code: string | null;
+};
+
+type RecoveryPath =
+  | "direct_success"
+  | "replay_fastpath"
+  | "replay_rpc"
+  | "alternatives_recovery"
+  | "failed_conflict"
+  | "failed_error"
+  | "in_progress";
+
+type CorrSummary = {
+  correlation_id: string;
+  path: RecoveryPath;
+  final_status: "confirmed" | "conflict" | "error" | "pending";
+  reference_number: string | null;
+  appointment_id: string | null;
+  conflicts: number;
+  errors: number;
+  attempts: number;
+  total_ms: number;
+  started_at: string;
+  ended_at: string;
+  last_error_code: string | null;
+};
+
+function summarize(rows: EventRow[]): CorrSummary[] {
+  const byCorr = new Map<string, EventRow[]>();
+  for (const r of rows) {
+    if (!byCorr.has(r.correlation_id)) byCorr.set(r.correlation_id, []);
+    byCorr.get(r.correlation_id)!.push(r);
+  }
+  const out: CorrSummary[] = [];
+  for (const [corr, list] of byCorr) {
+    const asc = [...list].sort((a, b) =>
+      a.created_at < b.created_at ? -1 : 1,
+    );
+    let attempts = 0;
+    let conflicts = 0;
+    let errors = 0;
+    let successIdx = -1;
+    let lastConflictIdx = -1;
+    let lastErrorIdx = -1;
+    let hasFastpathReplay = false;
+    let hasRpcReplay = false;
+    let reference: string | null = null;
+    let appointmentId: string | null = null;
+    let totalMs = 0;
+    let lastErrorCode: string | null = null;
+    asc.forEach((r, i) => {
+      if (r.event === "rpc.call") attempts++;
+      if (r.event.endsWith(".conflict")) {
+        conflicts++;
+        lastConflictIdx = i;
+        if (r.error_code) lastErrorCode = r.error_code;
+      }
+      if (r.event.endsWith(".error")) {
+        errors++;
+        lastErrorIdx = i;
+        if (r.error_code) lastErrorCode = r.error_code;
+      }
+      if (r.event === "rpc.replay.fastpath") hasFastpathReplay = true;
+      if (r.event === "rpc.replay.rpc" || r.event === "rpc.replay.race")
+        hasRpcReplay = true;
+      if (
+        r.event === "rpc.success" ||
+        r.event === "rpc.replay.rpc" ||
+        r.event === "rpc.replay.fastpath"
+      ) {
+        successIdx = i;
+      }
+      if (!reference && r.reference_number) reference = r.reference_number;
+      if (!appointmentId && r.appointment_id) appointmentId = r.appointment_id;
+      totalMs += r.duration_ms ?? 0;
+    });
+
+    let path: RecoveryPath;
+    let final_status: CorrSummary["final_status"];
+    if (successIdx >= 0) {
+      final_status = "confirmed";
+      if (hasFastpathReplay && conflicts === 0 && errors === 0)
+        path = "replay_fastpath";
+      else if (hasRpcReplay && conflicts === 0 && errors === 0)
+        path = "replay_rpc";
+      else if (conflicts > 0 || errors > 0) path = "alternatives_recovery";
+      else path = "direct_success";
+    } else if (lastErrorIdx > lastConflictIdx && lastErrorIdx >= 0) {
+      final_status = "error";
+      path = "failed_error";
+    } else if (lastConflictIdx >= 0) {
+      final_status = "conflict";
+      path = "failed_conflict";
+    } else {
+      final_status = "pending";
+      path = "in_progress";
+    }
+
+    out.push({
+      correlation_id: corr,
+      path,
+      final_status,
+      reference_number: reference,
+      appointment_id: appointmentId,
+      conflicts,
+      errors,
+      attempts: Math.max(attempts, asc.length > 0 ? 1 : 0),
+      total_ms: totalMs,
+      started_at: asc[0]?.created_at ?? "",
+      ended_at: asc[asc.length - 1]?.created_at ?? "",
+      last_error_code: lastErrorCode,
+    });
+  }
+  return out.sort((a, b) => (a.started_at < b.started_at ? 1 : -1));
+}
+
+const PATH_META: Record<
+  RecoveryPath,
+  { label: string; hint: string; cls: string }
+> = {
+  direct_success: {
+    label: "نجاح مباشر",
+    hint: "تم تأكيد الحجز من أول محاولة بدون تعارض أو إعادة.",
+    cls: "bg-emerald-50 text-emerald-800 border-emerald-200",
+  },
+  replay_fastpath: {
+    label: "إعادة تشغيل (Fast Path)",
+    hint: "تم اكتشاف idempotency-key مكرر وأُعيد نفس الحجز عبر المسار السريع.",
+    cls: "bg-sky-50 text-sky-800 border-sky-200",
+  },
+  replay_rpc: {
+    label: "إعادة تشغيل (RPC)",
+    hint: "أعادت قاعدة البيانات نفس الحجز نتيجة تكرار idempotency-key.",
+    cls: "bg-sky-50 text-sky-800 border-sky-200",
+  },
+  alternatives_recovery: {
+    label: "استرداد عبر البدائل",
+    hint: "وقع تعارض/خطأ في محاولة سابقة ثم نجح الحجز على وقت أو طبيب بديل.",
+    cls: "bg-violet-50 text-violet-800 border-violet-200",
+  },
+  failed_conflict: {
+    label: "فشل — تعارض غير مُسترَد",
+    hint: "انتهت الجلسة بتعارض على الموعد ولم يتم تأكيد أي بديل.",
+    cls: "bg-amber-50 text-amber-800 border-amber-200",
+  },
+  failed_error: {
+    label: "فشل — خطأ خادم",
+    hint: "انتهت الجلسة بخطأ من قاعدة البيانات أو الخادم دون تأكيد.",
+    cls: "bg-red-50 text-red-800 border-red-200",
+  },
+  in_progress: {
+    label: "قيد التنفيذ",
+    hint: "بدأت المحاولة ولم يُرصد حدث نهائي بعد.",
+    cls: "bg-slate-50 text-slate-700 border-slate-200",
+  },
+};
+
+const STATUS_META: Record<
+  CorrSummary["final_status"],
+  { label: string; cls: string }
+> = {
+  confirmed: { label: "مؤكد", cls: "bg-emerald-100 text-emerald-800" },
+  conflict: { label: "تعارض", cls: "bg-amber-100 text-amber-800" },
+  error: { label: "خطأ", cls: "bg-red-100 text-red-800" },
+  pending: { label: "معلّق", cls: "bg-slate-100 text-slate-700" },
+};
+
+function SummaryPanel({ rows }: { rows: EventRow[] }) {
+  const summaries = useMemo(() => summarize(rows), [rows]);
+  if (summaries.length === 0) return null;
+  return (
+    <div className="rounded border bg-white overflow-hidden">
+      <div className="px-3 py-2 text-sm text-slate-600 border-b flex items-center gap-2">
+        <Search className="w-3.5 h-3.5" />
+        ملخص مسار الاسترداد لكل Correlation ID
+      </div>
+      <ul className="divide-y">
+        {summaries.map((s) => {
+          const pathMeta = PATH_META[s.path];
+          const statusMeta = STATUS_META[s.final_status];
+          return (
+            <li key={s.correlation_id} className="p-3 space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() =>
+                    navigator.clipboard?.writeText(s.correlation_id)
+                  }
+                  className="text-xs font-mono inline-flex items-center gap-1 text-slate-700 hover:text-slate-900"
+                  title={s.correlation_id}
+                >
+                  <Copy className="w-3 h-3" />
+                  {s.correlation_id.length > 24
+                    ? `${s.correlation_id.slice(0, 10)}…${s.correlation_id.slice(-8)}`
+                    : s.correlation_id}
+                </button>
+                <span
+                  className={`px-2 py-0.5 rounded text-xs border ${pathMeta.cls}`}
+                >
+                  {pathMeta.label}
+                </span>
+                <span
+                  className={`px-2 py-0.5 rounded text-xs ${statusMeta.cls}`}
+                >
+                  {statusMeta.label}
+                </span>
+                {s.reference_number && (
+                  <span className="text-xs font-mono text-slate-700">
+                    المرجع: {s.reference_number}
+                  </span>
+                )}
+                {s.last_error_code && (
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-red-50 text-red-800 border border-red-200">
+                    {s.last_error_code}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-600">{pathMeta.hint}</p>
+              <div className="text-xs text-slate-500 flex flex-wrap gap-x-4 gap-y-1">
+                <span>محاولات: {s.attempts}</span>
+                <span>تعارضات: {s.conflicts}</span>
+                <span>أخطاء: {s.errors}</span>
+                <span>الزمن الكلي: {s.total_ms}ms</span>
+                <span>البداية: {fmt(s.started_at)}</span>
+                <span>النهاية: {fmt(s.ended_at)}</span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
