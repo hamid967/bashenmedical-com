@@ -725,7 +725,7 @@ function BookPage() {
     } catch {}
 
     // Explicit step=1 — otherwise the zod validator defaults `step` to 0.
-    navigate({ to: "/book", search: { step: 1 } });
+    navigate({ to: "/book", search: { step: "service" } });
   }
 
   const STEPS = [
