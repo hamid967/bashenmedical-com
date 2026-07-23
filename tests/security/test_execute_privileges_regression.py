@@ -173,9 +173,12 @@ def main() -> int:
         print(f"── Static privilege checks: {len(static)} issue(s)")
         for f in static:
             print(f"    {f}")
-        print(f"── Runtime SET LOCAL ROLE probes: {len(runtime)} issue(s)")
-        for f in runtime:
-            print(f"    {f}")
+        if SET_ROLE_UNAVAILABLE:
+            print("── Runtime SET LOCAL ROLE probes: skipped (pooler role cannot SET ROLE)")
+        else:
+            print(f"── Runtime SET LOCAL ROLE probes: {len(runtime)} issue(s)")
+            for f in runtime:
+                print(f"    {f}")
 
         if total == 0:
             print("\n✅ Execute-privilege regression suite clean.")
