@@ -150,12 +150,18 @@
     "edit": "Edit",
     "submitting": "Booking…",
     "confirm": "Confirm booking",
-    "terms": "By confirming, you agree to our terms of use."
+    "terms": "By confirming, you agree to our terms of use.",
+    "referenceFormatHint": "You'll receive a booking reference in the format BMC-YYYYMMDD-XXXX for lookup or changes."
+
   },
   "success": {
     "title": "Thank you — your booking request was received",
     "subtitle": "Our reception team will contact you within minutes to confirm. You'll also receive a WhatsApp reminder one day before your appointment. Keep the reference below for any inquiry or change.",
     "reference": "Booking reference",
+    "referenceFormatNew": "Current format",
+    "referenceFormatLegacy": "Legacy reference",
+    "referenceFormatLegacyHint": "This booking predates the BMC format. The reference is still valid for lookup and edits.",
+
     "copy": "Copy",
     "copied": "Copied",
     "copyRef": "Reference copied",
