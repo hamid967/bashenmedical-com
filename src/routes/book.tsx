@@ -712,6 +712,7 @@ function BookPage() {
       insurance_provider_id: isInsurance ? p.insuranceProviderId : null,
       insurance_policy_number: isInsurance ? p.insurancePolicyNumber.trim() || null : null,
       insurance_member_id: isInsurance ? p.insuranceMemberId.trim() || null : null,
+      verification_challenge_id: state.verificationChallengeId,
     });
     setSubmitting(false);
     if (res.ok) {
@@ -1094,6 +1095,9 @@ function BookPage() {
                 onSubmit={handleSubmit}
                 patientValid={patientValidation.ok}
                 onEditPatient={() => goto(7)}
+                onVerified={(challengeId, phone) =>
+                  dispatch({ t: "set", p: { verificationChallengeId: challengeId, verifiedPhone: phone } })
+                }
               />
             )}
             {state.step === 9 && result && (

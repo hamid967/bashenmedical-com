@@ -2,6 +2,7 @@ import { CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { SubmitErrorBanner } from "@/components/SubmitErrorBanner";
+import { BookingPhoneVerification } from "./BookingPhoneVerification";
 import type { BookingSubmitKind } from "@/lib/booking-submit";
 import { StepShell } from "./StepShell";
 import { formatArDate, type State } from "./types";
@@ -20,6 +21,7 @@ export function StepReview({
   onSubmit,
   patientValid,
   onEditPatient,
+  onVerified,
 }: {
   lang: "ar" | "en";
   state: State;
@@ -34,6 +36,7 @@ export function StepReview({
   onSubmit: () => void;
   patientValid: boolean;
   onEditPatient: () => void;
+  onVerified: (challengeId: string, phone: string) => void;
 }) {
 
   const { t } = useTranslation("booking");
@@ -113,6 +116,16 @@ export function StepReview({
           </div>
         )}
 
+        {patientValid && (
+          <BookingPhoneVerification
+            phone={state.patient.phone}
+            challengeId={state.verificationChallengeId}
+            verifiedPhone={state.verifiedPhone}
+            onVerified={onVerified}
+            disabled={submitting}
+          />
+        )}
+
         {errorMsg && (
           <div className="mt-4">
             <SubmitErrorBanner
@@ -125,22 +138,28 @@ export function StepReview({
           </div>
         )}
 
-
-        <Button
-          onClick={onSubmit}
-          disabled={submitting || !patientValid}
-          className="w-full mt-6 gap-2 h-12 text-base"
-        >
-          {submitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" /> {t("review.submitting")}
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="h-5 w-5" /> {t("review.confirm")}
-            </>
-          )}
-        </Button>
+        {(() => {
+          const phoneVerified =
+            !!state.verificationChallengeId &&
+            state.verifiedPhone === state.patient.phone.trim();
+          return (
+            <Button
+              onClick={onSubmit}
+              disabled={submitting || !patientValid || !phoneVerified}
+              className="w-full mt-6 gap-2 h-12 text-base"
+            >
+              {submitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("review.submitting")}
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="h-5 w-5" /> {t("review.confirm")}
+                </>
+              )}
+            </Button>
+          );
+        })()}
         <p className="mt-3 text-center text-xs text-muted-foreground">{t("review.terms")}</p>
         <p className="mt-1 text-center text-[11px] text-muted-foreground/80">
           {t("review.referenceFormatHint")}

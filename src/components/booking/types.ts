@@ -45,6 +45,10 @@ export type State = {
     insuranceEstimate: InsuranceEstimate;
     isNewPatient: boolean; // first-time visitor flag
   };
+  /** Server-issued OTP challenge id from a successful booking-purpose verification. */
+  verificationChallengeId: string | null;
+  /** Phone the user completed OTP verification for. Must match patient.phone at submit time. */
+  verifiedPhone: string | null;
 };
 
 export const INITIAL: State = {
@@ -71,6 +75,8 @@ export const INITIAL: State = {
     insuranceEstimate: null,
     isNewPatient: false,
   },
+  verificationChallengeId: null,
+  verifiedPhone: null,
 };
 
 
@@ -106,7 +112,7 @@ export const STORAGE_KEY = "booking:draft";
  * once the wall clock passes it, the draft is dropped — a 24h stale
  * reservation is more confusing than an empty form.
  */
-export const DRAFT_VERSION = 3;
+export const DRAFT_VERSION = 4;
 export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type DraftEnvelope = {

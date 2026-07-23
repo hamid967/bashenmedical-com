@@ -22,7 +22,7 @@ import { z } from "zod";
 const IssueSchema = z.object({
   channel: z.enum(["whatsapp", "email"]),
   destination: z.string().min(3).max(120),
-  purpose: z.enum(["login", "register", "recovery", "mobile_change"]),
+  purpose: z.enum(["login", "register", "recovery", "mobile_change", "booking"]),
   locale: z.enum(["ar", "en"]).default("ar"),
 });
 
@@ -273,6 +273,7 @@ export const verifyOtp = createServerFn({ method: "POST" })
       ok: true as const,
       destination: row.destination as string,
       channel: row.channel as "whatsapp" | "email" | "sms",
-      purpose: row.purpose as "login" | "register" | "recovery" | "mobile_change",
+      purpose: row.purpose as "login" | "register" | "recovery" | "mobile_change" | "booking",
+      challengeId: row.id as string,
     };
   });

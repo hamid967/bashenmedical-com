@@ -74,6 +74,11 @@ const bookingCreateSchema = z.object({
   insurance_provider_id: z.string().uuid("جهة تأمين غير صالحة").optional().nullable(),
   insurance_policy_number: z.string().trim().max(64, "رقم البوليصة طويل").optional().nullable(),
   insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
+  verification_challenge_id: z
+    .string()
+    .uuid("رمز التحقق مفقود أو غير صالح")
+    .nullable()
+    .optional(),
 });
 
 function json(status: number, body: Record<string, unknown>, extraHeaders?: Record<string, string>) {
@@ -225,6 +230,56 @@ export const Route = createFileRoute("/api/public/book/create")({
             autoRefreshToken: false,
           },
         });
+
+        // Server-enforced phone verification: caller MUST have completed a
+        // WhatsApp OTP challenge with purpose='booking' matching the patient
+        // phone. Enforced independently of the UI so a direct API caller
+        // cannot bypass the gate.
+        {
+          const challengeId = parsed.data.verification_challenge_id;
+          if (!challengeId) {
+            return respond(400, {
+              ok: false,
+              kind: "validation",
+              code: "VERIFICATION_REQUIRED",
+              message: "يجب التحقق من رقم الجوال قبل تأكيد الحجز.",
+            });
+          }
+          try {
+            const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+            const { normalizeSaudiMobile } = await import("@/lib/auth/otp.server");
+            const normalized = normalizeSaudiMobile(parsed.data.patient_phone);
+            const { data: row } = await supabaseAdmin
+              .from("otp_challenges")
+              .select("id, destination, purpose, consumed_at")
+              .eq("id", challengeId)
+              .maybeSingle();
+            const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
+            const consumedAt = row?.consumed_at ? new Date(row.consumed_at).getTime() : 0;
+            const ok =
+              !!row &&
+              row.purpose === "booking" &&
+              !!row.consumed_at &&
+              consumedAt >= fifteenMinAgo &&
+              !!normalized &&
+              row.destination === normalized;
+            if (!ok) {
+              return respond(400, {
+                ok: false,
+                kind: "validation",
+                code: "VERIFICATION_REQUIRED",
+                message: "انتهت صلاحية التحقق من الجوال. يرجى إعادة التحقق.",
+              });
+            }
+          } catch {
+            return respond(500, {
+              ok: false,
+              kind: "db",
+              code: "VERIFICATION_CHECK_FAILED",
+              message: FRIENDLY_INSERT_MESSAGES.unknown,
+            });
+          }
+        }
 
         // Structured logging helper. We log to stdout (captured by the
         // worker log tail + `stack_modern--server-function-logs`) so an
