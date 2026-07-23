@@ -75,6 +75,8 @@ export const INITIAL: State = {
     insuranceEstimate: null,
     isNewPatient: false,
   },
+  verificationChallengeId: null,
+  verifiedPhone: null,
 };
 
 
@@ -110,7 +112,7 @@ export const STORAGE_KEY = "booking:draft";
  * once the wall clock passes it, the draft is dropped — a 24h stale
  * reservation is more confusing than an empty form.
  */
-export const DRAFT_VERSION = 3;
+export const DRAFT_VERSION = 4;
 export const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
 
 export type DraftEnvelope = {
