@@ -9,6 +9,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { assertPermission } from "@/lib/rbac/enforce.server";
 import { PERMISSIONS } from "@/lib/rbac/permissions";
+import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 
 // Phase 3B: audit-log reads are gated on the `audit.export` permission
 // (held globally by `auditor` and `super_admin`). Global-only scope —
