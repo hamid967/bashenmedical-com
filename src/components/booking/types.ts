@@ -165,6 +165,23 @@ export function clearDraft(): void {
   }
 }
 
+/** Read the current draft's expiresAt (epoch ms), or null when no valid
+ *  envelope exists. Used to drive the "your draft is about to expire" UI
+ *  without duplicating the parse/validation in loadDraft. */
+export function getDraftExpiresAt(): number | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isEnvelope(parsed)) return null;
+    if (parsed.version !== DRAFT_VERSION) return null;
+    return parsed.expiresAt;
+  } catch {
+    return null;
+  }
+}
+
 export function loadDraft(initial: Partial<State>): State {
   if (typeof window === "undefined") return { ...INITIAL, ...initial };
   try {
