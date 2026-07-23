@@ -55,6 +55,7 @@ const FALLBACK_MESSAGES: Record<Exclude<BookingSubmitKind, "success">, string> =
 };
 
 const IDEMPOTENCY_KEY_STORAGE = "booking:idempotency-key";
+const CORRELATION_ID_STORAGE = "booking:correlation-id";
 
 /**
  * Return the current in-flight booking's idempotency key, creating one on
@@ -86,12 +87,52 @@ function getOrCreateIdempotencyKey(): string {
   return fresh;
 }
 
+/**
+ * Correlation ID threading every log line of one booking attempt series
+ * (initial call + timeouts + retries + RPC replays) into a single grep-able
+ * chain. Distinct from the idempotency key: this is a pure trace ID and
+ * carries no dedup semantics on the server. Sent as `X-Correlation-Id`;
+ * the server falls back to generating one if the header is missing.
+ * Persisted next to the idempotency key and cleared together.
+ */
+function getOrCreateCorrelationId(): string {
+  if (typeof window === "undefined") {
+    return `srv-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+  }
+  try {
+    const existing = sessionStorage.getItem(CORRELATION_ID_STORAGE);
+    if (existing && /^[A-Za-z0-9_-]{8,128}$/.test(existing)) return existing;
+  } catch {
+    /* ignore */
+  }
+  const fresh =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `c-${Date.now()}-${Math.random().toString(36).slice(2, 14)}`;
+  try {
+    sessionStorage.setItem(CORRELATION_ID_STORAGE, fresh);
+  } catch {
+    /* ignore */
+  }
+  return fresh;
+}
+
 export function clearBookingIdempotencyKey(): void {
   if (typeof window === "undefined") return;
   try {
     sessionStorage.removeItem(IDEMPOTENCY_KEY_STORAGE);
+    sessionStorage.removeItem(CORRELATION_ID_STORAGE);
   } catch {
     /* ignore */
+  }
+}
+
+export function getBookingCorrelationId(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return sessionStorage.getItem(CORRELATION_ID_STORAGE);
+  } catch {
+    return null;
   }
 }
 
