@@ -196,22 +196,6 @@ export const Route = createFileRoute("/api/public/book/create")({
         // retry, instead of silently dropping replay protection.
         const rawKey = request.headers.get("idempotency-key")?.trim() ?? "";
 
-        // Correlation ID — a pure trace identifier the client threads through
-        // every log line for one booking attempt series. Accept the same
-        // charset/length as the idempotency key; regenerate server-side when
-        // the header is missing/malformed so every request always has one.
-        const rawCorrId = request.headers.get("x-correlation-id")?.trim() ?? "";
-        const correlationId =
-          rawCorrId && /^[A-Za-z0-9_-]{8,128}$/.test(rawCorrId)
-            ? rawCorrId
-            : (globalThis.crypto?.randomUUID?.() ??
-              `srv-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`);
-
-        // Local response wrapper: echoes the correlation ID on every reply so
-        // the client (and any intermediary/log aggregator) can pin the whole
-        // exchange to one ID.
-        const respond = (status: number, body: Record<string, unknown>) =>
-          json(status, body, { "X-Correlation-Id": correlationId });
 
         if (rawKey && !/^[A-Za-z0-9_-]{8,128}$/.test(rawKey)) {
           return respond(400, {
