@@ -402,7 +402,9 @@ export const Route = createFileRoute("/api/public/book/create")({
             pg_code: err.code ?? null,
             pg_message: err.message ?? null,
             dup_on_idempotency_key: dupOnIdemKey,
+            error_code: isDup ? "SLOT_TAKEN" : `DB_ERROR${err.code ? `:${err.code}` : ""}`,
           });
+
 
           // Idempotency-key race: another concurrent request with the same
           // key already inserted — replay its reference.
