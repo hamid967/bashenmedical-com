@@ -281,7 +281,7 @@ export const Route = createFileRoute("/api/public/book/create")({
                 duration_ms:
                   typeof duration_ms === "number" ? duration_ms : null,
                 pg_code: typeof pg_code === "string" ? pg_code : null,
-                extra: rest,
+                extra: rest as Record<string, unknown> as never,
               });
             } catch {
               /* trace persistence is best-effort */
