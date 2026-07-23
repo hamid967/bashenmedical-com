@@ -6,10 +6,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-// B4-1: single source-of-truth for admin role guards. Re-exported here so any
-// external caller importing `assertHasRole` from this module keeps working.
-export { assertHasRole } from "./_guard";
+// B4-1: consolidated in `_guard.ts`. Re-exported for back-compat with any
+// external module that still imports `assertHasRole` from this file.
 import { assertHasRole } from "./_guard";
+export { assertHasRole };
 
 const STATUSES = [
   "new",
