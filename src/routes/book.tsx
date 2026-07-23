@@ -400,7 +400,8 @@ function BookPage() {
   ]);
 
   // Prefetch today's availability the moment a doctor is picked, so StepTime
-  // renders instantly when the user reaches step 6.
+  // renders instantly when the user reaches step 6. Also warm the current
+  // month's availability grid so StepDate doesn't flash a loading state.
   useEffect(() => {
     if (!state.doctorId) return;
     const today = new Date().toISOString().slice(0, 10);
@@ -409,7 +410,34 @@ function BookPage() {
       queryFn: () => fetchAvailability(today, state.doctorId, state.specialtyId, state.branchId),
       staleTime: 20_000,
     });
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1;
+    queryClient.prefetchQuery({
+      queryKey: ["month-avail", state.doctorId, state.branchId, y, m],
+      queryFn: async () => {
+        const p = new URLSearchParams({ year: String(y), month: String(m) });
+        if (state.doctorId) p.set("doctor_id", state.doctorId);
+        if (state.branchId) p.set("branch_id", state.branchId);
+        const res = await fetch(`/api/public/book/month-availability?${p.toString()}`);
+        if (!res.ok) return { dates: [] as string[] };
+        return (await res.json()) as { dates: string[] };
+      },
+      staleTime: 60_000,
+    });
   }, [state.doctorId, state.specialtyId, state.branchId, queryClient]);
+
+  // Prefetch the doctors list as soon as a specialty is chosen (step 3),
+  // so StepDoctor at step 4 renders without a spinner.
+  useEffect(() => {
+    if (!state.specialtyId || state.step >= 4) return;
+    queryClient.prefetchQuery({
+      queryKey: ["doctors-for-book", state.specialtyId, state.branchId],
+      queryFn: () => fetchDoctors(state.specialtyId, state.branchId),
+      staleTime: 5 * 60_000,
+    });
+  }, [state.specialtyId, state.branchId, state.step, queryClient]);
+
 
   // Consistency guard: clamp state.step to the highest step whose
   // prerequisites are actually met. Runs on every state change so a
