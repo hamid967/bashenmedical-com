@@ -208,6 +208,33 @@ export const Route = createFileRoute("/api/public/book/create")({
           },
         });
 
+        // Structured logging helper. We log to stdout (captured by the
+        // worker log tail + `stack_modern--server-function-logs`) so an
+        // operator can grep by idempotency key or reference number when
+        // triaging a duplicate/lost booking report.
+        //
+        // Idempotency keys are opaque client-generated tokens (crypto.randomUUID
+        // in the browser), not PII, but we still mask everything except the
+        // last 6 chars so raw keys never sit in log storage indefinitely.
+        const maskKey = (k: string | null): string =>
+          !k ? "none" : k.length <= 6 ? `***${k}` : `***${k.slice(-6)}`;
+        const logBook = (event: string, extra: Record<string, unknown> = {}) => {
+          const record = {
+            scope: "book/create",
+            event,
+            idempotency_key: maskKey(idempotencyKey),
+            doctor_id: parsed.data.doctor_id ?? null,
+            appointment_date: parsed.data.appointment_date,
+            appointment_time: parsed.data.appointment_time,
+            ...extra,
+          };
+          if (event.endsWith(".error") || event.endsWith(".conflict")) {
+            console.warn(JSON.stringify(record));
+          } else {
+            console.log(JSON.stringify(record));
+          }
+        };
+
         // Fast-path idempotency replay: fetch existing row's reference so we
         // don't even enter the RPC when the client is just retrying. The RPC
         // also handles replay internally, but doing it here saves a call and
@@ -221,12 +248,18 @@ export const Route = createFileRoute("/api/public/book/create")({
               .eq("idempotency_key", idempotencyKey)
               .maybeSingle();
             if (existing?.id) {
-              return json(200, {
-                ok: true,
-                reference: existing.reference_number ?? refFromId(existing.id),
+              const reference = existing.reference_number ?? refFromId(existing.id);
+              logBook("rpc.replay.fastpath", {
+                appointment_id: existing.id,
+                reference_number: reference,
+                replayed: true,
               });
+              return json(200, { ok: true, reference });
             }
-          } catch {
+          } catch (e) {
+            logBook("rpc.replay.fastpath.error", {
+              error: (e as Error)?.message ?? String(e),
+            });
             /* Fall through — the RPC will handle replay authoritatively. */
           }
         }
@@ -290,24 +323,32 @@ export const Route = createFileRoute("/api/public/book/create")({
         // (slot uidx or idempotency uidx) — never a partial-state failure.
         // Cast: `confirm_appointment_booking` isn't in the generated Database
         // type until types regenerate after this migration.
+        const rpcStart = Date.now();
+        logBook("rpc.call");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { data: rows, error } = await (supa as any).rpc("confirm_appointment_booking", {
           p_data: payload,
           p_idempotency_key: idempotencyKey,
         });
+        const rpcMs = Date.now() - rpcStart;
 
         if (error) {
           const err = error as { message?: string; code?: string };
           const isDup =
             err.code === "23505" || (err.message ?? "").includes("duplicate key");
+          const dupOnIdemKey =
+            isDup && !!idempotencyKey && (err.message ?? "").includes("idempotency_key");
+
+          logBook(isDup ? "rpc.conflict" : "rpc.error", {
+            duration_ms: rpcMs,
+            pg_code: err.code ?? null,
+            pg_message: err.message ?? null,
+            dup_on_idempotency_key: dupOnIdemKey,
+          });
 
           // Idempotency-key race: another concurrent request with the same
           // key already inserted — replay its reference.
-          if (
-            isDup &&
-            idempotencyKey &&
-            (err.message ?? "").includes("idempotency_key")
-          ) {
+          if (dupOnIdemKey) {
             try {
               const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
               const { data: existing } = await supabaseAdmin
@@ -316,12 +357,18 @@ export const Route = createFileRoute("/api/public/book/create")({
                 .eq("idempotency_key", idempotencyKey)
                 .maybeSingle();
               if (existing?.id) {
-                return json(200, {
-                  ok: true,
-                  reference: existing.reference_number ?? refFromId(existing.id),
+                const reference = existing.reference_number ?? refFromId(existing.id);
+                logBook("rpc.replay.race", {
+                  appointment_id: existing.id,
+                  reference_number: reference,
+                  replayed: true,
                 });
+                return json(200, { ok: true, reference });
               }
-            } catch {
+            } catch (e) {
+              logBook("rpc.replay.race.error", {
+                error: (e as Error)?.message ?? String(e),
+              });
               /* fall through */
             }
           }
@@ -343,9 +390,17 @@ export const Route = createFileRoute("/api/public/book/create")({
 
         // rows is an array of { id, reference, replayed }.
         const row = Array.isArray(rows) ? rows[0] : rows;
-        const reference =
-          (row && (row as { reference?: string | null }).reference) ??
-          (row && (row as { id?: string }).id ? refFromId((row as { id: string }).id) : null);
+        const rowId = row && (row as { id?: string }).id;
+        const rowRef = row && (row as { reference?: string | null }).reference;
+        const rowReplayed = !!(row && (row as { replayed?: boolean }).replayed);
+        const reference = rowRef ?? (rowId ? refFromId(rowId) : null);
+
+        logBook(rowReplayed ? "rpc.replay.rpc" : "rpc.success", {
+          duration_ms: rpcMs,
+          appointment_id: rowId ?? null,
+          reference_number: reference,
+          replayed: rowReplayed,
+        });
 
         return json(200, { ok: true, reference });
       },
