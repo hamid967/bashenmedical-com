@@ -151,6 +151,7 @@ import { Route as AuthenticatedOwnerSecurityRouteImport } from './routes/_authen
 import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
 import { Route as AuthenticatedPatientIndexRouteImport } from './routes/_authenticated/patient.index'
 import { Route as AuthenticatedPatientAppointmentsRouteImport } from './routes/_authenticated/patient.appointments'
+import { Route as AuthenticatedPatientReportsRouteImport } from './routes/_authenticated/patient.reports'
 import { Route as AuthenticatedPatientsIndexRouteImport } from './routes/_authenticated/patients.index'
 import { Route as AuthenticatedPatientsPatientIdRouteImport } from './routes/_authenticated/patients.$patientId'
 import { Route as AuthenticatedPortalIndexRouteImport } from './routes/_authenticated/portal.index'
@@ -994,6 +995,12 @@ const AuthenticatedPatientAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedPatientRoute,
   } as any)
+const AuthenticatedPatientReportsRoute =
+  AuthenticatedPatientReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
+    getParentRoute: () => AuthenticatedPatientRoute,
+  } as any)
 const AuthenticatedPatientsIndexRoute =
   AuthenticatedPatientsIndexRouteImport.update({
     id: '/patients/',
@@ -1582,6 +1589,7 @@ export interface FileRoutesByFullPath {
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
+  '/patient/reports': typeof AuthenticatedPatientReportsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/assistant': typeof AuthenticatedPortalAssistantRoute
@@ -1797,6 +1805,7 @@ export interface FileRoutesByTo {
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
+  '/patient/reports': typeof AuthenticatedPatientReportsRoute
   '/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/portal/assistant': typeof AuthenticatedPortalAssistantRoute
@@ -2019,6 +2028,7 @@ export interface FileRoutesById {
   '/_authenticated/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/_authenticated/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
+  '/_authenticated/patient/reports': typeof AuthenticatedPatientReportsRoute
   '/_authenticated/patients/$patientId': typeof AuthenticatedPatientsPatientIdRoute
   '/_authenticated/portal/appointments': typeof AuthenticatedPortalAppointmentsRoute
   '/_authenticated/portal/assistant': typeof AuthenticatedPortalAssistantRoute
@@ -2241,6 +2251,7 @@ export interface FileRouteTypes {
     | '/owner/security'
     | '/owner/settings'
     | '/patient/appointments'
+    | '/patient/reports'
     | '/patients/$patientId'
     | '/portal/appointments'
     | '/portal/assistant'
@@ -2456,6 +2467,7 @@ export interface FileRouteTypes {
     | '/owner/security'
     | '/owner/settings'
     | '/patient/appointments'
+    | '/patient/reports'
     | '/patients/$patientId'
     | '/portal/appointments'
     | '/portal/assistant'
@@ -2677,6 +2689,7 @@ export interface FileRouteTypes {
     | '/_authenticated/owner/security'
     | '/_authenticated/owner/settings'
     | '/_authenticated/patient/appointments'
+    | '/_authenticated/patient/reports'
     | '/_authenticated/patients/$patientId'
     | '/_authenticated/portal/appointments'
     | '/_authenticated/portal/assistant'
@@ -3846,6 +3859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPatientAppointmentsRouteImport
       parentRoute: typeof AuthenticatedPatientRoute
     }
+    '/_authenticated/patient/reports': {
+      id: '/_authenticated/patient/reports'
+      path: '/reports'
+      fullPath: '/patient/reports'
+      preLoaderRoute: typeof AuthenticatedPatientReportsRouteImport
+      parentRoute: typeof AuthenticatedPatientRoute
+    }
     '/_authenticated/patients/': {
       id: '/_authenticated/patients/'
       path: '/patients'
@@ -4533,11 +4553,13 @@ const AuthenticatedOwnerRouteWithChildren =
 
 interface AuthenticatedPatientRouteChildren {
   AuthenticatedPatientAppointmentsRoute: typeof AuthenticatedPatientAppointmentsRoute
+  AuthenticatedPatientReportsRoute: typeof AuthenticatedPatientReportsRoute
   AuthenticatedPatientIndexRoute: typeof AuthenticatedPatientIndexRoute
 }
 
 const AuthenticatedPatientRouteChildren: AuthenticatedPatientRouteChildren = {
   AuthenticatedPatientAppointmentsRoute: AuthenticatedPatientAppointmentsRoute,
+  AuthenticatedPatientReportsRoute: AuthenticatedPatientReportsRoute,
   AuthenticatedPatientIndexRoute: AuthenticatedPatientIndexRoute,
 }
 
