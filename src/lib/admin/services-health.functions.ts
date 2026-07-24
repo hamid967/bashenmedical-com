@@ -241,6 +241,76 @@ async function aiSafetyHealth(sb: any): Promise<ServiceHealth> {
   };
 }
 
+async function paymentsHealth(sb: any): Promise<ServiceHealth> {
+  const since = ONE_HOUR();
+  const { data: whRows } = await sb
+    .from("payment_webhook_events")
+    .select("processed, error_message, created_at")
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(500);
+  const wh = whRows ?? [];
+  const ok = wh.filter((r: any) => r.processed && !r.error_message).length;
+  const err = wh.filter((r: any) => r.error_message).length;
+  const { data: lastErr } = await sb
+    .from("payment_webhook_events")
+    .select("created_at, error_message")
+    .not("error_message", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const total = ok + err;
+  const status: ServiceHealthStatus =
+    total === 0 ? "idle" : err === 0 ? "ok" : err / total > 0.2 ? "down" : "degraded";
+  return {
+    key: "payments",
+    label: "Payments Webhooks",
+    status,
+    last_event_at: wh[0]?.created_at ?? null,
+    last_error_at: lastErr?.created_at ?? null,
+    last_error_message: lastErr?.error_message ?? null,
+    success_1h: ok,
+    error_1h: err,
+    detail: total === 0 ? "لا توجد أحداث خلال آخر ساعة" : null,
+  };
+}
+
+async function backupHealth(sb: any): Promise<ServiceHealth> {
+  // Lovable Cloud manages point-in-time backups. We expose a lightweight
+  // heartbeat: newest write across audit_logs indicates DB reachability, and
+  // an optional system_settings.last_backup_at note (if the ops team records it).
+  const { data: hb } = await sb
+    .from("audit_logs")
+    .select("created_at")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const { data: setting } = await sb
+    .from("system_settings")
+    .select("value, updated_at")
+    .eq("key", "last_backup_at")
+    .maybeSingle();
+  const lastBackup: string | null =
+    (setting?.value as any)?.timestamp ?? setting?.updated_at ?? null;
+  const ageHours = lastBackup ? (Date.now() - Date.parse(lastBackup)) / 3600_000 : null;
+  const status: ServiceHealthStatus =
+    ageHours == null ? "unknown" : ageHours < 26 ? "ok" : ageHours < 48 ? "degraded" : "down";
+  return {
+    key: "backup",
+    label: "Database Backup",
+    status,
+    last_event_at: hb?.created_at ?? null,
+    last_error_at: null,
+    last_error_message: null,
+    success_1h: 0,
+    error_1h: 0,
+    detail:
+      lastBackup == null
+        ? "النسخ الاحتياطي مُدار عبر Lovable Cloud (PITR). سجّل آخر تاريخ في system_settings.last_backup_at لتفعيل التنبيه."
+        : `آخر نسخة: ${lastBackup}`,
+  };
+}
+
 export const getServicesHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator(() => ({}))
