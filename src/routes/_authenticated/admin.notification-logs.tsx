@@ -21,10 +21,14 @@ import {
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 import {
   getNotificationDeliveryStats,
+  getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
   type NotificationDeliveryLog,
+  type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
 } from "@/lib/admin/notification-logs.functions";
+import { useQuery } from "@tanstack/react-query";
+import { X, FlaskConical } from "lucide-react";
 
 /* ------------------------------- queries -------------------------------- */
 
@@ -33,9 +37,16 @@ type Filters = {
   status: NotificationDeliveryLog["status"] | "";
   q: string;
   windowHours: number;
+  testOnly: boolean;
 };
 
-const DEFAULT_FILTERS: Filters = { channel: "", status: "", q: "", windowHours: 24 * 7 };
+const DEFAULT_FILTERS: Filters = {
+  channel: "",
+  status: "",
+  q: "",
+  windowHours: 24 * 7,
+  testOnly: false,
+};
 
 const logsQuery = (f: Filters) =>
   queryOptions({
@@ -46,6 +57,7 @@ const logsQuery = (f: Filters) =>
           channel: f.channel || null,
           status: f.status || null,
           q: f.q ? f.q : null,
+          testOnly: f.testOnly || null,
           windowHours: f.windowHours,
           limit: 200,
         },
@@ -92,6 +104,7 @@ export const Route = createFileRoute("/_authenticated/admin/notification-logs")(
 
 function NotifLogsPage() {
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const qc = useQueryClient();
   const logs = useSuspenseQuery(logsQuery(filters));
   const stats = useSuspenseQuery(statsQuery(filters.windowHours));
@@ -118,14 +131,29 @@ function NotifLogsPage() {
             مراقبة كل رسالة عبر جميع القنوات مع سبب الفشل عند وجوده.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] })}
-          className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 h-9 text-xs font-semibold"
-        >
-          <RefreshCw className="h-3.5 w-3.5" />
-          تحديث
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setFilters((f) => ({ ...f, testOnly: !f.testOnly }))}
+            className={`inline-flex items-center gap-1.5 rounded-full px-3 h-9 text-xs font-semibold border ${
+              filters.testOnly
+                ? "bg-amber-100 text-amber-800 border-amber-300"
+                : "bg-white text-muted-foreground hover:text-foreground"
+            }`}
+            title="عرض الاختبارات فقط"
+          >
+            <FlaskConical className="h-3.5 w-3.5" />
+            اختبارات فقط
+          </button>
+          <button
+            type="button"
+            onClick={() => qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] })}
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 h-9 text-xs font-semibold"
+          >
+            <RefreshCw className="h-3.5 w-3.5" />
+            تحديث
+          </button>
+        </div>
       </header>
 
       <StatsRow stats={s} />
@@ -136,7 +164,153 @@ function NotifLogsPage() {
         onReset={() => setFilters(DEFAULT_FILTERS)}
       />
 
-      <LogsTable rows={rows} loading={logs.isFetching} />
+      <LogsTable rows={rows} loading={logs.isFetching} onOpen={setSelectedId} />
+
+      {selectedId && (
+        <LogDetailDrawer id={selectedId} onClose={() => setSelectedId(null)} />
+      )}
+    </div>
+  );
+}
+
+/* --------------------------- detail drawer ------------------------------ */
+
+function LogDetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
+  const q = useQuery({
+    queryKey: ["admin", "notif-logs", "detail", id],
+    queryFn: () => getNotificationDeliveryLogDetail({ data: { id } }),
+    staleTime: 30_000,
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/40"
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+    >
+      <aside
+        className="absolute inset-y-0 start-0 w-full max-w-xl bg-white shadow-2xl overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+        dir="rtl"
+      >
+        <div className="sticky top-0 z-10 bg-white border-b px-5 py-3 flex items-center justify-between">
+          <h2 className="text-sm font-bold">تفاصيل محاولة التسليم</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 text-slate-500 hover:bg-slate-100"
+            aria-label="إغلاق"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {q.isLoading ? (
+          <div className="p-6 grid place-items-center text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+          </div>
+        ) : q.isError ? (
+          <div className="p-6 text-sm text-rose-700">
+            {(q.error as Error)?.message ?? "تعذّر تحميل التفاصيل"}
+          </div>
+        ) : q.data ? (
+          <LogDetailBody detail={q.data} />
+        ) : null}
+      </aside>
+    </div>
+  );
+}
+
+function LogDetailBody({ detail }: { detail: NotificationDeliveryLogDetail }) {
+  const n = detail.notification;
+  return (
+    <div className="p-5 space-y-5 text-sm">
+      <section className="space-y-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <ChannelBadge channel={detail.channel} />
+          <StatusBadge status={detail.status} />
+          {detail.is_test && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[11px] font-semibold">
+              <FlaskConical className="h-3 w-3" /> اختبار
+            </span>
+          )}
+          <span className="text-[11px] text-muted-foreground">
+            محاولة #{detail.attempt}
+          </span>
+        </div>
+        <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs">
+          <dt className="text-muted-foreground">التاريخ</dt>
+          <dd className="col-span-2">
+            {new Date(detail.created_at).toLocaleString("ar")}
+          </dd>
+          <dt className="text-muted-foreground">آخر تحديث</dt>
+          <dd className="col-span-2">
+            {new Date(detail.updated_at).toLocaleString("ar")}
+          </dd>
+          <dt className="text-muted-foreground">القالب</dt>
+          <dd className="col-span-2">{detail.template ?? "—"}</dd>
+          <dt className="text-muted-foreground">المزود</dt>
+          <dd className="col-span-2">{detail.provider ?? "—"}</dd>
+          <dt className="text-muted-foreground">المستلم</dt>
+          <dd className="col-span-2 font-mono break-all">
+            {detail.recipient ?? "—"}
+          </dd>
+          <dt className="text-muted-foreground">الموضوع</dt>
+          <dd className="col-span-2">{detail.subject ?? "—"}</dd>
+        </dl>
+      </section>
+
+      {detail.error_message && (
+        <section>
+          <h3 className="text-xs font-semibold text-rose-700 mb-1">
+            سبب الفشل
+          </h3>
+          <pre className="rounded-lg bg-rose-50 text-rose-800 text-xs p-3 whitespace-pre-wrap break-words border border-rose-200">
+            {detail.error_message}
+          </pre>
+        </section>
+      )}
+
+      {n && (
+        <section className="space-y-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase">
+            الرسالة الأصلية
+          </h3>
+          <div className="rounded-xl border p-3 space-y-2">
+            <div className="flex items-center gap-2 flex-wrap text-[11px] text-muted-foreground">
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                kind: {n.kind ?? "—"}
+              </span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                audience: {n.audience ?? "—"}
+              </span>
+              <span className="rounded-full bg-slate-100 px-2 py-0.5">
+                {n.send_status ?? "—"}
+              </span>
+            </div>
+            <div>
+              <div className="text-[11px] text-muted-foreground">العنوان</div>
+              <div className="text-sm font-semibold">{n.title ?? "—"}</div>
+            </div>
+            <div>
+              <div className="text-[11px] text-muted-foreground">النص</div>
+              <pre className="text-xs whitespace-pre-wrap break-words bg-slate-50 p-2 rounded border">
+                {n.body ?? "—"}
+              </pre>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section>
+        <h3 className="text-xs font-semibold text-muted-foreground uppercase mb-1">
+          البيانات الوصفية (metadata)
+        </h3>
+        <pre className="rounded-lg bg-slate-50 border text-[11px] p-3 whitespace-pre-wrap break-words max-h-64 overflow-auto">
+          {JSON.stringify(detail.metadata ?? {}, null, 2)}
+        </pre>
+      </section>
     </div>
   );
 }
@@ -287,7 +461,15 @@ function FiltersBar({
 
 /* -------------------------------- table --------------------------------- */
 
-function LogsTable({ rows, loading }: { rows: NotificationDeliveryLog[]; loading: boolean }) {
+function LogsTable({
+  rows,
+  loading,
+  onOpen,
+}: {
+  rows: NotificationDeliveryLog[];
+  loading: boolean;
+  onOpen: (id: string) => void;
+}) {
   if (loading && rows.length === 0) {
     return (
       <div className="rounded-2xl border bg-white p-8 grid place-items-center text-muted-foreground">
@@ -319,12 +501,26 @@ function LogsTable({ rows, loading }: { rows: NotificationDeliveryLog[]; loading
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t hover:bg-muted/30">
+              <tr
+                key={r.id}
+                className="border-t hover:bg-muted/30 cursor-pointer"
+                onClick={() => onOpen(r.id)}
+              >
                 <td className="px-3 py-2 whitespace-nowrap text-xs text-muted-foreground">
                   {new Date(r.created_at).toLocaleString("ar")}
                 </td>
                 <td className="px-3 py-2">
-                  <ChannelBadge channel={r.channel} />
+                  <div className="flex items-center gap-1">
+                    <ChannelBadge channel={r.channel} />
+                    {r.is_test && (
+                      <span
+                        className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-1.5 py-0.5 text-[10px] font-semibold"
+                        title="إرسال اختباري"
+                      >
+                        <FlaskConical className="h-3 w-3" />
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-3 py-2 text-xs">{r.template ?? "—"}</td>
                 <td
