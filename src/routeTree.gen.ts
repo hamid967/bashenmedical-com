@@ -220,6 +220,7 @@ import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes
 import { Route as AuthenticatedAdminBranchesIdRouteImport } from './routes/_authenticated/admin.branches.$id'
 import { Route as AuthenticatedAdminFilesIdRouteImport } from './routes/_authenticated/admin.files.$id'
 import { Route as AuthenticatedAdminInboxIdRouteImport } from './routes/_authenticated/admin.inbox.$id'
+import { Route as AuthenticatedAdminInboxSlaRouteImport } from './routes/_authenticated/admin.inbox.sla'
 import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './routes/_authenticated/admin.insurance.$approvalId'
 import { Route as AuthenticatedAdminIntegrationsKeyRouteImport } from './routes/_authenticated/admin.integrations.$key'
 import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_authenticated/admin.patients.$id'
@@ -1439,6 +1440,12 @@ const AuthenticatedAdminInboxIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminInboxRoute,
   } as any)
+const AuthenticatedAdminInboxSlaRoute =
+  AuthenticatedAdminInboxSlaRouteImport.update({
+    id: '/sla',
+    path: '/sla',
+    getParentRoute: () => AuthenticatedAdminInboxRoute,
+  } as any)
 const AuthenticatedAdminInsuranceApprovalIdRoute =
   AuthenticatedAdminInsuranceApprovalIdRouteImport.update({
     id: '/$approvalId',
@@ -1925,6 +1932,7 @@ export interface FileRoutesByFullPath {
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/admin/inbox/$id': typeof AuthenticatedAdminInboxIdRoute
+  '/admin/inbox/sla': typeof AuthenticatedAdminInboxSlaRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2179,6 +2187,7 @@ export interface FileRoutesByTo {
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/admin/inbox/$id': typeof AuthenticatedAdminInboxIdRoute
+  '/admin/inbox/sla': typeof AuthenticatedAdminInboxSlaRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2440,6 +2449,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/_authenticated/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/_authenticated/admin/inbox/$id': typeof AuthenticatedAdminInboxIdRoute
+  '/_authenticated/admin/inbox/sla': typeof AuthenticatedAdminInboxSlaRoute
   '/_authenticated/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/_authenticated/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/_authenticated/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2701,6 +2711,7 @@ export interface FileRouteTypes {
     | '/admin/branches/$id'
     | '/admin/files/$id'
     | '/admin/inbox/$id'
+    | '/admin/inbox/sla'
     | '/admin/insurance/$approvalId'
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
@@ -2955,6 +2966,7 @@ export interface FileRouteTypes {
     | '/admin/branches/$id'
     | '/admin/files/$id'
     | '/admin/inbox/$id'
+    | '/admin/inbox/sla'
     | '/admin/insurance/$approvalId'
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
@@ -3215,6 +3227,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/branches/$id'
     | '/_authenticated/admin/files/$id'
     | '/_authenticated/admin/inbox/$id'
+    | '/_authenticated/admin/inbox/sla'
     | '/_authenticated/admin/insurance/$approvalId'
     | '/_authenticated/admin/integrations/$key'
     | '/_authenticated/admin/patients/$id'
@@ -4834,6 +4847,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInboxIdRouteImport
       parentRoute: typeof AuthenticatedAdminInboxRoute
     }
+    '/_authenticated/admin/inbox/sla': {
+      id: '/_authenticated/admin/inbox/sla'
+      path: '/sla'
+      fullPath: '/admin/inbox/sla'
+      preLoaderRoute: typeof AuthenticatedAdminInboxSlaRouteImport
+      parentRoute: typeof AuthenticatedAdminInboxRoute
+    }
     '/_authenticated/admin/insurance/$approvalId': {
       id: '/_authenticated/admin/insurance/$approvalId'
       path: '/$approvalId'
@@ -5240,11 +5260,13 @@ const AuthenticatedAdminFilesRouteWithChildren =
 
 interface AuthenticatedAdminInboxRouteChildren {
   AuthenticatedAdminInboxIdRoute: typeof AuthenticatedAdminInboxIdRoute
+  AuthenticatedAdminInboxSlaRoute: typeof AuthenticatedAdminInboxSlaRoute
 }
 
 const AuthenticatedAdminInboxRouteChildren: AuthenticatedAdminInboxRouteChildren =
   {
     AuthenticatedAdminInboxIdRoute: AuthenticatedAdminInboxIdRoute,
+    AuthenticatedAdminInboxSlaRoute: AuthenticatedAdminInboxSlaRoute,
   }
 
 const AuthenticatedAdminInboxRouteWithChildren =
