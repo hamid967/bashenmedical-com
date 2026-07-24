@@ -22,6 +22,18 @@ export { SectionCard, type SectionCardProps } from "./SectionCard";
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog";
 export { FormDialog, type FormDialogProps } from "./FormDialog";
 export { DataTable } from "./DataTable";
+
+// Unified state contract (loading / disabled / error) shared by all wrappers.
+export {
+  V3_LABELS,
+  extractErrorMessage,
+  LoadingSpinner,
+  InlineError,
+  useAsyncAction,
+  type LoadingSpinnerProps,
+  type InlineErrorProps,
+  type AsyncActionOptions,
+} from "./state";
 export {
   Icon,
   iconRegistry,

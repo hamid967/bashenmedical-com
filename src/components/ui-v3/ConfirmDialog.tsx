@@ -1,9 +1,13 @@
 /**
  * ui-v3 ConfirmDialog — controlled confirmation on top of shadcn AlertDialog.
- * Handles async `onConfirm` with a loading state and error toast.
+ * Uses the unified `useAsyncAction` hook so the busy/error contract matches
+ * FormDialog and Button.
+ *
+ *   - `errorMode`: 'toast' (default), 'inline' (banner inside dialog), or 'both'.
+ *   - Body cannot be dismissed while busy.
+ *   - Confirm button gets `aria-busy`, spinner, and `busyLabel`.
  */
 import * as React from "react";
-import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,6 +19,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import {
+  InlineError,
+  LoadingSpinner,
+  V3_LABELS,
+  useAsyncAction,
+} from "./state";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -23,8 +33,11 @@ export interface ConfirmDialogProps {
   description?: React.ReactNode;
   confirmLabel?: React.ReactNode;
   cancelLabel?: React.ReactNode;
+  busyLabel?: React.ReactNode;
   destructive?: boolean;
   onConfirm: () => void | Promise<void>;
+  errorMode?: "toast" | "inline" | "both";
+  errorFallback?: string;
 }
 
 export function ConfirmDialog({
@@ -34,43 +47,55 @@ export function ConfirmDialog({
   description,
   confirmLabel = "تأكيد",
   cancelLabel = "إلغاء",
+  busyLabel = V3_LABELS.processing,
   destructive,
   onConfirm,
+  errorMode = "toast",
+  errorFallback = V3_LABELS.actionError,
 }: ConfirmDialogProps) {
-  const [busy, setBusy] = React.useState(false);
+  const { run, busy, error, reset } = useAsyncAction();
+
+  // Clear inline error when the dialog is reopened.
+  React.useEffect(() => {
+    if (!open) reset();
+  }, [open, reset]);
 
   const handleConfirm = async (e: React.MouseEvent) => {
     e.preventDefault();
-    try {
-      setBusy(true);
-      await onConfirm();
-      onOpenChange(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر إتمام العملية");
-    } finally {
-      setBusy(false);
-    }
+    await run(async () => onConfirm(), {
+      mode: errorMode,
+      errorFallback,
+      onSuccess: () => onOpenChange(false),
+    });
   };
 
   return (
     <AlertDialog open={open} onOpenChange={(v) => (!busy ? onOpenChange(v) : null)}>
-      <AlertDialogContent>
+      <AlertDialogContent aria-busy={busy || undefined}>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
         </AlertDialogHeader>
+        {error && (errorMode === "inline" || errorMode === "both") ? (
+          <InlineError variant="banner">{error}</InlineError>
+        ) : null}
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={busy} aria-disabled={busy || undefined}>
+            {cancelLabel}
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleConfirm}
             disabled={busy}
+            aria-disabled={busy || undefined}
             aria-busy={busy || undefined}
+            data-loading={busy || undefined}
             className={cn(
               destructive &&
                 "bg-destructive text-destructive-foreground hover:bg-destructive/90",
             )}
           >
-            {busy ? "جارٍ التنفيذ..." : confirmLabel}
+            {busy ? <LoadingSpinner label={V3_LABELS.processing} /> : null}
+            {busy ? busyLabel : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

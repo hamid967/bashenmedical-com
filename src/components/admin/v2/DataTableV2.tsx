@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui-v3";
 import { Button } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
+import { extractErrorMessage } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
@@ -604,7 +605,7 @@ export function DataTableV2<T>({
                       </div>
                       <p className="text-sm font-semibold text-foreground">{errorTitle}</p>
                       <p className="max-w-md text-xs text-muted-foreground">
-                        {error instanceof Error ? error.message : "خطأ غير متوقّع."}
+                        {extractErrorMessage(error)}
                       </p>
                       {onRetry && (
                         <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">

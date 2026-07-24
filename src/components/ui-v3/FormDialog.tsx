@@ -1,9 +1,13 @@
 /**
- * ui-v3 FormDialog — a Dialog scaffold for create/edit forms.
- * Consumers render <Field>s as children. Async submit with loading + error surface.
+ * ui-v3 FormDialog — Dialog scaffold for create/edit forms.
+ * Consumers render <Field>s as children. Uses the unified `useAsyncAction`
+ * hook so busy/error behavior matches ConfirmDialog and Button.
+ *
+ *   - `errorMode`: 'toast' (default), 'inline' (banner in the form), or 'both'.
+ *   - Cannot dismiss while submitting.
+ *   - `submitDisabled` for external form-validity gating.
  */
 import * as React from "react";
-import { toast } from "sonner";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui-v3/Button";
 import { cn } from "@/lib/utils";
+import { InlineError, V3_LABELS, useAsyncAction } from "./state";
 
 export interface FormDialogProps {
   open: boolean;
@@ -22,11 +27,14 @@ export interface FormDialogProps {
   description?: React.ReactNode;
   submitLabel?: React.ReactNode;
   cancelLabel?: React.ReactNode;
+  busyLabel?: React.ReactNode;
   onSubmit: () => void | Promise<void>;
   children: React.ReactNode;
   className?: string;
   /** Disables the submit button (e.g. when form is invalid). */
   submitDisabled?: boolean;
+  errorMode?: "toast" | "inline" | "both";
+  errorFallback?: string;
 }
 
 export function FormDialog({
@@ -36,35 +44,40 @@ export function FormDialog({
   description,
   submitLabel = "حفظ",
   cancelLabel = "إلغاء",
+  busyLabel = V3_LABELS.saving,
   onSubmit,
   children,
   className,
   submitDisabled,
+  errorMode = "toast",
+  errorFallback = V3_LABELS.saveError,
 }: FormDialogProps) {
-  const [busy, setBusy] = React.useState(false);
+  const { run, busy, error, reset } = useAsyncAction();
+
+  React.useEffect(() => {
+    if (!open) reset();
+  }, [open, reset]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (busy) return;
-    try {
-      setBusy(true);
-      await onSubmit();
-      onOpenChange(false);
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذّر الحفظ");
-    } finally {
-      setBusy(false);
-    }
+    await run(async () => onSubmit(), {
+      mode: errorMode,
+      errorFallback,
+      onSuccess: () => onOpenChange(false),
+    });
   };
 
   return (
     <Dialog open={open} onOpenChange={(v) => (!busy ? onOpenChange(v) : null)}>
-      <DialogContent className={cn("max-w-lg", className)}>
+      <DialogContent className={cn("max-w-lg", className)} aria-busy={busy || undefined}>
         <form onSubmit={handleSubmit} className="space-y-4">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             {description ? <DialogDescription>{description}</DialogDescription> : null}
           </DialogHeader>
+          {error && (errorMode === "inline" || errorMode === "both") ? (
+            <InlineError variant="banner">{error}</InlineError>
+          ) : null}
           <div className="space-y-4">{children}</div>
           <DialogFooter>
             <Button
@@ -75,8 +88,13 @@ export function FormDialog({
             >
               {cancelLabel}
             </Button>
-            <Button type="submit" loading={busy} disabled={submitDisabled}>
-              {submitLabel}
+            <Button
+              type="submit"
+              loading={busy}
+              loadingLabel={typeof busyLabel === "string" ? busyLabel : V3_LABELS.saving}
+              disabled={submitDisabled}
+            >
+              {busy ? busyLabel : submitLabel}
             </Button>
           </DialogFooter>
         </form>
