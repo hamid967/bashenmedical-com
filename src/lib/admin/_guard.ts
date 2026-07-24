@@ -34,9 +34,11 @@ export type Role =
   | "super_admin"
   | "support_agent"
   | "reception"
+  | "branch_manager"
   | "content_manager"
   | "auditor"
-  | "editor";
+  | "editor"
+  | "doctor";
 
 export async function assertHasRole(
   supabase: any,
@@ -46,6 +48,29 @@ export async function assertHasRole(
   const rolesToCheck: Role[] = role === "admin" ? ["admin", "super_admin"] : [role];
   const checks = await Promise.all(
     rolesToCheck.map((r) => supabase.rpc("has_role", { _user_id: userId, _role: r })),
+  );
+  if (checks.some((c) => c.error)) {
+    throw new Error("تعذّر التحقق من الصلاحية.");
+  }
+  if (!checks.some((c) => c.data === true)) {
+    throw new Error("ليست لديك الصلاحية لتنفيذ هذه العملية.");
+  }
+  return true;
+}
+
+/**
+ * Multi-role assertion — Front Desk / Queue tooling. Grants access when the
+ * caller carries ANY of the requested roles. `super_admin` is always
+ * implicitly accepted so top-level owners are never walled off.
+ */
+export async function assertHasAnyRole(
+  supabase: any,
+  userId: string,
+  roles: Role[],
+): Promise<true> {
+  const uniq = Array.from(new Set<Role>([...roles, "super_admin"]));
+  const checks = await Promise.all(
+    uniq.map((r) => supabase.rpc("has_role", { _user_id: userId, _role: r })),
   );
   if (checks.some((c) => c.error)) {
     throw new Error("تعذّر التحقق من الصلاحية.");

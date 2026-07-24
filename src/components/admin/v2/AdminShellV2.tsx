@@ -92,6 +92,12 @@ const NAV: NavGroup[] = [
       },
       { to: "/calendar", label: "التقويم", icon: CalendarCheck },
       {
+        to: "/admin/front-desk",
+        label: "الاستقبال والطابور",
+        icon: CalendarCheck,
+        roles: ["admin", "super_admin", "reception", "branch_manager"],
+      },
+      {
         to: "/admin/appointments",
         label: "المواعيد (Admin)",
         icon: CalendarCheck,
