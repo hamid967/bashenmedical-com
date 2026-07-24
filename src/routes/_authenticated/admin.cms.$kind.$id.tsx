@@ -245,6 +245,9 @@ function FieldsEditor({
         if (f.type === "list") {
           return <ListField key={f.name} f={f} value={Array.isArray(v) ? v : []} onChange={set} />;
         }
+        if (f.type === "image") {
+          return <MediaField key={f.name} label={f.label + (f.required ? " *" : "")} value={v ?? ""} onChange={set} />;
+        }
         const textarea = f.type === "textarea" || f.type === "rich";
         return (
           <TextInput
@@ -253,7 +256,7 @@ function FieldsEditor({
             value={v ?? ""}
             onChange={set}
             textarea={textarea}
-            placeholder={f.type === "url" || f.type === "image" ? "https://…" : undefined}
+            placeholder={f.type === "url" ? "https://…" : undefined}
           />
         );
       })}
