@@ -64,7 +64,7 @@ const NAV: NavGroup[] = [
         to: "/admin/inbox",
         label: "الصندوق الموحد",
         icon: Inbox,
-        roles: ["admin", "super_admin", "reception"],
+        roles: ["admin", "super_admin"],
       },
     ],
   },
