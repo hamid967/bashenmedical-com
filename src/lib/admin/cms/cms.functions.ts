@@ -279,6 +279,12 @@ export const submitCmsForReview = createServerFn({ method: "POST" })
     }
     const ar = entry.locale_completeness?.ar ?? 0;
     if (ar < 100) throw new Error("العربية غير مكتملة — أكمل الحقول المطلوبة قبل التقديم.");
+    const kindDef = CMS_KINDS[entry.kind as CmsKind];
+    if (kindDef?.bilingual) {
+      const en = entry.locale_completeness?.en ?? 0;
+      if (en < 100) throw new Error("الإنجليزية غير مكتملة — هذا النوع يتطلب ترجمة كاملة قبل التقديم.");
+    }
+
     await context.supabase.from("cms_entries")
       .update({ status: "in_review", updated_by: context.userId })
       .eq("id", data.entry_id);
