@@ -368,7 +368,8 @@ export function AdminShellV2({
       {/* Sidebar */}
       <aside
         className={[
-          "fixed lg:sticky top-0 z-40 h-dvh shrink-0 border-e transition-all duration-200 ease-out",
+          "fixed lg:sticky top-0 z-40 h-dvh shrink-0 border-e ease-out",
+          dragX > 0 ? "duration-0" : "transition-all duration-200",
           collapsed ? "w-16" : "w-72",
           mobileOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0",
         ].join(" ")}
@@ -376,7 +377,15 @@ export function AdminShellV2({
           background: "var(--ac-surface)",
           borderColor: "var(--ac-line)",
           backdropFilter: theme === "dark" ? "blur(14px) saturate(140%)" : undefined,
+          transform: mobileOpen && dragX > 0 ? `translateX(${dragX}px)` : undefined,
+          touchAction: "pan-y",
         }}
+        onTouchStart={onDrawerTouchStart}
+        onTouchMove={onDrawerTouchMove}
+        onTouchEnd={onDrawerTouchEnd}
+        role="dialog"
+        aria-modal={mobileOpen ? true : undefined}
+        aria-label="القائمة الجانبية"
       >
         <div
           className="h-16 flex items-center justify-between px-4 border-b"
