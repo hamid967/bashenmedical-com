@@ -9,6 +9,7 @@ import { ThemeSwitcher, useAdminTheme } from "./ThemeSwitcher";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { QuickActions } from "./QuickActions";
 import { BranchSwitcher } from "./BranchSwitcher";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AdminRole } from "@/components/admin/types";
 import {
   LayoutDashboard,
@@ -571,7 +572,10 @@ export function AdminShellV2({
 
           <BranchSwitcher />
 
+          <LanguageSwitcher className="hidden sm:inline-flex" />
+
           <QuickActions />
+
 
           <ThemeSwitcher theme={theme} onToggle={toggleTheme} />
 
