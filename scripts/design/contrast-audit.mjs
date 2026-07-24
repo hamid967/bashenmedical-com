@@ -76,8 +76,9 @@ function contrast(a, b) {
 
 // --- Pairs to check --------------------------------------------------------
 /**
- * `large` = intended for large text (≥18pt or 14pt bold), so it's audited
- * against the 3:1 threshold instead of 4.5:1.
+ * `large` = intended for large text (≥18pt or 14pt bold), audited at 3:1.
+ * `decorative` = purely decorative surface (e.g. subtle card outline). Reported
+ * for visibility but excluded from the WCAG gate per SC 1.4.11 exception.
  */
 const pairs = [
   { fg: "--foreground", bg: "--background", role: "Body text" },
@@ -92,7 +93,7 @@ const pairs = [
   { fg: "--primary", bg: "--background", role: "Primary link on page", large: true },
   { fg: "--primary", bg: "--card", role: "Primary link on card", large: true },
   { fg: "--ring", bg: "--background", role: "Focus ring", large: true },
-  { fg: "--border", bg: "--background", role: "Border on page", large: true },
+  { fg: "--border", bg: "--background", role: "Card outline", decorative: true },
 ];
 
 // --- Run -------------------------------------------------------------------
