@@ -294,6 +294,9 @@ export function ServiceInquiryDialog({
       toast.error("تعذّر الاتصال بالخادم. حاول لاحقًا.", { id: toastId });
     } finally {
       setSubmitting(false);
+      // Single-use token: reset regardless of outcome to prevent replay.
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     }
   }
 
