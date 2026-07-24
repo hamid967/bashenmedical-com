@@ -210,7 +210,7 @@ export const transitionContentStatus = createServerFn({ method: "POST" })
     if (data.to === "approved") patch.approved_by = context.userId;
     const { data: row, error } = await context.supabase
       .from("content_items")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .select("*")
       .single();
