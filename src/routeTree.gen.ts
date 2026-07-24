@@ -212,6 +212,7 @@ import { Route as AuthenticatedPortalUsageRouteImport } from './routes/_authenti
 import { Route as ApiAdminAiChatRouteImport } from './routes/api/admin/ai-chat'
 import { Route as ApiAiActionRouteImport } from './routes/api/ai/action'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
+import { Route as ApiAiStaffActionRouteImport } from './routes/api/ai/staff-action'
 import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
@@ -1400,6 +1401,11 @@ const ApiAiChatRoute = ApiAiChatRouteImport.update({
   path: '/api/ai/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAiStaffActionRoute = ApiAiStaffActionRouteImport.update({
+  id: '/api/ai/staff-action',
+  path: '/api/ai/staff-action',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPortalAiChatRoute = ApiPortalAiChatRouteImport.update({
   id: '/api/portal/ai-chat',
   path: '/api/portal/ai-chat',
@@ -1965,6 +1971,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
   '/api/ai/action': typeof ApiAiActionRoute
   '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/ai/staff-action': typeof ApiAiStaffActionRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -2227,6 +2234,7 @@ export interface FileRoutesByTo {
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
   '/api/ai/action': typeof ApiAiActionRoute
   '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/ai/staff-action': typeof ApiAiStaffActionRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -2496,6 +2504,7 @@ export interface FileRoutesById {
   '/api/admin/ai-chat': typeof ApiAdminAiChatRoute
   '/api/ai/action': typeof ApiAiActionRoute
   '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/ai/staff-action': typeof ApiAiStaffActionRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -2765,6 +2774,7 @@ export interface FileRouteTypes {
     | '/api/admin/ai-chat'
     | '/api/ai/action'
     | '/api/ai/chat'
+    | '/api/ai/staff-action'
     | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/admin/'
@@ -3027,6 +3037,7 @@ export interface FileRouteTypes {
     | '/api/admin/ai-chat'
     | '/api/ai/action'
     | '/api/ai/chat'
+    | '/api/ai/staff-action'
     | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/admin'
@@ -3295,6 +3306,7 @@ export interface FileRouteTypes {
     | '/api/admin/ai-chat'
     | '/api/ai/action'
     | '/api/ai/chat'
+    | '/api/ai/staff-action'
     | '/api/portal/ai-chat'
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
@@ -3425,6 +3437,7 @@ export interface RootRouteChildren {
   ApiAdminAiChatRoute: typeof ApiAdminAiChatRoute
   ApiAiActionRoute: typeof ApiAiActionRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
+  ApiAiStaffActionRoute: typeof ApiAiStaffActionRoute
   ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
   ApiPublicAiStreamMetricsRoute: typeof ApiPublicAiStreamMetricsRoute
   ApiPublicAppointmentsVerifyRoute: typeof ApiPublicAppointmentsVerifyRoute
@@ -4881,6 +4894,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ai/staff-action': {
+      id: '/api/ai/staff-action'
+      path: '/api/ai/staff-action'
+      fullPath: '/api/ai/staff-action'
+      preLoaderRoute: typeof ApiAiStaffActionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/portal/ai-chat': {
       id: '/api/portal/ai-chat'
       path: '/api/portal/ai-chat'
@@ -6127,6 +6147,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminAiChatRoute: ApiAdminAiChatRoute,
   ApiAiActionRoute: ApiAiActionRoute,
   ApiAiChatRoute: ApiAiChatRoute,
+  ApiAiStaffActionRoute: ApiAiStaffActionRoute,
   ApiPortalAiChatRoute: ApiPortalAiChatRoute,
   ApiPublicAiStreamMetricsRoute: ApiPublicAiStreamMetricsRoute,
   ApiPublicAppointmentsVerifyRoute: ApiPublicAppointmentsVerifyRoute,
