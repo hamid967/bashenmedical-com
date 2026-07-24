@@ -222,8 +222,83 @@ function AdminDashboard() {
         </div>
       </header>
 
+      {/* Global drill-down filters — time range + branch segment. */}
+      <div
+        className="mb-4 sm:mb-6 rounded-2xl p-3 sm:p-4 flex flex-wrap items-center gap-2 sm:gap-3"
+        style={{ background: OCEAN.panel, border: `1px solid ${OCEAN.panel2}` }}
+        aria-label="نطاق زمني وقطاع"
+      >
+        <span className="text-[11px] font-bold" style={{ color: OCEAN.glow }}>
+          النطاق:
+        </span>
+        {[
+          { id: "today", label: "اليوم" },
+          { id: "yesterday", label: "أمس" },
+          { id: "7d", label: "٧ أيام" },
+          { id: "30d", label: "٣٠ يوم" },
+        ].map((r) => {
+          const active = search.range === r.id;
+          return (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() =>
+                navigate({
+                  search: (prev) => ({ ...prev, range: r.id, from: "", to: "" }),
+                  replace: true,
+                })
+              }
+              className="text-[11px] font-bold rounded-full px-3 h-8"
+              style={{
+                background: active ? OCEAN.glow : OCEAN.bg,
+                color: active ? OCEAN.panel : OCEAN.glow,
+                border: `1px solid ${OCEAN.panel2}`,
+              }}
+              aria-pressed={active}
+            >
+              {r.label}
+            </button>
+          );
+        })}
+
+        <span className="mx-2 h-5 w-px" style={{ background: OCEAN.panel2 }} aria-hidden />
+
+        <span className="text-[11px] font-bold" style={{ color: OCEAN.glow }}>
+          الفرع:
+        </span>
+        <select
+          value={search.branch}
+          onChange={(e) =>
+            navigate({
+              search: (prev) => ({ ...prev, branch: e.target.value }),
+              replace: true,
+            })
+          }
+          className="text-[11px] font-bold rounded-full px-3 h-8 outline-none"
+          style={{
+            background: OCEAN.bg,
+            color: OCEAN.glow,
+            border: `1px solid ${OCEAN.panel2}`,
+          }}
+          aria-label="اختيار الفرع"
+        >
+          <option value="">كل الفروع</option>
+          {(branchesQ.data ?? []).map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name_ar}
+            </option>
+          ))}
+        </select>
+
+        <span className="ms-auto text-[10px]" style={{ color: OCEAN.glow, opacity: 0.7 }}>
+          {fromDate === toDate ? fromDate : `${fromDate} → ${toDate}`}
+          {branchId ? " · مخصص" : " · كل الفروع"}
+        </span>
+      </div>
+
       {/* Phase 7 — Enterprise Command Center KPIs (real data, 14 tiles) */}
-      <CommandCenterKpiGridV2 />
+      <CommandCenterKpiGridV2 filters={{ from: fromDate, to: toDate, branchId }} />
+
 
       {/* Legacy KPI strip (role-scoped period-over-period + sparklines) */}
       <KpiGrid />
