@@ -180,6 +180,40 @@ function PrefsPage() {
           </p>
         </Section>
 
+        <Section
+          title="الفئات المكتومة"
+          hint="أوقف مؤقتًا فئة كاملة من الإشعارات دون التأثير على القنوات."
+        >
+          <div className="flex flex-wrap gap-2">
+            {MUTABLE_CATEGORIES.map((c) => {
+              const active = form.muted_kinds.includes(c.key);
+              return (
+                <button
+                  key={c.key}
+                  type="button"
+                  onClick={() =>
+                    set(
+                      "muted_kinds",
+                      active
+                        ? form.muted_kinds.filter((k) => k !== c.key)
+                        : [...form.muted_kinds, c.key],
+                    )
+                  }
+                  className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-full border text-[12px] transition ${
+                    active
+                      ? "border-red-400/60 bg-red-500/10 text-red-700"
+                      : "border-[color:var(--portal-border)] bg-[color:var(--portal-surface)] text-[color:var(--portal-ink)] hover:border-[color:var(--portal-primary)]/40"
+                  }`}
+                  aria-pressed={active}
+                >
+                  <VolumeX className="h-3.5 w-3.5" />
+                  {c.label_ar}
+                </button>
+              );
+            })}
+          </div>
+        </Section>
+
         <Section title="تكرار التنبيهات">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {(
