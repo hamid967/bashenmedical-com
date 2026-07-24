@@ -37,7 +37,7 @@ import {
   Bell,
   FileText,
   Palette,
-  Image as ImageIcon,
+  
   Menu as MenuIcon,
   ScrollText,
   KeyRound,
