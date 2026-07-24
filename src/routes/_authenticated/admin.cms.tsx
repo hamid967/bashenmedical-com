@@ -6,6 +6,7 @@ import { CMS_KIND_LIST } from "@/lib/admin/cms/schemas";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { FileText, ClipboardCheck, Clock, Archive, Send, CheckCircle2 } from "lucide-react";
+import { useCmsTransitionNotifications } from "@/lib/admin/cms/useCmsTransitionNotifications";
 
 export const Route = createFileRoute("/_authenticated/admin/cms")({
   head: () => ({
