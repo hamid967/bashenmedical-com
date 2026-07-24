@@ -55,7 +55,7 @@ function formatBytes(n: number): string {
   return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-function FilesList() {
+export function FilesList() {
   const fn = useServerFn(listAdminFiles);
   const uploadFn = useServerFn(uploadAdminFile);
   const deleteFn = useServerFn(deleteAdminFile);

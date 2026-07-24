@@ -53,7 +53,7 @@ const AUDIT_EXPORT_COLS: Column<any>[] = [
   { header: "User-Agent", accessor: (r) => r.user_agent ?? "" },
 ];
 
-function AuditLogsPage() {
+export function AuditLogsPage() {
   const search = Route.useSearch();
   const rolesFn = useServerFn(getMyRoles);
   const listFn = useServerFn(listAdminAuditLogs);

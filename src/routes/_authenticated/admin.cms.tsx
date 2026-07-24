@@ -27,7 +27,7 @@ const STAT_CARDS = [
   { key: "archived", label: "مؤرشفة", icon: Archive },
 ] as const;
 
-function CmsDashboard() {
+export function CmsDashboard() {
   useCmsTransitionNotifications();
   const fetchFn = useServerFn(getCmsDashboard);
   const { data } = useSuspenseQuery({

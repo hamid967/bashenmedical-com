@@ -39,7 +39,7 @@ export const Route = createFileRoute("/_authenticated/admin/inbox/sla")({
   component: SlaPage,
 });
 
-function SlaPage() {
+export function SlaPage() {
   const fetchFn = useServerFn(getInboxSlaOverview);
   const [days, setDays] = useState<number>(30);
   const [fChannel, setFChannel] = useState<string>("");

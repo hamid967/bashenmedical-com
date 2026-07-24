@@ -38,7 +38,7 @@ const LANG_OPTIONS = [
   { value: "fr", label: "الفرنسية" },
 ];
 
-function AdminDoctorsPage() {
+export function AdminDoctorsPage() {
   const qc = useQueryClient();
   const listFn = useServerFn(listAllDoctors);
   const upsertFn = useServerFn(upsertDoctor);

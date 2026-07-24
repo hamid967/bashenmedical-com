@@ -100,7 +100,7 @@ export const Route = createFileRoute("/_authenticated/admin/content")({
   component: ContentAdminPage,
 });
 
-function ContentAdminPage() {
+export function ContentAdminPage() {
   const qc = useQueryClient();
   const [typeFilter, setTypeFilter] = React.useState<string>("all");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
