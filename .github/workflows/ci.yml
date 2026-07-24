@@ -456,6 +456,15 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python tests/e2e/book_public_api_edge_cases.py
 
+      - name: Run full booking lifecycle (hold → confirm → release) E2E
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          APP_BASE_URL: http://127.0.0.1:8080
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: python tests/e2e/book_full_flow_hold_release.py
+
+
       - name: Run portal complaints flow E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
