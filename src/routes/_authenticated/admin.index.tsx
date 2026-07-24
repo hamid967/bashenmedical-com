@@ -244,7 +244,7 @@ function AdminDashboard() {
               type="button"
               onClick={() =>
                 navigate({
-                  search: (prev) => ({ ...prev, range: r.id, from: "", to: "" }),
+                  search: (prev: Record<string, string>) => ({ ...prev, range: r.id, from: "", to: "" }),
                   replace: true,
                 })
               }
@@ -270,7 +270,7 @@ function AdminDashboard() {
           value={search.branch}
           onChange={(e) =>
             navigate({
-              search: (prev) => ({ ...prev, branch: e.target.value }),
+              search: (prev: Record<string, string>) => ({ ...prev, branch: e.target.value }),
               replace: true,
             })
           }
