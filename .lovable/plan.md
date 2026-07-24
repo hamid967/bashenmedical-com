@@ -1,58 +1,73 @@
-# ترقية منصة باعشن — حسب ملف "فريق حامد" (1129 سطرًا)
+# Baeshen Platform — Roadmap V3
 
-الملف نفسه يُلزم بالبدء بـ **Phase 0 (الفحص الشامل)** قبل أي تعديل مرتفع الخطورة، مع تقديم Change Manifest واعتماد قبل كل تغيير حساس (RLS، مصادقة، دفع، تأمين). لذا الخطة تلتزم بذلك بدل تنفيذ 8 مراحل دفعة واحدة.
+Source spec: `user-uploads://file-28` (فريق حامد, 1129 lines).
+Audit basis: `docs/audit/phase0-refresh-2026-07-24.md`.
+Manifest template: `docs/audit/change-manifest-template.md`.
 
-## الوضع الحالي (مؤكد من الشيفرة)
-- Phase 0/1/2 من الخارطة السابقة مكتملة (Design System v2/v3، Auth مع OTP وWhatsApp، RBAC/RLS، Booking SPA، Front Desk أولي، Admin Shell V2، Patient Portal v2، AI Assistant، NPHIES adapter، Web Vitals، Release Gate).
-- Batch 3.1 (Front Desk Polish) هو التالي المعتمد سابقًا لكنه غير منفذ.
-- توثيق Phase 0 السابق موجود في `docs/audit/phase0-audit-2026-07-23.md` وسيُحدَّث بدل إعادة الفحص من الصفر.
+Delivery contract: **one Batch per approval round**, with tests +
+rollback plan + Change Manifest for anything touching Auth, RLS,
+Payments, NPHIES, or production env.
 
-## المخرجات (Deliverable لهذه الجولة)
-1. **Phase 0 Refresh Report** — `docs/audit/phase0-refresh-2026-07-24.md`:
-   - جرد Routes/Server Fns/Tables المستجدة منذ آخر تقرير.
-   - Broken links + CTAs معطلة أو مخفية.
-   - Permission Matrix فعلي مقابل ما يطلبه القسم §11.
-   - فجوات ضد كل قسم من §6 إلى §28 مع تصنيف Critical/High/Medium/Low.
-   - Prioritized Backlog مرقّم يربط كل فجوة ببـ Batch.
-2. **Roadmap V3** في `.lovable/plan.md` — يحل محل V2 ويقسم البقية إلى Batches صغيرة قابلة للاعتماد.
-3. **Change Manifest Template** — `docs/audit/change-manifest-template.md` مطبّق كما يفرض §4.
+---
 
-## Roadmap V3 المقترحة (بعد الاعتماد، Batch واحد لكل جولة)
+## Track A — Operations close-out
 
-**المسار A — إغلاق العمليات (Front Desk + Doctor + Requests)**
-- A1: Batch 3.1 Front Desk Polish — MRN search, Patient Snapshot, reschedule/no-show workflows.
-- A2: Batch 3.2 Doctor Console `/doctor` — today schedule, visit close, follow-up hold.
-- A3: Requests Hub §17 — unified queue من الموقع/واتساب/الحجز/الاستقبال مع Audit.
+| Batch | Title | Spec § | Risk | Status |
+|---|---|---|---|---|
+| A1 | Front Desk Polish (MRN search, Patient Snapshot, reschedule, no-show) | §13 | Low | **next** |
+| A2 | Doctor Console `/doctor` (today, queue, visit close, follow-up hold) | §15 | Medium | pending |
+| A3 | Unified Requests Hub (site+WA+booking+phone in one queue with audit) | §17 | Medium | pending |
 
-**المسار B — دورة المريض المالية والطبية**
-- B1: Reports & Prescriptions §18 — Private Storage + Signed URLs + Version History.
-- B2: Insurance State Machine §19 — 11 حالة، فصل Mock/Prod، Retry للأخطاء التقنية فقط.
-- B3: Billing & Payments §20 — Estimate/Invoice/Refund مع Webhook موقّع + Idempotency.
+## Track B — Patient clinical + financial
 
-**المسار C — المحتوى والاتصال**
-- C1: Content Engine §21 — Offers/Announcements مع Audience+Impressions+Clicks.
-- C2: CMS Cycle §22 — Draft→Review→Approved→Scheduled→Published→Archived مع Preview & Rollback.
-- C3: Notifications §23 — توحيد الحالات queued/sent/delivered/failed مع Provider callback فقط.
+| Batch | Title | Spec § | Risk | Status |
+|---|---|---|---|---|
+| B1 | Reports & Prescriptions lifecycle (Draft→Publish→Revoke, signed URLs, versions) | §18 | Medium | pending |
+| B2 | NPHIES 11-state machine + Mock/Prod separation | §19 | High 🔒 | pending manifest |
+| B3 | Billing & Payments (Estimate/Invoice/Refund + signed webhook + idempotency) | §20 | High 🔒 | pending manifest |
 
-**المسار D — الجاهزية للإنتاج**
-- D1: SEO §27 — Doctor/Medical Org/Breadcrumb/Article schemas + 404 map.
-- D2: A11y §26 — WCAG 2.2 AA sweep + Reduced Motion + 200% Zoom.
-- D3: System Health §28 لوحة داخلية + Backup/DR verification.
-- D4: AI Safety §24 — Prompt Injection tests, PII masking, Mutations خلف بوابة صريحة.
+## Track C — Content & communications
 
-## قواعد الالتزام (من الملف)
-- لا جداول موازية، لا بيانات ثابتة، لا CTAs وهمية، لا نجاح مزيف.
-- كل Batch يحتاج: مالك، ملفات متأثرة، اختبارات، خطة تراجع، معيار قبول، Change Manifest.
-- الحساسات (RLS/Auth/Payments/NPHIES) تُوقف انتظارًا لاعتماد المهندس حامد قبل التنفيذ.
-- Playwright/Unit/RLS tests + tsgo + build يجب أن تخضر قبل كل تسليم.
+| Batch | Title | Spec § | Risk | Status |
+|---|---|---|---|---|
+| C1 | Content Engine (Audience, priority, impressions, clicks) | §21 | Low | pending |
+| C2 | CMS Cycle (Preview tokens, Rollback UI, scheduled publish) | §22 | Low | pending |
+| C3 | Notifications (`delivered` only on provider callback) | §23 | Medium | pending |
 
-## الجولة التالية بعد الاعتماد
-أبدأ فورًا بـ:
-1. توليد `phase0-refresh-2026-07-24.md` (قراءة الشيفرة، جرد فعلي، لا تخمين).
-2. كتابة `Roadmap V3` في `.lovable/plan.md`.
-3. اقتراح أول Batch للتنفيذ (المرشح: **A1 — Front Desk Polish** لأنه أقل خطرًا ويكمل عمل معتمد سابقًا).
+## Track D — Production readiness
 
-## طلب الاعتماد
-هل أعتمد:
-- (أ) تنفيذ Phase 0 Refresh + Roadmap V3 الآن، ثم أنتظر اعتمادك لاختيار الـ Batch الأول؟
-- (ب) أم تريد تعديل ترتيب المسارات A/B/C/D قبل التوثيق؟
+| Batch | Title | Spec § | Risk | Status |
+|---|---|---|---|---|
+| D1 | SEO structured data (Doctor / MedicalOrg / Breadcrumb / Article + 404 map) | §27 | Low | pending |
+| D2 | A11y WCAG 2.2 AA sweep (keyboard, focus, 200% zoom, reduced motion) | §26 | Low | pending |
+| D3 | System Health (Payments/NPHIES/AI/Backup probes) | §28 | Low | pending |
+| D4 | AI Safety hardening (prompt-injection tests, mutation gate) | §24 | Medium | pending |
+
+---
+
+## Rules (from master file)
+
+- No parallel tables, no static production data, no fake CTAs, no fake
+  success (§5, §31).
+- Every Batch delivers: owner, affected files, tests, rollback,
+  acceptance, Change Manifest (§4).
+- Sensitive Batches (Auth, RLS, Payments, NPHIES) block on المهندس
+  حامد's explicit approval before merge.
+- `tsgo`, ESLint, unit + RLS + E2E must be green before delivery.
+
+## Definition of Done per Batch
+
+1. End-to-end wired to real data.
+2. RBAC + RLS enforced server-side.
+3. AR + EN, mobile + desktop.
+4. Loading / empty / error / offline states.
+5. Audit rows for sensitive edits.
+6. No fake success, no fake CTAs.
+7. Tests green, docs updated, rollback documented.
+
+---
+
+## Next action
+
+Awaiting المهندس حامد's pick of the first Batch to execute. Default
+recommendation: **A1 — Front Desk Polish**.
