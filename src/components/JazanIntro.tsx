@@ -100,14 +100,21 @@ function shouldShow(
     if (p && path.startsWith(p)) return { show: false, reason: `blocked_path:${p}` };
   }
 
-  // Save-data / slow-network guard.
+  // Save-data / slow-network guard. Never block booking or login on weak links.
   try {
     const conn = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
+      connection?: { saveData?: boolean; effectiveType?: string; downlink?: number; rtt?: number };
     }).connection;
     if (conn?.saveData) return { show: false, reason: "save_data" };
-    if (conn?.effectiveType === "2g" || conn?.effectiveType === "slow-2g") {
-      return { show: false, reason: `slow_network:${conn.effectiveType}` };
+    const et = conn?.effectiveType;
+    if (et === "2g" || et === "slow-2g" || et === "3g") {
+      return { show: false, reason: `slow_network:${et}` };
+    }
+    if (typeof conn?.downlink === "number" && conn.downlink > 0 && conn.downlink < 1.5) {
+      return { show: false, reason: `low_downlink:${conn.downlink}` };
+    }
+    if (typeof conn?.rtt === "number" && conn.rtt > 500) {
+      return { show: false, reason: `high_rtt:${conn.rtt}` };
     }
   } catch {
     /* ignore */
