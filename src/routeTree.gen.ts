@@ -133,6 +133,7 @@ import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminCmsRouteImport } from './routes/_authenticated/admin.cms'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes/_authenticated/admin.content-analytics'
+import { Route as AuthenticatedAdminContentHubRouteImport } from './routes/_authenticated/admin.content-hub'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
@@ -938,6 +939,12 @@ const AuthenticatedAdminContentAnalyticsRoute =
   AuthenticatedAdminContentAnalyticsRouteImport.update({
     id: '/content-analytics',
     path: '/content-analytics',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminContentHubRoute =
+  AuthenticatedAdminContentHubRouteImport.update({
+    id: '/content-hub',
+    path: '/content-hub',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminDesignTokensRoute =
@@ -1917,6 +1924,7 @@ export interface FileRoutesByFullPath {
   '/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
+  '/admin/content-hub': typeof AuthenticatedAdminContentHubRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
@@ -2183,6 +2191,7 @@ export interface FileRoutesByTo {
   '/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
+  '/admin/content-hub': typeof AuthenticatedAdminContentHubRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
@@ -2456,6 +2465,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
   '/_authenticated/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
+  '/_authenticated/admin/content-hub': typeof AuthenticatedAdminContentHubRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
@@ -2729,6 +2739,7 @@ export interface FileRouteTypes {
     | '/admin/cms'
     | '/admin/content'
     | '/admin/content-analytics'
+    | '/admin/content-hub'
     | '/admin/design-tokens'
     | '/admin/doctors'
     | '/admin/files'
@@ -2995,6 +3006,7 @@ export interface FileRouteTypes {
     | '/admin/cms'
     | '/admin/content'
     | '/admin/content-analytics'
+    | '/admin/content-hub'
     | '/admin/design-tokens'
     | '/admin/doctors'
     | '/admin/files'
@@ -3267,6 +3279,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/cms'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/content-analytics'
+    | '/_authenticated/admin/content-hub'
     | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/files'
@@ -4379,6 +4392,13 @@ declare module '@tanstack/react-router' {
       path: '/content-analytics'
       fullPath: '/admin/content-analytics'
       preLoaderRoute: typeof AuthenticatedAdminContentAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/content-hub': {
+      id: '/_authenticated/admin/content-hub'
+      path: '/content-hub'
+      fullPath: '/admin/content-hub'
+      preLoaderRoute: typeof AuthenticatedAdminContentHubRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/design-tokens': {
@@ -5655,6 +5675,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminCmsRoute: typeof AuthenticatedAdminCmsRouteWithChildren
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
   AuthenticatedAdminContentAnalyticsRoute: typeof AuthenticatedAdminContentAnalyticsRoute
+  AuthenticatedAdminContentHubRoute: typeof AuthenticatedAdminContentHubRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRouteWithChildren
@@ -5708,6 +5729,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
   AuthenticatedAdminContentAnalyticsRoute:
     AuthenticatedAdminContentAnalyticsRoute,
+  AuthenticatedAdminContentHubRoute: AuthenticatedAdminContentHubRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRouteWithChildren,
