@@ -5942,6 +5942,79 @@ export type Database = {
         }
         Relationships: []
       }
+      queue_entries: {
+        Row: {
+          appointment_id: string
+          branch_id: string | null
+          called_at: string | null
+          completed_at: string | null
+          created_at: string
+          doctor_id: string
+          id: string
+          is_demo: boolean
+          notes: string | null
+          queue_date: string
+          queue_number: number
+          started_at: string | null
+          status: Database["public"]["Enums"]["queue_status"]
+          updated_at: string
+        }
+        Insert: {
+          appointment_id: string
+          branch_id?: string | null
+          called_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          doctor_id: string
+          id?: string
+          is_demo?: boolean
+          notes?: string | null
+          queue_date: string
+          queue_number: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["queue_status"]
+          updated_at?: string
+        }
+        Update: {
+          appointment_id?: string
+          branch_id?: string | null
+          called_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          doctor_id?: string
+          id?: string
+          is_demo?: boolean
+          notes?: string | null
+          queue_date?: string
+          queue_number?: number
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["queue_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "queue_entries_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_entries_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "queue_entries_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       radiology_reports: {
         Row: {
           body_part: string | null
@@ -8314,6 +8387,13 @@ export type Database = {
         | "failed"
         | "skipped"
       patient_status: "active" | "inactive" | "archived" | "deceased"
+      queue_status:
+        | "waiting"
+        | "called"
+        | "skipped"
+        | "in_service"
+        | "completed"
+        | "cancelled"
       resource_kind: "service" | "page"
       resource_permission: "view" | "edit" | "manage"
       service_inquiry_internal_status:
@@ -8661,6 +8741,14 @@ export const Constants = {
         "skipped",
       ],
       patient_status: ["active", "inactive", "archived", "deceased"],
+      queue_status: [
+        "waiting",
+        "called",
+        "skipped",
+        "in_service",
+        "completed",
+        "cancelled",
+      ],
       resource_kind: ["service", "page"],
       resource_permission: ["view", "edit", "manage"],
       service_inquiry_internal_status: [

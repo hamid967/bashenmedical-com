@@ -257,27 +257,45 @@ def main():
         _fail("slot_holds.released_at still NULL after DELETE", rows[0])
     print(f"[ok] slot_holds.released_at set → {rows[0]['released_at']}")
 
-    # ----- Step 6: queue_entries (Phase 3 — optional) ----------------------
-    st, tbl = sb("/rest/v1/", params={"select": "*", "limit": "0"})  # cheap ping
-    st_q, _ = sb("/rest/v1/queue_entries", params={"select": "id", "limit": "1"})
-    if st_q == 404:
-        print("[skip] queue_entries table not present yet (Phase 3 — deferred).")
-    elif st_q >= 400 and st_q != 200:
-        # RLS or other; we still consider the flow OK if the table doesn't
-        # participate in the current backend contract.
-        print(f"[skip] queue_entries not queryable (status={st_q}); leaving assertion for Phase 3.")
+    # ----- Step 6: queue_entries (Phase 3) — MUST auto-create --------------
+    st_q, q_rows = sb("/rest/v1/queue_entries", params={
+        "select": "id,appointment_id,doctor_id,branch_id,queue_date,queue_number,status",
+        "appointment_id": f"eq.{appt['id']}",
+    })
+    if st_q != 200:
+        _fail("queue_entries lookup failed", {"status": st_q, "rows": q_rows})
+    if len(q_rows) != 1:
+        _fail("expected exactly 1 queue_entry auto-created for appointment",
+              {"rows": q_rows})
+    qe = q_rows[0]
+    if qe["status"] != "waiting":
+        _fail(f"queue_entry initial status must be 'waiting', got {qe['status']}", qe)
+    if not isinstance(qe["queue_number"], int) or qe["queue_number"] < 1:
+        _fail("queue_number must be a positive integer", qe)
+    if qe["doctor_id"] != appt["doctor_id"]:
+        _fail("queue_entry doctor_id mismatch", {"qe": qe, "appt": appt})
+    if str(qe["queue_date"]) != str(appt["appointment_date"]):
+        _fail("queue_entry date mismatch", {"qe": qe, "appt": appt})
+    print(f"[ok] queue_entries auto-created "
+          f"#{qe['queue_number']} status={qe['status']}")
+
+    # Cancel the appointment → queue_entry should transition to 'cancelled'.
+    st_up, _ = sb(f"/rest/v1/appointments",
+                  method="PATCH",
+                  params={"id": f"eq.{appt['id']}"},
+                  body={"status": "cancelled"})
+    if st_up not in (200, 204):
+        print(f"[warn] appointment status update returned {st_up}; "
+              "skipping queue sync assertion")
     else:
-        st_q2, q_rows = sb("/rest/v1/queue_entries", params={
-            "select": "id,appointment_id,status",
+        _, q2 = sb("/rest/v1/queue_entries", params={
+            "select": "status",
             "appointment_id": f"eq.{appt['id']}",
         })
-        if st_q2 != 200:
-            _fail("queue_entries lookup failed", {"status": st_q2, "rows": q_rows})
-        if not q_rows:
-            print("[warn] queue_entries table exists but no row was auto-created "
-                  "for this appointment — front-desk check-in likely creates it.")
+        if q2 and q2[0]["status"] == "cancelled":
+            print("[ok] queue_entry synced to 'cancelled' after appointment cancel")
         else:
-            print(f"[ok] queue_entries row(s) found: {[r['status'] for r in q_rows]}")
+            _fail("queue_entry did not sync to 'cancelled'", q2)
 
     # ----- Cleanup ---------------------------------------------------------
     sb("/rest/v1/appointments", method="DELETE",

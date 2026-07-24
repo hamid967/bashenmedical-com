@@ -1,0 +1,2 @@
+REVOKE ALL ON FUNCTION public.create_queue_entry_on_appointment() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.sync_queue_entry_on_appointment_status() FROM PUBLIC, anon, authenticated;
