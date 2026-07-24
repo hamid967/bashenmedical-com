@@ -14,7 +14,7 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast as sonner } from "sonner";
 import {
@@ -38,6 +38,11 @@ import { Label } from "@/components/ui-v3";
 import { Textarea } from "@/components/ui-v3";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 import { useI18n } from "@/lib/i18n";
+import {
+  HCaptchaWidget,
+  HCAPTCHA_ENABLED,
+  type HCaptchaHandle,
+} from "@/components/security/HCaptchaWidget";
 
 export const Route = createFileRoute("/reservations/manage")({
   head: () => ({
@@ -112,6 +117,8 @@ function ManagePage() {
   const [phoneMasked, setPhoneMasked] = useState<string>("");
   const [devCode, setDevCode] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptchaHandle | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeCancelId, setActiveCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
@@ -216,12 +223,24 @@ function ManagePage() {
     mutationFn: async () => {
       setErrorMsg(null);
       setDevCode(null);
+      if (HCAPTCHA_ENABLED && !captchaToken) {
+        throw new Error("captcha_required");
+      }
       return apiPost<{
         ok: boolean;
         message?: string;
         phone_masked?: string;
         dev_code?: string;
-      }>("/api/public/reservations/otp/send", { phone });
+      }>("/api/public/reservations/otp/send", {
+        phone,
+        captcha_token: captchaToken ?? undefined,
+      });
+    },
+    onSettled: () => {
+      // hCaptcha tokens are single-use; reset after every attempt so a
+      // retry cannot replay the previous token.
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     },
     onSuccess: (res) => {
       if (!res.ok) {
@@ -232,18 +251,35 @@ function ManagePage() {
       if (res.dev_code) setDevCode(res.dev_code);
       setStep("code");
     },
-    onError: () => setErrorMsg("خطأ في الشبكة."),
+    onError: (e: unknown) => {
+      const msg =
+        e instanceof Error && e.message === "captcha_required"
+          ? "أكمل التحقق البشري أولًا."
+          : "خطأ في الشبكة.";
+      setErrorMsg(msg);
+    },
   });
 
   const verifyOtp = useMutation({
     mutationFn: async () => {
       setErrorMsg(null);
+      if (HCAPTCHA_ENABLED && !captchaToken) {
+        throw new Error("captcha_required");
+      }
       return apiPost<{
         ok: boolean;
         message?: string;
         session_token?: string;
         session_expires_at?: string;
-      }>("/api/public/reservations/otp/verify", { phone, code });
+      }>("/api/public/reservations/otp/verify", {
+        phone,
+        code,
+        captcha_token: captchaToken ?? undefined,
+      });
+    },
+    onSettled: () => {
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     },
     onSuccess: (res) => {
       if (!res.ok || !res.session_token || !res.session_expires_at) {
@@ -266,7 +302,13 @@ function ManagePage() {
       }
       setStep("list");
     },
-    onError: () => setErrorMsg("خطأ في الشبكة."),
+    onError: (e: unknown) => {
+      const msg =
+        e instanceof Error && e.message === "captcha_required"
+          ? "أكمل التحقق البشري أولًا."
+          : "خطأ في الشبكة.";
+      setErrorMsg(msg);
+    },
   });
 
   const listAppts = useMutation({
@@ -540,9 +582,14 @@ function ManagePage() {
                   required
                 />
               </div>
+              <HCaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
               <Button
                 type="submit"
-                disabled={sendOtp.isPending || phone.trim().length < 9}
+                disabled={
+                  sendOtp.isPending ||
+                  phone.trim().length < 9 ||
+                  (HCAPTCHA_ENABLED && !captchaToken)
+                }
                 className="w-full h-11"
               >
                 {sendOtp.isPending ? (
@@ -599,6 +646,7 @@ function ManagePage() {
                   required
                 />
               </div>
+              <HCaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -613,7 +661,11 @@ function ManagePage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={verifyOtp.isPending || code.length !== 6}
+                  disabled={
+                    verifyOtp.isPending ||
+                    code.length !== 6 ||
+                    (HCAPTCHA_ENABLED && !captchaToken)
+                  }
                   className="flex-1 h-11"
                 >
                   {verifyOtp.isPending ? (

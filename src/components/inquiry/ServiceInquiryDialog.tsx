@@ -13,7 +13,7 @@
  *   2) show confirmation view
  *   3) user clicks "افتح واتساب" → POST /mark-whatsapp-opened, then open wa.me
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { CheckCircle2, Copy, ExternalLink, Loader2, MessageCircle } from "lucide-react";
@@ -34,6 +34,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  HCaptchaWidget,
+  HCAPTCHA_ENABLED,
+  type HCaptchaHandle,
+} from "@/components/security/HCaptchaWidget";
 
 type ServiceRow = { id: string; name_ar: string };
 type BranchRow = { id: string; name_ar: string };
@@ -154,6 +159,8 @@ export function ServiceInquiryDialog({
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState<string | null>(null);
   const [handoffStatus, setHandoffStatus] = useState<"not_opened" | "opened">("not_opened");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptchaHandle | null>(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
@@ -192,6 +199,8 @@ export function ServiceInquiryDialog({
       setErrors({});
       setConfirmation(null);
       setHandoffStatus("not_opened");
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     }, 250);
     return () => clearTimeout(t);
   }, [open]);
@@ -218,6 +227,11 @@ export function ServiceInquiryDialog({
       return;
     }
 
+    if (HCAPTCHA_ENABLED && !captchaToken) {
+      toast.error("أكمل التحقق البشري أولًا.");
+      return;
+    }
+
     setSubmitting(true);
     const toastId = toast.loading("جاري إرسال طلب الاستفسار...");
     try {
@@ -231,6 +245,7 @@ export function ServiceInquiryDialog({
           preferred_date: parsed.data.preferred_date || undefined,
           notes: parsed.data.notes || undefined,
           source: isMobile ? "mobile_web" : "website",
+          captcha_token: captchaToken ?? undefined,
         }),
       });
       const body = (await res.json().catch(() => ({}))) as {
@@ -279,6 +294,9 @@ export function ServiceInquiryDialog({
       toast.error("تعذّر الاتصال بالخادم. حاول لاحقًا.", { id: toastId });
     } finally {
       setSubmitting(false);
+      // Single-use token: reset regardless of outcome to prevent replay.
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     }
   }
 
@@ -321,6 +339,9 @@ export function ServiceInquiryDialog({
       branches={branches}
       submitting={submitting}
       today={today}
+      captchaRef={captchaRef}
+      captchaToken={captchaToken}
+      onCaptchaToken={setCaptchaToken}
       onChange={update}
       onSubmit={onSubmit}
     />
@@ -360,6 +381,9 @@ function FormBody({
   branches,
   submitting,
   today,
+  captchaRef,
+  captchaToken,
+  onCaptchaToken,
   onChange,
   onSubmit,
 }: {
@@ -369,6 +393,9 @@ function FormBody({
   branches: BranchRow[];
   submitting: boolean;
   today: string;
+  captchaRef: React.RefObject<HCaptchaHandle | null>;
+  captchaToken: string | null;
+  onCaptchaToken: (t: string | null) => void;
   onChange: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   onSubmit: (e: React.FormEvent) => void;
 }) {
@@ -542,9 +569,11 @@ function FormBody({
         </label>
       </fieldset>
 
+      <HCaptchaWidget ref={captchaRef} onToken={onCaptchaToken} />
+
       <button
         type="submit"
-        disabled={submitting}
+        disabled={submitting || (HCAPTCHA_ENABLED && !captchaToken)}
         className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
       >
         {submitting ? (

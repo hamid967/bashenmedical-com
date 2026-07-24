@@ -27,16 +27,16 @@ const SUPABASE_WSS = "wss://rcerbsywuovcleqybumg.supabase.co";
 
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com`,
-  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com`,
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com`,
+  `style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://hcaptcha.com https://*.hcaptcha.com`,
   `font-src 'self' data: https://fonts.gstatic.com`,
   `img-src 'self' data: blob: https:`,
   `media-src 'self' data: blob: https:`,
-  `connect-src 'self' ${SUPABASE_ORIGIN} ${SUPABASE_WSS} https://accounts.google.com https://www.google-analytics.com https://*.lovable.app https://*.lovable.dev`,
+  `connect-src 'self' ${SUPABASE_ORIGIN} ${SUPABASE_WSS} https://accounts.google.com https://www.google-analytics.com https://*.lovable.app https://*.lovable.dev https://hcaptcha.com https://*.hcaptcha.com`,
   // frame-src is origin-based (paths aren't enforceable); www.google.com covers
   // /maps/embed, and maps.google.com is added because Google Maps embeds may
-  // redirect between the two hosts.
-  `frame-src 'self' https://accounts.google.com https://www.google.com https://maps.google.com`,
+  // redirect between the two hosts. hCaptcha renders its challenge in an iframe.
+  `frame-src 'self' https://accounts.google.com https://www.google.com https://maps.google.com https://hcaptcha.com https://*.hcaptcha.com`,
   "frame-ancestors 'none'",
   "object-src 'none'",
   "base-uri 'self'",

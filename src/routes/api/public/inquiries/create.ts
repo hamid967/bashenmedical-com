@@ -15,6 +15,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createHash } from "node:crypto";
 import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rate-limit.server";
+import { verifyHCaptcha, captchaFailureResponse } from "@/lib/security/hcaptcha.server";
 
 const NAME_MAX = 120;
 const PHONE_MAX = 32;
@@ -76,6 +77,7 @@ const schema = z.object({
   source: z
     .enum(["website", "mobile_web", "patient_portal", "campaign", "direct_link"])
     .default("website"),
+  captcha_token: z.string().trim().min(1).max(4000).optional(),
 });
 
 function json(status: number, body: Record<string, unknown>) {
@@ -142,7 +144,13 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
           );
         }
 
+        // hCaptcha — enforced after rate limits, before any DB access.
+        // Fails closed on network / config errors so retries can't bypass.
+        const captcha = await verifyHCaptcha(d.captcha_token, ip);
+        if (!captcha.ok) return captchaFailureResponse(captcha);
+
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
 
         // Soft rate limit: max 3 inquiries per mobile per hour.
         try {
