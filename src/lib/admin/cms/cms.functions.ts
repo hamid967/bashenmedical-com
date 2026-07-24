@@ -430,8 +430,8 @@ export const rollbackCmsVersion = createServerFn({ method: "POST" })
     if (nerr) throw new Error(nerr.message);
 
     const completeness = {
-      ar: computeCompleteness(entry.kind as CmsKind, target.payload_ar),
-      en: computeCompleteness(entry.kind as CmsKind, target.payload_en),
+      ar: computeCompleteness(entry.kind as CmsKind, target.payload_ar as any),
+      en: computeCompleteness(entry.kind as CmsKind, target.payload_en as any),
     };
     const now = new Date().toISOString();
     await context.supabase.from("cms_entries")
