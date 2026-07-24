@@ -22,10 +22,11 @@ import {
   getMyReminderPreferences,
   updateMyReminderPreferences,
   sendTestNotification,
+  MUTABLE_CATEGORIES,
   type ReminderPreferences,
   type TestChannel,
 } from "@/lib/portal/reminder-preferences.functions";
-import { Send } from "lucide-react";
+import { Send, VolumeX } from "lucide-react";
 
 const prefsQuery = queryOptions({
   queryKey: ["portal", "reminder-preferences"],
