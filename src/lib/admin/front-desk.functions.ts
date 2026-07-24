@@ -398,11 +398,8 @@ export const rescheduleAppointment = createServerFn({ method: "POST" })
     try {
       await context.supabase.from("appointment_audit").insert({
         appointment_id: data.appointment_id,
-        actor_id: context.userId,
-        action: "rescheduled",
-        reason: data.reason,
-        from_value: `${appt.appointment_date} ${appt.appointment_time}`,
-        to_value: `${data.new_date} ${time}`,
+        changed_by: context.userId,
+        reason: `[إعادة جدولة] ${appt.appointment_date} ${appt.appointment_time} → ${data.new_date} ${time} — ${data.reason}`,
       });
     } catch {
       /* audit best-effort; primary update already committed */
