@@ -148,10 +148,8 @@ function AdminIntegrationsRoute() {
 
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-medium text-muted-foreground">حالة التكاملات</h2>
-        <Link to="/admin/integrations/logs" className="text-sm text-primary hover:underline">
-          عرض جميع السجلات ←
-        </Link>
       </div>
+
 
       <div className="rounded-lg border bg-card overflow-hidden">
         {query.isLoading ? (
