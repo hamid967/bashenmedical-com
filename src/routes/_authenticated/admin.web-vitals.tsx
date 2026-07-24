@@ -17,6 +17,7 @@ import {
 import { getMyRoles } from "@/lib/admin.functions";
 import { ExportMenu } from "@/components/admin/v2/ExportMenu";
 import type { Column } from "@/lib/export-utils";
+import { PerfBudgetsPanel } from "@/components/admin/PerfBudgetsPanel";
 
 type MetricRow = MetricStats & { rating: string };
 type PathRow = { path: string; count: number };
