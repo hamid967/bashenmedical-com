@@ -493,8 +493,22 @@ export function AdminShellV2({
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden transition-opacity"
+          style={{ opacity: dragX > 0 ? Math.max(0, 1 - dragX / 260) : 1 }}
           onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Edge swipe strip to open the drawer (mobile only, RTL right edge) */}
+      {!mobileOpen && (
+        <div
+          className="fixed top-16 bottom-0 end-0 w-3 z-20 lg:hidden"
+          style={{ touchAction: "pan-y" }}
+          onTouchStart={onEdgeTouchStart}
+          onTouchMove={onEdgeTouchMove}
+          onTouchEnd={onEdgeTouchEnd}
+          aria-hidden="true"
         />
       )}
 
