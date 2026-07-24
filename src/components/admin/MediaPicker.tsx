@@ -234,7 +234,14 @@ export function MediaPicker({
           {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl" dir="rtl">
+      <DialogContent
+        className="max-w-3xl"
+        dir="rtl"
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+      >
         <DialogHeader>
           <DialogTitle>
             {editing ? "معاينة وقصّ الصورة" : "مكتبة الوسائط"}
