@@ -352,7 +352,7 @@ export const rescheduleAppointment = createServerFn({ method: "POST" })
 
     const { data: appt, error: readErr } = await context.supabase
       .from("appointments")
-      .select("id, status, doctor_id, appointment_date, appointment_time")
+      .select("id, status, doctor_id, appointment_date, appointment_time, notes")
       .eq("id", data.appointment_id)
       .maybeSingle();
     if (readErr) throw new Error(readErr.message);
