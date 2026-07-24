@@ -120,6 +120,7 @@ import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminAccessHubRouteImport } from './routes/_authenticated/admin.access-hub'
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
 import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin.appointments'
@@ -130,6 +131,7 @@ import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminBookingTraceRouteImport } from './routes/_authenticated/admin.booking-trace'
 import { Route as AuthenticatedAdminBranchesRouteImport } from './routes/_authenticated/admin.branches'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
+import { Route as AuthenticatedAdminClinicHubRouteImport } from './routes/_authenticated/admin.clinic-hub'
 import { Route as AuthenticatedAdminCmsRouteImport } from './routes/_authenticated/admin.cms'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes/_authenticated/admin.content-analytics'
@@ -864,6 +866,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminAccessHubRoute =
+  AuthenticatedAdminAccessHubRouteImport.update({
+    id: '/access-hub',
+    path: '/access-hub',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAiStreamingRoute =
   AuthenticatedAdminAiStreamingRouteImport.update({
     id: '/ai-streaming',
@@ -922,6 +930,12 @@ const AuthenticatedAdminClassicRoute =
   AuthenticatedAdminClassicRouteImport.update({
     id: '/classic',
     path: '/classic',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminClinicHubRoute =
+  AuthenticatedAdminClinicHubRouteImport.update({
+    id: '/clinic-hub',
+    path: '/clinic-hub',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminCmsRoute = AuthenticatedAdminCmsRouteImport.update({
@@ -1911,6 +1925,7 @@ export interface FileRoutesByFullPath {
   '/specialties/': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/access-hub': typeof AuthenticatedAdminAccessHubRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -1921,6 +1936,7 @@ export interface FileRoutesByFullPath {
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/clinic-hub': typeof AuthenticatedAdminClinicHubRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
@@ -2178,6 +2194,7 @@ export interface FileRoutesByTo {
   '/specialties': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/admin/access-hub': typeof AuthenticatedAdminAccessHubRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -2188,6 +2205,7 @@ export interface FileRoutesByTo {
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/clinic-hub': typeof AuthenticatedAdminClinicHubRoute
   '/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
@@ -2452,6 +2470,7 @@ export interface FileRoutesById {
   '/specialties/': typeof SpecialtiesIndexRoute
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
+  '/_authenticated/admin/access-hub': typeof AuthenticatedAdminAccessHubRoute
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -2462,6 +2481,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/_authenticated/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/_authenticated/admin/clinic-hub': typeof AuthenticatedAdminClinicHubRoute
   '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
   '/_authenticated/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
@@ -2726,6 +2746,7 @@ export interface FileRouteTypes {
     | '/specialties/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/access-hub'
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/appointments'
@@ -2736,6 +2757,7 @@ export interface FileRouteTypes {
     | '/admin/booking-trace'
     | '/admin/branches'
     | '/admin/classic'
+    | '/admin/clinic-hub'
     | '/admin/cms'
     | '/admin/content'
     | '/admin/content-analytics'
@@ -2993,6 +3015,7 @@ export interface FileRouteTypes {
     | '/specialties'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/admin/access-hub'
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/appointments'
@@ -3003,6 +3026,7 @@ export interface FileRouteTypes {
     | '/admin/booking-trace'
     | '/admin/branches'
     | '/admin/classic'
+    | '/admin/clinic-hub'
     | '/admin/cms'
     | '/admin/content'
     | '/admin/content-analytics'
@@ -3266,6 +3290,7 @@ export interface FileRouteTypes {
     | '/specialties/'
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
+    | '/_authenticated/admin/access-hub'
     | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/ai-usage'
     | '/_authenticated/admin/appointments'
@@ -3276,6 +3301,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/booking-trace'
     | '/_authenticated/admin/branches'
     | '/_authenticated/admin/classic'
+    | '/_authenticated/admin/clinic-hub'
     | '/_authenticated/admin/cms'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/content-analytics'
@@ -4303,6 +4329,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/access-hub': {
+      id: '/_authenticated/admin/access-hub'
+      path: '/access-hub'
+      fullPath: '/admin/access-hub'
+      preLoaderRoute: typeof AuthenticatedAdminAccessHubRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/ai-streaming': {
       id: '/_authenticated/admin/ai-streaming'
       path: '/ai-streaming'
@@ -4371,6 +4404,13 @@ declare module '@tanstack/react-router' {
       path: '/classic'
       fullPath: '/admin/classic'
       preLoaderRoute: typeof AuthenticatedAdminClassicRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/clinic-hub': {
+      id: '/_authenticated/admin/clinic-hub'
+      path: '/clinic-hub'
+      fullPath: '/admin/clinic-hub'
+      preLoaderRoute: typeof AuthenticatedAdminClinicHubRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/cms': {
@@ -5662,6 +5702,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
   )
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAccessHubRoute: typeof AuthenticatedAdminAccessHubRoute
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
   AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -5672,6 +5713,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBookingTraceRoute: typeof AuthenticatedAdminBookingTraceRoute
   AuthenticatedAdminBranchesRoute: typeof AuthenticatedAdminBranchesRouteWithChildren
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
+  AuthenticatedAdminClinicHubRoute: typeof AuthenticatedAdminClinicHubRoute
   AuthenticatedAdminCmsRoute: typeof AuthenticatedAdminCmsRouteWithChildren
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
   AuthenticatedAdminContentAnalyticsRoute: typeof AuthenticatedAdminContentAnalyticsRoute
@@ -5714,6 +5756,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAccessHubRoute: AuthenticatedAdminAccessHubRoute,
   AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
   AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
   AuthenticatedAdminAppointmentsRoute:
@@ -5725,6 +5768,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBookingTraceRoute: AuthenticatedAdminBookingTraceRoute,
   AuthenticatedAdminBranchesRoute: AuthenticatedAdminBranchesRouteWithChildren,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
+  AuthenticatedAdminClinicHubRoute: AuthenticatedAdminClinicHubRoute,
   AuthenticatedAdminCmsRoute: AuthenticatedAdminCmsRouteWithChildren,
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
   AuthenticatedAdminContentAnalyticsRoute:
