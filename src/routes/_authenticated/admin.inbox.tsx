@@ -160,7 +160,7 @@ function UnifiedInboxPage() {
   });
 
   const patch = (p: Partial<SearchIn>) =>
-    navigate({ search: (prev) => ({ ...(prev as SearchIn), ...p }) });
+    navigate({ search: (prev: SearchIn) => ({ ...prev, ...p }) });
 
   return (
     <div className="ac-card p-6 space-y-6">
