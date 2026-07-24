@@ -107,6 +107,36 @@ jobs:
         run: bun run perf:budget
 
 
+  chaos-and-idempotency:
+    name: Chaos — payment & notification fault injection
+    runs-on: ubuntu-latest
+    # Runs on every PR and push. Exercises the fault-injection kernel
+    # against in-memory idempotency + delivery-log ledgers to prove:
+    #   1. failed attempts leave a single terminal row (no partial writes)
+    #   2. Idempotency-Key replays do not double-fire the side effect
+    #   3. delivery-log status transitions are strictly monotonic
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        run: bun install --frozen-lockfile
+      - name: Run chaos test suite (fault injection ON)
+        env:
+          ENABLE_FAULT_INJECTION: "1"
+          NODE_ENV: test
+        run: bun test tests/unit/fault-injection-idempotency.test.ts
+      - name: Verify kernel is inert without the env flag (fail-closed)
+        env:
+          NODE_ENV: test
+        run: |
+          # Same suite; the "inert when flag missing" assertions must pass
+          # even when ENABLE_FAULT_INJECTION is unset in the environment.
+          unset ENABLE_FAULT_INJECTION
+          bun test tests/unit/fault-injection-idempotency.test.ts
+
+
 
   rls-tests-main:
     name: RLS integration tests (main — strict)
