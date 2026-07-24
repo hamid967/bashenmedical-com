@@ -562,9 +562,15 @@ export function DataTableV2<T>({
       </div>
 
       {/* Pagination footer */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+      <nav
+        className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"
+        aria-label="ترقيم الصفحات"
+      >
         <div className="flex items-center gap-2">
-          <span>عرض</span>
+          <label htmlFor="dtv2-per-page" className="sr-only">
+            عدد الصفوف في كل صفحة
+          </label>
+          <span aria-hidden="true">عرض</span>
           <Select
             value={String(effectivePagination.perPage)}
             onValueChange={(v) =>
@@ -575,7 +581,7 @@ export function DataTableV2<T>({
               })
             }
           >
-            <SelectTrigger className="h-8 w-[74px] text-xs">
+            <SelectTrigger id="dtv2-per-page" className="h-8 w-[74px] text-xs" aria-label="عدد الصفوف في كل صفحة">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -586,11 +592,11 @@ export function DataTableV2<T>({
               ))}
             </SelectContent>
           </Select>
-          <span>
+          <span aria-live="polite" aria-atomic="true">
             {rangeStart}-{rangeEnd} من {effectivePagination.total}
           </span>
           {isFetching && !isLoading && (
-            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" aria-label="جاري التحديث" />
           )}
         </div>
         <div className="flex items-center gap-1">
@@ -600,11 +606,12 @@ export function DataTableV2<T>({
             className="h-8"
             disabled={safePage <= 1 || isLoading}
             onClick={() => updatePagination({ ...effectivePagination, page: safePage - 1 })}
+            aria-label="الصفحة السابقة"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
             السابق
           </Button>
-          <span className="px-2">
+          <span className="px-2" aria-current="page">
             صفحة {safePage} / {totalPages}
           </span>
           <Button
@@ -613,9 +620,10 @@ export function DataTableV2<T>({
             className="h-8"
             disabled={safePage >= totalPages || isLoading}
             onClick={() => updatePagination({ ...effectivePagination, page: safePage + 1 })}
+            aria-label="الصفحة التالية"
           >
             التالي
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
       </div>
