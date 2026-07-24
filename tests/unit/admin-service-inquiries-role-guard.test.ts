@@ -40,14 +40,21 @@ function makeSupabase(response: { data: unknown; error: unknown }) {
 }
 
 describe("assertHasRole", () => {
-  test("يرفض عندما لا يملك المستخدم دور admin", async () => {
+  test("يرفض عندما لا يملك المستخدم دور admin ولا super_admin", async () => {
     const sb = makeSupabase({ data: false, error: null });
     await expect(assertHasRole(sb as any, "user-1", "admin")).rejects.toThrow(
       /ليست لديك الصلاحية/,
     );
-    expect(sb.calls).toEqual([
-      { fn: "has_role", args: { _user_id: "user-1", _role: "admin" } },
-    ]);
+    // `admin` implicitly checks `super_admin` too (unified guard in _guard.ts),
+    // so both RPC probes must run — order isn't guaranteed (Promise.all).
+    const roles = sb.calls
+      .filter((c) => c.fn === "has_role")
+      .map((c) => (c.args as { _role: string })._role)
+      .sort();
+    expect(roles).toEqual(["admin", "super_admin"]);
+    for (const c of sb.calls) {
+      expect((c.args as { _user_id: string })._user_id).toBe("user-1");
+    }
   });
 
   test("يرفض عند خطأ RPC ولا يمرّر كأنه مسموح", async () => {
