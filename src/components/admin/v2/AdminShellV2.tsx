@@ -98,6 +98,12 @@ const NAV: NavGroup[] = [
         roles: ["admin", "super_admin", "reception", "branch_manager"],
       },
       {
+        to: "/admin/doctor-today",
+        label: "شاشة الطبيب — اليوم",
+        icon: Stethoscope,
+        roles: ["doctor", "super_admin"],
+      },
+      {
         to: "/admin/appointments",
         label: "المواعيد (Admin)",
         icon: CalendarCheck,

@@ -138,6 +138,7 @@ import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes
 import { Route as AuthenticatedAdminContentHubRouteImport } from './routes/_authenticated/admin.content-hub'
 import { Route as AuthenticatedAdminContractsRouteImport } from './routes/_authenticated/admin.contracts'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
+import { Route as AuthenticatedAdminDoctorTodayRouteImport } from './routes/_authenticated/admin.doctor-today'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
 import { Route as AuthenticatedAdminFrontDeskRouteImport } from './routes/_authenticated/admin.front-desk'
@@ -974,6 +975,12 @@ const AuthenticatedAdminDesignTokensRoute =
   AuthenticatedAdminDesignTokensRouteImport.update({
     id: '/design-tokens',
     path: '/design-tokens',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDoctorTodayRoute =
+  AuthenticatedAdminDoctorTodayRouteImport.update({
+    id: '/doctor-today',
+    path: '/doctor-today',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminDoctorsRoute =
@@ -1964,6 +1971,7 @@ export interface FileRoutesByFullPath {
   '/admin/content-hub': typeof AuthenticatedAdminContentHubRoute
   '/admin/contracts': typeof AuthenticatedAdminContractsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/admin/doctor-today': typeof AuthenticatedAdminDoctorTodayRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
@@ -2236,6 +2244,7 @@ export interface FileRoutesByTo {
   '/admin/content-hub': typeof AuthenticatedAdminContentHubRoute
   '/admin/contracts': typeof AuthenticatedAdminContractsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/admin/doctor-today': typeof AuthenticatedAdminDoctorTodayRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
@@ -2515,6 +2524,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/content-hub': typeof AuthenticatedAdminContentHubRoute
   '/_authenticated/admin/contracts': typeof AuthenticatedAdminContractsRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
+  '/_authenticated/admin/doctor-today': typeof AuthenticatedAdminDoctorTodayRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/_authenticated/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
@@ -2794,6 +2804,7 @@ export interface FileRouteTypes {
     | '/admin/content-hub'
     | '/admin/contracts'
     | '/admin/design-tokens'
+    | '/admin/doctor-today'
     | '/admin/doctors'
     | '/admin/files'
     | '/admin/front-desk'
@@ -3066,6 +3077,7 @@ export interface FileRouteTypes {
     | '/admin/content-hub'
     | '/admin/contracts'
     | '/admin/design-tokens'
+    | '/admin/doctor-today'
     | '/admin/doctors'
     | '/admin/files'
     | '/admin/front-desk'
@@ -3344,6 +3356,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/content-hub'
     | '/_authenticated/admin/contracts'
     | '/_authenticated/admin/design-tokens'
+    | '/_authenticated/admin/doctor-today'
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/files'
     | '/_authenticated/admin/front-desk'
@@ -4492,6 +4505,13 @@ declare module '@tanstack/react-router' {
       path: '/design-tokens'
       fullPath: '/admin/design-tokens'
       preLoaderRoute: typeof AuthenticatedAdminDesignTokensRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/doctor-today': {
+      id: '/_authenticated/admin/doctor-today'
+      path: '/doctor-today'
+      fullPath: '/admin/doctor-today'
+      preLoaderRoute: typeof AuthenticatedAdminDoctorTodayRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/doctors': {
@@ -5780,6 +5800,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminContentHubRoute: typeof AuthenticatedAdminContentHubRoute
   AuthenticatedAdminContractsRoute: typeof AuthenticatedAdminContractsRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
+  AuthenticatedAdminDoctorTodayRoute: typeof AuthenticatedAdminDoctorTodayRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRouteWithChildren
   AuthenticatedAdminFrontDeskRoute: typeof AuthenticatedAdminFrontDeskRoute
@@ -5839,6 +5860,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminContentHubRoute: AuthenticatedAdminContentHubRoute,
   AuthenticatedAdminContractsRoute: AuthenticatedAdminContractsRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
+  AuthenticatedAdminDoctorTodayRoute: AuthenticatedAdminDoctorTodayRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRouteWithChildren,
   AuthenticatedAdminFrontDeskRoute: AuthenticatedAdminFrontDeskRoute,
