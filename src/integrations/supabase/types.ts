@@ -6330,6 +6330,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      auto_transition_content_items: {
+        Args: never
+        Returns: {
+          archived_count: number
+          published_count: number
+        }[]
+      }
       book_appointment_atomic: {
         Args: {
           p_appointment_date: string
