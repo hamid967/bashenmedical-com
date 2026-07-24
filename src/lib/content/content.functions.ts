@@ -105,12 +105,15 @@ export const getPatientContentFeed = createServerFn({ method: "GET" })
 
     // RLS already limits to published, in-window, non-disabled rows.
     // We further filter by surface and rank by priority.
+    const sel = (s: string): string => s;
     const q = supabase
       .from("content_items")
       .select(
-        "id,type,title_ar,title_en,body_ar,body_en,excerpt_ar,excerpt_en," +
-          "image_url,cta_label_ar,cta_label_en,cta_href,is_promotional,priority," +
-          "branch_id,specialty_id,starts_at,ends_at,audience,surface",
+        sel(
+          "id,type,title_ar,title_en,body_ar,body_en,excerpt_ar,excerpt_en," +
+            "image_url,cta_label_ar,cta_label_en,cta_href,is_promotional,priority," +
+            "branch_id,specialty_id,starts_at,ends_at,audience,surface",
+        ),
       )
       .eq("surface", surface)
       .order("priority", { ascending: false })
@@ -120,7 +123,7 @@ export const getPatientContentFeed = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const filtered = (rows as (RawRow & { surface: string })[])
+    const filtered = ((rows ?? []) as unknown as (RawRow & { surface: string })[])
       .filter((row) => matchesAudience(row, { lang, preferredBranch, bookedSpecialties }))
       .slice(0, limit);
 
