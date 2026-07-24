@@ -25,7 +25,7 @@ function AppointmentDetail() {
   if (q.isLoading) return <div className="container-app py-8"><div className="h-8 w-1/3 animate-pulse rounded bg-muted" /></div>;
   if (q.isError) throw q.error;
   if (!q.data) throw notFound();
-  const { appointment: a, history } = q.data;
+  const { appointment: a, history } = q.data as any;
 
   return (
     <div className="container-app py-8">
