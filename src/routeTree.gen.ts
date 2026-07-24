@@ -127,6 +127,7 @@ import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_authenticated/admin.booking-funnel'
 import { Route as AuthenticatedAdminBookingTraceRouteImport } from './routes/_authenticated/admin.booking-trace'
+import { Route as AuthenticatedAdminBranchesRouteImport } from './routes/_authenticated/admin.branches'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes/_authenticated/admin.content-analytics'
@@ -212,6 +213,7 @@ import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$sl
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
 import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_authenticated/admin.appointments.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
+import { Route as AuthenticatedAdminBranchesIdRouteImport } from './routes/_authenticated/admin.branches.$id'
 import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './routes/_authenticated/admin.insurance.$approvalId'
 import { Route as AuthenticatedAdminIntegrationsKeyRouteImport } from './routes/_authenticated/admin.integrations.$key'
 import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_authenticated/admin.patients.$id'
@@ -884,6 +886,12 @@ const AuthenticatedAdminBookingTraceRoute =
     path: '/booking-trace',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBranchesRoute =
+  AuthenticatedAdminBranchesRouteImport.update({
+    id: '/branches',
+    path: '/branches',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminClassicRoute =
   AuthenticatedAdminClassicRouteImport.update({
     id: '/classic',
@@ -1383,6 +1391,12 @@ const AuthenticatedAdminBillingInvoiceIdRoute =
     path: '/$invoiceId',
     getParentRoute: () => AuthenticatedAdminBillingRoute,
   } as any)
+const AuthenticatedAdminBranchesIdRoute =
+  AuthenticatedAdminBranchesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminBranchesRoute,
+  } as any)
 const AuthenticatedAdminInsuranceApprovalIdRoute =
   AuthenticatedAdminInsuranceApprovalIdRouteImport.update({
     id: '/$approvalId',
@@ -1769,6 +1783,7 @@ export interface FileRoutesByFullPath {
   '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
+  '/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
@@ -1855,6 +1870,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
+  '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2014,6 +2030,7 @@ export interface FileRoutesByTo {
   '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
+  '/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
@@ -2100,6 +2117,7 @@ export interface FileRoutesByTo {
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
+  '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2266,6 +2284,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/_authenticated/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/_authenticated/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
+  '/_authenticated/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
   '/_authenticated/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
@@ -2352,6 +2371,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/_authenticated/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
+  '/_authenticated/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/_authenticated/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/_authenticated/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/_authenticated/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2518,6 +2538,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/booking-funnel'
     | '/admin/booking-trace'
+    | '/admin/branches'
     | '/admin/classic'
     | '/admin/content'
     | '/admin/content-analytics'
@@ -2604,6 +2625,7 @@ export interface FileRouteTypes {
     | '/admin/ai/overview'
     | '/admin/appointments/$id'
     | '/admin/billing/$invoiceId'
+    | '/admin/branches/$id'
     | '/admin/insurance/$approvalId'
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
@@ -2763,6 +2785,7 @@ export interface FileRouteTypes {
     | '/admin/billing'
     | '/admin/booking-funnel'
     | '/admin/booking-trace'
+    | '/admin/branches'
     | '/admin/classic'
     | '/admin/content'
     | '/admin/content-analytics'
@@ -2849,6 +2872,7 @@ export interface FileRouteTypes {
     | '/admin/ai/overview'
     | '/admin/appointments/$id'
     | '/admin/billing/$invoiceId'
+    | '/admin/branches/$id'
     | '/admin/insurance/$approvalId'
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
@@ -3014,6 +3038,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/booking-funnel'
     | '/_authenticated/admin/booking-trace'
+    | '/_authenticated/admin/branches'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/content-analytics'
@@ -3100,6 +3125,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ai/overview'
     | '/_authenticated/admin/appointments/$id'
     | '/_authenticated/admin/billing/$invoiceId'
+    | '/_authenticated/admin/branches/$id'
     | '/_authenticated/admin/insurance/$approvalId'
     | '/_authenticated/admin/integrations/$key'
     | '/_authenticated/admin/patients/$id'
@@ -4067,6 +4093,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBookingTraceRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/branches': {
+      id: '/_authenticated/admin/branches'
+      path: '/branches'
+      fullPath: '/admin/branches'
+      preLoaderRoute: typeof AuthenticatedAdminBranchesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/classic': {
       id: '/_authenticated/admin/classic'
       path: '/classic'
@@ -4662,6 +4695,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBillingInvoiceIdRouteImport
       parentRoute: typeof AuthenticatedAdminBillingRoute
     }
+    '/_authenticated/admin/branches/$id': {
+      id: '/_authenticated/admin/branches/$id'
+      path: '/$id'
+      fullPath: '/admin/branches/$id'
+      preLoaderRoute: typeof AuthenticatedAdminBranchesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminBranchesRoute
+    }
     '/_authenticated/admin/insurance/$approvalId': {
       id: '/_authenticated/admin/insurance/$approvalId'
       path: '/$approvalId'
@@ -5017,6 +5057,20 @@ const AuthenticatedAdminBillingRouteWithChildren =
     AuthenticatedAdminBillingRouteChildren,
   )
 
+interface AuthenticatedAdminBranchesRouteChildren {
+  AuthenticatedAdminBranchesIdRoute: typeof AuthenticatedAdminBranchesIdRoute
+}
+
+const AuthenticatedAdminBranchesRouteChildren: AuthenticatedAdminBranchesRouteChildren =
+  {
+    AuthenticatedAdminBranchesIdRoute: AuthenticatedAdminBranchesIdRoute,
+  }
+
+const AuthenticatedAdminBranchesRouteWithChildren =
+  AuthenticatedAdminBranchesRoute._addFileChildren(
+    AuthenticatedAdminBranchesRouteChildren,
+  )
+
 interface AuthenticatedAdminInsuranceRouteChildren {
   AuthenticatedAdminInsuranceApprovalIdRoute: typeof AuthenticatedAdminInsuranceApprovalIdRoute
 }
@@ -5127,6 +5181,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRouteWithChildren
   AuthenticatedAdminBookingFunnelRoute: typeof AuthenticatedAdminBookingFunnelRoute
   AuthenticatedAdminBookingTraceRoute: typeof AuthenticatedAdminBookingTraceRoute
+  AuthenticatedAdminBranchesRoute: typeof AuthenticatedAdminBranchesRouteWithChildren
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
   AuthenticatedAdminContentAnalyticsRoute: typeof AuthenticatedAdminContentAnalyticsRoute
@@ -5172,6 +5227,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRouteWithChildren,
   AuthenticatedAdminBookingFunnelRoute: AuthenticatedAdminBookingFunnelRoute,
   AuthenticatedAdminBookingTraceRoute: AuthenticatedAdminBookingTraceRoute,
+  AuthenticatedAdminBranchesRoute: AuthenticatedAdminBranchesRouteWithChildren,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
   AuthenticatedAdminContentAnalyticsRoute:
