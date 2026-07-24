@@ -198,7 +198,19 @@ export const Route = createFileRoute("/api/ai/chat")({
 
         const lang = body.lang === "en" ? "en" : "ar";
         const auth = await readAuthUser(request);
-        const scope: "guest" | "patient" = auth ? "patient" : "guest";
+        let scope: "guest" | "patient" | "staff" = auth ? "patient" : "guest";
+        let staffRoles: string[] = [];
+        if (auth) {
+          const staffEnabled = await getFeatureFlag("ai.assistant.staff.enabled");
+          if (staffEnabled) {
+            const roles = await detectStaffRoles(auth.userId, auth.token);
+            if (roles.length > 0) {
+              scope = "staff";
+              staffRoles = roles;
+            }
+          }
+        }
+
         const lastUser = [...messages].reverse().find((m) => m.role === "user")?.content ?? "";
 
         // Safety classification on latest user turn
