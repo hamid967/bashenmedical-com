@@ -29,11 +29,11 @@ export const escalateAiConversation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((raw) => Input.parse(raw))
   .handler(async ({ data, context }) => {
-    // Rate limit escalations per user — this creates real operational load.
-    const req = new Request("http://local/escalate", {
-      headers: { "x-user-id": context.userId },
+    // Per-user rate limit — escalations create real operational load.
+    const limited = await applyRateLimit(new Request("http://local/escalate"), {
+      category: "ai_chat",
+      extraKey: `escalate:${context.userId}`,
     });
-    const limited = await applyRateLimit(req, { category: "ai_chat" });
     if (limited) throw new Error("rate_limited");
 
     const { data: rows, error } = await context.supabase.rpc(
