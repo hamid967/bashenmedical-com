@@ -315,6 +315,7 @@ function PageEditor() {
                   size="icon"
                   onClick={() => openPicker("og_image")}
                   title="اختيار من مكتبة الوسائط"
+                  aria-label="اختيار من مكتبة الوسائط"
                 >
                   <ImagePlus className="h-4 w-4" />
                 </Button>
