@@ -330,7 +330,7 @@ function QueueTab({ branchId }: { branchId: string | null }) {
 
   // Group by doctor
   const groups = new Map<string, { doctor: any; rows: any[] }>();
-  for (const row of query.data.rows) {
+  for (const row of query.data.rows as any[]) {
     const key = row.doctor?.id ?? "unknown";
     const g = groups.get(key) ?? { doctor: row.doctor, rows: [] };
     g.rows.push(row);
