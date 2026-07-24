@@ -181,7 +181,12 @@ export const updateQueueStatus = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, [...STAFF_ROLES]);
     const now = new Date().toISOString();
-    const patch: Record<string, unknown> = { status: data.status };
+    const patch: {
+      status: (typeof QUEUE_STATUSES)[number];
+      called_at?: string;
+      started_at?: string;
+      completed_at?: string;
+    } = { status: data.status };
     if (data.status === "called") patch.called_at = now;
     if (data.status === "in_service") patch.started_at = now;
     if (data.status === "completed") patch.completed_at = now;
