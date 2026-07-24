@@ -33,17 +33,94 @@ export const Route = createFileRoute("/_authenticated/admin/inbox/sla")({
 function SlaPage() {
   const fetchFn = useServerFn(getInboxSlaOverview);
   const [days, setDays] = useState<number>(30);
+  const [fChannel, setFChannel] = useState<string>("");
+  const [fBranch, setFBranch] = useState<string>("");
+  const [fStatus, setFStatus] = useState<string>("");
   const { data, refetch, isFetching } = useSuspenseQuery({
     queryKey: ["inbox", "sla", days],
     queryFn: () => fetchFn({ data: { days } }),
     staleTime: 60_000,
   });
 
+  const filteredBreaches = useMemo(
+    () =>
+      data.breaches.filter(
+        (b) =>
+          (!fChannel || b.channel === fChannel) &&
+          (!fBranch || (b.branch_id ?? "__none__") === fBranch) &&
+          (!fStatus || b.status === fStatus),
+      ),
+    [data.breaches, fChannel, fBranch, fStatus],
+  );
+
+  const branchOptions = useMemo(
+    () => data.byBranch.map((b) => ({ key: b.key, label: b.label })),
+    [data.byBranch],
+  );
+  const channelOptions = useMemo(() => data.byChannel.map((b) => b.key), [data.byChannel]);
+  const statusOptions = useMemo(() => data.byStatus.map((b) => b.key), [data.byStatus]);
+
+  const branchLabelOf = (id: string | null) =>
+    !id
+      ? "بدون فرع"
+      : branchOptions.find((b) => b.key === id)?.label ?? id.slice(0, 8);
+
+  const exportCsv = () => {
+    const header = [
+      "request_number",
+      "patient_name",
+      "channel",
+      "branch",
+      "priority",
+      "status",
+      "kind",
+      "created_at",
+      "age_minutes",
+      "overdue_minutes",
+      "threshold_minutes",
+    ];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [header.join(",")];
+    for (const b of filteredBreaches) {
+      lines.push(
+        [
+          b.request_number,
+          b.patient_name ?? "",
+          CHANNEL_LABELS[b.channel] ?? b.channel,
+          branchLabelOf(b.branch_id),
+          PRIORITY_LABELS[b.priority] ?? b.priority,
+          STATUS_LABELS[b.status] ?? b.status,
+          b.kind === "response" ? "استجابة" : "إنجاز",
+          b.created_at,
+          Math.round(b.ageMs / 60000),
+          Math.round(b.overdueMs / 60000),
+          b.thresholdMin,
+        ]
+          .map(esc)
+          .join(","),
+      );
+    }
+    const blob = new Blob(["\ufeff" + lines.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sla-breaches-${days}d-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const breachesByPriority = useMemo(() => {
     const m: Record<string, number> = {};
-    for (const b of data.breaches) m[b.priority] = (m[b.priority] ?? 0) + 1;
+    for (const b of filteredBreaches) m[b.priority] = (m[b.priority] ?? 0) + 1;
     return m;
-  }, [data.breaches]);
+  }, [filteredBreaches]);
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
