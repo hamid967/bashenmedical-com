@@ -1,6 +1,7 @@
 /**
  * Client-safe AI safety helpers: emergency keyword detection, medical
- * red-flag classification, and PII masking. Pure functions only.
+ * red-flag classification, PII masking, and assistant output sanitization.
+ * Pure functions only — safe for both server and browser.
  */
 
 export const EMERGENCY_KEYWORDS_AR = [
@@ -69,10 +70,18 @@ const PROMPT_INJECTION_PATTERNS = [
   /ignore (all )?previous instructions?/i,
   /disregard (the )?system prompt/i,
   /reveal (the )?system prompt/i,
-  /(you are|act as) (?:a )?(?:developer|admin|super|root)/i,
+  /print (?:the )?(?:system )?prompt/i,
+  /(you are|act as) (?:a )?(?:developer|admin|super|root|dan|jailbroken)/i,
+  /developer mode/i,
+  /do anything now/i,
+  /bypass (?:the )?(?:safety|filter|guard)/i,
+  /system\s*:\s*you are/i,
+  /</?\s*(?:system|assistant|instructions)\s*>/i,
   /تجاهل (كل )?التعليمات/i,
   /اكشف (لي )?التعليمات/i,
   /أنت الآن مطور/i,
+  /تجاوز (?:فلتر|قواعد|الحماية)/i,
+  /اعمل بدون قيود/i,
 ];
 
 export type SafetyClass =
@@ -108,17 +117,70 @@ export const MEDICAL_REFUSAL_AR =
 export const MEDICAL_REFUSAL_EN =
   "I cannot diagnose conditions, prescribe medications, adjust dosages, or interpret medical reports. Please book an appointment with a specialist or contact your treating physician via the portal.";
 
-/** Mask common PII in text: national IDs, long phone numbers, insurance policy numbers. */
+/**
+ * Mask common PII in text: national IDs, phones, emails, insurance policy numbers,
+ * credit cards, IBANs. Applied BOTH to inbound user turns (before sending to the
+ * model) and to outbound assistant text (defense-in-depth for streamed output).
+ */
 export function maskSensitive(input: string): string {
   if (!input) return input;
   let out = input;
-  // 10-digit Saudi national IDs / iqama
+  // 10-digit Saudi national IDs / iqama (1xxxxxxxxx / 2xxxxxxxxx)
   out = out.replace(/\b([12]\d{9})\b/g, (m) => `••••••${m.slice(-4)}`);
-  // Long phone numbers (7+ digits)
+  // Credit cards (13-19 digits, allow spaces/dashes)
+  out = out.replace(/\b(?:\d[ -]*?){13,19}\b/g, (m) => {
+    const digits = m.replace(/\D/g, "");
+    if (digits.length < 13 || digits.length > 19) return m;
+    return `••••-••••-••••-${digits.slice(-4)}`;
+  });
+  // IBAN (SA + 22 digits, optional spaces)
+  out = out.replace(/\bSA\d{2}(?:[ ]?\d){20}\b/gi, (m) => {
+    const compact = m.replace(/\s+/g, "");
+    return `SA••••••••••••••••••${compact.slice(-4)}`;
+  });
+  // Emails
+  out = out.replace(
+    /\b([A-Z0-9._%+-]{1,64})@([A-Z0-9.-]+\.[A-Z]{2,})\b/gi,
+    (_, local: string, domain: string) => {
+      const head = local.slice(0, Math.min(2, local.length));
+      return `${head}••••@${domain}`;
+    },
+  );
+  // Long phone numbers (7+ digits with optional + and separators)
   out = out.replace(/\+?\d[\d\s-]{7,}\d/g, (m) => {
     const digits = m.replace(/\D/g, "");
     if (digits.length < 7) return m;
     return `${digits.slice(0, 3)}••••${digits.slice(-2)}`;
   });
   return out;
+}
+
+/**
+ * Sanitize outgoing assistant text before returning it to the client.
+ * Applies the same PII masking as inbound user text so leaked identifiers
+ * from grounding context or model hallucinations do not reach the browser.
+ */
+export function sanitizeAssistantText(input: string): string {
+  return maskSensitive(input ?? "");
+}
+
+/**
+ * Quick heuristic used by post-generation guards. Returns true if the assistant
+ * text contains language that reads as a definitive medical diagnosis or a
+ * dosage/prescription instruction — which the assistant is never allowed to do.
+ */
+const MEDICAL_OUTPUT_PATTERNS = [
+  /\byou (?:have|are suffering from|are diagnosed with)\b/i,
+  /\btake\s+\d+\s*(?:mg|ml|tablets?|pills?|capsules?)\b/i,
+  /\bstop\s+taking\s+/i,
+  /\bincrease\s+(?:the\s+)?dose\b/i,
+  /أنت مصاب/,
+  /تشخيصك (?:هو )?/,
+  /تناول \d+\s*(?:مجم|ملغ|حبة|كبسولة)/,
+  /أوقف الدواء/,
+  /زد الجرعة/,
+];
+export function looksLikeMedicalDirective(text: string): boolean {
+  if (!text) return false;
+  return MEDICAL_OUTPUT_PATTERNS.some((p) => p.test(text));
 }
