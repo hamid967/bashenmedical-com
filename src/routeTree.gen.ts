@@ -140,6 +140,7 @@ import { Route as AuthenticatedAdminContractsRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminDoctorTodayRouteImport } from './routes/_authenticated/admin.doctor-today'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
+import { Route as AuthenticatedAdminExecutiveRouteImport } from './routes/_authenticated/admin.executive'
 import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
 import { Route as AuthenticatedAdminFrontDeskRouteImport } from './routes/_authenticated/admin.front-desk'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
@@ -282,6 +283,7 @@ import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/pu
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsSessionFromAuthRouteImport } from './routes/api/public/reservations/session-from-auth'
+import { Route as ApiPublicWarehouseKpisRouteImport } from './routes/api/public/warehouse/kpis'
 import { Route as ApiPublicWebhooksPaymentRouteImport } from './routes/api/public/webhooks/payment'
 import { Route as AuthenticatedAdminCmsKindIdRouteImport } from './routes/_authenticated/admin.cms.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
@@ -990,6 +992,12 @@ const AuthenticatedAdminDoctorsRoute =
   AuthenticatedAdminDoctorsRouteImport.update({
     id: '/doctors',
     path: '/doctors',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminExecutiveRoute =
+  AuthenticatedAdminExecutiveRouteImport.update({
+    id: '/executive',
+    path: '/executive',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
@@ -1820,6 +1828,11 @@ const ApiPublicReservationsSessionFromAuthRoute =
     path: '/api/public/reservations/session-from-auth',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWarehouseKpisRoute = ApiPublicWarehouseKpisRouteImport.update({
+  id: '/api/public/warehouse/kpis',
+  path: '/api/public/warehouse/kpis',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhooksPaymentRoute =
   ApiPublicWebhooksPaymentRouteImport.update({
     id: '/api/public/webhooks/payment',
@@ -1993,6 +2006,7 @@ export interface FileRoutesByFullPath {
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctor-today': typeof AuthenticatedAdminDoctorTodayRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
+  '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRouteWithChildren
@@ -2134,6 +2148,7 @@ export interface FileRoutesByFullPath {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/api/public/warehouse/kpis': typeof ApiPublicWarehouseKpisRoute
   '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
   '/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
@@ -2269,6 +2284,7 @@ export interface FileRoutesByTo {
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctor-today': typeof AuthenticatedAdminDoctorTodayRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
+  '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRouteWithChildren
@@ -2410,6 +2426,7 @@ export interface FileRoutesByTo {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/api/public/warehouse/kpis': typeof ApiPublicWarehouseKpisRoute
   '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
   '/owner/pages': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services': typeof AuthenticatedOwnerServicesIndexRoute
@@ -2552,6 +2569,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/doctor-today': typeof AuthenticatedAdminDoctorTodayRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
+  '/_authenticated/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/_authenticated/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRouteWithChildren
@@ -2693,6 +2711,7 @@ export interface FileRoutesById {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/api/public/warehouse/kpis': typeof ApiPublicWarehouseKpisRoute
   '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
   '/_authenticated/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/_authenticated/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
@@ -2835,6 +2854,7 @@ export interface FileRouteTypes {
     | '/admin/design-tokens'
     | '/admin/doctor-today'
     | '/admin/doctors'
+    | '/admin/executive'
     | '/admin/files'
     | '/admin/front-desk'
     | '/admin/inbox'
@@ -2976,6 +2996,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/api/public/warehouse/kpis'
     | '/api/public/webhooks/payment'
     | '/owner/pages/'
     | '/owner/services/'
@@ -3111,6 +3132,7 @@ export interface FileRouteTypes {
     | '/admin/design-tokens'
     | '/admin/doctor-today'
     | '/admin/doctors'
+    | '/admin/executive'
     | '/admin/files'
     | '/admin/front-desk'
     | '/admin/inbox'
@@ -3252,6 +3274,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/api/public/warehouse/kpis'
     | '/api/public/webhooks/payment'
     | '/owner/pages'
     | '/owner/services'
@@ -3393,6 +3416,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/doctor-today'
     | '/_authenticated/admin/doctors'
+    | '/_authenticated/admin/executive'
     | '/_authenticated/admin/files'
     | '/_authenticated/admin/front-desk'
     | '/_authenticated/admin/inbox'
@@ -3534,6 +3558,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/api/public/warehouse/kpis'
     | '/api/public/webhooks/payment'
     | '/_authenticated/owner/pages/'
     | '/_authenticated/owner/services/'
@@ -3637,6 +3662,7 @@ export interface RootRouteChildren {
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
   ApiPublicReservationsSessionFromAuthRoute: typeof ApiPublicReservationsSessionFromAuthRoute
+  ApiPublicWarehouseKpisRoute: typeof ApiPublicWarehouseKpisRoute
   ApiPublicWebhooksPaymentRoute: typeof ApiPublicWebhooksPaymentRoute
   ApiPublicReservationsOtpSendRoute: typeof ApiPublicReservationsOtpSendRoute
   ApiPublicReservationsOtpVerifyRoute: typeof ApiPublicReservationsOtpVerifyRoute
@@ -4559,6 +4585,13 @@ declare module '@tanstack/react-router' {
       path: '/doctors'
       fullPath: '/admin/doctors'
       preLoaderRoute: typeof AuthenticatedAdminDoctorsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/executive': {
+      id: '/_authenticated/admin/executive'
+      path: '/executive'
+      fullPath: '/admin/executive'
+      preLoaderRoute: typeof AuthenticatedAdminExecutiveRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/files': {
@@ -5555,6 +5588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReservationsSessionFromAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/warehouse/kpis': {
+      id: '/api/public/warehouse/kpis'
+      path: '/api/public/warehouse/kpis'
+      fullPath: '/api/public/warehouse/kpis'
+      preLoaderRoute: typeof ApiPublicWarehouseKpisRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/payment': {
       id: '/api/public/webhooks/payment'
       path: '/api/public/webhooks/payment'
@@ -5863,6 +5903,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminDoctorTodayRoute: typeof AuthenticatedAdminDoctorTodayRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
+  AuthenticatedAdminExecutiveRoute: typeof AuthenticatedAdminExecutiveRoute
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRouteWithChildren
   AuthenticatedAdminFrontDeskRoute: typeof AuthenticatedAdminFrontDeskRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRouteWithChildren
@@ -5924,6 +5965,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminDoctorTodayRoute: AuthenticatedAdminDoctorTodayRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
+  AuthenticatedAdminExecutiveRoute: AuthenticatedAdminExecutiveRoute,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRouteWithChildren,
   AuthenticatedAdminFrontDeskRoute: AuthenticatedAdminFrontDeskRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRouteWithChildren,
@@ -6464,6 +6506,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicReservationsRescheduleRoute: ApiPublicReservationsRescheduleRoute,
   ApiPublicReservationsSessionFromAuthRoute:
     ApiPublicReservationsSessionFromAuthRoute,
+  ApiPublicWarehouseKpisRoute: ApiPublicWarehouseKpisRoute,
   ApiPublicWebhooksPaymentRoute: ApiPublicWebhooksPaymentRoute,
   ApiPublicReservationsOtpSendRoute: ApiPublicReservationsOtpSendRoute,
   ApiPublicReservationsOtpVerifyRoute: ApiPublicReservationsOtpVerifyRoute,

@@ -1083,6 +1083,36 @@ export type Database = {
           },
         ]
       }
+      bi_daily_kpis: {
+        Row: {
+          day: string
+          dimension: string
+          id: string
+          metric: string
+          refreshed_at: string
+          sample_size: number
+          value_numeric: number
+        }
+        Insert: {
+          day: string
+          dimension?: string
+          id?: string
+          metric: string
+          refreshed_at?: string
+          sample_size?: number
+          value_numeric?: number
+        }
+        Update: {
+          day?: string
+          dimension?: string
+          id?: string
+          metric?: string
+          refreshed_at?: string
+          sample_size?: number
+          value_numeric?: number
+        }
+        Relationships: []
+      }
       booking_trace_events: {
         Row: {
           appointment_date: string | null
@@ -8188,6 +8218,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      refresh_bi_daily_kpis: { Args: { _days_back?: number }; Returns: number }
       release_expired_slot_holds: { Args: never; Returns: number }
       release_slot: { Args: { p_appointment_id: string }; Returns: boolean }
       reply_to_rating: {
