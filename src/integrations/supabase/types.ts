@@ -526,16 +526,16 @@ export type Database = {
       }
       appointment_ref_daily_counter: {
         Row: {
-          day: string
-          seq: number
+          day_key: string
+          last_seq: number
         }
         Insert: {
-          day: string
-          seq?: number
+          day_key: string
+          last_seq?: number
         }
         Update: {
-          day?: string
-          seq?: number
+          day_key?: string
+          last_seq?: number
         }
         Relationships: []
       }
@@ -8169,6 +8169,14 @@ export type Database = {
         | "pending_payment"
         | "checked_in"
         | "in_progress"
+        | "slot_held"
+        | "pending_insurance"
+        | "pending_confirmation"
+        | "arrived"
+        | "waiting"
+        | "called"
+        | "in_consultation"
+        | "rescheduled"
       attachment_category:
         | "lab"
         | "imaging"
@@ -8495,6 +8503,14 @@ export const Constants = {
         "pending_payment",
         "checked_in",
         "in_progress",
+        "slot_held",
+        "pending_insurance",
+        "pending_confirmation",
+        "arrived",
+        "waiting",
+        "called",
+        "in_consultation",
+        "rescheduled",
       ],
       attachment_category: [
         "lab",
