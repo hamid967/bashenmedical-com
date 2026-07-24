@@ -104,7 +104,7 @@ function PortalPrimitivesDocsPage() {
   };
 
   return (
-    <div className="portal-root min-h-screen" style={{ background: "var(--ds-brand-50)" }}>
+    <div className="portal-root min-h-dvh" style={{ background: "var(--ds-brand-50)" }}>
       <div className="container-app py-10 md:py-14 space-y-8">
         <PortalPageHeader
           eyebrow="Design System"

@@ -203,7 +203,7 @@ function MyOrdersPage() {
   };
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-dvh bg-muted/30">
       {/* Hero */}
       <section className="bg-primary text-primary-foreground">
         <div className="container-app py-10 md:py-14">

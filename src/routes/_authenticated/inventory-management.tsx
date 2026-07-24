@@ -90,7 +90,7 @@ function InventoryPage() {
   const branchesQ = useQuery({ queryKey: ["inv-branches"], queryFn: () => listBranches() });
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background">
+    <div dir="rtl" className="min-h-dvh bg-background">
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">

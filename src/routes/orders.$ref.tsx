@@ -168,7 +168,7 @@ function OrderDetailPage() {
   }, [data, isAr]);
 
   return (
-    <div className="min-h-screen bg-muted/30 print:bg-white">
+    <div className="min-h-dvh bg-muted/30 print:bg-white">
       <div className="container-app py-8 md:py-12 max-w-3xl">
         <Link
           to="/my-orders"

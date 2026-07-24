@@ -99,13 +99,13 @@ function OwnerPagesList() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end">
                       {p.status === "published" && (
-                        <Button asChild size="icon" variant="ghost" title="عرض">
+                        <Button asChild size="icon" variant="ghost" title="عرض" aria-label="عرض">
                           <a href={`/p/${p.slug}`} target="_blank" rel="noreferrer">
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         </Button>
                       )}
-                      <Button asChild size="icon" variant="ghost" title="تعديل">
+                      <Button asChild size="icon" variant="ghost" title="تعديل" aria-label="تعديل">
                         <Link to="/owner/pages/$id" params={{ id: p.id }}>
                           <Pencil className="h-4 w-4" />
                         </Link>
@@ -114,6 +114,7 @@ function OwnerPagesList() {
                         size="icon"
                         variant="ghost"
                         title="حذف"
+                        aria-label="حذف"
                         disabled={busy === p.id}
                         onClick={() => handleDelete(p.id, p.title_ar)}
                       >

@@ -208,7 +208,7 @@ function InsuranceVerifyPage() {
   }
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background">
+    <div dir="rtl" className="min-h-dvh bg-background">
       <div className="max-w-3xl mx-auto px-4 py-10 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">

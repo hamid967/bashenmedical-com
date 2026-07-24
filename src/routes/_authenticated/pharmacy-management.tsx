@@ -96,7 +96,7 @@ function PharmacyPage() {
   const branchesQ = useQuery({ queryKey: ["pharmacy", "branches"], queryFn: () => branchesFn() });
 
   return (
-    <div dir="rtl" className="min-h-screen bg-muted/20">
+    <div dir="rtl" className="min-h-dvh bg-muted/20">
       <div className="mx-auto max-w-7xl p-6 md:p-8 space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">

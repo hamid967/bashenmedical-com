@@ -116,7 +116,7 @@ function VerifyPage() {
   const meta = result ? (STATUS_LABEL[result.status] ?? { label: result.status, cls: "bg-slate-100 text-slate-700" }) : null;
 
   return (
-    <main className="min-h-screen bg-muted/30 py-10">
+    <main className="min-h-dvh bg-muted/30 py-10">
       <div className="container-app max-w-lg">
         <header className="text-center mb-6">
           <div className="inline-flex items-center gap-2 text-primary font-bold">

@@ -565,7 +565,7 @@ function StorybookPage() {
   };
 
   return (
-    <div className="portal-root min-h-screen" style={{ background: "var(--ds-brand-50)" }}>
+    <div className="portal-root min-h-dvh" style={{ background: "var(--ds-brand-50)" }}>
       <div className="container-app py-8 md:py-12 space-y-6">
         <PortalPageHeader
           eyebrow="Design System"

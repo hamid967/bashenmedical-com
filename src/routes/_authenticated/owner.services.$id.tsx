@@ -133,7 +133,7 @@ function ServiceEditor() {
     <div className="p-6 md:p-8 max-w-4xl" dir="rtl">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="icon">
+          <Button asChild variant="ghost" size="icon" aria-label="رجوع إلى الخدمات">
             <Link to="/owner/services">
               <ArrowRight className="h-4 w-4" />
             </Link>

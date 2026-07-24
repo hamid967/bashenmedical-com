@@ -196,7 +196,7 @@ function Page() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20" dir="rtl">
+    <div className="min-h-dvh bg-gradient-to-b from-background to-muted/20" dir="rtl">
       <header className="border-b border-border/50 bg-background/80 backdrop-blur sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4 flex flex-wrap items-center gap-3">
           <Link

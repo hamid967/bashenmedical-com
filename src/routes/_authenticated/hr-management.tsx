@@ -90,7 +90,7 @@ function HrError({ error, reset }: { error: Error; reset: () => void }) {
 function HrPage() {
   const [tab, setTab] = useState<"employees" | "attendance" | "leaves" | "payroll">("employees");
   return (
-    <div dir="rtl" className="min-h-screen bg-background">
+    <div dir="rtl" className="min-h-dvh bg-background">
       <div className="mx-auto max-w-7xl px-4 py-6 md:px-8">
         <div className="mb-6 flex items-center gap-3">
           <Link

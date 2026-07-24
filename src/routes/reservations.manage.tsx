@@ -518,7 +518,7 @@ function ManagePage() {
   }, []);
 
   return (
-    <div dir="rtl" className="min-h-screen bg-muted/30">
+    <div dir="rtl" className="min-h-dvh bg-muted/30">
       <header className="bg-card border-b">
         <div className="container-modern mx-auto max-w-3xl px-4 py-4 flex items-center justify-between">
           <Link

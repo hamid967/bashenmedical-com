@@ -138,7 +138,7 @@ function ReservationsPage() {
     : null;
 
   return (
-    <div dir="rtl" className="min-h-screen bg-muted/30">
+    <div dir="rtl" className="min-h-dvh bg-muted/30">
       {/* Hero */}
       <section className="bg-gradient-to-b from-primary/10 via-primary/5 to-transparent border-b">
         <div className="container-modern mx-auto max-w-6xl px-4 py-10 md:py-14">

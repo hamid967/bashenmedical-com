@@ -213,7 +213,7 @@ function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-dvh bg-muted/20">
       <div className="mx-auto max-w-7xl p-6 md:p-10 space-y-6">
         {/* Header */}
         <div className="mb-6 flex flex-wrap items-center justify-between gap-2">

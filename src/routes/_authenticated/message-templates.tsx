@@ -254,7 +254,7 @@ function MessageTemplatesPage() {
   const currentChannelMeta = CHANNEL_META[form.channel];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white p-4 md:p-6" dir="rtl">
+    <div className="min-h-dvh bg-gradient-to-b from-slate-50 to-white p-4 md:p-6" dir="rtl">
       <div className="mx-auto max-w-7xl">
         <div className="mb-4 flex items-center justify-between gap-2">
           <div>

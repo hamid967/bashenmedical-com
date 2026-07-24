@@ -123,7 +123,7 @@ function ClinicSettingsPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
+      <div className="flex min-h-dvh items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -205,7 +205,7 @@ function ClinicSettingsPage() {
   const label = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
-    <div dir="rtl" className="min-h-screen bg-gray-50">
+    <div dir="rtl" className="min-h-dvh bg-gray-50">
       <div className="mx-auto max-w-4xl px-4 py-8">
         <div className="mb-6 flex items-center justify-between">
           <div>
