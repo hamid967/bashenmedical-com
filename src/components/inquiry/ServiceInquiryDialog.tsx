@@ -199,6 +199,8 @@ export function ServiceInquiryDialog({
       setErrors({});
       setConfirmation(null);
       setHandoffStatus("not_opened");
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     }, 250);
     return () => clearTimeout(t);
   }, [open]);
