@@ -526,7 +526,15 @@ export function AdminShellV2({
       </div>
 
       {/* Overlays */}
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} onAskAI={askAI} />
+      <CommandPalette
+        open={paletteOpen}
+        onOpenChange={setPaletteOpen}
+        navGroups={groups}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+        onSignOut={handleSignOut}
+        onAskAI={askAI}
+      />
       <AIAssistantPanel open={aiOpen} onOpenChange={setAiOpen} initialPrompt={aiPrompt} />
     </div>
   );
