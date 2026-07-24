@@ -557,3 +557,162 @@ function fromLocalInput(v: string): string | null {
   if (!v) return null;
   return new Date(v).toISOString();
 }
+
+/* ---------------------- Audience / Branch / Specialty ---------------------- */
+
+type AudienceValue = {
+  languages?: string[];
+  preferredBranch?: string[];
+  hasBookedSpecialty?: string[];
+};
+
+function BranchSelect({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+}) {
+  const { data } = useQuery({
+    queryKey: ["admin", "content-branches"],
+    queryFn: () => listPublicBranches(),
+    staleTime: 300_000,
+  });
+  return (
+    <Select
+      value={value ?? "__none__"}
+      onValueChange={(v) => onChange(v === "__none__" ? null : v)}
+    >
+      <SelectTrigger><SelectValue placeholder="بدون تخصيص" /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__">— بدون —</SelectItem>
+        {(data ?? []).map((b) => (
+          <SelectItem key={b.id} value={b.id}>{b.name_ar}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function SpecialtySelect({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (v: string | null) => void;
+}) {
+  const { data } = useQuery({
+    queryKey: ["admin", "content-specialties"],
+    queryFn: () => listSpecialtiesMini(),
+    staleTime: 300_000,
+  });
+  return (
+    <Select
+      value={value ?? "__none__"}
+      onValueChange={(v) => onChange(v === "__none__" ? null : v)}
+    >
+      <SelectTrigger><SelectValue placeholder="بدون تخصيص" /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value="__none__">— بدون —</SelectItem>
+        {((data ?? []) as Array<{ id: string; name_ar: string }>).map((s) => (
+          <SelectItem key={s.id} value={s.id}>{s.name_ar}</SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+  );
+}
+
+function AudienceEditor({
+  value,
+  onChange,
+}: {
+  value: AudienceValue;
+  onChange: (next: AudienceValue) => void;
+}) {
+  const { data: branches = [] } = useQuery({
+    queryKey: ["admin", "content-branches"],
+    queryFn: () => listPublicBranches(),
+    staleTime: 300_000,
+  });
+  const { data: specialties = [] } = useQuery({
+    queryKey: ["admin", "content-specialties"],
+    queryFn: () => listSpecialtiesMini(),
+    staleTime: 300_000,
+  });
+
+  const langs = value.languages ?? [];
+  const branchIds = value.preferredBranch ?? [];
+  const specialtyIds = value.hasBookedSpecialty ?? [];
+
+  const toggle = (arr: string[], id: string): string[] =>
+    arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id];
+
+  const setLangs = (l: string[]) =>
+    onChange({ ...value, languages: l.length ? l : undefined });
+  const setBranches = (b: string[]) =>
+    onChange({ ...value, preferredBranch: b.length ? b : undefined });
+  const setSpecialties = (s: string[]) =>
+    onChange({ ...value, hasBookedSpecialty: s.length ? s : undefined });
+
+  const specialtyRows = specialties as Array<{ id: string; name_ar: string }>;
+
+  return (
+    <div className="space-y-3 rounded-md border p-3">
+      <div>
+        <Label className="text-sm">اللغة (اترك فارغًا للجميع)</Label>
+        <div className="mt-2 flex gap-4">
+          {(["ar", "en"] as const).map((l) => (
+            <label key={l} className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={langs.includes(l)}
+                onCheckedChange={() => setLangs(toggle(langs, l))}
+              />
+              {l === "ar" ? "العربية" : "English"}
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-sm">الفرع المفضّل للمريض (اختياري)</Label>
+        <div className="mt-2 grid gap-1 sm:grid-cols-2">
+          {branches.map((b) => (
+            <label key={b.id} className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={branchIds.includes(b.id)}
+                onCheckedChange={() => setBranches(toggle(branchIds, b.id))}
+              />
+              <span className="truncate">{b.name_ar}</span>
+            </label>
+          ))}
+          {branches.length === 0 && (
+            <span className="text-xs text-muted-foreground">لا توجد فروع.</span>
+          )}
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-sm">حجز سابق في تخصص (اختياري)</Label>
+        <div className="mt-2 grid gap-1 sm:grid-cols-2">
+          {specialtyRows.map((s) => (
+            <label key={s.id} className="flex items-center gap-2 text-sm">
+              <Checkbox
+                checked={specialtyIds.includes(s.id)}
+                onCheckedChange={() => setSpecialties(toggle(specialtyIds, s.id))}
+              />
+              <span className="truncate">{s.name_ar}</span>
+            </label>
+          ))}
+          {specialtyRows.length === 0 && (
+            <span className="text-xs text-muted-foreground">لا توجد تخصصات.</span>
+          )}
+        </div>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground">
+        يتم تطبيق كل المرشحات معًا (AND). لن يظهر العنصر إلا لمن يستوفي جميع الشروط.
+      </p>
+    </div>
+  );
+}
+
