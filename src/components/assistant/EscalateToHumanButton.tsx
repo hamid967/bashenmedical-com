@@ -11,7 +11,7 @@
  * live status chip that polls `getAiEscalationStatus` on a visibility-aware
  * interval and shows the current inbox status + last update time.
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink, ShieldAlert } from "lucide-react";
 import {
   Dialog,
