@@ -4,13 +4,100 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      pentest_status:
+        description: "Pentest sign-off (pass|fail|warn)"
+        required: false
+        default: ""
+      dr_status:
+        description: "DR drill status (pass|fail|warn)"
+        required: false
+        default: ""
+      captcha_status:
+        description: "CAPTCHA enforcement status"
+        required: false
+        default: ""
+      staging_status:
+        description: "Staging approval (pass|fail)"
+        required: false
+        default: ""
 
 concurrency:
   group: netlify-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # ─────────────────────────────────────────────────────────────
+  # Release Gate — blocks Production deploy on NO-GO conditions.
+  # Every check below must be "pass" (and fresh) or the deploy is
+  # skipped automatically. Inputs come from repository variables
+  # (updated by upstream release automation / release captain) and
+  # from workflow_dispatch overrides.
+  # ─────────────────────────────────────────────────────────────
+  release-gate:
+    name: Release Gate (NO-GO check)
+    runs-on: ubuntu-latest
+    outputs:
+      verdict: ${{ steps.gate.outputs.verdict }}
+      blocking: ${{ steps.gate.outputs.blocking }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      # Run the unit + eslint gates locally so their live status feeds the gate.
+      - name: Unit tests
+        id: unit
+        run: |
+          set -e
+          for f in tests/unit/*.test.ts; do echo "── $f ──"; bun "$f"; done
+          echo "status=pass" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: ESLint
+        id: eslint
+        run: |
+          set -e
+          bun run lint:inserts
+          bun run lint:portal-tokens
+          echo "status=pass" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Evaluate release gate
+        id: gate
+        env:
+          # Live-computed:
+          UNIT_STATUS: ${{ steps.unit.outcome == 'success' && 'pass' || 'fail' }}
+          ESLINT_STATUS: ${{ steps.eslint.outcome == 'success' && 'pass' || 'fail' }}
+          # From release-captain-maintained repository variables (fallback to workflow input):
+          PENTEST_STATUS: ${{ github.event.inputs.pentest_status || vars.PENTEST_STATUS }}
+          PENTEST_MEASURED_AT: ${{ vars.PENTEST_MEASURED_AT }}
+          PENTEST_URL: ${{ vars.PENTEST_URL }}
+          DR_STATUS: ${{ github.event.inputs.dr_status || vars.DR_STATUS }}
+          DR_MEASURED_AT: ${{ vars.DR_MEASURED_AT }}
+          DR_URL: ${{ vars.DR_URL }}
+          CAPTCHA_STATUS: ${{ github.event.inputs.captcha_status || vars.CAPTCHA_STATUS }}
+          CAPTCHA_MEASURED_AT: ${{ vars.CAPTCHA_MEASURED_AT }}
+          CAPTCHA_URL: ${{ vars.CAPTCHA_URL }}
+          STAGING_STATUS: ${{ github.event.inputs.staging_status || vars.STAGING_STATUS }}
+          STAGING_MEASURED_AT: ${{ vars.STAGING_MEASURED_AT }}
+          STAGING_URL: ${{ vars.STAGING_URL }}
+        run: node scripts/release/evaluate-gate.mjs
+
+      - name: Upload release-status.json
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-status
+          path: public/release-status.json
+          retention-days: 30
+
   deploy:
+    needs: release-gate
+    if: needs.release-gate.outputs.verdict == 'GO'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,6 +116,25 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
+
+      # Regenerate the status artifact so the shipped bundle reflects the GO decision.
+      - name: Publish release-status.json into build output
+        env:
+          UNIT_STATUS: pass
+          ESLINT_STATUS: pass
+          PENTEST_STATUS: ${{ vars.PENTEST_STATUS }}
+          PENTEST_MEASURED_AT: ${{ vars.PENTEST_MEASURED_AT }}
+          PENTEST_URL: ${{ vars.PENTEST_URL }}
+          DR_STATUS: ${{ vars.DR_STATUS }}
+          DR_MEASURED_AT: ${{ vars.DR_MEASURED_AT }}
+          DR_URL: ${{ vars.DR_URL }}
+          CAPTCHA_STATUS: ${{ vars.CAPTCHA_STATUS }}
+          CAPTCHA_MEASURED_AT: ${{ vars.CAPTCHA_MEASURED_AT }}
+          CAPTCHA_URL: ${{ vars.CAPTCHA_URL }}
+          STAGING_STATUS: ${{ vars.STAGING_STATUS }}
+          STAGING_MEASURED_AT: ${{ vars.STAGING_MEASURED_AT }}
+          STAGING_URL: ${{ vars.STAGING_URL }}
+        run: node scripts/release/evaluate-gate.mjs
 
       - name: Build (Nitro netlify preset)
         env:
@@ -50,4 +156,15 @@ jobs:
             --prod \
             --dir=dist \
             --functions=.netlify/functions-internal \
-            --message="GitHub Actions ${{ github.sha }}"
+            --message="GitHub Actions ${{ github.sha }} (gate=GO)"
+
+  deploy-blocked:
+    needs: release-gate
+    if: needs.release-gate.outputs.verdict != 'GO'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce NO-GO
+        run: |
+          echo "::error::Production deploy BLOCKED by Release Gate."
+          echo "Blocking checks: ${{ needs.release-gate.outputs.blocking }}"
+          exit 1

@@ -153,6 +153,7 @@ import { Route as AuthenticatedAdminObservabilityRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminOpsHubRouteImport } from './routes/_authenticated/admin.ops-hub'
 import { Route as AuthenticatedAdminPatientsRouteImport } from './routes/_authenticated/admin.patients'
 import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
+import { Route as AuthenticatedAdminReleaseGateRouteImport } from './routes/_authenticated/admin.release-gate'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
 import { Route as AuthenticatedAdminRolePermissionsMatrixRouteImport } from './routes/_authenticated/admin.role-permissions-matrix'
@@ -1062,6 +1063,12 @@ const AuthenticatedAdminRealtimeMonitorRoute =
     path: '/realtime-monitor',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminReleaseGateRoute =
+  AuthenticatedAdminReleaseGateRouteImport.update({
+    id: '/release-gate',
+    path: '/release-gate',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminReportsRoute =
   AuthenticatedAdminReportsRouteImport.update({
     id: '/reports',
@@ -1965,6 +1972,7 @@ export interface FileRoutesByFullPath {
   '/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
@@ -2235,6 +2243,7 @@ export interface FileRoutesByTo {
   '/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
@@ -2512,6 +2521,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/_authenticated/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/_authenticated/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/_authenticated/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
@@ -2789,6 +2799,7 @@ export interface FileRouteTypes {
     | '/admin/ops-hub'
     | '/admin/patients'
     | '/admin/realtime-monitor'
+    | '/admin/release-gate'
     | '/admin/reports'
     | '/admin/reservations-usage'
     | '/admin/role-permissions-matrix'
@@ -3059,6 +3070,7 @@ export interface FileRouteTypes {
     | '/admin/ops-hub'
     | '/admin/patients'
     | '/admin/realtime-monitor'
+    | '/admin/release-gate'
     | '/admin/reports'
     | '/admin/reservations-usage'
     | '/admin/role-permissions-matrix'
@@ -3335,6 +3347,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ops-hub'
     | '/_authenticated/admin/patients'
     | '/_authenticated/admin/realtime-monitor'
+    | '/_authenticated/admin/release-gate'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/reservations-usage'
     | '/_authenticated/admin/role-permissions-matrix'
@@ -4573,6 +4586,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRealtimeMonitorRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/release-gate': {
+      id: '/_authenticated/admin/release-gate'
+      path: '/release-gate'
+      fullPath: '/admin/release-gate'
+      preLoaderRoute: typeof AuthenticatedAdminReleaseGateRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/reports': {
       id: '/_authenticated/admin/reports'
       path: '/reports'
@@ -5755,6 +5775,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminOpsHubRoute: typeof AuthenticatedAdminOpsHubRoute
   AuthenticatedAdminPatientsRoute: typeof AuthenticatedAdminPatientsRouteWithChildren
   AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
+  AuthenticatedAdminReleaseGateRoute: typeof AuthenticatedAdminReleaseGateRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
   AuthenticatedAdminRolePermissionsMatrixRoute: typeof AuthenticatedAdminRolePermissionsMatrixRoute
@@ -5816,6 +5837,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPatientsRoute: AuthenticatedAdminPatientsRouteWithChildren,
   AuthenticatedAdminRealtimeMonitorRoute:
     AuthenticatedAdminRealtimeMonitorRoute,
+  AuthenticatedAdminReleaseGateRoute: AuthenticatedAdminReleaseGateRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminReservationsUsageRoute:
     AuthenticatedAdminReservationsUsageRoute,
