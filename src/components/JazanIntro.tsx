@@ -199,7 +199,17 @@ export function JazanIntro() {
   const endedRef = useRef<boolean>(false);
   const debugEnabled = isDebugEnabled(introCfg.debug);
 
-  const endIntro = (reason: "completed" | "skipped" | "escape" | "disabled" | "reduced_motion") => {
+  const endIntro = (
+    reason:
+      | "completed"
+      | "skipped"
+      | "escape"
+      | "disabled"
+      | "reduced_motion"
+      | "hard_cap"
+      | "network_downgrade"
+      | "navigation_intent",
+  ) => {
     if (endedRef.current) return;
     endedRef.current = true;
     if (reason === "disabled") {
