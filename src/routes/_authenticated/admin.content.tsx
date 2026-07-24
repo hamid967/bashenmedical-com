@@ -456,27 +456,24 @@ function EditorSheet({
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <Field label="فرع مستهدف (UUID اختياري)">
-              <Input value={form.branch_id ?? ""} onChange={(e) => set("branch_id", e.target.value || null)} />
+            <Field label="فرع مستهدف (اختياري)">
+              <BranchSelect
+                value={form.branch_id}
+                onChange={(v) => set("branch_id", v)}
+              />
             </Field>
-            <Field label="تخصص مستهدف (UUID اختياري)">
-              <Input value={form.specialty_id ?? ""} onChange={(e) => set("specialty_id", e.target.value || null)} />
+            <Field label="تخصص مستهدف (اختياري)">
+              <SpecialtySelect
+                value={form.specialty_id}
+                onChange={(v) => set("specialty_id", v)}
+              />
             </Field>
           </div>
 
-          <Field label="الجمهور (JSON)">
-            <Textarea
-              rows={3}
-              value={JSON.stringify(form.audience ?? {}, null, 2)}
-              onChange={(e) => {
-                try {
-                  set("audience", JSON.parse(e.target.value || "{}") as Record<string, unknown>);
-                } catch {
-                  /* ignore parse errors while typing */
-                }
-              }}
-            />
-          </Field>
+          <AudienceEditor
+            value={(form.audience ?? {}) as AudienceValue}
+            onChange={(next) => set("audience", next as Record<string, unknown>)}
+          />
 
           <div className="flex items-center gap-3 rounded-md border p-3">
             <Switch
