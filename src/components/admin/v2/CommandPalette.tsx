@@ -484,7 +484,29 @@ export function CommandPalette({
               </Command.Group>
             )}
 
-            {/* Recents — only when not actively searching */}
+            {/* Query suggestions — surfaced when idle or with short input */}
+            {(!isSearching || query.trim().length < 2) && (
+              <Command.Group heading="اقتراحات سريعة">
+                {[
+                  { to: "/admin/appointments?range=today", label: "مواعيد اليوم", icon: CalendarCheck },
+                  { to: "/admin/appointments?status=pending", label: "مواعيد بانتظار التأكيد", icon: CalendarCheck },
+                  { to: "/admin/service-inquiries?status=new", label: "طلبات جديدة", icon: Inbox },
+                  { to: "/admin/service-inquiries?status=in_progress", label: "طلبات قيد المعالجة", icon: Inbox },
+                  { to: "/patients-management", label: "المرضى", icon: Users },
+                  { to: "/doctors-management", label: "الأطباء", icon: Stethoscope },
+                ].map((s) => (
+                  <Command.Item
+                    key={`sugg-${s.to}`}
+                    value={`sugg-${s.to}-${s.label}`}
+                    onSelect={() => go({ to: s.to, label: s.label })}
+                  >
+                    <s.icon className="h-4 w-4 opacity-70" aria-hidden="true" />
+                    <span className="truncate">{s.label}</span>
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            )}
+
             {!isSearching && recentItems.length > 0 && (
               <Command.Group heading="آخر الصفحات">
                 {recentItems.map((r) => {
