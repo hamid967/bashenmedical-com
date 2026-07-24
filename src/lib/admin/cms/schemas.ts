@@ -31,8 +31,11 @@ export type KindDef = {
   key: CmsKind;
   label: string;
   singleton: boolean;
+  /** When true, submitCmsForReview requires 100% completeness in EN as well as AR. */
+  bilingual?: boolean;
   fields: FieldDef[];
 };
+
 
 const seoFields: FieldDef[] = [
   { name: "title", label: "العنوان (SEO)", type: "text" },
