@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import {
   ArrowRight,
   RefreshCw,
@@ -10,8 +11,27 @@ import {
   User,
   Building2,
   CalendarClock,
+  Wallet,
+  Ban,
+  Undo2,
 } from "lucide-react";
-import { getAdminInvoice } from "@/lib/admin/billing.functions";
+import { toast } from "sonner";
+import {
+  getAdminInvoice,
+  recordPayment,
+  voidInvoice,
+  requestRefund,
+  decideRefund,
+  listInvoiceRefunds,
+} from "@/lib/admin/billing.functions";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/_authenticated/admin/billing/$invoiceId")({
   head: ({ params }) => ({
@@ -212,6 +232,353 @@ function InvoiceDetailPage() {
           </dl>
         </section>
       </div>
+
+      <BillingActions invoice={inv} onChanged={() => q.refetch()} />
     </div>
+  );
+}
+
+// ------------- Billing state-machine actions (B3) -------------
+function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () => void }) {
+  const qc = useQueryClient();
+  const listRefundsFn = useServerFn(listInvoiceRefunds);
+  const recordFn = useServerFn(recordPayment);
+  const voidFn = useServerFn(voidInvoice);
+  const requestFn = useServerFn(requestRefund);
+  const decideFn = useServerFn(decideRefund);
+
+  const payments = useQuery({
+    queryKey: ["admin-invoice-refunds", invoice.id],
+    queryFn: () => listRefundsFn({ data: { invoice_id: invoice.id } }),
+  });
+
+  const [payOpen, setPayOpen] = useState(false);
+  const [voidOpen, setVoidOpen] = useState(false);
+  const [refundOpen, setRefundOpen] = useState<null | { payment_id: string; max: number }>(null);
+  const [payAmount, setPayAmount] = useState<string>(String(invoice.total ?? 0));
+  const [payMethod, setPayMethod] = useState<string>("cash");
+  const [payNote, setPayNote] = useState("");
+  const [voidReason, setVoidReason] = useState("");
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundReason, setRefundReason] = useState("");
+
+  const refetchAll = () => {
+    payments.refetch();
+    onChanged();
+    qc.invalidateQueries({ queryKey: ["admin-invoices"] });
+  };
+
+  const record = useMutation({
+    mutationFn: () =>
+      recordFn({
+        data: {
+          invoice_id: invoice.id,
+          amount: Number(payAmount),
+          method: payMethod as any,
+          idempotency_key: `manual-${invoice.id}-${Date.now()}`,
+          note: payNote || undefined,
+        },
+      }),
+    onSuccess: (r: any) => {
+      toast.success(r.deduplicated ? "دفعة مسجّلة مسبقاً (نفس المفتاح)." : "تم تسجيل الدفعة.");
+      setPayOpen(false);
+      setPayNote("");
+      refetchAll();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const voidM = useMutation({
+    mutationFn: () => voidFn({ data: { id: invoice.id, reason: voidReason.trim() } }),
+    onSuccess: () => {
+      toast.success("تم إلغاء الفاتورة.");
+      setVoidOpen(false);
+      refetchAll();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const request = useMutation({
+    mutationFn: () =>
+      requestFn({
+        data: {
+          payment_id: refundOpen!.payment_id,
+          amount: Number(refundAmount),
+          reason: refundReason.trim(),
+        },
+      }),
+    onSuccess: (r: any) => {
+      toast.success(`تم إنشاء طلب استرداد ${r.receipt_reference}.`);
+      setRefundOpen(null);
+      setRefundAmount("");
+      setRefundReason("");
+      refetchAll();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const decide = useMutation({
+    mutationFn: (v: { id: string; decision: "approved" | "rejected" | "completed" }) =>
+      decideFn({ data: v }),
+    onSuccess: () => {
+      toast.success("تم تحديث حالة الاسترداد.");
+      refetchAll();
+    },
+    onError: (e) => toast.error((e as Error).message),
+  });
+
+  const canRecord = invoice.status !== "cancelled" && invoice.status !== "paid";
+  const canVoid = invoice.status !== "paid" && invoice.status !== "partially_paid" && invoice.status !== "cancelled";
+
+  return (
+    <>
+      <section className="mt-6 rounded-lg border p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+            <Wallet className="h-4 w-4" /> إجراءات الفوترة
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <button
+              disabled={!canRecord}
+              onClick={() => setPayOpen(true)}
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-40"
+            >
+              تسجيل دفعة
+            </button>
+            <button
+              disabled={!canVoid}
+              onClick={() => setVoidOpen(true)}
+              className="rounded-md border border-destructive/40 px-3 py-1.5 text-sm text-destructive hover:bg-destructive/10 disabled:opacity-40"
+            >
+              <Ban className="me-1 inline h-3.5 w-3.5" /> إلغاء
+            </button>
+          </div>
+        </div>
+
+        {payments.isLoading ? (
+          <div className="text-sm text-muted-foreground">جارٍ تحميل الدفعات…</div>
+        ) : !payments.data || payments.data.payments.length === 0 ? (
+          <div className="text-sm text-muted-foreground">لا توجد دفعات مسجّلة.</div>
+        ) : (
+          <ul className="space-y-2 text-sm">
+            {payments.data.payments.map((p: any) => (
+              <li key={p.id} className="rounded-md border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div className="font-semibold">
+                      {Number(p.amount).toLocaleString("ar-SA")} {invoice.currency ?? "SAR"} · {p.method}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {p.status} · {p.paid_at ? new Date(p.paid_at).toLocaleString("ar-SA") : "—"}
+                    </div>
+                  </div>
+                  {p.status === "succeeded" && (
+                    <button
+                      onClick={() => {
+                        setRefundOpen({ payment_id: p.id, max: Number(p.amount) });
+                        setRefundAmount(String(p.amount));
+                      }}
+                      className="rounded-md border px-2.5 py-1 text-xs hover:bg-muted"
+                    >
+                      <Undo2 className="me-1 inline h-3 w-3" /> طلب استرداد
+                    </button>
+                  )}
+                </div>
+                {p.refunds && p.refunds.length > 0 && (
+                  <ul className="mt-2 space-y-1 border-t pt-2 text-xs">
+                    {p.refunds.map((r: any) => (
+                      <li
+                        key={r.id}
+                        className="flex flex-wrap items-center justify-between gap-2"
+                      >
+                        <span>
+                          <span className="font-mono">{r.receipt_reference}</span> ·{" "}
+                          {Number(r.amount).toLocaleString("ar-SA")} · {r.status}
+                        </span>
+                        <span className="flex gap-1">
+                          {r.status === "pending" && (
+                            <>
+                              <button
+                                onClick={() =>
+                                  decide.mutate({ id: r.id, decision: "approved" })
+                                }
+                                className="rounded border px-2 py-0.5 hover:bg-muted"
+                              >
+                                اعتماد
+                              </button>
+                              <button
+                                onClick={() =>
+                                  decide.mutate({ id: r.id, decision: "rejected" })
+                                }
+                                className="rounded border border-destructive/40 px-2 py-0.5 text-destructive hover:bg-destructive/10"
+                              >
+                                رفض
+                              </button>
+                            </>
+                          )}
+                          {r.status === "approved" && (
+                            <button
+                              onClick={() =>
+                                decide.mutate({ id: r.id, decision: "completed" })
+                              }
+                              className="rounded border border-emerald-400 px-2 py-0.5 text-emerald-700 hover:bg-emerald-50"
+                            >
+                              تنفيذ
+                            </button>
+                          )}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <Dialog open={payOpen} onOpenChange={setPayOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تسجيل دفعة</DialogTitle>
+            <DialogDescription>
+              يتم توليد مفتاح idempotency تلقائياً لمنع الازدواج عند إعادة الإرسال.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <label className="block">
+              المبلغ
+              <input
+                type="number"
+                value={payAmount}
+                onChange={(e) => setPayAmount(e.target.value)}
+                className="mt-1 w-full rounded-md border p-2"
+              />
+            </label>
+            <label className="block">
+              الطريقة
+              <select
+                value={payMethod}
+                onChange={(e) => setPayMethod(e.target.value)}
+                className="mt-1 w-full rounded-md border p-2"
+              >
+                {["cash", "bank_transfer", "mada", "visa", "mastercard", "apple_pay", "stc_pay", "insurance", "other"].map(
+                  (m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ),
+                )}
+              </select>
+            </label>
+            <label className="block">
+              ملاحظة (اختياري)
+              <textarea
+                value={payNote}
+                onChange={(e) => setPayNote(e.target.value)}
+                className="mt-1 min-h-16 w-full rounded-md border p-2"
+              />
+            </label>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setPayOpen(false)}
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={() => record.mutate()}
+              disabled={record.isPending || !Number(payAmount)}
+              className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground disabled:opacity-50"
+            >
+              تأكيد
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={voidOpen} onOpenChange={setVoidOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>إلغاء الفاتورة</DialogTitle>
+            <DialogDescription>
+              لا يمكن إلغاء فاتورة مدفوعة كلياً أو جزئياً — استخدم الاسترداد بدلاً من ذلك.
+            </DialogDescription>
+          </DialogHeader>
+          <textarea
+            value={voidReason}
+            onChange={(e) => setVoidReason(e.target.value)}
+            placeholder="سبب الإلغاء…"
+            className="min-h-24 w-full rounded-md border p-2 text-sm"
+          />
+          <DialogFooter>
+            <button
+              onClick={() => setVoidOpen(false)}
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              تراجع
+            </button>
+            <button
+              onClick={() => voidM.mutate()}
+              disabled={voidM.isPending || voidReason.trim().length < 3}
+              className="rounded-md bg-destructive px-3 py-1.5 text-sm text-destructive-foreground disabled:opacity-50"
+            >
+              تأكيد الإلغاء
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!refundOpen} onOpenChange={(o) => !o && setRefundOpen(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>طلب استرداد</DialogTitle>
+            <DialogDescription>
+              الحد الأقصى: {refundOpen?.max.toLocaleString("ar-SA")} {invoice.currency ?? "SAR"}.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <label className="block">
+              المبلغ
+              <input
+                type="number"
+                value={refundAmount}
+                onChange={(e) => setRefundAmount(e.target.value)}
+                className="mt-1 w-full rounded-md border p-2"
+              />
+            </label>
+            <label className="block">
+              السبب
+              <textarea
+                value={refundReason}
+                onChange={(e) => setRefundReason(e.target.value)}
+                className="mt-1 min-h-16 w-full rounded-md border p-2"
+              />
+            </label>
+          </div>
+          <DialogFooter>
+            <button
+              onClick={() => setRefundOpen(null)}
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              تراجع
+            </button>
+            <button
+              onClick={() => request.mutate()}
+              disabled={
+                request.isPending ||
+                !Number(refundAmount) ||
+                Number(refundAmount) > (refundOpen?.max ?? 0) ||
+                refundReason.trim().length < 3
+              }
+              className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground disabled:opacity-50"
+            >
+              إنشاء الطلب
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

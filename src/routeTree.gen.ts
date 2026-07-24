@@ -280,6 +280,7 @@ import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/pu
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsSessionFromAuthRouteImport } from './routes/api/public/reservations/session-from-auth'
+import { Route as ApiPublicWebhooksPaymentRouteImport } from './routes/api/public/webhooks/payment'
 import { Route as AuthenticatedAdminCmsKindIdRouteImport } from './routes/_authenticated/admin.cms.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
@@ -1806,6 +1807,12 @@ const ApiPublicReservationsSessionFromAuthRoute =
     path: '/api/public/reservations/session-from-auth',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksPaymentRoute =
+  ApiPublicWebhooksPaymentRouteImport.update({
+    id: '/api/public/webhooks/payment',
+    path: '/api/public/webhooks/payment',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedAdminCmsKindIdRoute =
   AuthenticatedAdminCmsKindIdRouteImport.update({
     id: '/$id',
@@ -2112,6 +2119,7 @@ export interface FileRoutesByFullPath {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
   '/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
   '/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
@@ -2385,6 +2393,7 @@ export interface FileRoutesByTo {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
   '/owner/pages': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services': typeof AuthenticatedOwnerServicesIndexRoute
   '/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
@@ -2665,6 +2674,7 @@ export interface FileRoutesById {
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
+  '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
   '/_authenticated/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/_authenticated/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
   '/_authenticated/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
@@ -2945,6 +2955,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/api/public/webhooks/payment'
     | '/owner/pages/'
     | '/owner/services/'
     | '/admin/cms/$kind/$id'
@@ -3218,6 +3229,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/api/public/webhooks/payment'
     | '/owner/pages'
     | '/owner/services'
     | '/admin/cms/$kind/$id'
@@ -3497,6 +3509,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
     | '/api/public/reservations/session-from-auth'
+    | '/api/public/webhooks/payment'
     | '/_authenticated/owner/pages/'
     | '/_authenticated/owner/services/'
     | '/_authenticated/admin/cms/$kind/$id'
@@ -3598,6 +3611,7 @@ export interface RootRouteChildren {
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
   ApiPublicReservationsSessionFromAuthRoute: typeof ApiPublicReservationsSessionFromAuthRoute
+  ApiPublicWebhooksPaymentRoute: typeof ApiPublicWebhooksPaymentRoute
   ApiPublicReservationsOtpSendRoute: typeof ApiPublicReservationsOtpSendRoute
   ApiPublicReservationsOtpVerifyRoute: typeof ApiPublicReservationsOtpVerifyRoute
 }
@@ -5501,6 +5515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReservationsSessionFromAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhooks/payment': {
+      id: '/api/public/webhooks/payment'
+      path: '/api/public/webhooks/payment'
+      fullPath: '/api/public/webhooks/payment'
+      preLoaderRoute: typeof ApiPublicWebhooksPaymentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin/cms/$kind/$id': {
       id: '/_authenticated/admin/cms/$kind/$id'
       path: '/$id'
@@ -6400,6 +6421,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicReservationsRescheduleRoute: ApiPublicReservationsRescheduleRoute,
   ApiPublicReservationsSessionFromAuthRoute:
     ApiPublicReservationsSessionFromAuthRoute,
+  ApiPublicWebhooksPaymentRoute: ApiPublicWebhooksPaymentRoute,
   ApiPublicReservationsOtpSendRoute: ApiPublicReservationsOtpSendRoute,
   ApiPublicReservationsOtpVerifyRoute: ApiPublicReservationsOtpVerifyRoute,
 }
