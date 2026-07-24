@@ -279,3 +279,17 @@ function Kpi({
     </div>
   );
 }
+
+function ConfigBadge({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span
+      className={`px-1.5 py-0.5 rounded font-mono ${
+        ok
+          ? "bg-emerald-100 text-emerald-900"
+          : "bg-muted text-muted-foreground line-through"
+      }`}
+    >
+      {label}
+    </span>
+  );
+}
