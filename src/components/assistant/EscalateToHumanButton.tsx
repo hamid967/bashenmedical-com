@@ -12,7 +12,7 @@
  * interval and shows the current inbox status + last update time.
  */
 import { useState } from "react";
-import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink } from "lucide-react";
+import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink, ShieldAlert } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +30,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   escalateAiConversation,
   getAiEscalationStatus,
+  listAiSafetyIncidents,
   type EscalationStatus,
+  type SafetyIncident,
 } from "@/lib/ai/escalate.functions";
 import { visibilityAwareInterval } from "@/lib/polling";
 import { formatDateTimeInTZ } from "@/lib/datetime";
