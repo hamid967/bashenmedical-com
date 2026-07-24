@@ -258,6 +258,14 @@ function MyAppointmentsPage() {
       pending_payment: 0,
       checked_in: 0,
       in_progress: 0,
+      slot_held: 0,
+      pending_insurance: 0,
+      pending_confirmation: 0,
+      arrived: 0,
+      waiting: 0,
+      called: 0,
+      in_consultation: 0,
+      rescheduled: 0,
     };
     items.forEach((a) => {
       c[a.status as ApptStatus] = (c[a.status as ApptStatus] ?? 0) + 1;
