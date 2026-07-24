@@ -2676,6 +2676,137 @@ export type Database = {
           },
         ]
       }
+      inbox_events: {
+        Row: {
+          action: Database["public"]["Enums"]["inbox_action"]
+          actor_user_id: string | null
+          created_at: string
+          from_value: Json | null
+          id: string
+          item_id: string
+          note: string | null
+          to_value: Json | null
+        }
+        Insert: {
+          action: Database["public"]["Enums"]["inbox_action"]
+          actor_user_id?: string | null
+          created_at?: string
+          from_value?: Json | null
+          id?: string
+          item_id: string
+          note?: string | null
+          to_value?: Json | null
+        }
+        Update: {
+          action?: Database["public"]["Enums"]["inbox_action"]
+          actor_user_id?: string | null
+          created_at?: string
+          from_value?: Json | null
+          id?: string
+          item_id?: string
+          note?: string | null
+          to_value?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_events_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inbox_items: {
+        Row: {
+          archived_at: string | null
+          assigned_to: string | null
+          branch_id: string | null
+          channel: Database["public"]["Enums"]["inbox_channel"]
+          created_at: string
+          department: string | null
+          id: string
+          last_action_at: string | null
+          linked_appointment_id: string | null
+          metadata: Json
+          patient_id: string | null
+          patient_name: string | null
+          patient_phone: string | null
+          priority: Database["public"]["Enums"]["inbox_priority"]
+          request_number: string
+          required_action: string | null
+          service_label: string | null
+          source_id: string | null
+          source_table: string
+          status: Database["public"]["Enums"]["inbox_status"]
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          assigned_to?: string | null
+          branch_id?: string | null
+          channel?: Database["public"]["Enums"]["inbox_channel"]
+          created_at?: string
+          department?: string | null
+          id?: string
+          last_action_at?: string | null
+          linked_appointment_id?: string | null
+          metadata?: Json
+          patient_id?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
+          priority?: Database["public"]["Enums"]["inbox_priority"]
+          request_number?: string
+          required_action?: string | null
+          service_label?: string | null
+          source_id?: string | null
+          source_table: string
+          status?: Database["public"]["Enums"]["inbox_status"]
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          assigned_to?: string | null
+          branch_id?: string | null
+          channel?: Database["public"]["Enums"]["inbox_channel"]
+          created_at?: string
+          department?: string | null
+          id?: string
+          last_action_at?: string | null
+          linked_appointment_id?: string | null
+          metadata?: Json
+          patient_id?: string | null
+          patient_name?: string | null
+          patient_phone?: string | null
+          priority?: Database["public"]["Enums"]["inbox_priority"]
+          request_number?: string
+          required_action?: string | null
+          service_label?: string | null
+          source_id?: string | null
+          source_table?: string
+          status?: Database["public"]["Enums"]["inbox_status"]
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inbox_items_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inbox_items_linked_appointment_id_fkey"
+            columns: ["linked_appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_approvals: {
         Row: {
           appointment_id: string | null
@@ -6613,6 +6744,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      inbox_log_event: {
+        Args: {
+          _action: Database["public"]["Enums"]["inbox_action"]
+          _from?: Json
+          _item_id: string
+          _note?: string
+          _to?: Json
+        }
+        Returns: string
+      }
       is_global_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -7257,6 +7398,44 @@ export type Database = {
         | "suggested_service"
       delivery_type: "pickup" | "delivery"
       gender_type: "male" | "female" | "other"
+      inbox_action:
+        | "created"
+        | "assign"
+        | "transfer"
+        | "change_priority"
+        | "change_status"
+        | "add_note"
+        | "contact_patient"
+        | "request_documents"
+        | "link_appointment"
+        | "send_notification"
+        | "merge_duplicate"
+        | "archive"
+        | "reopen"
+      inbox_channel:
+        | "website"
+        | "booking"
+        | "patient_portal"
+        | "whatsapp"
+        | "contact_form"
+        | "reception"
+        | "phone"
+        | "campaign"
+        | "support"
+        | "other"
+      inbox_priority: "low" | "normal" | "high" | "urgent"
+      inbox_status:
+        | "new"
+        | "reviewed"
+        | "contacted"
+        | "awaiting_patient"
+        | "awaiting_approval"
+        | "appointment_created"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "duplicate"
+        | "archived"
       medical_history_category: "chronic" | "past" | "family" | "surgical_note"
       medical_history_status: "active" | "resolved" | "managed"
       medication_status: "active" | "paused" | "stopped" | "completed"
@@ -7508,6 +7687,47 @@ export const Constants = {
       ],
       delivery_type: ["pickup", "delivery"],
       gender_type: ["male", "female", "other"],
+      inbox_action: [
+        "created",
+        "assign",
+        "transfer",
+        "change_priority",
+        "change_status",
+        "add_note",
+        "contact_patient",
+        "request_documents",
+        "link_appointment",
+        "send_notification",
+        "merge_duplicate",
+        "archive",
+        "reopen",
+      ],
+      inbox_channel: [
+        "website",
+        "booking",
+        "patient_portal",
+        "whatsapp",
+        "contact_form",
+        "reception",
+        "phone",
+        "campaign",
+        "support",
+        "other",
+      ],
+      inbox_priority: ["low", "normal", "high", "urgent"],
+      inbox_status: [
+        "new",
+        "reviewed",
+        "contacted",
+        "awaiting_patient",
+        "awaiting_approval",
+        "appointment_created",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "duplicate",
+        "archived",
+      ],
       medical_history_category: ["chronic", "past", "family", "surgical_note"],
       medical_history_status: ["active", "resolved", "managed"],
       medication_status: ["active", "paused", "stopped", "completed"],
