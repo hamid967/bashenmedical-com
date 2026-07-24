@@ -19,7 +19,7 @@ import {
   X,
 } from "lucide-react";
 
-import { AdminShellV2 } from "@/components/admin/v2/AdminShellV2";
+
 import {
   listMyTodayAppointments,
   startVisit,
