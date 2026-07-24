@@ -108,6 +108,43 @@ export const listAiSafetyIncidents = createServerFn({ method: "GET" })
     }));
   });
 
+export type IncidentEvent = {
+  id: string;
+  itemId: string;
+  eventType: string;
+  actorRole: string | null;
+  actorUserId: string | null;
+  payload: string | null;
+  createdAt: string;
+};
+
+const EventsInput = z.object({ incidentId: z.string().uuid() });
+
+export const listAiIncidentEvents = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw) => EventsInput.parse(raw))
+  .handler(async ({ data, context }): Promise<IncidentEvent[]> => {
+    const { data: rows, error } = await context.supabase.rpc(
+      "list_ai_incident_events",
+      { _incident_id: data.incidentId } as never,
+    );
+    if (error) {
+      const msg = error.message || "";
+      if (/not authorized|not authenticated/i.test(msg)) throw new Error("forbidden");
+      if (/not found/i.test(msg)) throw new Error("incident_not_found");
+      throw new Error("list_failed");
+    }
+    return (rows ?? []).map((r: any) => ({
+      id: r.id,
+      itemId: r.item_id,
+      eventType: r.event_type,
+      actorRole: r.actor_role ?? null,
+      actorUserId: r.actor_user_id ?? null,
+      payload: r.payload ? JSON.stringify(r.payload) : null,
+      createdAt: r.created_at,
+    }));
+  });
+
 /**
  * Status of the most recent Human-escalation ticket linked to an AI
  * conversation. Returns `null` when no ticket exists. Caller must own the

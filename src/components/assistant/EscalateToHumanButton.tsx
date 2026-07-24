@@ -31,8 +31,10 @@ import {
   escalateAiConversation,
   getAiEscalationStatus,
   listAiSafetyIncidents,
+  listAiIncidentEvents,
   type EscalationStatus,
   type SafetyIncident,
+  type IncidentEvent,
 } from "@/lib/ai/escalate.functions";
 import { visibilityAwareInterval } from "@/lib/polling";
 import { formatDateTimeInTZ } from "@/lib/datetime";
@@ -544,6 +546,7 @@ function IncidentsList({
   const [outcome, setOutcome] = useState<OutcomeFilter>("all");
   const [order, setOrder] = useState<SortOrder>("desc");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [selected, setSelected] = useState<SafetyIncident | null>(null);
 
   const filtered = useMemo(() => {
     const arr = incidents.filter((inc) => {
@@ -692,7 +695,17 @@ function IncidentsList({
               return (
                 <li
                   key={inc.id}
-                  className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5"
+                  className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5 cursor-pointer hover:bg-accent/40 focus:outline-none focus:ring-2 focus:ring-ring"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={isAr ? "عرض تفاصيل الحادثة" : "View incident details"}
+                  onClick={() => setSelected(inc)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelected(inc);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1 font-medium">
@@ -766,6 +779,211 @@ function IncidentsList({
           )}
         </>
       )}
+
+      <IncidentDetailsDialog
+        incident={selected}
+        isAr={isAr}
+        onClose={() => setSelected(null)}
+      />
     </div>
+  );
+}
+
+function IncidentDetailsDialog({
+  incident,
+  isAr,
+  onClose,
+}: {
+  incident: SafetyIncident | null;
+  isAr: boolean;
+  onClose: () => void;
+}) {
+  const t = (ar: string, en: string) => (isAr ? ar : en);
+  const listEvents = useServerFn(listAiIncidentEvents);
+  const open = !!incident;
+  const eventsQuery = useQuery<IncidentEvent[]>({
+    queryKey: ["ai-incident-events", incident?.id],
+    queryFn: () => listEvents({ data: { incidentId: incident!.id } }),
+    enabled: open,
+    staleTime: 15_000,
+    retry: 1,
+  });
+
+  const reason = incident ? parseReasonFromDetails(incident.details) : null;
+  let parsedDetails: unknown = null;
+  if (incident?.details) {
+    try {
+      parsedDetails = JSON.parse(incident.details);
+    } catch {
+      parsedDetails = incident.details;
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent className="max-w-lg">
+        <DialogHeader>
+          <DialogTitle className="inline-flex items-center gap-2">
+            <ShieldAlert className="h-4 w-4" />
+            {incident ? kindLabel(incident.kind, isAr) : t("تفاصيل الحادثة", "Incident details")}
+          </DialogTitle>
+          <DialogDescription>
+            {t(
+              "الحقول الكاملة وسجل خطوات المعالجة لهذه الحادثة.",
+              "Full fields and processing steps for this incident.",
+            )}
+          </DialogDescription>
+        </DialogHeader>
+
+        {incident && (
+          <div className="space-y-3 text-xs">
+            <dl className="grid grid-cols-3 gap-x-3 gap-y-1.5">
+              <dt className="text-muted-foreground">{t("النوع", "Kind")}</dt>
+              <dd className="col-span-2">{kindLabel(incident.kind, isAr)}</dd>
+
+              <dt className="text-muted-foreground">{t("الشدة", "Severity")}</dt>
+              <dd className="col-span-2">
+                <span
+                  className={
+                    "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium " +
+                    severityClass(incident.severity)
+                  }
+                >
+                  {severityLabel(incident.severity, isAr)}
+                </span>
+              </dd>
+
+              <dt className="text-muted-foreground">{t("التاريخ", "Created")}</dt>
+              <dd className="col-span-2">
+                {formatDateTimeInTZ(incident.createdAt, isAr ? "ar" : "en", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </dd>
+
+              {incident.requestNumber && (
+                <>
+                  <dt className="text-muted-foreground">{t("رقم التذكرة", "Ticket #")}</dt>
+                  <dd className="col-span-2 font-mono">{incident.requestNumber}</dd>
+                </>
+              )}
+
+              {incident.inboxStatus && (
+                <>
+                  <dt className="text-muted-foreground">{t("نتيجة المعالجة", "Outcome")}</dt>
+                  <dd className="col-span-2">{incident.inboxStatus}</dd>
+                </>
+              )}
+
+              {incident.actionTaken && (
+                <>
+                  <dt className="text-muted-foreground">{t("الإجراء المتخذ", "Action taken")}</dt>
+                  <dd className="col-span-2">{incident.actionTaken}</dd>
+                </>
+              )}
+
+              <dt className="text-muted-foreground">{t("معرّف الحادثة", "Incident ID")}</dt>
+              <dd className="col-span-2 font-mono break-all">{incident.id}</dd>
+            </dl>
+
+            {reason && (
+              <div>
+                <div className="text-muted-foreground mb-1">{t("السبب", "Reason")}</div>
+                <div className="rounded-md border bg-muted/40 p-2 whitespace-pre-wrap">
+                  {reason}
+                </div>
+              </div>
+            )}
+
+            {parsedDetails != null && (
+              <details className="rounded-md border bg-muted/30 p-2">
+                <summary className="cursor-pointer text-muted-foreground">
+                  {t("بيانات إضافية", "Raw details")}
+                </summary>
+                <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap break-all text-[10px]">
+                  {typeof parsedDetails === "string"
+                    ? parsedDetails
+                    : JSON.stringify(parsedDetails, null, 2)}
+                </pre>
+              </details>
+            )}
+
+            <div>
+              <div className="text-muted-foreground mb-1">
+                {t("خطوات المعالجة", "Processing steps")}
+              </div>
+              {eventsQuery.isLoading ? (
+                <div className="flex items-center gap-2 py-3 text-muted-foreground justify-center">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  {t("جارٍ التحميل...", "Loading...")}
+                </div>
+              ) : eventsQuery.isError ? (
+                <div className="flex items-center gap-2 py-3 text-destructive justify-center">
+                  <XCircle className="h-3.5 w-3.5" />
+                  {t("تعذّر تحميل خطوات المعالجة.", "Failed to load processing steps.")}
+                </div>
+              ) : !incident.inboxItemId ? (
+                <div className="rounded-md border border-dashed p-3 text-center text-muted-foreground">
+                  {t("لا توجد تذكرة مرتبطة بهذه الحادثة.", "No ticket linked to this incident.")}
+                </div>
+              ) : (eventsQuery.data ?? []).length === 0 ? (
+                <div className="rounded-md border border-dashed p-3 text-center text-muted-foreground">
+                  {t("لا توجد خطوات معالجة بعد.", "No processing steps yet.")}
+                </div>
+              ) : (
+                <ol className="relative max-h-56 space-y-2 overflow-y-auto border-s ps-3">
+                  {(eventsQuery.data ?? []).map((ev) => {
+                    let payloadObj: Record<string, unknown> | null = null;
+                    if (ev.payload) {
+                      try {
+                        const p = JSON.parse(ev.payload);
+                        if (p && typeof p === "object") payloadObj = p as Record<string, unknown>;
+                      } catch {
+                        /* ignore */
+                      }
+                    }
+                    return (
+                      <li key={ev.id} className="relative">
+                        <span className="absolute -start-[7px] top-1.5 h-2 w-2 rounded-full bg-primary" />
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-medium">{ev.eventType}</span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {formatDateTimeInTZ(ev.createdAt, isAr ? "ar" : "en", {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              day: "2-digit",
+                              month: "short",
+                            })}
+                          </span>
+                        </div>
+                        {ev.actorRole && (
+                          <div className="text-[10px] text-muted-foreground">
+                            {t("بواسطة", "By")}: {ev.actorRole}
+                          </div>
+                        )}
+                        {payloadObj && Object.keys(payloadObj).length > 0 && (
+                          <pre className="mt-1 max-h-28 overflow-auto whitespace-pre-wrap break-all rounded bg-muted/40 p-1.5 text-[10px]">
+                            {JSON.stringify(payloadObj, null, 2)}
+                          </pre>
+                        )}
+                      </li>
+                    );
+                  })}
+                </ol>
+              )}
+            </div>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button type="button" onClick={onClose}>
+            {t("إغلاق", "Close")}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
