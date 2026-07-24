@@ -6,6 +6,21 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
+/**
+ * Categories the patient may mute from the Preferences Center. Kept in sync
+ * with MUTABLE_CATEGORY_PREFIXES in src/lib/notifications/apply-preferences.server.ts.
+ */
+export const MUTABLE_CATEGORIES = [
+  { key: "medication_reminder", label_ar: "تذكيرات الأدوية" },
+  { key: "reminder_", label_ar: "تذكيرات المواعيد" },
+  { key: "results.", label_ar: "نتائج المختبر والأشعة" },
+  { key: "service_inquiry.", label_ar: "متابعة الاستفسارات" },
+  { key: "marketing.", label_ar: "العروض والتسويق" },
+  { key: "campaign.", label_ar: "الحملات الصحية" },
+] as const;
+
+export type MutableCategoryKey = (typeof MUTABLE_CATEGORIES)[number]["key"];
+
 export type ReminderPreferences = {
   channel_in_app: boolean;
   channel_email: boolean;
@@ -18,6 +33,7 @@ export type ReminderPreferences = {
   quiet_hours_enabled: boolean;
   wake_hour: number;
   sleep_hour: number;
+  muted_kinds: string[];
 };
 
 const DEFAULTS: ReminderPreferences = {
@@ -32,6 +48,7 @@ const DEFAULTS: ReminderPreferences = {
   quiet_hours_enabled: true,
   wake_hour: 7,
   sleep_hour: 23,
+  muted_kinds: [],
 };
 
 export const getMyReminderPreferences = createServerFn({ method: "GET" })
