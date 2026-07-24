@@ -130,9 +130,22 @@ function CmsEditor() {
               اعتماد
             </Button>
             <Button size="sm" variant="outline"
-              onClick={() => runAction(() => reviewFn({ data: { entry_id: id, decision: "rejected" } }), "تم الرفض")}
+              onClick={() => {
+                const c = window.prompt("سبب الرفض (مطلوب):", "");
+                if (!c || c.trim().length < 3) { toast.error("يجب إدخال سبب الرفض"); return; }
+                runAction(() => reviewFn({ data: { entry_id: id, decision: "rejected", comment: c.trim() } }), "تم الرفض");
+              }}
               disabled={status !== "in_review"}>
               رفض
+            </Button>
+            <Button size="sm" variant="outline"
+              onClick={() => {
+                const c = window.prompt("طلب تعديلات — الملاحظات (مطلوب):", "");
+                if (!c || c.trim().length < 3) { toast.error("يجب إدخال ملاحظات التعديل"); return; }
+                runAction(() => reviewFn({ data: { entry_id: id, decision: "changes_requested", comment: c.trim() } }), "أُعيد إلى المسودة");
+              }}
+              disabled={status !== "in_review"}>
+              طلب تعديلات
             </Button>
             <Button size="sm"
               onClick={() => runAction(() => publishFn({ data: { entry_id: id } }), "تم النشر")}
