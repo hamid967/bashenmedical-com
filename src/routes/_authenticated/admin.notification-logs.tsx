@@ -461,7 +461,15 @@ function FiltersBar({
 
 /* -------------------------------- table --------------------------------- */
 
-function LogsTable({ rows, loading }: { rows: NotificationDeliveryLog[]; loading: boolean }) {
+function LogsTable({
+  rows,
+  loading,
+  onOpen,
+}: {
+  rows: NotificationDeliveryLog[];
+  loading: boolean;
+  onOpen: (id: string) => void;
+}) {
   if (loading && rows.length === 0) {
     return (
       <div className="rounded-2xl border bg-white p-8 grid place-items-center text-muted-foreground">
@@ -493,12 +501,26 @@ function LogsTable({ rows, loading }: { rows: NotificationDeliveryLog[]; loading
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t hover:bg-muted/30">
+              <tr
+                key={r.id}
+                className="border-t hover:bg-muted/30 cursor-pointer"
+                onClick={() => onOpen(r.id)}
+              >
                 <td className="px-3 py-2 whitespace-nowrap text-xs text-muted-foreground">
                   {new Date(r.created_at).toLocaleString("ar")}
                 </td>
                 <td className="px-3 py-2">
-                  <ChannelBadge channel={r.channel} />
+                  <div className="flex items-center gap-1">
+                    <ChannelBadge channel={r.channel} />
+                    {r.is_test && (
+                      <span
+                        className="inline-flex items-center rounded-full bg-amber-100 text-amber-800 px-1.5 py-0.5 text-[10px] font-semibold"
+                        title="إرسال اختباري"
+                      >
+                        <FlaskConical className="h-3 w-3" />
+                      </span>
+                    )}
+                  </div>
                 </td>
                 <td className="px-3 py-2 text-xs">{r.template ?? "—"}</td>
                 <td
