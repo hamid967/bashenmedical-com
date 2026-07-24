@@ -13,6 +13,9 @@ import {
   toggleContentDisabled,
   getContentStats,
 } from "@/lib/admin/content.functions";
+import { listPublicBranches } from "@/lib/branches.functions";
+import { listSpecialtiesMini } from "@/lib/doctors.functions";
+import { Checkbox } from "@/components/ui-v3";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
 import { Button } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
