@@ -310,7 +310,7 @@ export const transferInboxItem = createServerFn({ method: "POST" })
     if (!Object.keys(patch).length) throw new Error("لا يوجد تحويل صالح.");
     const { error } = await context.supabase
       .from("inbox_items")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     await logEvent(
