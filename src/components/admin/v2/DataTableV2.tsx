@@ -626,7 +626,7 @@ export function DataTableV2<T>({
             <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
-      </div>
+      </nav>
     </div>
   );
 }
