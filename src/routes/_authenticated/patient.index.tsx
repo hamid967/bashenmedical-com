@@ -25,6 +25,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
+import { ContentFeed } from "@/components/patient/ContentFeed";
 import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
