@@ -14,9 +14,17 @@ const listSchema = z.object({
   category: z.string().trim().max(60).optional(),
 });
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | { [k: string]: JsonValue }
+  | JsonValue[];
+
 export type SystemSettingRow = {
   key: string;
-  value: unknown;
+  value: JsonValue;
   description: string | null;
   updated_at: string;
   updated_by: string | null;
