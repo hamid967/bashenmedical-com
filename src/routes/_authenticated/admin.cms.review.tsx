@@ -5,6 +5,7 @@ import { listCmsReviewQueue } from "@/lib/admin/cms/cms.functions";
 import { CMS_KINDS } from "@/lib/admin/cms/schemas";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useCmsTransitionNotifications } from "@/lib/admin/cms/useCmsTransitionNotifications";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/review")({
   head: () => ({ meta: [{ title: "طابور مراجعة المحتوى" }] }),
