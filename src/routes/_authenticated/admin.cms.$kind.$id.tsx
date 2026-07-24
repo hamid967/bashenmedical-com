@@ -351,7 +351,7 @@ function TextInput({
 }
 
 function HistoryPanel({
-  versions, currentId, canPublish, onRollback, fetchAudit,
+  versions, currentId, canPublish, onRollback, fetchAudit, fetchVersion,
 }: {
   entryId: string;
   versions: any[];
@@ -359,8 +359,25 @@ function HistoryPanel({
   canPublish: boolean;
   onRollback: (versionId: string) => void;
   fetchAudit: () => Promise<any[]>;
+  fetchVersion: (versionId: string) => Promise<any>;
 }) {
   const [audit, setAudit] = useState<any[] | null>(null);
+  const [diffLeft, setDiffLeft] = useState<any | null>(null);
+  const [diffRight, setDiffRight] = useState<any | null>(null);
+  const [diffLoading, setDiffLoading] = useState(false);
+
+  const loadDiff = async (leftId: string, rightId: string) => {
+    setDiffLoading(true);
+    try {
+      const [l, r] = await Promise.all([fetchVersion(leftId), fetchVersion(rightId)]);
+      setDiffLeft(l); setDiffRight(r);
+    } catch (e: any) {
+      toast.error(e?.message ?? "فشل تحميل المقارنة");
+    } finally {
+      setDiffLoading(false);
+    }
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <div>
@@ -374,15 +391,38 @@ function HistoryPanel({
                 {v.note && <span className="text-muted-foreground ms-2">— {v.note}</span>}
                 {v.id === currentId && <Badge className="ms-2" variant="secondary">الحالية</Badge>}
               </span>
-              {canPublish && v.id !== currentId && (
-                <Button size="sm" variant="outline" onClick={() => onRollback(v.id)}>
-                  استرجاع
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {currentId && v.id !== currentId && (
+                  <Button size="sm" variant="ghost" onClick={() => loadDiff(v.id, currentId)}>
+                    قارن بالحالية
+                  </Button>
+                )}
+                {canPublish && v.id !== currentId && (
+                  <Button size="sm" variant="outline" onClick={() => onRollback(v.id)}>
+                    استرجاع
+                  </Button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
       </div>
+
+      {(diffLeft && diffRight) && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-bold">
+              مقارنة: v{diffLeft.version_no} ↔ v{diffRight.version_no}
+            </h3>
+            <Button size="sm" variant="ghost" onClick={() => { setDiffLeft(null); setDiffRight(null); }}>
+              إغلاق
+            </Button>
+          </div>
+          <DiffTable left={diffLeft} right={diffRight} />
+        </div>
+      )}
+      {diffLoading && <div className="text-xs text-muted-foreground">جاري التحميل…</div>}
+
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold">سجل التدقيق</h3>
