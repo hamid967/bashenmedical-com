@@ -37,7 +37,7 @@ export const listAdminReports = createServerFn({ method: "GET" })
       cols = `id, title, modality, status, report_date, released_at, created_at, ${patientJoin}`;
       dateCol = "report_date";
     }
-    let q = context.supabase
+    let q: any = (context.supabase as any)
       .from(table)
       .select(cols, { count: "exact" })
       .order(dateCol, { ascending: false, nullsFirst: false })
