@@ -218,6 +218,7 @@ import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminArticlesIdRouteImport } from './routes/_authenticated/admin.articles.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
 import { Route as AuthenticatedAdminBranchesIdRouteImport } from './routes/_authenticated/admin.branches.$id'
+import { Route as AuthenticatedAdminFilesIdRouteImport } from './routes/_authenticated/admin.files.$id'
 import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './routes/_authenticated/admin.insurance.$approvalId'
 import { Route as AuthenticatedAdminIntegrationsKeyRouteImport } from './routes/_authenticated/admin.integrations.$key'
 import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_authenticated/admin.patients.$id'
@@ -1425,6 +1426,12 @@ const AuthenticatedAdminBranchesIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminBranchesRoute,
   } as any)
+const AuthenticatedAdminFilesIdRoute =
+  AuthenticatedAdminFilesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminFilesRoute,
+  } as any)
 const AuthenticatedAdminInsuranceApprovalIdRoute =
   AuthenticatedAdminInsuranceApprovalIdRouteImport.update({
     id: '/$approvalId',
@@ -1824,7 +1831,7 @@ export interface FileRoutesByFullPath {
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
-  '/admin/files': typeof AuthenticatedAdminFilesRoute
+  '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
@@ -1909,6 +1916,7 @@ export interface FileRoutesByFullPath {
   '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
+  '/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2076,7 +2084,7 @@ export interface FileRoutesByTo {
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
-  '/admin/files': typeof AuthenticatedAdminFilesRoute
+  '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
@@ -2161,6 +2169,7 @@ export interface FileRoutesByTo {
   '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
+  '/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2335,7 +2344,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
-  '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRoute
+  '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/_authenticated/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
@@ -2420,6 +2429,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/_authenticated/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
+  '/_authenticated/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/_authenticated/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
   '/_authenticated/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/_authenticated/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
@@ -2679,6 +2689,7 @@ export interface FileRouteTypes {
     | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/branches/$id'
+    | '/admin/files/$id'
     | '/admin/insurance/$approvalId'
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
@@ -2931,6 +2942,7 @@ export interface FileRouteTypes {
     | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/branches/$id'
+    | '/admin/files/$id'
     | '/admin/insurance/$approvalId'
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
@@ -3189,6 +3201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/articles/$id'
     | '/_authenticated/admin/billing/$invoiceId'
     | '/_authenticated/admin/branches/$id'
+    | '/_authenticated/admin/files/$id'
     | '/_authenticated/admin/insurance/$approvalId'
     | '/_authenticated/admin/integrations/$key'
     | '/_authenticated/admin/patients/$id'
@@ -4794,6 +4807,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBranchesIdRouteImport
       parentRoute: typeof AuthenticatedAdminBranchesRoute
     }
+    '/_authenticated/admin/files/$id': {
+      id: '/_authenticated/admin/files/$id'
+      path: '/$id'
+      fullPath: '/admin/files/$id'
+      preLoaderRoute: typeof AuthenticatedAdminFilesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminFilesRoute
+    }
     '/_authenticated/admin/insurance/$approvalId': {
       id: '/_authenticated/admin/insurance/$approvalId'
       path: '/$approvalId'
@@ -5184,6 +5204,20 @@ const AuthenticatedAdminBranchesRouteWithChildren =
     AuthenticatedAdminBranchesRouteChildren,
   )
 
+interface AuthenticatedAdminFilesRouteChildren {
+  AuthenticatedAdminFilesIdRoute: typeof AuthenticatedAdminFilesIdRoute
+}
+
+const AuthenticatedAdminFilesRouteChildren: AuthenticatedAdminFilesRouteChildren =
+  {
+    AuthenticatedAdminFilesIdRoute: AuthenticatedAdminFilesIdRoute,
+  }
+
+const AuthenticatedAdminFilesRouteWithChildren =
+  AuthenticatedAdminFilesRoute._addFileChildren(
+    AuthenticatedAdminFilesRouteChildren,
+  )
+
 interface AuthenticatedAdminInsuranceRouteChildren {
   AuthenticatedAdminInsuranceApprovalIdRoute: typeof AuthenticatedAdminInsuranceApprovalIdRoute
 }
@@ -5315,7 +5349,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminContentAnalyticsRoute: typeof AuthenticatedAdminContentAnalyticsRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
-  AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRoute
+  AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRouteWithChildren
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
   AuthenticatedAdminInsuranceRoute: typeof AuthenticatedAdminInsuranceRouteWithChildren
   AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRouteWithChildren
@@ -5365,7 +5399,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminContentAnalyticsRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
-  AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRoute,
+  AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRouteWithChildren,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
   AuthenticatedAdminInsuranceRoute:
     AuthenticatedAdminInsuranceRouteWithChildren,
