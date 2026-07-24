@@ -94,6 +94,9 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    import("@/lib/observability/error-reporter")
+      .then((m) => m.reportBrowserError(error, { mechanism: "react_error_boundary" }))
+      .catch(() => void 0);
   }, [error]);
   return (
     <div className="flex min-h-dvh items-center justify-center bg-background px-4">
@@ -255,6 +258,10 @@ function RootComponent() {
     // Client-only web-vitals sampler (LCP/CLS/INP/FCP/TTFB).
     // Fails silently if the collector endpoint isn't live yet — safe to ship.
     import("@/lib/observability/web-vitals").then((m) => m.startWebVitals()).catch(() => void 0);
+    // E1 Observability — install browser error reporter (window.onerror + unhandledrejection).
+    import("@/lib/observability/error-reporter")
+      .then((m) => m.installBrowserErrorReporter())
+      .catch(() => void 0);
   }, []);
   return (
     <QueryClientProvider client={queryClient}>

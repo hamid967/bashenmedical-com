@@ -5,21 +5,23 @@
  * links so existing bookmarks keep working.
  */
 import { createFileRoute, useSearch } from "@tanstack/react-router";
-import { Activity, Gauge, LineChart, Sparkles } from "lucide-react";
+import { Activity, AlertOctagon, Gauge, LineChart, Sparkles, Target } from "lucide-react";
 import { z } from "zod";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
+import { SloPanel } from "@/components/admin/observability/SloPanel";
+import { ErrorsPanel } from "@/components/admin/observability/ErrorsPanel";
 
 import { AiStreamingMonitor } from "./admin.ai-streaming";
 import { RealtimeMonitorPage } from "./admin.realtime-monitor";
 import { VisualAnalyticsPage } from "./admin.visual-analytics";
 import { WebVitalsPage } from "./admin.web-vitals";
 
-const TABS = ["web-vitals", "ai-streaming", "realtime", "visual"] as const;
+const TABS = ["slo", "errors", "web-vitals", "ai-streaming", "realtime", "visual"] as const;
 type ObservabilityTab = (typeof TABS)[number];
 
 const searchSchema = z.object({
-  tab: z.enum(TABS).default("web-vitals"),
+  tab: z.enum(TABS).default("slo"),
 });
 
 export const Route = createFileRoute("/_authenticated/admin/observability")({
@@ -56,7 +58,15 @@ function ObservabilityHub() {
       </header>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as ObservabilityTab)}>
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6">
+          <TabsTrigger value="slo" className="gap-2">
+            <Target className="h-4 w-4" aria-hidden />
+            <span>SLO / SLI</span>
+          </TabsTrigger>
+          <TabsTrigger value="errors" className="gap-2">
+            <AlertOctagon className="h-4 w-4" aria-hidden />
+            <span>Errors</span>
+          </TabsTrigger>
           <TabsTrigger value="web-vitals" className="gap-2">
             <Gauge className="h-4 w-4" aria-hidden />
             <span>Web Vitals</span>
@@ -75,6 +85,12 @@ function ObservabilityHub() {
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="slo" className="mt-4">
+          {tab === "slo" && <SloPanel />}
+        </TabsContent>
+        <TabsContent value="errors" className="mt-4">
+          {tab === "errors" && <ErrorsPanel />}
+        </TabsContent>
         <TabsContent value="web-vitals" className="mt-4">
           {tab === "web-vitals" && <WebVitalsPage />}
         </TabsContent>

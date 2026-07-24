@@ -1274,6 +1274,54 @@ export type Database = {
         }
         Relationships: []
       }
+      client_error_events: {
+        Row: {
+          correlation_id: string | null
+          extra: Json | null
+          fingerprint: string | null
+          id: string
+          mechanism: string
+          message: string
+          release: string | null
+          route: string
+          severity: string
+          stack: string | null
+          ts: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          correlation_id?: string | null
+          extra?: Json | null
+          fingerprint?: string | null
+          id?: string
+          mechanism: string
+          message: string
+          release?: string | null
+          route: string
+          severity?: string
+          stack?: string | null
+          ts?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          correlation_id?: string | null
+          extra?: Json | null
+          fingerprint?: string | null
+          id?: string
+          mechanism?: string
+          message?: string
+          release?: string | null
+          route?: string
+          severity?: string
+          stack?: string | null
+          ts?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       clinic_settings: {
         Row: {
           address_ar: string
