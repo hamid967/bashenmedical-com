@@ -88,3 +88,65 @@ export const listInsuranceProvidersForFilter = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data ?? [];
   });
+
+const decisionSchema = z.object({
+  id: z.string().uuid(),
+  decision: z.enum(["approved", "rejected"]),
+  note: z.string().trim().max(2000).optional(),
+  approved_amount: z.number().nonnegative().optional(),
+  patient_share: z.number().nonnegative().optional(),
+});
+
+export const decideInsuranceApproval = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => decisionSchema.parse(d ?? {}))
+  .handler(async ({ data, context }) => {
+    await assertHasRole(context.supabase, context.userId, "admin");
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    const { data: existing, error: readErr } = await supabaseAdmin
+      .from("insurance_approvals")
+      .select("id, notes")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!existing) throw new Error("طلب التأمين غير موجود");
+
+    const stamp = new Date().toISOString();
+    const decisionLabel = data.decision === "approved" ? "اعتماد" : "رفض";
+    const noteLine = `[${stamp}] ${decisionLabel} بواسطة ${context.userId}${
+      data.note ? ` — ${data.note}` : ""
+    }`;
+    const mergedNotes = existing.notes ? `${existing.notes}\n${noteLine}` : noteLine;
+
+    const patch: Record<string, unknown> = {
+      status: data.decision,
+      reviewed_at: stamp,
+      notes: mergedNotes,
+    };
+    if (typeof data.approved_amount === "number") patch.approved_amount = data.approved_amount;
+    if (typeof data.patient_share === "number") patch.patient_share = data.patient_share;
+
+    const { data: updated, error: updErr } = await supabaseAdmin
+      .from("insurance_approvals")
+      .update(patch)
+      .eq("id", data.id)
+      .select("id, status, reviewed_at, notes, approved_amount, patient_share")
+      .maybeSingle();
+    if (updErr) throw new Error(updErr.message);
+
+    await supabaseAdmin.from("audit_logs").insert({
+      user_id: context.userId,
+      action: `insurance_approval.${data.decision}`,
+      resource_type: "insurance_approvals",
+      resource_id: data.id,
+      metadata: {
+        note: data.note ?? null,
+        approved_amount: data.approved_amount ?? null,
+        patient_share: data.patient_share ?? null,
+      },
+    });
+
+    return updated;
+  });
+
