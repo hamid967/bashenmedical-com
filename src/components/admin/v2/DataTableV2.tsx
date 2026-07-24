@@ -211,6 +211,46 @@ export function DataTableV2<T>({
     }
   };
 
+  /* Hydrate persisted sort + perPage on first mount. */
+  useEffect(() => {
+    if (!storageKey || hydratedRef.current) return;
+    hydratedRef.current = true;
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { sort?: SortState; perPage?: number };
+      if (saved && "sort" in saved && onSortChange) {
+        onSortChange(saved.sort ?? null);
+      }
+      if (saved && typeof saved.perPage === "number" && perPageOptions.includes(saved.perPage)) {
+        if (onPaginationChange && pagination) {
+          onPaginationChange({ ...pagination, page: 1, perPage: saved.perPage });
+        } else {
+          setLocalPerPage(saved.perPage);
+        }
+      }
+    } catch {
+      /* ignore corrupt storage */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
+
+  /* Persist sort + perPage whenever they change (after hydration). */
+  useEffect(() => {
+    if (!storageKey || !hydratedRef.current) return;
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({ sort: sort ?? null, perPage: effectivePagination.perPage }),
+      );
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [storageKey, sort, effectivePagination.perPage]);
+
+
   /* When server-side isn't used, slice locally. */
   const displayedRows = useMemo(() => {
     if (pagination) return data; // server already sliced
