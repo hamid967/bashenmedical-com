@@ -369,6 +369,35 @@ export function DataTableV2<T>({
               onChange={onFiltersChange}
             />
           )}
+          {storageKey && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  try {
+                    window.localStorage.removeItem(storageKey);
+                  } catch {
+                    /* ignore */
+                  }
+                }
+                if (onSortChange) onSortChange(null);
+                const defaultPerPage = perPageOptions[0] ?? 10;
+                if (onPaginationChange && pagination) {
+                  onPaginationChange({ ...pagination, page: 1, perPage: defaultPerPage });
+                } else {
+                  setLocalPage(1);
+                  setLocalPerPage(defaultPerPage);
+                }
+              }}
+              className="h-9"
+              aria-label="إعادة ضبط تفضيلات الجدول"
+              title="إعادة ضبط الترتيب وحجم الصفحة"
+            >
+              <RotateCcw className="ml-2 h-4 w-4" aria-hidden="true" />
+              إعادة الضبط
+            </Button>
+          )}
           {onRetry && (
             <Button
               variant="outline"
