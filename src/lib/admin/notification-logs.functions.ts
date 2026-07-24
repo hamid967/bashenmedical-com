@@ -49,6 +49,7 @@ const ListInput = z.object({
   channel: z.enum(CHANNELS).nullish(),
   status: z.enum(STATUSES).nullish(),
   q: z.string().trim().max(120).nullish(),
+  testOnly: z.boolean().nullish(),
   windowHours: z
     .number()
     .int()
@@ -68,7 +69,7 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
     let q = context.supabase
       .from("notification_delivery_logs")
       .select(
-        "id, user_id, notification_id, channel, provider, template, recipient, subject, status, error_message, attempt, created_at",
+        "id, user_id, notification_id, channel, provider, template, recipient, subject, status, error_message, attempt, created_at, metadata",
       )
       .gte("created_at", since)
       .order("created_at", { ascending: false })
@@ -76,6 +77,7 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
 
     if (data.channel) q = q.eq("channel", data.channel);
     if (data.status) q = q.eq("status", data.status);
+    if (data.testOnly) q = q.contains("metadata", { test: true });
     if (data.q)
       q = q.or(
         `recipient.ilike.%${data.q}%,subject.ilike.%${data.q}%,template.ilike.%${data.q}%,error_message.ilike.%${data.q}%`,
@@ -83,7 +85,54 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as NotificationDeliveryLog[];
+    return (rows ?? []).map((r) => {
+      const meta = (r as { metadata?: Record<string, unknown> | null }).metadata;
+      const is_test = !!(meta && (meta as Record<string, unknown>).test === true);
+      return { ...(r as object), is_test } as NotificationDeliveryLog;
+    });
+  });
+
+const DetailInput = z.object({ id: z.string().uuid() });
+
+export const getNotificationDeliveryLogDetail = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => DetailInput.parse(d))
+  .handler(async ({ data, context }): Promise<NotificationDeliveryLogDetail> => {
+    await assertAdmin(context);
+    const { data: log, error } = await context.supabase
+      .from("notification_delivery_logs")
+      .select(
+        "id, user_id, notification_id, channel, provider, template, recipient, subject, status, error_message, attempt, created_at, updated_at, metadata",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!log) throw new Error("السجل غير موجود.");
+
+    let notification: NotificationDeliveryLogDetail["notification"] = null;
+    if (log.notification_id) {
+      const { data: n } = await context.supabase
+        .from("notifications")
+        .select(
+          "id, kind, title, body, send_status, sent_at, audience, created_at, metadata",
+        )
+        .eq("id", log.notification_id)
+        .maybeSingle();
+      if (n) {
+        notification = {
+          ...n,
+          metadata: (n.metadata as Record<string, unknown> | null) ?? null,
+        };
+      }
+    }
+
+    const meta = (log.metadata as Record<string, unknown> | null) ?? null;
+    return {
+      ...(log as object),
+      metadata: meta,
+      is_test: !!(meta && meta.test === true),
+      notification,
+    } as NotificationDeliveryLogDetail;
   });
 
 const StatsInput = z.object({
