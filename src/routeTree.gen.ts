@@ -149,6 +149,7 @@ import { Route as AuthenticatedAdminSchedulesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServicesHealthRouteImport } from './routes/_authenticated/admin.services-health'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminV3RouteImport } from './routes/_authenticated/admin.v3'
 import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
@@ -214,6 +215,7 @@ import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
+import { Route as AuthenticatedAdminUsersIdRouteImport } from './routes/_authenticated/admin.users.$id'
 import { Route as AuthenticatedAdminWhatsappInquiryIdRouteImport } from './routes/_authenticated/admin.whatsapp.$inquiryId'
 import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_authenticated/orders-unified.$kind.$id'
 import { Route as AuthenticatedOwnerPagesIndexRouteImport } from './routes/_authenticated/owner.pages.index'
@@ -1009,6 +1011,11 @@ const AuthenticatedAdminServicesHealthRoute =
     path: '/services-health',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminV3Route = AuthenticatedAdminV3RouteImport.update({
   id: '/v3',
   path: '/v3',
@@ -1390,6 +1397,12 @@ const AuthenticatedAdminSuperPermissionsRoute =
     path: '/super/permissions',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminUsersIdRoute =
+  AuthenticatedAdminUsersIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminUsersRoute,
+  } as any)
 const AuthenticatedAdminWhatsappInquiryIdRoute =
   AuthenticatedAdminWhatsappInquiryIdRouteImport.update({
     id: '/$inquiryId',
@@ -1750,6 +1763,7 @@ export interface FileRoutesByFullPath {
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/v3': typeof AuthenticatedAdminV3Route
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -1816,6 +1830,7 @@ export interface FileRoutesByFullPath {
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
+  '/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
   '/admin/whatsapp/$inquiryId': typeof AuthenticatedAdminWhatsappInquiryIdRoute
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
@@ -1989,6 +2004,7 @@ export interface FileRoutesByTo {
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/v3': typeof AuthenticatedAdminV3Route
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -2055,6 +2071,7 @@ export interface FileRoutesByTo {
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
+  '/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
   '/admin/whatsapp/$inquiryId': typeof AuthenticatedAdminWhatsappInquiryIdRoute
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
@@ -2235,6 +2252,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/v3': typeof AuthenticatedAdminV3Route
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -2301,6 +2319,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
+  '/_authenticated/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
   '/_authenticated/admin/whatsapp/$inquiryId': typeof AuthenticatedAdminWhatsappInquiryIdRoute
   '/_authenticated/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
   '/_authenticated/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
@@ -2481,6 +2500,7 @@ export interface FileRouteTypes {
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/services-health'
+    | '/admin/users'
     | '/admin/v3'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
@@ -2547,6 +2567,7 @@ export interface FileRouteTypes {
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
+    | '/admin/users/$id'
     | '/admin/whatsapp/$inquiryId'
     | '/orders-unified/$kind/$id'
     | '/owner/pages/$id'
@@ -2720,6 +2741,7 @@ export interface FileRouteTypes {
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/services-health'
+    | '/admin/users'
     | '/admin/v3'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
@@ -2786,6 +2808,7 @@ export interface FileRouteTypes {
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
+    | '/admin/users/$id'
     | '/admin/whatsapp/$inquiryId'
     | '/orders-unified/$kind/$id'
     | '/owner/pages/$id'
@@ -2965,6 +2988,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/admin/services-health'
+    | '/_authenticated/admin/users'
     | '/_authenticated/admin/v3'
     | '/_authenticated/admin/visual-analytics'
     | '/_authenticated/admin/web-vitals'
@@ -3031,6 +3055,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
+    | '/_authenticated/admin/users/$id'
     | '/_authenticated/admin/whatsapp/$inquiryId'
     | '/_authenticated/orders-unified/$kind/$id'
     | '/_authenticated/owner/pages/$id'
@@ -4144,6 +4169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServicesHealthRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/v3': {
       id: '/_authenticated/admin/v3'
       path: '/v3'
@@ -4599,6 +4631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSuperPermissionsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/users/$id': {
+      id: '/_authenticated/admin/users/$id'
+      path: '/$id'
+      fullPath: '/admin/users/$id'
+      preLoaderRoute: typeof AuthenticatedAdminUsersIdRouteImport
+      parentRoute: typeof AuthenticatedAdminUsersRoute
+    }
     '/_authenticated/admin/whatsapp/$inquiryId': {
       id: '/_authenticated/admin/whatsapp/$inquiryId'
       path: '/$inquiryId'
@@ -4927,6 +4966,20 @@ const AuthenticatedAdminPatientsRouteWithChildren =
     AuthenticatedAdminPatientsRouteChildren,
   )
 
+interface AuthenticatedAdminUsersRouteChildren {
+  AuthenticatedAdminUsersIdRoute: typeof AuthenticatedAdminUsersIdRoute
+}
+
+const AuthenticatedAdminUsersRouteChildren: AuthenticatedAdminUsersRouteChildren =
+  {
+    AuthenticatedAdminUsersIdRoute: AuthenticatedAdminUsersIdRoute,
+  }
+
+const AuthenticatedAdminUsersRouteWithChildren =
+  AuthenticatedAdminUsersRoute._addFileChildren(
+    AuthenticatedAdminUsersRouteChildren,
+  )
+
 interface AuthenticatedAdminWhatsappRouteChildren {
   AuthenticatedAdminWhatsappInquiryIdRoute: typeof AuthenticatedAdminWhatsappInquiryIdRoute
 }
@@ -4987,6 +5040,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminServicesHealthRoute: typeof AuthenticatedAdminServicesHealthRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminV3Route: typeof AuthenticatedAdminV3Route
   AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
   AuthenticatedAdminWebVitalsRoute: typeof AuthenticatedAdminWebVitalsRoute
@@ -5036,6 +5090,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
   AuthenticatedAdminServicesHealthRoute: AuthenticatedAdminServicesHealthRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminV3Route: AuthenticatedAdminV3Route,
   AuthenticatedAdminVisualAnalyticsRoute:
     AuthenticatedAdminVisualAnalyticsRoute,
