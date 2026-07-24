@@ -381,6 +381,9 @@ function FormBody({
   branches,
   submitting,
   today,
+  captchaRef,
+  captchaToken,
+  onCaptchaToken,
   onChange,
   onSubmit,
 }: {
@@ -390,6 +393,9 @@ function FormBody({
   branches: BranchRow[];
   submitting: boolean;
   today: string;
+  captchaRef: React.RefObject<HCaptchaHandle | null>;
+  captchaToken: string | null;
+  onCaptchaToken: (t: string | null) => void;
   onChange: <K extends keyof FormState>(k: K, v: FormState[K]) => void;
   onSubmit: (e: React.FormEvent) => void;
 }) {
