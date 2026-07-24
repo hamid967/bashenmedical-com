@@ -14,9 +14,9 @@ export type BiometricResult =
   | { ok: false; reason: "not-native" | "not-enrolled" | "cancelled" | "error"; error?: string };
 
 async function loadBiometricPlugin() {
-  const mod = await import(
-    /* @vite-ignore */ "@capgo/capacitor-native-biometric"
-  ).catch(() => null);
+  // Indirect specifier: plugin is only installed inside `capacitor/`.
+  const spec = "@capgo/capacitor-native-biometric";
+  const mod = await import(/* @vite-ignore */ spec).catch(() => null);
   return (mod as { NativeBiometric?: unknown } | null)?.NativeBiometric as
     | {
         isAvailable: () => Promise<{ isAvailable: boolean; biometryType?: number }>;
