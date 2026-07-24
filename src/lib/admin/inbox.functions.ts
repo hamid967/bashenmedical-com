@@ -304,7 +304,7 @@ export const transferInboxItem = createServerFn({ method: "POST" })
     const roles = await assertInboxStaff(context.supabase, context.userId);
     assertAllowed(roles, "transfer");
     const before = await loadItem(context.supabase, data.id);
-    const patch: Record<string, unknown> = {};
+    const patch: Record<string, any> = {};
     if (data.department !== undefined) patch.department = data.department;
     if (data.branch_id !== undefined) patch.branch_id = data.branch_id;
     if (!Object.keys(patch).length) throw new Error("لا يوجد تحويل صالح.");
