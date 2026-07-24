@@ -80,12 +80,23 @@ async function safeCount(
 
 export const getCommandCenterKpisV2 = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ kpis: CommandCenterKpiV2[]; fetchedAt: string }> => {
+  .validator((d) => FiltersInput.parse(d))
+  .handler(async ({ context, data }): Promise<{ kpis: CommandCenterKpiV2[]; fetchedAt: string; filters: { from: string; to: string; branchId: string | null } }> => {
     await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase as Sb;
     const today = todayIso();
-    const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+    const fromDate = data?.from ?? today;
+    const toDate = data?.to ?? today;
+    const branchId = data?.branchId ?? null;
+    // 7-day rolling window ANCHORED at the selected `to` date, so period KPIs
+    // (no-show rate, etc.) match the segment the user is viewing.
+    const sevenDaysBack = new Date(new Date(`${toDate}T00:00:00Z`).getTime() - 7 * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     const twentyFourHoursAgo = new Date(Date.now() - 86_400_000).toISOString();
+
+    // Helper: apply branch scope on tables that carry `branch_id`
+    const withBranch = (q: Sb) => (branchId ? q.eq("branch_id", branchId) : q);
 
     const [
       apptsToday,
