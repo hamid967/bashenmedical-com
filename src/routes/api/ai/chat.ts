@@ -21,6 +21,7 @@ import {
   MEDICAL_REFUSAL_AR,
   MEDICAL_REFUSAL_EN,
   maskSensitive,
+  sanitizeAssistantText,
 } from "@/lib/ai/safety";
 import {
   getFeatureFlag,
