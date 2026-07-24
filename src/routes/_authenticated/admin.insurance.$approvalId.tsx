@@ -138,7 +138,7 @@ function InsuranceDetailPage() {
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">الشركة</dt>
               <dd className="font-medium">
-                {provider?.name_ar || provider?.name_en || provider?.code || "—"}
+                {provider?.name_ar || provider?.name_en || "—"}
               </dd>
             </div>
             <div className="flex justify-between gap-4">

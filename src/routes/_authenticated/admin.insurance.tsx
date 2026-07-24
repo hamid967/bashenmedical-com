@@ -377,7 +377,7 @@ function InsurancePage() {
                       </div>
                     </td>
                     <td className="px-3 py-2">
-                      {prov?.name_ar || prov?.name_en || prov?.code || (
+                      {prov?.name_ar || prov?.name_en || (
                         <span className="text-muted-foreground">—</span>
                       )}
                     </td>
