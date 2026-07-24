@@ -135,6 +135,7 @@ import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
 import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
+import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
 import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
@@ -912,6 +913,12 @@ const AuthenticatedAdminNotificationLogsRoute =
     path: '/notification-logs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminNotificationsRoute =
+  AuthenticatedAdminNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNphiesLogsRoute =
   AuthenticatedAdminNphiesLogsRouteImport.update({
     id: '/nphies-logs',
@@ -1645,6 +1652,7 @@ export interface FileRoutesByFullPath {
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -1871,6 +1879,7 @@ export interface FileRoutesByTo {
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -2104,6 +2113,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
+  '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -2337,6 +2347,7 @@ export interface FileRouteTypes {
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
     | '/admin/notification-logs'
+    | '/admin/notifications'
     | '/admin/nphies-logs'
     | '/admin/realtime-monitor'
     | '/admin/reservations-usage'
@@ -2563,6 +2574,7 @@ export interface FileRouteTypes {
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
     | '/admin/notification-logs'
+    | '/admin/notifications'
     | '/admin/nphies-logs'
     | '/admin/realtime-monitor'
     | '/admin/reservations-usage'
@@ -2795,6 +2807,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/no-show-risk'
     | '/_authenticated/admin/no-show-stats'
     | '/_authenticated/admin/notification-logs'
+    | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/nphies-logs'
     | '/_authenticated/admin/realtime-monitor'
     | '/_authenticated/admin/reservations-usage'
@@ -3877,6 +3890,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNotificationLogsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/notifications': {
+      id: '/_authenticated/admin/notifications'
+      path: '/notifications'
+      fullPath: '/admin/notifications'
+      preLoaderRoute: typeof AuthenticatedAdminNotificationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/nphies-logs': {
       id: '/_authenticated/admin/nphies-logs'
       path: '/nphies-logs'
@@ -4639,6 +4659,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
   AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
+  AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
   AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
@@ -4674,6 +4695,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNoShowStatsRoute: AuthenticatedAdminNoShowStatsRoute,
   AuthenticatedAdminNotificationLogsRoute:
     AuthenticatedAdminNotificationLogsRoute,
+  AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
   AuthenticatedAdminRealtimeMonitorRoute:
     AuthenticatedAdminRealtimeMonitorRoute,
