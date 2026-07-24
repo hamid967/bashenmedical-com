@@ -66,3 +66,48 @@ export const escalateAiConversation = createServerFn({ method: "POST" })
       incidentId: (row as any).incident_id as string,
     };
   });
+
+/**
+ * Status of the most recent Human-escalation ticket linked to an AI
+ * conversation. Returns `null` when no ticket exists. Caller must own the
+ * conversation or hold a staff role (enforced inside the RPC).
+ */
+export type EscalationStatus = {
+  inboxItemId: string;
+  requestNumber: string;
+  status: string;
+  priority: string;
+  createdAt: string;
+  updatedAt: string;
+  severity: string | null;
+};
+
+const StatusInput = z.object({ conversationId: z.string().uuid() });
+
+export const getAiEscalationStatus = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw) => StatusInput.parse(raw))
+  .handler(async ({ data, context }): Promise<EscalationStatus | null> => {
+    const { data: rows, error } = await context.supabase.rpc(
+      "get_ai_escalation_status",
+      { _conversation_id: data.conversationId } as never,
+    );
+    if (error) {
+      const msg = error.message || "";
+      if (/authorized|authentication/i.test(msg)) throw new Error("forbidden");
+      if (/not found/i.test(msg)) return null;
+      throw new Error("status_failed");
+    }
+    const row = Array.isArray(rows) ? rows[0] : rows;
+    if (!row) return null;
+    const r = row as Record<string, unknown>;
+    return {
+      inboxItemId: String(r.inbox_item_id),
+      requestNumber: String(r.request_number),
+      status: String(r.status),
+      priority: String(r.priority),
+      createdAt: String(r.created_at),
+      updatedAt: String(r.updated_at),
+      severity: r.incident_severity ? String(r.incident_severity) : null,
+    };
+  });
