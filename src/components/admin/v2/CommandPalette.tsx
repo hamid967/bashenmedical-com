@@ -383,6 +383,62 @@ export function CommandPalette({
                     ))}
                   </Command.Group>
                 )}
+                {searchQ.data.appointments.length > 0 && (
+                  <Command.Group heading="المواعيد">
+                    {searchQ.data.appointments.map((a) => (
+                      <Command.Item
+                        key={`a-${a.id}`}
+                        value={`appt-${a.id}-${a.reference_number ?? ""}-${a.patient_name}`}
+                        onSelect={() =>
+                          go({
+                            to: `/admin/appointments?appointment=${a.id}`,
+                            label: a.reference_number ?? a.patient_name,
+                          })
+                        }
+                      >
+                        <CalendarCheck className="h-4 w-4 opacity-70" aria-hidden="true" />
+                        <span className="truncate">
+                          {a.reference_number ? `${a.reference_number} · ` : ""}
+                          {a.patient_name}
+                        </span>
+                        <span
+                          className="mr-auto text-[11px] truncate"
+                          style={{ color: "var(--ac-muted)" }}
+                        >
+                          {a.date?.slice(0, 10) ?? "—"} · {a.status}
+                        </span>
+                      </Command.Item>
+                    ))}
+                  </Command.Group>
+                )}
+                {searchQ.data.requests.length > 0 && (
+                  <Command.Group heading="الطلبات">
+                    {searchQ.data.requests.map((r) => (
+                      <Command.Item
+                        key={`r-${r.id}`}
+                        value={`req-${r.id}-${r.request_number ?? ""}-${r.full_name}`}
+                        onSelect={() =>
+                          go({
+                            to: `/admin/service-inquiries?inquiry=${r.id}`,
+                            label: r.request_number ?? r.full_name,
+                          })
+                        }
+                      >
+                        <Inbox className="h-4 w-4 opacity-70" aria-hidden="true" />
+                        <span className="truncate">
+                          {r.request_number ? `${r.request_number} · ` : ""}
+                          {r.full_name}
+                        </span>
+                        <span
+                          className="mr-auto text-[11px] truncate"
+                          style={{ color: "var(--ac-muted)" }}
+                        >
+                          {r.phone ?? "—"} · {r.status ?? "—"}
+                        </span>
+                      </Command.Item>
+                    ))}
+                  </Command.Group>
+                )}
               </>
             )}
 
