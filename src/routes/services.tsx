@@ -24,7 +24,7 @@ import {
   ClipboardList,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { Input } from "@/components/ui/input";
+import { Input } from "@/components/ui-v3";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
 export const Route = createFileRoute("/services")({

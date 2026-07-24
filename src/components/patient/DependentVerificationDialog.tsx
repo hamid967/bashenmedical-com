@@ -21,11 +21,11 @@ import {
   type VerificationStatus,
 } from "@/lib/portal/dependent-verification.functions";
 import type { Dependent } from "@/lib/portal/dependents.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
@@ -33,14 +33,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 import {
   BadgeCheck,
   Loader2,

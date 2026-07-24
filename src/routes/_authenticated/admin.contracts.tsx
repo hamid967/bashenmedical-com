@@ -25,11 +25,11 @@ import {
   ShieldAlert,
 } from "lucide-react";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { listDataContracts, type DataContract } from "@/lib/admin/contracts.functions";
 

@@ -24,7 +24,7 @@ import {
   type AdherenceStats,
   type ReminderPreferences,
 } from "@/lib/portal/prescriptions.functions";
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui-v3";
 import {
   AlertTriangle,
   BellRing,

@@ -6,8 +6,8 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useRef } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { ShieldAlert } from "lucide-react";
 
 export const Route = createFileRoute("/forbidden")({

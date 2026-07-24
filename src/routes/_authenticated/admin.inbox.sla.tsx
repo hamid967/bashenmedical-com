@@ -11,9 +11,9 @@ import {
   type TestWebhookResult,
 } from "@/lib/admin/sla-alerts.functions";
 import { STATUS_LABELS, CHANNEL_LABELS, PRIORITY_LABELS } from "./admin.inbox";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { AlertTriangle, Bell, Timer, CheckCircle2, Inbox as InboxIcon } from "lucide-react";
 import { toast } from "sonner";
 

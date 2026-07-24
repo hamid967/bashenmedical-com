@@ -22,7 +22,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 
 export type MessageCostMeta = {
   /** performance.now() at request start */

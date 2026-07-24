@@ -8,7 +8,7 @@ import { CalendarClock, Stethoscope, Building2 } from "lucide-react";
 import { z } from "zod";
 
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 
 import { AdminDoctorsPage } from "./admin.doctors";
 import { BranchesList } from "./admin.branches";

@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Loader2, Mail, ShieldCheck, User as UserIcon } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import { linkGuestAppointments } from "@/lib/patient-link.functions";
 
 type Phase = "idle" | "sending" | "code_sent" | "verifying" | "linking" | "linked" | "error";

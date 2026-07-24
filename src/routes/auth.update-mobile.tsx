@@ -8,10 +8,10 @@ import { createFileRoute, redirect, useNavigate, Link } from "@tanstack/react-ro
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { issueOtp } from "@/lib/auth/otp.functions";

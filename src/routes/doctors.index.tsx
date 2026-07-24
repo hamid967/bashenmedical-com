@@ -16,7 +16,7 @@ import { z } from "zod";
 import { fallback, zodValidator } from "@tanstack/zod-adapter";
 import { buildLocalBusinessSchema, buildBreadcrumbs } from "@/lib/localBusinessSchema";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import { type DoctorRow } from "@/components/doctors/types";
 import {
   UrlDoctorSearchProvider,

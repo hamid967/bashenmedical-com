@@ -31,17 +31,17 @@ import {
   PRIORITY_LABELS,
   maskPhone,
 } from "./admin.inbox";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Card } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 import { ArrowRight, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/inbox/$id")({

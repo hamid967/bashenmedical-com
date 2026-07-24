@@ -38,14 +38,14 @@ import {
   type PharmacyStatus,
 } from "@/lib/pharmacy.functions";
 import { listBranches } from "@/lib/dashboard.functions";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 export const Route = createFileRoute("/_authenticated/pharmacy-management")({

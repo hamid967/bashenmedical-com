@@ -24,17 +24,17 @@ import {
   SlidersHorizontal,
   X,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+} from "@/components/ui-v3";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui-v3";
 import {
   AlertDialog,
   AlertDialogAction,

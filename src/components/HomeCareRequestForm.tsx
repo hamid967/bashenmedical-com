@@ -7,9 +7,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { Loader2, CheckCircle2, Copy } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
 import { Link } from "@tanstack/react-router";
 
 const PHONE_RE = /^[+0-9\s\-()]+$/;

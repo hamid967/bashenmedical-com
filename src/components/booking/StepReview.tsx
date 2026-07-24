@@ -1,6 +1,6 @@
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import { SubmitErrorBanner } from "@/components/SubmitErrorBanner";
 import { BookingPhoneVerification } from "./BookingPhoneVerification";
 import type { BookingSubmitKind } from "@/lib/booking-submit";

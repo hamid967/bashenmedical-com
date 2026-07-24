@@ -10,7 +10,7 @@ import {
   listPatientQrScans,
   getPatientQrScanCount,
 } from "@/lib/patient-qr-scans.functions";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui-v3";
 import {
   ArrowLeft,
   User,

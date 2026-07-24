@@ -31,8 +31,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import {
   LineChart,
   Line,

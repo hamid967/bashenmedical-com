@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { listCmsAudit } from "@/lib/admin/cms/cms.functions";
-import { Card } from "@/components/ui/card";
+import { Card } from "@/components/ui-v3";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/audit")({
   head: () => ({ meta: [{ title: "سجل تدقيق CMS" }] }),

@@ -1,4 +1,4 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui-v3";
 import { cn } from "@/lib/utils";
 
 interface DemoBadgeProps {

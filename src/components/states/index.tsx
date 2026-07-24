@@ -10,8 +10,8 @@ import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { AlertTriangle, Inbox, Lock, RefreshCw, WifiOff, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui-v3";
+import { Skeleton } from "@/components/ui-v3";
 
 type Lang = "ar" | "en";
 

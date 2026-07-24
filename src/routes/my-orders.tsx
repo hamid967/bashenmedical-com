@@ -26,9 +26,9 @@ import {
   Clock,
 } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
 
 export const Route = createFileRoute("/my-orders")({
   head: () => ({

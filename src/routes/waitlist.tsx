@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { fallback } from "@tanstack/zod-adapter";
 import { Clock, CheckCircle2, AlertCircle, XCircle, Search, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
 import { Link } from "@tanstack/react-router";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 

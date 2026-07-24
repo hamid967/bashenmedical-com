@@ -3,8 +3,8 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getCmsDashboard } from "@/lib/admin/cms/cms.functions";
 import { CMS_KIND_LIST } from "@/lib/admin/cms/schemas";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import { FileText, ClipboardCheck, Clock, Archive, Send, CheckCircle2 } from "lucide-react";
 import { useCmsTransitionNotifications } from "@/lib/admin/cms/useCmsTransitionNotifications";
 

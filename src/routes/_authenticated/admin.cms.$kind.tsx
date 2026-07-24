@@ -4,9 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { listCmsEntries, createCmsEntry } from "@/lib/admin/cms/cms.functions";
 import { CMS_KINDS, type CmsKind } from "@/lib/admin/cms/schemas";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/$kind")({

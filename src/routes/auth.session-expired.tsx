@@ -5,8 +5,8 @@
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { Clock } from "lucide-react";
 
 const searchSchema = z.object({

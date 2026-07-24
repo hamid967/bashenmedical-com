@@ -32,10 +32,10 @@ import {
   LogOut,
   RefreshCw,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 import { useI18n } from "@/lib/i18n";
 

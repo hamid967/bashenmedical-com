@@ -32,8 +32,8 @@ import {
   FileText,
   Stethoscope,
 } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui-v3";
+import { Skeleton } from "@/components/ui-v3";
 import { submitBooking } from "@/lib/booking-submit";
 
 type Doctor = {

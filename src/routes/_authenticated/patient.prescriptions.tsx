@@ -6,8 +6,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getMyPrescriptions } from "@/lib/portal/prescriptions.functions";
 import { EmptyState, SkeletonList } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { Pill, ArrowLeft } from "lucide-react";
 
 const rxQuery = queryOptions({

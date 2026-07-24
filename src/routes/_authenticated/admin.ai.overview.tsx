@@ -3,8 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertConsoleAccess } from "@/lib/admin/_guard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import {
   AlertCircle,
   Bot,

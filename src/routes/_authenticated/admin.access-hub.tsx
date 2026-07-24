@@ -8,7 +8,7 @@ import { Users, KeyRound, Grid3x3 } from "lucide-react";
 import { z } from "zod";
 
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 
 import { AdminUsersRoute } from "./admin.users";
 import { RolePermissionsMatrixPage } from "./admin.role-permissions-matrix";

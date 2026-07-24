@@ -13,20 +13,20 @@ import {
   toggleContentDisabled,
   getContentStats,
 } from "@/lib/admin/content.functions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Switch } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 import {
   Sheet,
   SheetContent,
@@ -40,7 +40,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui-v3";
 import { toast } from "sonner";
 import { Ban, PlayCircle, Plus, BarChart3 } from "lucide-react";
 

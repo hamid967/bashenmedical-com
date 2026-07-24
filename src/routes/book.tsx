@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { submitBooking, clearBookingIdempotencyKey, getBookingCorrelationId } from "@/lib/booking-submit";
 import { getBookingSessionId } from "@/lib/booking-hold";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 
 import { fallback } from "@tanstack/zod-adapter";
 import {

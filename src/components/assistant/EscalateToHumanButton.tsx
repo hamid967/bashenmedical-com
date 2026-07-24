@@ -20,11 +20,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui-v3";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {

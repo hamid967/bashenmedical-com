@@ -28,9 +28,9 @@ import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
 import { ContentFeed } from "@/components/patient/ContentFeed";
 import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import { format, formatDistanceToNow } from "date-fns";
 import { ar } from "date-fns/locale";
 

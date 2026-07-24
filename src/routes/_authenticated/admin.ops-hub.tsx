@@ -7,7 +7,7 @@ import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { Inbox, AlarmClock, ScrollText } from "lucide-react";
 import { z } from "zod";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 
 import { AuditLogsPage } from "./admin.audit-logs";
 import { SlaPage } from "./admin.inbox.sla";
