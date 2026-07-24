@@ -34,6 +34,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import {
+  HCaptchaWidget,
+  HCAPTCHA_ENABLED,
+  type HCaptchaHandle,
+} from "@/components/security/HCaptchaWidget";
 
 type ServiceRow = { id: string; name_ar: string };
 type BranchRow = { id: string; name_ar: string };
