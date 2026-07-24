@@ -28,6 +28,7 @@ const STAT_CARDS = [
 ] as const;
 
 function CmsDashboard() {
+  useCmsTransitionNotifications();
   const fetchFn = useServerFn(getCmsDashboard);
   const { data } = useSuspenseQuery({
     queryKey: ["cms", "dashboard"],
