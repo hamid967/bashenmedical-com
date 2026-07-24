@@ -123,6 +123,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
 import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
+import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_authenticated/admin.booking-funnel'
 import { Route as AuthenticatedAdminBookingTraceRouteImport } from './routes/_authenticated/admin.booking-trace'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
@@ -200,6 +201,7 @@ import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
+import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
@@ -842,6 +844,12 @@ const AuthenticatedAdminAuditLogsRoute =
     path: '/audit-logs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBillingRoute =
+  AuthenticatedAdminBillingRouteImport.update({
+    id: '/billing',
+    path: '/billing',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminBookingFunnelRoute =
   AuthenticatedAdminBookingFunnelRouteImport.update({
     id: '/booking-funnel',
@@ -1294,6 +1302,12 @@ const AuthenticatedAdminAiOverviewRoute =
     path: '/ai/overview',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminBillingInvoiceIdRoute =
+  AuthenticatedAdminBillingInvoiceIdRouteImport.update({
+    id: '/$invoiceId',
+    path: '/$invoiceId',
+    getParentRoute: () => AuthenticatedAdminBillingRoute,
+  } as any)
 const AuthenticatedAdminSuperJazanVisualRoute =
   AuthenticatedAdminSuperJazanVisualRouteImport.update({
     id: '/super/jazan-visual',
@@ -1640,6 +1654,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
+  '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
@@ -1718,6 +1733,7 @@ export interface FileRoutesByFullPath {
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1867,6 +1883,7 @@ export interface FileRoutesByTo {
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
+  '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
@@ -1945,6 +1962,7 @@ export interface FileRoutesByTo {
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2101,6 +2119,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
+  '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/_authenticated/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
   '/_authenticated/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
@@ -2179,6 +2198,7 @@ export interface FileRoutesById {
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2335,6 +2355,7 @@ export interface FileRouteTypes {
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/audit-logs'
+    | '/admin/billing'
     | '/admin/booking-funnel'
     | '/admin/booking-trace'
     | '/admin/classic'
@@ -2413,6 +2434,7 @@ export interface FileRouteTypes {
     | '/patients/'
     | '/portal/'
     | '/admin/ai/overview'
+    | '/admin/billing/$invoiceId'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2562,6 +2584,7 @@ export interface FileRouteTypes {
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/audit-logs'
+    | '/admin/billing'
     | '/admin/booking-funnel'
     | '/admin/booking-trace'
     | '/admin/classic'
@@ -2640,6 +2663,7 @@ export interface FileRouteTypes {
     | '/patients'
     | '/portal'
     | '/admin/ai/overview'
+    | '/admin/billing/$invoiceId'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2795,6 +2819,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/ai-usage'
     | '/_authenticated/admin/audit-logs'
+    | '/_authenticated/admin/billing'
     | '/_authenticated/admin/booking-funnel'
     | '/_authenticated/admin/booking-trace'
     | '/_authenticated/admin/classic'
@@ -2873,6 +2898,7 @@ export interface FileRouteTypes {
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/ai/overview'
+    | '/_authenticated/admin/billing/$invoiceId'
     | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
@@ -3806,6 +3832,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAuditLogsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/billing': {
+      id: '/_authenticated/admin/billing'
+      path: '/billing'
+      fullPath: '/admin/billing'
+      preLoaderRoute: typeof AuthenticatedAdminBillingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/booking-funnel': {
       id: '/_authenticated/admin/booking-funnel'
       path: '/booking-funnel'
@@ -4345,6 +4378,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiOverviewRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/billing/$invoiceId': {
+      id: '/_authenticated/admin/billing/$invoiceId'
+      path: '/$invoiceId'
+      fullPath: '/admin/billing/$invoiceId'
+      preLoaderRoute: typeof AuthenticatedAdminBillingInvoiceIdRouteImport
+      parentRoute: typeof AuthenticatedAdminBillingRoute
+    }
     '/_authenticated/admin/super/jazan-visual': {
       id: '/_authenticated/admin/super/jazan-visual'
       path: '/super/jazan-visual'
@@ -4628,6 +4668,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminBillingRouteChildren {
+  AuthenticatedAdminBillingInvoiceIdRoute: typeof AuthenticatedAdminBillingInvoiceIdRoute
+}
+
+const AuthenticatedAdminBillingRouteChildren: AuthenticatedAdminBillingRouteChildren =
+  {
+    AuthenticatedAdminBillingInvoiceIdRoute:
+      AuthenticatedAdminBillingInvoiceIdRoute,
+  }
+
+const AuthenticatedAdminBillingRouteWithChildren =
+  AuthenticatedAdminBillingRoute._addFileChildren(
+    AuthenticatedAdminBillingRouteChildren,
+  )
+
 interface AuthenticatedAdminSuperPermissionsRouteChildren {
   AuthenticatedAdminSuperPermissionsAuditRoute: typeof AuthenticatedAdminSuperPermissionsAuditRoute
 }
@@ -4647,6 +4702,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
   AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
+  AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRouteWithChildren
   AuthenticatedAdminBookingFunnelRoute: typeof AuthenticatedAdminBookingFunnelRoute
   AuthenticatedAdminBookingTraceRoute: typeof AuthenticatedAdminBookingTraceRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
@@ -4681,6 +4737,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
   AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
   AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
+  AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRouteWithChildren,
   AuthenticatedAdminBookingFunnelRoute: AuthenticatedAdminBookingFunnelRoute,
   AuthenticatedAdminBookingTraceRoute: AuthenticatedAdminBookingTraceRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
