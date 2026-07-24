@@ -1,5 +1,5 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminNotificationsBell } from "@/components/admin/AdminNotificationsBell";
@@ -285,6 +285,64 @@ export function AdminShellV2({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Lock body scroll while mobile drawer is open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  // Swipe-to-close for the mobile drawer (sidebar sits on the right in RTL).
+  // A rightward swipe of > 80px closes; smaller drags rubber-band back.
+  const [dragX, setDragX] = useState(0);
+  const dragStart = useRef<{ x: number; y: number; active: boolean } | null>(null);
+
+  function onDrawerTouchStart(e: React.TouchEvent) {
+    if (!mobileOpen) return;
+    const t = e.touches[0];
+    dragStart.current = { x: t.clientX, y: t.clientY, active: true };
+  }
+  function onDrawerTouchMove(e: React.TouchEvent) {
+    const s = dragStart.current;
+    if (!s?.active) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
+    if (dx > 0) setDragX(dx); // rightward = toward closing edge in RTL
+  }
+  function onDrawerTouchEnd() {
+    if (dragX > 80) setMobileOpen(false);
+    setDragX(0);
+    dragStart.current = null;
+  }
+
+  // Edge swipe to open (from the right edge in RTL) on mobile.
+  const edgeStart = useRef<{ x: number; y: number } | null>(null);
+  function onEdgeTouchStart(e: React.TouchEvent) {
+    if (mobileOpen) return;
+    const t = e.touches[0];
+    edgeStart.current = { x: t.clientX, y: t.clientY };
+  }
+  function onEdgeTouchMove(e: React.TouchEvent) {
+    const s = edgeStart.current;
+    if (!s) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    if (dx < -50) {
+      setMobileOpen(true);
+      edgeStart.current = null;
+    }
+  }
+  function onEdgeTouchEnd() {
+    edgeStart.current = null;
+  }
+
   async function handleSignOut() {
     await qc.cancelQueries();
     qc.clear();
@@ -310,7 +368,8 @@ export function AdminShellV2({
       {/* Sidebar */}
       <aside
         className={[
-          "fixed lg:sticky top-0 z-40 h-dvh shrink-0 border-e transition-all duration-200 ease-out",
+          "fixed lg:sticky top-0 z-40 h-dvh shrink-0 border-e ease-out",
+          dragX > 0 ? "duration-0" : "transition-all duration-200",
           collapsed ? "w-16" : "w-72",
           mobileOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0",
         ].join(" ")}
@@ -318,7 +377,15 @@ export function AdminShellV2({
           background: "var(--ac-surface)",
           borderColor: "var(--ac-line)",
           backdropFilter: theme === "dark" ? "blur(14px) saturate(140%)" : undefined,
+          transform: mobileOpen && dragX > 0 ? `translateX(${dragX}px)` : undefined,
+          touchAction: "pan-y",
         }}
+        onTouchStart={onDrawerTouchStart}
+        onTouchMove={onDrawerTouchMove}
+        onTouchEnd={onDrawerTouchEnd}
+        role="dialog"
+        aria-modal={mobileOpen ? true : undefined}
+        aria-label="القائمة الجانبية"
       >
         <div
           className="h-16 flex items-center justify-between px-4 border-b"
@@ -426,8 +493,22 @@ export function AdminShellV2({
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+          className="fixed inset-0 z-30 bg-black/40 lg:hidden transition-opacity"
+          style={{ opacity: dragX > 0 ? Math.max(0, 1 - dragX / 260) : 1 }}
           onClick={() => setMobileOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Edge swipe strip to open the drawer (mobile only, RTL right edge) */}
+      {!mobileOpen && (
+        <div
+          className="fixed top-16 bottom-0 end-0 w-3 z-20 lg:hidden"
+          style={{ touchAction: "pan-y" }}
+          onTouchStart={onEdgeTouchStart}
+          onTouchMove={onEdgeTouchMove}
+          onTouchEnd={onEdgeTouchEnd}
+          aria-hidden="true"
         />
       )}
 
