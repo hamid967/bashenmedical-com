@@ -7,16 +7,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw, ShieldCheck, ShieldAlert, Timer, AlertTriangle } from "lucide-react";
-import { getNphiesLogs } from "@/lib/admin/nphies.functions";
+import { getNphiesLogs, getNphiesConfig } from "@/lib/admin/nphies.functions";
 
 const WINDOWS = [1, 6, 24, 24 * 7, 24 * 30];
+const MODES = ["all", "mock", "sandbox", "live"] as const;
+type ModeFilter = (typeof MODES)[number];
 
-const logsQuery = (windowHours: number) =>
+const logsQuery = (windowHours: number, mode: ModeFilter) =>
   queryOptions({
-    queryKey: ["admin", "nphies-logs", windowHours],
-    queryFn: () => getNphiesLogs({ data: { windowHours, limit: 200 } }),
+    queryKey: ["admin", "nphies-logs", windowHours, mode],
+    queryFn: () => getNphiesLogs({ data: { windowHours, limit: 200, mode } }),
     staleTime: 30_000,
   });
+
+const configQuery = queryOptions({
+  queryKey: ["admin", "nphies-config"],
+  queryFn: () => getNphiesConfig(),
+  staleTime: 60_000,
+});
 
 export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
   head: () => ({
@@ -25,7 +33,11 @@ export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(logsQuery(24)),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(logsQuery(24, "all")),
+      context.queryClient.ensureQueryData(configQuery),
+    ]),
   component: NphiesLogsPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">تعذّر تحميل سجلات التأمين: {error.message}</div>
@@ -35,8 +47,10 @@ export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
 
 function NphiesLogsPage() {
   const [windowHours, setWindowHours] = useState(24);
+  const [modeFilter, setModeFilter] = useState<ModeFilter>("all");
   const qc = useQueryClient();
-  const { data } = useSuspenseQuery(logsQuery(windowHours));
+  const { data } = useSuspenseQuery(logsQuery(windowHours, modeFilter));
+  const { data: cfg } = useSuspenseQuery(configQuery);
 
   return (
     <div className="p-6 space-y-6">

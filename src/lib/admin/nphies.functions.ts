@@ -1,5 +1,6 @@
 /**
- * Admin-only server fns for the NPHIES eligibility audit trail.
+ * Admin-only server fns for the NPHIES eligibility audit trail and
+ * runtime config health (Batch B2 — mock/sandbox/live separation).
  * Reads use RLS-protected `nphies_requests`, which only admins can select.
  */
 import { createServerFn } from "@tanstack/react-start";
@@ -40,12 +41,13 @@ export type NphiesLogSummary = {
   errorCount: number;
   avgLatencyMs: number | null;
   byReason: Array<{ reason: string; count: number }>;
+  byMode: Array<{ mode: string; count: number }>;
   rows: NphiesLogRow[];
 };
 
 export const getNphiesLogs = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((input: { windowHours?: number; limit?: number }) =>
+  .validator((input: { windowHours?: number; limit?: number; mode?: string }) =>
     z
       .object({
         windowHours: z
@@ -55,6 +57,7 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
           .max(24 * 90)
           .default(24),
         limit: z.number().int().min(1).max(500).default(100),
+        mode: z.enum(["mock", "sandbox", "live", "all"]).default("all"),
       })
       .parse(input),
   )
@@ -62,7 +65,7 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
     await assertAdmin(context);
     const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
 
-    const { data: rows, error } = await context.supabase
+    let q = context.supabase
       .from("nphies_requests")
       .select(
         "id, created_at, mode, provider_id, doctor_id, eligible, reason, coverage_percent, consultation_fee, covered_amount, patient_share, latency_ms, http_status, error_message",
@@ -70,6 +73,8 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(data.limit);
+    if (data.mode !== "all") q = q.eq("mode", data.mode);
+    const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
     const providerIds = Array.from(
@@ -111,12 +116,17 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
       : null;
 
     const reasonMap = new Map<string, number>();
+    const modeMap = new Map<string, number>();
     for (const r of enriched) {
-      const key = r.reason ?? "unknown";
-      reasonMap.set(key, (reasonMap.get(key) ?? 0) + 1);
+      const reasonKey = r.reason ?? "unknown";
+      reasonMap.set(reasonKey, (reasonMap.get(reasonKey) ?? 0) + 1);
+      modeMap.set(r.mode, (modeMap.get(r.mode) ?? 0) + 1);
     }
     const byReason = Array.from(reasonMap.entries())
       .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count);
+    const byMode = Array.from(modeMap.entries())
+      .map(([mode, count]) => ({ mode, count }))
       .sort((a, b) => b.count - a.count);
 
     return {
@@ -126,6 +136,16 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
       errorCount,
       avgLatencyMs,
       byReason,
+      byMode,
       rows: enriched,
     };
+  });
+
+/** Read-only NPHIES runtime config health — never returns secrets. */
+export const getNphiesConfig = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { getConfigReport } = await import("@/lib/nphies/adapter.server");
+    return getConfigReport();
   });
