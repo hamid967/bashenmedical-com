@@ -114,7 +114,7 @@ export type IncidentEvent = {
   eventType: string;
   actorRole: string | null;
   actorUserId: string | null;
-  payload: unknown;
+  payload: Record<string, unknown> | null;
   createdAt: string;
 };
 
