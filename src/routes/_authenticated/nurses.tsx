@@ -99,7 +99,7 @@ function NursesPage() {
   const branchesQ = useQuery({ queryKey: ["nurses", "branches"], queryFn: () => branchesFn() });
 
   return (
-    <div dir="rtl" className="min-h-screen bg-muted/20">
+    <div dir="rtl" className="min-h-dvh bg-muted/20">
       <div className="mx-auto max-w-7xl p-6 md:p-8 space-y-6">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-3">

@@ -243,7 +243,7 @@ function SettingsPage() {
   void tick;
 
   return (
-    <div dir="rtl" className="min-h-screen bg-background">
+    <div dir="rtl" className="min-h-dvh bg-background">
       <div className="container-app py-10 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
           <div>

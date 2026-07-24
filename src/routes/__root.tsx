@@ -52,7 +52,7 @@ function NotFoundComponent() {
   ];
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4 py-12">
       <div className="max-w-2xl w-full text-center">
         <h1 className="text-7xl font-bold text-primary">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">
@@ -96,7 +96,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight">لم يتم تحميل الصفحة</h1>
         <p className="mt-2 text-sm text-muted-foreground">
@@ -263,7 +263,7 @@ function RootComponent() {
           <Suspense fallback={null}>
             <JazanIntro />
           </Suspense>
-          <div className="min-h-screen flex flex-col">
+          <div className="min-h-dvh flex flex-col">
             <AnnouncementBar />
             <Header />
             <main className="flex-1">

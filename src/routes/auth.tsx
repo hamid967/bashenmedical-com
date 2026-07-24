@@ -20,7 +20,7 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
   component: () => (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
+    <main className="min-h-dvh bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <Outlet />
       </div>

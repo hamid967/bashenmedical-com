@@ -343,7 +343,7 @@ function ServicesPortal() {
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-dvh">
       {/* Hero */}
       <section className="relative hero-gradient-deep overflow-hidden">
         <div

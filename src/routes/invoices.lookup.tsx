@@ -236,7 +236,7 @@ function LookupPage() {
   return (
     <div
       dir="rtl"
-      className="min-h-screen bg-gradient-to-b from-background via-background to-muted/40"
+      className="min-h-dvh bg-gradient-to-b from-background via-background to-muted/40"
     >
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         <header className="mb-8">

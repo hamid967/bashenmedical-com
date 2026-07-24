@@ -184,7 +184,7 @@ function PatientsManagement() {
   );
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-dvh bg-muted/20">
       <div className="mx-auto max-w-7xl p-4 md:p-6">
         {/* Header */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">

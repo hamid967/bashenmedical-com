@@ -221,7 +221,7 @@ function TransitionAlertsPage() {
   const toggleRule = (r: AlertRule) => updateM.mutate({ id: r.id, enabled: !r.enabled });
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-dvh bg-background" dir="rtl">
       <header className="border-b bg-card">
         <div className="mx-auto max-w-6xl px-4 py-4 flex items-center gap-3 flex-wrap">
           <Link

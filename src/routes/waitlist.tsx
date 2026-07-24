@@ -115,7 +115,7 @@ function WaitlistStatusPage() {
     new Date(data.offered_expires_at).getTime() > Date.now();
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-dvh bg-muted/30">
       <div className="container-app py-10 md:py-14 max-w-xl">
         <header className="mb-6 text-center">
           <h1 className="text-2xl md:text-3xl font-bold">حالة قائمة الانتظار</h1>

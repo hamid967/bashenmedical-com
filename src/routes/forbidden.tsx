@@ -33,7 +33,7 @@ function ForbiddenPage() {
     <main
       role="main"
       aria-labelledby="forbidden-title"
-      className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-muted/20"
+      className="min-h-dvh flex items-center justify-center p-4 bg-gradient-to-b from-background to-muted/20"
     >
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">

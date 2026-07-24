@@ -114,7 +114,7 @@ function RatePage() {
   if (submitted) {
     return (
       <div
-        className="min-h-screen bg-gradient-to-b from-primary/5 to-background flex items-center justify-center p-4"
+        className="min-h-dvh bg-gradient-to-b from-primary/5 to-background flex items-center justify-center p-4"
         dir="rtl"
       >
         <div className="max-w-md w-full rounded-2xl border border-border bg-card p-8 text-center shadow-lg">
@@ -143,7 +143,7 @@ function RatePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-primary/5 to-background py-8 px-4" dir="rtl">
+    <div className="min-h-dvh bg-gradient-to-b from-primary/5 to-background py-8 px-4" dir="rtl">
       <div className="mx-auto max-w-xl">
         <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold">قيّم تجربتك</h1>

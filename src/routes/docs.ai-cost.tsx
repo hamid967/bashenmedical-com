@@ -33,7 +33,7 @@ function Row({ k, v }: { k: string; v: string }) {
 
 function AiCostDocsPage() {
   return (
-    <div className="min-h-screen bg-background text-foreground" dir="rtl">
+    <div className="min-h-dvh bg-background text-foreground" dir="rtl">
       <div className="max-w-2xl mx-auto px-4 py-10 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl sm:text-3xl font-bold">كيف تُحسب تكلفة رسائل المساعد؟</h1>

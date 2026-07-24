@@ -297,7 +297,7 @@ function DoctorsPageBody() {
   );
 
   return (
-    <div className="bg-muted/30 min-h-screen">
+    <div className="bg-muted/30 min-h-dvh">
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-br from-primary/10 via-primary/5 to-background">
         <div

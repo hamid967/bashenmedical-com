@@ -130,7 +130,7 @@ function TransitionsStatsPage() {
   }, [stats]);
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-dvh bg-background" dir="rtl">
       <header className="border-b bg-card">
         <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3">
