@@ -689,6 +689,27 @@ function ImageEditor({
   );
 }
 
+async function readAsBase64WithProgress(
+  blob: Blob,
+  onProgress: (fraction: number) => void,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onprogress = (ev) => {
+      if (ev.lengthComputable) onProgress(ev.loaded / ev.total);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("read failed"));
+    reader.onload = () => {
+      const result = reader.result as string;
+      // strip "data:*;base64,"
+      const idx = result.indexOf(",");
+      onProgress(1);
+      resolve(idx >= 0 ? result.slice(idx + 1) : result);
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
 function clamp(n: number, min: number, max: number) {
   return Math.max(min, Math.min(max, n));
 }
