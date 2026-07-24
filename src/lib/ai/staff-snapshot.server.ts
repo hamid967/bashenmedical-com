@@ -51,8 +51,9 @@ export async function detectStaffRoles(
 export async function loadStaffSnapshot(
   userId: string,
   token: string,
-  roles: StaffRole[],
+  roles: readonly string[],
 ): Promise<string> {
+
   try {
     const sb = createClient(
       process.env.SUPABASE_URL!,
