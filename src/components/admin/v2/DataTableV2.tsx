@@ -9,7 +9,7 @@
  *
  * Fully typed generic <T>. RTL-friendly (Arabic labels).
  */
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ArrowDown,
   ArrowUp,
