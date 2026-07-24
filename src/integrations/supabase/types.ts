@@ -669,12 +669,16 @@ export type Database = {
         Row: {
           appointment_date: string
           appointment_time: string
+          arrived_at: string | null
           booked_for_dependent_id: string | null
+          booking_source: Database["public"]["Enums"]["booking_source"]
           branch_id: string | null
+          called_at: string | null
           cancelled_at: string | null
           created_at: string
           doctor_id: string | null
           estimated_cost_sar: number | null
+          estimated_wait_min: number | null
           gender: string | null
           id: string
           idempotency_key: string | null
@@ -705,12 +709,16 @@ export type Database = {
         Insert: {
           appointment_date: string
           appointment_time: string
+          arrived_at?: string | null
           booked_for_dependent_id?: string | null
+          booking_source?: Database["public"]["Enums"]["booking_source"]
           branch_id?: string | null
+          called_at?: string | null
           cancelled_at?: string | null
           created_at?: string
           doctor_id?: string | null
           estimated_cost_sar?: number | null
+          estimated_wait_min?: number | null
           gender?: string | null
           id?: string
           idempotency_key?: string | null
@@ -741,12 +749,16 @@ export type Database = {
         Update: {
           appointment_date?: string
           appointment_time?: string
+          arrived_at?: string | null
           booked_for_dependent_id?: string | null
+          booking_source?: Database["public"]["Enums"]["booking_source"]
           branch_id?: string | null
+          called_at?: string | null
           cancelled_at?: string | null
           created_at?: string
           doctor_id?: string | null
           estimated_cost_sar?: number | null
+          estimated_wait_min?: number | null
           gender?: string | null
           id?: string
           idempotency_key?: string | null
@@ -1359,6 +1371,63 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clinics: {
+        Row: {
+          branch_id: string
+          created_at: string
+          floor: string | null
+          id: string
+          is_active: boolean
+          is_demo: boolean
+          name_ar: string
+          name_en: string
+          room_no: string | null
+          specialty_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          branch_id: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          is_demo?: boolean
+          name_ar: string
+          name_en: string
+          room_no?: string | null
+          specialty_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string
+          created_at?: string
+          floor?: string | null
+          id?: string
+          is_active?: boolean
+          is_demo?: boolean
+          name_ar?: string
+          name_en?: string
+          room_no?: string | null
+          specialty_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clinics_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clinics_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
             referencedColumns: ["id"]
           },
         ]
@@ -2485,6 +2554,82 @@ export type Database = {
             columns: ["specialty_id"]
             isOneToOne: false
             referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      doctor_schedules: {
+        Row: {
+          branch_id: string | null
+          capacity_per_slot: number
+          clinic_id: string | null
+          created_at: string
+          doctor_id: string
+          effective_from: string
+          effective_to: string | null
+          end_time: string
+          id: string
+          is_active: boolean
+          is_demo: boolean
+          slot_minutes: number
+          start_time: string
+          updated_at: string
+          weekday: number
+        }
+        Insert: {
+          branch_id?: string | null
+          capacity_per_slot?: number
+          clinic_id?: string | null
+          created_at?: string
+          doctor_id: string
+          effective_from?: string
+          effective_to?: string | null
+          end_time: string
+          id?: string
+          is_active?: boolean
+          is_demo?: boolean
+          slot_minutes?: number
+          start_time: string
+          updated_at?: string
+          weekday: number
+        }
+        Update: {
+          branch_id?: string | null
+          capacity_per_slot?: number
+          clinic_id?: string | null
+          created_at?: string
+          doctor_id?: string
+          effective_from?: string
+          effective_to?: string | null
+          end_time?: string
+          id?: string
+          is_active?: boolean
+          is_demo?: boolean
+          slot_minutes?: number
+          start_time?: string
+          updated_at?: string
+          weekday?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doctor_schedules_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_schedules_clinic_id_fkey"
+            columns: ["clinic_id"]
+            isOneToOne: false
+            referencedRelation: "clinics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doctor_schedules_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
             referencedColumns: ["id"]
           },
         ]
@@ -4500,6 +4645,116 @@ export type Database = {
           },
         ]
       }
+      patient_duplicate_cases: {
+        Row: {
+          created_at: string
+          duplicate_patient_id: string
+          id: string
+          is_demo: boolean
+          match_reason: Json
+          match_score: number
+          primary_patient_id: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duplicate_patient_id: string
+          id?: string
+          is_demo?: boolean
+          match_reason?: Json
+          match_score?: number
+          primary_patient_id: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duplicate_patient_id?: string
+          id?: string
+          is_demo?: boolean
+          match_reason?: Json
+          match_score?: number
+          primary_patient_id?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_duplicate_cases_duplicate_patient_id_fkey"
+            columns: ["duplicate_patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "patient_duplicate_cases_primary_patient_id_fkey"
+            columns: ["primary_patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      patient_identifiers: {
+        Row: {
+          country_code: string | null
+          created_at: string
+          id: string
+          id_type: string
+          id_value: string
+          is_demo: boolean
+          is_primary: boolean
+          patient_id: string
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          id_type: string
+          id_value: string
+          is_demo?: boolean
+          is_primary?: boolean
+          patient_id: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          country_code?: string | null
+          created_at?: string
+          id?: string
+          id_type?: string
+          id_value?: string
+          is_demo?: boolean
+          is_primary?: boolean
+          patient_id?: string
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "patient_identifiers_patient_id_fkey"
+            columns: ["patient_id"]
+            isOneToOne: false
+            referencedRelation: "patients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       patient_immunizations: {
         Row: {
           administered_on: string
@@ -6062,6 +6317,66 @@ export type Database = {
             columns: ["deployment_id"]
             isOneToOne: false
             referencedRelation: "deployment_markers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schedule_exceptions: {
+        Row: {
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          doctor_id: string
+          end_time: string | null
+          exception_date: string
+          id: string
+          is_demo: boolean
+          notes: string | null
+          reason: string
+          start_time: string | null
+          updated_at: string
+        }
+        Insert: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_id: string
+          end_time?: string | null
+          exception_date: string
+          id?: string
+          is_demo?: boolean
+          notes?: string | null
+          reason: string
+          start_time?: string | null
+          updated_at?: string
+        }
+        Update: {
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          doctor_id?: string
+          end_time?: string | null
+          exception_date?: string
+          id?: string
+          is_demo?: boolean
+          notes?: string | null
+          reason?: string
+          start_time?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "schedule_exceptions_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "schedule_exceptions_doctor_id_fkey"
+            columns: ["doctor_id"]
+            isOneToOne: false
+            referencedRelation: "doctors"
             referencedColumns: ["id"]
           },
         ]
@@ -7861,6 +8176,16 @@ export type Database = {
         | "prescription"
         | "insurance"
         | "other"
+      booking_source:
+        | "web"
+        | "mobile"
+        | "front_desk"
+        | "call_center"
+        | "whatsapp"
+        | "partner_api"
+        | "walk_in"
+        | "ai_assistant"
+        | "waitlist"
       cms_kind:
         | "home"
         | "nav"
@@ -8178,6 +8503,17 @@ export const Constants = {
         "prescription",
         "insurance",
         "other",
+      ],
+      booking_source: [
+        "web",
+        "mobile",
+        "front_desk",
+        "call_center",
+        "whatsapp",
+        "partner_api",
+        "walk_in",
+        "ai_assistant",
+        "waitlist",
       ],
       cms_kind: [
         "home",
