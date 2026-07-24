@@ -252,7 +252,13 @@ export const Route = createFileRoute("/api/ai/chat")({
           loadPublicKnowledge(),
           getModel("fast"),
         ]);
-        const snapshot = auth ? await loadPatientSnapshot(auth.userId, auth.token) : "";
+        let snapshot = "";
+        if (auth) {
+          snapshot =
+            scope === "staff"
+              ? await loadStaffSnapshot(auth.userId, auth.token, staffRoles as never)
+              : await loadPatientSnapshot(auth.userId, auth.token);
+        }
 
         // Mask sensitive tokens in each user message before sending upstream
         const safeMessages = messages.map((m) => ({
@@ -261,15 +267,20 @@ export const Route = createFileRoute("/api/ai/chat")({
             m.role === "user" ? maskSensitive(m.content).slice(0, 4000) : m.content.slice(0, 4000),
         }));
 
+        const baseSystem = scope === "staff" ? SYSTEM_BASE_STAFF_AR : SYSTEM_BASE_AR;
         const systemMessages: { role: "system"; content: string }[] = [
-          { role: "system", content: SYSTEM_BASE_AR },
+          { role: "system", content: baseSystem },
           { role: "system", content: publicKnowledge },
         ];
         if (snapshot) systemMessages.push({ role: "system", content: snapshot });
         systemMessages.push({
           role: "system",
-          content: `النطاق الحالي: ${scope}. اللغة: ${lang}. لا تُنفّذ أي إجراء تعديلي؛ اقترح فقط.`,
+          content:
+            scope === "staff"
+              ? `النطاق الحالي: staff (قراءة فقط). الأدوار: ${staffRoles.join(", ") || "unknown"}. اللغة: ${lang}. ممنوع كتلة action.`
+              : `النطاق الحالي: ${scope}. اللغة: ${lang}. لا تُنفّذ أي إجراء تعديلي؛ اقترح فقط.`,
         });
+
 
         const resumePartial =
           typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";
