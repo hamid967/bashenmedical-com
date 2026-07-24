@@ -14,10 +14,12 @@ import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
 import { useJazanSettings } from "@/components/jazan/JazanSettingsProvider";
 import { trackEvent } from "@/lib/analytics";
+import { DEFAULT_INTRO_BLOCKED_PREFIXES, type IntroFrequency } from "@/lib/jazan-settings";
 
 const bmcLogo = bmcLogoAsset.url;
 
 const STORAGE_KEY = "bmc_jazan_intro_last_v1";
+const SESSION_KEY = "bmc_jazan_intro_session_v1";
 const DISABLED_KEY = "bmc_jazan_intro_disabled_v1";
 const DEBUG_KEY = "bmc_jazan_intro_debug";
 
@@ -77,22 +79,64 @@ export const INTRO_CONFIG = {
   },
 };
 
-function shouldShow(enabled: boolean, cooldownHours: number): boolean {
-  if (!enabled) return false;
+/**
+ * Phase 11 — decide whether to render the intro on this navigation.
+ * Never-block rules: booking/auth/portal/admin/owner paths always skip.
+ * Slow/data-saver networks also skip. Frequency is Super-Admin controlled.
+ */
+function shouldShow(
+  enabled: boolean,
+  frequency: IntroFrequency,
+  cooldownHours: number,
+  blockedPathPrefixes: readonly string[],
+): { show: true } | { show: false; reason: string } {
+  if (!enabled || frequency === "off") return { show: false, reason: "disabled_by_settings" };
+  if (typeof window === "undefined") return { show: false, reason: "ssr" };
+
+  // Never-block paths — booking, auth, patient portal, admin, owner, API, etc.
+  const prefixes = blockedPathPrefixes.length > 0 ? blockedPathPrefixes : DEFAULT_INTRO_BLOCKED_PREFIXES;
+  const path = window.location.pathname || "/";
+  for (const p of prefixes) {
+    if (p && path.startsWith(p)) return { show: false, reason: `blocked_path:${p}` };
+  }
+
+  // Save-data / slow-network guard.
   try {
-    if (localStorage.getItem(DISABLED_KEY) === "1") return false;
-    const last = localStorage.getItem(STORAGE_KEY);
-    if (!last) return true;
-    const ageMs = Date.now() - Number(last);
-    return ageMs > cooldownHours * 3_600_000;
+    const conn = (navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    }).connection;
+    if (conn?.saveData) return { show: false, reason: "save_data" };
+    if (conn?.effectiveType === "2g" || conn?.effectiveType === "slow-2g") {
+      return { show: false, reason: `slow_network:${conn.effectiveType}` };
+    }
   } catch {
-    return true;
+    /* ignore */
+  }
+
+  try {
+    if (localStorage.getItem(DISABLED_KEY) === "1") return { show: false, reason: "user_opted_out" };
+    if (frequency === "every_visit") return { show: true };
+    if (frequency === "once_per_session") {
+      return sessionStorage.getItem(SESSION_KEY) === "1"
+        ? { show: false, reason: "session_seen" }
+        : { show: true };
+    }
+    // once_per_period
+    const last = localStorage.getItem(STORAGE_KEY);
+    if (!last) return { show: true };
+    const ageMs = Date.now() - Number(last);
+    return ageMs > cooldownHours * 3_600_000
+      ? { show: true }
+      : { show: false, reason: "cooldown" };
+  } catch {
+    return { show: true };
   }
 }
 
 function markSeen() {
   try {
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
+    sessionStorage.setItem(SESSION_KEY, "1");
   } catch {
     /* ignore */
   }
@@ -173,14 +217,14 @@ export function JazanIntro() {
 
   useEffect(() => {
     setLang(readLang());
-    if (!shouldShow(introCfg.enabled, introCfg.cooldownHours)) {
-      const suppressedPayload = {
-        reason: !introCfg.enabled
-          ? "disabled_by_settings"
-          : typeof window !== "undefined" && localStorage.getItem(DISABLED_KEY) === "1"
-            ? "user_opted_out"
-            : "cooldown",
-      };
+    const decision = shouldShow(
+      introCfg.enabled,
+      introCfg.frequency,
+      introCfg.cooldownHours,
+      introCfg.blockedPathPrefixes ?? [],
+    );
+    if (!decision.show) {
+      const suppressedPayload = { reason: decision.reason };
       trackEvent("jazan_intro_suppressed", suppressedPayload);
       debugLog(debugEnabled, "jazan_intro_suppressed", suppressedPayload);
       return;
@@ -188,13 +232,17 @@ export function JazanIntro() {
     setMounted(true);
     shownAtRef.current = Date.now();
     const shownPayload = {
+      frequency: introCfg.frequency,
       cooldown_hours: introCfg.cooldownHours,
       duration_ms: introCfg.durationMs,
+      path: typeof window !== "undefined" ? window.location.pathname : "",
     };
     trackEvent("jazan_intro_shown", shownPayload);
     debugLog(debugEnabled, "jazan_intro_shown", shownPayload);
     requestAnimationFrame(() => setVisible(true));
-  }, [introCfg.enabled, introCfg.cooldownHours]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [introCfg.enabled, introCfg.frequency, introCfg.cooldownHours]);
+  
 
   useEffect(() => {
     if (!mounted) return;

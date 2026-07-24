@@ -1,105 +1,99 @@
+# Phase 11 — Premium Visual System & Lightweight Intro
 
-# Phase 9 — Full Website CMS
+## Scope
+Unify the visual language across public site, patient portal, and admin, then add a lightweight 5–8s intro controlled by Super Admin. No neon, no glass excess, no dead space, no duplicate components.
 
-نظام إدارة محتوى موحّد داخل `/admin` يتحكم في كل أسطح الموقع العامة، بدلًا من جداول متفرقة لكل قسم. الأقسام الحالية (`doctors`, `branches`, `specialties`, `health_articles`, `faqs`, `custom_pages`, `insurance_providers`, `content_items`, `about_sections`, `intro_settings`…) تبقى مصدر البيانات؛ CMS يضيف **طبقة إصدار وسير عمل** فوقها.
+## Part A — Design System v3 (Medical Premium)
 
-## 1) نموذج البيانات (طبقة CMS)
+### 1. Token layer (`src/styles.css`)
+Extend `@theme` with a single medical palette:
+- Light (default, public):
+  - `--background` warm ivory `oklch(0.99 0.005 90)`
+  - `--foreground` deep slate `oklch(0.22 0.02 250)`
+  - `--primary` Baeshen teal `oklch(0.52 0.09 195)`
+  - `--secondary` Jazan sand `oklch(0.88 0.04 75)`
+  - `--accent` muted gold `oklch(0.72 0.09 80)`
+  - `--success/warning/destructive` restrained, AA on both themes
+- Dark (portals only, opt-in via `.theme-portal-dark`): same tokens re-mapped, no pure black.
+- Spacing scale `--s-1..--s-12` (4px base), radius `--radius-sm/md/lg/pill`, elevation `--shadow-1..3` (soft, no glow), motion `--ease-medical`, `--dur-fast/base/slow`.
+- Respect `prefers-reduced-motion` globally (durations → 0.01ms).
 
-جدول موحّد للنسخ + الحالة لكل نوع محتوى:
+### 2. Arabic typography
+- Load "IBM Plex Sans Arabic" + "Inter" via `<link>` in `__root.tsx` head (preconnect + stylesheet), never `@import` in CSS.
+- `--font-sans-ar`, `--font-sans-en`; body auto-picks by `<html dir>`.
+- Line-height 1.7 for Arabic body, tabular-nums for numeric cells.
 
-```text
-cms_entries        (id, kind, entity_id, slug, locale_completeness jsonb, current_version_id, status, scheduled_at, published_at, archived_at, created_by, updated_at)
-cms_versions       (id, entry_id, version_no, payload_ar jsonb, payload_en jsonb, media_ids uuid[], seo jsonb, og_image_id, author_id, note, created_at)
-cms_reviews        (id, version_id, reviewer_id, decision, comment, created_at)   -- approve/reject
-cms_schedule       (id, version_id, publish_at, unpublish_at, job_state)
-cms_audit          (id, entry_id, version_id, actor_id, action, before jsonb, after jsonb, created_at)  -- immutable, DELETE denied
-```
+### 3. RTL/LTR
+- Keep `dir` on `<html>` driven by i18n; audit primitives for logical properties (`ps-*`, `pe-*`, `text-start`) — replace lingering `pl-*/pr-*` in shared components only (no business logic changes).
 
-`kind` enum يغطي كل الأسطح المطلوبة:
-`home, nav, footer, hero, service, specialty, doctor, branch, offer, announcement, article, faq, insurance, contact, hours, banner, intro, whatsapp, policy, page, seo_defaults`.
+### 4. Unified primitives (`src/components/ui-v3/`)
+Thin wrappers over existing shadcn to enforce the tokens; existing imports keep working via re-exports:
+- `Button` (variants: primary, secondary, ghost, danger, link; sizes sm/md/lg/icon with min 44px tap on md+).
+- `Input`, `Textarea`, `Select`, `Field` (label+hint+error slot).
+- `Card` (flat, subtle border, `--shadow-1`), `SectionCard` (used across dashboards).
+- `DataTable` (reuses `DataTableV2`, restyled headers, zebra off by default).
+- `StatusBadge` (semantic: success/info/warn/danger/neutral + medical: pending/in-progress/completed/cancelled).
+- `Dialog`, `Sheet`, `Toast` — re-exported with tokenized shadow/radius.
 
-`status` enum: `draft, in_review, approved, scheduled, published, archived`.
+Prevents duplication: single source, delete `ui-legacy` components that shipped duplicates (Owner, Command-Center variants) → forward to `ui-v3`.
 
-RLS: كتابة عبر `has_role('editor'|'admin'|'super_admin')`؛ نشر عبر `has_role('admin'|'super_admin')` فقط. `cms_audit` تمنع UPDATE/DELETE.
+### 5. Original SVG icon set (`src/components/icons/`)
+Hand-authored 24px stroke icons for the 20 most-used medical concepts (appointment, prescription, lab, radiology, family, insurance, invoice, report, doctor, branch, home-care, nurse, inbox, alert, calendar, clock, shield, heart-pulse, mosque-arch motif, palm-frond motif). Tree-shakeable named exports.
 
-## 2) سير العمل
+### 6. Jazan motif system
+Restrained SVG decorative primitives (arch corner, palm-frond divider, geometric star). Used sparingly in hero, empty-states, and intro; never behind form fields.
 
-```text
-draft ──submit──▶ in_review ──approve──▶ approved ──schedule──▶ scheduled ──cron──▶ published
-   ▲                 │reject                   │publish-now         │                  │
-   └─────────────────┘                         └───────────────────▶┘                  └──archive──▶ archived
-```
+### 7. Accessibility gates
+- All new tokens verified AA (4.5:1 body, 3:1 large) in both themes via `scripts/a11y/contrast-check.ts`.
+- Focus ring token `--ring` visible on all themes; no `outline-none` without `outline-hidden` fallback.
 
-- `submit`, `approve`, `reject`, `publish`, `schedule`, `unschedule`, `archive`, `restore`, `rollback` كلها server functions محمية بأدوار.
-- النشر يحدّث `entity` الفعلي (doctor/branch/article…) من `payload_ar/payload_en` داخل transaction، ويسجّل `cms_audit`.
-- الجدولة عبر `pg_cron` كل دقيقة تنادي `/api/public/cron/cms-publish` (apikey header) الذي ينفّذ كل النسخ `scheduled_at <= now()`.
+## Part B — Lightweight Intro (5–8s)
 
-## 3) واجهات لوحة الإدارة `/admin/cms`
+### Route & control
+- `src/components/intro/BaeshenIntro.tsx` — SVG + CSS animation only (no video, no autoplay audio, no heavy Lottie unless <20 KB gzip).
+- Mounted once at `__root.tsx` inside `<ClientOnly>`, above `<Outlet />` as an overlay.
+- Preloads homepage in parallel: it never blocks route hydration, `/book`, or `/auth/*` — those routes short-circuit intro immediately.
 
-- `/admin/cms` — لوحة رئيسية: KPIs (مسودات، بانتظار المراجعة، مجدولة، مؤرشفة)، طابور المراجعة، آخر نشرات.
-- `/admin/cms/$kind` — قائمة بكل النوع مع فلاتر (حالة/فرع/لغة/كامل الترجمة) + عمود مؤشر اكتمال AR/EN.
-- `/admin/cms/$kind/$id` — محرر ثنائي اللغة، تبويبات: **AR | EN | Media | SEO/OG | Schedule | History**.
-  - AR/EN: نموذج مبني من مخطط لكل `kind` (schema-driven form).
-  - Media: MediaPicker موجود.
-  - SEO/OG: title, description, canonical, og:title, og:description, og:image (من MediaPicker).
-  - Schedule: `publish_at`, `unpublish_at`.
-  - History: قائمة نسخ + Diff + زر Rollback.
-- `/admin/cms/$kind/$id/preview` — Preview عبر توكن قصير الأمد يعيد render صفحة السطح العام بحمولة النسخة (بدون نشر).
-- `/admin/cms/review` — طابور المراجعين مع Approve/Reject.
-- `/admin/cms/audit` — سجل تدقيق كامل قابل للفلترة.
+### Animation
+- 0.0s: warm ivory bg fades in, Skip button appears in top-left (RTL: top-right).
+- 0.4–2.2s: Baeshen wordmark strokes draw in (`stroke-dasharray`).
+- 1.6–4.5s: Jazan arch + palm-frond motif fades behind logo.
+- 3.0–5.5s: tagline `رعاية حديثة بروح جازان` fades up.
+- 5.5–6.5s: overlay fades out, unmounts.
+- `prefers-reduced-motion`: static single-frame poster for 1.2s then dismiss.
 
-مؤشر اكتمال الترجمة: نسبة الحقول المُعبَّأة لكل لغة تظهر شارة (100% أخضر، <100% كهرماني، فارغ أحمر)؛ لا يمكن `approve` إذا AR غير مكتمل.
+### Skip / never-block rules
+- Skip button focusable on mount, `Esc` also dismisses.
+- Auto-skip if route is `/book`, `/auth`, `/patient`, `/admin`, `/owner`.
+- Auto-skip if session flag `intro_seen_<version>` present.
+- Auto-skip if network `saveData` or `effectiveType` is `2g`/`slow-2g`.
 
-## 4) المعاينة قبل النشر
+### Super Admin control
+- New table `public.intro_settings` (singleton row): `enabled`, `frequency` (`once_per_session` | `once_per_day` | `every_visit` | `off`), `version`, `tagline_ar`, `tagline_en`, `max_duration_ms`, `show_on_paths` (text[]), `hide_on_paths` (text[]), updated_by, updated_at. RLS: read = anon+authenticated, write = super_admin only. GRANTs per rules.
+- Server fn `getIntroConfig` (public, publishable client, projected columns).
+- Admin page `/admin/appearance/intro` under Content-Hub: toggle, frequency selector, tagline editor, path allow/deny, live preview button.
 
-- زر "Preview" يُنشئ توكن (`cms_preview_tokens` عمر 15 دقيقة) ويفتح المسار العام بـ `?preview=<token>`.
-- المسار العام (loader) يرصد `preview` token، يستدعي `getCmsVersionForPreview` (يتحقق من الدور + التوكن)، ويستبدل بيانات المصدر بحمولة النسخة أثناء الـ render فقط. لا يُخزَّن ولا يظهر لغير الأدمن.
+### Telemetry
+- Fires one `intro_shown` / `intro_skipped` inbox_event (lightweight) per session; no PII.
 
-## 5) النسخ، الاسترجاع، والتدقيق
+## Part C — Rollout & guards
+- Feature flag `ui.designSystemV3` (default on) and `ui.intro` (default off until Super Admin enables).
+- Keep legacy component paths as re-exports for one release; add lint rule warning on direct imports of `ui-legacy/*`.
+- Visual regression: extend `tests/e2e/visual/` with snapshots for Button, Card, StatusBadge, Intro (reduced-motion + full).
+- Playwright test: `/book` never shows intro; `Skip` dismisses < 100ms; auth flow uninterrupted.
 
-- كل حفظ ينشئ صفًا جديدًا في `cms_versions` مع `version_no` تصاعدي.
-- Rollback = نسخ الحمولة إلى نسخة جديدة برقم جديد ثم Publish (لا يحذف السجل التاريخي).
-- `cms_audit` يسجّل: create/update/submit/approve/reject/publish/schedule/unschedule/archive/rollback مع `before/after` diff. RLS يمنع الحذف والتحديث.
+## Deliverables
+1. Tokens + Arabic fonts wired in `src/styles.css` and `__root.tsx`.
+2. `src/components/ui-v3/*` unified primitives + icon set + Jazan motifs.
+3. `BaeshenIntro` overlay + config plumbing.
+4. `intro_settings` migration (schema + GRANTs + RLS + seed row).
+5. `/admin/appearance/intro` control page inside Content-Hub.
+6. A11y contrast script + Playwright specs for intro and never-block rules.
+7. Docs: `docs/design/system-v3.md` with usage rules and don'ts.
 
-## 6) الصلاحيات
-
-يُضاف دور `editor` لجدول `user_roles` (يوجد بالفعل). المصفوفة:
-
-| Action | editor | admin | super_admin |
-|---|---|---|---|
-| create/edit draft | ✅ | ✅ | ✅ |
-| submit for review | ✅ | ✅ | ✅ |
-| approve/reject | ❌ | ✅ | ✅ |
-| publish now | ❌ | ✅ | ✅ |
-| schedule | ❌ | ✅ | ✅ |
-| rollback | ❌ | ✅ | ✅ |
-| archive | ❌ | ✅ | ✅ |
-| SEO defaults / nav / footer / policies | ❌ | ❌ | ✅ |
-
-## 7) تكامل الأسطح العامة
-
-- `home, nav, footer, hero, contact, hours, whatsapp, intro, seo_defaults` تُخزَّن كـ singletons داخل `cms_entries` (kind + entity_id NULL) وتُقرأ في loaders الصفحات العامة عبر server-fn `getPublishedSurface(kind)` مع `TO anon` policy على `cms_entries` لصفوف `status='published'` فقط.
-- الأنواع المرتبطة بجداول قائمة (doctors/branches/articles…) — النشر يكتب في الجدول الأصلي؛ الصفحات العامة تبقى كما هي.
-
-## 8) الاختبارات
-
-- Unit: انتقالات الحالة، فحص الدور لكل action، تدقيق مناعي، اكتمال الترجمة.
-- E2E: draft→submit→approve→schedule→cron publish→rollback؛ preview token؛ non-editor rejected.
-
-## 9) خطوات التنفيذ (بالترتيب)
-
-1. Migration واحدة: enums، الجداول الخمسة، RLS/GRANT، فهارس، trigger منع UPDATE/DELETE على `cms_audit`.
-2. `src/lib/admin/cms/schemas.ts` — مخطط الحقول لكل `kind` (AR/EN).
-3. `src/lib/admin/cms/*.functions.ts` — server fns (list/get/save/submit/approve/reject/publish/schedule/rollback/archive/preview-token).
-4. `src/routes/api/public/cron/cms-publish.ts` + جدولة `pg_cron` كل دقيقة.
-5. صفحات `/admin/cms/*` + رابط "CMS" في `AdminShellV2`.
-6. تعديل loaders الأسطح المفردة (home/nav/footer/…) لتقرأ من `getPublishedSurface`.
-7. اختبارات unit + E2E.
-
-## Deliverable المرحلة الأولى (هذا الطلب)
-
-سأنفّذها في هذا الترتيب:
-1. الهجرة (سترسل لاعتمادك أولًا).
-2. server fns + مخططات + راوتات الأدمن + كرون + تكامل الأسطح المفردة + اختبارات.
-
-هل أبدأ بإرسال ملف الهجرة (الخطوة 1) الآن؟
+## Technical notes
+- Fonts via `<link>` (preconnect + stylesheet) — never `@import` a URL.
+- `@theme inline` mapping for shadcn tokens so `border-border`, `bg-background`, etc. resolve.
+- No `tailwind.config.js`; all tokens live in `src/styles.css`.
+- Intro overlay uses `position: fixed` + `pointer-events` toggled off during fade-out so it never eats clicks.
+- Reduced-motion path bypasses all keyframes; a single opacity transition only.
