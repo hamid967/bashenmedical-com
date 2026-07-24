@@ -7,11 +7,12 @@
  *   2) logs ai_safety_incidents (kind = human_escalation) linked to it
  *   3) writes an immutable inbox_events audit row
  *
- * Only works with a persisted conversation (conversationId present).
- * Silent no-op when the user opted into "no save" mode.
+ * Once a ticket exists for the active conversation, the button turns into a
+ * live status chip that polls `getAiEscalationStatus` on a visibility-aware
+ * interval and shows the current inbox status + last update time.
  */
 import { useState } from "react";
-import { LifeBuoy, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +25,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useServerFn } from "@tanstack/react-start";
-import { escalateAiConversation } from "@/lib/ai/escalate.functions";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  escalateAiConversation,
+  getAiEscalationStatus,
+  type EscalationStatus,
+} from "@/lib/ai/escalate.functions";
+import { visibilityAwareInterval } from "@/lib/polling";
+import { formatDateTimeInTZ } from "@/lib/datetime";
 
 type Severity = "low" | "medium" | "high" | "critical";
 
@@ -50,6 +58,37 @@ const SEVERITIES: { value: Severity; ar: string; en: string }[] = [
   { value: "critical", ar: "حرجة", en: "Critical" },
 ];
 
+/** Coarse bucket for badge color/label. */
+type Bucket = "open" | "in_review" | "closed";
+
+const CLOSED_STATUSES = new Set(["completed", "cancelled", "duplicate", "archived"]);
+const REVIEW_STATUSES = new Set([
+  "reviewed",
+  "contacted",
+  "awaiting_patient",
+  "awaiting_approval",
+  "appointment_created",
+  "in_progress",
+]);
+
+function bucketOf(status: string): Bucket {
+  if (CLOSED_STATUSES.has(status)) return "closed";
+  if (REVIEW_STATUSES.has(status)) return "in_review";
+  return "open";
+}
+
+function bucketLabel(b: Bucket, isAr: boolean) {
+  if (b === "closed") return isAr ? "مغلقة" : "Closed";
+  if (b === "in_review") return isAr ? "قيد المراجعة" : "In review";
+  return isAr ? "مفتوحة" : "Open";
+}
+
+function bucketClass(b: Bucket) {
+  if (b === "closed") return "border-muted bg-muted/50 text-muted-foreground";
+  if (b === "in_review") return "border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+  return "border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
+}
+
 export function EscalateToHumanButton({
   conversationId,
   lang,
@@ -62,8 +101,25 @@ export function EscalateToHumanButton({
   const [severity, setSeverity] = useState<Severity>("medium");
   const [state, setState] = useState<State>({ kind: "idle" });
   const escalate = useServerFn(escalateAiConversation);
+  const getStatus = useServerFn(getAiEscalationStatus);
+  const qc = useQueryClient();
   const isAr = lang === "ar";
   const t = (ar: string, en: string) => (isAr ? ar : en);
+
+  const canQuery = !!conversationId && !disabledReason;
+  const statusQuery = useQuery<EscalationStatus | null>({
+    queryKey: ["ai-escalation-status", conversationId],
+    queryFn: () => getStatus({ data: { conversationId: conversationId! } }),
+    enabled: canQuery,
+    // Poll every 20s while tab is visible, pause when hidden.
+    refetchInterval: visibilityAwareInterval(20_000, false),
+    refetchOnWindowFocus: true,
+    staleTime: 10_000,
+    retry: 1,
+  });
+
+  const ticket = statusQuery.data ?? null;
+  const bucket = ticket ? bucketOf(ticket.status) : null;
 
   const disabled = !conversationId || !!disabledReason;
 
@@ -71,7 +127,10 @@ export function EscalateToHumanButton({
     if (!conversationId) return;
     const trimmed = reason.trim();
     if (trimmed.length < 3) {
-      setState({ kind: "error", message: t("اكتب سبب التصعيد (3 أحرف على الأقل).", "Describe the reason (min 3 chars).") });
+      setState({
+        kind: "error",
+        message: t("اكتب سبب التصعيد (3 أحرف على الأقل).", "Describe the reason (min 3 chars)."),
+      });
       return;
     }
     setState({ kind: "submitting" });
@@ -87,6 +146,8 @@ export function EscalateToHumanButton({
         },
       });
       setState({ kind: "done", requestNumber: res.requestNumber });
+      // Refresh the status chip immediately after creation.
+      qc.invalidateQueries({ queryKey: ["ai-escalation-status", conversationId] });
     } catch (err) {
       const code = (err as Error)?.message ?? "";
       const message =
@@ -109,6 +170,116 @@ export function EscalateToHumanButton({
     setState({ kind: "idle" });
   }
 
+  // Existing ticket → show a live status chip that opens the details dialog.
+  if (ticket && bucket) {
+    const updatedLabel = formatDateTimeInTZ(ticket.updatedAt, isAr ? "ar" : "en", {
+      hour: "2-digit",
+      minute: "2-digit",
+      day: "2-digit",
+      month: "short",
+    });
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          title={t("عرض حالة التذكرة", "View ticket status")}
+          className={
+            "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+            bucketClass(bucket)
+          }
+        >
+          <LifeBuoy className="h-3 w-3" />
+          <span>{bucketLabel(bucket, isAr)}</span>
+          <span className="opacity-60">·</span>
+          <span className="font-mono">{ticket.requestNumber}</span>
+        </button>
+
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <LifeBuoy className="h-4 w-4 text-primary" />
+                {t("حالة تذكرة التصعيد", "Escalation ticket status")}
+              </DialogTitle>
+              <DialogDescription>
+                {t(
+                  "يتم تحديث الحالة تلقائيًا كل ٢٠ ثانية أثناء فتح النافذة.",
+                  "Status auto-refreshes every 20s while this tab is open.",
+                )}
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("رقم الطلب", "Request number")}</span>
+                <code className="rounded bg-muted px-1.5 py-0.5 font-mono">
+                  {ticket.requestNumber}
+                </code>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("الحالة", "Status")}</span>
+                <span
+                  className={
+                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+                    bucketClass(bucket)
+                  }
+                >
+                  {bucketLabel(bucket, isAr)}
+                  <span className="opacity-60">({ticket.status})</span>
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("الأولوية", "Priority")}</span>
+                <span className="text-xs">{ticket.priority}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">{t("أُنشئت", "Created")}</span>
+                <span className="text-xs">
+                  {formatDateTimeInTZ(ticket.createdAt, isAr ? "ar" : "en", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground inline-flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {t("آخر تحديث", "Last update")}
+                </span>
+                <span className="text-xs">{updatedLabel}</span>
+              </div>
+              {statusQuery.isFetching && (
+                <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  {t("جارٍ التحديث...", "Refreshing...")}
+                </div>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void statusQuery.refetch()}
+                disabled={statusQuery.isFetching}
+              >
+                {t("تحديث الآن", "Refresh now")}
+              </Button>
+              <Button type="button" onClick={() => setOpen(false)}>
+                {t("إغلاق", "Close")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </>
+    );
+  }
+
+  // No ticket yet → original "Request human help" flow.
   return (
     <>
       <button
@@ -154,12 +325,17 @@ export function EscalateToHumanButton({
                   id="esc-reason"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  placeholder={t("مثال: احتاج مساعدة عاجلة في حالة طبية.", "e.g., Need urgent help with a medical concern.")}
+                  placeholder={t(
+                    "مثال: احتاج مساعدة عاجلة في حالة طبية.",
+                    "e.g., Need urgent help with a medical concern.",
+                  )}
                   rows={3}
                   maxLength={500}
                   disabled={state.kind === "submitting"}
                 />
-                <div className="text-[11px] text-muted-foreground">{reason.trim().length}/500</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {reason.trim().length}/500
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -207,10 +383,11 @@ export function EscalateToHumanButton({
                   {state.requestNumber}
                 </code>
               </div>
-              <div className="text-[11px] text-muted-foreground">
+              <div className="text-[11px] text-muted-foreground inline-flex items-center gap-1">
+                <ExternalLink className="h-3 w-3" />
                 {t(
-                  "يمكنك متابعة الطلب لاحقًا عبر رقم التذكرة. تم تسجيل حادثة السلامة وربطها بهذه المحادثة.",
-                  "Track the request using its number. A safety incident record has been linked to this conversation.",
+                  "ستظهر حالة التذكرة أعلى المحادثة وتتحدث تلقائيًا.",
+                  "Ticket status will appear above the chat and update automatically.",
                 )}
               </div>
             </div>
