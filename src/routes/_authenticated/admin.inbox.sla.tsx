@@ -513,6 +513,29 @@ function AlertConfigCard() {
     onError: (e: any) => toast.error(e?.message ?? "فشل الفحص"),
   });
 
+  const testWebhook = useMutation({
+    mutationFn: async () => {
+      const url = webhookUrl.trim();
+      if (!url) throw new Error("أدخل رابط webhook أولاً");
+      return testHook({ data: { webhook_url: url } });
+    },
+    onSuccess: (r) => {
+      setTestResult(r);
+      if (r.ok) toast.success(`نجح الاختبار (HTTP ${r.status} • ${r.duration_ms}ms)`);
+      else toast.error(r.error ?? "فشل الاختبار");
+    },
+    onError: (e: any) => {
+      setTestResult({
+        ok: false,
+        status: null,
+        duration_ms: 0,
+        response_body: null,
+        error: e?.message ?? "خطأ غير معروف",
+      });
+      toast.error(e?.message ?? "فشل الاختبار");
+    },
+  });
+
   return (
     <Card className="p-4">
       <div className="flex items-center gap-2 mb-3">
