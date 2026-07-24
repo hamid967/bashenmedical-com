@@ -223,12 +223,24 @@ function ManagePage() {
     mutationFn: async () => {
       setErrorMsg(null);
       setDevCode(null);
+      if (HCAPTCHA_ENABLED && !captchaToken) {
+        throw new Error("captcha_required");
+      }
       return apiPost<{
         ok: boolean;
         message?: string;
         phone_masked?: string;
         dev_code?: string;
-      }>("/api/public/reservations/otp/send", { phone });
+      }>("/api/public/reservations/otp/send", {
+        phone,
+        captcha_token: captchaToken ?? undefined,
+      });
+    },
+    onSettled: () => {
+      // hCaptcha tokens are single-use; reset after every attempt so a
+      // retry cannot replay the previous token.
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     },
     onSuccess: (res) => {
       if (!res.ok) {
@@ -239,18 +251,35 @@ function ManagePage() {
       if (res.dev_code) setDevCode(res.dev_code);
       setStep("code");
     },
-    onError: () => setErrorMsg("خطأ في الشبكة."),
+    onError: (e: unknown) => {
+      const msg =
+        e instanceof Error && e.message === "captcha_required"
+          ? "أكمل التحقق البشري أولًا."
+          : "خطأ في الشبكة.";
+      setErrorMsg(msg);
+    },
   });
 
   const verifyOtp = useMutation({
     mutationFn: async () => {
       setErrorMsg(null);
+      if (HCAPTCHA_ENABLED && !captchaToken) {
+        throw new Error("captcha_required");
+      }
       return apiPost<{
         ok: boolean;
         message?: string;
         session_token?: string;
         session_expires_at?: string;
-      }>("/api/public/reservations/otp/verify", { phone, code });
+      }>("/api/public/reservations/otp/verify", {
+        phone,
+        code,
+        captcha_token: captchaToken ?? undefined,
+      });
+    },
+    onSettled: () => {
+      setCaptchaToken(null);
+      captchaRef.current?.reset();
     },
     onSuccess: (res) => {
       if (!res.ok || !res.session_token || !res.session_expires_at) {
@@ -273,7 +302,13 @@ function ManagePage() {
       }
       setStep("list");
     },
-    onError: () => setErrorMsg("خطأ في الشبكة."),
+    onError: (e: unknown) => {
+      const msg =
+        e instanceof Error && e.message === "captcha_required"
+          ? "أكمل التحقق البشري أولًا."
+          : "خطأ في الشبكة.";
+      setErrorMsg(msg);
+    },
   });
 
   const listAppts = useMutation({
