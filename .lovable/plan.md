@@ -1,99 +1,98 @@
-# Phase 11 — Premium Visual System & Lightweight Intro
+# خطة "منظومة باعشن HIS" — Medinous-Style Booking
 
-## Scope
-Unify the visual language across public site, patient portal, and admin, then add a lightweight 5–8s intro controlled by Super Admin. No neon, no glass excess, no dead space, no duplicate components.
+المرجع: `Baeshen_Medinous_Style_Booking_System_Lovable.md` (804 سطر، 30 قسم).
+الوثيقة نفسها ستنسخ إلى `docs/specs/booking-medinous-style.md` كمرجع دائم.
 
-## Part A — Design System v3 (Medical Premium)
+## المبادئ
 
-### 1. Token layer (`src/styles.css`)
-Extend `@theme` with a single medical palette:
-- Light (default, public):
-  - `--background` warm ivory `oklch(0.99 0.005 90)`
-  - `--foreground` deep slate `oklch(0.22 0.02 250)`
-  - `--primary` Baeshen teal `oklch(0.52 0.09 195)`
-  - `--secondary` Jazan sand `oklch(0.88 0.04 75)`
-  - `--accent` muted gold `oklch(0.72 0.09 80)`
-  - `--success/warning/destructive` restrained, AA on both themes
-- Dark (portals only, opt-in via `.theme-portal-dark`): same tokens re-mapped, no pure black.
-- Spacing scale `--s-1..--s-12` (4px base), radius `--radius-sm/md/lg/pill`, elevation `--shadow-1..3` (soft, no glow), motion `--ease-medical`, `--dur-fast/base/slow`.
-- Respect `prefers-reduced-motion` globally (durations → 0.01ms).
+- تطوير `/book` الحالي، بدون نظام حجز مواز.
+- الحفاظ على: `slot_holds`, `Idempotency-Key`, NPHIES adapter, Realtime monitor.
+- Migrations قابلة للتراجع؛ Manifest قبل أي تغيير عالي الخطورة.
+- فصل صارم Demo/Production عبر `is_demo boolean not null default false` + RLS تُخفيها في الإنتاج + Feature flag `bookings.show_demo`.
+- لا نسخ لواجهة Medinous أو محتواها.
 
-### 2. Arabic typography
-- Load "IBM Plex Sans Arabic" + "Inter" via `<link>` in `__root.tsx` head (preconnect + stylesheet), never `@import` in CSS.
-- `--font-sans-ar`, `--font-sans-en`; body auto-picks by `<html dir>`.
-- Line-height 1.7 for Arabic body, tabular-nums for numeric cells.
+## Phase 1 — Audit & Change Manifest (بدون كود إنتاج)
 
-### 3. RTL/LTR
-- Keep `dir` on `<html>` driven by i18n; audit primitives for logical properties (`ps-*`, `pe-*`, `text-start`) — replace lingering `pl-*/pr-*` in shared components only (no business logic changes).
+الناتج: `docs/audit/booking-hiv-phase1.md` يحوي:
 
-### 4. Unified primitives (`src/components/ui-v3/`)
-Thin wrappers over existing shadcn to enforce the tokens; existing imports keep working via re-exports:
-- `Button` (variants: primary, secondary, ghost, danger, link; sizes sm/md/lg/icon with min 44px tap on md+).
-- `Input`, `Textarea`, `Select`, `Field` (label+hint+error slot).
-- `Card` (flat, subtle border, `--shadow-1`), `SectionCard` (used across dashboards).
-- `DataTable` (reuses `DataTableV2`, restyled headers, zebra off by default).
-- `StatusBadge` (semantic: success/info/warn/danger/neutral + medical: pending/in-progress/completed/cancelled).
-- `Dialog`, `Sheet`, `Toast` — re-exported with tokenized shadow/radius.
+1. **Current Architecture** — قائمة routes `/book`, `/reservations/manage`, `/admin/*`, `patient.*`, `doctor.*`.
+2. **Database Map** — الجداول الحالية (34 جدول محدد، منها `appointments`, `slot_holds`, `availability_slots`, `patients`, `doctors`, `doctor_branches`, `insurance_*`, `patient_check_ins`, `appointment_status_history`, `appointment_waitlist`).
+3. **Gap Analysis** — ما ينقص مقابل القسم 22 من الوثيقة:
+   - `patient_identifiers` (MRN + national_id متعدد)
+   - `clinics` (منفصلة عن `branches`)
+   - `services` كجدول موحد
+   - `doctor_schedules` + `schedule_exceptions`
+   - `appointment_slots` (حالياً `availability_slots` — نُقيّم إعادة التسمية أو التكيّف)
+   - `queue_entries`, `estimates`, `refunds` (بعضها موجود؛ نتحقق)
+   - `booking_source` عمود على `appointments`
+   - State machine كاملة (16 حالة) — الحالي أقل
+4. **Security Findings** — RLS gaps, IDOR surface, branch-scope.
+5. **Change Manifest** — مصنّف حسب الخطورة (safe/medium/high) مع Rollback لكل تغيير.
+6. **Migration Order** لباقي المراحل.
 
-Prevents duplication: single source, delete `ui-legacy` components that shipped duplicates (Owner, Command-Center variants) → forward to `ui-v3`.
+**بوابة اعتماد م. حامد** قبل الانتقال للمرحلة 2.
 
-### 5. Original SVG icon set (`src/components/icons/`)
-Hand-authored 24px stroke icons for the 20 most-used medical concepts (appointment, prescription, lab, radiology, family, insurance, invoice, report, doctor, branch, home-care, nurse, inbox, alert, calendar, clock, shield, heart-pulse, mosque-arch motif, palm-frond motif). Tree-shakeable named exports.
+## Phase 2 — Foundation (Patient Master + Schedule Engine)
 
-### 6. Jazan motif system
-Restrained SVG decorative primitives (arch corner, palm-frond divider, geometric star). Used sparingly in hero, empty-states, and intro; never behind form fields.
+- Patient Master Index: توحيد `patients` + `patient_profiles`، إضافة `patient_identifiers` (national_id/iqama/passport)، MRN صيغة `BMC-MRN-######` (يوجد `branch_mrn_counter`).
+- **Duplicate Review Case**: جدول `patient_duplicate_cases` بدل الدمج التلقائي، مع UI مراجعة.
+- Schedule Engine: `doctor_schedules` (أسبوعي) + `schedule_exceptions` (إجازات/طوارئ) + `service_durations`.
+- تعزيز Slot Hold الحالي: تحقق من التوفر ذرّياً على الخادم، `hold_id`+`expires_at`، تحرير عند تغيير الاختيار.
+- Atomic Booking RPC: transaction واحدة (10 خطوات من القسم 8) + Idempotency (موجود، نتحقق من التغطية).
+- رقم الحجز `BMC-APT-YYYYMMDD-XXXX` (موجود counter — نتحقق من الصيغة).
+- عمود `booking_source` على `appointments` + enum.
 
-### 7. Accessibility gates
-- All new tokens verified AA (4.5:1 body, 3:1 large) in both themes via `scripts/a11y/contrast-check.ts`.
-- Focus ring token `--ring` visible on all themes; no `outline-none` without `outline-hidden` fallback.
+## Phase 3 — SPA Booking + Front Desk + Queue
 
-## Part B — Lightweight Intro (5–8s)
+- `/book` كـ SPA مع Stepper و Sticky Summary و Bottom Sheet جوال و Autosave و Browser Back/Forward بدون فقد بيانات (كثير منه موجود — نغلق الفجوات).
+- `/admin/front-desk`: بحث مريض، تسجيل، Snapshot، إنشاء حجز، حجوزات اليوم، Check-in، إعادة جدولة، إلغاء، No-show.
+- Queue: `queue_entries` مع الحالات (waiting/called/skipped/in_service/completed/cancelled) + رقم انتظار.
+- Waiting-list Opportunity workflow (1-click confirm + مهلة).
+- Reschedule "Hold-New-then-Release-Old" (القسم 14).
+- No-show بصلاحية + فترة سماح + سبب.
 
-### Route & control
-- `src/components/intro/BaeshenIntro.tsx` — SVG + CSS animation only (no video, no autoplay audio, no heavy Lottie unless <20 KB gzip).
-- Mounted once at `__root.tsx` inside `<ClientOnly>`, above `<Outlet />` as an overlay.
-- Preloads homepage in parallel: it never blocks route hydration, `/book`, or `/auth/*` — those routes short-circuit intro immediately.
+## Phase 4 — Portals (Patient / Doctor / Branch Manager)
 
-### Animation
-- 0.0s: warm ivory bg fades in, Skip button appears in top-left (RTL: top-right).
-- 0.4–2.2s: Baeshen wordmark strokes draw in (`stroke-dasharray`).
-- 1.6–4.5s: Jazan arch + palm-frond motif fades behind logo.
-- 3.0–5.5s: tagline `رعاية حديثة بروح جازان` fades up.
-- 5.5–6.5s: overlay fades out, unmounts.
-- `prefers-reduced-motion`: static single-frame poster for 1.2s then dismiss.
+- `/patient/*`: appointments, reports, prescriptions, billing, insurance, requests, family, profile — يبني على `PatientShell` الموجودة.
+- `/doctor`: جدول اليوم، المنتظرون، إنهاء الزيارة، طلب متابعة (بدون EMR كامل).
+- `/admin/branch-manager`: مواعيد اليوم، الحضور، الانتظار، No-show، إشغال الأطباء، التأمين، التحصيل — مع فلاتر (تاريخ/طبيب/تخصص/خدمة/عيادة/حالة/مصدر/تأمين).
+- Notification channels موحدة (In-app/SMS/WhatsApp/Email/Push) مع حالات (queued/sent/delivered/failed/unknown).
 
-### Skip / never-block rules
-- Skip button focusable on mount, `Esc` also dismisses.
-- Auto-skip if route is `/book`, `/auth`, `/patient`, `/admin`, `/owner`.
-- Auto-skip if session flag `intro_seen_<version>` present.
-- Auto-skip if network `saveData` or `effectiveType` is `2g`/`slow-2g`.
+## Phase 5 — Insurance, NPHIES, Billing
 
-### Super Admin control
-- New table `public.intro_settings` (singleton row): `enabled`, `frequency` (`once_per_session` | `once_per_day` | `every_visit` | `off`), `version`, `tagline_ar`, `tagline_en`, `max_duration_ms`, `show_on_paths` (text[]), `hide_on_paths` (text[]), updated_by, updated_at. RLS: read = anon+authenticated, write = super_admin only. GRANTs per rules.
-- Server fn `getIntroConfig` (public, publishable client, projected columns).
-- Admin page `/admin/appearance/intro` under Content-Hub: toggle, frequency selector, tagline editor, path allow/deny, live preview button.
+- Insurance states (11 حالة، القسم 16).
+- NPHIES Adapter محاذي للحالي مع Mock/Prod flag صريح + Request ID logging بدون PII.
+- Estimates + Invoices + Payments + Refunds workflow.
+- Payment states (9 حالات) — لا تأكيد قبل webhook موثّق + signature + idempotency.
 
-### Telemetry
-- Fires one `intro_shown` / `intro_skipped` inbox_event (lightweight) per session; no PII.
+## Phase 6 — Security / A11y / Perf / Docs / Production Readiness
 
-## Part C — Rollout & guards
-- Feature flag `ui.designSystemV3` (default on) and `ui.intro` (default off until Super Admin enables).
-- Keep legacy component paths as re-exports for one release; add lint rule warning on direct imports of `ui-legacy/*`.
-- Visual regression: extend `tests/e2e/visual/` with snapshots for Button, Card, StatusBadge, Intro (reduced-motion + full).
-- Playwright test: `/book` never shows intro; `Skip` dismisses < 100ms; auth flow uninterrupted.
+- RBAC 10 أدوار (Super Admin → Patient) على UI+API+RLS.
+- Cross-patient/branch/IDOR test suite.
+- WCAG 2.2 AA؛ Chromium+Firefox+WebKit Playwright.
+- Super Admin settings (القسم 23) — لا سياسات hardcoded.
+- Documentation + Training runbooks.
 
-## Deliverables
-1. Tokens + Arabic fonts wired in `src/styles.css` and `__root.tsx`.
-2. `src/components/ui-v3/*` unified primitives + icon set + Jazan motifs.
-3. `BaeshenIntro` overlay + config plumbing.
-4. `intro_settings` migration (schema + GRANTs + RLS + seed row).
-5. `/admin/appearance/intro` control page inside Content-Hub.
-6. A11y contrast script + Playwright specs for intro and never-block rules.
-7. Docs: `docs/design/system-v3.md` with usage rules and don'ts.
+## Demo/Production Data Separation
 
-## Technical notes
-- Fonts via `<link>` (preconnect + stylesheet) — never `@import` a URL.
-- `@theme inline` mapping for shadcn tokens so `border-border`, `bg-background`, etc. resolve.
-- No `tailwind.config.js`; all tokens live in `src/styles.css`.
-- Intro overlay uses `position: fixed` + `pointer-events` toggled off during fade-out so it never eats clicks.
-- Reduced-motion path bypasses all keyframes; a single opacity transition only.
+في كل جدول جديد تحوي بيانات تجريبية:
+
+```sql
+is_demo boolean not null default false
+-- RLS: policy on production excludes rows where is_demo AND NOT current_setting('app.show_demo', true)::bool
+```
+
++ Feature flag `bookings.show_demo` في `ai_feature_flags` + toggle في Super Admin UI. لا `is_demo=true` في مسارات المرضى الحقيقية.
+
+## Definition of Done (كل مرحلة)
+
+- Migrations reversible + Rollback موثّق.
+- Unit + Integration + Playwright خضراء.
+- ESLint + tsc + build ناجحة.
+- Security scan بدون findings حرجة جديدة.
+- RLS/RBAC tests للـcross-tenant.
+- No fake buttons / no fake success (شرط القسم 30).
+
+## القرار المطلوب
+
+الاعتماد على تسليم Phase 1 (Audit + Manifest بدون تعديل كود إنتاجي) خلال الجولة القادمة، والباقي بعد مراجعة الـManifest.
