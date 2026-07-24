@@ -617,12 +617,61 @@ function AlertConfigCard() {
         >
           تشغيل فحص فوري
         </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => testWebhook.mutate()}
+          disabled={testWebhook.isPending || !webhookUrl.trim()}
+        >
+          {testWebhook.isPending ? "جارٍ الاختبار…" : "اختبار webhook"}
+        </Button>
         {cfg?.updated_at && (
           <span className="text-[11px] text-muted-foreground ms-auto">
             آخر تحديث: {new Date(cfg.updated_at).toLocaleString("ar")}
           </span>
         )}
       </div>
+
+      {testResult && (
+        <div
+          className={`mt-3 rounded border p-3 text-xs ${
+            testResult.ok
+              ? "border-emerald-500/40 bg-emerald-500/5"
+              : "border-red-500/40 bg-red-500/5"
+          }`}
+        >
+          <div className="flex items-center gap-2 mb-2">
+            {testResult.ok ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            ) : (
+              <AlertTriangle className="w-4 h-4 text-red-600" />
+            )}
+            <span className="font-semibold">
+              {testResult.ok ? "نجح الاختبار" : "فشل الاختبار"}
+            </span>
+            <span className="text-muted-foreground">
+              HTTP {testResult.status ?? "—"} • {testResult.duration_ms}ms
+            </span>
+            <button
+              type="button"
+              className="ms-auto text-[11px] underline"
+              onClick={() => setTestResult(null)}
+            >
+              إخفاء
+            </button>
+          </div>
+          {testResult.error && (
+            <div className="mb-2 text-red-700 dark:text-red-400">
+              خطأ: {testResult.error}
+            </div>
+          )}
+          {testResult.response_body && (
+            <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-background/60 p-2 font-mono text-[11px]">
+              {testResult.response_body}
+            </pre>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
