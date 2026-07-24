@@ -124,13 +124,15 @@ for (const p of pairs) {
 
 // --- Report ----------------------------------------------------------------
 const pad = (s, n) => String(s).padEnd(n);
-const symbol = { pass: "PASS", fail: "FAIL", missing: "MISS" };
+const symbol = { pass: "PASS", fail: "FAIL", missing: "MISS", info: "INFO" };
 const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
 const YEL = "\x1b[33m";
+const CYA = "\x1b[36m";
 const DIM = "\x1b[2m";
 const OFF = "\x1b[0m";
-const color = (s) => (s === "pass" ? GREEN : s === "fail" ? RED : YEL);
+const color = (s) =>
+  s === "pass" ? GREEN : s === "fail" ? RED : s === "info" ? CYA : YEL;
 
 console.log(`\nContrast audit — src/styles.css :root (min ${MIN}, large ${LARGE_MIN})\n`);
 console.log(pad("role", 32), pad("fg", 22), pad("bg", 22), pad("ratio", 8), "status");
