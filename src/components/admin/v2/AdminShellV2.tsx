@@ -244,6 +244,7 @@ const NAV: NavGroup[] = [
       { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام", icon: Gauge, roles: ["admin"] },
       { to: "/admin/services-health", label: "حالة الخدمات", icon: Activity, roles: ["admin"] },
+      { to: "/admin/integrations", label: "التكاملات", icon: Activity, roles: ["admin"] },
       { to: "/clinic-settings", label: "الإعدادات", icon: Settings, roles: ["admin"] },
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Settings, roles: ["admin"] },
       { to: "/admin/classic", label: "النسخة الكلاسيكية", icon: Settings, roles: ["admin"] },
