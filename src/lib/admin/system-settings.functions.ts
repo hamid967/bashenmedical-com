@@ -109,3 +109,48 @@ export const getSystemSetting = createServerFn({ method: "GET" })
       updated_by_name: updatedByName,
     };
   });
+
+const updateSchema = z.object({
+  key: z.string().min(1).max(200),
+  value_json: z.string().min(1).max(50_000),
+  description: z.string().trim().max(500).nullable().optional(),
+});
+
+/**
+ * Update a single system setting's value + description.
+ * `value_json` is a JSON-encoded string; parsed & validated server-side
+ * to reject malformed payloads before hitting the DB.
+ */
+export const updateSystemSetting = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => updateSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasRole(context.supabase, context.userId, "admin");
+    const sb = context.supabase;
+
+    let parsed: JsonValue;
+    try {
+      parsed = JSON.parse(data.value_json) as JsonValue;
+    } catch {
+      throw new Error("قيمة JSON غير صالحة");
+    }
+
+    const { data: row, error } = await sb
+      .from("system_settings")
+      .update({
+        value: parsed as any,
+        description: data.description ?? null,
+        updated_by: context.userId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("key", data.key)
+      .select("key, value, description, updated_at, updated_by")
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!row) throw new Error("الإعداد غير موجود");
+
+    return {
+      ...row,
+      category: deriveCategory(row.key),
+    };
+  });
