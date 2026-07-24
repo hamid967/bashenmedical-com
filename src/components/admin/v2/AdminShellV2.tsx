@@ -217,7 +217,7 @@ const NAV: NavGroup[] = [
     title: "الذكاء والأدوات",
     items: [
       { to: "/admin/ai/overview", label: "نظرة AI الشاملة", icon: Sparkles, roles: ["admin"] },
-      { to: "/admin/ai-streaming", label: "AI Streaming", icon: Sparkles, roles: ["admin"] },
+      
       { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       {
         to: "/admin/design-tokens",
@@ -264,16 +264,14 @@ const NAV: NavGroup[] = [
   {
     title: "المراقبة والأداء",
     items: [
-      { to: "/admin/web-vitals", label: "Web Vitals", icon: Gauge, roles: ["admin"] },
       {
-        to: "/admin/visual-analytics",
-        label: "تحليلات بصرية",
-        icon: FileBarChart,
+        to: "/admin/observability",
+        label: "Observability Hub",
+        icon: Gauge,
         roles: ["admin"],
       },
       { to: "/admin/booking-funnel", label: "قمع الحجوزات", icon: FileBarChart, roles: ["admin"] },
       { to: "/admin/no-show-risk", label: "توقّع الغياب", icon: ShieldCheck, roles: ["admin"] },
-      { to: "/admin/realtime-monitor", label: "مراقبة Realtime", icon: Gauge, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام", icon: Gauge, roles: ["admin"] },
       { to: "/admin/services-health", label: "حالة الخدمات", icon: Activity, roles: ["admin"] },
     ],

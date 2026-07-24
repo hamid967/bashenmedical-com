@@ -72,7 +72,7 @@ export const Route = createFileRoute("/_authenticated/admin/ai-streaming")({
   component: AiStreamingMonitor,
 });
 
-function AiStreamingMonitor() {
+export function AiStreamingMonitor() {
   const [windowMinutes, setWindowMinutes] = useState(60);
   const [surface, setSurface] = useState<Surface>("all");
   const [onlyErrors, setOnlyErrors] = useState(false);
