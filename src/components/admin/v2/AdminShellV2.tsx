@@ -72,6 +72,18 @@ const NAV: NavGroup[] = [
         icon: Inbox,
         roles: ["admin", "super_admin"],
       },
+      {
+        to: "/admin/cms",
+        label: "إدارة المحتوى",
+        icon: FileText,
+        roles: ["admin", "super_admin", "editor"],
+      },
+      {
+        to: "/admin/cms/review",
+        label: "طابور مراجعة CMS",
+        icon: ClipboardCheck,
+        roles: ["admin", "super_admin"],
+      },
     ],
   },
   {
