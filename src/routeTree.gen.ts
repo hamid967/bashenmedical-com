@@ -267,6 +267,7 @@ import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/p
 import { Route as ApiPublicCronCmsPublishRouteImport } from './routes/api/public/cron/cms-publish'
 import { Route as ApiPublicCronPerfBudgetsRouteImport } from './routes/api/public/cron/perf-budgets'
 import { Route as ApiPublicCronSlaSweepRouteImport } from './routes/api/public/cron/sla-sweep'
+import { Route as ApiPublicHooksErrorsRouteImport } from './routes/api/public/hooks/errors'
 import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
 import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
@@ -1733,6 +1734,11 @@ const ApiPublicCronSlaSweepRoute = ApiPublicCronSlaSweepRouteImport.update({
   path: '/api/public/cron/sla-sweep',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksErrorsRoute = ApiPublicHooksErrorsRouteImport.update({
+  id: '/api/public/hooks/errors',
+  path: '/api/public/hooks/errors',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksPermissionWatchdogRoute =
   ApiPublicHooksPermissionWatchdogRouteImport.update({
     id: '/api/public/hooks/permission-watchdog',
@@ -2113,6 +2119,7 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
+  '/api/public/hooks/errors': typeof ApiPublicHooksErrorsRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -2388,6 +2395,7 @@ export interface FileRoutesByTo {
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
+  '/api/public/hooks/errors': typeof ApiPublicHooksErrorsRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -2670,6 +2678,7 @@ export interface FileRoutesById {
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
+  '/api/public/hooks/errors': typeof ApiPublicHooksErrorsRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -2952,6 +2961,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/cms-publish'
     | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
+    | '/api/public/hooks/errors'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
@@ -3227,6 +3237,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/cms-publish'
     | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
+    | '/api/public/hooks/errors'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
@@ -3508,6 +3519,7 @@ export interface FileRouteTypes {
     | '/api/public/cron/cms-publish'
     | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
+    | '/api/public/hooks/errors'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
@@ -3610,6 +3622,7 @@ export interface RootRouteChildren {
   ApiPublicCronCmsPublishRoute: typeof ApiPublicCronCmsPublishRoute
   ApiPublicCronPerfBudgetsRoute: typeof ApiPublicCronPerfBudgetsRoute
   ApiPublicCronSlaSweepRoute: typeof ApiPublicCronSlaSweepRoute
+  ApiPublicHooksErrorsRoute: typeof ApiPublicHooksErrorsRoute
   ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
   ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
@@ -5437,6 +5450,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronSlaSweepRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/errors': {
+      id: '/api/public/hooks/errors'
+      path: '/api/public/hooks/errors'
+      fullPath: '/api/public/hooks/errors'
+      preLoaderRoute: typeof ApiPublicHooksErrorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/permission-watchdog': {
       id: '/api/public/hooks/permission-watchdog'
       path: '/api/public/hooks/permission-watchdog'
@@ -6426,6 +6446,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronCmsPublishRoute: ApiPublicCronCmsPublishRoute,
   ApiPublicCronPerfBudgetsRoute: ApiPublicCronPerfBudgetsRoute,
   ApiPublicCronSlaSweepRoute: ApiPublicCronSlaSweepRoute,
+  ApiPublicHooksErrorsRoute: ApiPublicHooksErrorsRoute,
   ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
   ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
@@ -6450,13 +6471,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
