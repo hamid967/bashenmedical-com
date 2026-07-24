@@ -569,6 +569,8 @@ export function AdminShellV2({
             <span className="hidden sm:inline">المساعد</span>
           </button>
 
+          <BranchSwitcher />
+
           <QuickActions />
 
           <ThemeSwitcher theme={theme} onToggle={toggleTheme} />
