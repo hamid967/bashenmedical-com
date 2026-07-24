@@ -133,9 +133,9 @@ export const getAdminSpecialty = createServerFn({ method: "GET" })
     const [doctorsRes, todayApptsRes, upcomingApptsRes] = await Promise.all([
       sb
         .from("doctors")
-        .select("id, full_name_ar, full_name_en, is_active, branch_id")
+        .select("id, name_ar, name_en, is_active, branch_id")
         .eq("specialty_id", data.id)
-        .order("full_name_ar", { ascending: true })
+        .order("name_ar", { ascending: true })
         .limit(100),
       sb
         .from("appointments")

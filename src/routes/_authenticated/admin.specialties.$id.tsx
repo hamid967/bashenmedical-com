@@ -151,7 +151,7 @@ function SpecialtyDetail() {
           <ul className="divide-y">
             {doctors.map((d) => (
               <li key={d.id} className="px-4 py-2 text-sm flex items-center justify-between">
-                <span>{d.full_name_ar}</span>
+                <span>{d.name_ar}</span>
                 {d.is_active ? (
                   <span className="text-xs text-emerald-600 dark:text-emerald-400">نشِط</span>
                 ) : (
