@@ -134,6 +134,7 @@ import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_au
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
 import { Route as AuthenticatedAdminInsuranceRouteImport } from './routes/_authenticated/admin.insurance'
+import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin.integrations'
 import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_authenticated/admin.no-show-detail'
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
 import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
@@ -211,6 +212,7 @@ import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_authenticated/admin.appointments.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
 import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './routes/_authenticated/admin.insurance.$approvalId'
+import { Route as AuthenticatedAdminIntegrationsKeyRouteImport } from './routes/_authenticated/admin.integrations.$key'
 import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_authenticated/admin.patients.$id'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
@@ -921,6 +923,12 @@ const AuthenticatedAdminInsuranceRoute =
     path: '/insurance',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminIntegrationsRoute =
+  AuthenticatedAdminIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminNoShowDetailRoute =
   AuthenticatedAdminNoShowDetailRouteImport.update({
     id: '/no-show-detail',
@@ -1373,6 +1381,12 @@ const AuthenticatedAdminInsuranceApprovalIdRoute =
     path: '/$approvalId',
     getParentRoute: () => AuthenticatedAdminInsuranceRoute,
   } as any)
+const AuthenticatedAdminIntegrationsKeyRoute =
+  AuthenticatedAdminIntegrationsKeyRouteImport.update({
+    id: '/$key',
+    path: '/$key',
+    getParentRoute: () => AuthenticatedAdminIntegrationsRoute,
+  } as any)
 const AuthenticatedAdminPatientsIdRoute =
   AuthenticatedAdminPatientsIdRouteImport.update({
     id: '/$id',
@@ -1748,6 +1762,7 @@ export interface FileRoutesByFullPath {
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
+  '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -1826,6 +1841,7 @@ export interface FileRoutesByFullPath {
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
+  '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
@@ -1989,6 +2005,7 @@ export interface FileRoutesByTo {
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
+  '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -2067,6 +2084,7 @@ export interface FileRoutesByTo {
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
+  '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
@@ -2237,6 +2255,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/_authenticated/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
+  '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
   '/_authenticated/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -2315,6 +2334,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/_authenticated/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
+  '/_authenticated/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/_authenticated/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
@@ -2485,6 +2505,7 @@ export interface FileRouteTypes {
     | '/admin/doctors'
     | '/admin/inbox'
     | '/admin/insurance'
+    | '/admin/integrations'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -2563,6 +2584,7 @@ export interface FileRouteTypes {
     | '/admin/appointments/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/insurance/$approvalId'
+    | '/admin/integrations/$key'
     | '/admin/patients/$id'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
@@ -2726,6 +2748,7 @@ export interface FileRouteTypes {
     | '/admin/doctors'
     | '/admin/inbox'
     | '/admin/insurance'
+    | '/admin/integrations'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -2804,6 +2827,7 @@ export interface FileRouteTypes {
     | '/admin/appointments/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/insurance/$approvalId'
+    | '/admin/integrations/$key'
     | '/admin/patients/$id'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
@@ -2973,6 +2997,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/inbox'
     | '/_authenticated/admin/insurance'
+    | '/_authenticated/admin/integrations'
     | '/_authenticated/admin/no-show-detail'
     | '/_authenticated/admin/no-show-risk'
     | '/_authenticated/admin/no-show-stats'
@@ -3051,6 +3076,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/appointments/$id'
     | '/_authenticated/admin/billing/$invoiceId'
     | '/_authenticated/admin/insurance/$approvalId'
+    | '/_authenticated/admin/integrations/$key'
     | '/_authenticated/admin/patients/$id'
     | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
@@ -4064,6 +4090,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInsuranceRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/integrations': {
+      id: '/_authenticated/admin/integrations'
+      path: '/integrations'
+      fullPath: '/admin/integrations'
+      preLoaderRoute: typeof AuthenticatedAdminIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/no-show-detail': {
       id: '/_authenticated/admin/no-show-detail'
       path: '/no-show-detail'
@@ -4603,6 +4636,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminInsuranceApprovalIdRouteImport
       parentRoute: typeof AuthenticatedAdminInsuranceRoute
     }
+    '/_authenticated/admin/integrations/$key': {
+      id: '/_authenticated/admin/integrations/$key'
+      path: '/$key'
+      fullPath: '/admin/integrations/$key'
+      preLoaderRoute: typeof AuthenticatedAdminIntegrationsKeyRouteImport
+      parentRoute: typeof AuthenticatedAdminIntegrationsRoute
+    }
     '/_authenticated/admin/patients/$id': {
       id: '/_authenticated/admin/patients/$id'
       path: '/$id'
@@ -4952,6 +4992,21 @@ const AuthenticatedAdminInsuranceRouteWithChildren =
     AuthenticatedAdminInsuranceRouteChildren,
   )
 
+interface AuthenticatedAdminIntegrationsRouteChildren {
+  AuthenticatedAdminIntegrationsKeyRoute: typeof AuthenticatedAdminIntegrationsKeyRoute
+}
+
+const AuthenticatedAdminIntegrationsRouteChildren: AuthenticatedAdminIntegrationsRouteChildren =
+  {
+    AuthenticatedAdminIntegrationsKeyRoute:
+      AuthenticatedAdminIntegrationsKeyRoute,
+  }
+
+const AuthenticatedAdminIntegrationsRouteWithChildren =
+  AuthenticatedAdminIntegrationsRoute._addFileChildren(
+    AuthenticatedAdminIntegrationsRouteChildren,
+  )
+
 interface AuthenticatedAdminPatientsRouteChildren {
   AuthenticatedAdminPatientsIdRoute: typeof AuthenticatedAdminPatientsIdRoute
 }
@@ -5025,6 +5080,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
   AuthenticatedAdminInsuranceRoute: typeof AuthenticatedAdminInsuranceRouteWithChildren
+  AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRouteWithChildren
   AuthenticatedAdminNoShowDetailRoute: typeof AuthenticatedAdminNoShowDetailRoute
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
   AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
@@ -5070,6 +5126,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
   AuthenticatedAdminInsuranceRoute:
     AuthenticatedAdminInsuranceRouteWithChildren,
+  AuthenticatedAdminIntegrationsRoute:
+    AuthenticatedAdminIntegrationsRouteWithChildren,
   AuthenticatedAdminNoShowDetailRoute: AuthenticatedAdminNoShowDetailRoute,
   AuthenticatedAdminNoShowRiskRoute: AuthenticatedAdminNoShowRiskRoute,
   AuthenticatedAdminNoShowStatsRoute: AuthenticatedAdminNoShowStatsRoute,
