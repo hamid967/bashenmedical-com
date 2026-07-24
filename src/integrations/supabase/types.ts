@@ -1353,6 +1353,292 @@ export type Database = {
           },
         ]
       }
+      cms_audit: {
+        Row: {
+          action: string
+          actor_id: string | null
+          after_snapshot: Json | null
+          before_snapshot: Json | null
+          created_at: string
+          entry_id: string | null
+          id: string
+          metadata: Json | null
+          version_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          metadata?: Json | null
+          version_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          after_snapshot?: Json | null
+          before_snapshot?: Json | null
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          metadata?: Json | null
+          version_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_audit_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "cms_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_audit_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "cms_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_entries: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          created_by: string | null
+          current_version_id: string | null
+          entity_id: string | null
+          id: string
+          kind: Database["public"]["Enums"]["cms_kind"]
+          locale_completeness: Json
+          published_at: string | null
+          scheduled_at: string | null
+          slug: string | null
+          status: Database["public"]["Enums"]["cms_status"]
+          title: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          entity_id?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["cms_kind"]
+          locale_completeness?: Json
+          published_at?: string | null
+          scheduled_at?: string | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["cms_status"]
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          current_version_id?: string | null
+          entity_id?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["cms_kind"]
+          locale_completeness?: Json
+          published_at?: string | null
+          scheduled_at?: string | null
+          slug?: string | null
+          status?: Database["public"]["Enums"]["cms_status"]
+          title?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      cms_preview_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          entry_id: string
+          expires_at: string
+          token: string
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          entry_id: string
+          expires_at: string
+          token: string
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          entry_id?: string
+          expires_at?: string
+          token?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_preview_tokens_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "cms_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_preview_tokens_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "cms_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          decision: Database["public"]["Enums"]["cms_review_decision"]
+          id: string
+          reviewer_id: string
+          version_id: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          decision: Database["public"]["Enums"]["cms_review_decision"]
+          id?: string
+          reviewer_id: string
+          version_id: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          decision?: Database["public"]["Enums"]["cms_review_decision"]
+          id?: string
+          reviewer_id?: string
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_reviews_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "cms_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_schedule: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          entry_id: string
+          error: string | null
+          id: string
+          job_state: string
+          publish_at: string
+          ran_at: string | null
+          unpublish_at: string | null
+          version_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          entry_id: string
+          error?: string | null
+          id?: string
+          job_state?: string
+          publish_at: string
+          ran_at?: string | null
+          unpublish_at?: string | null
+          version_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          entry_id?: string
+          error?: string | null
+          id?: string
+          job_state?: string
+          publish_at?: string
+          ran_at?: string | null
+          unpublish_at?: string | null
+          version_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_schedule_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "cms_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cms_schedule_version_id_fkey"
+            columns: ["version_id"]
+            isOneToOne: false
+            referencedRelation: "cms_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cms_versions: {
+        Row: {
+          author_id: string | null
+          created_at: string
+          entry_id: string
+          id: string
+          media_ids: string[]
+          note: string | null
+          og_image_url: string | null
+          payload_ar: Json
+          payload_en: Json
+          seo: Json
+          version_no: number
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string
+          entry_id: string
+          id?: string
+          media_ids?: string[]
+          note?: string | null
+          og_image_url?: string | null
+          payload_ar?: Json
+          payload_en?: Json
+          seo?: Json
+          version_no: number
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string
+          entry_id?: string
+          id?: string
+          media_ids?: string[]
+          note?: string | null
+          og_image_url?: string | null
+          payload_ar?: Json
+          payload_en?: Json
+          seo?: Json
+          version_no?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cms_versions_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "cms_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       complaints: {
         Row: {
           assigned_to: string | null
@@ -7413,6 +7699,7 @@ export type Database = {
         | "support_agent"
         | "content_manager"
         | "auditor"
+        | "editor"
       appointment_status:
         | "new"
         | "confirmed"
@@ -7431,6 +7718,36 @@ export type Database = {
         | "prescription"
         | "insurance"
         | "other"
+      cms_kind:
+        | "home"
+        | "nav"
+        | "footer"
+        | "hero"
+        | "service"
+        | "specialty"
+        | "doctor"
+        | "branch"
+        | "offer"
+        | "announcement"
+        | "article"
+        | "faq"
+        | "insurance"
+        | "contact"
+        | "hours"
+        | "banner"
+        | "intro"
+        | "whatsapp"
+        | "policy"
+        | "page"
+        | "seo_defaults"
+      cms_review_decision: "approved" | "rejected" | "changes_requested"
+      cms_status:
+        | "draft"
+        | "in_review"
+        | "approved"
+        | "scheduled"
+        | "published"
+        | "archived"
       consent_status: "granted" | "withdrawn" | "expired" | "superseded"
       consent_type:
         | "terms_of_service"
@@ -7696,6 +8013,7 @@ export const Constants = {
         "support_agent",
         "content_manager",
         "auditor",
+        "editor",
       ],
       appointment_status: [
         "new",
@@ -7716,6 +8034,38 @@ export const Constants = {
         "prescription",
         "insurance",
         "other",
+      ],
+      cms_kind: [
+        "home",
+        "nav",
+        "footer",
+        "hero",
+        "service",
+        "specialty",
+        "doctor",
+        "branch",
+        "offer",
+        "announcement",
+        "article",
+        "faq",
+        "insurance",
+        "contact",
+        "hours",
+        "banner",
+        "intro",
+        "whatsapp",
+        "policy",
+        "page",
+        "seo_defaults",
+      ],
+      cms_review_decision: ["approved", "rejected", "changes_requested"],
+      cms_status: [
+        "draft",
+        "in_review",
+        "approved",
+        "scheduled",
+        "published",
+        "archived",
       ],
       consent_status: ["granted", "withdrawn", "expired", "superseded"],
       consent_type: [

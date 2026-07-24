@@ -130,6 +130,7 @@ import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminBookingTraceRouteImport } from './routes/_authenticated/admin.booking-trace'
 import { Route as AuthenticatedAdminBranchesRouteImport } from './routes/_authenticated/admin.branches'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
+import { Route as AuthenticatedAdminCmsRouteImport } from './routes/_authenticated/admin.cms'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes/_authenticated/admin.content-analytics'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
@@ -218,6 +219,9 @@ import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_
 import { Route as AuthenticatedAdminArticlesIdRouteImport } from './routes/_authenticated/admin.articles.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
 import { Route as AuthenticatedAdminBranchesIdRouteImport } from './routes/_authenticated/admin.branches.$id'
+import { Route as AuthenticatedAdminCmsKindRouteImport } from './routes/_authenticated/admin.cms.$kind'
+import { Route as AuthenticatedAdminCmsAuditRouteImport } from './routes/_authenticated/admin.cms.audit'
+import { Route as AuthenticatedAdminCmsReviewRouteImport } from './routes/_authenticated/admin.cms.review'
 import { Route as AuthenticatedAdminFilesIdRouteImport } from './routes/_authenticated/admin.files.$id'
 import { Route as AuthenticatedAdminInboxIdRouteImport } from './routes/_authenticated/admin.inbox.$id'
 import { Route as AuthenticatedAdminInboxSlaRouteImport } from './routes/_authenticated/admin.inbox.sla'
@@ -249,6 +253,7 @@ import { Route as ApiPublicBookResolveAnyDoctorRouteImport } from './routes/api/
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
+import { Route as ApiPublicCronCmsPublishRouteImport } from './routes/api/public/cron/cms-publish'
 import { Route as ApiPublicCronSlaSweepRouteImport } from './routes/api/public/cron/sla-sweep'
 import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
 import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
@@ -264,6 +269,7 @@ import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/pu
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
 import { Route as ApiPublicReservationsSessionFromAuthRouteImport } from './routes/api/public/reservations/session-from-auth'
+import { Route as AuthenticatedAdminCmsKindIdRouteImport } from './routes/_authenticated/admin.cms.$kind.$id'
 import { Route as AuthenticatedAdminSuperPermissionsAuditRouteImport } from './routes/_authenticated/admin.super.permissions.audit'
 import { Route as AuthenticatedPortalOrdersKindIdRouteImport } from './routes/_authenticated/portal.orders.$kind.$id'
 import { Route as ApiPublicReservationsCancelUndoRouteImport } from './routes/api/public/reservations/cancel.undo'
@@ -913,6 +919,11 @@ const AuthenticatedAdminClassicRoute =
     path: '/classic',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminCmsRoute = AuthenticatedAdminCmsRouteImport.update({
+  id: '/cms',
+  path: '/cms',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminContentRoute =
   AuthenticatedAdminContentRouteImport.update({
     id: '/content',
@@ -1429,6 +1440,24 @@ const AuthenticatedAdminBranchesIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminBranchesRoute,
   } as any)
+const AuthenticatedAdminCmsKindRoute =
+  AuthenticatedAdminCmsKindRouteImport.update({
+    id: '/$kind',
+    path: '/$kind',
+    getParentRoute: () => AuthenticatedAdminCmsRoute,
+  } as any)
+const AuthenticatedAdminCmsAuditRoute =
+  AuthenticatedAdminCmsAuditRouteImport.update({
+    id: '/audit',
+    path: '/audit',
+    getParentRoute: () => AuthenticatedAdminCmsRoute,
+  } as any)
+const AuthenticatedAdminCmsReviewRoute =
+  AuthenticatedAdminCmsReviewRouteImport.update({
+    id: '/review',
+    path: '/review',
+    getParentRoute: () => AuthenticatedAdminCmsRoute,
+  } as any)
 const AuthenticatedAdminFilesIdRoute =
   AuthenticatedAdminFilesIdRouteImport.update({
     id: '/$id',
@@ -1610,6 +1639,11 @@ const ApiPublicBookWaitlistConfirmRoute =
     path: '/api/public/book/waitlist-confirm',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronCmsPublishRoute = ApiPublicCronCmsPublishRouteImport.update({
+  id: '/api/public/cron/cms-publish',
+  path: '/api/public/cron/cms-publish',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCronSlaSweepRoute = ApiPublicCronSlaSweepRouteImport.update({
   id: '/api/public/cron/sla-sweep',
   path: '/api/public/cron/sla-sweep',
@@ -1695,6 +1729,12 @@ const ApiPublicReservationsSessionFromAuthRoute =
     id: '/api/public/reservations/session-from-auth',
     path: '/api/public/reservations/session-from-auth',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const AuthenticatedAdminCmsKindIdRoute =
+  AuthenticatedAdminCmsKindIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminCmsKindRoute,
   } as any)
 const AuthenticatedAdminSuperPermissionsAuditRoute =
   AuthenticatedAdminSuperPermissionsAuditRouteImport.update({
@@ -1847,6 +1887,7 @@ export interface FileRoutesByFullPath {
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -1936,6 +1977,9 @@ export interface FileRoutesByFullPath {
   '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
+  '/admin/cms/$kind': typeof AuthenticatedAdminCmsKindRouteWithChildren
+  '/admin/cms/audit': typeof AuthenticatedAdminCmsAuditRoute
+  '/admin/cms/review': typeof AuthenticatedAdminCmsReviewRoute
   '/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/admin/inbox/$id': typeof AuthenticatedAdminInboxIdRoute
   '/admin/inbox/sla': typeof AuthenticatedAdminInboxSlaRoute
@@ -1965,6 +2009,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
@@ -1982,6 +2027,7 @@ export interface FileRoutesByFullPath {
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
+  '/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -2103,6 +2149,7 @@ export interface FileRoutesByTo {
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -2192,6 +2239,9 @@ export interface FileRoutesByTo {
   '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
+  '/admin/cms/$kind': typeof AuthenticatedAdminCmsKindRouteWithChildren
+  '/admin/cms/audit': typeof AuthenticatedAdminCmsAuditRoute
+  '/admin/cms/review': typeof AuthenticatedAdminCmsReviewRoute
   '/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/admin/inbox/$id': typeof AuthenticatedAdminInboxIdRoute
   '/admin/inbox/sla': typeof AuthenticatedAdminInboxSlaRoute
@@ -2221,6 +2271,7 @@ export interface FileRoutesByTo {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
@@ -2238,6 +2289,7 @@ export interface FileRoutesByTo {
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/owner/pages': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services': typeof AuthenticatedOwnerServicesIndexRoute
+  '/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -2366,6 +2418,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/_authenticated/admin/branches': typeof AuthenticatedAdminBranchesRouteWithChildren
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
+  '/_authenticated/admin/cms': typeof AuthenticatedAdminCmsRouteWithChildren
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
   '/_authenticated/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
@@ -2455,6 +2508,9 @@ export interface FileRoutesById {
   '/_authenticated/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/_authenticated/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
+  '/_authenticated/admin/cms/$kind': typeof AuthenticatedAdminCmsKindRouteWithChildren
+  '/_authenticated/admin/cms/audit': typeof AuthenticatedAdminCmsAuditRoute
+  '/_authenticated/admin/cms/review': typeof AuthenticatedAdminCmsReviewRoute
   '/_authenticated/admin/files/$id': typeof AuthenticatedAdminFilesIdRoute
   '/_authenticated/admin/inbox/$id': typeof AuthenticatedAdminInboxIdRoute
   '/_authenticated/admin/inbox/sla': typeof AuthenticatedAdminInboxSlaRoute
@@ -2484,6 +2540,7 @@ export interface FileRoutesById {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
@@ -2501,6 +2558,7 @@ export interface FileRoutesById {
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/_authenticated/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/_authenticated/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
+  '/_authenticated/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
   '/api/public/reservations/cancel/undo': typeof ApiPublicReservationsCancelUndoRoute
@@ -2629,6 +2687,7 @@ export interface FileRouteTypes {
     | '/admin/booking-trace'
     | '/admin/branches'
     | '/admin/classic'
+    | '/admin/cms'
     | '/admin/content'
     | '/admin/content-analytics'
     | '/admin/design-tokens'
@@ -2718,6 +2777,9 @@ export interface FileRouteTypes {
     | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/branches/$id'
+    | '/admin/cms/$kind'
+    | '/admin/cms/audit'
+    | '/admin/cms/review'
     | '/admin/files/$id'
     | '/admin/inbox/$id'
     | '/admin/inbox/sla'
@@ -2747,6 +2809,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/cron/cms-publish'
     | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
@@ -2764,6 +2827,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/session-from-auth'
     | '/owner/pages/'
     | '/owner/services/'
+    | '/admin/cms/$kind/$id'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -2885,6 +2949,7 @@ export interface FileRouteTypes {
     | '/admin/booking-trace'
     | '/admin/branches'
     | '/admin/classic'
+    | '/admin/cms'
     | '/admin/content'
     | '/admin/content-analytics'
     | '/admin/design-tokens'
@@ -2974,6 +3039,9 @@ export interface FileRouteTypes {
     | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/branches/$id'
+    | '/admin/cms/$kind'
+    | '/admin/cms/audit'
+    | '/admin/cms/review'
     | '/admin/files/$id'
     | '/admin/inbox/$id'
     | '/admin/inbox/sla'
@@ -3003,6 +3071,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/cron/cms-publish'
     | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
@@ -3020,6 +3089,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/session-from-auth'
     | '/owner/pages'
     | '/owner/services'
+    | '/admin/cms/$kind/$id'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -3147,6 +3217,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/booking-trace'
     | '/_authenticated/admin/branches'
     | '/_authenticated/admin/classic'
+    | '/_authenticated/admin/cms'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/content-analytics'
     | '/_authenticated/admin/design-tokens'
@@ -3236,6 +3307,9 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/articles/$id'
     | '/_authenticated/admin/billing/$invoiceId'
     | '/_authenticated/admin/branches/$id'
+    | '/_authenticated/admin/cms/$kind'
+    | '/_authenticated/admin/cms/audit'
+    | '/_authenticated/admin/cms/review'
     | '/_authenticated/admin/files/$id'
     | '/_authenticated/admin/inbox/$id'
     | '/_authenticated/admin/inbox/sla'
@@ -3265,6 +3339,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/cron/cms-publish'
     | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
@@ -3282,6 +3357,7 @@ export interface FileRouteTypes {
     | '/api/public/reservations/session-from-auth'
     | '/_authenticated/owner/pages/'
     | '/_authenticated/owner/services/'
+    | '/_authenticated/admin/cms/$kind/$id'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
     | '/api/public/reservations/cancel/undo'
@@ -3362,6 +3438,7 @@ export interface RootRouteChildren {
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
+  ApiPublicCronCmsPublishRoute: typeof ApiPublicCronCmsPublishRoute
   ApiPublicCronSlaSweepRoute: typeof ApiPublicCronSlaSweepRoute
   ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
   ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
@@ -4230,6 +4307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminClassicRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/cms': {
+      id: '/_authenticated/admin/cms'
+      path: '/cms'
+      fullPath: '/admin/cms'
+      preLoaderRoute: typeof AuthenticatedAdminCmsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/content': {
       id: '/_authenticated/admin/content'
       path: '/content'
@@ -4846,6 +4930,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminBranchesIdRouteImport
       parentRoute: typeof AuthenticatedAdminBranchesRoute
     }
+    '/_authenticated/admin/cms/$kind': {
+      id: '/_authenticated/admin/cms/$kind'
+      path: '/$kind'
+      fullPath: '/admin/cms/$kind'
+      preLoaderRoute: typeof AuthenticatedAdminCmsKindRouteImport
+      parentRoute: typeof AuthenticatedAdminCmsRoute
+    }
+    '/_authenticated/admin/cms/audit': {
+      id: '/_authenticated/admin/cms/audit'
+      path: '/audit'
+      fullPath: '/admin/cms/audit'
+      preLoaderRoute: typeof AuthenticatedAdminCmsAuditRouteImport
+      parentRoute: typeof AuthenticatedAdminCmsRoute
+    }
+    '/_authenticated/admin/cms/review': {
+      id: '/_authenticated/admin/cms/review'
+      path: '/review'
+      fullPath: '/admin/cms/review'
+      preLoaderRoute: typeof AuthenticatedAdminCmsReviewRouteImport
+      parentRoute: typeof AuthenticatedAdminCmsRoute
+    }
     '/_authenticated/admin/files/$id': {
       id: '/_authenticated/admin/files/$id'
       path: '/$id'
@@ -5063,6 +5168,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBookWaitlistConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/cms-publish': {
+      id: '/api/public/cron/cms-publish'
+      path: '/api/public/cron/cms-publish'
+      fullPath: '/api/public/cron/cms-publish'
+      preLoaderRoute: typeof ApiPublicCronCmsPublishRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/sla-sweep': {
       id: '/api/public/cron/sla-sweep'
       path: '/api/public/cron/sla-sweep'
@@ -5168,6 +5280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicReservationsSessionFromAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/cms/$kind/$id': {
+      id: '/_authenticated/admin/cms/$kind/$id'
+      path: '/$id'
+      fullPath: '/admin/cms/$kind/$id'
+      preLoaderRoute: typeof AuthenticatedAdminCmsKindIdRouteImport
+      parentRoute: typeof AuthenticatedAdminCmsKindRoute
+    }
     '/_authenticated/admin/super/permissions/audit': {
       id: '/_authenticated/admin/super/permissions/audit'
       path: '/audit'
@@ -5262,6 +5381,37 @@ const AuthenticatedAdminBranchesRouteChildren: AuthenticatedAdminBranchesRouteCh
 const AuthenticatedAdminBranchesRouteWithChildren =
   AuthenticatedAdminBranchesRoute._addFileChildren(
     AuthenticatedAdminBranchesRouteChildren,
+  )
+
+interface AuthenticatedAdminCmsKindRouteChildren {
+  AuthenticatedAdminCmsKindIdRoute: typeof AuthenticatedAdminCmsKindIdRoute
+}
+
+const AuthenticatedAdminCmsKindRouteChildren: AuthenticatedAdminCmsKindRouteChildren =
+  {
+    AuthenticatedAdminCmsKindIdRoute: AuthenticatedAdminCmsKindIdRoute,
+  }
+
+const AuthenticatedAdminCmsKindRouteWithChildren =
+  AuthenticatedAdminCmsKindRoute._addFileChildren(
+    AuthenticatedAdminCmsKindRouteChildren,
+  )
+
+interface AuthenticatedAdminCmsRouteChildren {
+  AuthenticatedAdminCmsKindRoute: typeof AuthenticatedAdminCmsKindRouteWithChildren
+  AuthenticatedAdminCmsAuditRoute: typeof AuthenticatedAdminCmsAuditRoute
+  AuthenticatedAdminCmsReviewRoute: typeof AuthenticatedAdminCmsReviewRoute
+}
+
+const AuthenticatedAdminCmsRouteChildren: AuthenticatedAdminCmsRouteChildren = {
+  AuthenticatedAdminCmsKindRoute: AuthenticatedAdminCmsKindRouteWithChildren,
+  AuthenticatedAdminCmsAuditRoute: AuthenticatedAdminCmsAuditRoute,
+  AuthenticatedAdminCmsReviewRoute: AuthenticatedAdminCmsReviewRoute,
+}
+
+const AuthenticatedAdminCmsRouteWithChildren =
+  AuthenticatedAdminCmsRoute._addFileChildren(
+    AuthenticatedAdminCmsRouteChildren,
   )
 
 interface AuthenticatedAdminFilesRouteChildren {
@@ -5421,6 +5571,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBookingTraceRoute: typeof AuthenticatedAdminBookingTraceRoute
   AuthenticatedAdminBranchesRoute: typeof AuthenticatedAdminBranchesRouteWithChildren
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
+  AuthenticatedAdminCmsRoute: typeof AuthenticatedAdminCmsRouteWithChildren
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
   AuthenticatedAdminContentAnalyticsRoute: typeof AuthenticatedAdminContentAnalyticsRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
@@ -5470,6 +5621,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBookingTraceRoute: AuthenticatedAdminBookingTraceRoute,
   AuthenticatedAdminBranchesRoute: AuthenticatedAdminBranchesRouteWithChildren,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
+  AuthenticatedAdminCmsRoute: AuthenticatedAdminCmsRouteWithChildren,
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
   AuthenticatedAdminContentAnalyticsRoute:
     AuthenticatedAdminContentAnalyticsRoute,
@@ -5988,6 +6140,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
+  ApiPublicCronCmsPublishRoute: ApiPublicCronCmsPublishRoute,
   ApiPublicCronSlaSweepRoute: ApiPublicCronSlaSweepRoute,
   ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
   ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,

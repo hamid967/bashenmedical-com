@@ -42,6 +42,7 @@ import {
   ScrollText,
   KeyRound,
   Activity,
+  ClipboardCheck,
 } from "lucide-react";
 
 type NavItem = {
@@ -70,6 +71,18 @@ const NAV: NavGroup[] = [
         to: "/admin/inbox/sla",
         label: "لوحة SLA",
         icon: Inbox,
+        roles: ["admin", "super_admin"],
+      },
+      {
+        to: "/admin/cms",
+        label: "إدارة المحتوى",
+        icon: FileText,
+        roles: ["admin", "super_admin", "editor"],
+      },
+      {
+        to: "/admin/cms/review",
+        label: "طابور مراجعة CMS",
+        icon: ClipboardCheck,
         roles: ["admin", "super_admin"],
       },
     ],

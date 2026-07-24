@@ -35,7 +35,8 @@ export type Role =
   | "support_agent"
   | "reception"
   | "content_manager"
-  | "auditor";
+  | "auditor"
+  | "editor";
 
 export async function assertHasRole(
   supabase: any,
