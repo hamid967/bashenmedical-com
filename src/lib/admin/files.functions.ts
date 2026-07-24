@@ -123,18 +123,17 @@ export const getAdminFile = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     if (!row) throw new Error("الملف غير موجود.");
 
-    let uploader: { id: string; name: string | null; email: string | null } | null = null;
+    let uploader: { id: string; name: string | null } | null = null;
     if (row.uploaded_by) {
       const { data: prof } = await context.supabase
         .from("profiles")
-        .select("id, full_name, email")
+        .select("id, full_name")
         .eq("id", row.uploaded_by)
         .maybeSingle();
       if (prof)
         uploader = {
-          id: prof.id,
+          id: (prof as any).id,
           name: (prof as any).full_name ?? null,
-          email: (prof as any).email ?? null,
         };
     }
 
