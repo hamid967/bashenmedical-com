@@ -28,7 +28,7 @@ export const listAdminInvoices = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => listSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
-    await assertHasRole(context, "admin");
+    await assertHasRole(context.supabase, context.userId, "admin");
 
     // Use inner join on appointments when filtering by branch so PostgREST
     // applies the nested filter as a real WHERE clause.
@@ -64,7 +64,7 @@ export const getAdminInvoice = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => detailSchema.parse(d ?? {}))
   .handler(async ({ data, context }) => {
-    await assertHasRole(context, "admin");
+    await assertHasRole(context.supabase, context.userId, "admin");
     const { data: row, error } = await context.supabase
       .from("invoices")
       .select(INVOICE_COLUMNS)
