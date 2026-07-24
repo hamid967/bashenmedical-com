@@ -87,7 +87,7 @@ export const getPatientContentFeed = createServerFn({ method: "GET" })
       supabase
         .from("appointments")
         .select("specialty_id")
-        .eq("patient_user_id", userId)
+        .eq("patient_id", userId)
         .not("specialty_id", "is", null)
         .limit(20),
     ]);
