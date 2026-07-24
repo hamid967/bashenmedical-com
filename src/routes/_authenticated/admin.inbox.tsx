@@ -1,10 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { z } from "zod";
 import {
   listInboxItems,
+  getInboxCounts,
   INBOX_STATUSES,
   INBOX_CHANNELS,
   INBOX_PRIORITIES,
@@ -13,6 +14,7 @@ import {
   type InboxChannel,
   type InboxPriority,
 } from "@/lib/admin/inbox.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
@@ -23,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui-v3";
-import { Inbox, AlertTriangle, RefreshCw } from "lucide-react";
+import { Inbox, AlertTriangle, RefreshCw, Flame, UserCheck, UserX, ArrowUpDown } from "lucide-react";
 
 const SearchSchema = z.object({
   status: z.enum(INBOX_STATUSES).optional(),
@@ -31,8 +33,12 @@ const SearchSchema = z.object({
   priority: z.enum(INBOX_PRIORITIES).optional(),
   q: z.string().optional(),
   archived: z.boolean().optional(),
+  mine: z.boolean().optional(),
+  unassigned: z.boolean().optional(),
+  sort: z.enum(["recent", "priority"]).optional(),
 });
 type SearchIn = z.infer<typeof SearchSchema>;
+
 
 export const STATUS_LABELS: Record<InboxStatus, string> = {
   new: "جديد",
