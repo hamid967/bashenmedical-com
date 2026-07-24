@@ -45,6 +45,10 @@ export function InstallAppCard({ lang = "ar" }: { lang?: Lang }) {
   const { canPrompt, isInstalled, isIOS, promptInstall } = useInstallPrompt();
   const [busy, setBusy] = useState(false);
 
+  // Inside the Capacitor native shell the app is already installed — hide.
+  if (isNative()) return null;
+
+
   if (isInstalled) {
     return (
       <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-4 flex items-center gap-3">
