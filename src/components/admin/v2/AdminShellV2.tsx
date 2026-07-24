@@ -572,7 +572,10 @@ export function AdminShellV2({
 
           <BranchSwitcher />
 
+          <LanguageSwitcher className="hidden sm:inline-flex" />
+
           <QuickActions />
+
 
           <ThemeSwitcher theme={theme} onToggle={toggleTheme} />
 
