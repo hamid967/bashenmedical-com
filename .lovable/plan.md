@@ -1,73 +1,74 @@
-# Baeshen Platform — Roadmap V3
+# F2 — Native App (Capacitor)
 
-Source spec: `user-uploads://file-28` (فريق حامد, 1129 lines).
-Audit basis: `docs/audit/phase0-refresh-2026-07-24.md`.
-Manifest template: `docs/audit/change-manifest-template.md`.
+Goal: ship real iOS/Android apps for patients on the App Store and Google Play, reusing the existing TanStack Start site instead of rebuilding it in a native framework.
 
-Delivery contract: **one Batch per approval round**, with tests +
-rollback plan + Change Manifest for anything touching Auth, RLS,
-Payments, NPHIES, or production env.
+## Strategy: Remote-URL Capacitor shell
 
----
+The site runs on Cloudflare/Netlify with SSR — it is not a static SPA, so a "copy the `dist/` into the app" approach loses SSR, server functions, and auth cookies. The pragmatic path is a Capacitor shell that loads the published site (`https://bashenmedical.com`) inside a native WebView, and layers native-only capabilities on top:
 
-## Track A — Operations close-out
+- Native push (APNs / FCM) alongside our existing Web Push
+- Biometric unlock (Face ID / Touch ID / fingerprint)
+- Universal / App Links so `bashenmedical.com/...` opens directly in the app
+- Native splash, status bar, safe-area handling, and app icons
+- Store-ready metadata
 
-| Batch | Title | Spec § | Risk | Status |
-|---|---|---|---|---|
-| A1 | Front Desk Polish (MRN search, Patient Snapshot, reschedule, no-show) | §13 | Low | **next** |
-| A2 | Doctor Console `/doctor` (today, queue, visit close, follow-up hold) | §15 | Medium | pending |
-| A3 | Unified Requests Hub (site+WA+booking+phone in one queue with audit) | §17 | Medium | pending |
+App Store review requires the app to feel more than a wrapped site, so we also add: install-detected UI polish, native share integration, and a "Live from Baeshen" native badge count for unread notifications.
 
-## Track B — Patient clinical + financial
+## Deliverables
 
-| Batch | Title | Spec § | Risk | Status |
-|---|---|---|---|---|
-| B1 | Reports & Prescriptions lifecycle (Draft→Publish→Revoke, signed URLs, versions) | §18 | Medium | pending |
-| B2 | NPHIES 11-state machine + Mock/Prod separation | §19 | High 🔒 | pending manifest |
-| B3 | Billing & Payments (Estimate/Invoice/Refund + signed webhook + idempotency) | §20 | High 🔒 | pending manifest |
+```text
+capacitor/                        (new folder — native project lives outside src/)
+├── capacitor.config.ts           app id, server URL, plugins
+├── ios/                          Xcode project (generated)
+├── android/                      Gradle project (generated)
+├── resources/
+│   ├── icon.png                  1024×1024 master
+│   └── splash.png                2732×2732 master
+└── README.md                     build & release steps
 
-## Track C — Content & communications
+src/lib/native/
+├── bridge.ts                     detects Capacitor, exposes helpers
+├── push-native.ts                registers APNs/FCM, syncs to push_subscriptions
+└── biometric.ts                  Face ID unlock for /portal
 
-| Batch | Title | Spec § | Risk | Status |
-|---|---|---|---|---|
-| C1 | Content Engine (Audience, priority, impressions, clicks) | §21 | Low | pending |
-| C2 | CMS Cycle (Preview tokens, Rollback UI, scheduled publish) | §22 | Low | pending |
-| C3 | Notifications (`delivered` only on provider callback) | §23 | Medium | pending |
+src/routes/api/public/native/
+└── register-device.ts            POST device token → stores native FCM/APNs subscription
 
-## Track D — Production readiness
+supabase migration
+└── adds device_platform + native_token columns to push_subscriptions
+```
 
-| Batch | Title | Spec § | Risk | Status |
-|---|---|---|---|---|
-| D1 | SEO structured data (Doctor / MedicalOrg / Breadcrumb / Article + 404 map) | §27 | Low | pending |
-| D2 | A11y WCAG 2.2 AA sweep (keyboard, focus, 200% zoom, reduced motion) | §26 | Low | pending |
-| D3 | System Health (Payments/NPHIES/AI/Backup probes) | §28 | Low | pending |
-| D4 | AI Safety hardening (prompt-injection tests, mutation gate) | §24 | Medium | pending |
+## Steps
 
----
+1. Scaffold Capacitor in a `capacitor/` folder with `@capacitor/core`, `@capacitor/ios`, `@capacitor/android`, plus plugins: `@capacitor/push-notifications`, `@capacitor-community/biometric-auth`, `@capacitor/app`, `@capacitor/status-bar`, `@capacitor/splash-screen`, `@capacitor/share`, `@capacitor/badge`.
+2. Point `capacitor.config.ts` `server.url` at `https://bashenmedical.com` (production) with `androidScheme: "https"`; document a `.env.local` override for staging (`project--*-dev.lovable.app`).
+3. Add `src/lib/native/bridge.ts` that detects Capacitor via `window.Capacitor?.isNativePlatform()` and exposes typed accessors; gate all native code behind it so the web build ignores it.
+4. Native push: on portal login, `push-native.ts` requests permission, registers with APNs/FCM, and POSTs the token to `/api/public/native/register-device` (auth via Supabase bearer). Server stores it in `push_subscriptions` with `platform='ios'|'android'`. Fan-out logic in `notifications.functions.ts` sends via FCM/APNs for native rows and Web Push for browser rows.
+5. Biometric guard: after Supabase session load, if `Capacitor.isNativePlatform()` and user opted in via a new toggle on `/portal/settings`, prompt Face ID / fingerprint before revealing `/portal/*`.
+6. Deep links: register `bashenmedical.com` as an App Link (Android `assetlinks.json`) and Universal Link (iOS `apple-app-site-association`). Both files served from `/api/public/.well-known/*` routes.
+7. Icons & splash: run `@capacitor/assets` to generate every iOS/Android size from `icon.png` and `splash.png`. Icons match the existing brand teal `#0f766e`.
+8. In-app UX polish: hide the "Install app" card when running native (already installed), add native `Share` API to the report/appointment pages, and reflect unread notification count on the app badge.
+9. CI: add `.github/workflows/native-build.yml` (manual dispatch) that runs `pnpm cap sync` and builds unsigned iOS/Android artifacts for QA. Signing/store uploads stay manual for now — they need Apple/Google developer accounts you own.
+10. Docs: `capacitor/README.md` with exact commands to run/build/deploy, plus checklists for App Store and Play Store submission (screenshots, privacy nutrition labels, permission strings).
 
-## Rules (from master file)
+## Non-goals (this phase)
 
-- No parallel tables, no static production data, no fake CTAs, no fake
-  success (§5, §31).
-- Every Batch delivers: owner, affected files, tests, rollback,
-  acceptance, Change Manifest (§4).
-- Sensitive Batches (Auth, RLS, Payments, NPHIES) block on المهندس
-  حامد's explicit approval before merge.
-- `tsgo`, ESLint, unit + RLS + E2E must be green before delivery.
+- Rewriting screens as native components — the WebView is the UI.
+- Offline mode beyond what the PWA service worker already provides.
+- Automated store submission — needs your developer accounts and signing certs.
 
-## Definition of Done per Batch
+## Technical notes
 
-1. End-to-end wired to real data.
-2. RBAC + RLS enforced server-side.
-3. AR + EN, mobile + desktop.
-4. Loading / empty / error / offline states.
-5. Audit rows for sensitive edits.
-6. No fake success, no fake CTAs.
-7. Tests green, docs updated, rollback documented.
+- Server-URL apps must whitelist the origin in `capacitor.config.ts` (`allowNavigation`) and set `App-Bound Domains` on iOS or the WebView blocks navigation to `bashenmedical.com`.
+- Push tokens are per-install and rotate; the register endpoint upserts by `(user_id, platform, token)` and prunes stale rows on server-side send failures (410/`NotRegistered`).
+- Universal Links require serving `apple-app-site-association` with `Content-Type: application/json` and no redirects — the TanStack public API route handles both.
+- `SUPABASE_URL` must be reachable from the WebView; nothing new to configure since the site already talks to it.
+- New secrets needed later (when we do real push): `FCM_SERVER_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`. I will request them via `add_secret` only when we reach step 4's server side.
 
----
+## What I need from you before step 4
 
-## Next action
+- Apple Developer Team ID and bundle identifier (e.g. `com.baeshenmedical.patient`).
+- Android package name.
+- Firebase project (for FCM) — or approval to create one under your Google account.
 
-Awaiting المهندس حامد's pick of the first Batch to execute. Default
-recommendation: **A1 — Front Desk Polish**.
+Approving this plan starts with steps 1–3 and 7 (fully offline, no external accounts needed); we pause before step 4 to gather the credentials above.

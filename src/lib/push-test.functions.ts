@@ -54,7 +54,9 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
     const { data: subs, error } = await context.supabase
       .from("push_subscriptions")
       .select("id, endpoint, p256dh, auth")
-      .eq("user_id", context.userId);
+      .eq("user_id", context.userId)
+      .eq("platform", "web")
+      .not("endpoint", "is", null);
     if (error) throw new Error(error.message);
     if (!subs || subs.length === 0) {
       return {
@@ -94,19 +96,24 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
 
     await Promise.all(
       subs.map(async (s) => {
+        // Web rows always have endpoint/keys populated (filtered above and
+        // enforced by the DB check constraint), but Supabase types treat the
+        // columns as nullable since native rows may omit them.
+        if (!s.endpoint || !s.p256dh || !s.auth) return;
+        const endpoint = s.endpoint;
         try {
           const resp = await webpush.sendNotification(
-            { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+            { endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
             payload,
             { TTL: 60 },
           );
-          results.push({ endpoint: s.endpoint, ok: true, statusCode: resp.statusCode });
+          results.push({ endpoint, ok: true, statusCode: resp.statusCode });
         } catch (e) {
           const err = e as { statusCode?: number; body?: string; message?: string };
           const gone = err.statusCode === 404 || err.statusCode === 410;
-          if (gone) staleEndpoints.push(s.endpoint);
+          if (gone) staleEndpoints.push(endpoint);
           results.push({
-            endpoint: s.endpoint,
+            endpoint,
             ok: false,
             statusCode: err.statusCode,
             error: err.body || err.message || "Delivery failed",

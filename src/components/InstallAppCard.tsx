@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Smartphone, Share, PlusSquare, CheckCircle2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { isNative } from "@/lib/native/bridge";
 
 const T = {
   title: { ar: "ثبّت التطبيق على جهازك", en: "Install the app on your device" },
@@ -43,6 +44,10 @@ function tr(key: keyof typeof T, lang: Lang): string {
 export function InstallAppCard({ lang = "ar" }: { lang?: Lang }) {
   const { canPrompt, isInstalled, isIOS, promptInstall } = useInstallPrompt();
   const [busy, setBusy] = useState(false);
+
+  // Inside the Capacitor native shell the app is already installed — hide.
+  if (isNative()) return null;
+
 
   if (isInstalled) {
     return (

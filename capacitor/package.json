@@ -1,0 +1,33 @@
+{
+  "name": "@baeshen/native",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Capacitor native shell for the Baeshen Medical patient app. Wraps the published web site (https://bashenmedical.com) in a native iOS/Android WebView and adds native-only capabilities (push, biometrics, deep links).",
+  "scripts": {
+    "add:ios": "cap add ios",
+    "add:android": "cap add android",
+    "sync": "cap sync",
+    "open:ios": "cap open ios",
+    "open:android": "cap open android",
+    "run:ios": "cap run ios",
+    "run:android": "cap run android",
+    "assets": "capacitor-assets generate --assetPath ./resources"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/badge": "^6.0.0",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor/push-notifications": "^6.0.4",
+    "@capacitor/share": "^6.0.3",
+    "@capacitor/splash-screen": "^6.0.3",
+    "@capacitor/status-bar": "^6.0.2",
+    "@capgo/capacitor-native-biometric": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^6.2.0",
+    "typescript": "^5.5.0"
+  }
+}
