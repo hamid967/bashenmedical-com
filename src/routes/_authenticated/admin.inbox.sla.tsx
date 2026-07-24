@@ -458,6 +458,8 @@ function AlertConfigCard() {
   const getCfg = useServerFn(getSlaAlertConfig);
   const updateCfg = useServerFn(updateSlaAlertConfig);
   const runSweep = useServerFn(runSlaAlertSweep);
+  const testHook = useServerFn(testSlaAlertWebhook);
+  const [testResult, setTestResult] = useState<TestWebhookResult | null>(null);
   const qc = useQueryClient();
 
   const { data: cfg } = useQuery({
