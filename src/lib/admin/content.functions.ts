@@ -154,7 +154,7 @@ export const upsertContentItem = createServerFn({ method: "POST" })
     const payload = {
       ...data,
       created_by: context.userId,
-    };
+    } as never;
 
     const query = data.id
       ? context.supabase
