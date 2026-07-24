@@ -22,7 +22,7 @@ const listSchema = z.object({
 
 const APPROVAL_COLUMNS =
   "id, request_number, service_description, status, submitted_at, reviewed_at, expires_at, " +
-  "approved_amount, patient_share, missing_documents, notes, is_mock, created_at, updated_at, " +
+  "approved_amount, patient_share, missing_documents, attachments, notes, is_mock, created_at, updated_at, " +
   "patient:patients(id, full_name_ar, full_name_en, mrn, phone), " +
   "provider:insurance_providers(id, name_ar, name_en), " +
   "appointment:appointments(id, appointment_date, branch_id, doctor_id, branch:branches(id, name_ar, name_en))";
