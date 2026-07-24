@@ -369,7 +369,7 @@ export const changeInboxStatus = createServerFn({ method: "POST" })
     if (data.status === "archived")
       throw new Error("استخدم إجراء «الأرشفة» بدل تغيير الحالة مباشرة.");
     const before = await loadItem(context.supabase, data.id);
-    if (before.status === "archived" && data.status !== "archived") {
+    if ((before.status as string) === "archived") {
       throw new Error("لا يمكن تغيير حالة طلب مؤرشف — استخدم إعادة الفتح.");
     }
     if (before.status === data.status) return { ok: true, noop: true };
