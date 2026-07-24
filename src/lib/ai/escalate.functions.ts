@@ -67,6 +67,47 @@ export const escalateAiConversation = createServerFn({ method: "POST" })
     };
   });
 
+export type SafetyIncident = {
+  id: string;
+  kind: string;
+  severity: string;
+  actionTaken: string | null;
+  details: Record<string, unknown> | null;
+  createdAt: string;
+  inboxItemId: string | null;
+  requestNumber: string | null;
+  inboxStatus: string | null;
+};
+
+const ListInput = z.object({ conversationId: z.string().uuid() });
+
+export const listAiSafetyIncidents = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((raw) => ListInput.parse(raw))
+  .handler(async ({ data, context }): Promise<SafetyIncident[]> => {
+    const { data: rows, error } = await context.supabase.rpc(
+      "list_ai_safety_incidents",
+      { _conversation_id: data.conversationId } as never,
+    );
+    if (error) {
+      const msg = error.message || "";
+      if (/not authorized|not authenticated/i.test(msg)) throw new Error("forbidden");
+      if (/not found/i.test(msg)) throw new Error("conversation_not_found");
+      throw new Error("list_failed");
+    }
+    return (rows ?? []).map((r: any) => ({
+      id: r.id,
+      kind: r.kind,
+      severity: r.severity,
+      actionTaken: r.action_taken ?? null,
+      details: r.details ?? null,
+      createdAt: r.created_at,
+      inboxItemId: r.inbox_item_id ?? null,
+      requestNumber: r.request_number ?? null,
+      inboxStatus: r.inbox_status ?? null,
+    }));
+  });
+
 /**
  * Status of the most recent Human-escalation ticket linked to an AI
  * conversation. Returns `null` when no ticket exists. Caller must own the
