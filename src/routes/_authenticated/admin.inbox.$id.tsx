@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
+import { getMyRoles } from "@/lib/admin.functions";
+import { isActionAllowedForRoles, type StaffRole } from "@/lib/admin/inbox.functions";
 import {
   getInboxItem,
   assignInboxItem,
@@ -103,6 +105,18 @@ function InboxDetailPage() {
   const doMerge = useServerFn(mergeInboxDuplicate);
   const doArchive = useServerFn(archiveInboxItem);
   const doReopen = useServerFn(reopenInboxItem);
+
+  // ----- caller roles → UI action gating (server still re-checks) -----
+  const fetchRoles = useServerFn(getMyRoles);
+  const { data: rolesData } = useQuery({
+    queryKey: ["my-roles"],
+    queryFn: () => fetchRoles(),
+    staleTime: 60_000,
+  });
+  const roles = (rolesData?.roles ?? []) as StaffRole[];
+  const canMerge = isActionAllowedForRoles(roles, "merge_duplicate");
+  const canArchive = isActionAllowedForRoles(roles, "archive");
+  const canReopen = isActionAllowedForRoles(roles, "reopen");
 
   const [busy, setBusy] = useState<string | null>(null);
   async function run(label: string, fn: () => Promise<any>) {
@@ -454,6 +468,7 @@ function InboxDetailPage() {
           </ActionButton>
         </Panel>
 
+        {canMerge && (
         <Panel title="دمج مكرر">
           <Input
             placeholder="UUID الطلب الأصلي (سيتم دمج هذا الطلب فيه)"
@@ -478,9 +493,12 @@ function InboxDetailPage() {
             دمج
           </ActionButton>
         </Panel>
+        )}
 
+        {(canArchive || canReopen) && (
         <Panel title="أرشفة / إعادة فتح">
           {isArchived ? (
+            canReopen && (
             <ActionButton
               busy={busy === "reopen"}
               onClick={() =>
@@ -491,7 +509,9 @@ function InboxDetailPage() {
             >
               إعادة فتح الطلب
             </ActionButton>
+            )
           ) : (
+            canArchive && (
             <ActionButton
               busy={busy === "archive"}
               variant="destructive"
@@ -503,8 +523,10 @@ function InboxDetailPage() {
             >
               أرشفة (بدون حذف)
             </ActionButton>
+            )
           )}
         </Panel>
+        )}
       </div>
 
       {/* Shared note */}

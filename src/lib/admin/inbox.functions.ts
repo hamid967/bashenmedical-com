@@ -101,8 +101,8 @@ export type InboxEvent = {
 };
 
 // ---------------- Auth helpers ----------------
-const STAFF_ROLES = ["admin", "super_admin", "reception", "support_agent"] as const;
-type StaffRole = (typeof STAFF_ROLES)[number];
+export const STAFF_ROLES = ["admin", "super_admin", "reception", "support_agent"] as const;
+export type StaffRole = (typeof STAFF_ROLES)[number];
 
 async function assertInboxStaff(
   supabase: any,
@@ -119,13 +119,22 @@ async function assertInboxStaff(
 }
 
 /** Actions that only admins/super_admins may perform. */
-const ADMIN_ONLY_ACTIONS = new Set<InboxActionKind>([
+export const ADMIN_ONLY_ACTIONS: ReadonlySet<InboxActionKind> = new Set<InboxActionKind>([
   "merge_duplicate",
   "archive",
   "reopen",
 ]);
 
-function assertAllowed(roles: StaffRole[], action: InboxActionKind) {
+/** Exported for unit tests + UI role-gating. */
+export function isActionAllowedForRoles(
+  roles: readonly StaffRole[],
+  action: InboxActionKind,
+): boolean {
+  if (!ADMIN_ONLY_ACTIONS.has(action)) return roles.length > 0;
+  return roles.includes("admin") || roles.includes("super_admin");
+}
+
+export function assertAllowed(roles: StaffRole[], action: InboxActionKind) {
   if (!ADMIN_ONLY_ACTIONS.has(action)) return;
   const isAdmin = roles.includes("admin") || roles.includes("super_admin");
   if (!isAdmin) throw new Error("هذا الإجراء يتطلب صلاحية مسؤول.");
