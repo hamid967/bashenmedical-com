@@ -24,12 +24,13 @@ import {
   getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
   retryNotificationDeliveryLog,
+  exportNotificationDeliveryLogsCsv,
   type NotificationDeliveryLog,
   type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
 } from "@/lib/admin/notification-logs.functions";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { X, FlaskConical, RotateCw } from "lucide-react";
+import { X, FlaskConical, RotateCw, Download } from "lucide-react";
 import { toast } from "sonner";
 
 /* ------------------------------- queries -------------------------------- */
@@ -146,6 +147,40 @@ function NotifLogsPage() {
           >
             <FlaskConical className="h-3.5 w-3.5" />
             اختبارات فقط
+          </button>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                const res = await exportNotificationDeliveryLogsCsv({
+                  data: {
+                    channel: filters.channel || null,
+                    status: filters.status || null,
+                    q: filters.q ? filters.q : null,
+                    testOnly: filters.testOnly || null,
+                    windowHours: filters.windowHours,
+                    limit: 5000,
+                  },
+                });
+                const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = res.filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                toast.success(`تم تصدير ${res.count.toLocaleString("ar")} سجل.`);
+              } catch (e) {
+                toast.error((e as Error)?.message || "تعذّر التصدير.");
+              }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white border px-3 h-9 text-xs font-semibold hover:bg-slate-50"
+            title="تصدير السجلات المطابقة للفلاتر الحالية إلى ملف CSV"
+          >
+            <Download className="h-3.5 w-3.5" />
+            تصدير CSV
           </button>
           <button
             type="button"

@@ -92,6 +92,99 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
     });
   });
 
+/* ------------------------------- export --------------------------------- */
+
+const ExportInput = ListInput.extend({
+  limit: z.number().int().min(1).max(5000).default(5000),
+});
+
+function csvEscape(v: unknown): string {
+  if (v === null || v === undefined) return "";
+  const s = typeof v === "string" ? v : typeof v === "object" ? JSON.stringify(v) : String(v);
+  // RFC 4180: wrap when contains comma / quote / newline; escape " → ""
+  return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
+export const exportNotificationDeliveryLogsCsv = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => ExportInput.parse(d ?? {}))
+  .handler(async ({ data, context }): Promise<{ filename: string; csv: string; count: number }> => {
+    await assertAdmin(context);
+    const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
+
+    let q = context.supabase
+      .from("notification_delivery_logs")
+      .select(
+        "id, user_id, notification_id, channel, provider, template, recipient, subject, status, error_message, attempt, created_at, updated_at, metadata",
+      )
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(data.limit);
+
+    if (data.channel) q = q.eq("channel", data.channel);
+    if (data.status) q = q.eq("status", data.status);
+    if (data.testOnly) q = q.contains("metadata", { test: true });
+    if (data.q)
+      q = q.or(
+        `recipient.ilike.%${data.q}%,subject.ilike.%${data.q}%,template.ilike.%${data.q}%,error_message.ilike.%${data.q}%`,
+      );
+
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+
+    const headers = [
+      "id",
+      "created_at",
+      "updated_at",
+      "channel",
+      "status",
+      "attempt",
+      "provider",
+      "template",
+      "recipient",
+      "subject",
+      "notification_id",
+      "user_id",
+      "is_test",
+      "error_message",
+      "metadata",
+    ];
+    const lines: string[] = [headers.join(",")];
+    for (const r of rows ?? []) {
+      const meta = (r.metadata as Record<string, any> | null) ?? null;
+      const isTest = !!(meta && meta.test === true);
+      lines.push(
+        [
+          r.id,
+          r.created_at,
+          r.updated_at,
+          r.channel,
+          r.status,
+          r.attempt,
+          r.provider,
+          r.template,
+          r.recipient,
+          r.subject,
+          r.notification_id,
+          r.user_id,
+          isTest ? "true" : "false",
+          r.error_message,
+          meta,
+        ]
+          .map(csvEscape)
+          .join(","),
+      );
+    }
+    // Prepend UTF-8 BOM so Excel opens Arabic text without mojibake.
+    const csv = "\uFEFF" + lines.join("\r\n");
+    const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+    return {
+      filename: `notification-delivery-logs_${stamp}.csv`,
+      csv,
+      count: rows?.length ?? 0,
+    };
+  });
+
 const DetailInput = z.object({ id: z.string().uuid() });
 
 export const getNotificationDeliveryLogDetail = createServerFn({ method: "GET" })
