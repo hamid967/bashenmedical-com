@@ -380,8 +380,8 @@ export const rescheduleAppointment = createServerFn({ method: "POST" })
         appointment_date: data.new_date,
         appointment_time: time,
         status: "new",
-        notes: (appt as any).notes
-          ? `${(appt as any).notes}\n[إعادة جدولة] ${data.reason}`
+        notes: appt.notes
+          ? `${appt.notes}\n[إعادة جدولة] ${data.reason}`
           : `[إعادة جدولة] ${data.reason}`,
       })
       .eq("id", data.appointment_id);
