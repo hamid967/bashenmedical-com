@@ -63,65 +63,57 @@ function DoctorTodayPage() {
   const [openVisit, setOpenVisit] = useState<{ appt: ApptRow; visit_id: string } | null>(null);
   const [openFollowUp, setOpenFollowUp] = useState<ApptRow | null>(null);
 
-  return (
-    <AdminShellV2 title="شاشة الطبيب — اليوم" description="قائمة مواعيدك اليوم مع تدفق الكشف والزيارات.">
-      <div className="space-y-4">
-        <header className="flex items-center gap-2">
-          <Stethoscope className="h-5 w-5 text-primary" />
-          <h1 className="text-lg font-semibold">مواعيدي اليوم</h1>
-          <span className="text-xs text-muted-foreground">
-            {query.data ? `${query.data.rows.length} حجز` : ""}
-          </span>
-        </header>
+  const rows: ApptRow[] = ((query.data?.rows as unknown as ApptRow[]) ?? []);
 
-        {query.isLoading ? (
-          <p className="text-sm text-muted-foreground">جاري التحميل…</p>
-        ) : query.isError ? (
-          <p className="text-sm text-destructive">
-            تعذّر التحميل: {(query.error as Error).message}
-          </p>
-        ) : (query.data?.rows.length ?? 0) === 0 ? (
-          <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-            لا توجد مواعيد لك اليوم.
-          </p>
-        ) : (
-          <div className="overflow-x-auto rounded-md border">
-            <table className="min-w-full text-sm">
-              <thead className="bg-muted/50 text-xs">
-                <tr>
-                  <th className="p-2 text-start">الوقت</th>
-                  <th className="p-2 text-start">المرجع</th>
-                  <th className="p-2 text-start">المريض</th>
-                  <th className="p-2 text-start">الحالة</th>
-                  <th className="p-2 text-start">إجراءات</th>
-                </tr>
-              </thead>
-              <tbody>
-                {query.data!.rows.map((r) => (
-                  <DoctorRow
-                    key={r.id}
-                    row={r as ApptRow}
-                    onStarted={(visit_id) => setOpenVisit({ appt: r as ApptRow, visit_id })}
-                    onFollowUp={() => setOpenFollowUp(r as ApptRow)}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+  return (
+    <div className="mx-auto max-w-5xl space-y-4 p-4">
+      <header className="flex items-center gap-2">
+        <Stethoscope className="h-5 w-5 text-primary" />
+        <h1 className="text-lg font-semibold">مواعيدي اليوم</h1>
+        <span className="text-xs text-muted-foreground">{query.data ? `${rows.length} حجز` : ""}</span>
+      </header>
+
+      {query.isLoading ? (
+        <p className="text-sm text-muted-foreground">جاري التحميل…</p>
+      ) : query.isError ? (
+        <p className="text-sm text-destructive">تعذّر التحميل: {(query.error as Error).message}</p>
+      ) : rows.length === 0 ? (
+        <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
+          لا توجد مواعيد لك اليوم.
+        </p>
+      ) : (
+        <div className="overflow-x-auto rounded-md border">
+          <table className="min-w-full text-sm">
+            <thead className="bg-muted/50 text-xs">
+              <tr>
+                <th className="p-2 text-start">الوقت</th>
+                <th className="p-2 text-start">المرجع</th>
+                <th className="p-2 text-start">المريض</th>
+                <th className="p-2 text-start">الحالة</th>
+                <th className="p-2 text-start">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <DoctorRow
+                  key={r.id}
+                  row={r}
+                  onStarted={(visit_id) => setOpenVisit({ appt: r, visit_id })}
+                  onFollowUp={() => setOpenFollowUp(r)}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {openVisit ? (
-        <VisitDialog
-          appt={openVisit.appt}
-          visitId={openVisit.visit_id}
-          onClose={() => setOpenVisit(null)}
-        />
+        <VisitDialog appt={openVisit.appt} visitId={openVisit.visit_id} onClose={() => setOpenVisit(null)} />
       ) : null}
       {openFollowUp ? (
         <FollowUpDialog appt={openFollowUp} onClose={() => setOpenFollowUp(null)} />
       ) : null}
-    </AdminShellV2>
+    </div>
   );
 }
 
