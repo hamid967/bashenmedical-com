@@ -12,7 +12,20 @@ const Input = z.object({ q: z.string().min(1).max(80) });
 export type GlobalSearchResult = {
   patients: { id: string; name: string; mrn: string | null; phone: string | null }[];
   doctors: { id: string; name_ar: string; name_en: string | null; specialty: string | null }[];
-  appointments: { id: string; patient_name: string; date: string; status: string }[];
+  appointments: {
+    id: string;
+    reference_number: string | null;
+    patient_name: string;
+    date: string;
+    status: string;
+  }[];
+  requests: {
+    id: string;
+    request_number: string | null;
+    full_name: string;
+    phone: string | null;
+    status: string | null;
+  }[];
 };
 
 function maskPhone(p: string | null): string | null {
