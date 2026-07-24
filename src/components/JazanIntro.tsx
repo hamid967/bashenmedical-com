@@ -100,14 +100,21 @@ function shouldShow(
     if (p && path.startsWith(p)) return { show: false, reason: `blocked_path:${p}` };
   }
 
-  // Save-data / slow-network guard.
+  // Save-data / slow-network guard. Never block booking or login on weak links.
   try {
     const conn = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
+      connection?: { saveData?: boolean; effectiveType?: string; downlink?: number; rtt?: number };
     }).connection;
     if (conn?.saveData) return { show: false, reason: "save_data" };
-    if (conn?.effectiveType === "2g" || conn?.effectiveType === "slow-2g") {
-      return { show: false, reason: `slow_network:${conn.effectiveType}` };
+    const et = conn?.effectiveType;
+    if (et === "2g" || et === "slow-2g" || et === "3g") {
+      return { show: false, reason: `slow_network:${et}` };
+    }
+    if (typeof conn?.downlink === "number" && conn.downlink > 0 && conn.downlink < 1.5) {
+      return { show: false, reason: `low_downlink:${conn.downlink}` };
+    }
+    if (typeof conn?.rtt === "number" && conn.rtt > 500) {
+      return { show: false, reason: `high_rtt:${conn.rtt}` };
     }
   } catch {
     /* ignore */
@@ -192,7 +199,17 @@ export function JazanIntro() {
   const endedRef = useRef<boolean>(false);
   const debugEnabled = isDebugEnabled(introCfg.debug);
 
-  const endIntro = (reason: "completed" | "skipped" | "escape" | "disabled" | "reduced_motion") => {
+  const endIntro = (
+    reason:
+      | "completed"
+      | "skipped"
+      | "escape"
+      | "disabled"
+      | "reduced_motion"
+      | "hard_cap"
+      | "network_downgrade"
+      | "navigation_intent",
+  ) => {
     if (endedRef.current) return;
     endedRef.current = true;
     if (reason === "disabled") {
@@ -265,6 +282,85 @@ export function JazanIntro() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted, reduced, introCfg.durationMs]);
+
+  // Never-block watchdogs: hard time cap, live network downgrade, and
+  // navigation intent toward booking/auth/portal. Any of these end the intro
+  // immediately so the user reaches the critical flow without delay.
+  useEffect(() => {
+    if (!mounted) return;
+
+    // 1) Absolute hard cap — even if animation timers get throttled by a
+    // backgrounded tab, we never keep the overlay above 8s.
+    const HARD_CAP_MS = 8_000;
+    const cap = window.setTimeout(() => endIntro("hard_cap"), HARD_CAP_MS);
+
+    // 2) Live network downgrade — if the connection turns slow/save-data
+    // mid-intro, bail out immediately.
+    const conn = (navigator as Navigator & {
+      connection?: {
+        saveData?: boolean;
+        effectiveType?: string;
+        downlink?: number;
+        rtt?: number;
+        addEventListener?: (t: string, cb: () => void) => void;
+        removeEventListener?: (t: string, cb: () => void) => void;
+      };
+    }).connection;
+    const onNetChange = () => {
+      if (!conn) return;
+      const et = conn.effectiveType;
+      const weak =
+        conn.saveData === true ||
+        et === "2g" ||
+        et === "slow-2g" ||
+        et === "3g" ||
+        (typeof conn.downlink === "number" && conn.downlink > 0 && conn.downlink < 1.5) ||
+        (typeof conn.rtt === "number" && conn.rtt > 500);
+      if (weak) endIntro("network_downgrade");
+    };
+    conn?.addEventListener?.("change", onNetChange);
+
+    // 3) Navigation intent — if the user clicks any link/button that leads to
+    // a never-block prefix (booking, auth, patient, admin, …) dismiss now so
+    // the target flow isn't visually blocked while the router transitions.
+    const prefixes =
+      (introCfg.blockedPathPrefixes ?? []).length > 0
+        ? introCfg.blockedPathPrefixes
+        : DEFAULT_INTRO_BLOCKED_PREFIXES;
+    const matchesBlocked = (path: string) => {
+      for (const p of prefixes) if (p && path.startsWith(p)) return true;
+      return false;
+    };
+    const onClick = (e: MouseEvent) => {
+      const target = e.target as Element | null;
+      const anchor = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+      try {
+        const url = new URL(anchor.href, window.location.origin);
+        if (url.origin === window.location.origin && matchesBlocked(url.pathname)) {
+          endIntro("navigation_intent");
+        }
+      } catch {
+        /* ignore */
+      }
+    };
+    const onPopState = () => {
+      if (matchesBlocked(window.location.pathname)) endIntro("navigation_intent");
+    };
+    // Capture phase so we react before router link handlers run.
+    document.addEventListener("click", onClick, true);
+    window.addEventListener("popstate", onPopState);
+
+    return () => {
+      window.clearTimeout(cap);
+      conn?.removeEventListener?.("change", onNetChange);
+      document.removeEventListener("click", onClick, true);
+      window.removeEventListener("popstate", onPopState);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mounted]);
+
+
 
   // Focus management: save previous focus, focus skip button, restore on unmount.
   // Escape closes; Tab is trapped inside the dialog.
