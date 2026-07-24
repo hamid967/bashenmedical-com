@@ -1,15 +1,15 @@
 /**
- * ui-v3 Field — one primitive to render a labelled form control with help + error.
- * Wraps any input (Input / Textarea / Select / Switch / Checkbox / custom).
+ * ui-v3 Field — one primitive to render a labelled form control with
+ * help + unified error surface. Uses shared InlineError.
  *
- * Usage:
- *   <Field label="الاسم" required error={errors.name} help="كما في الهوية">
- *     <Input value={...} onChange={...} />
- *   </Field>
+ * Also supports:
+ *  - `disabled`: propagates aria-disabled + visual dim to child control.
+ *  - `loading`:  sets aria-busy on child control (skeleton left to consumer).
  */
 import * as React from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { InlineError } from "./state";
 
 export interface FieldProps {
   label?: React.ReactNode;
@@ -17,6 +17,8 @@ export interface FieldProps {
   required?: boolean;
   help?: React.ReactNode;
   error?: React.ReactNode;
+  disabled?: boolean;
+  loading?: boolean;
   className?: string;
   children: React.ReactNode;
   /** Renders label + control on the same row (for switches/checkboxes). */
@@ -29,6 +31,8 @@ export function Field({
   required,
   help,
   error,
+  disabled,
+  loading,
   className,
   children,
   inline,
@@ -36,35 +40,46 @@ export function Field({
   const helpId = htmlFor ? `${htmlFor}-help` : undefined;
   const errorId = htmlFor ? `${htmlFor}-error` : undefined;
 
-  const control = React.isValidElement(children) && htmlFor
+  const control = React.isValidElement(children)
     ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         id: (children.props as { id?: string }).id ?? htmlFor,
         "aria-invalid": error ? true : undefined,
+        "aria-busy": loading || undefined,
+        "aria-disabled": disabled || undefined,
+        disabled:
+          disabled ??
+          (children.props as { disabled?: boolean }).disabled,
         "aria-describedby":
           [error ? errorId : null, help ? helpId : null].filter(Boolean).join(" ") || undefined,
       })
     : children;
 
+  const labelNode = label ? (
+    <Label htmlFor={htmlFor} className={cn(inline && "text-sm", disabled && "opacity-60")}>
+      {label}
+      {required ? <span className="text-destructive"> *</span> : null}
+    </Label>
+  ) : null;
+
+  const helpNode = help ? (
+    <p id={helpId} className={cn("text-xs text-muted-foreground", inline && "mt-1")}>
+      {help}
+    </p>
+  ) : null;
+
+  const errorNode = error ? <InlineError id={errorId}>{error}</InlineError> : null;
+
   if (inline) {
     return (
-      <div className={cn("flex items-start justify-between gap-4", className)}>
+      <div
+        data-loading={loading || undefined}
+        data-disabled={disabled || undefined}
+        className={cn("flex items-start justify-between gap-4", className)}
+      >
         <div className="min-w-0">
-          {label ? (
-            <Label htmlFor={htmlFor} className="text-sm">
-              {label}
-              {required ? <span className="text-destructive"> *</span> : null}
-            </Label>
-          ) : null}
-          {help ? (
-            <p id={helpId} className="text-xs text-muted-foreground mt-1">
-              {help}
-            </p>
-          ) : null}
-          {error ? (
-            <p id={errorId} className="text-xs text-destructive mt-1" role="alert">
-              {error}
-            </p>
-          ) : null}
+          {labelNode}
+          {helpNode}
+          {errorNode}
         </div>
         <div className="shrink-0">{control}</div>
       </div>
@@ -72,24 +87,15 @@ export function Field({
   }
 
   return (
-    <div className={cn("space-y-1.5", className)}>
-      {label ? (
-        <Label htmlFor={htmlFor}>
-          {label}
-          {required ? <span className="text-destructive"> *</span> : null}
-        </Label>
-      ) : null}
+    <div
+      data-loading={loading || undefined}
+      data-disabled={disabled || undefined}
+      className={cn("space-y-1.5", className)}
+    >
+      {labelNode}
       {control}
-      {help && !error ? (
-        <p id={helpId} className="text-xs text-muted-foreground">
-          {help}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={errorId} className="text-xs text-destructive" role="alert">
-          {error}
-        </p>
-      ) : null}
+      {!error ? helpNode : null}
+      {errorNode}
     </div>
   );
 }
