@@ -42,6 +42,7 @@ import {
   ScrollText,
   KeyRound,
   Activity,
+  ClipboardCheck,
 } from "lucide-react";
 
 type NavItem = {
