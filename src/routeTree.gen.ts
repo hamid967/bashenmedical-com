@@ -279,6 +279,7 @@ import { Route as ApiPublicInquiriesMarkWhatsappOpenedRouteImport } from './rout
 import { Route as ApiPublicInsuranceVerifyRouteImport } from './routes/api/public/insurance/verify'
 import { Route as ApiPublicInvoicesLookupRouteImport } from './routes/api/public/invoices/lookup'
 import { Route as ApiPublicMediaSplatRouteImport } from './routes/api/public/media/$'
+import { Route as ApiPublicNativeRegisterDeviceRouteImport } from './routes/api/public/native/register-device'
 import { Route as ApiPublicReservationsCancelRouteImport } from './routes/api/public/reservations/cancel'
 import { Route as ApiPublicReservationsListRouteImport } from './routes/api/public/reservations/list'
 import { Route as ApiPublicReservationsRescheduleRouteImport } from './routes/api/public/reservations/reschedule'
@@ -1804,6 +1805,12 @@ const ApiPublicMediaSplatRoute = ApiPublicMediaSplatRouteImport.update({
   path: '/api/public/media/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicNativeRegisterDeviceRoute =
+  ApiPublicNativeRegisterDeviceRouteImport.update({
+    id: '/api/public/native/register-device',
+    path: '/api/public/native/register-device',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicReservationsCancelRoute =
   ApiPublicReservationsCancelRouteImport.update({
     id: '/api/public/reservations/cancel',
@@ -2144,6 +2151,7 @@ export interface FileRoutesByFullPath {
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/api/public/native/register-device': typeof ApiPublicNativeRegisterDeviceRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -2422,6 +2430,7 @@ export interface FileRoutesByTo {
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/api/public/native/register-device': typeof ApiPublicNativeRegisterDeviceRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -2707,6 +2716,7 @@ export interface FileRoutesById {
   '/api/public/insurance/verify': typeof ApiPublicInsuranceVerifyRoute
   '/api/public/invoices/lookup': typeof ApiPublicInvoicesLookupRoute
   '/api/public/media/$': typeof ApiPublicMediaSplatRoute
+  '/api/public/native/register-device': typeof ApiPublicNativeRegisterDeviceRoute
   '/api/public/reservations/cancel': typeof ApiPublicReservationsCancelRouteWithChildren
   '/api/public/reservations/list': typeof ApiPublicReservationsListRoute
   '/api/public/reservations/reschedule': typeof ApiPublicReservationsRescheduleRoute
@@ -2992,6 +3002,7 @@ export interface FileRouteTypes {
     | '/api/public/insurance/verify'
     | '/api/public/invoices/lookup'
     | '/api/public/media/$'
+    | '/api/public/native/register-device'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -3270,6 +3281,7 @@ export interface FileRouteTypes {
     | '/api/public/insurance/verify'
     | '/api/public/invoices/lookup'
     | '/api/public/media/$'
+    | '/api/public/native/register-device'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -3554,6 +3566,7 @@ export interface FileRouteTypes {
     | '/api/public/insurance/verify'
     | '/api/public/invoices/lookup'
     | '/api/public/media/$'
+    | '/api/public/native/register-device'
     | '/api/public/reservations/cancel'
     | '/api/public/reservations/list'
     | '/api/public/reservations/reschedule'
@@ -3658,6 +3671,7 @@ export interface RootRouteChildren {
   ApiPublicInsuranceVerifyRoute: typeof ApiPublicInsuranceVerifyRoute
   ApiPublicInvoicesLookupRoute: typeof ApiPublicInvoicesLookupRoute
   ApiPublicMediaSplatRoute: typeof ApiPublicMediaSplatRoute
+  ApiPublicNativeRegisterDeviceRoute: typeof ApiPublicNativeRegisterDeviceRoute
   ApiPublicReservationsCancelRoute: typeof ApiPublicReservationsCancelRouteWithChildren
   ApiPublicReservationsListRoute: typeof ApiPublicReservationsListRoute
   ApiPublicReservationsRescheduleRoute: typeof ApiPublicReservationsRescheduleRoute
@@ -5560,6 +5574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicMediaSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/native/register-device': {
+      id: '/api/public/native/register-device'
+      path: '/api/public/native/register-device'
+      fullPath: '/api/public/native/register-device'
+      preLoaderRoute: typeof ApiPublicNativeRegisterDeviceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/reservations/cancel': {
       id: '/api/public/reservations/cancel'
       path: '/api/public/reservations/cancel'
@@ -6500,6 +6521,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicInsuranceVerifyRoute: ApiPublicInsuranceVerifyRoute,
   ApiPublicInvoicesLookupRoute: ApiPublicInvoicesLookupRoute,
   ApiPublicMediaSplatRoute: ApiPublicMediaSplatRoute,
+  ApiPublicNativeRegisterDeviceRoute: ApiPublicNativeRegisterDeviceRoute,
   ApiPublicReservationsCancelRoute:
     ApiPublicReservationsCancelRouteWithChildren,
   ApiPublicReservationsListRoute: ApiPublicReservationsListRoute,
