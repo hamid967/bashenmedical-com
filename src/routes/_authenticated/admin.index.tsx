@@ -156,6 +156,18 @@ function AdminDashboard() {
     (l) => !l.roles || l.roles.some((r) => roles.includes(r)),
   );
 
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { from: fromDate, to: toDate } = resolveRange(search.range, search.from, search.to);
+  const branchId = search.branch || null;
+  const fetchBranches = useServerFn(listBranchesLite);
+  const branchesQ = useQuery({
+    queryKey: ["admin", "branches-lite"],
+    queryFn: () => fetchBranches(),
+    staleTime: 5 * 60_000,
+  });
+
+
   return (
     <div
       dir="rtl"
