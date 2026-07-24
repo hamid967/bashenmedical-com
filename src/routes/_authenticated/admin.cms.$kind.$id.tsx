@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   getCmsEntry, saveCmsVersion, submitCmsForReview, reviewCmsEntry,
   publishCmsEntry, scheduleCmsEntry, archiveCmsEntry, rollbackCmsVersion,
-  createCmsPreviewToken, listCmsAudit, getCmsRoleInfo,
+  createCmsPreviewToken, listCmsAudit, getCmsRoleInfo, getCmsVersion,
 } from "@/lib/admin/cms/cms.functions";
 import { CMS_KINDS, type CmsKind, type FieldDef } from "@/lib/admin/cms/schemas";
 import { Card } from "@/components/ui-v3";
@@ -38,6 +38,7 @@ function CmsEditor() {
   const previewFn = useServerFn(createCmsPreviewToken);
   const auditFn = useServerFn(listCmsAudit);
   const roleFn = useServerFn(getCmsRoleInfo);
+  const versionFn = useServerFn(getCmsVersion);
 
   const { data } = useSuspenseQuery({
     queryKey: ["cms", "entry", id],
@@ -129,9 +130,22 @@ function CmsEditor() {
               اعتماد
             </Button>
             <Button size="sm" variant="outline"
-              onClick={() => runAction(() => reviewFn({ data: { entry_id: id, decision: "rejected" } }), "تم الرفض")}
+              onClick={() => {
+                const c = window.prompt("سبب الرفض (مطلوب):", "");
+                if (!c || c.trim().length < 3) { toast.error("يجب إدخال سبب الرفض"); return; }
+                runAction(() => reviewFn({ data: { entry_id: id, decision: "rejected", comment: c.trim() } }), "تم الرفض");
+              }}
               disabled={status !== "in_review"}>
               رفض
+            </Button>
+            <Button size="sm" variant="outline"
+              onClick={() => {
+                const c = window.prompt("طلب تعديلات — الملاحظات (مطلوب):", "");
+                if (!c || c.trim().length < 3) { toast.error("يجب إدخال ملاحظات التعديل"); return; }
+                runAction(() => reviewFn({ data: { entry_id: id, decision: "changes_requested", comment: c.trim() } }), "أُعيد إلى المسودة");
+              }}
+              disabled={status !== "in_review"}>
+              طلب تعديلات
             </Button>
             <Button size="sm"
               onClick={() => runAction(() => publishFn({ data: { entry_id: id } }), "تم النشر")}
@@ -210,6 +224,7 @@ function CmsEditor() {
             )
           }
           fetchAudit={() => auditFn({ data: { entry_id: id, limit: 100 } })}
+          fetchVersion={(vid) => versionFn({ data: { entry_id: id, version_id: vid } })}
         />
       )}
 
@@ -336,7 +351,7 @@ function TextInput({
 }
 
 function HistoryPanel({
-  versions, currentId, canPublish, onRollback, fetchAudit,
+  versions, currentId, canPublish, onRollback, fetchAudit, fetchVersion,
 }: {
   entryId: string;
   versions: any[];
@@ -344,8 +359,25 @@ function HistoryPanel({
   canPublish: boolean;
   onRollback: (versionId: string) => void;
   fetchAudit: () => Promise<any[]>;
+  fetchVersion: (versionId: string) => Promise<any>;
 }) {
   const [audit, setAudit] = useState<any[] | null>(null);
+  const [diffLeft, setDiffLeft] = useState<any | null>(null);
+  const [diffRight, setDiffRight] = useState<any | null>(null);
+  const [diffLoading, setDiffLoading] = useState(false);
+
+  const loadDiff = async (leftId: string, rightId: string) => {
+    setDiffLoading(true);
+    try {
+      const [l, r] = await Promise.all([fetchVersion(leftId), fetchVersion(rightId)]);
+      setDiffLeft(l); setDiffRight(r);
+    } catch (e: any) {
+      toast.error(e?.message ?? "فشل تحميل المقارنة");
+    } finally {
+      setDiffLoading(false);
+    }
+  };
+
   return (
     <Card className="p-4 space-y-4">
       <div>
@@ -359,15 +391,38 @@ function HistoryPanel({
                 {v.note && <span className="text-muted-foreground ms-2">— {v.note}</span>}
                 {v.id === currentId && <Badge className="ms-2" variant="secondary">الحالية</Badge>}
               </span>
-              {canPublish && v.id !== currentId && (
-                <Button size="sm" variant="outline" onClick={() => onRollback(v.id)}>
-                  استرجاع
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {currentId && v.id !== currentId && (
+                  <Button size="sm" variant="ghost" onClick={() => loadDiff(v.id, currentId)}>
+                    قارن بالحالية
+                  </Button>
+                )}
+                {canPublish && v.id !== currentId && (
+                  <Button size="sm" variant="outline" onClick={() => onRollback(v.id)}>
+                    استرجاع
+                  </Button>
+                )}
+              </div>
             </li>
           ))}
         </ul>
       </div>
+
+      {(diffLeft && diffRight) && (
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-bold">
+              مقارنة: v{diffLeft.version_no} ↔ v{diffRight.version_no}
+            </h3>
+            <Button size="sm" variant="ghost" onClick={() => { setDiffLeft(null); setDiffRight(null); }}>
+              إغلاق
+            </Button>
+          </div>
+          <DiffTable left={diffLeft} right={diffRight} />
+        </div>
+      )}
+      {diffLoading && <div className="text-xs text-muted-foreground">جاري التحميل…</div>}
+
       <div>
         <div className="flex items-center justify-between mb-2">
           <h3 className="font-bold">سجل التدقيق</h3>
@@ -390,3 +445,71 @@ function HistoryPanel({
     </Card>
   );
 }
+
+function flattenPayload(prefix: string, val: any, out: Record<string, string>) {
+  if (val === null || val === undefined) {
+    out[prefix] = "";
+    return;
+  }
+  if (typeof val === "object") {
+    if (Array.isArray(val)) {
+      val.forEach((item, i) => flattenPayload(`${prefix}[${i}]`, item, out));
+      if (val.length === 0) out[prefix] = "[]";
+      return;
+    }
+    const keys = Object.keys(val);
+    if (keys.length === 0) { out[prefix] = "{}"; return; }
+    for (const k of keys) flattenPayload(prefix ? `${prefix}.${k}` : k, val[k], out);
+    return;
+  }
+  out[prefix] = String(val);
+}
+
+function DiffTable({ left, right }: { left: any; right: any }) {
+  const rows = useMemo(() => {
+    const buckets: Array<[string, any, any]> = [];
+    for (const label of ["payload_ar", "payload_en", "seo"] as const) {
+      const l: Record<string, string> = {};
+      const r: Record<string, string> = {};
+      flattenPayload("", left?.[label] ?? {}, l);
+      flattenPayload("", right?.[label] ?? {}, r);
+      const keys = Array.from(new Set([...Object.keys(l), ...Object.keys(r)])).sort();
+      for (const k of keys) {
+        const a = l[k] ?? "";
+        const b = r[k] ?? "";
+        if (a !== b) buckets.push([`${label}.${k}`, a, b]);
+      }
+    }
+    if ((left?.og_image_url ?? "") !== (right?.og_image_url ?? "")) {
+      buckets.push(["og_image_url", left?.og_image_url ?? "", right?.og_image_url ?? ""]);
+    }
+    return buckets;
+  }, [left, right]);
+
+  if (rows.length === 0) {
+    return <div className="text-sm text-muted-foreground">لا فروق بين النسختين.</div>;
+  }
+  return (
+    <div className="overflow-x-auto border rounded">
+      <table className="w-full text-xs">
+        <thead className="bg-muted/50">
+          <tr>
+            <th className="text-start p-2 w-1/4">الحقل</th>
+            <th className="text-start p-2">v{left.version_no}</th>
+            <th className="text-start p-2">v{right.version_no}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([k, a, b]) => (
+            <tr key={k} className="border-t align-top">
+              <td className="p-2 font-mono text-[11px] text-muted-foreground break-all">{k}</td>
+              <td className="p-2 bg-red-500/5 whitespace-pre-wrap break-all">{a || <span className="text-muted-foreground">—</span>}</td>
+              <td className="p-2 bg-emerald-500/5 whitespace-pre-wrap break-all">{b || <span className="text-muted-foreground">—</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+

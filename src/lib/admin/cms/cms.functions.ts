@@ -302,6 +302,13 @@ export const reviewCmsEntry = createServerFn({ method: "POST" })
     await assertCmsPublisher(context);
     const entry = await loadEntry(context.supabase, data.entry_id);
     if (entry.status !== "in_review") throw new Error("العنصر ليس تحت المراجعة.");
+    // Require a comment when rejecting or asking for changes so authors know why.
+    if (data.decision !== "approved") {
+      const trimmed = (data.comment ?? "").trim();
+      if (trimmed.length < 3) {
+        throw new Error("يجب إضافة سبب/ملاحظة عند الرفض أو طلب تعديلات.");
+      }
+    }
     await context.supabase.from("cms_reviews").insert({
       version_id: entry.current_version_id,
       reviewer_id: context.userId,
@@ -324,6 +331,7 @@ export const reviewCmsEntry = createServerFn({ method: "POST" })
       { status: "in_review" }, { status: nextStatus, comment: data.comment ?? null });
     return { ok: true, status: nextStatus };
   });
+
 
 export const publishCmsEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -534,3 +542,27 @@ export const listCmsAudit = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+/* ============== version diff ============== */
+
+export const getCmsVersion = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) =>
+    z.object({
+      entry_id: z.string().uuid(),
+      version_id: z.string().uuid(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertCmsEditor(context);
+    const { data: v, error } = await context.supabase
+      .from("cms_versions")
+      .select("id, version_no, payload_ar, payload_en, seo, og_image_url, note, author_id, created_at")
+      .eq("id", data.version_id)
+      .eq("entry_id", data.entry_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!v) throw new Error("النسخة غير موجودة");
+    return v;
+  });
+
