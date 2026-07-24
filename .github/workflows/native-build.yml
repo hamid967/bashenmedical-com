@@ -1,0 +1,76 @@
+name: native-build
+# Manual CI workflow that syncs and builds unsigned iOS/Android artifacts
+# for QA. Signing + store upload stay manual — those need your Apple / Play
+# developer accounts and signing keys.
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: "Server URL to point the shell at (prod or staging)"
+        required: false
+        default: "https://bashenmedical.com"
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: capacitor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Add Android platform
+        run: |
+          if [ ! -d android ]; then bun run add:android; fi
+        env:
+          BAESHEN_NATIVE_SERVER_URL: ${{ inputs.server_url }}
+      - name: Sync
+        run: bun run sync
+        env:
+          BAESHEN_NATIVE_SERVER_URL: ${{ inputs.server_url }}
+      - name: Assemble debug APK
+        run: cd android && ./gradlew assembleDebug --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: baeshen-android-debug
+          path: capacitor/android/app/build/outputs/apk/debug/*.apk
+
+  ios:
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: capacitor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v1
+      - name: Install
+        run: bun install --frozen-lockfile
+      - name: Add iOS platform
+        run: |
+          if [ ! -d ios ]; then bun run add:ios; fi
+        env:
+          BAESHEN_NATIVE_SERVER_URL: ${{ inputs.server_url }}
+      - name: Sync
+        run: bun run sync
+        env:
+          BAESHEN_NATIVE_SERVER_URL: ${{ inputs.server_url }}
+      - name: Build unsigned .app (Debug, Simulator)
+        run: |
+          cd ios/App
+          xcodebuild -workspace App.xcworkspace -scheme App \
+            -configuration Debug -sdk iphonesimulator \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+      - name: Upload app bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: baeshen-ios-debug-sim
+          path: capacitor/ios/App/build/Build/Products/Debug-iphonesimulator/App.app
