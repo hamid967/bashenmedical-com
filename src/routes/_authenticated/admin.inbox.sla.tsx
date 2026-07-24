@@ -216,11 +216,16 @@ function SlaPage() {
 
       {/* Breaches */}
       <Card className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-destructive" />
             <h2 className="text-lg font-bold">تنبيهات SLA النشطة</h2>
-            <Badge variant="destructive">{data.breaches.length}</Badge>
+            <Badge variant="destructive">{filteredBreaches.length}</Badge>
+            {filteredBreaches.length !== data.breaches.length && (
+              <span className="text-xs text-muted-foreground">
+                من إجمالي {data.breaches.length}
+              </span>
+            )}
           </div>
           <div className="text-xs text-muted-foreground flex gap-3">
             {Object.entries(breachesByPriority).map(([p, n]) => (
@@ -230,9 +235,75 @@ function SlaPage() {
             ))}
           </div>
         </div>
-        {data.breaches.length === 0 ? (
+
+        {/* Filters + Export */}
+        <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
+          <select
+            value={fChannel}
+            onChange={(e) => setFChannel(e.target.value)}
+            className="border rounded px-2 py-1 bg-background"
+          >
+            <option value="">كل القنوات</option>
+            {channelOptions.map((k) => (
+              <option key={k} value={k}>
+                {CHANNEL_LABELS[k as keyof typeof CHANNEL_LABELS] ?? k}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fBranch}
+            onChange={(e) => setFBranch(e.target.value)}
+            className="border rounded px-2 py-1 bg-background"
+          >
+            <option value="">كل الفروع</option>
+            {branchOptions.map((b) => (
+              <option key={b.key} value={b.key}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fStatus}
+            onChange={(e) => setFStatus(e.target.value)}
+            className="border rounded px-2 py-1 bg-background"
+          >
+            <option value="">كل الحالات</option>
+            {statusOptions.map((k) => (
+              <option key={k} value={k}>
+                {STATUS_LABELS[k as keyof typeof STATUS_LABELS] ?? k}
+              </option>
+            ))}
+          </select>
+          {(fChannel || fBranch || fStatus) && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setFChannel("");
+                setFBranch("");
+                setFStatus("");
+              }}
+            >
+              مسح الفلاتر
+            </Button>
+          )}
+          <div className="ms-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={exportCsv}
+              disabled={filteredBreaches.length === 0}
+            >
+              تصدير CSV ({filteredBreaches.length})
+            </Button>
+          </div>
+        </div>
+
+        {filteredBreaches.length === 0 ? (
           <div className="text-sm text-muted-foreground text-center py-8">
-            لا توجد تجاوزات SLA حالية 🎉
+            {data.breaches.length === 0
+              ? "لا توجد تجاوزات SLA حالية 🎉"
+              : "لا توجد نتائج مطابقة للفلاتر"}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -251,7 +322,7 @@ function SlaPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.breaches.map((b) => (
+                {filteredBreaches.map((b) => (
                   <tr key={`${b.id}-${b.kind}`} className="border-t hover:bg-muted/40">
                     <td className="p-2 font-mono text-xs">{b.request_number}</td>
                     <td className="p-2">{b.patient_name ?? "—"}</td>
@@ -289,6 +360,7 @@ function SlaPage() {
           </div>
         )}
       </Card>
+
     </div>
   );
 }
