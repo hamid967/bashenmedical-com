@@ -42,6 +42,22 @@ export const Route = createFileRoute("/services")({
         property: "og:description",
         content: "منصة موحدة لجميع خدمات المرضى الإلكترونية.",
       },
+      { property: "og:url", content: "https://bashenmedical.com/services" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://bashenmedical.com/services" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://bashenmedical.com/" },
+            { "@type": "ListItem", position: 2, name: "الخدمات الإلكترونية", item: "https://bashenmedical.com/services" },
+          ],
+        }),
+      },
     ],
   }),
   component: ServicesPortal,

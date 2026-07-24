@@ -36,6 +36,17 @@ export const Route = createFileRoute("/insurance")({
           audience: { "@type": "MedicalAudience", audienceType: "Patient" },
         }),
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://bashenmedical.com/" },
+            { "@type": "ListItem", position: 2, name: "شركات التأمين المعتمدة", item: "https://bashenmedical.com/insurance" },
+          ],
+        }),
+      },
     ],
   }),
   component: InsurancePage,

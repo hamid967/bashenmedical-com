@@ -107,6 +107,18 @@ export const Route = createFileRoute("/branches/$slug")({
           type: "application/ld+json",
           children: JSON.stringify(jsonLd),
         },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://bashenmedical.com/" },
+              { "@type": "ListItem", position: 2, name: "الفروع", item: "https://bashenmedical.com/branches" },
+              { "@type": "ListItem", position: 3, name: b.name_ar, item: url },
+            ],
+          }),
+        },
       ],
     };
   },

@@ -56,6 +56,17 @@ export const Route = createFileRoute("/about")({
           sameAs: [SITE.instagram, SITE.x, SITE.tiktok],
         }),
       },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE_URL },
+            { "@type": "ListItem", position: 2, name: "من نحن", item: PAGE_URL },
+          ],
+        }),
+      },
     ],
   }),
   component: AboutPage,

@@ -23,6 +23,20 @@ export const Route = createFileRoute("/media/stories")({
       { property: "og:description", content: "تجارب علاج ملهمة من مرضانا." },
     ],
     links: [{ rel: "canonical", href: "https://bashenmedical.com/media/stories" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://bashenmedical.com/" },
+            { "@type": "ListItem", position: 2, name: "الوسائط", item: "https://bashenmedical.com/media/news" },
+            { "@type": "ListItem", position: 3, name: "قصص المرضى", item: "https://bashenmedical.com/media/stories" },
+          ],
+        }),
+      },
+    ],
   }),
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData(storiesQuery);
