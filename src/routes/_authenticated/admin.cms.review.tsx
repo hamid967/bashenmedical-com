@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_authenticated/admin/cms/review")({
 });
 
 function ReviewQueue() {
+  useCmsTransitionNotifications();
   const fetchFn = useServerFn(listCmsReviewQueue);
   const { data } = useSuspenseQuery({
     queryKey: ["cms", "review-queue"],
