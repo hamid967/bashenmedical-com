@@ -5411,6 +5411,63 @@ export type Database = {
           },
         ]
       }
+      payment_webhook_events: {
+        Row: {
+          error_message: string | null
+          event_id: string
+          event_type: string | null
+          http_status: number
+          id: string
+          invoice_id: string | null
+          payment_id: string | null
+          provider: string
+          raw: Json | null
+          received_at: string
+          signature_valid: boolean
+        }
+        Insert: {
+          error_message?: string | null
+          event_id: string
+          event_type?: string | null
+          http_status: number
+          id?: string
+          invoice_id?: string | null
+          payment_id?: string | null
+          provider: string
+          raw?: Json | null
+          received_at?: string
+          signature_valid: boolean
+        }
+        Update: {
+          error_message?: string | null
+          event_id?: string
+          event_type?: string | null
+          http_status?: number
+          id?: string
+          invoice_id?: string | null
+          payment_id?: string | null
+          provider?: string
+          raw?: Json | null
+          received_at?: string
+          signature_valid?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_webhook_events_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_webhook_events_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount: number
@@ -5419,6 +5476,7 @@ export type Database = {
           gateway: string | null
           gateway_ref: string | null
           id: string
+          idempotency_key: string | null
           invoice_id: string
           is_mock: boolean
           metadata: Json | null
@@ -5434,6 +5492,7 @@ export type Database = {
           gateway?: string | null
           gateway_ref?: string | null
           id?: string
+          idempotency_key?: string | null
           invoice_id: string
           is_mock?: boolean
           metadata?: Json | null
@@ -5449,6 +5508,7 @@ export type Database = {
           gateway?: string | null
           gateway_ref?: string | null
           id?: string
+          idempotency_key?: string | null
           invoice_id?: string
           is_mock?: boolean
           metadata?: Json | null
