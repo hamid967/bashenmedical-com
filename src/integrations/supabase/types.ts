@@ -7159,6 +7159,20 @@ export type Database = {
           patient_id: string
         }[]
       }
+      list_ai_safety_incidents: {
+        Args: { _conversation_id: string }
+        Returns: {
+          action_taken: string
+          created_at: string
+          details: Json
+          id: string
+          inbox_item_id: string
+          inbox_status: string
+          kind: string
+          request_number: string
+          severity: string
+        }[]
+      }
       list_appointment_audit_by_ref: {
         Args: { _phone: string; _ref: string }
         Returns: {

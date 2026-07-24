@@ -12,7 +12,7 @@
  * interval and shows the current inbox status + last update time.
  */
 import { useState } from "react";
-import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink } from "lucide-react";
+import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink, ShieldAlert } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,7 +30,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   escalateAiConversation,
   getAiEscalationStatus,
+  listAiSafetyIncidents,
   type EscalationStatus,
+  type SafetyIncident,
 } from "@/lib/ai/escalate.functions";
 import { visibilityAwareInterval } from "@/lib/polling";
 import { formatDateTimeInTZ } from "@/lib/datetime";
@@ -115,6 +118,15 @@ export function EscalateToHumanButton({
     refetchInterval: visibilityAwareInterval(20_000, false),
     refetchOnWindowFocus: true,
     staleTime: 10_000,
+    retry: 1,
+  });
+
+  const listIncidents = useServerFn(listAiSafetyIncidents);
+  const incidentsQuery = useQuery<SafetyIncident[]>({
+    queryKey: ["ai-safety-incidents", conversationId],
+    queryFn: () => listIncidents({ data: { conversationId: conversationId! } }),
+    enabled: canQuery && open,
+    staleTime: 15_000,
     retry: 1,
   });
 
@@ -210,55 +222,78 @@ export function EscalateToHumanButton({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("رقم الطلب", "Request number")}</span>
-                <code className="rounded bg-muted px-1.5 py-0.5 font-mono">
-                  {ticket.requestNumber}
-                </code>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("الحالة", "Status")}</span>
-                <span
-                  className={
-                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-                    bucketClass(bucket)
-                  }
-                >
-                  {bucketLabel(bucket, isAr)}
-                  <span className="opacity-60">({ticket.status})</span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("الأولوية", "Priority")}</span>
-                <span className="text-xs">{ticket.priority}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("أُنشئت", "Created")}</span>
-                <span className="text-xs">
-                  {formatDateTimeInTZ(ticket.createdAt, isAr ? "ar" : "en", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground inline-flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {t("آخر تحديث", "Last update")}
-                </span>
-                <span className="text-xs">{updatedLabel}</span>
-              </div>
-              {statusQuery.isFetching && (
-                <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  {t("جارٍ التحديث...", "Refreshing...")}
+            <Tabs defaultValue="status" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="status">{t("الحالة", "Status")}</TabsTrigger>
+                <TabsTrigger value="history">
+                  {t("سجل الحوادث", "Incidents")}
+                  {incidentsQuery.data && incidentsQuery.data.length > 0 && (
+                    <span className="ms-1.5 rounded-full bg-muted px-1.5 text-[10px]">
+                      {incidentsQuery.data.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="status" className="mt-3 space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("رقم الطلب", "Request number")}</span>
+                  <code className="rounded bg-muted px-1.5 py-0.5 font-mono">
+                    {ticket.requestNumber}
+                  </code>
                 </div>
-              )}
-            </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("الحالة", "Status")}</span>
+                  <span
+                    className={
+                      "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+                      bucketClass(bucket)
+                    }
+                  >
+                    {bucketLabel(bucket, isAr)}
+                    <span className="opacity-60">({ticket.status})</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("الأولوية", "Priority")}</span>
+                  <span className="text-xs">{ticket.priority}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("أُنشئت", "Created")}</span>
+                  <span className="text-xs">
+                    {formatDateTimeInTZ(ticket.createdAt, isAr ? "ar" : "en", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {t("آخر تحديث", "Last update")}
+                  </span>
+                  <span className="text-xs">{updatedLabel}</span>
+                </div>
+                {statusQuery.isFetching && (
+                  <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    {t("جارٍ التحديث...", "Refreshing...")}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-3">
+                <IncidentsList
+                  isLoading={incidentsQuery.isLoading}
+                  isError={incidentsQuery.isError}
+                  incidents={incidentsQuery.data ?? []}
+                  isAr={isAr}
+                />
+              </TabsContent>
+            </Tabs>
 
             <DialogFooter>
               <Button
@@ -428,5 +463,153 @@ export function EscalateToHumanButton({
         </DialogContent>
       </Dialog>
     </>
+  );
+}
+
+function severityClass(sev: string): string {
+  switch (sev) {
+    case "critical":
+      return "border-red-300 bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300";
+    case "high":
+      return "border-orange-300 bg-orange-50 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300";
+    case "medium":
+      return "border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+    default:
+      return "border-muted bg-muted/50 text-muted-foreground";
+  }
+}
+
+function severityLabel(sev: string, isAr: boolean): string {
+  const map: Record<string, [string, string]> = {
+    low: ["منخفضة", "Low"],
+    medium: ["متوسطة", "Medium"],
+    high: ["عالية", "High"],
+    critical: ["حرجة", "Critical"],
+  };
+  const pair = map[sev];
+  return pair ? (isAr ? pair[0] : pair[1]) : sev;
+}
+
+function kindLabel(kind: string, isAr: boolean): string {
+  const map: Record<string, [string, string]> = {
+    human_escalation: ["تصعيد بشري", "Human escalation"],
+    emergency_trigger: ["إنذار طوارئ", "Emergency trigger"],
+    pii_leak: ["تسريب بيانات حسّاسة", "PII leak"],
+    unsafe_response: ["استجابة غير آمنة", "Unsafe response"],
+    policy_violation: ["مخالفة سياسة", "Policy violation"],
+  };
+  const pair = map[kind];
+  return pair ? (isAr ? pair[0] : pair[1]) : kind;
+}
+
+function parseReasonFromDetails(details: string | null): string | null {
+  if (!details) return null;
+  try {
+    const parsed = JSON.parse(details) as { reason?: unknown };
+    if (typeof parsed.reason === "string" && parsed.reason.trim()) return parsed.reason;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function IncidentsList({
+  isLoading,
+  isError,
+  incidents,
+  isAr,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  incidents: SafetyIncident[];
+  isAr: boolean;
+}) {
+  const t = (ar: string, en: string) => (isAr ? ar : en);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-muted-foreground py-6 justify-center">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        {t("جارٍ تحميل السجل...", "Loading history...")}
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-destructive py-6 justify-center">
+        <XCircle className="h-3.5 w-3.5" />
+        {t("تعذّر تحميل سجل الحوادث.", "Failed to load incidents.")}
+      </div>
+    );
+  }
+  if (incidents.length === 0) {
+    return (
+      <div className="text-center text-xs text-muted-foreground py-6">
+        {t("لا توجد حوادث مسجّلة لهذه المحادثة.", "No incidents recorded for this conversation.")}
+      </div>
+    );
+  }
+
+  return (
+    <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
+      {incidents.map((inc) => {
+        const reason = parseReasonFromDetails(inc.details);
+        return (
+          <li
+            key={inc.id}
+            className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1 font-medium">
+                <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" />
+                {kindLabel(inc.kind, isAr)}
+              </span>
+              <span
+                className={
+                  "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium " +
+                  severityClass(inc.severity)
+                }
+              >
+                {severityLabel(inc.severity, isAr)}
+              </span>
+            </div>
+
+            {reason && (
+              <div className="text-muted-foreground line-clamp-3 whitespace-pre-wrap">{reason}</div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+              <span>
+                {formatDateTimeInTZ(inc.createdAt, isAr ? "ar" : "en", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+              {inc.requestNumber && (
+                <span className="inline-flex items-center gap-1">
+                  <span>{t("التذكرة", "Ticket")}:</span>
+                  <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">
+                    {inc.requestNumber}
+                  </code>
+                </span>
+              )}
+              {inc.inboxStatus && (
+                <span>
+                  {t("نتيجة المعالجة", "Outcome")}: {inc.inboxStatus}
+                </span>
+              )}
+              {inc.actionTaken && (
+                <span>
+                  {t("الإجراء", "Action")}: {inc.actionTaken}
+                </span>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
   );
 }
