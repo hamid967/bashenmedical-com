@@ -10,6 +10,7 @@ import * as React from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { InlineError } from "./state";
+import { shouldAutoDir } from "./rtl";
 
 export interface FieldProps {
   label?: React.ReactNode;
