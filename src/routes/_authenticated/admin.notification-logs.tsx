@@ -21,6 +21,7 @@ import {
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 import {
   getNotificationDeliveryStats,
+  getNotificationDeliveryKpis,
   getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
   retryNotificationDeliveryLog,
@@ -28,6 +29,7 @@ import {
   type NotificationDeliveryLog,
   type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
+  type NotificationDeliveryKpis,
 } from "@/lib/admin/notification-logs.functions";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { X, FlaskConical, RotateCw, Download } from "lucide-react";
@@ -75,6 +77,13 @@ const statsQuery = (windowHours: number) =>
     staleTime: 30_000,
   });
 
+const kpisQuery = () =>
+  queryOptions({
+    queryKey: ["admin", "notif-logs", "kpis-24h"],
+    queryFn: () => getNotificationDeliveryKpis({ data: { windowHours: 24 } }),
+    staleTime: 30_000,
+  });
+
 /* ------------------------------- route ---------------------------------- */
 
 export const Route = createFileRoute("/_authenticated/admin/notification-logs")({
@@ -82,6 +91,7 @@ export const Route = createFileRoute("/_authenticated/admin/notification-logs")(
     Promise.all([
       context.queryClient.ensureQueryData(logsQuery(DEFAULT_FILTERS)),
       context.queryClient.ensureQueryData(statsQuery(DEFAULT_FILTERS.windowHours)),
+      context.queryClient.ensureQueryData(kpisQuery()),
     ]),
   head: () => ({
     meta: [
@@ -111,9 +121,11 @@ function NotifLogsPage() {
   const qc = useQueryClient();
   const logs = useSuspenseQuery(logsQuery(filters));
   const stats = useSuspenseQuery(statsQuery(filters.windowHours));
+  const kpis = useSuspenseQuery(kpisQuery());
 
   const rows = logs.data;
   const s = stats.data;
+  const k = kpis.data;
 
   return (
     <div className="container-app py-6 space-y-6" dir="rtl">
@@ -192,6 +204,8 @@ function NotifLogsPage() {
           </button>
         </div>
       </header>
+
+      <KpiHeader24h k={k} />
 
       <StatsRow stats={s} />
 
@@ -382,7 +396,122 @@ function LogDetailBody({ detail }: { detail: NotificationDeliveryLogDetail }) {
   );
 }
 
+/* ------------------------ 24h KPI header (top) -------------------------- */
+
+function KpiHeader24h({ k }: { k: NotificationDeliveryKpis }) {
+  const successPct = (k.successRate * 100).toFixed(1);
+  const rateTone: "ok" | "danger" | "muted" =
+    k.total === 0 ? "muted" : k.successRate >= 0.95 ? "ok" : "danger";
+
+  const fmtMs = (ms: number | null) => {
+    if (ms == null) return "—";
+    if (ms < 1000) return `${ms} مي‍ث`;
+    const s = ms / 1000;
+    if (s < 60) return `${s.toFixed(1)}ث`;
+    return `${(s / 60).toFixed(1)}د`;
+  };
+
+  return (
+    <section
+      aria-label="مؤشرات الأداء خلال 24 ساعة"
+      className="rounded-2xl border bg-white p-4"
+    >
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-sm font-bold text-foreground">
+          آخر 24 ساعة · مؤشرات التسليم
+        </h2>
+        <span className="text-[11px] text-muted-foreground">
+          إجمالي المحاولات: {k.total.toLocaleString("ar")}
+        </span>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        {/* Success rate */}
+        <div className="rounded-xl border bg-slate-50/50 p-3">
+          <div className="text-[11px] text-muted-foreground">معدل النجاح</div>
+          <div
+            className={`mt-1 text-2xl font-bold ${
+              rateTone === "ok"
+                ? "text-emerald-700"
+                : rateTone === "danger"
+                  ? "text-rose-700"
+                  : "text-foreground"
+            }`}
+          >
+            {k.total === 0 ? "—" : `${successPct}%`}
+          </div>
+          <div className="text-[10px] text-muted-foreground mt-1">
+            نجاح {k.successCount.toLocaleString("ar")} · فشل{" "}
+            {k.failedCount.toLocaleString("ar")} · قيد الإرسال{" "}
+            {k.pendingCount.toLocaleString("ar")}
+          </div>
+        </div>
+
+        {/* Avg delivery time by channel */}
+        <div className="rounded-xl border bg-slate-50/50 p-3">
+          <div className="text-[11px] text-muted-foreground mb-1.5">
+            متوسط زمن التسليم لكل قناة
+          </div>
+          {k.avgDeliveryMsByChannel.length === 0 ? (
+            <div className="text-xs text-muted-foreground">لا توجد بيانات كافية.</div>
+          ) : (
+            <ul className="space-y-1">
+              {k.avgDeliveryMsByChannel.map((c) => (
+                <li
+                  key={c.channel}
+                  className="flex items-center justify-between text-xs"
+                >
+                  <span className="text-foreground">
+                    {channelLabel(c.channel as any)}
+                  </span>
+                  <span className="font-mono tabular-nums text-slate-700">
+                    {fmtMs(c.avgMs)}
+                    <span className="text-[10px] text-muted-foreground mr-1">
+                      ({c.sampleSize.toLocaleString("ar")})
+                    </span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Top failure reasons */}
+        <div className="rounded-xl border bg-slate-50/50 p-3">
+          <div className="text-[11px] text-muted-foreground mb-1.5">
+            أعلى أسباب الفشل
+          </div>
+          {k.topFailureReasons.length === 0 ? (
+            <div className="text-xs text-muted-foreground">لا فشل مسجّل. ✅</div>
+          ) : (
+            <ul className="space-y-1">
+              {k.topFailureReasons.map((r, i) => (
+                <li
+                  key={`${i}-${r.reason}`}
+                  className="flex items-center justify-between gap-2 text-xs"
+                >
+                  <span
+                    className="truncate text-slate-700"
+                    title={r.reason}
+                  >
+                    {r.reason}
+                  </span>
+                  <span className="shrink-0 rounded-full bg-rose-100 text-rose-700 px-2 py-0.5 text-[10px] font-semibold">
+                    {r.count.toLocaleString("ar")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* -------------------------------- stats --------------------------------- */
+
+
 
 function StatsRow({ stats }: { stats: NotificationDeliveryStats }) {
   const byChannel = useMemo(() => {
