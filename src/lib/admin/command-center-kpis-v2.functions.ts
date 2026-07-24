@@ -11,6 +11,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertHasRole } from "@/lib/admin/_guard";
+import { z } from "zod";
+
+const FiltersInput = z
+  .object({
+    from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    branchId: z.string().uuid().nullable().optional(),
+  })
+  .optional();
+
+export type CommandCenterFilters = z.infer<typeof FiltersInput>;
 
 export type CommandCenterKpiKey =
   | "appointments_today"
