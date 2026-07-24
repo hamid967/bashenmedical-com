@@ -318,18 +318,22 @@ export const getServicesHealth = createServerFn({ method: "GET" })
     const { supabase, userId } = context;
     await assertHasRole(supabase, userId, "admin");
 
-    const [ai, nphies, notifs, integ, apiPerm, safety] = await Promise.all([
+    const [ai, nphies, notifs, integ, apiPerm, safety, payments, backup] = await Promise.all([
       aiStreamingHealth(supabase).catch((e) => errCard("ai_streaming", "AI Streaming", e)),
       nphiesHealth(supabase).catch((e) => errCard("nphies", "NPHIES Insurance", e)),
       notificationsHealth(supabase).catch((e) => [errCard("notifications", "Notifications", e)]),
       integrationsHealth(supabase).catch((e) => [errCard("integrations", "Integrations", e)]),
       apiPermissionsHealth(supabase).catch((e) => errCard("api_permissions", "API Permissions", e)),
       aiSafetyHealth(supabase).catch((e) => errCard("ai_safety", "AI Safety", e)),
+      paymentsHealth(supabase).catch((e) => errCard("payments", "Payments Webhooks", e)),
+      backupHealth(supabase).catch((e) => errCard("backup", "Database Backup", e)),
     ]);
 
     const list: ServiceHealth[] = [
       ai as ServiceHealth,
       nphies as ServiceHealth,
+      payments as ServiceHealth,
+      backup as ServiceHealth,
       ...(notifs as ServiceHealth[]),
       ...(integ as ServiceHealth[]),
       apiPerm as ServiceHealth,
