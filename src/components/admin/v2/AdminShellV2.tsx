@@ -150,7 +150,12 @@ const NAV: NavGroup[] = [
     title: "الطاقم الطبي",
     items: [
       { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
-      { to: "/admin/doctors", label: "إضافة/تعديل طبيب", icon: Stethoscope, roles: ["admin"] },
+      {
+        to: "/admin/clinic-hub",
+        label: "المركز السريري",
+        icon: Stethoscope,
+        roles: ["admin", "super_admin"],
+      },
       {
         to: "/availability-management",
         label: "جدولة التوفر",
@@ -169,7 +174,6 @@ const NAV: NavGroup[] = [
   {
     title: "الكتالوج",
     items: [
-      { to: "/admin/branches", label: "الفروع", icon: Building2, roles: ["admin"] },
       { to: "/admin/specialties", label: "التخصصات", icon: Stethoscope, roles: ["admin"] },
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Package, roles: ["admin"] },
     ],
@@ -178,7 +182,6 @@ const NAV: NavGroup[] = [
     title: "المحتوى والوسائط",
     items: [
       { to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] },
-      { to: "/admin/files", label: "الملفات", icon: ImageIcon, roles: ["admin"] },
     ],
   },
   {
