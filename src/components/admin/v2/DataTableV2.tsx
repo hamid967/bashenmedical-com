@@ -135,6 +135,11 @@ export type DataTableV2Props<T> = {
   /** Sticky header. */
   stickyHeader?: boolean;
   className?: string;
+
+  /** Accessible name for the table (announced to screen readers). */
+  ariaLabel?: string;
+  /** Visually-hidden <caption> text summarising the table. */
+  caption?: string;
 };
 
 /* ────────────────────────────────────────────────────────────
