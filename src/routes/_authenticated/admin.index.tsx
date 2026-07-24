@@ -48,7 +48,33 @@ const rolesQuery = queryOptions({
   staleTime: 60_000,
 });
 
+const adminSearchSchema = z.object({
+  range: fallback(z.string(), "today").default("today"),
+  from: fallback(z.string(), "").default(""),
+  to: fallback(z.string(), "").default(""),
+  branch: fallback(z.string(), "").default(""),
+});
+
+function resolveRange(range: string, from: string, to: string): { from: string; to: string } {
+  const today = new Date();
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const back = (n: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d;
+  };
+  if (range === "custom" && from && to) return { from, to };
+  if (range === "yesterday") {
+    const y = back(1);
+    return { from: iso(y), to: iso(y) };
+  }
+  if (range === "7d") return { from: iso(back(6)), to: iso(today) };
+  if (range === "30d") return { from: iso(back(29)), to: iso(today) };
+  return { from: iso(today), to: iso(today) };
+}
+
 export const Route = createFileRoute("/_authenticated/admin/")({
+  validateSearch: zodValidator(adminSearchSchema),
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(rolesQuery),
