@@ -166,11 +166,22 @@ const ListInput = z
     priority: z.enum(INBOX_PRIORITIES).optional(),
     branch_id: z.string().uuid().optional(),
     assigned_to: z.string().uuid().nullable().optional(),
+    mine: z.boolean().optional(),
+    unassigned: z.boolean().optional(),
     search: z.string().max(200).optional(),
     include_archived: z.boolean().optional().default(false),
+    sort: z.enum(["recent", "priority"]).optional().default("recent"),
     limit: z.number().int().min(1).max(500).optional().default(200),
   })
   .default({});
+
+// Sort weight so we can order by priority DESC then created_at DESC in JS.
+const PRIORITY_WEIGHT: Record<InboxPriority, number> = {
+  urgent: 4,
+  high: 3,
+  normal: 2,
+  low: 1,
+};
 
 export const listInboxItems = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -186,7 +197,9 @@ export const listInboxItems = createServerFn({ method: "GET" })
     if (data.channel) q = q.eq("channel", data.channel);
     if (data.priority) q = q.eq("priority", data.priority);
     if (data.branch_id) q = q.eq("branch_id", data.branch_id);
-    if (data.assigned_to === null) q = q.is("assigned_to", null);
+    if (data.mine) q = q.eq("assigned_to", context.userId);
+    else if (data.unassigned) q = q.is("assigned_to", null);
+    else if (data.assigned_to === null) q = q.is("assigned_to", null);
     else if (data.assigned_to) q = q.eq("assigned_to", data.assigned_to);
     if (!data.include_archived && !data.status) q = q.neq("status", "archived");
     if (data.search?.trim()) {
@@ -203,7 +216,14 @@ export const listInboxItems = createServerFn({ method: "GET" })
     }
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []) as InboxItem[];
+    let items = (rows ?? []) as InboxItem[];
+    if (data.sort === "priority") {
+      items = [...items].sort((a, b) => {
+        const w = PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority];
+        return w !== 0 ? w : (a.created_at < b.created_at ? 1 : -1);
+      });
+    }
+    return items;
   });
 
 export const getInboxItem = createServerFn({ method: "GET" })
@@ -245,16 +265,33 @@ export const getInboxCounts = createServerFn({ method: "GET" })
     await assertInboxStaff(context.supabase, context.userId);
     const { data, error } = await context.supabase
       .from("inbox_items")
-      .select("status,priority");
+      .select("status,priority,assigned_to")
+      .neq("status", "archived");
     if (error) throw new Error(error.message);
     const byStatus: Record<string, number> = {};
     const byPriority: Record<string, number> = {};
-    for (const r of (data ?? []) as { status: string; priority: string }[]) {
+    let mine = 0;
+    let unassigned = 0;
+    for (const r of (data ?? []) as {
+      status: string;
+      priority: string;
+      assigned_to: string | null;
+    }[]) {
       byStatus[r.status] = (byStatus[r.status] ?? 0) + 1;
       byPriority[r.priority] = (byPriority[r.priority] ?? 0) + 1;
+      if (r.assigned_to === context.userId) mine += 1;
+      if (r.assigned_to === null) unassigned += 1;
     }
-    return { total: data?.length ?? 0, byStatus, byPriority };
+    return {
+      total: data?.length ?? 0,
+      byStatus,
+      byPriority,
+      mine,
+      unassigned,
+      me_user_id: context.userId,
+    };
   });
+
 
 // ---------------- Mutations (each = 1 audit event) ----------------
 const IdOnly = z.object({ id: z.string().uuid() });
