@@ -219,6 +219,7 @@ import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './rou
 import { Route as AuthenticatedAdminIntegrationsKeyRouteImport } from './routes/_authenticated/admin.integrations.$key'
 import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_authenticated/admin.patients.$id'
 import { Route as AuthenticatedAdminSettingsKeyRouteImport } from './routes/_authenticated/admin.settings.$key'
+import { Route as AuthenticatedAdminSpecialtiesIdRouteImport } from './routes/_authenticated/admin.specialties.$id'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
@@ -1428,6 +1429,12 @@ const AuthenticatedAdminSettingsKeyRoute =
     path: '/$key',
     getParentRoute: () => AuthenticatedAdminSettingsRoute,
   } as any)
+const AuthenticatedAdminSpecialtiesIdRoute =
+  AuthenticatedAdminSpecialtiesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminSpecialtiesRoute,
+  } as any)
 const AuthenticatedAdminSuperJazanVisualRoute =
   AuthenticatedAdminSuperJazanVisualRouteImport.update({
     id: '/super/jazan-visual',
@@ -1815,7 +1822,7 @@ export interface FileRoutesByFullPath {
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
-  '/admin/specialties': typeof AuthenticatedAdminSpecialtiesRoute
+  '/admin/specialties': typeof AuthenticatedAdminSpecialtiesRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/v3': typeof AuthenticatedAdminV3Route
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -1883,6 +1890,7 @@ export interface FileRoutesByFullPath {
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/admin/settings/$key': typeof AuthenticatedAdminSettingsKeyRoute
+  '/admin/specialties/$id': typeof AuthenticatedAdminSpecialtiesIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2063,7 +2071,7 @@ export interface FileRoutesByTo {
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
-  '/admin/specialties': typeof AuthenticatedAdminSpecialtiesRoute
+  '/admin/specialties': typeof AuthenticatedAdminSpecialtiesRouteWithChildren
   '/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/admin/v3': typeof AuthenticatedAdminV3Route
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -2131,6 +2139,7 @@ export interface FileRoutesByTo {
   '/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/admin/settings/$key': typeof AuthenticatedAdminSettingsKeyRoute
+  '/admin/specialties/$id': typeof AuthenticatedAdminSpecialtiesIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2318,7 +2327,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRouteWithChildren
-  '/_authenticated/admin/specialties': typeof AuthenticatedAdminSpecialtiesRoute
+  '/_authenticated/admin/specialties': typeof AuthenticatedAdminSpecialtiesRouteWithChildren
   '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRouteWithChildren
   '/_authenticated/admin/v3': typeof AuthenticatedAdminV3Route
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -2386,6 +2395,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/integrations/$key': typeof AuthenticatedAdminIntegrationsKeyRoute
   '/_authenticated/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/_authenticated/admin/settings/$key': typeof AuthenticatedAdminSettingsKeyRoute
+  '/_authenticated/admin/specialties/$id': typeof AuthenticatedAdminSpecialtiesIdRoute
   '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2641,6 +2651,7 @@ export interface FileRouteTypes {
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
     | '/admin/settings/$key'
+    | '/admin/specialties/$id'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2889,6 +2900,7 @@ export interface FileRouteTypes {
     | '/admin/integrations/$key'
     | '/admin/patients/$id'
     | '/admin/settings/$key'
+    | '/admin/specialties/$id'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -3143,6 +3155,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/integrations/$key'
     | '/_authenticated/admin/patients/$id'
     | '/_authenticated/admin/settings/$key'
+    | '/_authenticated/admin/specialties/$id'
     | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
@@ -4750,6 +4763,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSettingsKeyRouteImport
       parentRoute: typeof AuthenticatedAdminSettingsRoute
     }
+    '/_authenticated/admin/specialties/$id': {
+      id: '/_authenticated/admin/specialties/$id'
+      path: '/$id'
+      fullPath: '/admin/specialties/$id'
+      preLoaderRoute: typeof AuthenticatedAdminSpecialtiesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminSpecialtiesRoute
+    }
     '/_authenticated/admin/super/jazan-visual': {
       id: '/_authenticated/admin/super/jazan-visual'
       path: '/super/jazan-visual'
@@ -5149,6 +5169,20 @@ const AuthenticatedAdminSettingsRouteWithChildren =
     AuthenticatedAdminSettingsRouteChildren,
   )
 
+interface AuthenticatedAdminSpecialtiesRouteChildren {
+  AuthenticatedAdminSpecialtiesIdRoute: typeof AuthenticatedAdminSpecialtiesIdRoute
+}
+
+const AuthenticatedAdminSpecialtiesRouteChildren: AuthenticatedAdminSpecialtiesRouteChildren =
+  {
+    AuthenticatedAdminSpecialtiesIdRoute: AuthenticatedAdminSpecialtiesIdRoute,
+  }
+
+const AuthenticatedAdminSpecialtiesRouteWithChildren =
+  AuthenticatedAdminSpecialtiesRoute._addFileChildren(
+    AuthenticatedAdminSpecialtiesRouteChildren,
+  )
+
 interface AuthenticatedAdminUsersRouteChildren {
   AuthenticatedAdminUsersIdRoute: typeof AuthenticatedAdminUsersIdRoute
 }
@@ -5226,7 +5260,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminServicesHealthRoute: typeof AuthenticatedAdminServicesHealthRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRouteWithChildren
-  AuthenticatedAdminSpecialtiesRoute: typeof AuthenticatedAdminSpecialtiesRoute
+  AuthenticatedAdminSpecialtiesRoute: typeof AuthenticatedAdminSpecialtiesRouteWithChildren
   AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRouteWithChildren
   AuthenticatedAdminV3Route: typeof AuthenticatedAdminV3Route
   AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
@@ -5281,7 +5315,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminServiceInquiriesRoute,
   AuthenticatedAdminServicesHealthRoute: AuthenticatedAdminServicesHealthRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRouteWithChildren,
-  AuthenticatedAdminSpecialtiesRoute: AuthenticatedAdminSpecialtiesRoute,
+  AuthenticatedAdminSpecialtiesRoute:
+    AuthenticatedAdminSpecialtiesRouteWithChildren,
   AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRouteWithChildren,
   AuthenticatedAdminV3Route: AuthenticatedAdminV3Route,
   AuthenticatedAdminVisualAnalyticsRoute:
