@@ -276,6 +276,7 @@ export type Database = {
           created_at: string
           details: Json
           id: string
+          inbox_item_id: string | null
           kind: string
           severity: string
         }
@@ -286,6 +287,7 @@ export type Database = {
           created_at?: string
           details?: Json
           id?: string
+          inbox_item_id?: string | null
           kind: string
           severity?: string
         }
@@ -296,6 +298,7 @@ export type Database = {
           created_at?: string
           details?: Json
           id?: string
+          inbox_item_id?: string | null
           kind?: string
           severity?: string
         }
@@ -305,6 +308,13 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "ai_conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_safety_incidents_inbox_item_id_fkey"
+            columns: ["inbox_item_id"]
+            isOneToOne: false
+            referencedRelation: "inbox_items"
             referencedColumns: ["id"]
           },
         ]
@@ -6992,6 +7002,22 @@ export type Database = {
         }[]
       }
       enqueue_appointment_reminders: { Args: never; Returns: Json }
+      escalate_ai_to_inbox: {
+        Args: {
+          _conversation_id: string
+          _lang?: string
+          _last_ai_msg?: string
+          _last_user_msg?: string
+          _reason: string
+          _severity?: string
+          _summary?: string
+        }
+        Returns: {
+          inbox_item_id: string
+          incident_id: string
+          request_number: string
+        }[]
+      }
       estimate_appointment_cost: {
         Args: { _doctor_id: string; _provider_id: string }
         Returns: Json
@@ -7806,6 +7832,7 @@ export type Database = {
         | "campaign"
         | "support"
         | "other"
+        | "ai_assistant"
       inbox_priority: "low" | "normal" | "high" | "urgent"
       inbox_status:
         | "new"
@@ -8129,6 +8156,7 @@ export const Constants = {
         "campaign",
         "support",
         "other",
+        "ai_assistant",
       ],
       inbox_priority: ["low", "normal", "high", "urgent"],
       inbox_status: [
