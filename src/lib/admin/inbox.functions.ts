@@ -81,7 +81,7 @@ export type InboxItem = {
   assigned_to: string | null;
   linked_appointment_id: string | null;
   required_action: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, any>;
   last_action_at: string | null;
   archived_at: string | null;
   created_at: string;
