@@ -12,6 +12,7 @@ import {
   Plug,
 } from "lucide-react";
 import {
+  getIntegrationLog,
   listIntegrationLogs,
   listIntegrationsOverview,
 } from "@/lib/admin/integrations.functions";
