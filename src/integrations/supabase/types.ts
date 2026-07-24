@@ -1509,6 +1509,216 @@ export type Database = {
           },
         ]
       }
+      content_clicks: {
+        Row: {
+          clicked_at: string
+          href_at_click: string | null
+          id: number
+          item_id: string
+          session_id: string | null
+          surface: string | null
+          user_id: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          href_at_click?: string | null
+          id?: number
+          item_id: string
+          session_id?: string | null
+          surface?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          href_at_click?: string | null
+          id?: number
+          item_id?: string
+          session_id?: string | null
+          surface?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_clicks_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_impressions: {
+        Row: {
+          id: number
+          item_id: string
+          session_id: string | null
+          shown_at: string
+          surface: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: number
+          item_id: string
+          session_id?: string | null
+          shown_at?: string
+          surface?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: number
+          item_id?: string
+          session_id?: string | null
+          shown_at?: string
+          surface?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_impressions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_item_versions: {
+        Row: {
+          changed_by: string | null
+          created_at: string
+          id: string
+          item_id: string
+          reason: string | null
+          snapshot: Json
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          item_id: string
+          reason?: string | null
+          snapshot: Json
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string
+          id?: string
+          item_id?: string
+          reason?: string | null
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_item_versions_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "content_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      content_items: {
+        Row: {
+          approved_by: string | null
+          audience: Json
+          body_ar: string | null
+          body_en: string | null
+          branch_id: string | null
+          created_at: string
+          created_by: string | null
+          cta_href: string | null
+          cta_label_ar: string | null
+          cta_label_en: string | null
+          disabled_at: string | null
+          ends_at: string | null
+          excerpt_ar: string | null
+          excerpt_en: string | null
+          id: string
+          image_url: string | null
+          is_promotional: boolean
+          priority: number
+          specialty_id: string | null
+          starts_at: string | null
+          status: Database["public"]["Enums"]["content_item_status"]
+          surface: string
+          title_ar: string
+          title_en: string
+          type: Database["public"]["Enums"]["content_item_type"]
+          updated_at: string
+        }
+        Insert: {
+          approved_by?: string | null
+          audience?: Json
+          body_ar?: string | null
+          body_en?: string | null
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_href?: string | null
+          cta_label_ar?: string | null
+          cta_label_en?: string | null
+          disabled_at?: string | null
+          ends_at?: string | null
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          id?: string
+          image_url?: string | null
+          is_promotional?: boolean
+          priority?: number
+          specialty_id?: string | null
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["content_item_status"]
+          surface?: string
+          title_ar: string
+          title_en: string
+          type: Database["public"]["Enums"]["content_item_type"]
+          updated_at?: string
+        }
+        Update: {
+          approved_by?: string | null
+          audience?: Json
+          body_ar?: string | null
+          body_en?: string | null
+          branch_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_href?: string | null
+          cta_label_ar?: string | null
+          cta_label_en?: string | null
+          disabled_at?: string | null
+          ends_at?: string | null
+          excerpt_ar?: string | null
+          excerpt_en?: string | null
+          id?: string
+          image_url?: string | null
+          is_promotional?: boolean
+          priority?: number
+          specialty_id?: string | null
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["content_item_status"]
+          surface?: string
+          title_ar?: string
+          title_en?: string
+          type?: Database["public"]["Enums"]["content_item_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_items_branch_id_fkey"
+            columns: ["branch_id"]
+            isOneToOne: false
+            referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "content_items_specialty_id_fkey"
+            columns: ["specialty_id"]
+            isOneToOne: false
+            referencedRelation: "specialties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       corporate_requests: {
         Row: {
           admin_notes: string | null
@@ -7022,6 +7232,22 @@ export type Database = {
         | "research_participation"
         | "photography_recording"
         | "minor_guardian_consent"
+      content_item_status:
+        | "draft"
+        | "review"
+        | "approved"
+        | "scheduled"
+        | "published"
+        | "archived"
+      content_item_type:
+        | "announcement"
+        | "offer"
+        | "screening"
+        | "new_service"
+        | "reminder"
+        | "doctor_spotlight"
+        | "nearest_slot"
+        | "suggested_service"
       delivery_type: "pickup" | "delivery"
       gender_type: "male" | "female" | "other"
       medical_history_category: "chronic" | "past" | "family" | "surgical_note"
@@ -7254,6 +7480,24 @@ export const Constants = {
         "research_participation",
         "photography_recording",
         "minor_guardian_consent",
+      ],
+      content_item_status: [
+        "draft",
+        "review",
+        "approved",
+        "scheduled",
+        "published",
+        "archived",
+      ],
+      content_item_type: [
+        "announcement",
+        "offer",
+        "screening",
+        "new_service",
+        "reminder",
+        "doctor_spotlight",
+        "nearest_slot",
+        "suggested_service",
       ],
       delivery_type: ["pickup", "delivery"],
       gender_type: ["male", "female", "other"],

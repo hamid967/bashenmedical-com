@@ -25,6 +25,7 @@ import {
   MapPin,
 } from "lucide-react";
 import { getPortalQuickSnapshot } from "@/lib/portal/snapshot.functions";
+import { ContentFeed } from "@/components/patient/ContentFeed";
 import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -166,6 +167,9 @@ function PatientDashboard() {
           </CardContent>
         </Card>
       )}
+
+      {/* Personalized content feed (announcements, offers, campaigns, suggestions) */}
+      <ContentFeed surface="dashboard_bento" />
 
       {/* Bento grid */}
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
