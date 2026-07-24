@@ -35,6 +35,7 @@ import { MessageCostBadge, type MessageCostMeta } from "./MessageCostBadge";
 import { AssistantCostMeter } from "./AssistantCostMeter";
 import { PreflightCostChip } from "./PreflightCostChip";
 import { SessionExportButton } from "./SessionExportButton";
+import { EscalateToHumanButton } from "./EscalateToHumanButton";
 
 type Msg = { role: "user" | "assistant"; content: string; meta?: MessageCostMeta };
 
