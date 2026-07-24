@@ -85,3 +85,72 @@ export const runSlaAlertSweep = createServerFn({ method: "POST" })
     const { runSweep } = await import("./sla-alerts.server");
     return runSweep();
   });
+
+const TestWebhookSchema = z.object({
+  webhook_url: z
+    .string()
+    .trim()
+    .max(2048)
+    .regex(/^https:\/\//i, "must start with https://"),
+});
+
+export type TestWebhookResult = {
+  ok: boolean;
+  status: number | null;
+  duration_ms: number;
+  response_body: string | null;
+  error: string | null;
+};
+
+export const testSlaAlertWebhook = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => TestWebhookSchema.parse(d))
+  .handler(async ({ data, context }): Promise<TestWebhookResult> => {
+    await assertAdmin(context.supabase, context.userId);
+    const payload = {
+      event: "sla.breach.test",
+      kind: "response",
+      item: {
+        id: "00000000-0000-0000-0000-000000000000",
+        request_number: "TEST-0001",
+        patient_name: "اختبار Webhook",
+        channel: "website",
+        branch_id: null,
+        priority: "high",
+        status: "new",
+        created_at: new Date(Date.now() - 3600_000).toISOString(),
+      },
+      overdue_ms: 1_800_000,
+      threshold_min: 60,
+      admin_link:
+        (process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ||
+          "https://bashenmedical-com.lovable.app") + "/admin/inbox",
+      at: new Date().toISOString(),
+      note: "This is a test event triggered from the SLA dashboard.",
+    };
+    const started = Date.now();
+    try {
+      const res = await fetch(data.webhook_url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(8000),
+      });
+      const text = await res.text().catch(() => "");
+      return {
+        ok: res.ok,
+        status: res.status,
+        duration_ms: Date.now() - started,
+        response_body: text.slice(0, 2000),
+        error: res.ok ? null : `HTTP ${res.status}`,
+      };
+    } catch (e: any) {
+      return {
+        ok: false,
+        status: null,
+        duration_ms: Date.now() - started,
+        response_body: null,
+        error: e?.message ?? "network error",
+      };
+    }
+  });
