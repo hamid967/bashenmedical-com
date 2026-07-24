@@ -117,6 +117,8 @@ function ManagePage() {
   const [phoneMasked, setPhoneMasked] = useState<string>("");
   const [devCode, setDevCode] = useState<string | null>(null);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptchaHandle | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [activeCancelId, setActiveCancelId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
