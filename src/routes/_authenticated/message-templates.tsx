@@ -15,12 +15,17 @@ import {
   Eye,
   ChevronLeft,
   Sparkles,
+  Send,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import {
   listMessageTemplates,
   upsertMessageTemplate,
   deleteMessageTemplate,
+  sendTemplateTest,
   renderTemplate,
+  extractTemplateVariables,
   TEMPLATE_VARIABLES,
   type MessageChannel,
   type MessageTemplate,
@@ -113,11 +118,14 @@ function MessageTemplatesPage() {
   const listFn = useServerFn(listMessageTemplates);
   const upsertFn = useServerFn(upsertMessageTemplate);
   const deleteFn = useServerFn(deleteMessageTemplate);
+  const testSendFn = useServerFn(sendTemplateTest);
   const qc = useQueryClient();
 
   const [filterChannel, setFilterChannel] = useState<MessageChannel | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [testOpen, setTestOpen] = useState(false);
+  const [testRecipient, setTestRecipient] = useState("");
 
   const listQ = useQuery({
     queryKey: ["message-templates", filterChannel],
@@ -200,6 +208,30 @@ function MessageTemplatesPage() {
     () => renderTemplate(form.title || "", sampleValues),
     [form.title, sampleValues],
   );
+  const knownVars = useMemo(() => new Set(TEMPLATE_VARIABLES.map((v) => v.key)), []);
+  const unknownVars = useMemo(
+    () =>
+      extractTemplateVariables(form.body, form.title).filter((k) => !knownVars.has(k)),
+    [form.body, form.title, knownVars],
+  );
+
+  const testSend = useMutation({
+    mutationFn: async () => {
+      if (!form.id) throw new Error("احفظ القالب أولًا قبل الإرسال التجريبي.");
+      return testSendFn({ data: { id: form.id, recipient: testRecipient.trim() } });
+    },
+    onSuccess: (res) => {
+      toast.success(
+        res.channel === "in_app"
+          ? "تم إنشاء إشعار تجريبي داخل التطبيق."
+          : "تم وضع الرسالة التجريبية في قائمة الإرسال.",
+      );
+      setTestOpen(false);
+      setTestRecipient("");
+      qc.invalidateQueries({ queryKey: ["admin-notif"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "فشل الإرسال التجريبي"),
+  });
 
   function insertVariable(key: string) {
     const token = `{{${key}}}`;
@@ -483,6 +515,20 @@ function MessageTemplatesPage() {
                 />
               </div>
 
+              {unknownVars.length > 0 && (
+                <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 p-2 text-xs text-amber-900">
+                  <AlertTriangle className="h-4 w-4 shrink-0" />
+                  <div>
+                    متغيّرات غير معروفة لن تُستبدل عند الإرسال:{" "}
+                    {unknownVars.map((v) => (
+                      <code key={v} className="mx-0.5 rounded bg-white px-1" dir="ltr">
+                        {`{{${v}}}`}
+                      </code>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="mt-4 flex items-center justify-between gap-2">
                 <div>
                   {form.id && (
@@ -499,6 +545,16 @@ function MessageTemplatesPage() {
                   )}
                 </div>
                 <div className="flex items-center gap-2">
+                  {form.id && (
+                    <button
+                      type="button"
+                      onClick={() => setTestOpen(true)}
+                      className="inline-flex items-center gap-1 rounded-md border border-primary/40 px-3 py-2 text-sm text-primary hover:bg-primary/5"
+                      title="إرسال رسالة تجريبية بهذا القالب"
+                    >
+                      <Send className="h-4 w-4" /> إرسال اختباري
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => {
@@ -558,6 +614,87 @@ function MessageTemplatesPage() {
           </section>
         </div>
       </div>
+
+      {testOpen && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !testSend.isPending && setTestOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border bg-white p-4 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                <Send className="h-4 w-4" /> إرسال اختباري
+              </div>
+              <button
+                type="button"
+                onClick={() => setTestOpen(false)}
+                className="rounded-md p-1 text-slate-500 hover:bg-slate-100"
+                aria-label="إغلاق"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              سيُستخدم القالب <b>{form.name || form.template_key}</b> عبر قناة{" "}
+              <b>{currentChannelMeta.label}</b> بقيم تجريبية للمتغيّرات.
+            </p>
+            <label className="mb-1 block text-sm font-medium">
+              {form.channel === "email"
+                ? "البريد الإلكتروني للاختبار"
+                : form.channel === "in_app"
+                  ? "لا يتطلب مستلم (سيظهر في جرس الإدارة)"
+                  : "رقم الهاتف للاختبار"}
+            </label>
+            <input
+              value={testRecipient}
+              onChange={(e) => setTestRecipient(e.target.value)}
+              placeholder={
+                form.channel === "email"
+                  ? "you@example.com"
+                  : form.channel === "in_app"
+                    ? "-"
+                    : "05xxxxxxxx"
+              }
+              className="w-full rounded-md border px-3 py-2 text-sm ltr:text-left"
+              dir="ltr"
+              disabled={form.channel === "in_app"}
+            />
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setTestOpen(false)}
+                disabled={testSend.isPending}
+                className="rounded-md border px-3 py-2 text-sm hover:bg-slate-50"
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (form.channel !== "in_app" && !testRecipient.trim()) {
+                    toast.error("أدخل المستلم أولًا");
+                    return;
+                  }
+                  if (form.channel === "in_app" && !testRecipient.trim()) {
+                    setTestRecipient("in-app");
+                  }
+                  testSend.mutate();
+                }}
+                disabled={testSend.isPending}
+                className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm disabled:opacity-60"
+              >
+                <Send className="h-4 w-4" />
+                {testSend.isPending ? "جارِ الإرسال…" : "إرسال"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -161,3 +161,94 @@ export function renderTemplate(body: string, values: Record<string, string>): st
     return typeof v === "string" ? v : `{{${key}}}`;
   });
 }
+
+/* -------- Extract variables referenced by a template body/title -------- */
+export function extractTemplateVariables(...parts: Array<string | null | undefined>): string[] {
+  const found = new Set<string>();
+  const re = /\{\{\s*([a-z0-9_]+)\s*\}\}/gi;
+  for (const p of parts) {
+    if (!p) continue;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(p)) !== null) found.add(m[1].toLowerCase());
+  }
+  return Array.from(found);
+}
+
+/* -------- Send a test message to a chosen recipient using a template -------- */
+const TestSendInput = z.object({
+  id: z.string().uuid(),
+  recipient: z.string().trim().min(3).max(200),
+  overrides: z.record(z.string().max(500)).optional(),
+});
+
+export const sendTemplateTest = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => TestSendInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const roles = await getRoles(context.supabase, context.userId);
+    ensureStaff(roles);
+
+    // Rate limit: max 10 test sends per user in the last 5 minutes
+    const since = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+    const { count } = await context.supabase
+      .from("notifications")
+      .select("id", { count: "exact", head: true })
+      .eq("kind", "template_test")
+      .gte("created_at", since)
+      .contains("metadata", { sender_id: context.userId });
+    if ((count ?? 0) >= 10) {
+      throw new Error("تجاوزت حد الاختبار (10 كل 5 دقائق). حاول لاحقًا.");
+    }
+
+    const { data: tpl, error: tErr } = await context.supabase
+      .from("message_templates")
+      .select("id, template_key, channel, name, title, body, is_active")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (tErr) throw new Error(tErr.message);
+    if (!tpl) throw new Error("القالب غير موجود.");
+
+    // Basic recipient sanity per channel
+    const ch = tpl.channel as MessageChannel;
+    const r = data.recipient.trim();
+    if (ch === "email") {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r)) throw new Error("بريد إلكتروني غير صالح.");
+    } else if (ch === "sms" || ch === "whatsapp") {
+      if (!/^\+?\d{8,15}$/.test(r.replace(/[\s-]/g, ""))) throw new Error("رقم هاتف غير صالح.");
+    }
+
+    const values: Record<string, string> = Object.fromEntries(
+      TEMPLATE_VARIABLES.map((v) => [v.key, v.sample]),
+    );
+    for (const [k, v] of Object.entries(data.overrides ?? {})) {
+      values[k.toLowerCase()] = String(v);
+    }
+    const renderedTitle = renderTemplate(tpl.title || tpl.name || "", values);
+    const renderedBody = renderTemplate(tpl.body || "", values);
+
+    // notifications has no INSERT RLS policy for staff; use admin client after role check.
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row, error } = await supabaseAdmin
+      .from("notifications")
+      .insert({
+        audience: "staff",
+        user_id: context.userId,
+        kind: "template_test",
+        channel: ch,
+        title: renderedTitle || tpl.name,
+        body: renderedBody,
+        recipient: ch === "in_app" ? null : r,
+        send_status: ch === "in_app" ? "sent" : "pending",
+        sent_at: ch === "in_app" ? new Date().toISOString() : null,
+        metadata: {
+          template_id: tpl.id,
+          template_key: tpl.template_key,
+          sender_id: context.userId,
+          test: true,
+        },
+      } as never)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id, channel: ch };
+  });
