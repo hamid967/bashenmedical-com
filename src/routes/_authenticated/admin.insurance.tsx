@@ -261,7 +261,7 @@ function InsurancePage() {
             <option value="">كل الشركات</option>
             {(providers.data ?? []).map((p: any) => (
               <option key={p.id} value={p.id}>
-                {p.name_ar || p.name_en || p.code}
+                {p.name_ar || p.name_en}
               </option>
             ))}
           </select>

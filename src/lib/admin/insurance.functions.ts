@@ -83,7 +83,7 @@ export const listInsuranceProvidersForFilter = createServerFn({ method: "GET" })
     await assertHasRole(context.supabase, context.userId, "admin");
     const { data, error } = await context.supabase
       .from("insurance_providers")
-      .select("id, name_ar, name_en, code")
+      .select("id, name_ar, name_en")
       .order("name_ar", { ascending: true });
     if (error) throw new Error(error.message);
     return data ?? [];
