@@ -695,7 +695,17 @@ function IncidentsList({
               return (
                 <li
                   key={inc.id}
-                  className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5"
+                  className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5 cursor-pointer hover:bg-accent/40 focus:outline-none focus:ring-2 focus:ring-ring"
+                  role="button"
+                  tabIndex={0}
+                  aria-label={isAr ? "عرض تفاصيل الحادثة" : "View incident details"}
+                  onClick={() => setSelected(inc)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelected(inc);
+                    }
+                  }}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="inline-flex items-center gap-1 font-medium">
