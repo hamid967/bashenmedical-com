@@ -108,6 +108,14 @@ function statusMeta(s: ApptStatus) {
     },
     checked_in: { label: "تم الحضور", cls: "bg-cyan-50 text-cyan-700 border-cyan-200" },
     in_progress: { label: "قيد الكشف", cls: "bg-violet-50 text-violet-700 border-violet-200" },
+    slot_held: { label: "محجوز مؤقتًا", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+    pending_insurance: { label: "بانتظار التأمين", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+    pending_confirmation: { label: "بانتظار التأكيد", cls: "bg-sky-50 text-sky-700 border-sky-200" },
+    arrived: { label: "وصل", cls: "bg-teal-50 text-teal-700 border-teal-200" },
+    waiting: { label: "في الانتظار", cls: "bg-amber-50 text-amber-700 border-amber-200" },
+    called: { label: "تم النداء", cls: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200" },
+    in_consultation: { label: "قيد الاستشارة", cls: "bg-violet-50 text-violet-700 border-violet-200" },
+    rescheduled: { label: "أعيد جدولته", cls: "bg-slate-100 text-slate-700 border-slate-200" },
   };
   return m[s] ?? { label: s, cls: "bg-slate-100 text-slate-700 border-slate-200" };
 }
