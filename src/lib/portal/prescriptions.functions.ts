@@ -373,14 +373,18 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
       model,
     };
 
-    // Persist each slot in the notifications log so the user can see history & status
+    // Persist each slot in the notifications log so the user can see history & status.
+    // Respect the user's Preferences Center (channel + muted categories + quiet hours).
     if (plan.slots.length > 0) {
       try {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        const { filterRowsForUser } = await import(
+          "@/lib/notifications/apply-preferences.server"
+        );
         const rows = plan.slots.slice(0, 40).map((s) => ({
-          audience: "user",
+          audience: "user" as const,
           user_id: userId,
-          kind: "medication_reminder",
+          kind: "medication_reminder" as const,
           title: s.medication,
           body: [s.dosage, s.label, s.note].filter(Boolean).join(" • "),
           channel: "in_app" as const,
@@ -394,7 +398,10 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
             headline: plan.headline,
           },
         }));
-        await supabaseAdmin.from("notifications").insert(rows);
+        const { delivered } = await filterRowsForUser(supabaseAdmin, userId, rows);
+        if (delivered.length > 0) {
+          await supabaseAdmin.from("notifications").insert(delivered);
+        }
       } catch {
         // logging is best-effort; the plan itself is still returned
       }
