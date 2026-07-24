@@ -139,8 +139,8 @@ const NAV: NavGroup[] = [
         roles: ["admin", "super_admin"],
       },
       {
-        to: "/admin/users",
-        label: "المستخدمون (Admin)",
+        to: "/admin/access-hub",
+        label: "مركز الوصول",
         icon: Users,
         roles: ["admin", "super_admin"],
       },
