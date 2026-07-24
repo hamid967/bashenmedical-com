@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { MediaField } from "@/components/admin/MediaPicker";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/$kind/$id")({
   head: () => ({ meta: [{ title: "محرر المحتوى" }] }),
