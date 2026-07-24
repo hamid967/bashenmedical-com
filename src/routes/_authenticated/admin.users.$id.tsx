@@ -83,7 +83,7 @@ function AdminUserDetail() {
   const data = query.data;
   if (!data) return null;
 
-  const p = data.profile as Record<string, unknown> & {
+  const p = data.profile as unknown as Record<string, unknown> & {
     id: string;
     full_name?: string;
     phone?: string;
