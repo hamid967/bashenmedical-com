@@ -22,6 +22,7 @@ export { SectionCard, type SectionCardProps } from "./SectionCard";
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog";
 export { FormDialog, type FormDialogProps } from "./FormDialog";
 export { DataTable } from "./DataTable";
+export { useDirection, shouldAutoDir, type Direction } from "./rtl";
 
 // Unified state contract (loading / disabled / error) shared by all wrappers.
 export {
