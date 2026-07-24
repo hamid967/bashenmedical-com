@@ -8,6 +8,7 @@ import { AIAssistantPanel } from "./AIAssistantPanel";
 import { ThemeSwitcher, useAdminTheme } from "./ThemeSwitcher";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { QuickActions } from "./QuickActions";
+import { BranchSwitcher } from "./BranchSwitcher";
 import type { AdminRole } from "@/components/admin/types";
 import {
   LayoutDashboard,
@@ -567,6 +568,8 @@ export function AdminShellV2({
             <Sparkles className="h-4 w-4" />
             <span className="hidden sm:inline">المساعد</span>
           </button>
+
+          <BranchSwitcher />
 
           <QuickActions />
 
