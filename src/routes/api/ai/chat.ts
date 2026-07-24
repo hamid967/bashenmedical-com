@@ -360,8 +360,9 @@ export const Route = createFileRoute("/api/ai/chat")({
 
 function sseSingle(text: string): Response {
   const enc = new TextEncoder();
+  const safe = sanitizeAssistantText(text);
   const chunks = [
-    `data: ${JSON.stringify({ choices: [{ delta: { content: text } }] })}\n\n`,
+    `data: ${JSON.stringify({ choices: [{ delta: { content: safe } }] })}\n\n`,
     `data: [DONE]\n\n`,
   ];
   const stream = new ReadableStream({
