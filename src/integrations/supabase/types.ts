@@ -7042,6 +7042,18 @@ export type Database = {
       generate_mrn: { Args: { _branch_id: string }; Returns: string }
       generate_refund_receipt_reference: { Args: never; Returns: string }
       generate_service_inquiry_number: { Args: never; Returns: string }
+      get_ai_escalation_status: {
+        Args: { _conversation_id: string }
+        Returns: {
+          created_at: string
+          inbox_item_id: string
+          incident_severity: string
+          priority: Database["public"]["Enums"]["inbox_priority"]
+          request_number: string
+          status: Database["public"]["Enums"]["inbox_status"]
+          updated_at: string
+        }[]
+      }
       get_my_doctor_id: { Args: never; Returns: string }
       get_my_patient_id: { Args: never; Returns: string }
       get_order_by_ref: {
