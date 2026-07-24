@@ -66,6 +66,12 @@ const NAV: NavGroup[] = [
         icon: Inbox,
         roles: ["admin", "super_admin"],
       },
+      {
+        to: "/admin/inbox/sla",
+        label: "لوحة SLA",
+        icon: Inbox,
+        roles: ["admin", "super_admin"],
+      },
     ],
   },
   {
