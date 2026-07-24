@@ -192,13 +192,30 @@ function KpiTile({
   );
 }
 
-export function CommandCenterKpiGridV2() {
+export type KpiGridFilters = { from?: string; to?: string; branchId?: string | null };
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function CommandCenterKpiGridV2({ filters }: { filters?: KpiGridFilters } = {}) {
   const fetchKpis = useServerFn(getCommandCenterKpisV2);
+  const args = {
+    from: filters?.from,
+    to: filters?.to,
+    branchId: filters?.branchId ?? null,
+  };
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["admin", "command-center-kpis-v2"],
-    queryFn: () => fetchKpis(),
+    queryKey: ["admin", "command-center-kpis-v2", args],
+    queryFn: () => fetchKpis({ data: args }),
     staleTime: 30_000,
   });
+
+  const effective = data?.filters ?? {
+    from: args.from ?? todayIso(),
+    to: args.to ?? todayIso(),
+    branchId: args.branchId,
+  };
 
   return (
     <section className="mb-6 sm:mb-10" aria-labelledby="cc-kpi-heading">
@@ -212,7 +229,7 @@ export function CommandCenterKpiGridV2() {
             مؤشرات مركز التحكم
           </h2>
           <p className="text-[11px] sm:text-xs" style={{ color: OCEAN.glow, opacity: 0.7 }}>
-            بيانات حية — كل بطاقة قابلة للنقر للانتقال إلى التفاصيل
+            بيانات حية — كل بطاقة قابلة للنقر للانتقال إلى التفاصيل بنفس النطاق الزمني والقسم
           </p>
         </div>
         <button
@@ -266,7 +283,9 @@ export function CommandCenterKpiGridV2() {
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4">
           {isLoading
             ? Array.from({ length: 14 }).map((_, i) => <KpiSkeleton key={i} />)
-            : (data?.kpis ?? []).map((k) => <KpiTile key={k.key} k={k} />)}
+            : (data?.kpis ?? []).map((k) => (
+                <KpiTile key={k.key} k={k} filters={effective} />
+              ))}
         </div>
       )}
     </section>
