@@ -1,0 +1,78 @@
+name: DR drill (cross-region)
+
+# Automated cross-region disaster-recovery exercise.
+# - Scheduled weekly (Monday 03:00 UTC).
+# - Also runnable on-demand via workflow_dispatch with custom budgets.
+# - Uploads the report artifact (JSON + Markdown) after every run.
+# - Fires the DR_ALERT_WEBHOOK when the drill breaches or aborts.
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"
+  workflow_dispatch:
+    inputs:
+      rpo_seconds:
+        description: "RPO budget (seconds)"
+        required: false
+        default: "300"
+      rto_seconds:
+        description: "RTO budget (seconds)"
+        required: false
+        default: "600"
+      scenario:
+        description: "Scenario label"
+        required: false
+        default: "primary_region_outage"
+
+jobs:
+  dr-drill:
+    name: Run DR drill and publish report
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        run: bun install --frozen-lockfile
+
+      - name: Run drill
+        env:
+          DR_PRIMARY_URL: ${{ vars.DR_PRIMARY_URL || 'https://project--550c7bc5-80b4-4118-853f-28cc7bd42f26.lovable.app/api/public/health' }}
+          DR_SECONDARY_URL: ${{ vars.DR_SECONDARY_URL || 'https://project--550c7bc5-80b4-4118-853f-28cc7bd42f26-dev.lovable.app/api/public/health' }}
+          DR_PRIMARY_REGION: ${{ vars.DR_PRIMARY_REGION || 'production' }}
+          DR_SECONDARY_REGION: ${{ vars.DR_SECONDARY_REGION || 'preview-standby' }}
+          DR_RPO_SECONDS: ${{ github.event.inputs.rpo_seconds || '300' }}
+          DR_RTO_SECONDS: ${{ github.event.inputs.rto_seconds || '600' }}
+          DR_SCENARIO: ${{ github.event.inputs.scenario || 'primary_region_outage' }}
+          DR_PROBE_INTERVAL_MS: "500"
+          DR_MAX_DURATION_MS: "120000"
+          DR_SIMULATE_PRIMARY_FAIL_AFTER_MS: "3000"
+          DR_ALERT_WEBHOOK_URL: ${{ secrets.DR_ALERT_WEBHOOK_URL }}
+          DR_OPERATOR: ${{ github.actor }}
+          GITHUB_SHA: ${{ github.sha }}
+        run: bun run scripts/dr/run-drill.mjs
+
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dr-drill-report
+          path: artifacts/dr/**
+          if-no-files-found: error
+          retention-days: 90
+
+  dr-drill-unit:
+    name: DR drill invariants (unit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Install deps
+        run: bun install --frozen-lockfile
+      - name: Run pure-logic tests
+        run: bun test tests/unit/dr-drill.test.ts
