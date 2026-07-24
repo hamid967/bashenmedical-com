@@ -582,9 +582,14 @@ function ManagePage() {
                   required
                 />
               </div>
+              <HCaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
               <Button
                 type="submit"
-                disabled={sendOtp.isPending || phone.trim().length < 9}
+                disabled={
+                  sendOtp.isPending ||
+                  phone.trim().length < 9 ||
+                  (HCAPTCHA_ENABLED && !captchaToken)
+                }
                 className="w-full h-11"
               >
                 {sendOtp.isPending ? (
