@@ -82,14 +82,14 @@ export const saveMedicalReportDraft = createServerFn({ method: "POST" })
       context.userId,
       "reports.medical.publish",
     );
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: Record<string, any> = { updated_at: new Date().toISOString() };
     if (data.title_ar !== undefined) patch.title_ar = data.title_ar;
     if (data.title_en !== undefined) patch.title_en = data.title_en;
     if (data.summary !== undefined) patch.summary = data.summary;
     if (data.file_path !== undefined) patch.file_path = data.file_path;
     const { data: row, error } = await context.supabase
       .from("medical_reports")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .select("id, status, summary, file_path")
       .maybeSingle();
@@ -139,7 +139,7 @@ export const publishMedicalReport = createServerFn({ method: "POST" })
     if (before.status === "published")
       throw new Error("التقرير منشور بالفعل.");
 
-    const patch: Record<string, unknown> = {
+    const patch: Record<string, any> = {
       status: "published",
       published_at: new Date().toISOString(),
     };
@@ -148,7 +148,7 @@ export const publishMedicalReport = createServerFn({ method: "POST" })
 
     const { data: row, error } = await context.supabase
       .from("medical_reports")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id)
       .select("id, summary, file_path")
       .maybeSingle();
