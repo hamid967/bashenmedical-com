@@ -585,3 +585,272 @@ function ActionBtn({
     </button>
   );
 }
+
+/* ---------------------- Batch A1: Patient Snapshot ---------------------- */
+
+function PatientSnapshotDialog({
+  patientId,
+  onClose,
+}: {
+  patientId: string;
+  onClose: () => void;
+}) {
+  const fetchFn = useServerFn(getPatientSnapshot);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["front-desk", "snapshot", patientId],
+    queryFn: () => fetchFn({ data: { patient_id: patientId } }),
+    staleTime: 30_000,
+  });
+
+  return (
+    <DialogShell title="بطاقة المريض" onClose={onClose}>
+      {isLoading ? (
+        <SkeletonRows />
+      ) : isError ? (
+        <ErrorBanner message={(error as Error).message} />
+      ) : !data ? (
+        <EmptyState message="لا توجد بيانات." />
+      ) : (
+        <div className="space-y-4 text-sm">
+          <section>
+            <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+              البيانات الأساسية
+            </h3>
+            <div className="grid grid-cols-2 gap-2">
+              <Field label="الاسم" value={data.patient.full_name_ar || data.patient.full_name_en} />
+              <Field label="MRN" value={data.patient.mrn} mono />
+              <Field label="الجوال" value={data.patient.phone} mono />
+              <Field label="تاريخ الميلاد" value={data.patient.date_of_birth} mono />
+              <Field label="الجنس" value={data.patient.gender} />
+              <Field label="فصيلة الدم" value={data.patient.blood_type} />
+              <Field label="الجنسية" value={data.patient.nationality} />
+              <Field label="الهوية" value={data.patient.national_id} mono />
+            </div>
+          </section>
+
+          <section>
+            <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+              الحساسية ({data.allergies.length})
+            </h3>
+            {data.allergies.length === 0 ? (
+              <p className="text-xs text-muted-foreground">لا يوجد.</p>
+            ) : (
+              <ul className="space-y-1">
+                {data.allergies.map((a: any, i: number) => (
+                  <li key={i} className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-xs">
+                    <strong>{a.allergen}</strong>
+                    {a.severity ? ` — ${a.severity}` : ""}
+                    {a.reaction ? ` (${a.reaction})` : ""}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section>
+            <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+              التأمين
+            </h3>
+            {data.insurance ? (
+              <p className="text-xs">
+                {data.insurance.insurance_provider} · {data.insurance.status}
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">لا يوجد تحقق حديث.</p>
+            )}
+          </section>
+
+          <section>
+            <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
+              آخر المواعيد
+            </h3>
+            {data.recent_appointments.length === 0 ? (
+              <p className="text-xs text-muted-foreground">لا يوجد.</p>
+            ) : (
+              <ul className="space-y-1">
+                {data.recent_appointments.map((a: any) => (
+                  <li key={a.id} className="flex justify-between rounded border px-2 py-1 text-xs">
+                    <span>
+                      <span className="font-mono">{a.appointment_date}</span>{" "}
+                      {a.appointment_time} · {a.doctor?.name_ar ?? "—"}
+                    </span>
+                    <StatusBadge status={a.status} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        </div>
+      )}
+    </DialogShell>
+  );
+}
+
+/* ---------------------- Batch A1: Reschedule dialog ---------------------- */
+
+function RescheduleDialog({
+  appointment,
+  onClose,
+  onSuccess,
+}: {
+  appointment: {
+    id: string;
+    patient_name: string | null;
+    appointment_date: string | null;
+    appointment_time: string | null;
+  };
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const rescheduleFn = useServerFn(rescheduleAppointment);
+  const [newDate, setNewDate] = useState(appointment.appointment_date ?? "");
+  const [newTime, setNewTime] = useState(
+    (appointment.appointment_time ?? "").slice(0, 5),
+  );
+  const [reason, setReason] = useState("");
+
+  const mutate = useMutation({
+    mutationFn: () =>
+      rescheduleFn({
+        data: {
+          appointment_id: appointment.id,
+          new_date: newDate,
+          new_time: newTime,
+          reason: reason.trim(),
+        },
+      }),
+    onSuccess,
+  });
+
+  const disabled =
+    !newDate ||
+    !newTime ||
+    reason.trim().length < 3 ||
+    mutate.isPending;
+
+  return (
+    <DialogShell title="إعادة جدولة الحجز" onClose={onClose}>
+      <div className="space-y-3 text-sm">
+        <p className="text-xs text-muted-foreground">
+          المريض: <strong>{appointment.patient_name ?? "—"}</strong>
+          <br />
+          الوقت الحالي:{" "}
+          <span className="font-mono">
+            {appointment.appointment_date} {appointment.appointment_time}
+          </span>
+        </p>
+        <label className="block space-y-1">
+          <span className="text-xs">التاريخ الجديد</span>
+          <input
+            type="date"
+            value={newDate}
+            onChange={(e) => setNewDate(e.target.value)}
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="text-xs">الوقت الجديد</span>
+          <input
+            type="time"
+            value={newTime}
+            onChange={(e) => setNewTime(e.target.value)}
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+          />
+        </label>
+        <label className="block space-y-1">
+          <span className="text-xs">سبب إعادة الجدولة (مطلوب)</span>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            rows={2}
+            maxLength={500}
+            className="w-full rounded-md border bg-background p-2 text-sm"
+            placeholder="مثال: تعارض مع جدول الطبيب."
+          />
+        </label>
+        {mutate.isError ? (
+          <ErrorBanner message={(mutate.error as Error).message} />
+        ) : null}
+        <div className="flex justify-end gap-2 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            إلغاء
+          </button>
+          <button
+            type="button"
+            disabled={disabled}
+            onClick={() => mutate.mutate()}
+            className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-40"
+          >
+            {mutate.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CalendarClock className="h-4 w-4" />
+            )}
+            حفظ الجدولة
+          </button>
+        </div>
+      </div>
+    </DialogShell>
+  );
+}
+
+/* ---------------------- Dialog primitives ---------------------- */
+
+function DialogShell({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-lg border bg-background p-4 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <header className="mb-3 flex items-center justify-between border-b pb-2">
+          <h2 className="text-sm font-semibold">{title}</h2>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-1 hover:bg-muted"
+            aria-label="إغلاق"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </header>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  mono,
+}: {
+  label: string;
+  value: string | null | undefined;
+  mono?: boolean;
+}) {
+  return (
+    <div className="text-xs">
+      <div className="text-muted-foreground">{label}</div>
+      <div className={mono ? "font-mono" : ""}>{value ?? "—"}</div>
+    </div>
+  );
+}
