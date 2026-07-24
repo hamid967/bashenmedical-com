@@ -94,8 +94,8 @@ export type InboxEvent = {
   item_id: string;
   actor_user_id: string | null;
   action: InboxActionKind;
-  from_value: unknown;
-  to_value: unknown;
+  from_value: any;
+  to_value: any;
   note: string | null;
   created_at: string;
 };
