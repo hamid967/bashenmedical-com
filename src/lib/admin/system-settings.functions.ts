@@ -58,7 +58,7 @@ export const listSystemSettings = createServerFn({ method: "GET" })
 
     const enriched: SystemSettingRow[] = (rows ?? []).map((r) => ({
       key: r.key,
-      value: r.value,
+      value: r.value as JsonValue,
       description: r.description,
       updated_at: r.updated_at,
       updated_by: r.updated_by,
