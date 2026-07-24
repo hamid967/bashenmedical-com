@@ -653,7 +653,8 @@ function PatientSnapshotDialog({
             </h3>
             {data.insurance ? (
               <p className="text-xs">
-                {data.insurance.insurance_provider} · {data.insurance.status}
+                مزود: {data.insurance.provider_id ?? "—"} ·{" "}
+                {data.insurance.eligible ? "مؤهل" : "غير مؤهل"}
               </p>
             ) : (
               <p className="text-xs text-muted-foreground">لا يوجد تحقق حديث.</p>
