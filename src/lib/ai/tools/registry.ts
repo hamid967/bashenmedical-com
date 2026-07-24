@@ -79,7 +79,26 @@ export const TOOL_REGISTRY: Record<string, ToolDef> = {
     allowedScopes: ["staff"],
     requiresConfirmation: false,
   },
+
+  // ---------- staff mutations (Phase 10.b — gradual rollout) ----------
+  // Enabled only when BOTH `ai.assistant.staff.enabled` AND
+  // `ai.assistant.staff.mutations.enabled` are true. Every call runs through
+  // the two-phase confirmation flow in /api/ai/staff-action:
+  //   1) phase=prepare   → returns a short-lived HMAC confirm_token + a
+  //                        human-readable summary the UI must display verbatim
+  //                        to the staff member.
+  //   2) phase=execute   → requires that exact confirm_token AND `confirm: true`.
+  //                        RLS still applies (uses the staff caller's session).
+  staff_add_inbox_note: {
+    name: "staff_add_inbox_note",
+    labelAr: "إضافة ملاحظة داخلية لعنصر الصندوق الموحد",
+    kind: "mutation",
+    allowedScopes: ["staff"],
+    requiresConfirmation: true,
+    featureFlag: "ai.assistant.staff.mutations.enabled",
+  },
 } as const;
+
 
 /** Tools currently allowed to appear in an ```action fence for a scope. */
 export function allowedActionTools(scope: AssistantScope): ToolDef[] {
