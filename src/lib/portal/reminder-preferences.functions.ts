@@ -57,7 +57,7 @@ export const getMyReminderPreferences = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("reminder_preferences")
       .select(
-        "channel_in_app, channel_email, channel_sms, channel_whatsapp, channel_push, frequency, appointment_lead_minutes, medication_lead_minutes, quiet_hours_enabled, wake_hour, sleep_hour",
+        "channel_in_app, channel_email, channel_sms, channel_whatsapp, channel_push, frequency, appointment_lead_minutes, medication_lead_minutes, quiet_hours_enabled, wake_hour, sleep_hour, muted_kinds",
       )
       .eq("user_id", context.userId)
       .maybeSingle();
@@ -67,16 +67,19 @@ export const getMyReminderPreferences = createServerFn({ method: "GET" })
       channel_in_app: data.channel_in_app,
       channel_email: data.channel_email,
       channel_sms: data.channel_sms,
-      channel_whatsapp: (data as any).channel_whatsapp ?? false,
-      channel_push: (data as any).channel_push ?? true,
+      channel_whatsapp: (data as { channel_whatsapp?: boolean }).channel_whatsapp ?? false,
+      channel_push: (data as { channel_push?: boolean }).channel_push ?? true,
       frequency: (data.frequency as ReminderPreferences["frequency"]) ?? "immediate",
       appointment_lead_minutes: data.appointment_lead_minutes,
       medication_lead_minutes: data.medication_lead_minutes,
       quiet_hours_enabled: data.quiet_hours_enabled,
       wake_hour: data.wake_hour,
       sleep_hour: data.sleep_hour,
+      muted_kinds: (data as { muted_kinds?: string[] }).muted_kinds ?? [],
     };
   });
+
+const ALLOWED_MUTABLE = MUTABLE_CATEGORIES.map((c) => c.key) as unknown as [string, ...string[]];
 
 const UpdateInput = z.object({
   channel_in_app: z.boolean(),
@@ -90,6 +93,7 @@ const UpdateInput = z.object({
   quiet_hours_enabled: z.boolean(),
   wake_hour: z.number().int().min(0).max(23),
   sleep_hour: z.number().int().min(0).max(23),
+  muted_kinds: z.array(z.enum(ALLOWED_MUTABLE)).max(20).default([]),
 });
 
 export const updateMyReminderPreferences = createServerFn({ method: "POST" })
