@@ -54,7 +54,9 @@ export const sendTestPushToMe = createServerFn({ method: "POST" })
     const { data: subs, error } = await context.supabase
       .from("push_subscriptions")
       .select("id, endpoint, p256dh, auth")
-      .eq("user_id", context.userId);
+      .eq("user_id", context.userId)
+      .eq("platform", "web")
+      .not("endpoint", "is", null);
     if (error) throw new Error(error.message);
     if (!subs || subs.length === 0) {
       return {
