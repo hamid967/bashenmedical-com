@@ -1,6 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
+import { fallback, zodValidator } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import { listBranchesLite } from "@/lib/admin/no-show-stats.functions";
+import { useServerFn } from "@tanstack/react-start";
 import {
   AreaChart,
   Area,
@@ -44,7 +48,33 @@ const rolesQuery = queryOptions({
   staleTime: 60_000,
 });
 
+const adminSearchSchema = z.object({
+  range: fallback(z.string(), "today").default("today"),
+  from: fallback(z.string(), "").default(""),
+  to: fallback(z.string(), "").default(""),
+  branch: fallback(z.string(), "").default(""),
+});
+
+function resolveRange(range: string, from: string, to: string): { from: string; to: string } {
+  const today = new Date();
+  const iso = (d: Date) => d.toISOString().slice(0, 10);
+  const back = (n: number) => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - n);
+    return d;
+  };
+  if (range === "custom" && from && to) return { from, to };
+  if (range === "yesterday") {
+    const y = back(1);
+    return { from: iso(y), to: iso(y) };
+  }
+  if (range === "7d") return { from: iso(back(6)), to: iso(today) };
+  if (range === "30d") return { from: iso(back(29)), to: iso(today) };
+  return { from: iso(today), to: iso(today) };
+}
+
 export const Route = createFileRoute("/_authenticated/admin/")({
+  validateSearch: zodValidator(adminSearchSchema),
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(rolesQuery),
@@ -126,6 +156,18 @@ function AdminDashboard() {
     (l) => !l.roles || l.roles.some((r) => roles.includes(r)),
   );
 
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { from: fromDate, to: toDate } = resolveRange(search.range, search.from, search.to);
+  const branchId = search.branch || null;
+  const fetchBranches = useServerFn(listBranchesLite);
+  const branchesQ = useQuery({
+    queryKey: ["admin", "branches-lite"],
+    queryFn: () => fetchBranches(),
+    staleTime: 5 * 60_000,
+  });
+
+
   return (
     <div
       dir="rtl"
@@ -180,8 +222,83 @@ function AdminDashboard() {
         </div>
       </header>
 
+      {/* Global drill-down filters — time range + branch segment. */}
+      <div
+        className="mb-4 sm:mb-6 rounded-2xl p-3 sm:p-4 flex flex-wrap items-center gap-2 sm:gap-3"
+        style={{ background: OCEAN.panel, border: `1px solid ${OCEAN.panel2}` }}
+        aria-label="نطاق زمني وقطاع"
+      >
+        <span className="text-[11px] font-bold" style={{ color: OCEAN.glow }}>
+          النطاق:
+        </span>
+        {[
+          { id: "today", label: "اليوم" },
+          { id: "yesterday", label: "أمس" },
+          { id: "7d", label: "٧ أيام" },
+          { id: "30d", label: "٣٠ يوم" },
+        ].map((r) => {
+          const active = search.range === r.id;
+          return (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() =>
+                navigate({
+                  search: (prev: Record<string, string>) => ({ ...prev, range: r.id, from: "", to: "" }),
+                  replace: true,
+                })
+              }
+              className="text-[11px] font-bold rounded-full px-3 h-8"
+              style={{
+                background: active ? OCEAN.glow : OCEAN.bg,
+                color: active ? OCEAN.panel : OCEAN.glow,
+                border: `1px solid ${OCEAN.panel2}`,
+              }}
+              aria-pressed={active}
+            >
+              {r.label}
+            </button>
+          );
+        })}
+
+        <span className="mx-2 h-5 w-px" style={{ background: OCEAN.panel2 }} aria-hidden />
+
+        <span className="text-[11px] font-bold" style={{ color: OCEAN.glow }}>
+          الفرع:
+        </span>
+        <select
+          value={search.branch}
+          onChange={(e) =>
+            navigate({
+              search: (prev: Record<string, string>) => ({ ...prev, branch: e.target.value }),
+              replace: true,
+            })
+          }
+          className="text-[11px] font-bold rounded-full px-3 h-8 outline-none"
+          style={{
+            background: OCEAN.bg,
+            color: OCEAN.glow,
+            border: `1px solid ${OCEAN.panel2}`,
+          }}
+          aria-label="اختيار الفرع"
+        >
+          <option value="">كل الفروع</option>
+          {(branchesQ.data ?? []).map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name_ar}
+            </option>
+          ))}
+        </select>
+
+        <span className="ms-auto text-[10px]" style={{ color: OCEAN.glow, opacity: 0.7 }}>
+          {fromDate === toDate ? fromDate : `${fromDate} → ${toDate}`}
+          {branchId ? " · مخصص" : " · كل الفروع"}
+        </span>
+      </div>
+
       {/* Phase 7 — Enterprise Command Center KPIs (real data, 14 tiles) */}
-      <CommandCenterKpiGridV2 />
+      <CommandCenterKpiGridV2 filters={{ from: fromDate, to: toDate, branchId }} />
+
 
       {/* Legacy KPI strip (role-scoped period-over-period + sparklines) */}
       <KpiGrid />

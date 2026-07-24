@@ -11,6 +11,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertHasRole } from "@/lib/admin/_guard";
+import { z } from "zod";
+
+const FiltersInput = z
+  .object({
+    from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+    branchId: z.string().uuid().nullable().optional(),
+  })
+  .optional();
+
+export type CommandCenterFilters = z.infer<typeof FiltersInput>;
 
 export type CommandCenterKpiKey =
   | "appointments_today"
@@ -69,12 +80,23 @@ async function safeCount(
 
 export const getCommandCenterKpisV2 = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<{ kpis: CommandCenterKpiV2[]; fetchedAt: string }> => {
+  .validator((d) => FiltersInput.parse(d))
+  .handler(async ({ context, data }): Promise<{ kpis: CommandCenterKpiV2[]; fetchedAt: string; filters: { from: string; to: string; branchId: string | null } }> => {
     await assertHasRole(context.supabase, context.userId, "admin");
     const sb = context.supabase as Sb;
     const today = todayIso();
-    const sevenDaysAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+    const fromDate = data?.from ?? today;
+    const toDate = data?.to ?? today;
+    const branchId = data?.branchId ?? null;
+    // 7-day rolling window ANCHORED at the selected `to` date, so period KPIs
+    // (no-show rate, etc.) match the segment the user is viewing.
+    const sevenDaysBack = new Date(new Date(`${toDate}T00:00:00Z`).getTime() - 7 * 86_400_000)
+      .toISOString()
+      .slice(0, 10);
     const twentyFourHoursAgo = new Date(Date.now() - 86_400_000).toISOString();
+
+    // Helper: apply branch scope on tables that carry `branch_id`
+    const withBranch = (q: Sb) => (branchId ? q.eq("branch_id", branchId) : q);
 
     const [
       apptsToday,
@@ -96,33 +118,39 @@ export const getCommandCenterKpisV2 = createServerFn({ method: "GET" })
       complaintsOpen,
       integrationFailures,
     ] = await Promise.all([
-      safeCount(sb, "appointments", (q: Sb) => q.eq("appointment_date", today)),
+      safeCount(sb, "appointments", (q: Sb) => withBranch(q.gte("appointment_date", fromDate).lte("appointment_date", toDate))),
       safeCount(sb, "appointments", (q: Sb) =>
-        q.eq("appointment_date", today).eq("status", "confirmed"),
+        withBranch(q.gte("appointment_date", fromDate).lte("appointment_date", toDate).eq("status", "confirmed")),
       ),
-      safeCount(sb, "service_inquiries", (q: Sb) => q.eq("status", "pending")),
-      safeCount(sb, "appointments", (q: Sb) => q.eq("status", "new")),
+      safeCount(sb, "service_inquiries", (q: Sb) => withBranch(q.eq("status", "pending"))),
+      safeCount(sb, "appointments", (q: Sb) => withBranch(q.eq("status", "new"))),
       safeCount(sb, "appointments", (q: Sb) =>
-        q.eq("appointment_date", today).eq("status", "cancelled"),
+        withBranch(q.gte("appointment_date", fromDate).lte("appointment_date", toDate).eq("status", "cancelled")),
       ),
       safeCount(sb, "appointments", (q: Sb) =>
-        q.gte("appointment_date", sevenDaysAgo).eq("status", "no_show"),
+        withBranch(q.gte("appointment_date", sevenDaysBack).lte("appointment_date", toDate).eq("status", "no_show")),
       ),
-      safeCount(sb, "appointments", (q: Sb) => q.gte("appointment_date", sevenDaysAgo)),
+      safeCount(sb, "appointments", (q: Sb) =>
+        withBranch(q.gte("appointment_date", sevenDaysBack).lte("appointment_date", toDate)),
+      ),
       safeCount(sb, "availability_slots", (q: Sb) =>
-        q.eq("slot_date", today).eq("status", "booked"),
+        withBranch(q.gte("slot_date", fromDate).lte("slot_date", toDate).eq("status", "booked")),
       ),
       safeCount(sb, "availability_slots", (q: Sb) =>
-        q.eq("slot_date", today).eq("status", "available"),
+        withBranch(q.gte("slot_date", fromDate).lte("slot_date", toDate).eq("status", "available")),
       ),
-      safeCount(sb, "patients", (q: Sb) => q.gte("created_at", `${today}T00:00:00Z`)),
+      safeCount(sb, "patients", (q: Sb) =>
+        q.gte("created_at", `${fromDate}T00:00:00Z`).lte("created_at", `${toDate}T23:59:59Z`),
+      ),
       safeCount(sb, "medical_reports", (q: Sb) => q.eq("status", "pending")),
       safeCount(sb, "lab_reports", (q: Sb) => q.eq("status", "pending")),
       safeCount(sb, "radiology_reports", (q: Sb) => q.eq("status", "pending")),
       safeCount(sb, "insurance_approvals", (q: Sb) => q.eq("status", "pending")),
       safeCount(sb, "invoices", (q: Sb) => q.eq("status", "unpaid")),
       safeCount(sb, "service_inquiries", (q: Sb) =>
-        q.eq("source", "whatsapp").gte("created_at", `${today}T00:00:00Z`),
+        q.eq("source", "whatsapp")
+          .gte("created_at", `${fromDate}T00:00:00Z`)
+          .lte("created_at", `${toDate}T23:59:59Z`),
       ),
       safeCount(sb, "complaints", (q: Sb) => q.in("status", ["open", "new", "in_progress"])),
       safeCount(sb, "integration_logs", (q: Sb) =>
@@ -276,5 +304,9 @@ export const getCommandCenterKpisV2 = createServerFn({ method: "GET" })
       }),
     ];
 
-    return { kpis, fetchedAt: new Date().toISOString() };
+    return {
+      kpis,
+      fetchedAt: new Date().toISOString(),
+      filters: { from: fromDate, to: toDate, branchId },
+    };
   });

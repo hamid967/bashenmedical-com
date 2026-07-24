@@ -83,10 +83,32 @@ function KpiSkeleton() {
   );
 }
 
-function KpiTile({ k }: { k: CommandCenterKpiV2 }) {
+function appendDrillFilters(
+  to: string,
+  filters: { from: string; to: string; branchId: string | null },
+): string {
+  const [pathAndSearch, hash] = to.split("#");
+  const [path, existing] = pathAndSearch.split("?");
+  const sp = new URLSearchParams(existing ?? "");
+  // Only set if not already present so KPI-specific filters (e.g. status=confirmed) win
+  if (!sp.has("from")) sp.set("from", filters.from);
+  if (!sp.has("to")) sp.set("to", filters.to);
+  if (filters.branchId && !sp.has("branch")) sp.set("branch", filters.branchId);
+  const qs = sp.toString();
+  return `${path}${qs ? `?${qs}` : ""}${hash ? `#${hash}` : ""}`;
+}
+
+function KpiTile({
+  k,
+  filters,
+}: {
+  k: CommandCenterKpiV2;
+  filters: { from: string; to: string; branchId: string | null };
+}) {
   const Icon = ICONS[k.key];
   const unavailable = k.unavailable;
   const empty = k.empty && !unavailable;
+  const href = appendDrillFilters(k.drillTo, filters);
 
   const body = (
     <div
@@ -160,7 +182,7 @@ function KpiTile({ k }: { k: CommandCenterKpiV2 }) {
 
   return (
     <Link
-      to={k.drillTo}
+      to={href}
       preload="intent"
       aria-label={`فتح تفاصيل ${k.label}`}
       className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-2xl"
@@ -170,13 +192,30 @@ function KpiTile({ k }: { k: CommandCenterKpiV2 }) {
   );
 }
 
-export function CommandCenterKpiGridV2() {
+export type KpiGridFilters = { from?: string; to?: string; branchId?: string | null };
+
+function todayIso(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+export function CommandCenterKpiGridV2({ filters }: { filters?: KpiGridFilters } = {}) {
   const fetchKpis = useServerFn(getCommandCenterKpisV2);
+  const args = {
+    from: filters?.from,
+    to: filters?.to,
+    branchId: filters?.branchId ?? null,
+  };
   const { data, isLoading, isError, refetch, isFetching } = useQuery({
-    queryKey: ["admin", "command-center-kpis-v2"],
-    queryFn: () => fetchKpis(),
+    queryKey: ["admin", "command-center-kpis-v2", args],
+    queryFn: () => fetchKpis({ data: args }),
     staleTime: 30_000,
   });
+
+  const effective = data?.filters ?? {
+    from: args.from ?? todayIso(),
+    to: args.to ?? todayIso(),
+    branchId: args.branchId,
+  };
 
   return (
     <section className="mb-6 sm:mb-10" aria-labelledby="cc-kpi-heading">
@@ -190,7 +229,7 @@ export function CommandCenterKpiGridV2() {
             مؤشرات مركز التحكم
           </h2>
           <p className="text-[11px] sm:text-xs" style={{ color: OCEAN.glow, opacity: 0.7 }}>
-            بيانات حية — كل بطاقة قابلة للنقر للانتقال إلى التفاصيل
+            بيانات حية — كل بطاقة قابلة للنقر للانتقال إلى التفاصيل بنفس النطاق الزمني والقسم
           </p>
         </div>
         <button
@@ -244,7 +283,9 @@ export function CommandCenterKpiGridV2() {
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4">
           {isLoading
             ? Array.from({ length: 14 }).map((_, i) => <KpiSkeleton key={i} />)
-            : (data?.kpis ?? []).map((k) => <KpiTile key={k.key} k={k} />)}
+            : (data?.kpis ?? []).map((k) => (
+                <KpiTile key={k.key} k={k} filters={effective} />
+              ))}
         </div>
       )}
     </section>
