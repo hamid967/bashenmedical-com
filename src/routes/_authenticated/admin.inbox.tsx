@@ -137,8 +137,11 @@ export const Route = createFileRoute("/_authenticated/admin/inbox")({
 export function UnifiedInboxPage() {
   const search = Route.useSearch() as SearchIn;
   const navigate = Route.useNavigate();
+  const queryClient = useQueryClient();
 
   const list = useServerFn(listInboxItems);
+  const counts = useServerFn(getInboxCounts);
+
   const queryKey = useMemo(
     () => [
       "admin-inbox",
@@ -147,6 +150,9 @@ export function UnifiedInboxPage() {
       search.priority ?? "any",
       search.q ?? "",
       search.archived ? "1" : "0",
+      search.mine ? "1" : "0",
+      search.unassigned ? "1" : "0",
+      search.sort ?? "recent",
     ],
     [search],
   );
@@ -160,13 +166,55 @@ export function UnifiedInboxPage() {
           priority: search.priority,
           search: search.q,
           include_archived: !!search.archived,
+          mine: !!search.mine,
+          unassigned: !search.mine && !!search.unassigned,
+          sort: search.sort ?? "recent",
         },
       }),
     staleTime: 15_000,
   });
 
+  const { data: kpi } = useSuspenseQuery({
+    queryKey: ["admin-inbox-counts"],
+    queryFn: () => counts({}),
+    staleTime: 30_000,
+  });
+
+  // Realtime: refresh list + KPI on any inbox_items change.
+  useEffect(() => {
+    const channel = supabase
+      .channel("admin-inbox-live")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "inbox_items" },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["admin-inbox"] });
+          queryClient.invalidateQueries({ queryKey: ["admin-inbox-counts"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [queryClient]);
+
   const patch = (p: Partial<SearchIn>) =>
     navigate({ search: (prev: SearchIn) => ({ ...prev, ...p }) });
+
+  const activeChip = search.mine
+    ? "mine"
+    : search.unassigned
+      ? "unassigned"
+      : search.priority === "urgent"
+        ? "urgent"
+        : "all";
+
+  const chipCls = (active: boolean) =>
+    `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition ${
+      active
+        ? "border-primary bg-primary/10 text-primary"
+        : "border-border hover:bg-muted"
+    }`;
 
   return (
     <div className="ac-card p-6 space-y-6">
@@ -187,6 +235,68 @@ export function UnifiedInboxPage() {
           <RefreshCw className="h-4 w-4" /> إعادة تعيين
         </button>
       </header>
+
+      {/* KPI header */}
+      <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-4">
+        <KpiTile label="الإجمالي (غير مؤرشف)" value={kpi.total} />
+        <KpiTile label="غير مسند" value={kpi.unassigned} tone="amber" />
+        <KpiTile label="مسند إليّ" value={kpi.mine} tone="indigo" />
+        <KpiTile
+          label="عاجل"
+          value={kpi.byPriority?.urgent ?? 0}
+          tone="red"
+        />
+      </div>
+
+      {/* Quick chips */}
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className={chipCls(activeChip === "all")}
+          onClick={() =>
+            patch({ mine: undefined, unassigned: undefined, priority: undefined })
+          }
+        >
+          الكل
+        </button>
+        <button
+          type="button"
+          className={chipCls(activeChip === "mine")}
+          onClick={() => patch({ mine: true, unassigned: undefined })}
+        >
+          <UserCheck className="h-3.5 w-3.5" /> مسند إليّ ({kpi.mine})
+        </button>
+        <button
+          type="button"
+          className={chipCls(activeChip === "unassigned")}
+          onClick={() => patch({ unassigned: true, mine: undefined })}
+        >
+          <UserX className="h-3.5 w-3.5" /> غير مسند ({kpi.unassigned})
+        </button>
+        <button
+          type="button"
+          className={chipCls(activeChip === "urgent")}
+          onClick={() =>
+            patch({ priority: "urgent", mine: undefined, unassigned: undefined })
+          }
+        >
+          <Flame className="h-3.5 w-3.5" /> عاجل ({kpi.byPriority?.urgent ?? 0})
+        </button>
+        <div className="ms-auto flex items-center gap-2 text-xs text-muted-foreground">
+          <button
+            type="button"
+            onClick={() =>
+              patch({ sort: search.sort === "priority" ? "recent" : "priority" })
+            }
+            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 hover:bg-muted"
+            title="ترتيب حسب الأولوية"
+          >
+            <ArrowUpDown className="h-3.5 w-3.5" />
+            {search.sort === "priority" ? "حسب الأولوية" : "الأحدث"}
+          </button>
+          <span>{items.length} نتيجة</span>
+        </div>
+      </div>
 
       <div className="grid gap-3 md:grid-cols-5">
         <Input
@@ -245,6 +355,7 @@ export function UnifiedInboxPage() {
           إظهار المؤرشف
         </label>
       </div>
+
 
       {items.length === 0 ? (
         <Card className="p-10 text-center text-sm text-[color:var(--ac-ink-3)]">
