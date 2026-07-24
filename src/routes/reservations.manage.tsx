@@ -43,7 +43,6 @@ import {
   HCAPTCHA_ENABLED,
   type HCaptchaHandle,
 } from "@/components/security/HCaptchaWidget";
-import { useRef } from "react";
 
 export const Route = createFileRoute("/reservations/manage")({
   head: () => ({
