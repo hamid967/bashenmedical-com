@@ -31,8 +31,10 @@ import {
   escalateAiConversation,
   getAiEscalationStatus,
   listAiSafetyIncidents,
+  listAiIncidentEvents,
   type EscalationStatus,
   type SafetyIncident,
+  type IncidentEvent,
 } from "@/lib/ai/escalate.functions";
 import { visibilityAwareInterval } from "@/lib/polling";
 import { formatDateTimeInTZ } from "@/lib/datetime";
