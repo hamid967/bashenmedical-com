@@ -17,7 +17,7 @@ type RegisterResult =
 
 async function loadPushPlugin() {
   // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const mod = await import(
+  const mod = await (0, eval)("import(\"__PKG__\")".replace("__PKG__", "@capacitor/push-notifications"))
     /* @vite-ignore */ "@capacitor/push-notifications"
   ).catch(() => null);
   return (mod as { PushNotifications?: unknown } | null)?.PushNotifications as
