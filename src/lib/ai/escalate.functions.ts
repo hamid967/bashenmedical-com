@@ -100,7 +100,7 @@ export const listAiSafetyIncidents = createServerFn({ method: "GET" })
       kind: r.kind,
       severity: r.severity,
       actionTaken: r.action_taken ?? null,
-      details: r.details ?? null,
+      details: r.details ? JSON.stringify(r.details) : null,
       createdAt: r.created_at,
       inboxItemId: r.inbox_item_id ?? null,
       requestNumber: r.request_number ?? null,
