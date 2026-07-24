@@ -16,10 +16,10 @@ type RegisterResult =
   | { ok: false; reason: "not-native" | "permission-denied" | "error"; error?: string };
 
 async function loadPushPlugin() {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-imports
-  const mod = await (0, eval)("import(\"__PKG__\")".replace("__PKG__", "@capacitor/push-notifications"))
-    /* @vite-ignore */ "@capacitor/push-notifications"
-  ).catch(() => null);
+  // Indirect specifier defeats TS's static module resolution: the plugin is
+  // only installed inside `capacitor/`, never in the web bundle's package.json.
+  const spec = "@capacitor/push-notifications";
+  const mod = await import(/* @vite-ignore */ spec).catch(() => null);
   return (mod as { PushNotifications?: unknown } | null)?.PushNotifications as
     | {
         checkPermissions: () => Promise<{ receive: "granted" | "denied" | "prompt" }>;
