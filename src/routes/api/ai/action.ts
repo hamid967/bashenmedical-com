@@ -55,10 +55,27 @@ export const Route = createFileRoute("/api/ai/action")({
         const tool = body.tool as ToolName | undefined;
         if (!tool || !(tool in ToolSchemas)) return json({ error: "unknown_tool" }, 400);
 
+        // Phase 10: staff scope is read-only. Reject any mutation call from a
+        // user that carries a staff role, regardless of the mutations flag.
+        try {
+          const { detectStaffRoles } = await import("@/lib/ai/staff-snapshot.server");
+          const roles = await detectStaffRoles(auth.userId, auth.token);
+          if (roles.length > 0) {
+            return json({ error: "staff_read_only" }, 403);
+          }
+        } catch {
+          /* on failure fall through — mutation still requires the feature flag + RLS */
+        }
+
+        // Deny-by-default via registry (patient scope only for mutations).
+        const { canInvoke } = await import("@/lib/ai/tools/registry");
+        if (!canInvoke("patient", tool)) return json({ error: "tool_not_allowed" }, 403);
+
         const parsed = ToolSchemas[tool].safeParse(body.params);
         if (!parsed.success) {
           return json({ error: "invalid_params", details: parsed.error.flatten() }, 400);
         }
+
 
         const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
           auth: { persistSession: false, autoRefreshToken: false },
