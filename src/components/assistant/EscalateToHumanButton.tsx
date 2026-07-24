@@ -465,3 +465,151 @@ export function EscalateToHumanButton({
     </>
   );
 }
+
+function severityClass(sev: string): string {
+  switch (sev) {
+    case "critical":
+      return "border-red-300 bg-red-50 text-red-800 dark:bg-red-950/40 dark:text-red-300";
+    case "high":
+      return "border-orange-300 bg-orange-50 text-orange-800 dark:bg-orange-950/40 dark:text-orange-300";
+    case "medium":
+      return "border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+    default:
+      return "border-muted bg-muted/50 text-muted-foreground";
+  }
+}
+
+function severityLabel(sev: string, isAr: boolean): string {
+  const map: Record<string, [string, string]> = {
+    low: ["منخفضة", "Low"],
+    medium: ["متوسطة", "Medium"],
+    high: ["عالية", "High"],
+    critical: ["حرجة", "Critical"],
+  };
+  const pair = map[sev];
+  return pair ? (isAr ? pair[0] : pair[1]) : sev;
+}
+
+function kindLabel(kind: string, isAr: boolean): string {
+  const map: Record<string, [string, string]> = {
+    human_escalation: ["تصعيد بشري", "Human escalation"],
+    emergency_trigger: ["إنذار طوارئ", "Emergency trigger"],
+    pii_leak: ["تسريب بيانات حسّاسة", "PII leak"],
+    unsafe_response: ["استجابة غير آمنة", "Unsafe response"],
+    policy_violation: ["مخالفة سياسة", "Policy violation"],
+  };
+  const pair = map[kind];
+  return pair ? (isAr ? pair[0] : pair[1]) : kind;
+}
+
+function parseReasonFromDetails(details: string | null): string | null {
+  if (!details) return null;
+  try {
+    const parsed = JSON.parse(details) as { reason?: unknown };
+    if (typeof parsed.reason === "string" && parsed.reason.trim()) return parsed.reason;
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function IncidentsList({
+  isLoading,
+  isError,
+  incidents,
+  isAr,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  incidents: SafetyIncident[];
+  isAr: boolean;
+}) {
+  const t = (ar: string, en: string) => (isAr ? ar : en);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-muted-foreground py-6 justify-center">
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        {t("جارٍ تحميل السجل...", "Loading history...")}
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-destructive py-6 justify-center">
+        <XCircle className="h-3.5 w-3.5" />
+        {t("تعذّر تحميل سجل الحوادث.", "Failed to load incidents.")}
+      </div>
+    );
+  }
+  if (incidents.length === 0) {
+    return (
+      <div className="text-center text-xs text-muted-foreground py-6">
+        {t("لا توجد حوادث مسجّلة لهذه المحادثة.", "No incidents recorded for this conversation.")}
+      </div>
+    );
+  }
+
+  return (
+    <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
+      {incidents.map((inc) => {
+        const reason = parseReasonFromDetails(inc.details);
+        return (
+          <li
+            key={inc.id}
+            className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1 font-medium">
+                <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" />
+                {kindLabel(inc.kind, isAr)}
+              </span>
+              <span
+                className={
+                  "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium " +
+                  severityClass(inc.severity)
+                }
+              >
+                {severityLabel(inc.severity, isAr)}
+              </span>
+            </div>
+
+            {reason && (
+              <div className="text-muted-foreground line-clamp-3 whitespace-pre-wrap">{reason}</div>
+            )}
+
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+              <span>
+                {formatDateTimeInTZ(inc.createdAt, isAr ? "ar" : "en", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </span>
+              {inc.requestNumber && (
+                <span className="inline-flex items-center gap-1">
+                  <span>{t("التذكرة", "Ticket")}:</span>
+                  <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">
+                    {inc.requestNumber}
+                  </code>
+                </span>
+              )}
+              {inc.inboxStatus && (
+                <span>
+                  {t("نتيجة المعالجة", "Outcome")}: {inc.inboxStatus}
+                </span>
+              )}
+              {inc.actionTaken && (
+                <span>
+                  {t("الإجراء", "Action")}: {inc.actionTaken}
+                </span>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
