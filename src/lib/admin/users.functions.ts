@@ -62,10 +62,11 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       );
     }
 
-    const { data: rows, error, count } = await q;
+    const { data: rowsRaw, error, count } = await q;
     if (error) throw new Error(error.message);
+    const rows = (rowsRaw ?? []) as Array<Record<string, unknown> & { id: string }>;
 
-    const ids = (rows ?? []).map((r: { id: string }) => r.id);
+    const ids = rows.map((r) => r.id);
     let rolesByUser: Record<string, string[]> = {};
     if (ids.length > 0) {
       const { data: roleRows, error: rErr } = await sb
@@ -73,8 +74,8 @@ export const listAdminUsers = createServerFn({ method: "GET" })
         .select("user_id, role, branch_id, is_global")
         .in("user_id", ids);
       if (rErr) throw new Error(rErr.message);
-      rolesByUser = (roleRows ?? []).reduce(
-        (acc: Record<string, string[]>, r: { user_id: string; role: string }) => {
+      rolesByUser = ((roleRows ?? []) as Array<{ user_id: string; role: string }>).reduce(
+        (acc: Record<string, string[]>, r) => {
           (acc[r.user_id] ||= []).push(r.role);
           return acc;
         },
@@ -82,12 +83,11 @@ export const listAdminUsers = createServerFn({ method: "GET" })
       );
     }
 
-    const merged = (rows ?? []).map((r: { id: string }) => ({
+    const merged = rows.map((r) => ({
       ...r,
       roles: rolesByUser[r.id] ?? [],
     }));
 
-    // Optional post-filter by role (RLS-safe: filters only rows already visible)
     const filtered = data.role
       ? merged.filter((r) => r.roles.includes(data.role as string))
       : merged;
