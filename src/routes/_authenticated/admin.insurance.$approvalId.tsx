@@ -141,10 +141,6 @@ function InsuranceDetailPage() {
                 {provider?.name_ar || provider?.name_en || "—"}
               </dd>
             </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-muted-foreground">الرمز</dt>
-              <dd className="font-mono text-xs">{provider?.code ?? "—"}</dd>
-            </div>
           </dl>
         </section>
 
