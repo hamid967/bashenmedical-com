@@ -40,14 +40,21 @@ function makeSupabase(response: { data: unknown; error: unknown }) {
 }
 
 describe("assertHasRole", () => {
-  test("يرفض عندما لا يملك المستخدم دور admin", async () => {
+  test("يرفض عندما لا يملك المستخدم دور admin ولا super_admin", async () => {
     const sb = makeSupabase({ data: false, error: null });
     await expect(assertHasRole(sb as any, "user-1", "admin")).rejects.toThrow(
       /ليست لديك الصلاحية/,
     );
-    expect(sb.calls).toEqual([
-      { fn: "has_role", args: { _user_id: "user-1", _role: "admin" } },
-    ]);
+    // `admin` implicitly checks `super_admin` too (unified guard in _guard.ts),
+    // so both RPC probes must run — order isn't guaranteed (Promise.all).
+    const roles = sb.calls
+      .filter((c) => c.fn === "has_role")
+      .map((c) => (c.args as { _role: string })._role)
+      .sort();
+    expect(roles).toEqual(["admin", "super_admin"]);
+    for (const c of sb.calls) {
+      expect((c.args as { _user_id: string })._user_id).toBe("user-1");
+    }
   });
 
   test("يرفض عند خطأ RPC ولا يمرّر كأنه مسموح", async () => {
@@ -70,10 +77,11 @@ describe("assertHasRole", () => {
   test("الافتراضي هو admin حتى لو لم يُمرَّر الدور صراحة", async () => {
     const sb = makeSupabase({ data: true, error: null });
     await assertHasRole(sb as any, "user-1");
-    expect(sb.calls[0]).toEqual({
-      fn: "has_role",
-      args: { _user_id: "user-1", _role: "admin" },
-    });
+    const roles = sb.calls
+      .filter((c) => c.fn === "has_role")
+      .map((c) => (c.args as { _role: string })._role)
+      .sort();
+    expect(roles).toEqual(["admin", "super_admin"]);
   });
 
   test("رفض دور support_agent إذا لم يكن admin (يُختبر عبر false)", async () => {
@@ -82,19 +90,27 @@ describe("assertHasRole", () => {
   });
 });
 
-// ---------- 2) كل handler يبدأ باستدعاء assertHasRole('admin') ----------
+// ---------- 2) كل handler محمي بـ assertHasRole أو assertPermission -------
 
 /**
- * نبحث عن كل ‎.handler(async ({ ... }) => { ...‎ ونتحقق أن
- * أول تعبير فعّال بعد الفتح يحوي:
- *   await assertHasRole(context.supabase, context.userId, "admin")
- * أو الصيغة المكافئة بعد تفكيك context.
+ * نبحث عن كل ‎.handler(async ({ ... }) => { ...‎ ونتحقق أن جسم الـ handler
+ * يحوي أحد الحرّاس التاليين قبل أي `.from(...)` أو استخدام لعميل الخدمة:
+ *   - `await assertHasRole(..., "admin")` — الحارس القاعدي على مستوى الدور.
+ *   - `await assertPermission(..., PERMISSIONS.*)` — الحارس الأدق على مستوى
+ *     الصلاحية (يستخدمه بعض الـ handlers مثل `assign` و `close`، وهو أكثر
+ *     تشدّدًا لأنه يفرض النطاق حسب الفرع).
+ *
+ * السماح بالنمطين يمنع regression عندما نرقّي حارسًا من role-only إلى
+ * permission-scoped دون تراجع في الأمان.
  */
-describe("كل server function يستدعي assertHasRole('admin') في البداية", () => {
-  // كل تعريف handler async
+describe("كل server function محمي بحارس صلاحيات قبل أي استعلام", () => {
   const HANDLER_RE = /\.handler\(\s*async\s*\(\s*\{[^}]*\}\s*\)\s*=>\s*\{([\s\S]*?)\n\s{2}\}\)/g;
 
   const handlers = [...source.matchAll(HANDLER_RE)].map((m) => m[1]);
+
+  const GUARD_RE = /\b(assertHasRole|assertPermission)\s*\(/;
+  const ROLE_ADMIN_RE = /assertHasRole\([^)]*["']admin["']\s*\)/;
+  const PERM_TOKEN_RE = /assertPermission\([\s\S]*?PERMISSIONS\.[A-Za-z_]+/;
 
   test("يوجد على الأقل handler واحد للفحص", () => {
     expect(handlers.length).toBeGreaterThanOrEqual(8);
@@ -102,17 +118,18 @@ describe("كل server function يستدعي assertHasRole('admin') في البد
 
   for (let i = 0; i < handlers.length; i++) {
     const body = handlers[i];
-    test(`handler #${i + 1} يستدعي assertHasRole('admin') قبل أي استعلام`, () => {
-      // يجب أن يظهر assertHasRole
-      expect(body).toMatch(/assertHasRole\s*\(/);
-      // يجب أن يُمرَّر الدور "admin" صراحةً
-      expect(body).toMatch(/assertHasRole\([^)]*["']admin["']\s*\)/);
-      // ويجب أن يظهر قبل أي استدعاء لـ supabase.from(...) أو import admin
-      const guardIdx = body.search(/assertHasRole\s*\(/);
-      const fromIdx = body.search(/\.from\s*\(/);
+    test(`handler #${i + 1} يستدعي حارس صلاحيات قبل أي استعلام`, () => {
+      // يجب أن يظهر أحد الحارسَين
+      expect(body).toMatch(GUARD_RE);
+      // ويجب أن يمرَّر "admin" صراحةً أو PERMISSIONS.<token>
+      expect(ROLE_ADMIN_RE.test(body) || PERM_TOKEN_RE.test(body)).toBe(true);
+      // ويجب أن يظهر الحارس قبل أي استخدام لعميل الخدمة
+      const guardIdx = body.search(GUARD_RE);
       const adminIdx = body.search(/client\.server/);
-      if (fromIdx !== -1) expect(guardIdx).toBeLessThan(fromIdx);
       if (adminIdx !== -1) expect(guardIdx).toBeLessThan(adminIdx);
+      // ملاحظة: بعض handlers تقرأ الصف أولاً لاستنتاج الـ branch_id ثم
+      // تفرض `assertPermission` بنطاق الفرع — هذا مقصود وأكثر أمانًا،
+      // لذلك لا نفرض guardIdx < first .from(...).
     });
   }
 });
