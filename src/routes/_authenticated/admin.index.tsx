@@ -180,8 +180,12 @@ function AdminDashboard() {
         </div>
       </header>
 
-      {/* KPIs — expanded with period-over-period + sparklines + drill-down */}
+      {/* Phase 7 — Enterprise Command Center KPIs (real data, 14 tiles) */}
+      <CommandCenterKpiGridV2 />
+
+      {/* Legacy KPI strip (role-scoped period-over-period + sparklines) */}
       <KpiGrid />
+
 
       {/* Trends section — daily/weekly stats for developers */}
       <TrendsSection />
