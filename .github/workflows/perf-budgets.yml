@@ -1,0 +1,27 @@
+name: Performance Budgets (production)
+
+on:
+  schedule:
+    - cron: "17 * * * *"   # hourly, offset from other crons
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "vite.config.ts"
+      - ".lighthouserc.json"
+      - ".github/workflows/perf-budgets.yml"
+
+jobs:
+  budgets-gate:
+    name: Perf budgets gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Trigger sweep + evaluate
+        env:
+          PERF_CRON_URL: ${{ secrets.PERF_CRON_URL }}
+          PERF_CRON_SECRET: ${{ secrets.PERF_CRON_SECRET }}
+          # On PRs, warn-only so a single hot metric doesn't block product work.
+          PERF_ALLOW_BREACH: ${{ github.event_name == 'pull_request' && '1' || '0' }}
+        run: python3 scripts/ci/check-perf-budgets.py
