@@ -227,6 +227,11 @@ export function ServiceInquiryDialog({
       return;
     }
 
+    if (HCAPTCHA_ENABLED && !captchaToken) {
+      toast.error("أكمل التحقق البشري أولًا.");
+      return;
+    }
+
     setSubmitting(true);
     const toastId = toast.loading("جاري إرسال طلب الاستفسار...");
     try {
@@ -240,6 +245,7 @@ export function ServiceInquiryDialog({
           preferred_date: parsed.data.preferred_date || undefined,
           notes: parsed.data.notes || undefined,
           source: isMobile ? "mobile_web" : "website",
+          captcha_token: captchaToken ?? undefined,
         }),
       });
       const body = (await res.json().catch(() => ({}))) as {
