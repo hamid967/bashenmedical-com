@@ -33,7 +33,7 @@ const listSchema = z.object({
 });
 
 const APPT_COLS =
-  "id, reference_number, patient_name, patient_phone, appointment_date, appointment_time, " +
+  "id, reference_number, patient_id, patient_name, patient_phone, appointment_date, appointment_time, " +
   "status, arrived_at, called_at, estimated_wait_min, notes, booking_source, " +
   "doctor:doctors(id, name_ar, name_en), " +
   "branch:branches(id, name_ar, name_en)";
