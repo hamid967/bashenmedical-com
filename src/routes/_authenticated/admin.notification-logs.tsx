@@ -601,6 +601,53 @@ function StatsRow({ stats }: { stats: NotificationDeliveryStats }) {
   );
 }
 
+function LiveBadge({
+  status,
+  bump,
+}: {
+  status: "connecting" | "live" | "error" | "off";
+  bump: number;
+}) {
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    if (bump === 0) return;
+    setPulse(true);
+    const t = setTimeout(() => setPulse(false), 800);
+    return () => clearTimeout(t);
+  }, [bump]);
+
+  const cfg =
+    status === "live"
+      ? { dot: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50", label: "مباشر" }
+      : status === "connecting"
+        ? { dot: "bg-amber-500", text: "text-amber-700", border: "border-amber-200", bg: "bg-amber-50", label: "جارٍ الاتصال…" }
+        : status === "error"
+          ? { dot: "bg-rose-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50", label: "خطأ في الاتصال" }
+          : { dot: "bg-slate-400", text: "text-slate-600", border: "border-slate-200", bg: "bg-slate-50", label: "غير متصل" };
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 h-9 text-[11px] font-semibold border ${cfg.bg} ${cfg.text} ${cfg.border}`}
+      title={
+        status === "live"
+          ? `التحديث الفوري مفعّل · ${bump.toLocaleString("ar")} حدث`
+          : cfg.label
+      }
+      aria-live="polite"
+    >
+      <span className="relative inline-flex h-2 w-2">
+        {status === "live" && (
+          <span
+            className={`absolute inline-flex h-full w-full rounded-full ${cfg.dot} opacity-60 ${pulse ? "animate-ping" : ""}`}
+          />
+        )}
+        <span className={`relative inline-flex h-2 w-2 rounded-full ${cfg.dot}`} />
+      </span>
+      {cfg.label}
+    </span>
+  );
+}
+
 function Kpi({
   label,
   value,
