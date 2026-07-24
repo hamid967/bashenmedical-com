@@ -149,7 +149,7 @@ function BillingPage() {
 
   const applyFilters = () => {
     navigate({
-      search: (prev) => ({
+      search: (prev: BillingSearch) => ({
         ...prev,
         q: q || undefined,
         status: status || undefined,
@@ -169,7 +169,7 @@ function BillingPage() {
   };
 
   const setPage = (next: number) => {
-    navigate({ search: (prev) => ({ ...prev, page: next }) });
+    navigate({ search: (prev: BillingSearch) => ({ ...prev, page: next }) });
   };
 
   return (
