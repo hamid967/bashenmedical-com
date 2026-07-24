@@ -3,6 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { ArrowRight, RefreshCw, AlertTriangle, ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 import {
   decideInsuranceApproval,
   getAdminInsuranceApproval,
@@ -71,10 +72,16 @@ function InsuranceDetailPage() {
   const decide = useMutation({
     mutationFn: (decision: "approved" | "rejected") =>
       decideFn({ data: { id: approvalId, decision, note: note.trim() || undefined } }),
-    onSuccess: () => {
+    onSuccess: (_data, decision) => {
       setNote("");
       setConfirmOpen(null);
       queryClient.invalidateQueries({ queryKey: ["admin-insurance"] });
+      toast.success(
+        decision === "approved" ? "تم اعتماد طلب التأمين بنجاح" : "تم رفض طلب التأمين",
+      );
+    },
+    onError: (err) => {
+      toast.error(err instanceof Error ? err.message : "تعذّر تنفيذ الإجراء");
     },
   });
 
