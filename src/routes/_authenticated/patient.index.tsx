@@ -168,6 +168,9 @@ function PatientDashboard() {
         </Card>
       )}
 
+      {/* Personalized content feed (announcements, offers, campaigns, suggestions) */}
+      <ContentFeed surface="dashboard_bento" />
+
       {/* Bento grid */}
       <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <TileCard
