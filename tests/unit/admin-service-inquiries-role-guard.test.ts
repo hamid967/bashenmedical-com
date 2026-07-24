@@ -77,10 +77,11 @@ describe("assertHasRole", () => {
   test("الافتراضي هو admin حتى لو لم يُمرَّر الدور صراحة", async () => {
     const sb = makeSupabase({ data: true, error: null });
     await assertHasRole(sb as any, "user-1");
-    expect(sb.calls[0]).toEqual({
-      fn: "has_role",
-      args: { _user_id: "user-1", _role: "admin" },
-    });
+    const roles = sb.calls
+      .filter((c) => c.fn === "has_role")
+      .map((c) => (c.args as { _role: string })._role)
+      .sort();
+    expect(roles).toEqual(["admin", "super_admin"]);
   });
 
   test("رفض دور support_agent إذا لم يكن admin (يُختبر عبر false)", async () => {
