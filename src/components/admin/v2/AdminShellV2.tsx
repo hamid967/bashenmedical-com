@@ -285,6 +285,64 @@ export function AdminShellV2({
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  // Lock body scroll while mobile drawer is open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
+  // Swipe-to-close for the mobile drawer (sidebar sits on the right in RTL).
+  // A rightward swipe of > 80px closes; smaller drags rubber-band back.
+  const [dragX, setDragX] = useState(0);
+  const dragStart = useRef<{ x: number; y: number; active: boolean } | null>(null);
+
+  function onDrawerTouchStart(e: React.TouchEvent) {
+    if (!mobileOpen) return;
+    const t = e.touches[0];
+    dragStart.current = { x: t.clientX, y: t.clientY, active: true };
+  }
+  function onDrawerTouchMove(e: React.TouchEvent) {
+    const s = dragStart.current;
+    if (!s?.active) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dy) > Math.abs(dx)) return; // vertical scroll wins
+    if (dx > 0) setDragX(dx); // rightward = toward closing edge in RTL
+  }
+  function onDrawerTouchEnd() {
+    if (dragX > 80) setMobileOpen(false);
+    setDragX(0);
+    dragStart.current = null;
+  }
+
+  // Edge swipe to open (from the right edge in RTL) on mobile.
+  const edgeStart = useRef<{ x: number; y: number } | null>(null);
+  function onEdgeTouchStart(e: React.TouchEvent) {
+    if (mobileOpen) return;
+    const t = e.touches[0];
+    edgeStart.current = { x: t.clientX, y: t.clientY };
+  }
+  function onEdgeTouchMove(e: React.TouchEvent) {
+    const s = edgeStart.current;
+    if (!s) return;
+    const t = e.touches[0];
+    const dx = t.clientX - s.x;
+    const dy = t.clientY - s.y;
+    if (Math.abs(dy) > Math.abs(dx)) return;
+    if (dx < -50) {
+      setMobileOpen(true);
+      edgeStart.current = null;
+    }
+  }
+  function onEdgeTouchEnd() {
+    edgeStart.current = null;
+  }
+
   async function handleSignOut() {
     await qc.cancelQueries();
     qc.clear();
