@@ -273,6 +273,7 @@ const NAV: NavGroup[] = [
       { to: "/admin/integrations", label: "التكاملات", icon: Activity, roles: ["admin"] },
       { to: "/clinic-settings", label: "إعدادات العيادة", icon: Settings, roles: ["admin"] },
       { to: "/admin/v3", label: "ترقية V3", icon: Sparkles, roles: ["admin"] },
+      { to: "/admin/contracts", label: "توثيق العقود", icon: ScrollText, roles: ["admin"] },
       { to: "/admin/classic", label: "النسخة الكلاسيكية", icon: Settings, roles: ["admin"] },
     ],
   },
