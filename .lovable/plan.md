@@ -1,98 +1,103 @@
-# خطة "منظومة باعشن HIS" — Medinous-Style Booking
+# خطة "منظومة باعشن HIS" — Roadmap V2 (Batch-by-Batch)
 
-المرجع: `Baeshen_Medinous_Style_Booking_System_Lovable.md` (804 سطر، 30 قسم).
-الوثيقة نفسها ستنسخ إلى `docs/specs/booking-medinous-style.md` كمرجع دائم.
+المرجع الأصلي: `Baeshen_Medinous_Style_Booking_System_Lovable.md` + خطة فريق حامد العالمية (رفع 2026-07-24).
+المسار: تسليم على شكل Batches صغيرة، كل Batch يمر ببوابة اعتماد م. حامد قبل التالي.
 
-## المبادئ
+## الحالة الحالية
 
-- تطوير `/book` الحالي، بدون نظام حجز مواز.
-- الحفاظ على: `slot_holds`, `Idempotency-Key`, NPHIES adapter, Realtime monitor.
-- Migrations قابلة للتراجع؛ Manifest قبل أي تغيير عالي الخطورة.
-- فصل صارم Demo/Production عبر `is_demo boolean not null default false` + RLS تُخفيها في الإنتاج + Feature flag `bookings.show_demo`.
-- لا نسخ لواجهة Medinous أو محتواها.
+- ✅ Phase 1 (Audit + Manifest) — منجز.
+- ✅ Phase 2 (Patient Master, Schedule Engine, Atomic Booking RPC, BMC-APT reference) — منجز.
+- ✅ Phase 3 Backend (queue_entries + triggers + RLS + E2E) — منجز.
+- ✅ Phase 3 UI Initial (`/admin/front-desk` — تبويب حجوزات اليوم + الطابور، Realtime) — منجز.
+- ⏳ Phase 3 Polish, Phase 4, 5, 6 — النطاق أدناه.
 
-## Phase 1 — Audit & Change Manifest (بدون كود إنتاج)
+---
 
-الناتج: `docs/audit/booking-hiv-phase1.md` يحوي:
+## Batch 3.1 — Front Desk Polish (Phase 3 Close-out)
 
-1. **Current Architecture** — قائمة routes `/book`, `/reservations/manage`, `/admin/*`, `patient.*`, `doctor.*`.
-2. **Database Map** — الجداول الحالية (34 جدول محدد، منها `appointments`, `slot_holds`, `availability_slots`, `patients`, `doctors`, `doctor_branches`, `insurance_*`, `patient_check_ins`, `appointment_status_history`, `appointment_waitlist`).
-3. **Gap Analysis** — ما ينقص مقابل القسم 22 من الوثيقة:
-   - `patient_identifiers` (MRN + national_id متعدد)
-   - `clinics` (منفصلة عن `branches`)
-   - `services` كجدول موحد
-   - `doctor_schedules` + `schedule_exceptions`
-   - `appointment_slots` (حالياً `availability_slots` — نُقيّم إعادة التسمية أو التكيّف)
-   - `queue_entries`, `estimates`, `refunds` (بعضها موجود؛ نتحقق)
-   - `booking_source` عمود على `appointments`
-   - State machine كاملة (16 حالة) — الحالي أقل
-4. **Security Findings** — RLS gaps, IDOR surface, branch-scope.
-5. **Change Manifest** — مصنّف حسب الخطورة (safe/medium/high) مع Rollback لكل تغيير.
-6. **Migration Order** لباقي المراحل.
+**الهدف**: إغلاق الفجوات التشغيلية في `/admin/front-desk` قبل الانتقال للتأمين.
 
-**بوابة اعتماد م. حامد** قبل الانتقال للمرحلة 2.
+- بحث مريض سريع (بالاسم/الجوال/MRN) + Patient Snapshot Card (آخر زيارة، تأمين نشط، تنبيهات).
+- Actions من صف الحجز: Check-in، إعادة جدولة (Hold-New-then-Release-Old)، إلغاء بسبب، No-show بفترة سماح.
+- فلاتر شريطية: طبيب/عيادة/حالة/مصدر/تأمين، حفظ آخر فلتر لكل مستخدم.
+- Print/Export قائمة اليوم (PDF بسيط).
+- Empty/Error/Loading states موحدة عبر `FeatureErrorBoundary` + skeleton.
 
-## Phase 2 — Foundation (Patient Master + Schedule Engine)
+**DoD**: Playwright يمر لسيناريو Check-in→In-service→Completed + إعادة الجدولة مع تحرير Slot القديم.
 
-- Patient Master Index: توحيد `patients` + `patient_profiles`، إضافة `patient_identifiers` (national_id/iqama/passport)، MRN صيغة `BMC-MRN-######` (يوجد `branch_mrn_counter`).
-- **Duplicate Review Case**: جدول `patient_duplicate_cases` بدل الدمج التلقائي، مع UI مراجعة.
-- Schedule Engine: `doctor_schedules` (أسبوعي) + `schedule_exceptions` (إجازات/طوارئ) + `service_durations`.
-- تعزيز Slot Hold الحالي: تحقق من التوفر ذرّياً على الخادم، `hold_id`+`expires_at`، تحرير عند تغيير الاختيار.
-- Atomic Booking RPC: transaction واحدة (10 خطوات من القسم 8) + Idempotency (موجود، نتحقق من التغطية).
-- رقم الحجز `BMC-APT-YYYYMMDD-XXXX` (موجود counter — نتحقق من الصيغة).
-- عمود `booking_source` على `appointments` + enum.
+## Batch 3.2 — Doctor Console (`/admin/doctor-today`)
 
-## Phase 3 — SPA Booking + Front Desk + Queue
+- جدول اليوم للطبيب المسجل دخوله فقط.
+- المنتظرون (queue_entries حالة waiting/called) — استدعاء التالي / تخطي.
+- إنهاء الزيارة → مزامنة `appointments.status = completed` + `queue_entries.completed_at`.
+- طلب متابعة (يفتح slot hold للطبيب نفسه، بدون EMR).
 
-- `/book` كـ SPA مع Stepper و Sticky Summary و Bottom Sheet جوال و Autosave و Browser Back/Forward بدون فقد بيانات (كثير منه موجود — نغلق الفجوات).
-- `/admin/front-desk`: بحث مريض، تسجيل، Snapshot، إنشاء حجز، حجوزات اليوم، Check-in، إعادة جدولة، إلغاء، No-show.
-- Queue: `queue_entries` مع الحالات (waiting/called/skipped/in_service/completed/cancelled) + رقم انتظار.
-- Waiting-list Opportunity workflow (1-click confirm + مهلة).
-- Reschedule "Hold-New-then-Release-Old" (القسم 14).
-- No-show بصلاحية + فترة سماح + سبب.
+## Batch 4.1 — Insurance State Machine
 
-## Phase 4 — Portals (Patient / Doctor / Branch Manager)
+- Enum `insurance_state` بـ11 حالة (draft, submitted, pending, approved, partial, denied, expired…) على `insurance_verifications` + `insurance_approvals`.
+- transitions RPC + audit history.
+- UI في `/admin/insurance` + شارة داخل صف الحجز.
 
-- `/patient/*`: appointments, reports, prescriptions, billing, insurance, requests, family, profile — يبني على `PatientShell` الموجودة.
-- `/doctor`: جدول اليوم، المنتظرون، إنهاء الزيارة، طلب متابعة (بدون EMR كامل).
-- `/admin/branch-manager`: مواعيد اليوم، الحضور، الانتظار، No-show، إشغال الأطباء، التأمين، التحصيل — مع فلاتر (تاريخ/طبيب/تخصص/خدمة/عيادة/حالة/مصدر/تأمين).
-- Notification channels موحدة (In-app/SMS/WhatsApp/Email/Push) مع حالات (queued/sent/delivered/failed/unknown).
+## Batch 4.2 — NPHIES Adapter Mock/Prod Flag
 
-## Phase 5 — Insurance, NPHIES, Billing
+- ai_feature_flags: `nphies.mode` = `mock` | `sandbox` | `prod`.
+- Request-ID logging على `nphies_requests` بدون PII (masking helper).
+- UI Super Admin لعرض السجل + إعادة المحاولة.
 
-- Insurance states (11 حالة، القسم 16).
-- NPHIES Adapter محاذي للحالي مع Mock/Prod flag صريح + Request ID logging بدون PII.
-- Estimates + Invoices + Payments + Refunds workflow.
-- Payment states (9 حالات) — لا تأكيد قبل webhook موثّق + signature + idempotency.
+## Batch 4.3 — Estimates + Invoices + Refunds
 
-## Phase 6 — Security / A11y / Perf / Docs / Production Readiness
+- ربط `estimate_appointment_cost` RPC القائم بواجهة داخل `/book` (تقدير قبل التأكيد) و`/admin/front-desk` (تعديل التأمين → إعادة الحساب).
+- Invoice lifecycle: draft → issued → paid/partial → refunded.
+- Refunds: قيد refunds table مع state machine (requested/approved/executed/rejected).
+- Webhook signature + idempotency على أي Payment provider (لا تأكيد قبل webhook موثّق).
 
-- RBAC 10 أدوار (Super Admin → Patient) على UI+API+RLS.
-- Cross-patient/branch/IDOR test suite.
-- WCAG 2.2 AA؛ Chromium+Firefox+WebKit Playwright.
-- Super Admin settings (القسم 23) — لا سياسات hardcoded.
-- Documentation + Training runbooks.
+## Batch 5.1 — Patient Portal: Reports & Prescriptions
 
-## Demo/Production Data Separation
+- `/patient/reports` — عرض `medical_reports` + `lab_reports` + `radiology_reports` للمريض + تابعيه المعتمدين فقط.
+- `/patient/prescriptions` — قائمة الوصفات + طلب صرف من صيدلية المجمع (يربط `medicine_orders`).
+- تنزيل PDF عبر server function مع signed URL قصير الأجل.
 
-في كل جدول جديد تحوي بيانات تجريبية:
+## Batch 5.2 — Patient Portal: Billing & Insurance
 
-```sql
-is_demo boolean not null default false
--- RLS: policy on production excludes rows where is_demo AND NOT current_setting('app.show_demo', true)::bool
-```
+- `/patient/billing` — الفواتير + المدفوعات + استرداد.
+- `/patient/insurance` — بطاقات التأمين + طلبات الموافقة.
+- استخدام نفس State Machine Batch 4.1.
 
-+ Feature flag `bookings.show_demo` في `ai_feature_flags` + toggle في Super Admin UI. لا `is_demo=true` في مسارات المرضى الحقيقية.
+## Batch 6.1 — Unified Notifications
 
-## Definition of Done (كل مرحلة)
+- جدول `notification_channels_status` (queued/sent/delivered/failed/unknown) موحد عبر SMS/WhatsApp/Email/Push/In-app.
+- Dispatcher server-fn واحد + retry policy + dead-letter.
+- UI `/admin/notifications-log` مع فلترة حسب القناة/الحالة/المستلم.
+
+## Batch 6.2 — WhatsApp Templates + Inbound
+
+- تسجيل قوالب واتساب المعتمدة في `message_templates` (موجود) + validator.
+- Inbound webhook إلى `/api/public/webhooks/whatsapp` مع signature verification.
+- ربط الرد بمحادثة inbox_items القائمة.
+
+## Batch 6.3 — AI Assistant Depth
+
+- ربط المساعد بـ`getMyPatientContext` server-fn (مواعيد قادمة، وصفات نشطة، فواتير مستحقة) بعد فحص RBAC صارم.
+- Streaming موجود؛ الإضافة: Tool-calling للحجز/إعادة الجدولة عبر HMAC-signed intents (تأكيد إنساني قبل التنفيذ).
+- تسجيل كل استدعاء أداة على `ai_tool_invocations` + rate-limit.
+
+---
+
+## Demo/Production Data Separation (يبقى كما هو)
+
+- عمود `is_demo boolean not null default false` في كل جدول جديد يحتمل بيانات تجريبية.
+- RLS تُخفي `is_demo=true` عن مسارات المرضى.
+- Feature flag `bookings.show_demo` + toggle في Super Admin.
+
+## Definition of Done لكل Batch
 
 - Migrations reversible + Rollback موثّق.
-- Unit + Integration + Playwright خضراء.
-- ESLint + tsc + build ناجحة.
+- Unit + Integration + Playwright خضراء (على الأقل سيناريو واحد للـBatch).
+- ESLint + tsc + build نظيفة.
 - Security scan بدون findings حرجة جديدة.
-- RLS/RBAC tests للـcross-tenant.
-- No fake buttons / no fake success (شرط القسم 30).
+- RLS cross-tenant test عند إضافة جدول/عمود حساس.
+- لا أزرار وهمية / لا نجاح مزيف.
 
 ## القرار المطلوب
 
-الاعتماد على تسليم Phase 1 (Audit + Manifest بدون تعديل كود إنتاجي) خلال الجولة القادمة، والباقي بعد مراجعة الـManifest.
+اعتماد ترتيب Batches أعلاه (3.1 → 6.3). عند التأكيد أبدأ Batch 3.1 مباشرة وأوقف عند بوابته قبل 3.2.
