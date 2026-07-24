@@ -58,7 +58,7 @@ const Body = z.object({
 });
 
 async function auditInvocation(
-  sb: ReturnType<typeof createClient>,
+  sb: any,
   row: {
     user_id: string;
     tool: string;
@@ -220,7 +220,7 @@ export const Route = createFileRoute("/api/ai/staff-action")({
 });
 
 async function buildSummary(
-  sb: ReturnType<typeof createClient>,
+  sb: any,
   tool: StaffToolName,
   params: Record<string, unknown>,
 ): Promise<string> {
@@ -240,7 +240,7 @@ async function buildSummary(
 }
 
 async function execute(
-  sb: ReturnType<typeof createClient>,
+  sb: any,
   tool: StaffToolName,
   params: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
