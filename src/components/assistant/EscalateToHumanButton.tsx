@@ -546,6 +546,7 @@ function IncidentsList({
   const [outcome, setOutcome] = useState<OutcomeFilter>("all");
   const [order, setOrder] = useState<SortOrder>("desc");
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [selected, setSelected] = useState<SafetyIncident | null>(null);
 
   const filtered = useMemo(() => {
     const arr = incidents.filter((inc) => {
