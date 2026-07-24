@@ -26,20 +26,62 @@ import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
 import { CommandPaletteProvider } from "@/components/v3/CommandPaletteProvider";
 
 function NotFoundComponent() {
+  useEffect(() => {
+    // Signal to crawlers this URL should not be indexed.
+    const m = document.createElement("meta");
+    m.name = "robots";
+    m.content = "noindex, follow";
+    document.head.appendChild(m);
+    const prevTitle = document.title;
+    document.title = "الصفحة غير موجودة (404) — مجمع باعشن الطبي";
+    return () => {
+      m.remove();
+      document.title = prevTitle;
+    };
+  }, []);
+
+  const popular: { to: string; ar: string; en: string }[] = [
+    { to: "/", ar: "الرئيسية", en: "Home" },
+    { to: "/book", ar: "احجز موعداً", en: "Book appointment" },
+    { to: "/doctors", ar: "الأطباء", en: "Doctors" },
+    { to: "/specialties", ar: "التخصصات", en: "Specialties" },
+    { to: "/services", ar: "الخدمات", en: "Services" },
+    { to: "/branches", ar: "الفروع", en: "Branches" },
+    { to: "/health", ar: "المدونة الصحية", en: "Health blog" },
+    { to: "/contact", ar: "تواصل معنا", en: "Contact" },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="max-w-2xl w-full text-center">
         <h1 className="text-7xl font-bold text-primary">404</h1>
         <h2 className="mt-4 text-xl font-semibold text-foreground">
           الصفحة غير موجودة / Page not found
         </h2>
-        <p className="mt-2 text-sm text-muted-foreground">الصفحة التي تبحث عنها غير متاحة.</p>
-        <div className="mt-6">
+        <p className="mt-2 text-sm text-muted-foreground">
+          الصفحة التي تبحث عنها غير متاحة. جرّب أحد الروابط الشائعة أدناه.
+        </p>
+        <nav
+          aria-label="روابط مقترحة"
+          className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm"
+        >
+          {popular.map((p) => (
+            <Link
+              key={p.to}
+              to={p.to}
+              className="rounded-md border border-input px-3 py-3 hover:bg-muted transition-colors"
+            >
+              <div className="font-medium text-foreground">{p.ar}</div>
+              <div className="text-xs text-muted-foreground mt-0.5">{p.en}</div>
+            </Link>
+          ))}
+        </nav>
+        <div className="mt-8">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            الصفحة الرئيسية
+            العودة إلى الصفحة الرئيسية
           </Link>
         </div>
       </div>
