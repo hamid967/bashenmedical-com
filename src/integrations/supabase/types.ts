@@ -6292,6 +6292,7 @@ export type Database = {
           frequency: string
           id: string
           medication_lead_minutes: number
+          muted_kinds: string[]
           quiet_hours_enabled: boolean
           sleep_hour: number
           updated_at: string
@@ -6310,6 +6311,7 @@ export type Database = {
           frequency?: string
           id?: string
           medication_lead_minutes?: number
+          muted_kinds?: string[]
           quiet_hours_enabled?: boolean
           sleep_hour?: number
           updated_at?: string
@@ -6328,6 +6330,7 @@ export type Database = {
           frequency?: string
           id?: string
           medication_lead_minutes?: number
+          muted_kinds?: string[]
           quiet_hours_enabled?: boolean
           sleep_hour?: number
           updated_at?: string
