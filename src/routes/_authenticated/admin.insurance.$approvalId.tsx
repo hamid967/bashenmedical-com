@@ -1,8 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, RefreshCw, AlertTriangle, ShieldCheck } from "lucide-react";
-import { getAdminInsuranceApproval } from "@/lib/admin/insurance.functions";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { ArrowRight, RefreshCw, AlertTriangle, ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
+import {
+  decideInsuranceApproval,
+  getAdminInsuranceApproval,
+} from "@/lib/admin/insurance.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/insurance/$approvalId")({
   head: () => ({
@@ -54,9 +58,24 @@ function fmtMoney(v: number | null, currency = "SAR"): string {
 function InsuranceDetailPage() {
   const { approvalId } = Route.useParams();
   const getFn = useServerFn(getAdminInsuranceApproval);
+  const decideFn = useServerFn(decideInsuranceApproval);
+  const queryClient = useQueryClient();
+  const [note, setNote] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState<null | "approved" | "rejected">(null);
+
   const q = useQuery({
     queryKey: ["admin-insurance", approvalId],
     queryFn: () => getFn({ data: { id: approvalId } }),
+  });
+
+  const decide = useMutation({
+    mutationFn: (decision: "approved" | "rejected") =>
+      decideFn({ data: { id: approvalId, decision, note: note.trim() || undefined } }),
+    onSuccess: () => {
+      setNote("");
+      setConfirmOpen(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-insurance"] });
+    },
   });
 
   if (q.isLoading) {
@@ -110,6 +129,116 @@ function InsuranceDetailPage() {
           </p>
         </div>
       </header>
+
+      <section
+        className="mt-6 rounded-lg border p-4"
+        aria-label="إجراءات القرار"
+      >
+        <h2 className="text-sm font-semibold text-muted-foreground">إجراء على الطلب</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          سيتم تحديث حالة الطلب وتسجيل ملاحظة في السجل الزمني للطلب مع تدوين حدث في سجل التدقيق.
+        </p>
+        <label className="mt-3 block text-xs text-muted-foreground">
+          ملاحظة القرار (اختيارية)
+          <textarea
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            rows={3}
+            maxLength={2000}
+            placeholder="سبب القرار، مستندات إضافية مطلوبة، ملاحظات للمريض…"
+            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm text-foreground"
+            disabled={decide.isPending}
+          />
+        </label>
+        {decide.isError ? (
+          <div className="mt-2 flex items-center gap-2 rounded-md border border-destructive/40 bg-destructive/10 p-2 text-xs text-destructive">
+            <AlertTriangle className="h-4 w-4" aria-hidden="true" />
+            {decide.error instanceof Error ? decide.error.message : "تعذّر تنفيذ الإجراء"}
+          </div>
+        ) : null}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setConfirmOpen("approved")}
+            disabled={decide.isPending || r.status === "approved"}
+            className="inline-flex items-center gap-2 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:opacity-90 disabled:opacity-40"
+          >
+            <CheckCircle2 className="h-4 w-4" /> اعتماد
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmOpen("rejected")}
+            disabled={decide.isPending || r.status === "rejected"}
+            className="inline-flex items-center gap-2 rounded-md bg-destructive px-3 py-1.5 text-sm font-medium text-destructive-foreground hover:opacity-90 disabled:opacity-40"
+          >
+            <XCircle className="h-4 w-4" /> رفض
+          </button>
+          {decide.isPending ? (
+            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <RefreshCw className="h-3.5 w-3.5 animate-spin" /> جارٍ الحفظ…
+            </span>
+          ) : null}
+        </div>
+      </section>
+
+      {confirmOpen ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="تأكيد القرار"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => !decide.isPending && setConfirmOpen(null)}
+        >
+          <div
+            className="w-full max-w-md rounded-lg border bg-background p-5 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-base font-semibold">
+              {confirmOpen === "approved" ? "تأكيد اعتماد الطلب" : "تأكيد رفض الطلب"}
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {confirmOpen === "approved"
+                ? "سيتم تحديث حالة الطلب إلى معتمد وإضافة ملاحظتك إلى السجل الزمني."
+                : "سيتم تحديث حالة الطلب إلى مرفوض وإضافة ملاحظتك إلى السجل الزمني."}
+            </p>
+            {note.trim() ? (
+              <p className="mt-3 whitespace-pre-wrap rounded-md border bg-muted/40 p-2 text-xs">
+                {note.trim()}
+              </p>
+            ) : (
+              <p className="mt-3 text-xs text-muted-foreground">لم تُدخل ملاحظة.</p>
+            )}
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setConfirmOpen(null)}
+                disabled={decide.isPending}
+                className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                onClick={() => decide.mutate(confirmOpen)}
+                disabled={decide.isPending}
+                className={`inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40 ${
+                  confirmOpen === "approved" ? "bg-emerald-600" : "bg-destructive"
+                }`}
+              >
+                {decide.isPending ? (
+                  <RefreshCw className="h-4 w-4 animate-spin" />
+                ) : confirmOpen === "approved" ? (
+                  <CheckCircle2 className="h-4 w-4" />
+                ) : (
+                  <XCircle className="h-4 w-4" />
+                )}
+                تأكيد
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
 
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <section className="rounded-lg border p-4">
