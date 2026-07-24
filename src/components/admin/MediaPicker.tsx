@@ -27,6 +27,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 
 export type MediaItem = {
@@ -67,6 +68,10 @@ export function MediaPicker({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<EditingSource | null>(null);
+  const [progress, setProgress] = useState<number>(0);
+  const [progressLabel, setProgressLabel] = useState<string>("");
+  const [dragOver, setDragOver] = useState(false);
+  const dragCounter = useRef(0);
   const qc = useQueryClient();
   const listFn = useServerFn(listAdminFiles);
   const uploadFn = useServerFn(uploadAdminFile);
@@ -81,20 +86,34 @@ export function MediaPicker({
 
   const upload = useMutation({
     mutationFn: async (args: { fileName: string; mime: string; blob: Blob }) => {
-      const buf = await args.blob.arrayBuffer();
-      const bytes = new Uint8Array(buf);
-      let binary = "";
-      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-      const b64 = btoa(binary);
-      return uploadFn({
-        data: {
-          file_name: args.fileName,
-          mime_type: args.mime,
-          data_base64: b64,
-        },
+      // Phase 1 (0-70%): read + base64-encode via FileReader with progress
+      setProgressLabel("قراءة الملف…");
+      setProgress(1);
+      const b64 = await readAsBase64WithProgress(args.blob, (p) => {
+        setProgress(Math.max(1, Math.round(p * 70)));
       });
+      // Phase 2 (70-99%): upload RPC (no native progress; animate softly)
+      setProgressLabel("جارِ الرفع…");
+      setProgress(72);
+      const ticker = window.setInterval(() => {
+        setProgress((v) => (v < 95 ? v + 1 : v));
+      }, 150);
+      try {
+        const r = await uploadFn({
+          data: {
+            file_name: args.fileName,
+            mime_type: args.mime,
+            data_base64: b64,
+          },
+        });
+        return r;
+      } finally {
+        window.clearInterval(ticker);
+      }
     },
     onSuccess: (r, args) => {
+      setProgress(100);
+      setProgressLabel("اكتمل");
       toast.success("تم حفظ الصورة");
       qc.invalidateQueries({ queryKey: ["media-picker"] });
       qc.invalidateQueries({ queryKey: ["admin-files"] });
@@ -108,22 +127,65 @@ export function MediaPicker({
       });
       setEditing(null);
       setOpen(false);
+      window.setTimeout(() => {
+        setProgress(0);
+        setProgressLabel("");
+      }, 400);
     },
-    onError: (e: Error) => toast.error(e.message || "فشل الحفظ"),
+    onError: (e: Error) => {
+      setProgress(0);
+      setProgressLabel("");
+      toast.error(e.message || "فشل الحفظ");
+    },
   });
 
-  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
+  const handleFile = (file: File) => {
+    if (imagesOnly && !file.type.startsWith("image/")) {
+      toast.error("يُقبل رفع الصور فقط");
+      return;
+    }
     if (file.type.startsWith("image/")) {
       const src = URL.createObjectURL(file);
       setEditing({ src, fileName: file.name, mime: file.type });
     } else {
-      // non-image: upload directly, no editor
-      upload.mutate({ fileName: file.name, mime: file.type || "application/octet-stream", blob: file });
+      upload.mutate({
+        fileName: file.name,
+        mime: file.type || "application/octet-stream",
+        blob: file,
+      });
     }
   };
+
+  const onPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) handleFile(file);
+  };
+
+  const onDragEnter = (e: React.DragEvent) => {
+    if (!Array.from(e.dataTransfer.types).includes("Files")) return;
+    e.preventDefault();
+    dragCounter.current += 1;
+    setDragOver(true);
+  };
+  const onDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current = Math.max(0, dragCounter.current - 1);
+    if (dragCounter.current === 0) setDragOver(false);
+  };
+  const onDragOver = (e: React.DragEvent) => {
+    if (!Array.from(e.dataTransfer.types).includes("Files")) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "copy";
+  };
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    dragCounter.current = 0;
+    setDragOver(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFile(file);
+  };
+
 
   const openEditorFromLibrary = (row: any) => {
     if (!row.is_image) {
@@ -172,12 +234,38 @@ export function MediaPicker({
           {triggerLabel}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl" dir="rtl">
+      <DialogContent
+        className="max-w-3xl"
+        dir="rtl"
+        onDragEnter={onDragEnter}
+        onDragLeave={onDragLeave}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+      >
         <DialogHeader>
           <DialogTitle>
             {editing ? "معاينة وقصّ الصورة" : "مكتبة الوسائط"}
           </DialogTitle>
         </DialogHeader>
+
+        {upload.isPending && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{progressLabel || "جارِ الرفع…"}</span>
+              <span>{progress}%</span>
+            </div>
+            <Progress value={progress} />
+          </div>
+        )}
+
+        {dragOver && (
+          <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10 backdrop-blur-sm">
+            <div className="rounded-md bg-background/90 px-4 py-2 text-sm font-medium text-primary shadow">
+              أفلت الصورة هنا للرفع
+            </div>
+          </div>
+        )}
+
 
         {editing ? (
           <ImageEditor
@@ -599,6 +687,27 @@ function ImageEditor({
       )}
     </div>
   );
+}
+
+async function readAsBase64WithProgress(
+  blob: Blob,
+  onProgress: (fraction: number) => void,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onprogress = (ev) => {
+      if (ev.lengthComputable) onProgress(ev.loaded / ev.total);
+    };
+    reader.onerror = () => reject(reader.error ?? new Error("read failed"));
+    reader.onload = () => {
+      const result = reader.result as string;
+      // strip "data:*;base64,"
+      const idx = result.indexOf(",");
+      onProgress(1);
+      resolve(idx >= 0 ? result.slice(idx + 1) : result);
+    };
+    reader.readAsDataURL(blob);
+  });
 }
 
 function clamp(n: number, min: number, max: number) {
