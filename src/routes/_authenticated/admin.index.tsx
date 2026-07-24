@@ -13,6 +13,7 @@ import {
 } from "recharts";
 import { getAdminStats, getMyRoles, getAdminTrends } from "@/lib/admin.functions";
 import { KpiGrid } from "@/components/admin/v2/KpiGrid";
+import { CommandCenterKpiGridV2 } from "@/components/admin/v2/CommandCenterKpiGridV2";
 import type { AdminRole } from "@/components/admin/types";
 import {
   CalendarCheck,
