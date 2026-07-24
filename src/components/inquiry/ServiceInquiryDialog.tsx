@@ -13,7 +13,7 @@
  *   2) show confirmation view
  *   3) user clicks "افتح واتساب" → POST /mark-whatsapp-opened, then open wa.me
  */
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { CheckCircle2, Copy, ExternalLink, Loader2, MessageCircle } from "lucide-react";
