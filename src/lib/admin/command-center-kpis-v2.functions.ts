@@ -304,5 +304,9 @@ export const getCommandCenterKpisV2 = createServerFn({ method: "GET" })
       }),
     ];
 
-    return { kpis, fetchedAt: new Date().toISOString() };
+    return {
+      kpis,
+      fetchedAt: new Date().toISOString(),
+      filters: { from: fromDate, to: toDate, branchId },
+    };
   });
