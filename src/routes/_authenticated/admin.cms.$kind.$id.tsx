@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MediaField } from "@/components/admin/MediaPicker";
+import { useCmsTransitionNotifications } from "@/lib/admin/cms/useCmsTransitionNotifications";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/$kind/$id")({
   head: () => ({ meta: [{ title: "محرر المحتوى" }] }),
