@@ -146,6 +146,7 @@ import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
 import { Route as AuthenticatedAdminObservabilityRouteImport } from './routes/_authenticated/admin.observability'
+import { Route as AuthenticatedAdminOpsHubRouteImport } from './routes/_authenticated/admin.ops-hub'
 import { Route as AuthenticatedAdminPatientsRouteImport } from './routes/_authenticated/admin.patients'
 import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
@@ -1013,6 +1014,12 @@ const AuthenticatedAdminObservabilityRoute =
   AuthenticatedAdminObservabilityRouteImport.update({
     id: '/observability',
     path: '/observability',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminOpsHubRoute =
+  AuthenticatedAdminOpsHubRouteImport.update({
+    id: '/ops-hub',
+    path: '/ops-hub',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminPatientsRoute =
@@ -1923,6 +1930,7 @@ export interface FileRoutesByFullPath {
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
+  '/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -2188,6 +2196,7 @@ export interface FileRoutesByTo {
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
+  '/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -2460,6 +2469,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
   '/_authenticated/admin/observability': typeof AuthenticatedAdminObservabilityRoute
+  '/_authenticated/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/_authenticated/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -2732,6 +2742,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/nphies-logs'
     | '/admin/observability'
+    | '/admin/ops-hub'
     | '/admin/patients'
     | '/admin/realtime-monitor'
     | '/admin/reports'
@@ -2997,6 +3008,7 @@ export interface FileRouteTypes {
     | '/admin/notifications'
     | '/admin/nphies-logs'
     | '/admin/observability'
+    | '/admin/ops-hub'
     | '/admin/patients'
     | '/admin/realtime-monitor'
     | '/admin/reports'
@@ -3268,6 +3280,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/nphies-logs'
     | '/_authenticated/admin/observability'
+    | '/_authenticated/admin/ops-hub'
     | '/_authenticated/admin/patients'
     | '/_authenticated/admin/realtime-monitor'
     | '/_authenticated/admin/reports'
@@ -4459,6 +4472,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminObservabilityRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ops-hub': {
+      id: '/_authenticated/admin/ops-hub'
+      path: '/ops-hub'
+      fullPath: '/admin/ops-hub'
+      preLoaderRoute: typeof AuthenticatedAdminOpsHubRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/patients': {
       id: '/_authenticated/admin/patients'
       path: '/patients'
@@ -5648,6 +5668,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
   AuthenticatedAdminObservabilityRoute: typeof AuthenticatedAdminObservabilityRoute
+  AuthenticatedAdminOpsHubRoute: typeof AuthenticatedAdminOpsHubRoute
   AuthenticatedAdminPatientsRoute: typeof AuthenticatedAdminPatientsRouteWithChildren
   AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
@@ -5703,6 +5724,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
   AuthenticatedAdminObservabilityRoute: AuthenticatedAdminObservabilityRoute,
+  AuthenticatedAdminOpsHubRoute: AuthenticatedAdminOpsHubRoute,
   AuthenticatedAdminPatientsRoute: AuthenticatedAdminPatientsRouteWithChildren,
   AuthenticatedAdminRealtimeMonitorRoute:
     AuthenticatedAdminRealtimeMonitorRoute,
