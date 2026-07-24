@@ -15,7 +15,6 @@ interface Incident {
   kind: string;
   severity: string;
   action_taken: string | null;
-  details: unknown;
   created_at: string;
 }
 
