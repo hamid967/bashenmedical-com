@@ -248,6 +248,25 @@ export function MediaPicker({
           </DialogTitle>
         </DialogHeader>
 
+        {upload.isPending && (
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
+              <span>{progressLabel || "جارِ الرفع…"}</span>
+              <span>{progress}%</span>
+            </div>
+            <Progress value={progress} />
+          </div>
+        )}
+
+        {dragOver && (
+          <div className="pointer-events-none absolute inset-0 z-40 flex items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10 backdrop-blur-sm">
+            <div className="rounded-md bg-background/90 px-4 py-2 text-sm font-medium text-primary shadow">
+              أفلت الصورة هنا للرفع
+            </div>
+          </div>
+        )}
+
+
         {editing ? (
           <ImageEditor
             source={editing}
