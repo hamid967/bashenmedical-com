@@ -121,6 +121,15 @@ export function EscalateToHumanButton({
     retry: 1,
   });
 
+  const listIncidents = useServerFn(listAiSafetyIncidents);
+  const incidentsQuery = useQuery<SafetyIncident[]>({
+    queryKey: ["ai-safety-incidents", conversationId],
+    queryFn: () => listIncidents({ data: { conversationId: conversationId! } }),
+    enabled: canQuery && open,
+    staleTime: 15_000,
+    retry: 1,
+  });
+
   const ticket = statusQuery.data ?? null;
   const bucket = ticket ? bucketOf(ticket.status) : null;
 
