@@ -108,7 +108,7 @@ function CmsEditor() {
         <h1 className="text-xl font-bold">{data.entry.title ?? "(بدون عنوان)"}</h1>
         <Badge variant="outline">{status}</Badge>
         <span className="text-[11px] text-muted-foreground">
-          AR {data.entry.locale_completeness?.ar ?? 0}% · EN {data.entry.locale_completeness?.en ?? 0}%
+          AR {(data.entry.locale_completeness as any)?.ar ?? 0}% · EN {(data.entry.locale_completeness as any)?.en ?? 0}%
         </span>
         <div className="flex-1" />
         <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>حفظ نسخة</Button>
