@@ -250,6 +250,7 @@ const NAV: NavGroup[] = [
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Settings, roles: ["admin"] },
       { to: "/admin/branches", label: "الفروع", icon: Building2, roles: ["admin"] },
       { to: "/admin/specialties", label: "التخصصات", icon: Stethoscope, roles: ["admin"] },
+      { to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] },
       { to: "/admin/classic", label: "النسخة الكلاسيكية", icon: Settings, roles: ["admin"] },
     ],
   },
