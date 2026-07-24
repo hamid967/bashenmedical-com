@@ -38,6 +38,12 @@ import { Label } from "@/components/ui-v3";
 import { Textarea } from "@/components/ui-v3";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 import { useI18n } from "@/lib/i18n";
+import {
+  HCaptchaWidget,
+  HCAPTCHA_ENABLED,
+  type HCaptchaHandle,
+} from "@/components/security/HCaptchaWidget";
+import { useRef } from "react";
 
 export const Route = createFileRoute("/reservations/manage")({
   head: () => ({
