@@ -256,6 +256,7 @@ import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
 import { Route as ApiPublicCronCmsPublishRouteImport } from './routes/api/public/cron/cms-publish'
+import { Route as ApiPublicCronPerfBudgetsRouteImport } from './routes/api/public/cron/perf-budgets'
 import { Route as ApiPublicCronSlaSweepRouteImport } from './routes/api/public/cron/sla-sweep'
 import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
 import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
@@ -1657,6 +1658,12 @@ const ApiPublicCronCmsPublishRoute = ApiPublicCronCmsPublishRouteImport.update({
   path: '/api/public/cron/cms-publish',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicCronPerfBudgetsRoute =
+  ApiPublicCronPerfBudgetsRouteImport.update({
+    id: '/api/public/cron/perf-budgets',
+    path: '/api/public/cron/perf-budgets',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicCronSlaSweepRoute = ApiPublicCronSlaSweepRouteImport.update({
   id: '/api/public/cron/sla-sweep',
   path: '/api/public/cron/sla-sweep',
@@ -2025,6 +2032,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
+  '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
@@ -2289,6 +2297,7 @@ export interface FileRoutesByTo {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
+  '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
@@ -2560,6 +2569,7 @@ export interface FileRoutesById {
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
+  '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
@@ -2831,6 +2841,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
     | '/api/public/cron/cms-publish'
+    | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
@@ -3095,6 +3106,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
     | '/api/public/cron/cms-publish'
+    | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
@@ -3365,6 +3377,7 @@ export interface FileRouteTypes {
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
     | '/api/public/cron/cms-publish'
+    | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
@@ -3465,6 +3478,7 @@ export interface RootRouteChildren {
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
   ApiPublicCronCmsPublishRoute: typeof ApiPublicCronCmsPublishRoute
+  ApiPublicCronPerfBudgetsRoute: typeof ApiPublicCronPerfBudgetsRoute
   ApiPublicCronSlaSweepRoute: typeof ApiPublicCronSlaSweepRoute
   ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
   ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
@@ -5215,6 +5229,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronCmsPublishRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/perf-budgets': {
+      id: '/api/public/cron/perf-budgets'
+      path: '/api/public/cron/perf-budgets'
+      fullPath: '/api/public/cron/perf-budgets'
+      preLoaderRoute: typeof ApiPublicCronPerfBudgetsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/sla-sweep': {
       id: '/api/public/cron/sla-sweep'
       path: '/api/public/cron/sla-sweep'
@@ -6184,6 +6205,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
   ApiPublicCronCmsPublishRoute: ApiPublicCronCmsPublishRoute,
+  ApiPublicCronPerfBudgetsRoute: ApiPublicCronPerfBudgetsRoute,
   ApiPublicCronSlaSweepRoute: ApiPublicCronSlaSweepRoute,
   ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
   ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,
