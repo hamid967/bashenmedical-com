@@ -362,7 +362,13 @@ export function DataTableV2<T>({
           </div>
         )}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
+          <table
+            className="w-full min-w-[720px] border-collapse text-sm"
+            role="table"
+            aria-rowcount={effectivePagination.total || undefined}
+            aria-colcount={colCount}
+          >
+            {caption && <caption className="sr-only">{caption}</caption>}
             <thead
               className={cn(
                 "bg-muted/40 text-right text-xs uppercase tracking-wide text-muted-foreground",
@@ -371,10 +377,29 @@ export function DataTableV2<T>({
             >
               <tr>
                 {visibleColumns.map((col) => {
-                  const isSorted = sort?.key === (col.sortKey ?? col.id);
+                  const key = col.sortKey ?? col.id;
+                  const isSorted = sort?.key === key;
+                  const ariaSort: "ascending" | "descending" | "none" | undefined = col.sortable
+                    ? isSorted
+                      ? sort!.dir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                    : undefined;
+                  const nextLabel = !isSorted
+                    ? "ترتيب تصاعدي"
+                    : sort!.dir === "asc"
+                      ? "ترتيب تنازلي"
+                      : "إلغاء الترتيب";
+                  const headerText =
+                    typeof col.header === "string" || typeof col.header === "number"
+                      ? String(col.header)
+                      : col.id;
                   return (
                     <th
                       key={col.id}
+                      scope="col"
+                      aria-sort={ariaSort}
                       className={cn(
                         "px-3 py-2.5 font-semibold",
                         col.className,
@@ -385,21 +410,23 @@ export function DataTableV2<T>({
                         {col.sortable && onSortChange ? (
                           <button
                             type="button"
-                            onClick={() => handleSort(col.sortKey ?? col.id)}
+                            onClick={() => handleSort(key)}
+                            aria-label={`${headerText} — ${nextLabel}`}
                             className={cn(
                               "inline-flex items-center gap-1 rounded px-1 py-0.5 transition-colors hover:bg-background/60",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
                               isSorted && "text-foreground",
                             )}
                           >
                             <span>{col.header}</span>
                             {isSorted ? (
                               sort!.dir === "asc" ? (
-                                <ArrowUp className="h-3.5 w-3.5" />
+                                <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
                               ) : (
-                                <ArrowDown className="h-3.5 w-3.5" />
+                                <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
                               )
                             ) : (
-                              <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+                              <ArrowUpDown className="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
                             )}
                           </button>
                         ) : (
@@ -412,18 +439,26 @@ export function DataTableV2<T>({
               </tr>
               {hasColumnSearch && onColumnSearchChange && (
                 <tr className="bg-background/40">
-                  {visibleColumns.map((col) => (
-                    <th key={`s-${col.id}`} className={cn("px-2 pb-2", col.className)}>
-                      {col.searchable ? (
-                        <Input
-                          value={columnSearch?.[col.id] ?? ""}
-                          onChange={(e) => onColumnSearchChange(col.id, e.target.value)}
-                          placeholder="فلترة…"
-                          className="h-7 text-xs"
-                        />
-                      ) : null}
-                    </th>
-                  ))}
+                  {visibleColumns.map((col) => {
+                    const headerText =
+                      typeof col.header === "string" || typeof col.header === "number"
+                        ? String(col.header)
+                        : col.id;
+                    return (
+                      <th key={`s-${col.id}`} scope="col" className={cn("px-2 pb-2", col.className)}>
+                        {col.searchable ? (
+                          <Input
+                            value={columnSearch?.[col.id] ?? ""}
+                            onChange={(e) => onColumnSearchChange(col.id, e.target.value)}
+                            placeholder="فلترة…"
+                            aria-label={`فلترة ${headerText}`}
+                            type="search"
+                            className="h-7 text-xs"
+                          />
+                        ) : null}
+                      </th>
+                    );
+                  })}
                 </tr>
               )}
             </thead>
@@ -431,7 +466,7 @@ export function DataTableV2<T>({
             <tbody>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={`sk-${i}`} className="border-t border-border">
+                  <tr key={`sk-${i}`} className="border-t border-border" aria-hidden="true">
                     {visibleColumns.map((col) => (
                       <td key={col.id} className={cn("px-3", rowPadY)}>
                         <div className="h-3 w-full max-w-[180px] animate-pulse rounded bg-muted" />
@@ -442,9 +477,13 @@ export function DataTableV2<T>({
               ) : error ? (
                 <tr>
                   <td colSpan={colCount} className="px-3 py-12">
-                    <div className="flex flex-col items-center gap-2 text-center">
+                    <div
+                      role="alert"
+                      aria-live="assertive"
+                      className="flex flex-col items-center gap-2 text-center"
+                    >
                       <div className="rounded-full bg-destructive/10 p-2 text-destructive">
-                        <X className="h-5 w-5" />
+                        <X className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <p className="text-sm font-semibold text-foreground">{errorTitle}</p>
                       <p className="max-w-md text-xs text-muted-foreground">
@@ -452,7 +491,7 @@ export function DataTableV2<T>({
                       </p>
                       {onRetry && (
                         <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
-                          <RefreshCw className="ml-2 h-4 w-4" />
+                          <RefreshCw className="ml-2 h-4 w-4" aria-hidden="true" />
                           إعادة المحاولة
                         </Button>
                       )}
@@ -462,38 +501,60 @@ export function DataTableV2<T>({
               ) : displayedRows.length === 0 ? (
                 <tr>
                   <td colSpan={colCount} className="px-3 py-12">
-                    <div className="flex flex-col items-center gap-1.5 text-center">
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      className="flex flex-col items-center gap-1.5 text-center"
+                    >
                       <p className="text-sm font-semibold text-foreground">{emptyTitle}</p>
                       <p className="max-w-md text-xs text-muted-foreground">{emptyDescription}</p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                displayedRows.map((row, idx) => (
-                  <tr
-                    key={rowKey(row)}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(
-                      "border-t border-border transition-colors",
-                      onRowClick && "cursor-pointer hover:bg-muted/40",
-                      rowClassName?.(row),
-                    )}
-                  >
-                    {visibleColumns.map((col) => (
-                      <td
-                        key={col.id}
-                        className={cn(
-                          "px-3 align-middle",
-                          rowPadY,
-                          col.className,
-                          col.cellClassName,
-                        )}
-                      >
-                        {col.cell(row, idx)}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                displayedRows.map((row, idx) => {
+                  const clickable = Boolean(onRowClick);
+                  const handleKey = clickable
+                    ? (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onRowClick!(row);
+                        }
+                      }
+                    : undefined;
+                  return (
+                    <tr
+                      key={rowKey(row)}
+                      onClick={clickable ? () => onRowClick!(row) : undefined}
+                      onKeyDown={handleKey}
+                      tabIndex={clickable ? 0 : undefined}
+                      role={clickable ? "button" : undefined}
+                      aria-rowindex={
+                        (safePage - 1) * effectivePagination.perPage + idx + 1 || undefined
+                      }
+                      className={cn(
+                        "border-t border-border transition-colors",
+                        clickable &&
+                          "cursor-pointer hover:bg-muted/40 focus-visible:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                        rowClassName?.(row),
+                      )}
+                    >
+                      {visibleColumns.map((col) => (
+                        <td
+                          key={col.id}
+                          className={cn(
+                            "px-3 align-middle",
+                            rowPadY,
+                            col.className,
+                            col.cellClassName,
+                          )}
+                        >
+                          {col.cell(row, idx)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
