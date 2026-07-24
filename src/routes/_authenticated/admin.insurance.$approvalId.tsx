@@ -58,9 +58,24 @@ function fmtMoney(v: number | null, currency = "SAR"): string {
 function InsuranceDetailPage() {
   const { approvalId } = Route.useParams();
   const getFn = useServerFn(getAdminInsuranceApproval);
+  const decideFn = useServerFn(decideInsuranceApproval);
+  const queryClient = useQueryClient();
+  const [note, setNote] = useState("");
+  const [confirmOpen, setConfirmOpen] = useState<null | "approved" | "rejected">(null);
+
   const q = useQuery({
     queryKey: ["admin-insurance", approvalId],
     queryFn: () => getFn({ data: { id: approvalId } }),
+  });
+
+  const decide = useMutation({
+    mutationFn: (decision: "approved" | "rejected") =>
+      decideFn({ data: { id: approvalId, decision, note: note.trim() || undefined } }),
+    onSuccess: () => {
+      setNote("");
+      setConfirmOpen(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-insurance"] });
+    },
   });
 
   if (q.isLoading) {
