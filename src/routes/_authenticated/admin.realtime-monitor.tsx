@@ -107,7 +107,7 @@ function summarize(table: TableName, kind: EventKind, row: Record<string, unknow
   return `hold · exp ${exp}`;
 }
 
-function RealtimeMonitorPage() {
+export function RealtimeMonitorPage() {
   const [status, setStatus] = useState<Record<TableName, Status>>({
     appointments: "idle",
     slot_holds: "idle",

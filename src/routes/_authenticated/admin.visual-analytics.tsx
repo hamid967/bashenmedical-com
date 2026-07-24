@@ -182,7 +182,7 @@ function Sparkline({
   );
 }
 
-function VisualAnalyticsPage() {
+export function VisualAnalyticsPage() {
   const router = useRouter();
   const [from, setFrom] = useState(daysAgo(30));
   const [to, setTo] = useState(today());

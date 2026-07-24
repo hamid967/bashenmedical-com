@@ -100,7 +100,7 @@ export const Route = createFileRoute("/_authenticated/admin/web-vitals")({
   component: WebVitalsPage,
 });
 
-function WebVitalsPage() {
+export function WebVitalsPage() {
   const [presetId, setPresetId] = useState<string>("all");
   const [customPath, setCustomPath] = useState<string>("");
   const [windowHours, setWindowHours] = useState<number>(24);
