@@ -76,7 +76,7 @@ const PROMPT_INJECTION_PATTERNS = [
   /do anything now/i,
   /bypass (?:the )?(?:safety|filter|guard)/i,
   /system\s*:\s*you are/i,
-  /</?\s*(?:system|assistant|instructions)\s*>/i,
+  /<\/?\s*(?:system|assistant|instructions)\s*>/i,
   /تجاهل (كل )?التعليمات/i,
   /اكشف (لي )?التعليمات/i,
   /أنت الآن مطور/i,
