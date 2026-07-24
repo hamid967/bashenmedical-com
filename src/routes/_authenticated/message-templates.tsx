@@ -614,6 +614,87 @@ function MessageTemplatesPage() {
           </section>
         </div>
       </div>
+
+      {testOpen && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/40 p-4"
+          role="dialog"
+          aria-modal="true"
+          onClick={() => !testSend.isPending && setTestOpen(false)}
+        >
+          <div
+            className="w-full max-w-md rounded-2xl border bg-white p-4 shadow-lg"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold">
+                <Send className="h-4 w-4" /> إرسال اختباري
+              </div>
+              <button
+                type="button"
+                onClick={() => setTestOpen(false)}
+                className="rounded-md p-1 text-slate-500 hover:bg-slate-100"
+                aria-label="إغلاق"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <p className="mb-3 text-xs text-muted-foreground">
+              سيُستخدم القالب <b>{form.name || form.template_key}</b> عبر قناة{" "}
+              <b>{currentChannelMeta.label}</b> بقيم تجريبية للمتغيّرات.
+            </p>
+            <label className="mb-1 block text-sm font-medium">
+              {form.channel === "email"
+                ? "البريد الإلكتروني للاختبار"
+                : form.channel === "in_app"
+                  ? "لا يتطلب مستلم (سيظهر في جرس الإدارة)"
+                  : "رقم الهاتف للاختبار"}
+            </label>
+            <input
+              value={testRecipient}
+              onChange={(e) => setTestRecipient(e.target.value)}
+              placeholder={
+                form.channel === "email"
+                  ? "you@example.com"
+                  : form.channel === "in_app"
+                    ? "-"
+                    : "05xxxxxxxx"
+              }
+              className="w-full rounded-md border px-3 py-2 text-sm ltr:text-left"
+              dir="ltr"
+              disabled={form.channel === "in_app"}
+            />
+            <div className="mt-4 flex items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setTestOpen(false)}
+                disabled={testSend.isPending}
+                className="rounded-md border px-3 py-2 text-sm hover:bg-slate-50"
+              >
+                إلغاء
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (form.channel !== "in_app" && !testRecipient.trim()) {
+                    toast.error("أدخل المستلم أولًا");
+                    return;
+                  }
+                  if (form.channel === "in_app" && !testRecipient.trim()) {
+                    setTestRecipient("in-app");
+                  }
+                  testSend.mutate();
+                }}
+                disabled={testSend.isPending}
+                className="inline-flex items-center gap-1 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm disabled:opacity-60"
+              >
+                <Send className="h-4 w-4" />
+                {testSend.isPending ? "جارِ الإرسال…" : "إرسال"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
