@@ -9,7 +9,7 @@
  *
  * Fully typed generic <T>. RTL-friendly (Arabic labels).
  */
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -140,6 +140,13 @@ export type DataTableV2Props<T> = {
   ariaLabel?: string;
   /** Visually-hidden <caption> text summarising the table. */
   caption?: string;
+
+  /**
+   * Stable key for persisting user preferences (sort direction/column and
+   * page size) to `localStorage` across sessions. Omit to disable.
+   * Use a unique value per table (e.g. "admin.appointments").
+   */
+  persistKey?: string;
 };
 
 /* ────────────────────────────────────────────────────────────
@@ -178,10 +185,15 @@ export function DataTableV2<T>({
   className,
   ariaLabel = "جدول البيانات",
   caption,
+  persistKey,
 }: DataTableV2Props<T>) {
   const visibleColumns = useMemo(() => columns.filter((c) => !c.hidden), [columns]);
   const hasColumnSearch = visibleColumns.some((c) => c.searchable);
   const hasFilters = visibleColumns.some((c) => c.filter);
+
+  /* ── Persistence: hydrate saved sort + perPage on first mount ── */
+  const storageKey = persistKey ? `dtv2:${persistKey}` : null;
+  const hydratedRef = useRef(false);
 
   /* Fallback local client-side pagination when server-side isn't wired. */
   const [localPage, setLocalPage] = useState(1);
@@ -198,6 +210,46 @@ export function DataTableV2<T>({
       setLocalPerPage(next.perPage);
     }
   };
+
+  /* Hydrate persisted sort + perPage on first mount. */
+  useEffect(() => {
+    if (!storageKey || hydratedRef.current) return;
+    hydratedRef.current = true;
+    if (typeof window === "undefined") return;
+    try {
+      const raw = window.localStorage.getItem(storageKey);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { sort?: SortState; perPage?: number };
+      if (saved && "sort" in saved && onSortChange) {
+        onSortChange(saved.sort ?? null);
+      }
+      if (saved && typeof saved.perPage === "number" && perPageOptions.includes(saved.perPage)) {
+        if (onPaginationChange && pagination) {
+          onPaginationChange({ ...pagination, page: 1, perPage: saved.perPage });
+        } else {
+          setLocalPerPage(saved.perPage);
+        }
+      }
+    } catch {
+      /* ignore corrupt storage */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storageKey]);
+
+  /* Persist sort + perPage whenever they change (after hydration). */
+  useEffect(() => {
+    if (!storageKey || !hydratedRef.current) return;
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({ sort: sort ?? null, perPage: effectivePagination.perPage }),
+      );
+    } catch {
+      /* ignore quota errors */
+    }
+  }, [storageKey, sort, effectivePagination.perPage]);
+
 
   /* When server-side isn't used, slice locally. */
   const displayedRows = useMemo(() => {
