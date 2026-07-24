@@ -37,7 +37,7 @@ import {
   Bell,
   FileText,
   Palette,
-  Image as ImageIcon,
+  
   Menu as MenuIcon,
   ScrollText,
   KeyRound,
@@ -62,20 +62,14 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard },
       {
-        to: "/admin/inbox",
-        label: "الصندوق الموحد",
+        to: "/admin/ops-hub",
+        label: "مركز العمليات",
         icon: Inbox,
         roles: ["admin", "super_admin"],
       },
       {
-        to: "/admin/inbox/sla",
-        label: "لوحة SLA",
-        icon: Inbox,
-        roles: ["admin", "super_admin"],
-      },
-      {
-        to: "/admin/cms",
-        label: "إدارة المحتوى",
+        to: "/admin/content-hub",
+        label: "مركز المحتوى",
         icon: FileText,
         roles: ["admin", "super_admin", "editor"],
       },
@@ -145,8 +139,8 @@ const NAV: NavGroup[] = [
         roles: ["admin", "super_admin"],
       },
       {
-        to: "/admin/users",
-        label: "المستخدمون (Admin)",
+        to: "/admin/access-hub",
+        label: "مركز الوصول",
         icon: Users,
         roles: ["admin", "super_admin"],
       },
@@ -156,7 +150,12 @@ const NAV: NavGroup[] = [
     title: "الطاقم الطبي",
     items: [
       { to: "/doctors-management", label: "الأطباء", icon: Stethoscope, roles: ["admin", "hr"] },
-      { to: "/admin/doctors", label: "إضافة/تعديل طبيب", icon: Stethoscope, roles: ["admin"] },
+      {
+        to: "/admin/clinic-hub",
+        label: "المركز السريري",
+        icon: Stethoscope,
+        roles: ["admin", "super_admin"],
+      },
       {
         to: "/availability-management",
         label: "جدولة التوفر",
@@ -175,7 +174,6 @@ const NAV: NavGroup[] = [
   {
     title: "الكتالوج",
     items: [
-      { to: "/admin/branches", label: "الفروع", icon: Building2, roles: ["admin"] },
       { to: "/admin/specialties", label: "التخصصات", icon: Stethoscope, roles: ["admin"] },
       { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Package, roles: ["admin"] },
     ],
@@ -184,7 +182,6 @@ const NAV: NavGroup[] = [
     title: "المحتوى والوسائط",
     items: [
       { to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] },
-      { to: "/admin/files", label: "الملفات", icon: ImageIcon, roles: ["admin"] },
     ],
   },
   {
@@ -244,13 +241,6 @@ const NAV: NavGroup[] = [
     title: "الحوكمة والأمان",
     items: [
       { to: "/rbac", label: "الأدوار", icon: ShieldCheck, roles: ["admin"] },
-      {
-        to: "/admin/role-permissions-matrix",
-        label: "مصفوفة الصلاحيات",
-        icon: ShieldCheck,
-        roles: ["admin"],
-      },
-      { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ScrollText, roles: ["admin"] },
       { to: "/admin/booking-trace", label: "تتبع الحجوزات", icon: ShieldCheck, roles: ["admin"] },
       {
         to: "/report-downloads-audit",

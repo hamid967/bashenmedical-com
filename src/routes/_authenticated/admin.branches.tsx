@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_authenticated/admin/branches")({
   component: BranchesList,
 });
 
-function BranchesList() {
+export function BranchesList() {
   const fn = useServerFn(listAdminBranches);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");

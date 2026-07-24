@@ -97,7 +97,7 @@ export const Route = createFileRoute("/_authenticated/admin/super/permissions")(
   ),
 });
 
-function SuperPermissionsPage() {
+export function SuperPermissionsPage() {
   const qc = useQueryClient();
   const { data: catalog } = useSuspenseQuery(catalogQuery);
   const { data: matrix } = useSuspenseQuery(matrixQuery);

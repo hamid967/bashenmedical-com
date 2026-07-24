@@ -128,7 +128,7 @@ export const Route = createFileRoute("/_authenticated/admin/inbox")({
   component: UnifiedInboxPage,
 });
 
-function UnifiedInboxPage() {
+export function UnifiedInboxPage() {
   const search = Route.useSearch() as SearchIn;
   const navigate = Route.useNavigate();
 

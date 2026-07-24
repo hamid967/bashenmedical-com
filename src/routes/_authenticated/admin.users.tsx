@@ -73,7 +73,7 @@ export const Route = createFileRoute("/_authenticated/admin/users")({
   component: AdminUsersRoute,
 });
 
-function AdminUsersRoute() {
+export function AdminUsersRoute() {
   const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const activeBranch = useActiveBranch();

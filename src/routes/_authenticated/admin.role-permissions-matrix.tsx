@@ -58,7 +58,7 @@ const DISPLAY_ROLES: AppRole[] = [
   "auditor",
 ];
 
-function RolePermissionsMatrixPage() {
+export function RolePermissionsMatrixPage() {
   const [branchId, setBranchId] = useState<string>("all");
 
   const permsQ = useQuery({

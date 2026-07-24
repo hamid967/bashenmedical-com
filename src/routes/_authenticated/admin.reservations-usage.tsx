@@ -32,7 +32,7 @@ export const Route = createFileRoute("/_authenticated/admin/reservations-usage")
   component: ReservationsUsagePage,
 });
 
-function ReservationsUsagePage() {
+export function ReservationsUsagePage() {
   const [windowDays, setWindowDays] = useState(14);
   const qc = useQueryClient();
   const { data, isFetching } = useSuspenseQuery(summaryQuery(windowDays));
