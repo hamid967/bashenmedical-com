@@ -6,7 +6,7 @@
  * announcements, and offers.
  */
 import * as React from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import {
   Calendar,
@@ -41,7 +41,18 @@ const snapshotQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/patient/")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(snapshotQuery),
+  loader: async ({ context }) => {
+    try {
+      await context.queryClient.ensureQueryData(snapshotQuery);
+    } catch (err) {
+      // Staff/admin accounts must use the admin portal — redirect instead of crashing.
+      const msg = String((err as { message?: unknown })?.message ?? "");
+      if (/staff accounts must use the admin portal/i.test(msg)) {
+        throw redirect({ to: "/admin" });
+      }
+      throw err;
+    }
+  },
   head: () => ({
     meta: [
       { title: "لوحة المريض | مجمع باعشن الطبي" },
