@@ -37,9 +37,16 @@ type Filters = {
   status: NotificationDeliveryLog["status"] | "";
   q: string;
   windowHours: number;
+  testOnly: boolean;
 };
 
-const DEFAULT_FILTERS: Filters = { channel: "", status: "", q: "", windowHours: 24 * 7 };
+const DEFAULT_FILTERS: Filters = {
+  channel: "",
+  status: "",
+  q: "",
+  windowHours: 24 * 7,
+  testOnly: false,
+};
 
 const logsQuery = (f: Filters) =>
   queryOptions({
@@ -50,6 +57,7 @@ const logsQuery = (f: Filters) =>
           channel: f.channel || null,
           status: f.status || null,
           q: f.q ? f.q : null,
+          testOnly: f.testOnly || null,
           windowHours: f.windowHours,
           limit: 200,
         },
