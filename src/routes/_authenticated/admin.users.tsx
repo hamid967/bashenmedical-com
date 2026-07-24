@@ -83,13 +83,13 @@ function AdminUsersRoute() {
   const offset = (page - 1) * PAGE_SIZE;
 
   const query = useQuery({
-    queryKey: ["admin-users", search, activeBranch?.id],
+    queryKey: ["admin-users", search, activeBranch.branchId],
     queryFn: () =>
       listFn({
         data: {
           q: search.q,
           role: search.role as never,
-          branch_id: activeBranch?.id,
+          branch_id: activeBranch.branchId,
           limit: PAGE_SIZE,
           offset,
         },
