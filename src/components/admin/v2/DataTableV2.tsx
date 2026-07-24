@@ -285,18 +285,25 @@ export function DataTableV2<T>({
   const rowPadY = dense ? "py-2" : "py-3";
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div
+      className={cn("flex flex-col gap-3", className)}
+      role="region"
+      aria-label={ariaLabel}
+      aria-busy={isLoading || isFetching || undefined}
+    >
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2" role="toolbar" aria-label="أدوات الجدول">
         {toolbarLeft}
         {onGlobalSearchChange && (
           <div className="relative min-w-0 flex-1 sm:max-w-xs">
-            <Search className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               value={globalSearch ?? ""}
               onChange={(e) => onGlobalSearchChange(e.target.value)}
               placeholder={globalSearchPlaceholder}
               className="h-9 pr-8"
+              aria-label={globalSearchPlaceholder}
+              type="search"
             />
           </div>
         )}
