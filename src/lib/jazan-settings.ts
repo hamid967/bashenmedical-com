@@ -16,10 +16,32 @@ export type JazanHeritageAreas = {
   footer: boolean;
 };
 
+export type IntroFrequency = "off" | "every_visit" | "once_per_session" | "once_per_period";
+
+/**
+ * Phase 11 — never-block path prefixes.
+ * The intro is auto-skipped when the current pathname starts with any of these.
+ * Admins can override via `intro.blockedPathPrefixes` (empty → use these defaults).
+ */
+export const DEFAULT_INTRO_BLOCKED_PREFIXES: readonly string[] = [
+  "/book",
+  "/auth",
+  "/patient",
+  "/admin",
+  "/owner",
+  "/verify",
+  "/reservations/manage",
+  "/api",
+];
+
 export type JazanSettings = {
   intro: {
     enabled: boolean;
+    /** Phase 11: `once_per_session` is the recommended default. */
+    frequency: IntroFrequency;
+    /** Only used when frequency === "once_per_period". */
     cooldownHours: number;
+    /** Phase 11 spec: 5000–8000 ms. */
     durationMs: number;
     headlineAr: string;
     headlineEn: string;
@@ -27,6 +49,8 @@ export type JazanSettings = {
     taglineEn: string;
     /** Optional licensed logo override; empty falls back to bundled BMC logo. */
     logoUrl: string;
+    /** Path prefixes where the intro must not appear. Empty → use defaults. */
+    blockedPathPrefixes: string[];
     /** When true, JazanIntro logs analytics events to the browser console. */
     debug: boolean;
   };
@@ -42,13 +66,15 @@ export type JazanSettings = {
 export const DEFAULT_JAZAN_SETTINGS: JazanSettings = {
   intro: {
     enabled: true,
+    frequency: "once_per_session",
     cooldownHours: 24 * 7,
-    durationMs: 10_000,
+    durationMs: 6_500,
     headlineAr: "مجمع باعشن الطبي",
     headlineEn: "Baeshen Medical Center",
-    taglineAr: "من جازان… نعتني بصحتكم",
-    taglineEn: "From Jazan… we care for your health",
+    taglineAr: "رعاية حديثة بروح جازان",
+    taglineEn: "Modern care with the spirit of Jazan",
     logoUrl: "",
+    blockedPathPrefixes: [],
     debug: false,
   },
   patternIntensity: "standard",

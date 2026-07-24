@@ -158,12 +158,38 @@ function JazanVisualAdmin() {
             <Label>تفعيل المقدمة السينمائية</Label>
           </div>
           <div>
-            <Label>تردد الظهور (ساعات)</Label>
+            <Label>تردد الظهور</Label>
+            <Select
+              value={s.intro.frequency}
+              onValueChange={(v) =>
+                setS({
+                  ...s,
+                  intro: { ...s.intro, frequency: v as typeof s.intro.frequency },
+                })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="off">إيقاف تام</SelectItem>
+                <SelectItem value="once_per_session">مرة واحدة في الجلسة (موصى به)</SelectItem>
+                <SelectItem value="once_per_period">مرة كل فترة (بالساعات)</SelectItem>
+                <SelectItem value="every_visit">كل زيارة</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground mt-1">
+              الافتراضي: مرة واحدة في الجلسة. لا يظهر أبدًا في مسارات الحجز/الدخول/لوحة المريض/الإدارة.
+            </p>
+          </div>
+          <div>
+            <Label>فترة الظهور (ساعات)</Label>
             <Input
               type="number"
               min={0}
               max={24 * 90}
               step={1}
+              disabled={s.intro.frequency !== "once_per_period"}
               value={s.intro.cooldownHours}
               onChange={(e) =>
                 setS({
@@ -176,16 +202,16 @@ function JazanVisualAdmin() {
               }
             />
             <p className="text-xs text-muted-foreground mt-1">
-              0 = كل زيارة. الافتراضي 168 (كل 7 أيام).
+              يُستخدم فقط عند اختيار «مرة كل فترة». الافتراضي 168 (كل 7 أيام).
             </p>
           </div>
           <div>
             <Label>المدة الكلية (مللي ثانية)</Label>
             <Input
               type="number"
-              min={4000}
-              max={20000}
-              step={500}
+              min={5000}
+              max={8000}
+              step={250}
               value={s.intro.durationMs}
               onChange={(e) =>
                 setS({
@@ -193,14 +219,40 @@ function JazanVisualAdmin() {
                   intro: {
                     ...s.intro,
                     durationMs: Math.max(
-                      4000,
-                      Math.min(20000, Math.round(Number(e.target.value) || 10000)),
+                      5000,
+                      Math.min(8000, Math.round(Number(e.target.value) || 6500)),
                     ),
                   },
                 })
               }
             />
-            <p className="text-xs text-muted-foreground mt-1">يوصى بين 8000 و 12000.</p>
+            <p className="text-xs text-muted-foreground mt-1">مسموح 5000–8000 (المرحلة 11).</p>
+          </div>
+          <div className="md:col-span-2">
+            <Label>مسارات لا يظهر فيها المقدمة (سطر لكل مسار)</Label>
+            <Textarea
+              dir="ltr"
+              rows={4}
+              placeholder="/book&#10;/auth&#10;/patient&#10;/admin&#10;/owner"
+              value={(s.intro.blockedPathPrefixes ?? []).join("\n")}
+              onChange={(e) =>
+                setS({
+                  ...s,
+                  intro: {
+                    ...s.intro,
+                    blockedPathPrefixes: e.target.value
+                      .split("\n")
+                      .map((line) => line.trim())
+                      .filter(Boolean),
+                  },
+                })
+              }
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              اتركه فارغًا لاستخدام القائمة الافتراضية (
+              <code>/book, /auth, /patient, /admin, /owner, /verify, /reservations/manage, /api</code>).
+              المقدمة تُتخطى تلقائيًا أيضًا على شبكات Data Saver و 2G.
+            </p>
           </div>
           <div>
             <Label>العنوان الرئيسي (عربي)</Label>
