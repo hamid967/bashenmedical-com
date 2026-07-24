@@ -72,7 +72,7 @@ export type SafetyIncident = {
   kind: string;
   severity: string;
   actionTaken: string | null;
-  details: Record<string, unknown> | null;
+  details: unknown;
   createdAt: string;
   inboxItemId: string | null;
   requestNumber: string | null;
