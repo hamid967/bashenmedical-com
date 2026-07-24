@@ -176,6 +176,8 @@ export function DataTableV2<T>({
   dense = false,
   stickyHeader = true,
   className,
+  ariaLabel = "جدول البيانات",
+  caption,
 }: DataTableV2Props<T>) {
   const visibleColumns = useMemo(() => columns.filter((c) => !c.hidden), [columns]);
   const hasColumnSearch = visibleColumns.some((c) => c.searchable);
