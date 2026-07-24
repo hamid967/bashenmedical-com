@@ -322,6 +322,8 @@ export function WebVitalsPage() {
             </ul>
           )}
         </section>
+
+        <PerfBudgetsPanel />
       </div>
     </div>
   );
