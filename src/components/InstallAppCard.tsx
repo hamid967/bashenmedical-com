@@ -8,6 +8,7 @@ import { useState } from "react";
 import { Smartphone, Share, PlusSquare, CheckCircle2, Download } from "lucide-react";
 import { toast } from "sonner";
 import { useInstallPrompt } from "@/hooks/useInstallPrompt";
+import { isNative } from "@/lib/native/bridge";
 
 const T = {
   title: { ar: "ثبّت التطبيق على جهازك", en: "Install the app on your device" },
