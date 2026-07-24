@@ -308,9 +308,9 @@ export const getPatientSnapshot = createServerFn({ method: "GET" })
         .limit(3),
       context.supabase
         .from("insurance_verifications")
-        .select("id, status, insurance_provider, verified_at")
+        .select("id, eligible, provider_id, created_at")
         .eq("patient_id", data.patient_id)
-        .order("verified_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(1),
     ]);
 
