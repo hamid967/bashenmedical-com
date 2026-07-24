@@ -347,32 +347,31 @@ function ImageEditor({
     if (!overlay || !natural) return;
     const parent = overlay.parentElement!;
     const bounds = parent.getBoundingClientRect();
-    const start = { x: e.clientX, y: e.clientY, ...rect };
+    const start = { px: e.clientX, py: e.clientY, rx: rect.x, ry: rect.y, rw: rect.w, rh: rect.h };
     (e.target as Element).setPointerCapture(e.pointerId);
 
     const onMove = (ev: PointerEvent) => {
-      const dx = ((ev.clientX - start.x) / bounds.width) * 100;
-      const dy = ((ev.clientY - start.y) / bounds.height) * 100;
+      const dx = ((ev.clientX - start.px) / bounds.width) * 100;
+      const dy = ((ev.clientY - start.py) / bounds.height) * 100;
       if (mode === "move") {
-        const nx = clamp(start.x_ + dx, 0, 100 - start.w);
-        const ny = clamp(start.y_ + dy, 0, 100 - start.h);
-        setRect({ x: nx, y: ny, w: start.w, h: start.h });
+        const nx = clamp(start.rx + dx, 0, 100 - start.rw);
+        const ny = clamp(start.ry + dy, 0, 100 - start.rh);
+        setRect({ x: nx, y: ny, w: start.rw, h: start.rh });
       } else {
-        let nw = clamp(start.w + dx, 5, 100 - start.x_);
-        let nh = clamp(start.h + dy, 5, 100 - start.y_);
+        let nw = clamp(start.rw + dx, 5, 100 - start.rx);
+        let nh = clamp(start.rh + dy, 5, 100 - start.ry);
         if (aspect) {
-          // maintain aspect using pixel space
           const pxW = (nw / 100) * natural.w;
           const pxH = pxW / aspect;
           nh = (pxH / natural.h) * 100;
-          if (start.y_ + nh > 100) {
-            nh = 100 - start.y_;
+          if (start.ry + nh > 100) {
+            nh = 100 - start.ry;
             const pxH2 = (nh / 100) * natural.h;
             const pxW2 = pxH2 * aspect;
             nw = (pxW2 / natural.w) * 100;
           }
         }
-        setRect({ x: start.x_, y: start.y_, w: nw, h: nh });
+        setRect({ x: start.rx, y: start.ry, w: nw, h: nh });
       }
     };
     const onUp = () => {
