@@ -83,10 +83,32 @@ function KpiSkeleton() {
   );
 }
 
-function KpiTile({ k }: { k: CommandCenterKpiV2 }) {
+function appendDrillFilters(
+  to: string,
+  filters: { from: string; to: string; branchId: string | null },
+): string {
+  const [pathAndSearch, hash] = to.split("#");
+  const [path, existing] = pathAndSearch.split("?");
+  const sp = new URLSearchParams(existing ?? "");
+  // Only set if not already present so KPI-specific filters (e.g. status=confirmed) win
+  if (!sp.has("from")) sp.set("from", filters.from);
+  if (!sp.has("to")) sp.set("to", filters.to);
+  if (filters.branchId && !sp.has("branch")) sp.set("branch", filters.branchId);
+  const qs = sp.toString();
+  return `${path}${qs ? `?${qs}` : ""}${hash ? `#${hash}` : ""}`;
+}
+
+function KpiTile({
+  k,
+  filters,
+}: {
+  k: CommandCenterKpiV2;
+  filters: { from: string; to: string; branchId: string | null };
+}) {
   const Icon = ICONS[k.key];
   const unavailable = k.unavailable;
   const empty = k.empty && !unavailable;
+  const href = appendDrillFilters(k.drillTo, filters);
 
   const body = (
     <div
@@ -160,7 +182,7 @@ function KpiTile({ k }: { k: CommandCenterKpiV2 }) {
 
   return (
     <Link
-      to={k.drillTo}
+      to={href}
       preload="intent"
       aria-label={`فتح تفاصيل ${k.label}`}
       className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 rounded-2xl"
