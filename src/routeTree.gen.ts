@@ -127,6 +127,7 @@ import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_a
 import { Route as AuthenticatedAdminBookingTraceRouteImport } from './routes/_authenticated/admin.booking-trace'
 import { Route as AuthenticatedAdminClassicRouteImport } from './routes/_authenticated/admin.classic'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
+import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes/_authenticated/admin.content-analytics'
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
@@ -862,6 +863,12 @@ const AuthenticatedAdminContentRoute =
   AuthenticatedAdminContentRouteImport.update({
     id: '/content',
     path: '/content',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminContentAnalyticsRoute =
+  AuthenticatedAdminContentAnalyticsRouteImport.update({
+    id: '/content-analytics',
+    path: '/content-analytics',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminDesignTokensRoute =
@@ -1630,6 +1637,7 @@ export interface FileRoutesByFullPath {
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/content': typeof AuthenticatedAdminContentRoute
+  '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -1855,6 +1863,7 @@ export interface FileRoutesByTo {
   '/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/admin/content': typeof AuthenticatedAdminContentRoute
+  '/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -2087,6 +2096,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/booking-trace': typeof AuthenticatedAdminBookingTraceRoute
   '/_authenticated/admin/classic': typeof AuthenticatedAdminClassicRoute
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
+  '/_authenticated/admin/content-analytics': typeof AuthenticatedAdminContentAnalyticsRoute
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
@@ -2319,6 +2329,7 @@ export interface FileRouteTypes {
     | '/admin/booking-trace'
     | '/admin/classic'
     | '/admin/content'
+    | '/admin/content-analytics'
     | '/admin/design-tokens'
     | '/admin/doctors'
     | '/admin/inbox'
@@ -2544,6 +2555,7 @@ export interface FileRouteTypes {
     | '/admin/booking-trace'
     | '/admin/classic'
     | '/admin/content'
+    | '/admin/content-analytics'
     | '/admin/design-tokens'
     | '/admin/doctors'
     | '/admin/inbox'
@@ -2775,6 +2787,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/booking-trace'
     | '/_authenticated/admin/classic'
     | '/_authenticated/admin/content'
+    | '/_authenticated/admin/content-analytics'
     | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/inbox'
@@ -3808,6 +3821,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContentRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/content-analytics': {
+      id: '/_authenticated/admin/content-analytics'
+      path: '/content-analytics'
+      fullPath: '/admin/content-analytics'
+      preLoaderRoute: typeof AuthenticatedAdminContentAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/design-tokens': {
       id: '/_authenticated/admin/design-tokens'
       path: '/design-tokens'
@@ -4611,6 +4631,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminBookingTraceRoute: typeof AuthenticatedAdminBookingTraceRoute
   AuthenticatedAdminClassicRoute: typeof AuthenticatedAdminClassicRoute
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
+  AuthenticatedAdminContentAnalyticsRoute: typeof AuthenticatedAdminContentAnalyticsRoute
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
@@ -4643,6 +4664,8 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminBookingTraceRoute: AuthenticatedAdminBookingTraceRoute,
   AuthenticatedAdminClassicRoute: AuthenticatedAdminClassicRoute,
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
+  AuthenticatedAdminContentAnalyticsRoute:
+    AuthenticatedAdminContentAnalyticsRoute,
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
