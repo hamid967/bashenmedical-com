@@ -217,7 +217,7 @@ const NAV: NavGroup[] = [
     title: "الذكاء والأدوات",
     items: [
       { to: "/admin/ai/overview", label: "نظرة AI الشاملة", icon: Sparkles, roles: ["admin"] },
-      { to: "/admin/ai-streaming", label: "AI Streaming", icon: Sparkles, roles: ["admin"] },
+      
       { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       {
         to: "/admin/design-tokens",
