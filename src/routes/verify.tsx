@@ -9,8 +9,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
 import { CalendarDays, CheckCircle2, Clock, ShieldCheck, XCircle } from "lucide-react";
 
 const search = z.object({

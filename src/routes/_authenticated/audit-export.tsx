@@ -4,11 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { ArrowRight, Download, RefreshCw } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
 import { exportCsv, type Column } from "@/lib/export-utils";
 import { fetchAuditExport, listBranchesForAudit } from "@/lib/audit-export.functions";
 

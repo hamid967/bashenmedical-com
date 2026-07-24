@@ -34,7 +34,7 @@ import {
   Printer,
   XCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
 import {
   Dialog,
@@ -43,8 +43,8 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-} from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 import i18n from "i18next";
 

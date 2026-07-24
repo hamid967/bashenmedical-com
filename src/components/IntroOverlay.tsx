@@ -15,7 +15,7 @@ import {
   CalendarCheck,
   type LucideIcon,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui-v3";
 import { supabase } from "@/integrations/supabase/client";
 import { trackEvent } from "@/lib/analytics";
 import bmcLogoAsset from "@/assets/bmc-logo-transparent.png.asset.json";

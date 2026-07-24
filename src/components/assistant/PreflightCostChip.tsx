@@ -13,7 +13,7 @@
 import { Coins, Info } from "lucide-react";
 import { estimateCredits, formatCredits, formatTokens } from "@/lib/ai/pricing";
 import { estimateTokensCalibrated } from "@/lib/ai/token-calibration";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui-v3";
 
 export function PreflightCostChip({
   input,

@@ -7,9 +7,9 @@ import {
   deleteOwnerService,
   toggleOwnerService,
 } from "@/lib/owner/services.functions";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Switch } from "@/components/ui-v3";
 import { Plus, Pencil, Trash2, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 

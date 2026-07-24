@@ -9,8 +9,8 @@ import {
   type RadiologyReport,
   type RadiologyAiSummary,
 } from "@/lib/portal/radiology.functions";
-import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui-v3";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui-v3";
 import {
   AlertTriangle,
   Bone,

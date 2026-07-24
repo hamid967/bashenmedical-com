@@ -26,7 +26,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import {
   Drawer,
   DrawerContent,

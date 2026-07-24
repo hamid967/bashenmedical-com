@@ -14,7 +14,7 @@ import {
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui-v3";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   listAdminFeed,

@@ -3,8 +3,8 @@
  */
 import { createFileRoute } from "@tanstack/react-router";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { Shield, Smartphone, Key, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/patient/security")({

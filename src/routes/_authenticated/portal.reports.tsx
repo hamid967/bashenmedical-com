@@ -32,9 +32,9 @@ import {
   type MyMedicalReportDetail,
   type ReportType,
 } from "@/lib/portal/reports.functions";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
@@ -42,7 +42,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import { DemoBadge } from "@/components/DemoBadge";
 
 const reportsQuery = queryOptions({

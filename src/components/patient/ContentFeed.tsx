@@ -9,9 +9,9 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { ArrowLeft } from "lucide-react";
 import {
   getPatientContentFeed,

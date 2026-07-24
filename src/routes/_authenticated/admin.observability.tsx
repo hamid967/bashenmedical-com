@@ -8,7 +8,7 @@ import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { Activity, Gauge, LineChart, Sparkles } from "lucide-react";
 import { z } from "zod";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 
 import { AiStreamingMonitor } from "./admin.ai-streaming";
 import { RealtimeMonitorPage } from "./admin.realtime-monitor";

@@ -6,9 +6,9 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listMyInsuranceVerifications } from "@/lib/portal/insurance.functions";
 import { EmptyState, SkeletonList } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { ShieldCheck } from "lucide-react";
 
 const insuranceQuery = queryOptions({

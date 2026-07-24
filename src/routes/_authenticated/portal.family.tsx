@@ -23,16 +23,16 @@ import {
 } from "@/lib/portal/dependents.functions";
 
 import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
@@ -40,7 +40,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import {
   AlertDialog,
   AlertDialogAction,

@@ -12,9 +12,9 @@ import {
 } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 import { Download, History, Info, Loader2, Search, ShieldCheck, Upload } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
@@ -22,14 +22,14 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 
 const ALL_ROLES: AppRole[] = [
   "super_admin",

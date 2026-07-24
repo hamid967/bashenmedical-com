@@ -12,8 +12,8 @@
 import { useState, type ReactNode } from "react";
 import { Download, FileText, FileSpreadsheet, FileType2, Loader2, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui-v3";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui-v3";
 import { exportCsv, exportXlsx, exportPdf, type Column } from "@/lib/export-utils";
 
 export type ExportFormat = "csv" | "xlsx" | "pdf";

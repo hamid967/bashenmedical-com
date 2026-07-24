@@ -6,7 +6,7 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listMyNotifications } from "@/lib/portal/notifications.functions";
 import { EmptyState, SkeletonList } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui-v3";
 import { Bell } from "lucide-react";
 
 const notifsQuery = queryOptions({

@@ -7,7 +7,7 @@ import { createFileRoute, useSearch } from "@tanstack/react-router";
 import { FileText, Image as ImageIcon, LayoutTemplate } from "lucide-react";
 import { z } from "zod";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 
 import { CmsDashboard } from "./admin.cms";
 import { ContentAdminPage } from "./admin.content";

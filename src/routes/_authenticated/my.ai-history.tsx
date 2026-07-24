@@ -8,7 +8,7 @@ import {
   clearMyAiConversations,
 } from "@/lib/ai/assistant.functions";
 import { useI18n } from "@/lib/i18n";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import { Bot, Trash2, MessageSquare, Loader2, ShieldOff, Info } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

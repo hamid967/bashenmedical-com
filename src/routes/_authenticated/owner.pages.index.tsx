@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import { listOwnerPages, deleteOwnerPage } from "@/lib/owner/pages.functions";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import { Plus, Pencil, Trash2, ExternalLink, FileText } from "lucide-react";
 import { toast } from "sonner";
 

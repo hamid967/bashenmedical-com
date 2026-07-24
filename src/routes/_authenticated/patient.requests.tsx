@@ -6,9 +6,9 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { listMyInquiries } from "@/lib/portal/inquiries.functions";
 import { EmptyState, SkeletonList } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { MessageSquare, ArrowLeft } from "lucide-react";
 
 const inquiriesQuery = queryOptions({

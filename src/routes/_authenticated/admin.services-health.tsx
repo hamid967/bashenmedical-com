@@ -20,10 +20,10 @@ import {
   type ServiceHealth,
   type ServiceHealthStatus,
 } from "@/lib/admin/services-health.functions";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui-v3";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Skeleton } from "@/components/ui-v3";
 
 const healthQuery = (fn: () => Promise<{ services: ServiceHealth[]; generated_at: string }>) =>
   queryOptions({

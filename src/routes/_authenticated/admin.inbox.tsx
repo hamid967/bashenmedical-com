@@ -13,16 +13,16 @@ import {
   type InboxChannel,
   type InboxPriority,
 } from "@/lib/admin/inbox.functions";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 import { Inbox, AlertTriangle, RefreshCw } from "lucide-react";
 
 const SearchSchema = z.object({

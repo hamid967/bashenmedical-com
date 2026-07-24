@@ -22,18 +22,18 @@ import { EmptyState, LoadingState } from "@/components/states";
 import { InlineStateBanner } from "@/components/states/InlineStateBanner";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
@@ -41,7 +41,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-} from "@/components/ui/dialog";
+} from "@/components/ui-v3";
 import {
   AlertDialog,
   AlertDialogAction,

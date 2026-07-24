@@ -8,9 +8,9 @@ import {
   createCmsPreviewToken, listCmsAudit, getCmsRoleInfo,
 } from "@/lib/admin/cms/cms.functions";
 import { CMS_KINDS, type CmsKind, type FieldDef } from "@/lib/admin/cms/schemas";
-import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import { toast } from "sonner";
 import { MediaField } from "@/components/admin/MediaPicker";
 import { useCmsTransitionNotifications } from "@/lib/admin/cms/useCmsTransitionNotifications";

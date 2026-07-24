@@ -31,7 +31,7 @@ import {
   Clock,
   CalendarDays,
 } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 import {
   Accordion,
   AccordionContent,

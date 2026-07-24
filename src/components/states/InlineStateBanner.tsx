@@ -15,7 +15,7 @@ import {
   WifiOff,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import { classifyPatientError } from "@/components/states/patient-route-states";
 import { signalPatientSessionExpired } from "@/lib/patient/session-guard";
 

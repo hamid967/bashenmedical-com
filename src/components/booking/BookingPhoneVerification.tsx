@@ -11,8 +11,8 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Loader2, ShieldCheck, MessageCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
 import { useServerFn } from "@tanstack/react-start";
 import { issueOtp, verifyOtp } from "@/lib/auth/otp.functions";
 

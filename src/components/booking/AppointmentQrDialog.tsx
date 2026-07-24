@@ -13,7 +13,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import QRCode from "qrcode";
 import { toast } from "sonner";
 import { Copy, Download, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 
 export function AppointmentQrDialog({
   reference,

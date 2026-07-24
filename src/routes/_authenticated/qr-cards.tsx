@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { jsPDF } from "jspdf";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 import { listBranchesForRatings, listDoctorsForRatings } from "@/lib/ratings.functions";
 import { listPatientsAdvanced } from "@/lib/patients-mgmt.functions";
 

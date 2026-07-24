@@ -16,16 +16,16 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { listMyReportDownloads, type MyReportDownloadEntry } from "@/lib/portal/reports.functions";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-v3";
 
 export const Route = createFileRoute("/_authenticated/portal/reports/downloads")({
   head: () => ({

@@ -27,7 +27,7 @@ import {
   listBranchesForRatings,
   listDoctorsForRatings,
 } from "@/lib/ratings.functions";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 
 export const Route = createFileRoute("/_authenticated/ratings")({
   head: () => ({

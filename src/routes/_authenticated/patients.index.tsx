@@ -7,7 +7,7 @@ import { PatientQrDialog } from "@/components/PatientQrDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { listBranches } from "@/lib/dashboard.functions";
 import { generateMrn } from "@/lib/patients.functions";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 import {
   Users,
   Search,

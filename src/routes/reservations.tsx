@@ -20,8 +20,8 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
 import { useSessionProfile } from "@/hooks/use-session-profile";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 

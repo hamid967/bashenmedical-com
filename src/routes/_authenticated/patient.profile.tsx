@@ -6,8 +6,8 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { getMyProfile } from "@/lib/portal/portal.functions";
 import { SkeletonList } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import { User, Phone, Mail, IdCard, ArrowLeft } from "lucide-react";
 
 const profileQuery = queryOptions({

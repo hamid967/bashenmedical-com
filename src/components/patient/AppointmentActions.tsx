@@ -20,7 +20,7 @@ import {
   RotateCcw,
   XCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-v3";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -40,10 +40,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui-v3";
+import { Input } from "@/components/ui-v3";
+import { Label } from "@/components/ui-v3";
+import { Textarea } from "@/components/ui-v3";
 import {
   cancelMyAppointment,
   confirmMyAttendance,

@@ -7,9 +7,9 @@ import {
   type AppRole,
 } from "@/lib/rbac.functions";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui-v3";
+import { Badge } from "@/components/ui-v3";
+import { Button } from "@/components/ui-v3";
 import {
   AlertTriangle,
   ArrowRight,
