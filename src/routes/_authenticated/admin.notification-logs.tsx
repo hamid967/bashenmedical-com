@@ -77,6 +77,13 @@ const statsQuery = (windowHours: number) =>
     staleTime: 30_000,
   });
 
+const kpisQuery = () =>
+  queryOptions({
+    queryKey: ["admin", "notif-logs", "kpis-24h"],
+    queryFn: () => getNotificationDeliveryKpis({ data: { windowHours: 24 } }),
+    staleTime: 30_000,
+  });
+
 /* ------------------------------- route ---------------------------------- */
 
 export const Route = createFileRoute("/_authenticated/admin/notification-logs")({
@@ -84,6 +91,7 @@ export const Route = createFileRoute("/_authenticated/admin/notification-logs")(
     Promise.all([
       context.queryClient.ensureQueryData(logsQuery(DEFAULT_FILTERS)),
       context.queryClient.ensureQueryData(statsQuery(DEFAULT_FILTERS.windowHours)),
+      context.queryClient.ensureQueryData(kpisQuery()),
     ]),
   head: () => ({
     meta: [
