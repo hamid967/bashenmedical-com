@@ -149,6 +149,7 @@ import { Route as AuthenticatedAdminSchedulesRouteImport } from './routes/_authe
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServicesHealthRouteImport } from './routes/_authenticated/admin.services-health'
+import { Route as AuthenticatedAdminUsersRouteImport } from './routes/_authenticated/admin.users'
 import { Route as AuthenticatedAdminV3RouteImport } from './routes/_authenticated/admin.v3'
 import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
@@ -1009,6 +1010,11 @@ const AuthenticatedAdminServicesHealthRoute =
     path: '/services-health',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminUsersRoute = AuthenticatedAdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminV3Route = AuthenticatedAdminV3RouteImport.update({
   id: '/v3',
   path: '/v3',
@@ -1750,6 +1756,7 @@ export interface FileRoutesByFullPath {
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/v3': typeof AuthenticatedAdminV3Route
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -1989,6 +1996,7 @@ export interface FileRoutesByTo {
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
+  '/admin/users': typeof AuthenticatedAdminUsersRoute
   '/admin/v3': typeof AuthenticatedAdminV3Route
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -2235,6 +2243,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
+  '/_authenticated/admin/users': typeof AuthenticatedAdminUsersRoute
   '/_authenticated/admin/v3': typeof AuthenticatedAdminV3Route
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
@@ -2481,6 +2490,7 @@ export interface FileRouteTypes {
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/services-health'
+    | '/admin/users'
     | '/admin/v3'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
@@ -2720,6 +2730,7 @@ export interface FileRouteTypes {
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/services-health'
+    | '/admin/users'
     | '/admin/v3'
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
@@ -2965,6 +2976,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/admin/services-health'
+    | '/_authenticated/admin/users'
     | '/_authenticated/admin/v3'
     | '/_authenticated/admin/visual-analytics'
     | '/_authenticated/admin/web-vitals'
@@ -4144,6 +4156,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminServicesHealthRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/users': {
+      id: '/_authenticated/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AuthenticatedAdminUsersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/v3': {
       id: '/_authenticated/admin/v3'
       path: '/v3'
@@ -4987,6 +5006,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminServicesHealthRoute: typeof AuthenticatedAdminServicesHealthRoute
+  AuthenticatedAdminUsersRoute: typeof AuthenticatedAdminUsersRoute
   AuthenticatedAdminV3Route: typeof AuthenticatedAdminV3Route
   AuthenticatedAdminVisualAnalyticsRoute: typeof AuthenticatedAdminVisualAnalyticsRoute
   AuthenticatedAdminWebVitalsRoute: typeof AuthenticatedAdminWebVitalsRoute
@@ -5036,6 +5056,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
   AuthenticatedAdminServicesHealthRoute: AuthenticatedAdminServicesHealthRoute,
+  AuthenticatedAdminUsersRoute: AuthenticatedAdminUsersRoute,
   AuthenticatedAdminV3Route: AuthenticatedAdminV3Route,
   AuthenticatedAdminVisualAnalyticsRoute:
     AuthenticatedAdminVisualAnalyticsRoute,
