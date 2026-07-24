@@ -33,17 +33,94 @@ export const Route = createFileRoute("/_authenticated/admin/inbox/sla")({
 function SlaPage() {
   const fetchFn = useServerFn(getInboxSlaOverview);
   const [days, setDays] = useState<number>(30);
+  const [fChannel, setFChannel] = useState<string>("");
+  const [fBranch, setFBranch] = useState<string>("");
+  const [fStatus, setFStatus] = useState<string>("");
   const { data, refetch, isFetching } = useSuspenseQuery({
     queryKey: ["inbox", "sla", days],
     queryFn: () => fetchFn({ data: { days } }),
     staleTime: 60_000,
   });
 
+  const filteredBreaches = useMemo(
+    () =>
+      data.breaches.filter(
+        (b) =>
+          (!fChannel || b.channel === fChannel) &&
+          (!fBranch || (b.branch_id ?? "__none__") === fBranch) &&
+          (!fStatus || b.status === fStatus),
+      ),
+    [data.breaches, fChannel, fBranch, fStatus],
+  );
+
+  const branchOptions = useMemo(
+    () => data.byBranch.map((b) => ({ key: b.key, label: b.label })),
+    [data.byBranch],
+  );
+  const channelOptions = useMemo(() => data.byChannel.map((b) => b.key), [data.byChannel]);
+  const statusOptions = useMemo(() => data.byStatus.map((b) => b.key), [data.byStatus]);
+
+  const branchLabelOf = (id: string | null) =>
+    !id
+      ? "بدون فرع"
+      : branchOptions.find((b) => b.key === id)?.label ?? id.slice(0, 8);
+
+  const exportCsv = () => {
+    const header = [
+      "request_number",
+      "patient_name",
+      "channel",
+      "branch",
+      "priority",
+      "status",
+      "kind",
+      "created_at",
+      "age_minutes",
+      "overdue_minutes",
+      "threshold_minutes",
+    ];
+    const esc = (v: unknown) => {
+      const s = v == null ? "" : String(v);
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const lines = [header.join(",")];
+    for (const b of filteredBreaches) {
+      lines.push(
+        [
+          b.request_number,
+          b.patient_name ?? "",
+          CHANNEL_LABELS[b.channel] ?? b.channel,
+          branchLabelOf(b.branch_id),
+          PRIORITY_LABELS[b.priority] ?? b.priority,
+          STATUS_LABELS[b.status] ?? b.status,
+          b.kind === "response" ? "استجابة" : "إنجاز",
+          b.created_at,
+          Math.round(b.ageMs / 60000),
+          Math.round(b.overdueMs / 60000),
+          b.thresholdMin,
+        ]
+          .map(esc)
+          .join(","),
+      );
+    }
+    const blob = new Blob(["\ufeff" + lines.join("\n")], {
+      type: "text/csv;charset=utf-8;",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `sla-breaches-${days}d-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   const breachesByPriority = useMemo(() => {
     const m: Record<string, number> = {};
-    for (const b of data.breaches) m[b.priority] = (m[b.priority] ?? 0) + 1;
+    for (const b of filteredBreaches) m[b.priority] = (m[b.priority] ?? 0) + 1;
     return m;
-  }, [data.breaches]);
+  }, [filteredBreaches]);
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
@@ -139,11 +216,16 @@ function SlaPage() {
 
       {/* Breaches */}
       <Card className="p-4">
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-3 flex-wrap gap-3">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-5 h-5 text-destructive" />
             <h2 className="text-lg font-bold">تنبيهات SLA النشطة</h2>
-            <Badge variant="destructive">{data.breaches.length}</Badge>
+            <Badge variant="destructive">{filteredBreaches.length}</Badge>
+            {filteredBreaches.length !== data.breaches.length && (
+              <span className="text-xs text-muted-foreground">
+                من إجمالي {data.breaches.length}
+              </span>
+            )}
           </div>
           <div className="text-xs text-muted-foreground flex gap-3">
             {Object.entries(breachesByPriority).map(([p, n]) => (
@@ -153,9 +235,75 @@ function SlaPage() {
             ))}
           </div>
         </div>
-        {data.breaches.length === 0 ? (
+
+        {/* Filters + Export */}
+        <div className="flex flex-wrap items-center gap-2 mb-3 text-sm">
+          <select
+            value={fChannel}
+            onChange={(e) => setFChannel(e.target.value)}
+            className="border rounded px-2 py-1 bg-background"
+          >
+            <option value="">كل القنوات</option>
+            {channelOptions.map((k) => (
+              <option key={k} value={k}>
+                {CHANNEL_LABELS[k as keyof typeof CHANNEL_LABELS] ?? k}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fBranch}
+            onChange={(e) => setFBranch(e.target.value)}
+            className="border rounded px-2 py-1 bg-background"
+          >
+            <option value="">كل الفروع</option>
+            {branchOptions.map((b) => (
+              <option key={b.key} value={b.key}>
+                {b.label}
+              </option>
+            ))}
+          </select>
+          <select
+            value={fStatus}
+            onChange={(e) => setFStatus(e.target.value)}
+            className="border rounded px-2 py-1 bg-background"
+          >
+            <option value="">كل الحالات</option>
+            {statusOptions.map((k) => (
+              <option key={k} value={k}>
+                {STATUS_LABELS[k as keyof typeof STATUS_LABELS] ?? k}
+              </option>
+            ))}
+          </select>
+          {(fChannel || fBranch || fStatus) && (
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setFChannel("");
+                setFBranch("");
+                setFStatus("");
+              }}
+            >
+              مسح الفلاتر
+            </Button>
+          )}
+          <div className="ms-auto">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={exportCsv}
+              disabled={filteredBreaches.length === 0}
+            >
+              تصدير CSV ({filteredBreaches.length})
+            </Button>
+          </div>
+        </div>
+
+        {filteredBreaches.length === 0 ? (
           <div className="text-sm text-muted-foreground text-center py-8">
-            لا توجد تجاوزات SLA حالية 🎉
+            {data.breaches.length === 0
+              ? "لا توجد تجاوزات SLA حالية 🎉"
+              : "لا توجد نتائج مطابقة للفلاتر"}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -174,7 +322,7 @@ function SlaPage() {
                 </tr>
               </thead>
               <tbody>
-                {data.breaches.map((b) => (
+                {filteredBreaches.map((b) => (
                   <tr key={`${b.id}-${b.kind}`} className="border-t hover:bg-muted/40">
                     <td className="p-2 font-mono text-xs">{b.request_number}</td>
                     <td className="p-2">{b.patient_name ?? "—"}</td>
@@ -212,6 +360,7 @@ function SlaPage() {
           </div>
         )}
       </Card>
+
     </div>
   );
 }
