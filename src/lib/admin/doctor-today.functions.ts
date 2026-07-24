@@ -93,6 +93,9 @@ export const startVisit = createServerFn({ method: "POST" })
       .maybeSingle();
     if (existing?.id) return { ok: true, visit_id: existing.id };
 
+    if (!appt.patient_id) {
+      throw new Error("لا يمكن بدء الكشف قبل ربط المريض بالحجز.");
+    }
     const { data: visit, error: vErr } = await context.supabase
       .from("patient_visits")
       .insert({
