@@ -120,6 +120,12 @@ const NAV: NavGroup[] = [
         roles: ["admin", "super_admin"],
       },
       {
+        to: "/admin/users",
+        label: "المستخدمون (Admin)",
+        icon: Users,
+        roles: ["admin", "super_admin"],
+      },
+      {
         to: "/admin/schedules",
         label: "الجداول والإجازات",
         icon: ClipboardList,
