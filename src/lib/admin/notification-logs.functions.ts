@@ -24,6 +24,23 @@ export type NotificationDeliveryLog = {
   error_message: string | null;
   attempt: number;
   created_at: string;
+  is_test?: boolean;
+};
+
+export type NotificationDeliveryLogDetail = NotificationDeliveryLog & {
+  updated_at: string;
+  metadata: Record<string, unknown> | null;
+  notification: {
+    id: string;
+    kind: string | null;
+    title: string | null;
+    body: string | null;
+    send_status: string | null;
+    sent_at: string | null;
+    audience: string | null;
+    created_at: string;
+    metadata: Record<string, unknown> | null;
+  } | null;
 };
 
 import { assertConsoleAccess as assertAdmin } from "./_guard";
