@@ -341,10 +341,6 @@ function Metric({
 }
 
 function LogDetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
-  // Lazy-import to keep the drawer isolated
-  const { getIntegrationLog } = require("@/lib/admin/integrations.functions") as typeof import(
-    "@/lib/admin/integrations.functions"
-  );
   const fn = useServerFn(getIntegrationLog);
   const q = useQuery({
     queryKey: ["admin-integration-log", id],
