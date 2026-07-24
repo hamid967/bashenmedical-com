@@ -101,6 +101,30 @@ const NAV: NavGroup[] = [
         icon: MessageSquare,
         roles: ["admin", "reception"],
       },
+      {
+        to: "/admin/appointments",
+        label: "المواعيد (Admin)",
+        icon: CalendarCheck,
+        roles: ["admin", "super_admin"],
+      },
+      {
+        to: "/admin/patients",
+        label: "المرضى (Admin)",
+        icon: Users,
+        roles: ["admin", "super_admin"],
+      },
+      {
+        to: "/admin/schedules",
+        label: "الجداول والإجازات",
+        icon: ClipboardList,
+        roles: ["admin", "super_admin"],
+      },
+      {
+        to: "/admin/reports",
+        label: "التقارير (Admin)",
+        icon: FileText,
+        roles: ["admin", "super_admin"],
+      },
     ],
   },
   {
