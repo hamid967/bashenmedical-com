@@ -129,10 +129,11 @@ async def capture(update_baseline: bool) -> dict:
                     baseline.write_bytes(current.read_bytes())
                     entry["status"] = "baseline_updated"
                 elif baseline.exists():
-                    diff_pct = diff_images(baseline, current, DIFF_DIR / f"{route['name']}.png")
+                    diff_path = DIFF_DIR / f"{route['name']}.png"
+                    diff_pct = diff_images(baseline, current, diff_path)
                     entry["diff_percent"] = diff_pct
                     entry["baseline"] = str(baseline)
-                    entry["diff"] = str(DIF_DIFF_PATH := DIFF_DIR / f"{route['name']}.png")
+                    entry["diff"] = str(diff_path)
                     entry["status"] = "clean" if diff_pct < 0.5 else "changed"
                 else:
                     entry["status"] = "no_baseline"
