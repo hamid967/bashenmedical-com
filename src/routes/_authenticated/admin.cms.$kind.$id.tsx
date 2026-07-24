@@ -38,6 +38,7 @@ function CmsEditor() {
   const previewFn = useServerFn(createCmsPreviewToken);
   const auditFn = useServerFn(listCmsAudit);
   const roleFn = useServerFn(getCmsRoleInfo);
+  const versionFn = useServerFn(getCmsVersion);
 
   const { data } = useSuspenseQuery({
     queryKey: ["cms", "entry", id],
