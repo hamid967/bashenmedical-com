@@ -72,14 +72,15 @@ export function ConfirmDialog({
   return (
     <AlertDialog open={open} onOpenChange={(v) => (!busy ? onOpenChange(v) : null)}>
       <AlertDialogContent aria-busy={busy || undefined}>
-        <AlertDialogHeader>
+        <AlertDialogHeader className="sm:text-start">
           <AlertDialogTitle>{title}</AlertDialogTitle>
           {description ? <AlertDialogDescription>{description}</AlertDialogDescription> : null}
         </AlertDialogHeader>
         {error && (errorMode === "inline" || errorMode === "both") ? (
           <InlineError variant="banner">{error}</InlineError>
         ) : null}
-        <AlertDialogFooter>
+        <AlertDialogFooter className="gap-2 sm:space-x-0">
+
           <AlertDialogCancel disabled={busy} aria-disabled={busy || undefined}>
             {cancelLabel}
           </AlertDialogCancel>
