@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { MediaField } from "@/components/admin/MediaPicker";
+import { useCmsTransitionNotifications } from "@/lib/admin/cms/useCmsTransitionNotifications";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/$kind/$id")({
   head: () => ({ meta: [{ title: "محرر المحتوى" }] }),
@@ -23,6 +24,7 @@ type Tab = "ar" | "en" | "seo" | "schedule" | "history";
 
 function CmsEditor() {
   const { kind, id } = Route.useParams() as { kind: CmsKind; id: string };
+  useCmsTransitionNotifications({ entryId: id });
   const def = CMS_KINDS[kind];
   const qc = useQueryClient();
   const getFn = useServerFn(getCmsEntry);
