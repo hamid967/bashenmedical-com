@@ -224,6 +224,7 @@ function CmsEditor() {
             )
           }
           fetchAudit={() => auditFn({ data: { entry_id: id, limit: 100 } })}
+          fetchVersion={(vid) => versionFn({ data: { entry_id: id, version_id: vid } })}
         />
       )}
 
