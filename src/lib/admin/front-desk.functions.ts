@@ -198,3 +198,215 @@ export const updateQueueStatus = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/* ---------------------- Batch A1: Patient search by identifier ---------------------- */
+
+const patientSearchSchema = z.object({
+  q: z.string().trim().min(2).max(120),
+  branch_id: z.string().uuid().optional(),
+});
+
+/**
+ * Staff-side patient lookup. Matches on MRN, national_id, phone, and
+ * `full_name_*`, plus any row in `patient_identifiers` (Iqama/Passport/etc.).
+ * Restricted to non-demo rows unless the caller flips a future flag.
+ */
+export const searchPatientByIdentifier = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => patientSearchSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...STAFF_ROLES]);
+    const needle = data.q.replace(/[%_]/g, "");
+    const like = `%${needle}%`;
+
+    // 1. Direct match on patients columns.
+    let q = context.supabase
+      .from("patients")
+      .select(
+        "id, mrn, full_name_ar, full_name_en, phone, gender, date_of_birth, national_id, is_active, branch_id",
+      )
+      .eq("is_demo", false)
+      .or(
+        `mrn.ilike.${like},national_id.ilike.${like},phone.ilike.${like},full_name_ar.ilike.${like},full_name_en.ilike.${like}`,
+      )
+      .limit(25);
+    if (data.branch_id) q = q.eq("branch_id", data.branch_id);
+    const { data: direct, error: e1 } = await q;
+    if (e1) throw new Error(e1.message);
+
+    // 2. Match on patient_identifiers (Iqama, Passport, Border, etc.).
+    const { data: idHits, error: e2 } = await context.supabase
+      .from("patient_identifiers")
+      .select("patient_id, id_type, id_value")
+      .ilike("id_value", like)
+      .limit(25);
+    if (e2) throw new Error(e2.message);
+
+    const knownIds = new Set((direct ?? []).map((r: any) => r.id));
+    const missingIds = (idHits ?? [])
+      .map((r: any) => r.patient_id)
+      .filter((id: string) => !knownIds.has(id));
+
+    let extra: any[] = [];
+    if (missingIds.length > 0) {
+      let q2 = context.supabase
+        .from("patients")
+        .select(
+          "id, mrn, full_name_ar, full_name_en, phone, gender, date_of_birth, national_id, is_active, branch_id",
+        )
+        .in("id", missingIds)
+        .eq("is_demo", false);
+      if (data.branch_id) q2 = q2.eq("branch_id", data.branch_id);
+      const { data: rows, error: e3 } = await q2;
+      if (e3) throw new Error(e3.message);
+      extra = rows ?? [];
+    }
+
+    return { rows: [...(direct ?? []), ...extra].slice(0, 25) };
+  });
+
+/* ---------------------- Batch A1: Patient snapshot ---------------------- */
+
+const snapshotSchema = z.object({ patient_id: z.string().uuid() });
+
+/**
+ * Small, read-only patient dossier for the Front Desk snapshot card.
+ * Every fetch is RLS-scoped as the staff user; no admin bypass.
+ */
+export const getPatientSnapshot = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => snapshotSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...STAFF_ROLES]);
+
+    const [patientRes, apptRes, allergyRes, visitRes, insRes] = await Promise.all([
+      context.supabase
+        .from("patients")
+        .select(
+          "id, mrn, full_name_ar, full_name_en, phone, secondary_phone, gender, date_of_birth, blood_type, nationality, national_id, tags, notes",
+        )
+        .eq("id", data.patient_id)
+        .maybeSingle(),
+      context.supabase
+        .from("appointments")
+        .select(
+          "id, reference_number, appointment_date, appointment_time, status, doctor:doctors(name_ar,name_en)",
+        )
+        .eq("patient_id", data.patient_id)
+        .order("appointment_date", { ascending: false })
+        .limit(5),
+      context.supabase
+        .from("patient_allergies")
+        .select("allergen, severity, reaction")
+        .eq("patient_id", data.patient_id)
+        .limit(10),
+      context.supabase
+        .from("patient_visits")
+        .select("id, visit_date, chief_complaint, doctor:doctors(name_ar,name_en)")
+        .eq("patient_id", data.patient_id)
+        .order("visit_date", { ascending: false })
+        .limit(3),
+      context.supabase
+        .from("insurance_verifications")
+        .select("id, status, insurance_provider, verified_at")
+        .eq("patient_id", data.patient_id)
+        .order("verified_at", { ascending: false })
+        .limit(1),
+    ]);
+
+    if (patientRes.error) throw new Error(patientRes.error.message);
+    if (!patientRes.data) throw new Error("المريض غير موجود.");
+
+    return {
+      patient: patientRes.data,
+      recent_appointments: apptRes.data ?? [],
+      allergies: allergyRes.data ?? [],
+      recent_visits: visitRes.data ?? [],
+      insurance: insRes.data?.[0] ?? null,
+    };
+  });
+
+/* ---------------------- Batch A1: Reschedule (staff) ---------------------- */
+
+const rescheduleSchema = z.object({
+  appointment_id: z.string().uuid(),
+  new_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  new_time: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/),
+  reason: z.string().trim().min(3).max(500),
+});
+
+/**
+ * Staff-side reschedule. Unlike the guest endpoint under
+ * `/api/public/reservations/reschedule`, this requires a reason (logged
+ * to `appointment_audit`) and is restricted to admin/reception/branch_manager.
+ * Same-doctor clash check runs before the update; the DB unique index is
+ * the ultimate race-condition guard.
+ */
+export const rescheduleAppointment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => rescheduleSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...STAFF_ROLES]);
+
+    const time = data.new_time.length === 5 ? `${data.new_time}:00` : data.new_time;
+
+    const { data: appt, error: readErr } = await context.supabase
+      .from("appointments")
+      .select("id, status, doctor_id, appointment_date, appointment_time")
+      .eq("id", data.appointment_id)
+      .maybeSingle();
+    if (readErr) throw new Error(readErr.message);
+    if (!appt) throw new Error("الحجز غير موجود.");
+    if (appt.status === "cancelled" || appt.status === "completed") {
+      throw new Error("لا يمكن إعادة جدولة حجز منتهٍ أو ملغى.");
+    }
+
+    if (appt.doctor_id) {
+      const { data: clash } = await context.supabase
+        .from("appointments")
+        .select("id")
+        .eq("doctor_id", appt.doctor_id)
+        .eq("appointment_date", data.new_date)
+        .eq("appointment_time", time)
+        .in("status", ["new", "confirmed"])
+        .neq("id", appt.id)
+        .maybeSingle();
+      if (clash) throw new Error("الوقت الجديد غير متاح. اختر وقتًا آخر.");
+    }
+
+    const { error: updErr } = await context.supabase
+      .from("appointments")
+      .update({
+        appointment_date: data.new_date,
+        appointment_time: time,
+        status: "new",
+        notes: (appt as any).notes
+          ? `${(appt as any).notes}\n[إعادة جدولة] ${data.reason}`
+          : `[إعادة جدولة] ${data.reason}`,
+      })
+      .eq("id", data.appointment_id);
+    if (updErr) {
+      const msg = /duplicate|unique/i.test(updErr.message)
+        ? "الوقت الجديد غير متاح."
+        : "تعذّر تنفيذ إعادة الجدولة.";
+      throw new Error(msg);
+    }
+
+    // Best-effort audit row — trigger `trg_appointments_audit` also logs
+    // status changes, but reschedule keeps status='new' so we insert
+    // explicitly to preserve the reason.
+    try {
+      await context.supabase.from("appointment_audit").insert({
+        appointment_id: data.appointment_id,
+        actor_id: context.userId,
+        action: "rescheduled",
+        reason: data.reason,
+        from_value: `${appt.appointment_date} ${appt.appointment_time}`,
+        to_value: `${data.new_date} ${time}`,
+      });
+    } catch {
+      /* audit best-effort; primary update already committed */
+    }
+
+    return { ok: true };
+  });
