@@ -150,6 +150,40 @@ function NotifLogsPage() {
           </button>
           <button
             type="button"
+            onClick={async () => {
+              try {
+                const res = await exportNotificationDeliveryLogsCsv({
+                  data: {
+                    channel: filters.channel || null,
+                    status: filters.status || null,
+                    q: filters.q ? filters.q : null,
+                    testOnly: filters.testOnly || null,
+                    windowHours: filters.windowHours,
+                    limit: 5000,
+                  },
+                });
+                const blob = new Blob([res.csv], { type: "text/csv;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = res.filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                toast.success(`تم تصدير ${res.count.toLocaleString("ar")} سجل.`);
+              } catch (e) {
+                toast.error((e as Error)?.message || "تعذّر التصدير.");
+              }
+            }}
+            className="inline-flex items-center gap-1.5 rounded-full bg-white border px-3 h-9 text-xs font-semibold hover:bg-slate-50"
+            title="تصدير السجلات المطابقة للفلاتر الحالية إلى ملف CSV"
+          >
+            <Download className="h-3.5 w-3.5" />
+            تصدير CSV
+          </button>
+          <button
+            type="button"
             onClick={() => qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] })}
             className="inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 h-9 text-xs font-semibold"
           >
