@@ -434,3 +434,29 @@ export function UnifiedInboxPage() {
     </div>
   );
 }
+
+function KpiTile({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone?: "amber" | "indigo" | "red";
+}) {
+  const toneCls =
+    tone === "amber"
+      ? "text-amber-700"
+      : tone === "indigo"
+        ? "text-indigo-700"
+        : tone === "red"
+          ? "text-red-700"
+          : "text-foreground";
+  return (
+    <Card className="p-4">
+      <div className="text-xs text-[color:var(--ac-ink-3)]">{label}</div>
+      <div className={`mt-1 text-2xl font-bold ${toneCls}`}>{value}</div>
+    </Card>
+  );
+}
+
