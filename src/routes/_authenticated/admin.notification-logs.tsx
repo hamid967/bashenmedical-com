@@ -24,12 +24,13 @@ import {
   getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
   retryNotificationDeliveryLog,
+  exportNotificationDeliveryLogsCsv,
   type NotificationDeliveryLog,
   type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
 } from "@/lib/admin/notification-logs.functions";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { X, FlaskConical, RotateCw } from "lucide-react";
+import { X, FlaskConical, RotateCw, Download } from "lucide-react";
 import { toast } from "sonner";
 
 /* ------------------------------- queries -------------------------------- */
