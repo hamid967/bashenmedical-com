@@ -369,3 +369,95 @@ export const getNotificationDeliveryStats = createServerFn({ method: "GET" })
       failureRate: total > 0 ? failed / total : 0,
     };
   });
+
+/* --------------------------- 24h KPI header ------------------------------ */
+
+export type NotificationDeliveryKpis = {
+  windowHours: number;
+  total: number;
+  successRate: number; // 0..1 (sent + delivered) / total
+  successCount: number;
+  failedCount: number;
+  pendingCount: number;
+  avgDeliveryMsByChannel: {
+    channel: string;
+    avgMs: number | null;
+    sampleSize: number;
+  }[];
+  topFailureReasons: { reason: string; count: number }[];
+};
+
+const KpisInput = z.object({
+  windowHours: z.number().int().min(1).max(24 * 30).default(24),
+});
+
+export const getNotificationDeliveryKpis = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => KpisInput.parse(d ?? {}))
+  .handler(async ({ data, context }): Promise<NotificationDeliveryKpis> => {
+    await assertAdmin(context);
+    const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
+
+    const { data: rows, error } = await context.supabase
+      .from("notification_delivery_logs")
+      .select("channel, status, error_message, created_at, updated_at")
+      .gte("created_at", since)
+      .limit(10_000);
+    if (error) throw new Error(error.message);
+
+    let total = 0;
+    let successCount = 0;
+    let failedCount = 0;
+    let pendingCount = 0;
+    const durByChannel = new Map<string, { sum: number; n: number }>();
+    const failReasons = new Map<string, number>();
+
+    for (const r of rows ?? []) {
+      total += 1;
+      const status = r.status as string;
+      const channel = r.channel as string;
+      if (status === "sent" || status === "delivered") {
+        successCount += 1;
+        if (r.created_at && r.updated_at) {
+          const ms =
+            new Date(r.updated_at).getTime() - new Date(r.created_at).getTime();
+          if (Number.isFinite(ms) && ms >= 0 && ms < 24 * 3600_000) {
+            const cur = durByChannel.get(channel) ?? { sum: 0, n: 0 };
+            cur.sum += ms;
+            cur.n += 1;
+            durByChannel.set(channel, cur);
+          }
+        }
+      } else if (status === "failed" || status === "bounced") {
+        failedCount += 1;
+        const reason = (r.error_message || "غير محدد").toString().slice(0, 180);
+        failReasons.set(reason, (failReasons.get(reason) ?? 0) + 1);
+      } else if (status === "pending") {
+        pendingCount += 1;
+      }
+    }
+
+    const avgDeliveryMsByChannel = Array.from(durByChannel.entries())
+      .map(([channel, v]) => ({
+        channel,
+        avgMs: v.n > 0 ? Math.round(v.sum / v.n) : null,
+        sampleSize: v.n,
+      }))
+      .sort((a, b) => a.channel.localeCompare(b.channel));
+
+    const topFailureReasons = Array.from(failReasons.entries())
+      .map(([reason, count]) => ({ reason, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+
+    return {
+      windowHours: data.windowHours,
+      total,
+      successRate: total > 0 ? successCount / total : 0,
+      successCount,
+      failedCount,
+      pendingCount,
+      avgDeliveryMsByChannel,
+      topFailureReasons,
+    };
+  });
