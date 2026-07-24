@@ -22,6 +22,29 @@ export { SectionCard, type SectionCardProps } from "./SectionCard";
 export { ConfirmDialog, type ConfirmDialogProps } from "./ConfirmDialog";
 export { FormDialog, type FormDialogProps } from "./FormDialog";
 export { DataTable } from "./DataTable";
+export {
+  Icon,
+  iconRegistry,
+  type IconName,
+  type IconProps,
+  type UnifiedIconProps,
+  // Direct icon components (tree-shakable)
+  Stethoscope,
+  AppointmentCard,
+  PatientHeart,
+  Family,
+  ShieldVerified,
+  MedicalReport,
+  Prescription,
+  LabFlask,
+  Radiology,
+  HomeCare,
+  Ambulance,
+  ChatBubble,
+  InsuranceCard,
+  JazanMark,
+  ArrowForward,
+} from "./Icon";
 
 // Pass-through primitives (no duplication)
 export { Input } from "@/components/ui/input";
