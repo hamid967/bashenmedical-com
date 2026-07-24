@@ -464,6 +464,15 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
         run: python tests/e2e/book_full_flow_hold_release.py
 
+      - name: Run booking RPC review (Batch 2.9)
+        if: steps.verify_secrets.outputs.has_secrets == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: python tests/e2e/book_rpc_review_batch_29.py
+
+
 
       - name: Run portal complaints flow E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
