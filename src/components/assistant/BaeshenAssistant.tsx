@@ -384,6 +384,27 @@ export function BaeshenAssistant() {
                   surface={t("surfaceLabel")}
                   lang={isAr ? "ar" : "en"}
                 />
+                <EscalateToHumanButton
+                  conversationId={conversationId.current}
+                  lang={isAr ? "ar" : "en"}
+                  lastUserMessage={
+                    [...messages].reverse().find((m) => m.role === "user")?.content ?? null
+                  }
+                  lastAiMessage={
+                    [...messages].reverse().find((m) => m.role === "assistant")?.content ?? null
+                  }
+                  disabledReason={
+                    noSave
+                      ? isAr
+                        ? "عطّل «عدم الحفظ» لطلب مساعدة بشرية"
+                        : "Turn off ‘No save’ to request human help"
+                      : !conversationId.current
+                        ? isAr
+                          ? "ابدأ محادثة أولًا"
+                          : "Start a conversation first"
+                        : null
+                  }
+                />
                 <button
                   type="button"
                   onClick={newConversation}
