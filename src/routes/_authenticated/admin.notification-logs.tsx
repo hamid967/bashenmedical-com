@@ -128,6 +128,54 @@ function NotifLogsPage() {
   const s = stats.data;
   const k = kpis.data;
 
+  // ---- Realtime: live updates on new/changed delivery attempts. ----
+  const [liveStatus, setLiveStatus] = useState<
+    "connecting" | "live" | "error" | "off"
+  >("connecting");
+  const [liveBump, setLiveBump] = useState(0);
+  const pendingInvalidateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Debounced invalidation so bursts of inserts collapse into one refetch.
+    const scheduleInvalidate = () => {
+      if (pendingInvalidateRef.current) return;
+      pendingInvalidateRef.current = setTimeout(() => {
+        pendingInvalidateRef.current = null;
+        qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] });
+      }, 400);
+    };
+
+    const channel = supabase
+      .channel("admin-notification-delivery-logs")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notification_delivery_logs",
+        },
+        () => {
+          setLiveBump((n) => n + 1);
+          scheduleInvalidate();
+        },
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setLiveStatus("live");
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT")
+          setLiveStatus("error");
+        else if (status === "CLOSED") setLiveStatus("off");
+      });
+
+    return () => {
+      if (pendingInvalidateRef.current) {
+        clearTimeout(pendingInvalidateRef.current);
+        pendingInvalidateRef.current = null;
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
+
   return (
     <div className="container-app py-6 space-y-6" dir="rtl">
       <header className="flex flex-wrap items-start justify-between gap-3">
