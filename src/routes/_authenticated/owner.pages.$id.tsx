@@ -159,7 +159,7 @@ function PageEditor() {
     <div className="p-6 md:p-8 max-w-5xl" dir="rtl">
       <div className="flex items-center justify-between mb-6 gap-3">
         <div className="flex items-center gap-3">
-          <Button asChild variant="ghost" size="icon">
+          <Button asChild variant="ghost" size="icon" aria-label="رجوع إلى الصفحات">
             <Link to="/owner/pages">
               <ArrowRight className="h-4 w-4" />
             </Link>
