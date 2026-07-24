@@ -166,7 +166,7 @@ function CmsEditor() {
           <TextInput label="Canonical URL" value={seo.canonical ?? ""} onChange={(v) => setSeo({ ...seo, canonical: v })} />
           <TextInput label="og:title" value={seo.og_title ?? ""} onChange={(v) => setSeo({ ...seo, og_title: v })} />
           <TextInput label="og:description" value={seo.og_description ?? ""} onChange={(v) => setSeo({ ...seo, og_description: v })} textarea />
-          <TextInput label="og:image URL" value={ogImage} onChange={setOgImage} />
+          <MediaField label="og:image" value={ogImage} onChange={setOgImage} />
         </Card>
       )}
 
