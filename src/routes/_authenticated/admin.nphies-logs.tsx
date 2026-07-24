@@ -7,16 +7,24 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw, ShieldCheck, ShieldAlert, Timer, AlertTriangle } from "lucide-react";
-import { getNphiesLogs } from "@/lib/admin/nphies.functions";
+import { getNphiesLogs, getNphiesConfig } from "@/lib/admin/nphies.functions";
 
 const WINDOWS = [1, 6, 24, 24 * 7, 24 * 30];
+const MODES = ["all", "mock", "sandbox", "live"] as const;
+type ModeFilter = (typeof MODES)[number];
 
-const logsQuery = (windowHours: number) =>
+const logsQuery = (windowHours: number, mode: ModeFilter) =>
   queryOptions({
-    queryKey: ["admin", "nphies-logs", windowHours],
-    queryFn: () => getNphiesLogs({ data: { windowHours, limit: 200 } }),
+    queryKey: ["admin", "nphies-logs", windowHours, mode],
+    queryFn: () => getNphiesLogs({ data: { windowHours, limit: 200, mode } }),
     staleTime: 30_000,
   });
+
+const configQuery = queryOptions({
+  queryKey: ["admin", "nphies-config"],
+  queryFn: () => getNphiesConfig(),
+  staleTime: 60_000,
+});
 
 export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
   head: () => ({
@@ -25,7 +33,11 @@ export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
       { name: "robots", content: "noindex" },
     ],
   }),
-  loader: ({ context }) => context.queryClient.ensureQueryData(logsQuery(24)),
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.ensureQueryData(logsQuery(24, "all")),
+      context.queryClient.ensureQueryData(configQuery),
+    ]),
   component: NphiesLogsPage,
   errorComponent: ({ error }) => (
     <div className="p-6 text-sm text-destructive">تعذّر تحميل سجلات التأمين: {error.message}</div>
@@ -35,8 +47,10 @@ export const Route = createFileRoute("/_authenticated/admin/nphies-logs")({
 
 function NphiesLogsPage() {
   const [windowHours, setWindowHours] = useState(24);
+  const [modeFilter, setModeFilter] = useState<ModeFilter>("all");
   const qc = useQueryClient();
-  const { data } = useSuspenseQuery(logsQuery(windowHours));
+  const { data } = useSuspenseQuery(logsQuery(windowHours, modeFilter));
+  const { data: cfg } = useSuspenseQuery(configQuery);
 
   return (
     <div className="p-6 space-y-6">
@@ -70,6 +84,64 @@ function NphiesLogsPage() {
           </button>
         </div>
       </header>
+
+      <section
+        className={`rounded-xl border p-4 ${
+          cfg.ready
+            ? "border-border bg-background"
+            : "border-amber-300 bg-amber-50 text-amber-900"
+        }`}
+      >
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h2 className="text-sm font-semibold">حالة تكوين NPHIES</h2>
+            <p className="text-xs mt-1 opacity-80">
+              المطلوب: <span className="font-mono">{cfg.requested_mode}</span> · الفعّال:{" "}
+              <span
+                className={`font-mono px-1.5 py-0.5 rounded ${
+                  cfg.effective_mode === "live"
+                    ? "bg-emerald-100 text-emerald-900"
+                    : cfg.effective_mode === "sandbox"
+                      ? "bg-amber-100 text-amber-900"
+                      : "bg-muted"
+                }`}
+              >
+                {cfg.effective_mode}
+              </span>
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 text-xs">
+            <ConfigBadge ok={cfg.has_base_url} label="BASE_URL" />
+            <ConfigBadge ok={cfg.has_client_id} label="CLIENT_ID" />
+            <ConfigBadge ok={cfg.has_client_secret} label="CLIENT_SECRET" />
+            <ConfigBadge ok={cfg.live_allowed} label="ALLOW_LIVE" />
+          </div>
+        </div>
+        {cfg.warnings.length > 0 && (
+          <ul className="mt-3 text-xs list-disc ps-5 space-y-0.5">
+            {cfg.warnings.map((w, i) => (
+              <li key={i}>{w}</li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      <section className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-muted-foreground">تصفية حسب المصدر:</span>
+        {MODES.map((m) => (
+          <button
+            key={m}
+            onClick={() => setModeFilter(m)}
+            className={`px-2.5 py-1 text-xs rounded-md border ${
+              modeFilter === m
+                ? "bg-primary text-primary-foreground border-primary"
+                : "bg-background hover:bg-muted"
+            }`}
+          >
+            {m}
+          </button>
+        ))}
+      </section>
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <Kpi label="إجمالي الطلبات" value={data.total} icon={Timer} />
@@ -205,5 +277,19 @@ function Kpi({
       </div>
       <div className="text-2xl font-bold font-mono mt-2">{value}</div>
     </div>
+  );
+}
+
+function ConfigBadge({ ok, label }: { ok: boolean; label: string }) {
+  return (
+    <span
+      className={`px-1.5 py-0.5 rounded font-mono ${
+        ok
+          ? "bg-emerald-100 text-emerald-900"
+          : "bg-muted text-muted-foreground line-through"
+      }`}
+    >
+      {label}
+    </span>
   );
 }
