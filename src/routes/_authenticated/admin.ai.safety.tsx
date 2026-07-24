@@ -30,7 +30,7 @@ const getSafetyIncidents = createServerFn({ method: "GET" })
     const since = new Date(Date.now() - data.hours * 3600 * 1000).toISOString();
     let query = context.supabase
       .from("ai_safety_incidents")
-      .select("id, conversation_id, actor, kind, severity, action_taken, details, created_at")
+      .select("id, conversation_id, actor, kind, severity, action_taken, created_at")
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(500);
