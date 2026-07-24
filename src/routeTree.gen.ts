@@ -122,6 +122,7 @@ import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
+import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin.appointments'
 import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_authenticated/admin.booking-funnel'
@@ -139,9 +140,12 @@ import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_aut
 import { Route as AuthenticatedAdminNotificationLogsRouteImport } from './routes/_authenticated/admin.notification-logs'
 import { Route as AuthenticatedAdminNotificationsRouteImport } from './routes/_authenticated/admin.notifications'
 import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_authenticated/admin.nphies-logs'
+import { Route as AuthenticatedAdminPatientsRouteImport } from './routes/_authenticated/admin.patients'
 import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
+import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
 import { Route as AuthenticatedAdminRolePermissionsMatrixRouteImport } from './routes/_authenticated/admin.role-permissions-matrix'
+import { Route as AuthenticatedAdminSchedulesRouteImport } from './routes/_authenticated/admin.schedules'
 import { Route as AuthenticatedAdminServiceCatalogRouteImport } from './routes/_authenticated/admin.service-catalog'
 import { Route as AuthenticatedAdminServiceInquiriesRouteImport } from './routes/_authenticated/admin.service-inquiries'
 import { Route as AuthenticatedAdminServicesHealthRouteImport } from './routes/_authenticated/admin.services-health'
@@ -202,8 +206,10 @@ import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
+import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_authenticated/admin.appointments.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
 import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './routes/_authenticated/admin.insurance.$approvalId'
+import { Route as AuthenticatedAdminPatientsIdRouteImport } from './routes/_authenticated/admin.patients.$id'
 import { Route as AuthenticatedAdminSuperJazanVisualRouteImport } from './routes/_authenticated/admin.super.jazan-visual'
 import { Route as AuthenticatedAdminSuperMonitoringRouteImport } from './routes/_authenticated/admin.super.monitoring'
 import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes/_authenticated/admin.super.permissions'
@@ -840,6 +846,12 @@ const AuthenticatedAdminAiUsageRoute =
     path: '/ai-usage',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAppointmentsRoute =
+  AuthenticatedAdminAppointmentsRouteImport.update({
+    id: '/appointments',
+    path: '/appointments',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAuditLogsRoute =
   AuthenticatedAdminAuditLogsRouteImport.update({
     id: '/audit-logs',
@@ -941,10 +953,22 @@ const AuthenticatedAdminNphiesLogsRoute =
     path: '/nphies-logs',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminPatientsRoute =
+  AuthenticatedAdminPatientsRouteImport.update({
+    id: '/patients',
+    path: '/patients',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminRealtimeMonitorRoute =
   AuthenticatedAdminRealtimeMonitorRouteImport.update({
     id: '/realtime-monitor',
     path: '/realtime-monitor',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminReportsRoute =
+  AuthenticatedAdminReportsRouteImport.update({
+    id: '/reports',
+    path: '/reports',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminReservationsUsageRoute =
@@ -957,6 +981,12 @@ const AuthenticatedAdminRolePermissionsMatrixRoute =
   AuthenticatedAdminRolePermissionsMatrixRouteImport.update({
     id: '/role-permissions-matrix',
     path: '/role-permissions-matrix',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSchedulesRoute =
+  AuthenticatedAdminSchedulesRouteImport.update({
+    id: '/schedules',
+    path: '/schedules',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminServiceCatalogRoute =
@@ -1310,6 +1340,12 @@ const AuthenticatedAdminAiOverviewRoute =
     path: '/ai/overview',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAppointmentsIdRoute =
+  AuthenticatedAdminAppointmentsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminAppointmentsRoute,
+  } as any)
 const AuthenticatedAdminBillingInvoiceIdRoute =
   AuthenticatedAdminBillingInvoiceIdRouteImport.update({
     id: '/$invoiceId',
@@ -1321,6 +1357,12 @@ const AuthenticatedAdminInsuranceApprovalIdRoute =
     id: '/$approvalId',
     path: '/$approvalId',
     getParentRoute: () => AuthenticatedAdminInsuranceRoute,
+  } as any)
+const AuthenticatedAdminPatientsIdRoute =
+  AuthenticatedAdminPatientsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminPatientsRoute,
   } as any)
 const AuthenticatedAdminSuperJazanVisualRoute =
   AuthenticatedAdminSuperJazanVisualRouteImport.update({
@@ -1667,6 +1709,7 @@ export interface FileRoutesByFullPath {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
+  '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
@@ -1684,9 +1727,12 @@ export interface FileRoutesByFullPath {
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
+  '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
+  '/admin/schedules': typeof AuthenticatedAdminSchedulesRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
@@ -1748,8 +1794,10 @@ export interface FileRoutesByFullPath {
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
+  '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -1898,6 +1946,7 @@ export interface FileRoutesByTo {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
+  '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
@@ -1915,9 +1964,12 @@ export interface FileRoutesByTo {
   '/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
+  '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
+  '/admin/schedules': typeof AuthenticatedAdminSchedulesRoute
   '/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
@@ -1979,8 +2031,10 @@ export interface FileRoutesByTo {
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
+  '/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2136,6 +2190,7 @@ export interface FileRoutesById {
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
+  '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
   '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/_authenticated/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
@@ -2153,9 +2208,12 @@ export interface FileRoutesById {
   '/_authenticated/admin/notification-logs': typeof AuthenticatedAdminNotificationLogsRoute
   '/_authenticated/admin/notifications': typeof AuthenticatedAdminNotificationsRoute
   '/_authenticated/admin/nphies-logs': typeof AuthenticatedAdminNphiesLogsRoute
+  '/_authenticated/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
   '/_authenticated/admin/role-permissions-matrix': typeof AuthenticatedAdminRolePermissionsMatrixRoute
+  '/_authenticated/admin/schedules': typeof AuthenticatedAdminSchedulesRoute
   '/_authenticated/admin/service-catalog': typeof AuthenticatedAdminServiceCatalogRoute
   '/_authenticated/admin/service-inquiries': typeof AuthenticatedAdminServiceInquiriesRoute
   '/_authenticated/admin/services-health': typeof AuthenticatedAdminServicesHealthRoute
@@ -2217,8 +2275,10 @@ export interface FileRoutesById {
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/_authenticated/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/_authenticated/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
+  '/_authenticated/admin/patients/$id': typeof AuthenticatedAdminPatientsIdRoute
   '/_authenticated/admin/super/jazan-visual': typeof AuthenticatedAdminSuperJazanVisualRoute
   '/_authenticated/admin/super/monitoring': typeof AuthenticatedAdminSuperMonitoringRoute
   '/_authenticated/admin/super/permissions': typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -2374,6 +2434,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
+    | '/admin/appointments'
     | '/admin/audit-logs'
     | '/admin/billing'
     | '/admin/booking-funnel'
@@ -2391,9 +2452,12 @@ export interface FileRouteTypes {
     | '/admin/notification-logs'
     | '/admin/notifications'
     | '/admin/nphies-logs'
+    | '/admin/patients'
     | '/admin/realtime-monitor'
+    | '/admin/reports'
     | '/admin/reservations-usage'
     | '/admin/role-permissions-matrix'
+    | '/admin/schedules'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/services-health'
@@ -2455,8 +2519,10 @@ export interface FileRouteTypes {
     | '/patients/'
     | '/portal/'
     | '/admin/ai/overview'
+    | '/admin/appointments/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/insurance/$approvalId'
+    | '/admin/patients/$id'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2605,6 +2671,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
+    | '/admin/appointments'
     | '/admin/audit-logs'
     | '/admin/billing'
     | '/admin/booking-funnel'
@@ -2622,9 +2689,12 @@ export interface FileRouteTypes {
     | '/admin/notification-logs'
     | '/admin/notifications'
     | '/admin/nphies-logs'
+    | '/admin/patients'
     | '/admin/realtime-monitor'
+    | '/admin/reports'
     | '/admin/reservations-usage'
     | '/admin/role-permissions-matrix'
+    | '/admin/schedules'
     | '/admin/service-catalog'
     | '/admin/service-inquiries'
     | '/admin/services-health'
@@ -2686,8 +2756,10 @@ export interface FileRouteTypes {
     | '/patients'
     | '/portal'
     | '/admin/ai/overview'
+    | '/admin/appointments/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/insurance/$approvalId'
+    | '/admin/patients/$id'
     | '/admin/super/jazan-visual'
     | '/admin/super/monitoring'
     | '/admin/super/permissions'
@@ -2842,6 +2914,7 @@ export interface FileRouteTypes {
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/ai-usage'
+    | '/_authenticated/admin/appointments'
     | '/_authenticated/admin/audit-logs'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/booking-funnel'
@@ -2859,9 +2932,12 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/notification-logs'
     | '/_authenticated/admin/notifications'
     | '/_authenticated/admin/nphies-logs'
+    | '/_authenticated/admin/patients'
     | '/_authenticated/admin/realtime-monitor'
+    | '/_authenticated/admin/reports'
     | '/_authenticated/admin/reservations-usage'
     | '/_authenticated/admin/role-permissions-matrix'
+    | '/_authenticated/admin/schedules'
     | '/_authenticated/admin/service-catalog'
     | '/_authenticated/admin/service-inquiries'
     | '/_authenticated/admin/services-health'
@@ -2923,8 +2999,10 @@ export interface FileRouteTypes {
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/ai/overview'
+    | '/_authenticated/admin/appointments/$id'
     | '/_authenticated/admin/billing/$invoiceId'
     | '/_authenticated/admin/insurance/$approvalId'
+    | '/_authenticated/admin/patients/$id'
     | '/_authenticated/admin/super/jazan-visual'
     | '/_authenticated/admin/super/monitoring'
     | '/_authenticated/admin/super/permissions'
@@ -3851,6 +3929,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiUsageRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/appointments': {
+      id: '/_authenticated/admin/appointments'
+      path: '/appointments'
+      fullPath: '/admin/appointments'
+      preLoaderRoute: typeof AuthenticatedAdminAppointmentsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/audit-logs': {
       id: '/_authenticated/admin/audit-logs'
       path: '/audit-logs'
@@ -3970,11 +4055,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminNphiesLogsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/patients': {
+      id: '/_authenticated/admin/patients'
+      path: '/patients'
+      fullPath: '/admin/patients'
+      preLoaderRoute: typeof AuthenticatedAdminPatientsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/realtime-monitor': {
       id: '/_authenticated/admin/realtime-monitor'
       path: '/realtime-monitor'
       fullPath: '/admin/realtime-monitor'
       preLoaderRoute: typeof AuthenticatedAdminRealtimeMonitorRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/reports': {
+      id: '/_authenticated/admin/reports'
+      path: '/reports'
+      fullPath: '/admin/reports'
+      preLoaderRoute: typeof AuthenticatedAdminReportsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/reservations-usage': {
@@ -3989,6 +4088,13 @@ declare module '@tanstack/react-router' {
       path: '/role-permissions-matrix'
       fullPath: '/admin/role-permissions-matrix'
       preLoaderRoute: typeof AuthenticatedAdminRolePermissionsMatrixRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/schedules': {
+      id: '/_authenticated/admin/schedules'
+      path: '/schedules'
+      fullPath: '/admin/schedules'
+      preLoaderRoute: typeof AuthenticatedAdminSchedulesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/service-catalog': {
@@ -4411,6 +4517,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiOverviewRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/appointments/$id': {
+      id: '/_authenticated/admin/appointments/$id'
+      path: '/$id'
+      fullPath: '/admin/appointments/$id'
+      preLoaderRoute: typeof AuthenticatedAdminAppointmentsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminAppointmentsRoute
+    }
     '/_authenticated/admin/billing/$invoiceId': {
       id: '/_authenticated/admin/billing/$invoiceId'
       path: '/$invoiceId'
@@ -4424,6 +4537,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/insurance/$approvalId'
       preLoaderRoute: typeof AuthenticatedAdminInsuranceApprovalIdRouteImport
       parentRoute: typeof AuthenticatedAdminInsuranceRoute
+    }
+    '/_authenticated/admin/patients/$id': {
+      id: '/_authenticated/admin/patients/$id'
+      path: '/$id'
+      fullPath: '/admin/patients/$id'
+      preLoaderRoute: typeof AuthenticatedAdminPatientsIdRouteImport
+      parentRoute: typeof AuthenticatedAdminPatientsRoute
     }
     '/_authenticated/admin/super/jazan-visual': {
       id: '/_authenticated/admin/super/jazan-visual'
@@ -4708,6 +4828,21 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminAppointmentsRouteChildren {
+  AuthenticatedAdminAppointmentsIdRoute: typeof AuthenticatedAdminAppointmentsIdRoute
+}
+
+const AuthenticatedAdminAppointmentsRouteChildren: AuthenticatedAdminAppointmentsRouteChildren =
+  {
+    AuthenticatedAdminAppointmentsIdRoute:
+      AuthenticatedAdminAppointmentsIdRoute,
+  }
+
+const AuthenticatedAdminAppointmentsRouteWithChildren =
+  AuthenticatedAdminAppointmentsRoute._addFileChildren(
+    AuthenticatedAdminAppointmentsRouteChildren,
+  )
+
 interface AuthenticatedAdminBillingRouteChildren {
   AuthenticatedAdminBillingInvoiceIdRoute: typeof AuthenticatedAdminBillingInvoiceIdRoute
 }
@@ -4738,6 +4873,20 @@ const AuthenticatedAdminInsuranceRouteWithChildren =
     AuthenticatedAdminInsuranceRouteChildren,
   )
 
+interface AuthenticatedAdminPatientsRouteChildren {
+  AuthenticatedAdminPatientsIdRoute: typeof AuthenticatedAdminPatientsIdRoute
+}
+
+const AuthenticatedAdminPatientsRouteChildren: AuthenticatedAdminPatientsRouteChildren =
+  {
+    AuthenticatedAdminPatientsIdRoute: AuthenticatedAdminPatientsIdRoute,
+  }
+
+const AuthenticatedAdminPatientsRouteWithChildren =
+  AuthenticatedAdminPatientsRoute._addFileChildren(
+    AuthenticatedAdminPatientsRouteChildren,
+  )
+
 interface AuthenticatedAdminSuperPermissionsRouteChildren {
   AuthenticatedAdminSuperPermissionsAuditRoute: typeof AuthenticatedAdminSuperPermissionsAuditRoute
 }
@@ -4756,6 +4905,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
+  AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRouteWithChildren
   AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRouteWithChildren
   AuthenticatedAdminBookingFunnelRoute: typeof AuthenticatedAdminBookingFunnelRoute
@@ -4773,9 +4923,12 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminNotificationLogsRoute: typeof AuthenticatedAdminNotificationLogsRoute
   AuthenticatedAdminNotificationsRoute: typeof AuthenticatedAdminNotificationsRoute
   AuthenticatedAdminNphiesLogsRoute: typeof AuthenticatedAdminNphiesLogsRoute
+  AuthenticatedAdminPatientsRoute: typeof AuthenticatedAdminPatientsRouteWithChildren
   AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
+  AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
   AuthenticatedAdminRolePermissionsMatrixRoute: typeof AuthenticatedAdminRolePermissionsMatrixRoute
+  AuthenticatedAdminSchedulesRoute: typeof AuthenticatedAdminSchedulesRoute
   AuthenticatedAdminServiceCatalogRoute: typeof AuthenticatedAdminServiceCatalogRoute
   AuthenticatedAdminServiceInquiriesRoute: typeof AuthenticatedAdminServiceInquiriesRoute
   AuthenticatedAdminServicesHealthRoute: typeof AuthenticatedAdminServicesHealthRoute
@@ -4792,6 +4945,8 @@ interface AuthenticatedAdminRouteChildren {
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
   AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
+  AuthenticatedAdminAppointmentsRoute:
+    AuthenticatedAdminAppointmentsRouteWithChildren,
   AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRouteWithChildren,
   AuthenticatedAdminBookingFunnelRoute: AuthenticatedAdminBookingFunnelRoute,
@@ -4812,12 +4967,15 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
     AuthenticatedAdminNotificationLogsRoute,
   AuthenticatedAdminNotificationsRoute: AuthenticatedAdminNotificationsRoute,
   AuthenticatedAdminNphiesLogsRoute: AuthenticatedAdminNphiesLogsRoute,
+  AuthenticatedAdminPatientsRoute: AuthenticatedAdminPatientsRouteWithChildren,
   AuthenticatedAdminRealtimeMonitorRoute:
     AuthenticatedAdminRealtimeMonitorRoute,
+  AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminReservationsUsageRoute:
     AuthenticatedAdminReservationsUsageRoute,
   AuthenticatedAdminRolePermissionsMatrixRoute:
     AuthenticatedAdminRolePermissionsMatrixRoute,
+  AuthenticatedAdminSchedulesRoute: AuthenticatedAdminSchedulesRoute,
   AuthenticatedAdminServiceCatalogRoute: AuthenticatedAdminServiceCatalogRoute,
   AuthenticatedAdminServiceInquiriesRoute:
     AuthenticatedAdminServiceInquiriesRoute,
