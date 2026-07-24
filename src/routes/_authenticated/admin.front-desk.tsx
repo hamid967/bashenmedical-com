@@ -151,6 +151,13 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
   const listFn = useServerFn(listTodayAppointments);
   const statusFn = useServerFn(updateAppointmentStatus);
   const [q, setQ] = useState("");
+  const [snapshotPatientId, setSnapshotPatientId] = useState<string | null>(null);
+  const [rescheduleAppt, setRescheduleAppt] = useState<{
+    id: string;
+    patient_name: string | null;
+    appointment_date: string | null;
+    appointment_time: string | null;
+  } | null>(null);
   const qc = useQueryClient();
 
   const query = useQuery({
@@ -177,6 +184,16 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
     },
   });
 
+  const askReason = (label: string): string | null => {
+    const raw = window.prompt(`${label} — السبب مطلوب:`);
+    const reason = (raw ?? "").trim();
+    if (reason.length < 3) {
+      alert("يجب إدخال سبب لا يقل عن 3 أحرف.");
+      return null;
+    }
+    return reason;
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -185,8 +202,8 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
           <input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="بحث بالاسم / الجوال / الرقم المرجعي"
-            className="h-9 w-72 rounded-md border bg-background ps-8 pe-2 text-sm"
+            placeholder="بحث بالاسم / MRN / الجوال / الرقم المرجعي / الهوية"
+            className="h-9 w-96 rounded-md border bg-background ps-8 pe-2 text-sm"
           />
         </div>
         <button
@@ -230,7 +247,19 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                   <td className="p-3 font-mono text-xs">
                     {r.reference_number ?? r.id.slice(0, 8)}
                   </td>
-                  <td className="p-3">{r.patient_name ?? "—"}</td>
+                  <td className="p-3">
+                    {r.patient_id ? (
+                      <button
+                        type="button"
+                        onClick={() => setSnapshotPatientId(r.patient_id)}
+                        className="text-start underline-offset-2 hover:underline"
+                      >
+                        {r.patient_name ?? "—"}
+                      </button>
+                    ) : (
+                      (r.patient_name ?? "—")
+                    )}
+                  </td>
                   <td className="p-3 font-mono text-xs">{r.patient_phone ?? "—"}</td>
                   <td className="p-3">
                     {r.doctor?.name_ar ?? r.doctor?.name_en ?? "—"}
@@ -266,13 +295,32 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                         label="حضور"
                       />
                       <ActionBtn
-                        disabled={mutate.isPending || r.status === "no_show"}
+                        disabled={
+                          mutate.isPending ||
+                          ["completed", "cancelled", "no_show"].includes(r.status)
+                        }
                         onClick={() =>
+                          setRescheduleAppt({
+                            id: r.id,
+                            patient_name: r.patient_name,
+                            appointment_date: r.appointment_date,
+                            appointment_time: r.appointment_time,
+                          })
+                        }
+                        icon={<CalendarClock className="h-3.5 w-3.5" />}
+                        label="جدولة"
+                      />
+                      <ActionBtn
+                        disabled={mutate.isPending || r.status === "no_show"}
+                        onClick={() => {
+                          const reason = askReason("لم يحضر");
+                          if (!reason) return;
                           mutate.mutate({
                             appointment_id: r.id,
                             status: "no_show",
-                          })
-                        }
+                            reason,
+                          });
+                        }}
                         icon={<UserX className="h-3.5 w-3.5" />}
                         label="لم يحضر"
                         variant="warn"
@@ -280,7 +328,8 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                       <ActionBtn
                         disabled={mutate.isPending || r.status === "cancelled"}
                         onClick={() => {
-                          const reason = window.prompt("سبب الإلغاء (اختياري):") ?? undefined;
+                          const reason = askReason("إلغاء الحجز");
+                          if (!reason) return;
                           mutate.mutate({
                             appointment_id: r.id,
                             status: "cancelled",
@@ -299,6 +348,24 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
           </table>
         </div>
       )}
+
+      {snapshotPatientId ? (
+        <PatientSnapshotDialog
+          patientId={snapshotPatientId}
+          onClose={() => setSnapshotPatientId(null)}
+        />
+      ) : null}
+      {rescheduleAppt ? (
+        <RescheduleDialog
+          appointment={rescheduleAppt}
+          onClose={() => setRescheduleAppt(null)}
+          onSuccess={() => {
+            setRescheduleAppt(null);
+            qc.invalidateQueries({ queryKey: ["front-desk", "today"] });
+            qc.invalidateQueries({ queryKey: ["front-desk", "queue"] });
+          }}
+        />
+      ) : null}
     </div>
   );
 }
