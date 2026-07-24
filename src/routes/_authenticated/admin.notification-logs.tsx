@@ -21,10 +21,14 @@ import {
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 import {
   getNotificationDeliveryStats,
+  getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
   type NotificationDeliveryLog,
+  type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
 } from "@/lib/admin/notification-logs.functions";
+import { useQuery } from "@tanstack/react-query";
+import { X, FlaskConical } from "lucide-react";
 
 /* ------------------------------- queries -------------------------------- */
 
