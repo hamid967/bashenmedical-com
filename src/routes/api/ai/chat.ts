@@ -268,19 +268,44 @@ export const Route = createFileRoute("/api/ai/chat")({
             m.role === "user" ? maskSensitive(m.content).slice(0, 4000) : m.content.slice(0, 4000),
         }));
 
+        const staffMutationsOn =
+          scope === "staff" ? await getFeatureFlag("ai.assistant.staff.mutations.enabled") : false;
+
         const baseSystem = scope === "staff" ? SYSTEM_BASE_STAFF_AR : SYSTEM_BASE_AR;
         const systemMessages: { role: "system"; content: string }[] = [
           { role: "system", content: baseSystem },
           { role: "system", content: publicKnowledge },
         ];
         if (snapshot) systemMessages.push({ role: "system", content: snapshot });
+
+        if (scope === "staff" && staffMutationsOn) {
+          systemMessages.push({
+            role: "system",
+            content: `تفعيل مرحلي: يمكنك اقتراح إجراء تعديلي واحد فقط من القائمة التالية عبر كتلة \`\`\`action ثم انتظار تأكيد الموظف من الواجهة. أي إجراء آخر ممنوع.
+
+الأدوات المسموحة للموظف (mutation):
+- staff_add_inbox_note: إضافة ملاحظة داخلية على عنصر في الصندوق الموحد. لا تُرسَل للمريض. تتطلب inbox_item_id (UUID) و note (نص 1..2000).
+
+قواعد صارمة:
+1. لا تقترح إجراء إلا إذا طلب الموظف ذلك صراحة.
+2. اذكر في summary التغيير الفعلي والحقول المتأثرة والسبب.
+3. لا تخترع inbox_item_id — إن لم يوفّره الموظف اطلبه أولًا.
+4. صيغة الاقتراح:
+\`\`\`action
+{"tool":"staff_add_inbox_note","label":"إضافة ملاحظة","summary":"سيتم توثيق ملاحظة داخلية على الطلب X.","params":{"inbox_item_id":"<uuid>","note":"..."}}
+\`\`\`
+5. سيمر كل تنفيذ عبر خطوتين: prepare ثم execute مع confirm_token — أنت لا تنفّذ، الواجهة هي من تنفّذ بعد ضغط الموظف "تأكيد".`,
+          });
+        }
+
         systemMessages.push({
           role: "system",
           content:
             scope === "staff"
-              ? `النطاق الحالي: staff (قراءة فقط). الأدوار: ${staffRoles.join(", ") || "unknown"}. اللغة: ${lang}. ممنوع كتلة action.`
+              ? `النطاق الحالي: staff. الأدوار: ${staffRoles.join(", ") || "unknown"}. اللغة: ${lang}. ${staffMutationsOn ? "الأدوات التعديلية مفعّلة بتأكيد صريح لكل خطوة." : "قراءة فقط — ممنوع كتلة action."}`
               : `النطاق الحالي: ${scope}. اللغة: ${lang}. لا تُنفّذ أي إجراء تعديلي؛ اقترح فقط.`,
         });
+
 
 
         const resumePartial =
