@@ -256,8 +256,9 @@ export const Route = createFileRoute("/api/ai/chat")({
         if (auth) {
           snapshot =
             scope === "staff"
-              ? await loadStaffSnapshot(auth.userId, auth.token, staffRoles as never)
+              ? await loadStaffSnapshot(auth.userId, auth.token, staffRoles)
               : await loadPatientSnapshot(auth.userId, auth.token);
+
         }
 
         // Mask sensitive tokens in each user message before sending upstream
