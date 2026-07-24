@@ -29,7 +29,7 @@ export type NotificationDeliveryLog = {
 
 export type NotificationDeliveryLogDetail = NotificationDeliveryLog & {
   updated_at: string;
-  metadata: Record<string, unknown> | null;
+  metadata: Record<string, any> | null;
   notification: {
     id: string;
     kind: string | null;
@@ -39,7 +39,7 @@ export type NotificationDeliveryLogDetail = NotificationDeliveryLog & {
     sent_at: string | null;
     audience: string | null;
     created_at: string;
-    metadata: Record<string, unknown> | null;
+    metadata: Record<string, any> | null;
   } | null;
 };
 
@@ -86,8 +86,8 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return (rows ?? []).map((r) => {
-      const meta = (r as { metadata?: Record<string, unknown> | null }).metadata;
-      const is_test = !!(meta && (meta as Record<string, unknown>).test === true);
+      const meta = (r as { metadata?: Record<string, any> | null }).metadata;
+      const is_test = !!(meta && (meta as Record<string, any>).test === true);
       return { ...(r as object), is_test } as NotificationDeliveryLog;
     });
   });
@@ -121,12 +121,12 @@ export const getNotificationDeliveryLogDetail = createServerFn({ method: "GET" }
       if (n) {
         notification = {
           ...n,
-          metadata: (n.metadata as Record<string, unknown> | null) ?? null,
+          metadata: (n.metadata as Record<string, any> | null) ?? null,
         };
       }
     }
 
-    const meta = (log.metadata as Record<string, unknown> | null) ?? null;
+    const meta = (log.metadata as Record<string, any> | null) ?? null;
     return {
       ...(log as object),
       metadata: meta,
