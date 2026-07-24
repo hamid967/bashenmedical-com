@@ -7413,6 +7413,7 @@ export type Database = {
         | "support_agent"
         | "content_manager"
         | "auditor"
+        | "editor"
       appointment_status:
         | "new"
         | "confirmed"
@@ -7696,6 +7697,7 @@ export const Constants = {
         "support_agent",
         "content_manager",
         "auditor",
+        "editor",
       ],
       appointment_status: [
         "new",
