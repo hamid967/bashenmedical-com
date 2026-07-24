@@ -23,12 +23,14 @@ import {
   getNotificationDeliveryStats,
   getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
+  retryNotificationDeliveryLog,
   type NotificationDeliveryLog,
   type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
 } from "@/lib/admin/notification-logs.functions";
-import { useQuery } from "@tanstack/react-query";
-import { X, FlaskConical } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { X, FlaskConical, RotateCw } from "lucide-react";
+import { toast } from "sonner";
 
 /* ------------------------------- queries -------------------------------- */
 
@@ -224,6 +226,20 @@ function LogDetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
 
 function LogDetailBody({ detail }: { detail: NotificationDeliveryLogDetail }) {
   const n = detail.notification;
+  const qc = useQueryClient();
+  const canRetry = ["failed", "bounced", "skipped"].includes(detail.status);
+  const retry = useMutation({
+    mutationFn: () => retryNotificationDeliveryLog({ data: { id: detail.id } }),
+    onSuccess: (res) => {
+      toast.success(
+        res.reused
+          ? "تم استخدام محاولة إعادة موجودة مسبقًا (idempotent)."
+          : "تم إدراج محاولة تسليم جديدة بحالة pending.",
+      );
+      qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] });
+    },
+    onError: (e: Error) => toast.error(e.message || "تعذّر إعادة المحاولة."),
+  });
   return (
     <div className="p-5 space-y-5 text-sm">
       <section className="space-y-2">
@@ -238,6 +254,22 @@ function LogDetailBody({ detail }: { detail: NotificationDeliveryLogDetail }) {
           <span className="text-[11px] text-muted-foreground">
             محاولة #{detail.attempt}
           </span>
+          {canRetry && (
+            <button
+              type="button"
+              onClick={() => retry.mutate()}
+              disabled={retry.isPending}
+              className="ms-auto inline-flex items-center gap-1.5 rounded-full bg-primary text-primary-foreground px-3 h-8 text-xs font-semibold disabled:opacity-60"
+              title="إعادة إدراج محاولة تسليم جديدة (idempotent)"
+            >
+              {retry.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RotateCw className="h-3.5 w-3.5" />
+              )}
+              إعادة المحاولة
+            </button>
+          )}
         </div>
         <dl className="grid grid-cols-3 gap-x-3 gap-y-1 text-xs">
           <dt className="text-muted-foreground">التاريخ</dt>

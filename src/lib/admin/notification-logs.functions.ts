@@ -142,7 +142,96 @@ const StatsInput = z.object({
     .min(1)
     .max(24 * 30)
     .default(24 * 7),
-});
+  });
+
+/* ------------------------------- retry ---------------------------------- */
+
+const RetryInput = z.object({ id: z.string().uuid() });
+
+export type RetryResult = {
+  ok: true;
+  new_log_id: string;
+  reused: boolean;
+  idempotency_key: string;
+};
+
+/**
+ * Re-queue a failed/bounced/skipped delivery attempt by inserting a new
+ * `pending` row on the same notification+channel. Safe against double-clicks
+ * and duplicate admin actions via a stable idempotency_key stored in
+ * metadata (`retry:<source_log_id>`): if a retry row already exists for the
+ * same source, we return it instead of inserting a duplicate.
+ *
+ * Actual dispatch is handled by the delivery worker that watches for
+ * `status='pending'` rows — this function does not send the message itself.
+ */
+export const retryNotificationDeliveryLog = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => RetryInput.parse(d))
+  .handler(async ({ data, context }): Promise<RetryResult> => {
+    await assertAdmin(context);
+
+    // 1) Load source row and validate it's retryable.
+    const { data: src, error: srcErr } = await context.supabase
+      .from("notification_delivery_logs")
+      .select(
+        "id, user_id, notification_id, channel, provider, template, recipient, subject, status, attempt, metadata",
+      )
+      .eq("id", data.id)
+      .maybeSingle();
+    if (srcErr) throw new Error(srcErr.message);
+    if (!src) throw new Error("السجل غير موجود.");
+    if (!["failed", "bounced", "skipped"].includes(src.status)) {
+      throw new Error("يمكن إعادة المحاولة فقط للسجلات الفاشلة أو المرفوضة أو المتخطاة.");
+    }
+
+    const idempotencyKey = `retry:${src.id}`;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // 2) Idempotency: return existing retry if we've already enqueued one.
+    const { data: existing, error: exErr } = await supabaseAdmin
+      .from("notification_delivery_logs")
+      .select("id")
+      .contains("metadata", { idempotency_key: idempotencyKey })
+      .maybeSingle();
+    if (exErr && exErr.code !== "PGRST116") throw new Error(exErr.message);
+    if (existing?.id) {
+      return { ok: true, new_log_id: existing.id, reused: true, idempotency_key: idempotencyKey };
+    }
+
+    // 3) Insert new pending attempt on the same channel/notification.
+    const srcMeta = (src.metadata as Record<string, any> | null) ?? {};
+    const newMeta: Record<string, any> = {
+      retry_of: src.id,
+      idempotency_key: idempotencyKey,
+      requested_by: context.userId,
+      requested_at: new Date().toISOString(),
+    };
+    if (srcMeta.test === true) newMeta.test = true;
+    if (typeof srcMeta.notification_kind === "string") {
+      newMeta.notification_kind = srcMeta.notification_kind;
+    }
+
+    const { data: ins, error: insErr } = await supabaseAdmin
+      .from("notification_delivery_logs")
+      .insert({
+        user_id: src.user_id,
+        notification_id: src.notification_id,
+        channel: src.channel,
+        provider: src.provider,
+        template: src.template,
+        recipient: src.recipient,
+        subject: src.subject,
+        status: "pending",
+        attempt: (src.attempt ?? 0) + 1,
+        metadata: newMeta,
+      })
+      .select("id")
+      .single();
+    if (insErr) throw new Error(insErr.message);
+
+    return { ok: true, new_log_id: ins.id, reused: false, idempotency_key: idempotencyKey };
+  });
 
 export type NotificationDeliveryStats = {
   windowHours: number;
