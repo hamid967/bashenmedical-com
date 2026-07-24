@@ -205,6 +205,8 @@ function NotifLogsPage() {
         </div>
       </header>
 
+      <KpiHeader24h k={k} />
+
       <StatsRow stats={s} />
 
       <FiltersBar
