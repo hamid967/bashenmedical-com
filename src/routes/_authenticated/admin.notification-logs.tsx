@@ -4,7 +4,8 @@
  */
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   AlertTriangle,
   Bell,
@@ -127,6 +128,54 @@ function NotifLogsPage() {
   const s = stats.data;
   const k = kpis.data;
 
+  // ---- Realtime: live updates on new/changed delivery attempts. ----
+  const [liveStatus, setLiveStatus] = useState<
+    "connecting" | "live" | "error" | "off"
+  >("connecting");
+  const [liveBump, setLiveBump] = useState(0);
+  const pendingInvalidateRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    // Debounced invalidation so bursts of inserts collapse into one refetch.
+    const scheduleInvalidate = () => {
+      if (pendingInvalidateRef.current) return;
+      pendingInvalidateRef.current = setTimeout(() => {
+        pendingInvalidateRef.current = null;
+        qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] });
+      }, 400);
+    };
+
+    const channel = supabase
+      .channel("admin-notification-delivery-logs")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notification_delivery_logs",
+        },
+        () => {
+          setLiveBump((n) => n + 1);
+          scheduleInvalidate();
+        },
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") setLiveStatus("live");
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT")
+          setLiveStatus("error");
+        else if (status === "CLOSED") setLiveStatus("off");
+      });
+
+    return () => {
+      if (pendingInvalidateRef.current) {
+        clearTimeout(pendingInvalidateRef.current);
+        pendingInvalidateRef.current = null;
+      }
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
+
+
   return (
     <div className="container-app py-6 space-y-6" dir="rtl">
       <header className="flex flex-wrap items-start justify-between gap-3">
@@ -194,6 +243,7 @@ function NotifLogsPage() {
             <Download className="h-3.5 w-3.5" />
             تصدير CSV
           </button>
+          <LiveBadge status={liveStatus} bump={liveBump} />
           <button
             type="button"
             onClick={() => qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] })}
@@ -548,6 +598,53 @@ function StatsRow({ stats }: { stats: NotificationDeliveryStats }) {
         />
       ))}
     </div>
+  );
+}
+
+function LiveBadge({
+  status,
+  bump,
+}: {
+  status: "connecting" | "live" | "error" | "off";
+  bump: number;
+}) {
+  const [pulse, setPulse] = useState(false);
+  useEffect(() => {
+    if (bump === 0) return;
+    setPulse(true);
+    const t = setTimeout(() => setPulse(false), 800);
+    return () => clearTimeout(t);
+  }, [bump]);
+
+  const cfg =
+    status === "live"
+      ? { dot: "bg-emerald-500", text: "text-emerald-700", border: "border-emerald-200", bg: "bg-emerald-50", label: "مباشر" }
+      : status === "connecting"
+        ? { dot: "bg-amber-500", text: "text-amber-700", border: "border-amber-200", bg: "bg-amber-50", label: "جارٍ الاتصال…" }
+        : status === "error"
+          ? { dot: "bg-rose-500", text: "text-rose-700", border: "border-rose-200", bg: "bg-rose-50", label: "خطأ في الاتصال" }
+          : { dot: "bg-slate-400", text: "text-slate-600", border: "border-slate-200", bg: "bg-slate-50", label: "غير متصل" };
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 h-9 text-[11px] font-semibold border ${cfg.bg} ${cfg.text} ${cfg.border}`}
+      title={
+        status === "live"
+          ? `التحديث الفوري مفعّل · ${bump.toLocaleString("ar")} حدث`
+          : cfg.label
+      }
+      aria-live="polite"
+    >
+      <span className="relative inline-flex h-2 w-2">
+        {status === "live" && (
+          <span
+            className={`absolute inline-flex h-full w-full rounded-full ${cfg.dot} opacity-60 ${pulse ? "animate-ping" : ""}`}
+          />
+        )}
+        <span className={`relative inline-flex h-2 w-2 rounded-full ${cfg.dot}`} />
+      </span>
+      {cfg.label}
+    </span>
   );
 }
 
