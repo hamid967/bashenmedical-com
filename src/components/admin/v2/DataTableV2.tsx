@@ -135,6 +135,11 @@ export type DataTableV2Props<T> = {
   /** Sticky header. */
   stickyHeader?: boolean;
   className?: string;
+
+  /** Accessible name for the table (announced to screen readers). */
+  ariaLabel?: string;
+  /** Visually-hidden <caption> text summarising the table. */
+  caption?: string;
 };
 
 /* ────────────────────────────────────────────────────────────
@@ -171,6 +176,8 @@ export function DataTableV2<T>({
   dense = false,
   stickyHeader = true,
   className,
+  ariaLabel = "جدول البيانات",
+  caption,
 }: DataTableV2Props<T>) {
   const visibleColumns = useMemo(() => columns.filter((c) => !c.hidden), [columns]);
   const hasColumnSearch = visibleColumns.some((c) => c.searchable);
@@ -278,18 +285,25 @@ export function DataTableV2<T>({
   const rowPadY = dense ? "py-2" : "py-3";
 
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div
+      className={cn("flex flex-col gap-3", className)}
+      role="region"
+      aria-label={ariaLabel}
+      aria-busy={isLoading || isFetching || undefined}
+    >
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2" role="toolbar" aria-label="أدوات الجدول">
         {toolbarLeft}
         {onGlobalSearchChange && (
           <div className="relative min-w-0 flex-1 sm:max-w-xs">
-            <Search className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
             <Input
               value={globalSearch ?? ""}
               onChange={(e) => onGlobalSearchChange(e.target.value)}
               placeholder={globalSearchPlaceholder}
               className="h-9 pr-8"
+              aria-label={globalSearchPlaceholder}
+              type="search"
             />
           </div>
         )}
@@ -348,7 +362,13 @@ export function DataTableV2<T>({
           </div>
         )}
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] border-collapse text-sm">
+          <table
+            className="w-full min-w-[720px] border-collapse text-sm"
+            role="table"
+            aria-rowcount={effectivePagination.total || undefined}
+            aria-colcount={colCount}
+          >
+            {caption && <caption className="sr-only">{caption}</caption>}
             <thead
               className={cn(
                 "bg-muted/40 text-right text-xs uppercase tracking-wide text-muted-foreground",
@@ -357,10 +377,29 @@ export function DataTableV2<T>({
             >
               <tr>
                 {visibleColumns.map((col) => {
-                  const isSorted = sort?.key === (col.sortKey ?? col.id);
+                  const key = col.sortKey ?? col.id;
+                  const isSorted = sort?.key === key;
+                  const ariaSort: "ascending" | "descending" | "none" | undefined = col.sortable
+                    ? isSorted
+                      ? sort!.dir === "asc"
+                        ? "ascending"
+                        : "descending"
+                      : "none"
+                    : undefined;
+                  const nextLabel = !isSorted
+                    ? "ترتيب تصاعدي"
+                    : sort!.dir === "asc"
+                      ? "ترتيب تنازلي"
+                      : "إلغاء الترتيب";
+                  const headerText =
+                    typeof col.header === "string" || typeof col.header === "number"
+                      ? String(col.header)
+                      : col.id;
                   return (
                     <th
                       key={col.id}
+                      scope="col"
+                      aria-sort={ariaSort}
                       className={cn(
                         "px-3 py-2.5 font-semibold",
                         col.className,
@@ -371,21 +410,23 @@ export function DataTableV2<T>({
                         {col.sortable && onSortChange ? (
                           <button
                             type="button"
-                            onClick={() => handleSort(col.sortKey ?? col.id)}
+                            onClick={() => handleSort(key)}
+                            aria-label={`${headerText} — ${nextLabel}`}
                             className={cn(
                               "inline-flex items-center gap-1 rounded px-1 py-0.5 transition-colors hover:bg-background/60",
+                              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1",
                               isSorted && "text-foreground",
                             )}
                           >
                             <span>{col.header}</span>
                             {isSorted ? (
                               sort!.dir === "asc" ? (
-                                <ArrowUp className="h-3.5 w-3.5" />
+                                <ArrowUp className="h-3.5 w-3.5" aria-hidden="true" />
                               ) : (
-                                <ArrowDown className="h-3.5 w-3.5" />
+                                <ArrowDown className="h-3.5 w-3.5" aria-hidden="true" />
                               )
                             ) : (
-                              <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+                              <ArrowUpDown className="h-3.5 w-3.5 opacity-50" aria-hidden="true" />
                             )}
                           </button>
                         ) : (
@@ -398,18 +439,26 @@ export function DataTableV2<T>({
               </tr>
               {hasColumnSearch && onColumnSearchChange && (
                 <tr className="bg-background/40">
-                  {visibleColumns.map((col) => (
-                    <th key={`s-${col.id}`} className={cn("px-2 pb-2", col.className)}>
-                      {col.searchable ? (
-                        <Input
-                          value={columnSearch?.[col.id] ?? ""}
-                          onChange={(e) => onColumnSearchChange(col.id, e.target.value)}
-                          placeholder="فلترة…"
-                          className="h-7 text-xs"
-                        />
-                      ) : null}
-                    </th>
-                  ))}
+                  {visibleColumns.map((col) => {
+                    const headerText =
+                      typeof col.header === "string" || typeof col.header === "number"
+                        ? String(col.header)
+                        : col.id;
+                    return (
+                      <th key={`s-${col.id}`} scope="col" className={cn("px-2 pb-2", col.className)}>
+                        {col.searchable ? (
+                          <Input
+                            value={columnSearch?.[col.id] ?? ""}
+                            onChange={(e) => onColumnSearchChange(col.id, e.target.value)}
+                            placeholder="فلترة…"
+                            aria-label={`فلترة ${headerText}`}
+                            type="search"
+                            className="h-7 text-xs"
+                          />
+                        ) : null}
+                      </th>
+                    );
+                  })}
                 </tr>
               )}
             </thead>
@@ -417,7 +466,7 @@ export function DataTableV2<T>({
             <tbody>
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, i) => (
-                  <tr key={`sk-${i}`} className="border-t border-border">
+                  <tr key={`sk-${i}`} className="border-t border-border" aria-hidden="true">
                     {visibleColumns.map((col) => (
                       <td key={col.id} className={cn("px-3", rowPadY)}>
                         <div className="h-3 w-full max-w-[180px] animate-pulse rounded bg-muted" />
@@ -428,9 +477,13 @@ export function DataTableV2<T>({
               ) : error ? (
                 <tr>
                   <td colSpan={colCount} className="px-3 py-12">
-                    <div className="flex flex-col items-center gap-2 text-center">
+                    <div
+                      role="alert"
+                      aria-live="assertive"
+                      className="flex flex-col items-center gap-2 text-center"
+                    >
                       <div className="rounded-full bg-destructive/10 p-2 text-destructive">
-                        <X className="h-5 w-5" />
+                        <X className="h-5 w-5" aria-hidden="true" />
                       </div>
                       <p className="text-sm font-semibold text-foreground">{errorTitle}</p>
                       <p className="max-w-md text-xs text-muted-foreground">
@@ -438,7 +491,7 @@ export function DataTableV2<T>({
                       </p>
                       {onRetry && (
                         <Button variant="outline" size="sm" onClick={onRetry} className="mt-2">
-                          <RefreshCw className="ml-2 h-4 w-4" />
+                          <RefreshCw className="ml-2 h-4 w-4" aria-hidden="true" />
                           إعادة المحاولة
                         </Button>
                       )}
@@ -448,38 +501,60 @@ export function DataTableV2<T>({
               ) : displayedRows.length === 0 ? (
                 <tr>
                   <td colSpan={colCount} className="px-3 py-12">
-                    <div className="flex flex-col items-center gap-1.5 text-center">
+                    <div
+                      role="status"
+                      aria-live="polite"
+                      className="flex flex-col items-center gap-1.5 text-center"
+                    >
                       <p className="text-sm font-semibold text-foreground">{emptyTitle}</p>
                       <p className="max-w-md text-xs text-muted-foreground">{emptyDescription}</p>
                     </div>
                   </td>
                 </tr>
               ) : (
-                displayedRows.map((row, idx) => (
-                  <tr
-                    key={rowKey(row)}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(
-                      "border-t border-border transition-colors",
-                      onRowClick && "cursor-pointer hover:bg-muted/40",
-                      rowClassName?.(row),
-                    )}
-                  >
-                    {visibleColumns.map((col) => (
-                      <td
-                        key={col.id}
-                        className={cn(
-                          "px-3 align-middle",
-                          rowPadY,
-                          col.className,
-                          col.cellClassName,
-                        )}
-                      >
-                        {col.cell(row, idx)}
-                      </td>
-                    ))}
-                  </tr>
-                ))
+                displayedRows.map((row, idx) => {
+                  const clickable = Boolean(onRowClick);
+                  const handleKey = clickable
+                    ? (e: React.KeyboardEvent<HTMLTableRowElement>) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          onRowClick!(row);
+                        }
+                      }
+                    : undefined;
+                  return (
+                    <tr
+                      key={rowKey(row)}
+                      onClick={clickable ? () => onRowClick!(row) : undefined}
+                      onKeyDown={handleKey}
+                      tabIndex={clickable ? 0 : undefined}
+                      role={clickable ? "button" : undefined}
+                      aria-rowindex={
+                        (safePage - 1) * effectivePagination.perPage + idx + 1 || undefined
+                      }
+                      className={cn(
+                        "border-t border-border transition-colors",
+                        clickable &&
+                          "cursor-pointer hover:bg-muted/40 focus-visible:bg-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring",
+                        rowClassName?.(row),
+                      )}
+                    >
+                      {visibleColumns.map((col) => (
+                        <td
+                          key={col.id}
+                          className={cn(
+                            "px-3 align-middle",
+                            rowPadY,
+                            col.className,
+                            col.cellClassName,
+                          )}
+                        >
+                          {col.cell(row, idx)}
+                        </td>
+                      ))}
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -487,9 +562,15 @@ export function DataTableV2<T>({
       </div>
 
       {/* Pagination footer */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground">
+      <nav
+        className="flex flex-wrap items-center justify-between gap-3 text-xs text-muted-foreground"
+        aria-label="ترقيم الصفحات"
+      >
         <div className="flex items-center gap-2">
-          <span>عرض</span>
+          <label htmlFor="dtv2-per-page" className="sr-only">
+            عدد الصفوف في كل صفحة
+          </label>
+          <span aria-hidden="true">عرض</span>
           <Select
             value={String(effectivePagination.perPage)}
             onValueChange={(v) =>
@@ -500,7 +581,7 @@ export function DataTableV2<T>({
               })
             }
           >
-            <SelectTrigger className="h-8 w-[74px] text-xs">
+            <SelectTrigger id="dtv2-per-page" className="h-8 w-[74px] text-xs" aria-label="عدد الصفوف في كل صفحة">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -511,11 +592,11 @@ export function DataTableV2<T>({
               ))}
             </SelectContent>
           </Select>
-          <span>
+          <span aria-live="polite" aria-atomic="true">
             {rangeStart}-{rangeEnd} من {effectivePagination.total}
           </span>
           {isFetching && !isLoading && (
-            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" aria-label="جاري التحديث" />
           )}
         </div>
         <div className="flex items-center gap-1">
@@ -525,11 +606,12 @@ export function DataTableV2<T>({
             className="h-8"
             disabled={safePage <= 1 || isLoading}
             onClick={() => updatePagination({ ...effectivePagination, page: safePage - 1 })}
+            aria-label="الصفحة السابقة"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
             السابق
           </Button>
-          <span className="px-2">
+          <span className="px-2" aria-current="page">
             صفحة {safePage} / {totalPages}
           </span>
           <Button
@@ -538,12 +620,13 @@ export function DataTableV2<T>({
             className="h-8"
             disabled={safePage >= totalPages || isLoading}
             onClick={() => updatePagination({ ...effectivePagination, page: safePage + 1 })}
+            aria-label="الصفحة التالية"
           >
             التالي
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
-      </div>
+      </nav>
     </div>
   );
 }
