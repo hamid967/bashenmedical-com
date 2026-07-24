@@ -64,7 +64,7 @@ export const listAdminUsers = createServerFn({ method: "GET" })
 
     const { data: rowsRaw, error, count } = await q;
     if (error) throw new Error(error.message);
-    const rows = (rowsRaw ?? []) as Array<Record<string, unknown> & { id: string }>;
+    const rows = ((rowsRaw ?? []) as unknown) as Array<Record<string, unknown> & { id: string }>;
 
     const ids = rows.map((r) => r.id);
     let rolesByUser: Record<string, string[]> = {};
