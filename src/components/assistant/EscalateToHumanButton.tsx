@@ -11,7 +11,7 @@
  * live status chip that polls `getAiEscalationStatus` on a visibility-aware
  * interval and shows the current inbox status + last update time.
  */
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink, ShieldAlert } from "lucide-react";
 import {
   Dialog,
@@ -513,6 +513,21 @@ function parseReasonFromDetails(details: string | null): string | null {
   return null;
 }
 
+type SevFilter = "all" | "low" | "medium" | "high" | "critical";
+type OutcomeFilter = "all" | "open" | "in_progress" | "resolved" | "closed" | "none";
+type SortOrder = "desc" | "asc";
+const PAGE_SIZE = 10;
+
+function outcomeBucket(status: string | null): Exclude<OutcomeFilter, "all"> {
+  if (!status) return "none";
+  const s = status.toLowerCase();
+  if (["closed", "archived", "cancelled", "canceled"].includes(s)) return "closed";
+  if (["resolved", "done", "completed"].includes(s)) return "resolved";
+  if (["in_progress", "in_review", "reviewing", "processing", "assigned"].includes(s))
+    return "in_progress";
+  return "open";
+}
+
 function IncidentsList({
   isLoading,
   isError,
@@ -525,6 +540,41 @@ function IncidentsList({
   isAr: boolean;
 }) {
   const t = (ar: string, en: string) => (isAr ? ar : en);
+  const [sev, setSev] = useState<SevFilter>("all");
+  const [outcome, setOutcome] = useState<OutcomeFilter>("all");
+  const [order, setOrder] = useState<SortOrder>("desc");
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  const filtered = useMemo(() => {
+    const arr = incidents.filter((inc) => {
+      if (sev !== "all" && inc.severity !== sev) return false;
+      if (outcome !== "all" && outcomeBucket(inc.inboxStatus) !== outcome) return false;
+      return true;
+    });
+    arr.sort((a, b) => {
+      const da = new Date(a.createdAt).getTime();
+      const db = new Date(b.createdAt).getTime();
+      return order === "desc" ? db - da : da - db;
+    });
+    return arr;
+  }, [incidents, sev, outcome, order]);
+
+  const shown = filtered.slice(0, visible);
+  const hasMore = filtered.length > shown.length;
+
+  // Reset pagination when filters/order change.
+  function updateSev(v: SevFilter) {
+    setSev(v);
+    setVisible(PAGE_SIZE);
+  }
+  function updateOutcome(v: OutcomeFilter) {
+    setOutcome(v);
+    setVisible(PAGE_SIZE);
+  }
+  function updateOrder(v: SortOrder) {
+    setOrder(v);
+    setVisible(PAGE_SIZE);
+  }
 
   if (isLoading) {
     return (
@@ -550,66 +600,172 @@ function IncidentsList({
     );
   }
 
+  const sevOpts: { v: SevFilter; ar: string; en: string }[] = [
+    { v: "all", ar: "الكل", en: "All" },
+    { v: "critical", ar: "حرجة", en: "Critical" },
+    { v: "high", ar: "عالية", en: "High" },
+    { v: "medium", ar: "متوسطة", en: "Medium" },
+    { v: "low", ar: "منخفضة", en: "Low" },
+  ];
+  const outcomeOpts: { v: OutcomeFilter; ar: string; en: string }[] = [
+    { v: "all", ar: "الكل", en: "All" },
+    { v: "open", ar: "مفتوحة", en: "Open" },
+    { v: "in_progress", ar: "قيد المعالجة", en: "In progress" },
+    { v: "resolved", ar: "منجزة", en: "Resolved" },
+    { v: "closed", ar: "مغلقة", en: "Closed" },
+    { v: "none", ar: "بلا تذكرة", en: "No ticket" },
+  ];
+
   return (
-    <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
-      {incidents.map((inc) => {
-        const reason = parseReasonFromDetails(inc.details);
-        return (
-          <li
-            key={inc.id}
-            className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5"
+    <div className="space-y-2">
+      <div className="grid gap-2 sm:grid-cols-3 text-[11px]">
+        <label className="flex flex-col gap-1">
+          <span className="text-muted-foreground">{t("الشدة", "Severity")}</span>
+          <select
+            value={sev}
+            onChange={(e) => updateSev(e.target.value as SevFilter)}
+            className="h-8 rounded-md border border-input bg-background px-2"
           >
-            <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1 font-medium">
-                <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" />
-                {kindLabel(inc.kind, isAr)}
-              </span>
-              <span
-                className={
-                  "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium " +
-                  severityClass(inc.severity)
-                }
+            {sevOpts.map((o) => (
+              <option key={o.v} value={o.v}>
+                {isAr ? o.ar : o.en}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-muted-foreground">{t("النتيجة", "Outcome")}</span>
+          <select
+            value={outcome}
+            onChange={(e) => updateOutcome(e.target.value as OutcomeFilter)}
+            className="h-8 rounded-md border border-input bg-background px-2"
+          >
+            {outcomeOpts.map((o) => (
+              <option key={o.v} value={o.v}>
+                {isAr ? o.ar : o.en}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-muted-foreground">{t("الترتيب", "Order")}</span>
+          <select
+            value={order}
+            onChange={(e) => updateOrder(e.target.value as SortOrder)}
+            className="h-8 rounded-md border border-input bg-background px-2"
+          >
+            <option value="desc">{t("الأحدث أولًا", "Newest first")}</option>
+            <option value="asc">{t("الأقدم أولًا", "Oldest first")}</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+        <span>
+          {t("النتائج", "Results")}: {filtered.length}
+        </span>
+        {(sev !== "all" || outcome !== "all" || order !== "desc") && (
+          <button
+            type="button"
+            className="underline underline-offset-2 hover:text-foreground"
+            onClick={() => {
+              setSev("all");
+              setOutcome("all");
+              setOrder("desc");
+              setVisible(PAGE_SIZE);
+            }}
+          >
+            {t("مسح الفلاتر", "Clear filters")}
+          </button>
+        )}
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center text-xs text-muted-foreground py-6">
+          {t("لا توجد حوادث مطابقة للفلاتر.", "No incidents match the filters.")}
+        </div>
+      ) : (
+        <>
+          <ul className="max-h-72 space-y-2 overflow-y-auto pr-1">
+            {shown.map((inc) => {
+              const reason = parseReasonFromDetails(inc.details);
+              return (
+                <li
+                  key={inc.id}
+                  className="rounded-md border border-border bg-card p-2.5 text-xs space-y-1.5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1 font-medium">
+                      <ShieldAlert className="h-3.5 w-3.5 text-muted-foreground" />
+                      {kindLabel(inc.kind, isAr)}
+                    </span>
+                    <span
+                      className={
+                        "inline-flex items-center rounded-full border px-1.5 py-0.5 text-[10px] font-medium " +
+                        severityClass(inc.severity)
+                      }
+                    >
+                      {severityLabel(inc.severity, isAr)}
+                    </span>
+                  </div>
+
+                  {reason && (
+                    <div className="text-muted-foreground line-clamp-3 whitespace-pre-wrap">
+                      {reason}
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
+                    <span>
+                      {formatDateTimeInTZ(inc.createdAt, isAr ? "ar" : "en", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </span>
+                    {inc.requestNumber && (
+                      <span className="inline-flex items-center gap-1">
+                        <span>{t("التذكرة", "Ticket")}:</span>
+                        <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">
+                          {inc.requestNumber}
+                        </code>
+                      </span>
+                    )}
+                    {inc.inboxStatus && (
+                      <span>
+                        {t("نتيجة المعالجة", "Outcome")}: {inc.inboxStatus}
+                      </span>
+                    )}
+                    {inc.actionTaken && (
+                      <span>
+                        {t("الإجراء", "Action")}: {inc.actionTaken}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+
+          {hasMore && (
+            <div className="flex justify-center pt-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setVisible((v) => v + PAGE_SIZE)}
               >
-                {severityLabel(inc.severity, isAr)}
-              </span>
+                {t(
+                  `تحميل المزيد (${filtered.length - shown.length})`,
+                  `Load more (${filtered.length - shown.length})`,
+                )}
+              </Button>
             </div>
-
-            {reason && (
-              <div className="text-muted-foreground line-clamp-3 whitespace-pre-wrap">{reason}</div>
-            )}
-
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-              <span>
-                {formatDateTimeInTZ(inc.createdAt, isAr ? "ar" : "en", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                })}
-              </span>
-              {inc.requestNumber && (
-                <span className="inline-flex items-center gap-1">
-                  <span>{t("التذكرة", "Ticket")}:</span>
-                  <code className="rounded bg-muted px-1 py-0.5 font-mono text-foreground">
-                    {inc.requestNumber}
-                  </code>
-                </span>
-              )}
-              {inc.inboxStatus && (
-                <span>
-                  {t("نتيجة المعالجة", "Outcome")}: {inc.inboxStatus}
-                </span>
-              )}
-              {inc.actionTaken && (
-                <span>
-                  {t("الإجراء", "Action")}: {inc.actionTaken}
-                </span>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+          )}
+        </>
+      )}
+    </div>
   );
 }
