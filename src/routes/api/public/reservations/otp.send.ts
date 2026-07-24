@@ -10,6 +10,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit.server";
+import { verifyHCaptcha, captchaFailureResponse } from "@/lib/security/hcaptcha.server";
 import {
   generateOtp,
   hashCode,
@@ -20,6 +21,7 @@ import {
 
 const schema = z.object({
   phone: z.string().trim().min(6).max(32),
+  captcha_token: z.string().trim().min(1).max(4000).optional(),
 });
 
 export const Route = createFileRoute("/api/public/reservations/otp/send")({
@@ -68,6 +70,12 @@ export const Route = createFileRoute("/api/public/reservations/otp/send")({
             },
           );
         }
+
+        // hCaptcha — verified AFTER rate limit so bots can't burn quota,
+        // BEFORE any DB write. Fails closed on network / config errors.
+        const captcha = await verifyHCaptcha(parsed.data.captcha_token, ip);
+        if (!captcha.ok) return captchaFailureResponse(captcha);
+
 
         const code = generateOtp();
         const code_hash = await hashCode(phone, code);

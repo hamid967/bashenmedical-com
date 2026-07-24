@@ -9,6 +9,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit.server";
+import { verifyHCaptcha, captchaFailureResponse } from "@/lib/security/hcaptcha.server";
 import {
   MAX_ATTEMPTS,
   SESSION_TTL_MS,
@@ -24,6 +25,7 @@ const schema = z.object({
     .string()
     .trim()
     .regex(/^\d{6}$/, "أدخل الرمز المكوّن من 6 أرقام."),
+  captcha_token: z.string().trim().min(1).max(4000).optional(),
 });
 
 export const Route = createFileRoute("/api/public/reservations/otp/verify")({
@@ -72,6 +74,13 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
             },
           );
         }
+
+        // hCaptcha guards verify to stop credential-stuffing 6-digit brute
+        // force even when attacker rotates IPs to dodge the rate limiter.
+        const captcha = await verifyHCaptcha(parsed.data.captcha_token, ip);
+        if (!captcha.ok) return captchaFailureResponse(captcha);
+
+
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
