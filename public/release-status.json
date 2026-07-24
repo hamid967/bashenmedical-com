@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-07-24T10:13:56.625Z",
+  "commitSha": null,
+  "runId": null,
+  "runUrl": null,
+  "evaluation": {
+    "verdict": "NO_GO",
+    "evaluatedAt": "2026-07-24T10:13:56.625Z",
+    "blockingFailures": [
+      "pentest",
+      "dr_drill",
+      "captcha",
+      "unit_tests",
+      "eslint",
+      "staging_approval"
+    ],
+    "advisoryWarnings": [],
+    "checks": [
+      {
+        "id": "pentest",
+        "label": "Pentest sign-off",
+        "severity": "blocking",
+        "status": "unknown",
+        "maxAgeSeconds": 7776000,
+        "ageSeconds": null,
+        "stale": false,
+        "effectiveStatus": "unknown"
+      },
+      {
+        "id": "dr_drill",
+        "label": "DR drill (RPO/RTO within budget)",
+        "severity": "blocking",
+        "status": "unknown",
+        "maxAgeSeconds": 1209600,
+        "ageSeconds": null,
+        "stale": false,
+        "effectiveStatus": "unknown"
+      },
+      {
+        "id": "captcha",
+        "label": "CAPTCHA fail-closed on OTP/inquiries",
+        "severity": "blocking",
+        "status": "unknown",
+        "maxAgeSeconds": 604800,
+        "ageSeconds": null,
+        "stale": false,
+        "effectiveStatus": "unknown"
+      },
+      {
+        "id": "unit_tests",
+        "label": "Unit test suite green",
+        "severity": "blocking",
+        "status": "unknown",
+        "measuredAt": "2026-07-24T10:13:56.625Z",
+        "maxAgeSeconds": 86400,
+        "ageSeconds": 0,
+        "stale": false,
+        "effectiveStatus": "unknown"
+      },
+      {
+        "id": "eslint",
+        "label": "ESLint clean (no errors)",
+        "severity": "blocking",
+        "status": "unknown",
+        "measuredAt": "2026-07-24T10:13:56.625Z",
+        "maxAgeSeconds": 86400,
+        "ageSeconds": 0,
+        "stale": false,
+        "effectiveStatus": "unknown"
+      },
+      {
+        "id": "staging_approval",
+        "label": "Staging approval recorded",
+        "severity": "blocking",
+        "status": "unknown",
+        "maxAgeSeconds": 259200,
+        "ageSeconds": null,
+        "stale": false,
+        "effectiveStatus": "unknown"
+      }
+    ]
+  }
+}
