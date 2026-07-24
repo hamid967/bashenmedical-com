@@ -23,7 +23,9 @@ export const Route = createFileRoute("/_authenticated/admin/cms/$kind/$id")({
 type Tab = "ar" | "en" | "seo" | "schedule" | "history";
 
 function CmsEditor() {
+function CmsEditor() {
   const { kind, id } = Route.useParams() as { kind: CmsKind; id: string };
+  useCmsTransitionNotifications({ entryId: id });
   const def = CMS_KINDS[kind];
   const qc = useQueryClient();
   const getFn = useServerFn(getCmsEntry);
