@@ -5264,6 +5264,84 @@ export type Database = {
         }
         Relationships: []
       }
+      perf_budget_alerts: {
+        Row: {
+          bucket_at: string
+          created_at: string
+          email_status: string | null
+          id: string
+          metric: string
+          p75_value: number
+          path: string
+          sample_size: number
+          threshold: number
+          webhook_status: number | null
+          window_hours: number
+        }
+        Insert: {
+          bucket_at?: string
+          created_at?: string
+          email_status?: string | null
+          id?: string
+          metric: string
+          p75_value: number
+          path: string
+          sample_size: number
+          threshold: number
+          webhook_status?: number | null
+          window_hours: number
+        }
+        Update: {
+          bucket_at?: string
+          created_at?: string
+          email_status?: string | null
+          id?: string
+          metric?: string
+          p75_value?: number
+          path?: string
+          sample_size?: number
+          threshold?: number
+          webhook_status?: number | null
+          window_hours?: number
+        }
+        Relationships: []
+      }
+      perf_budgets: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          metric: string
+          min_samples: number
+          path: string
+          threshold: number
+          updated_at: string
+          window_hours: number
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          metric: string
+          min_samples?: number
+          path: string
+          threshold: number
+          updated_at?: string
+          window_hours?: number
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          metric?: string
+          min_samples?: number
+          path?: string
+          threshold?: number
+          updated_at?: string
+          window_hours?: number
+        }
+        Relationships: []
+      }
       permissions: {
         Row: {
           category: string
