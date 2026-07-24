@@ -445,3 +445,71 @@ function HistoryPanel({
     </Card>
   );
 }
+
+function flattenPayload(prefix: string, val: any, out: Record<string, string>) {
+  if (val === null || val === undefined) {
+    out[prefix] = "";
+    return;
+  }
+  if (typeof val === "object") {
+    if (Array.isArray(val)) {
+      val.forEach((item, i) => flattenPayload(`${prefix}[${i}]`, item, out));
+      if (val.length === 0) out[prefix] = "[]";
+      return;
+    }
+    const keys = Object.keys(val);
+    if (keys.length === 0) { out[prefix] = "{}"; return; }
+    for (const k of keys) flattenPayload(prefix ? `${prefix}.${k}` : k, val[k], out);
+    return;
+  }
+  out[prefix] = String(val);
+}
+
+function DiffTable({ left, right }: { left: any; right: any }) {
+  const rows = useMemo(() => {
+    const buckets: Array<[string, any, any]> = [];
+    for (const label of ["payload_ar", "payload_en", "seo"] as const) {
+      const l: Record<string, string> = {};
+      const r: Record<string, string> = {};
+      flattenPayload("", left?.[label] ?? {}, l);
+      flattenPayload("", right?.[label] ?? {}, r);
+      const keys = Array.from(new Set([...Object.keys(l), ...Object.keys(r)])).sort();
+      for (const k of keys) {
+        const a = l[k] ?? "";
+        const b = r[k] ?? "";
+        if (a !== b) buckets.push([`${label}.${k}`, a, b]);
+      }
+    }
+    if ((left?.og_image_url ?? "") !== (right?.og_image_url ?? "")) {
+      buckets.push(["og_image_url", left?.og_image_url ?? "", right?.og_image_url ?? ""]);
+    }
+    return buckets;
+  }, [left, right]);
+
+  if (rows.length === 0) {
+    return <div className="text-sm text-muted-foreground">لا فروق بين النسختين.</div>;
+  }
+  return (
+    <div className="overflow-x-auto border rounded">
+      <table className="w-full text-xs">
+        <thead className="bg-muted/50">
+          <tr>
+            <th className="text-start p-2 w-1/4">الحقل</th>
+            <th className="text-start p-2">v{left.version_no}</th>
+            <th className="text-start p-2">v{right.version_no}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(([k, a, b]) => (
+            <tr key={k} className="border-t align-top">
+              <td className="p-2 font-mono text-[11px] text-muted-foreground break-all">{k}</td>
+              <td className="p-2 bg-red-500/5 whitespace-pre-wrap break-all">{a || <span className="text-muted-foreground">—</span>}</td>
+              <td className="p-2 bg-emerald-500/5 whitespace-pre-wrap break-all">{b || <span className="text-muted-foreground">—</span>}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
