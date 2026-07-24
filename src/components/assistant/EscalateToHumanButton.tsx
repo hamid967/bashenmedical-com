@@ -222,55 +222,78 @@ export function EscalateToHumanButton({
               </DialogDescription>
             </DialogHeader>
 
-            <div className="space-y-3 text-sm">
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("رقم الطلب", "Request number")}</span>
-                <code className="rounded bg-muted px-1.5 py-0.5 font-mono">
-                  {ticket.requestNumber}
-                </code>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("الحالة", "Status")}</span>
-                <span
-                  className={
-                    "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
-                    bucketClass(bucket)
-                  }
-                >
-                  {bucketLabel(bucket, isAr)}
-                  <span className="opacity-60">({ticket.status})</span>
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("الأولوية", "Priority")}</span>
-                <span className="text-xs">{ticket.priority}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground">{t("أُنشئت", "Created")}</span>
-                <span className="text-xs">
-                  {formatDateTimeInTZ(ticket.createdAt, isAr ? "ar" : "en", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground inline-flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {t("آخر تحديث", "Last update")}
-                </span>
-                <span className="text-xs">{updatedLabel}</span>
-              </div>
-              {statusQuery.isFetching && (
-                <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  {t("جارٍ التحديث...", "Refreshing...")}
+            <Tabs defaultValue="status" className="w-full">
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="status">{t("الحالة", "Status")}</TabsTrigger>
+                <TabsTrigger value="history">
+                  {t("سجل الحوادث", "Incidents")}
+                  {incidentsQuery.data && incidentsQuery.data.length > 0 && (
+                    <span className="ms-1.5 rounded-full bg-muted px-1.5 text-[10px]">
+                      {incidentsQuery.data.length}
+                    </span>
+                  )}
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="status" className="mt-3 space-y-3 text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("رقم الطلب", "Request number")}</span>
+                  <code className="rounded bg-muted px-1.5 py-0.5 font-mono">
+                    {ticket.requestNumber}
+                  </code>
                 </div>
-              )}
-            </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("الحالة", "Status")}</span>
+                  <span
+                    className={
+                      "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium " +
+                      bucketClass(bucket)
+                    }
+                  >
+                    {bucketLabel(bucket, isAr)}
+                    <span className="opacity-60">({ticket.status})</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("الأولوية", "Priority")}</span>
+                  <span className="text-xs">{ticket.priority}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground">{t("أُنشئت", "Created")}</span>
+                  <span className="text-xs">
+                    {formatDateTimeInTZ(ticket.createdAt, isAr ? "ar" : "en", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-muted-foreground inline-flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    {t("آخر تحديث", "Last update")}
+                  </span>
+                  <span className="text-xs">{updatedLabel}</span>
+                </div>
+                {statusQuery.isFetching && (
+                  <div className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    {t("جارٍ التحديث...", "Refreshing...")}
+                  </div>
+                )}
+              </TabsContent>
+
+              <TabsContent value="history" className="mt-3">
+                <IncidentsList
+                  isLoading={incidentsQuery.isLoading}
+                  isError={incidentsQuery.isError}
+                  incidents={incidentsQuery.data ?? []}
+                  isAr={isAr}
+                />
+              </TabsContent>
+            </Tabs>
 
             <DialogFooter>
               <Button
