@@ -494,7 +494,7 @@ export const linkInboxAppointment = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       if (!appt) throw new Error("الموعد غير موجود.");
     }
-    const patch: Record<string, unknown> = {
+    const patch: Record<string, any> = {
       linked_appointment_id: data.appointment_id,
     };
     if (data.appointment_id && before.status !== "appointment_created") {
@@ -502,7 +502,7 @@ export const linkInboxAppointment = createServerFn({ method: "POST" })
     }
     const { error } = await context.supabase
       .from("inbox_items")
-      .update(patch)
+      .update(patch as never)
       .eq("id", data.id);
     if (error) throw new Error(error.message);
     await logEvent(
