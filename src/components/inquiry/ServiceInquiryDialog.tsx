@@ -339,6 +339,9 @@ export function ServiceInquiryDialog({
       branches={branches}
       submitting={submitting}
       today={today}
+      captchaRef={captchaRef}
+      captchaToken={captchaToken}
+      onCaptchaToken={setCaptchaToken}
       onChange={update}
       onSubmit={onSubmit}
     />
