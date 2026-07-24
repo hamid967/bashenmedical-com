@@ -259,7 +259,7 @@ function InsurancePage() {
             className="rounded-md border bg-background px-3 py-2 text-sm"
           >
             <option value="">كل الشركات</option>
-            {(providers.data ?? []).map((p: any) => (
+            {(providers.data?.rows ?? []).map((p: any) => (
               <option key={p.id} value={p.id}>
                 {p.name_ar || p.name_en}
               </option>

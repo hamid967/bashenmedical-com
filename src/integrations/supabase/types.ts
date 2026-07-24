@@ -3248,6 +3248,47 @@ export type Database = {
           },
         ]
       }
+      insurance_approval_events: {
+        Row: {
+          actor_user_id: string | null
+          approval_id: string
+          created_at: string
+          from_status: string | null
+          id: string
+          meta: Json
+          note: string | null
+          to_status: string
+        }
+        Insert: {
+          actor_user_id?: string | null
+          approval_id: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          meta?: Json
+          note?: string | null
+          to_status: string
+        }
+        Update: {
+          actor_user_id?: string | null
+          approval_id?: string
+          created_at?: string
+          from_status?: string | null
+          id?: string
+          meta?: Json
+          note?: string | null
+          to_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "insurance_approval_events_approval_id_fkey"
+            columns: ["approval_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_approvals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insurance_approvals: {
         Row: {
           appointment_id: string | null
@@ -8163,6 +8204,40 @@ export type Database = {
           status: string
           title: string
         }[]
+      }
+      transition_insurance_approval: {
+        Args: {
+          _approval_id: string
+          _meta?: Json
+          _note?: string
+          _to_status: string
+        }
+        Returns: {
+          appointment_id: string | null
+          approved_amount: number | null
+          attachments: Json | null
+          created_at: string
+          expires_at: string | null
+          id: string
+          insurance_provider_id: string | null
+          is_mock: boolean
+          missing_documents: string[] | null
+          notes: string | null
+          patient_id: string
+          patient_share: number | null
+          request_number: string | null
+          reviewed_at: string | null
+          service_description: string
+          status: string
+          submitted_at: string | null
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "insurance_approvals"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       try_fill_waitlist_slot: {
         Args: {
