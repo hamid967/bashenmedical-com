@@ -6076,6 +6076,72 @@ export type Database = {
           },
         ]
       }
+      sla_alert_config: {
+        Row: {
+          email_recipients: string[]
+          enabled: boolean
+          id: boolean
+          min_priority: string
+          updated_at: string
+          updated_by: string | null
+          webhook_url: string | null
+        }
+        Insert: {
+          email_recipients?: string[]
+          enabled?: boolean
+          id?: boolean
+          min_priority?: string
+          updated_at?: string
+          updated_by?: string | null
+          webhook_url?: string | null
+        }
+        Update: {
+          email_recipients?: string[]
+          enabled?: boolean
+          id?: boolean
+          min_priority?: string
+          updated_at?: string
+          updated_by?: string | null
+          webhook_url?: string | null
+        }
+        Relationships: []
+      }
+      sla_alert_log: {
+        Row: {
+          channel: string
+          email_status: string | null
+          id: string
+          item_id: string
+          kind: string
+          notified_at: string
+          overdue_ms: number
+          priority: string
+          webhook_status: number | null
+        }
+        Insert: {
+          channel: string
+          email_status?: string | null
+          id?: string
+          item_id: string
+          kind: string
+          notified_at?: string
+          overdue_ms: number
+          priority: string
+          webhook_status?: number | null
+        }
+        Update: {
+          channel?: string
+          email_status?: string | null
+          id?: string
+          item_id?: string
+          kind?: string
+          notified_at?: string
+          overdue_ms?: number
+          priority?: string
+          webhook_status?: number | null
+        }
+        Relationships: []
+      }
       slot_holds: {
         Row: {
           appointment_date: string
