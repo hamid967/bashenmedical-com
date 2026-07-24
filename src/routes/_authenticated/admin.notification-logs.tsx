@@ -243,6 +243,7 @@ function NotifLogsPage() {
             <Download className="h-3.5 w-3.5" />
             تصدير CSV
           </button>
+          <LiveBadge status={liveStatus} bump={liveBump} />
           <button
             type="button"
             onClick={() => qc.invalidateQueries({ queryKey: ["admin", "notif-logs"] })}
