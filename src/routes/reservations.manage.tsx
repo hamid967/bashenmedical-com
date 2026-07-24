@@ -646,6 +646,7 @@ function ManagePage() {
                   required
                 />
               </div>
+              <HCaptchaWidget ref={captchaRef} onToken={setCaptchaToken} />
               <div className="flex gap-2">
                 <Button
                   type="button"
@@ -660,7 +661,11 @@ function ManagePage() {
                 </Button>
                 <Button
                   type="submit"
-                  disabled={verifyOtp.isPending || code.length !== 6}
+                  disabled={
+                    verifyOtp.isPending ||
+                    code.length !== 6 ||
+                    (HCAPTCHA_ENABLED && !captchaToken)
+                  }
                   className="flex-1 h-11"
                 >
                   {verifyOtp.isPending ? (
