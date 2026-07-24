@@ -159,6 +159,8 @@ export function ServiceInquiryDialog({
   const [confirmation, setConfirmation] = useState<ConfirmationState | null>(null);
   const [whatsappNumber, setWhatsappNumber] = useState<string | null>(null);
   const [handoffStatus, setHandoffStatus] = useState<"not_opened" | "opened">("not_opened");
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const captchaRef = useRef<HCaptchaHandle | null>(null);
 
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
