@@ -34,6 +34,8 @@ import {
   History,
   Users,
   Stethoscope,
+  CalendarCheck,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import { globalSearch } from "@/lib/admin/global-search.functions";
