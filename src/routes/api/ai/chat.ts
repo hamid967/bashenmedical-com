@@ -29,6 +29,8 @@ import {
   serverClient,
   readAuthUser,
 } from "@/lib/ai/ai.server";
+import { detectStaffRoles, loadStaffSnapshot } from "@/lib/ai/staff-snapshot.server";
+
 
 const SYSTEM_BASE_AR = `أنت "مساعد باعشن الذكي" في مجمع باعشن الطبي.
 - تحدث بالعربية بلهجة سعودية مهنية موجزة (أو الإنجليزية إذا استخدم المستخدم الإنجليزية).
