@@ -6891,6 +6891,7 @@ export type Database = {
       }
       _next_booking_reference: { Args: never; Returns: string }
       _purge_old_permission_errors: { Args: never; Returns: undefined }
+      admin_list_data_contracts: { Args: never; Returns: Json }
       assign_user_role: {
         Args: {
           _branch_id?: string
