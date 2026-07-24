@@ -225,6 +225,7 @@ import { Route as ApiAiStaffActionRouteImport } from './routes/api/ai/staff-acti
 import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
+import { Route as AuthenticatedAdminAiSafetyRouteImport } from './routes/_authenticated/admin.ai.safety'
 import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_authenticated/admin.appointments.$id'
 import { Route as AuthenticatedAdminArticlesIdRouteImport } from './routes/_authenticated/admin.articles.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
@@ -1487,6 +1488,12 @@ const AuthenticatedAdminAiOverviewRoute =
     path: '/ai/overview',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminAiSafetyRoute =
+  AuthenticatedAdminAiSafetyRouteImport.update({
+    id: '/ai/safety',
+    path: '/ai/safety',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAppointmentsIdRoute =
   AuthenticatedAdminAppointmentsIdRouteImport.update({
     id: '/$id',
@@ -2066,6 +2073,7 @@ export interface FileRoutesByFullPath {
   '/patients/': typeof AuthenticatedPatientsIndexRoute
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/admin/ai/safety': typeof AuthenticatedAdminAiSafetyRoute
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
@@ -2340,6 +2348,7 @@ export interface FileRoutesByTo {
   '/patients': typeof AuthenticatedPatientsIndexRoute
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/admin/ai/safety': typeof AuthenticatedAdminAiSafetyRoute
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
@@ -2621,6 +2630,7 @@ export interface FileRoutesById {
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
+  '/_authenticated/admin/ai/safety': typeof AuthenticatedAdminAiSafetyRoute
   '/_authenticated/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
   '/_authenticated/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
@@ -2902,6 +2912,7 @@ export interface FileRouteTypes {
     | '/patients/'
     | '/portal/'
     | '/admin/ai/overview'
+    | '/admin/ai/safety'
     | '/admin/appointments/$id'
     | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
@@ -3176,6 +3187,7 @@ export interface FileRouteTypes {
     | '/patients'
     | '/portal'
     | '/admin/ai/overview'
+    | '/admin/ai/safety'
     | '/admin/appointments/$id'
     | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
@@ -3456,6 +3468,7 @@ export interface FileRouteTypes {
     | '/_authenticated/patients/'
     | '/_authenticated/portal/'
     | '/_authenticated/admin/ai/overview'
+    | '/_authenticated/admin/ai/safety'
     | '/_authenticated/admin/appointments/$id'
     | '/_authenticated/admin/articles/$id'
     | '/_authenticated/admin/billing/$invoiceId'
@@ -5130,6 +5143,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAiOverviewRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/ai/safety': {
+      id: '/_authenticated/admin/ai/safety'
+      path: '/ai/safety'
+      fullPath: '/admin/ai/safety'
+      preLoaderRoute: typeof AuthenticatedAdminAiSafetyRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/appointments/$id': {
       id: '/_authenticated/admin/appointments/$id'
       path: '/$id'
@@ -5855,6 +5875,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminWhatsappRoute: typeof AuthenticatedAdminWhatsappRouteWithChildren
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminAiOverviewRoute: typeof AuthenticatedAdminAiOverviewRoute
+  AuthenticatedAdminAiSafetyRoute: typeof AuthenticatedAdminAiSafetyRoute
   AuthenticatedAdminSuperJazanVisualRoute: typeof AuthenticatedAdminSuperJazanVisualRoute
   AuthenticatedAdminSuperMonitoringRoute: typeof AuthenticatedAdminSuperMonitoringRoute
   AuthenticatedAdminSuperPermissionsRoute: typeof AuthenticatedAdminSuperPermissionsRouteWithChildren
@@ -5924,6 +5945,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminWhatsappRoute: AuthenticatedAdminWhatsappRouteWithChildren,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminAiOverviewRoute: AuthenticatedAdminAiOverviewRoute,
+  AuthenticatedAdminAiSafetyRoute: AuthenticatedAdminAiSafetyRoute,
   AuthenticatedAdminSuperJazanVisualRoute:
     AuthenticatedAdminSuperJazanVisualRoute,
   AuthenticatedAdminSuperMonitoringRoute:
