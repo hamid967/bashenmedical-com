@@ -62,20 +62,14 @@ const NAV: NavGroup[] = [
     items: [
       { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard },
       {
-        to: "/admin/inbox",
-        label: "الصندوق الموحد",
+        to: "/admin/ops-hub",
+        label: "مركز العمليات",
         icon: Inbox,
         roles: ["admin", "super_admin"],
       },
       {
-        to: "/admin/inbox/sla",
-        label: "لوحة SLA",
-        icon: Inbox,
-        roles: ["admin", "super_admin"],
-      },
-      {
-        to: "/admin/cms",
-        label: "إدارة المحتوى",
+        to: "/admin/content-hub",
+        label: "مركز المحتوى",
         icon: FileText,
         roles: ["admin", "super_admin", "editor"],
       },
