@@ -123,6 +123,7 @@ import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
 import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin.appointments'
+import { Route as AuthenticatedAdminArticlesRouteImport } from './routes/_authenticated/admin.articles'
 import { Route as AuthenticatedAdminAuditLogsRouteImport } from './routes/_authenticated/admin.audit-logs'
 import { Route as AuthenticatedAdminBillingRouteImport } from './routes/_authenticated/admin.billing'
 import { Route as AuthenticatedAdminBookingFunnelRouteImport } from './routes/_authenticated/admin.booking-funnel'
@@ -213,6 +214,7 @@ import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
 import { Route as AuthenticatedAdminAppointmentsIdRouteImport } from './routes/_authenticated/admin.appointments.$id'
+import { Route as AuthenticatedAdminArticlesIdRouteImport } from './routes/_authenticated/admin.articles.$id'
 import { Route as AuthenticatedAdminBillingInvoiceIdRouteImport } from './routes/_authenticated/admin.billing.$invoiceId'
 import { Route as AuthenticatedAdminBranchesIdRouteImport } from './routes/_authenticated/admin.branches.$id'
 import { Route as AuthenticatedAdminInsuranceApprovalIdRouteImport } from './routes/_authenticated/admin.insurance.$approvalId'
@@ -864,6 +866,12 @@ const AuthenticatedAdminAppointmentsRoute =
     path: '/appointments',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminArticlesRoute =
+  AuthenticatedAdminArticlesRouteImport.update({
+    id: '/articles',
+    path: '/articles',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAuditLogsRoute =
   AuthenticatedAdminAuditLogsRouteImport.update({
     id: '/audit-logs',
@@ -1393,6 +1401,12 @@ const AuthenticatedAdminAppointmentsIdRoute =
     path: '/$id',
     getParentRoute: () => AuthenticatedAdminAppointmentsRoute,
   } as any)
+const AuthenticatedAdminArticlesIdRoute =
+  AuthenticatedAdminArticlesIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedAdminArticlesRoute,
+  } as any)
 const AuthenticatedAdminBillingInvoiceIdRoute =
   AuthenticatedAdminBillingInvoiceIdRouteImport.update({
     id: '/$invoiceId',
@@ -1793,6 +1807,7 @@ export interface FileRoutesByFullPath {
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
+  '/admin/articles': typeof AuthenticatedAdminArticlesRouteWithChildren
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
@@ -1884,6 +1899,7 @@ export interface FileRoutesByFullPath {
   '/portal/': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
+  '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
@@ -2042,6 +2058,7 @@ export interface FileRoutesByTo {
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
+  '/admin/articles': typeof AuthenticatedAdminArticlesRouteWithChildren
   '/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
@@ -2133,6 +2150,7 @@ export interface FileRoutesByTo {
   '/portal': typeof AuthenticatedPortalIndexRoute
   '/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
+  '/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
@@ -2298,6 +2316,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
+  '/_authenticated/admin/articles': typeof AuthenticatedAdminArticlesRouteWithChildren
   '/_authenticated/admin/audit-logs': typeof AuthenticatedAdminAuditLogsRoute
   '/_authenticated/admin/billing': typeof AuthenticatedAdminBillingRouteWithChildren
   '/_authenticated/admin/booking-funnel': typeof AuthenticatedAdminBookingFunnelRoute
@@ -2389,6 +2408,7 @@ export interface FileRoutesById {
   '/_authenticated/portal/': typeof AuthenticatedPortalIndexRoute
   '/_authenticated/admin/ai/overview': typeof AuthenticatedAdminAiOverviewRoute
   '/_authenticated/admin/appointments/$id': typeof AuthenticatedAdminAppointmentsIdRoute
+  '/_authenticated/admin/articles/$id': typeof AuthenticatedAdminArticlesIdRoute
   '/_authenticated/admin/billing/$invoiceId': typeof AuthenticatedAdminBillingInvoiceIdRoute
   '/_authenticated/admin/branches/$id': typeof AuthenticatedAdminBranchesIdRoute
   '/_authenticated/admin/insurance/$approvalId': typeof AuthenticatedAdminInsuranceApprovalIdRoute
@@ -2554,6 +2574,7 @@ export interface FileRouteTypes {
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/appointments'
+    | '/admin/articles'
     | '/admin/audit-logs'
     | '/admin/billing'
     | '/admin/booking-funnel'
@@ -2645,6 +2666,7 @@ export interface FileRouteTypes {
     | '/portal/'
     | '/admin/ai/overview'
     | '/admin/appointments/$id'
+    | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/branches/$id'
     | '/admin/insurance/$approvalId'
@@ -2803,6 +2825,7 @@ export interface FileRouteTypes {
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/appointments'
+    | '/admin/articles'
     | '/admin/audit-logs'
     | '/admin/billing'
     | '/admin/booking-funnel'
@@ -2894,6 +2917,7 @@ export interface FileRouteTypes {
     | '/portal'
     | '/admin/ai/overview'
     | '/admin/appointments/$id'
+    | '/admin/articles/$id'
     | '/admin/billing/$invoiceId'
     | '/admin/branches/$id'
     | '/admin/insurance/$approvalId'
@@ -3058,6 +3082,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/ai-usage'
     | '/_authenticated/admin/appointments'
+    | '/_authenticated/admin/articles'
     | '/_authenticated/admin/audit-logs'
     | '/_authenticated/admin/billing'
     | '/_authenticated/admin/booking-funnel'
@@ -3149,6 +3174,7 @@ export interface FileRouteTypes {
     | '/_authenticated/portal/'
     | '/_authenticated/admin/ai/overview'
     | '/_authenticated/admin/appointments/$id'
+    | '/_authenticated/admin/articles/$id'
     | '/_authenticated/admin/billing/$invoiceId'
     | '/_authenticated/admin/branches/$id'
     | '/_authenticated/admin/insurance/$approvalId'
@@ -4091,6 +4117,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAppointmentsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/articles': {
+      id: '/_authenticated/admin/articles'
+      path: '/articles'
+      fullPath: '/admin/articles'
+      preLoaderRoute: typeof AuthenticatedAdminArticlesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/audit-logs': {
       id: '/_authenticated/admin/audit-logs'
       path: '/audit-logs'
@@ -4721,6 +4754,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAppointmentsIdRouteImport
       parentRoute: typeof AuthenticatedAdminAppointmentsRoute
     }
+    '/_authenticated/admin/articles/$id': {
+      id: '/_authenticated/admin/articles/$id'
+      path: '/$id'
+      fullPath: '/admin/articles/$id'
+      preLoaderRoute: typeof AuthenticatedAdminArticlesIdRouteImport
+      parentRoute: typeof AuthenticatedAdminArticlesRoute
+    }
     '/_authenticated/admin/billing/$invoiceId': {
       id: '/_authenticated/admin/billing/$invoiceId'
       path: '/$invoiceId'
@@ -5082,6 +5122,20 @@ const AuthenticatedAdminAppointmentsRouteWithChildren =
     AuthenticatedAdminAppointmentsRouteChildren,
   )
 
+interface AuthenticatedAdminArticlesRouteChildren {
+  AuthenticatedAdminArticlesIdRoute: typeof AuthenticatedAdminArticlesIdRoute
+}
+
+const AuthenticatedAdminArticlesRouteChildren: AuthenticatedAdminArticlesRouteChildren =
+  {
+    AuthenticatedAdminArticlesIdRoute: AuthenticatedAdminArticlesIdRoute,
+  }
+
+const AuthenticatedAdminArticlesRouteWithChildren =
+  AuthenticatedAdminArticlesRoute._addFileChildren(
+    AuthenticatedAdminArticlesRouteChildren,
+  )
+
 interface AuthenticatedAdminBillingRouteChildren {
   AuthenticatedAdminBillingInvoiceIdRoute: typeof AuthenticatedAdminBillingInvoiceIdRoute
 }
@@ -5231,6 +5285,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
   AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRouteWithChildren
+  AuthenticatedAdminArticlesRoute: typeof AuthenticatedAdminArticlesRouteWithChildren
   AuthenticatedAdminAuditLogsRoute: typeof AuthenticatedAdminAuditLogsRoute
   AuthenticatedAdminBillingRoute: typeof AuthenticatedAdminBillingRouteWithChildren
   AuthenticatedAdminBookingFunnelRoute: typeof AuthenticatedAdminBookingFunnelRoute
@@ -5278,6 +5333,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
   AuthenticatedAdminAppointmentsRoute:
     AuthenticatedAdminAppointmentsRouteWithChildren,
+  AuthenticatedAdminArticlesRoute: AuthenticatedAdminArticlesRouteWithChildren,
   AuthenticatedAdminAuditLogsRoute: AuthenticatedAdminAuditLogsRoute,
   AuthenticatedAdminBillingRoute: AuthenticatedAdminBillingRouteWithChildren,
   AuthenticatedAdminBookingFunnelRoute: AuthenticatedAdminBookingFunnelRoute,
