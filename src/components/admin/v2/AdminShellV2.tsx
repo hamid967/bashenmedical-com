@@ -8,6 +8,7 @@ import { AIAssistantPanel } from "./AIAssistantPanel";
 import { ThemeSwitcher, useAdminTheme } from "./ThemeSwitcher";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { QuickActions } from "./QuickActions";
+import { BranchSwitcher } from "./BranchSwitcher";
 import type { AdminRole } from "@/components/admin/types";
 import {
   LayoutDashboard,
