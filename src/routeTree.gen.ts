@@ -249,6 +249,7 @@ import { Route as ApiPublicBookResolveAnyDoctorRouteImport } from './routes/api/
 import { Route as ApiPublicBookTrackRouteImport } from './routes/api/public/book/track'
 import { Route as ApiPublicBookWaitlistRouteImport } from './routes/api/public/book/waitlist'
 import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/public/book/waitlist-confirm'
+import { Route as ApiPublicCronSlaSweepRouteImport } from './routes/api/public/cron/sla-sweep'
 import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
 import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
@@ -1609,6 +1610,11 @@ const ApiPublicBookWaitlistConfirmRoute =
     path: '/api/public/book/waitlist-confirm',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronSlaSweepRoute = ApiPublicCronSlaSweepRouteImport.update({
+  id: '/api/public/cron/sla-sweep',
+  path: '/api/public/cron/sla-sweep',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksPermissionWatchdogRoute =
   ApiPublicHooksPermissionWatchdogRouteImport.update({
     id: '/api/public/hooks/permission-watchdog',
@@ -1959,6 +1965,7 @@ export interface FileRoutesByFullPath {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -2214,6 +2221,7 @@ export interface FileRoutesByTo {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -2476,6 +2484,7 @@ export interface FileRoutesById {
   '/api/public/book/track': typeof ApiPublicBookTrackRoute
   '/api/public/book/waitlist': typeof ApiPublicBookWaitlistRoute
   '/api/public/book/waitlist-confirm': typeof ApiPublicBookWaitlistConfirmRoute
+  '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
@@ -2738,6 +2747,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
@@ -2993,6 +3003,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
@@ -3254,6 +3265,7 @@ export interface FileRouteTypes {
     | '/api/public/book/track'
     | '/api/public/book/waitlist'
     | '/api/public/book/waitlist-confirm'
+    | '/api/public/cron/sla-sweep'
     | '/api/public/hooks/permission-watchdog'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
@@ -3350,6 +3362,7 @@ export interface RootRouteChildren {
   ApiPublicBookTrackRoute: typeof ApiPublicBookTrackRoute
   ApiPublicBookWaitlistRoute: typeof ApiPublicBookWaitlistRoute
   ApiPublicBookWaitlistConfirmRoute: typeof ApiPublicBookWaitlistConfirmRoute
+  ApiPublicCronSlaSweepRoute: typeof ApiPublicCronSlaSweepRoute
   ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
   ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
@@ -5050,6 +5063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicBookWaitlistConfirmRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/sla-sweep': {
+      id: '/api/public/cron/sla-sweep'
+      path: '/api/public/cron/sla-sweep'
+      fullPath: '/api/public/cron/sla-sweep'
+      preLoaderRoute: typeof ApiPublicCronSlaSweepRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/permission-watchdog': {
       id: '/api/public/hooks/permission-watchdog'
       path: '/api/public/hooks/permission-watchdog'
@@ -5968,6 +5988,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicBookTrackRoute: ApiPublicBookTrackRoute,
   ApiPublicBookWaitlistRoute: ApiPublicBookWaitlistRoute,
   ApiPublicBookWaitlistConfirmRoute: ApiPublicBookWaitlistConfirmRoute,
+  ApiPublicCronSlaSweepRoute: ApiPublicCronSlaSweepRoute,
   ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
   ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,

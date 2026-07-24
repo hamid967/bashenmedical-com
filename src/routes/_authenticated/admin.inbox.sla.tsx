@@ -1,13 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getInboxSlaOverview, SLA_THRESHOLDS } from "@/lib/admin/inbox-sla.functions";
+import {
+  getSlaAlertConfig,
+  updateSlaAlertConfig,
+  runSlaAlertSweep,
+} from "@/lib/admin/sla-alerts.functions";
 import { STATUS_LABELS, CHANNEL_LABELS, PRIORITY_LABELS } from "./admin.inbox";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Timer, CheckCircle2, Inbox as InboxIcon } from "lucide-react";
+import { AlertTriangle, Bell, Timer, CheckCircle2, Inbox as InboxIcon } from "lucide-react";
+import { toast } from "sonner";
+
 
 function fmtDuration(ms: number | null): string {
   if (ms == null) return "—";
@@ -178,6 +185,10 @@ function SlaPage() {
           highlight={data.totals.breachedResponse + data.totals.breachedResolution > 0}
         />
       </div>
+
+      <AlertConfigCard />
+
+
 
       {/* Thresholds legend */}
       <Card className="p-4">
@@ -440,3 +451,152 @@ function BucketTable({ title, rows }: { title: string; rows: Row[] }) {
     </Card>
   );
 }
+
+function AlertConfigCard() {
+  const getCfg = useServerFn(getSlaAlertConfig);
+  const updateCfg = useServerFn(updateSlaAlertConfig);
+  const runSweep = useServerFn(runSlaAlertSweep);
+  const qc = useQueryClient();
+
+  const { data: cfg } = useQuery({
+    queryKey: ["sla-alert-config"],
+    queryFn: () => getCfg(),
+    staleTime: 30_000,
+  });
+
+  const [enabled, setEnabled] = useState(false);
+  const [webhookUrl, setWebhookUrl] = useState("");
+  const [recipients, setRecipients] = useState("");
+  const [minPriority, setMinPriority] = useState<"urgent" | "high" | "normal" | "low">("high");
+
+  useEffect(() => {
+    if (!cfg) return;
+    setEnabled(cfg.enabled);
+    setWebhookUrl(cfg.webhook_url ?? "");
+    setRecipients((cfg.email_recipients ?? []).join(", "));
+    setMinPriority(cfg.min_priority);
+  }, [cfg]);
+
+  const save = useMutation({
+    mutationFn: async () => {
+      const emails = recipients
+        .split(/[,\n;\s]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      return updateCfg({
+        data: {
+          enabled,
+          webhook_url: webhookUrl.trim(),
+          email_recipients: emails,
+          min_priority: minPriority,
+        },
+      });
+    },
+    onSuccess: () => {
+      toast.success("تم حفظ إعدادات التنبيهات");
+      qc.invalidateQueries({ queryKey: ["sla-alert-config"] });
+    },
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
+  });
+
+  const sweep = useMutation({
+    mutationFn: () => runSweep(),
+    onSuccess: (r: any) => {
+      toast.success(
+        `فحص فوري: ${r.new_breaches} تجاوز جديد • webhook ${r.webhook_sent} • بريد ${r.email_queued}`,
+      );
+    },
+    onError: (e: any) => toast.error(e?.message ?? "فشل الفحص"),
+  });
+
+  return (
+    <Card className="p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Bell className="w-5 h-5" />
+        <h2 className="text-lg font-bold">تنبيهات فورية عند تجاوز SLA</h2>
+        {enabled ? (
+          <Badge variant="default">مفعّلة</Badge>
+        ) : (
+          <Badge variant="secondary">متوقفة</Badge>
+        )}
+      </div>
+      <p className="text-xs text-muted-foreground mb-3">
+        عند تجاوز حد الاستجابة أو الإنجاز، يُرسَل حدث لكل طلب مرة واحدة عبر webhook و/أو بريد
+        إلكتروني. رابط الطلب مُضمَّن في التنبيه.
+      </p>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={enabled}
+            onChange={(e) => setEnabled(e.target.checked)}
+          />
+          تفعيل التنبيهات
+        </label>
+        <label className="text-sm">
+          <span className="block text-xs text-muted-foreground mb-1">
+            الحد الأدنى للأولوية
+          </span>
+          <select
+            value={minPriority}
+            onChange={(e) => setMinPriority(e.target.value as any)}
+            className="w-full border rounded px-2 py-1 bg-background"
+          >
+            <option value="urgent">عاجل فقط</option>
+            <option value="high">عالٍ فأعلى</option>
+            <option value="normal">عادي فأعلى</option>
+            <option value="low">كل الأولويات</option>
+          </select>
+        </label>
+        <label className="text-sm md:col-span-2">
+          <span className="block text-xs text-muted-foreground mb-1">
+            رابط Webhook (HTTPS)
+          </span>
+          <input
+            type="url"
+            value={webhookUrl}
+            placeholder="https://example.com/hooks/sla"
+            onChange={(e) => setWebhookUrl(e.target.value)}
+            className="w-full border rounded px-2 py-1 bg-background font-mono text-xs"
+          />
+        </label>
+        <label className="text-sm md:col-span-2">
+          <span className="block text-xs text-muted-foreground mb-1">
+            مستقبلو البريد (مفصولون بفواصل)
+          </span>
+          <input
+            type="text"
+            value={recipients}
+            placeholder="ops@example.com, sla@example.com"
+            onChange={(e) => setRecipients(e.target.value)}
+            className="w-full border rounded px-2 py-1 bg-background text-xs"
+          />
+          <span className="block text-[11px] text-muted-foreground mt-1">
+            قناة البريد تبدأ الإرسال الفعلي فور إعداد نطاق البريد للمشروع.
+          </span>
+        </label>
+      </div>
+
+      <div className="flex items-center gap-2 mt-4">
+        <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>
+          حفظ
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => sweep.mutate()}
+          disabled={sweep.isPending || !enabled}
+        >
+          تشغيل فحص فوري
+        </Button>
+        {cfg?.updated_at && (
+          <span className="text-[11px] text-muted-foreground ms-auto">
+            آخر تحديث: {new Date(cfg.updated_at).toLocaleString("ar")}
+          </span>
+        )}
+      </div>
+    </Card>
+  );
+}
+
