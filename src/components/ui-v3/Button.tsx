@@ -3,7 +3,11 @@
  * ui-v3 loading/disabled contract:
  *  - `loading` shows the shared LoadingSpinner and sets `aria-busy`.
  *  - `disabled` OR `loading` disables the button and sets `aria-disabled`.
- *  - `leftIcon` / `rightIcon` for RTL-aware icon slots.
+ *  - `startIcon` / `endIcon` for direction-aware icon slots (RTL flips them
+ *    automatically via flexbox — no per-page config).
+ *  - `leftIcon` / `rightIcon` are kept as aliases for `startIcon`/`endIcon`
+ *    so existing call sites continue to work; in RTL both render on the
+ *    logically correct side.
  *  - `loadingLabel` overrides the spinner's aria-label (defaults V3_LABELS.loading).
  *
  * Keeps the same variants/sizes as `@/components/ui/button`.
@@ -16,16 +20,35 @@ import { LoadingSpinner, V3_LABELS } from "./state";
 export interface ButtonProps extends BaseProps {
   loading?: boolean;
   loadingLabel?: string;
+  /** Icon at the logical start of the button (right in RTL, left in LTR). */
+  startIcon?: React.ReactNode;
+  /** Icon at the logical end of the button (left in RTL, right in LTR). */
+  endIcon?: React.ReactNode;
+  /** @deprecated Alias of `startIcon`. Kept for legacy imports. */
   leftIcon?: React.ReactNode;
+  /** @deprecated Alias of `endIcon`. Kept for legacy imports. */
   rightIcon?: React.ReactNode;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    { loading, loadingLabel, disabled, leftIcon, rightIcon, children, className, ...rest },
+    {
+      loading,
+      loadingLabel,
+      disabled,
+      startIcon,
+      endIcon,
+      leftIcon,
+      rightIcon,
+      children,
+      className,
+      ...rest
+    },
     ref,
   ) => {
     const isDisabled = disabled || loading;
+    const start = startIcon ?? leftIcon;
+    const end = endIcon ?? rightIcon;
     return (
       <BaseButton
         ref={ref}
@@ -39,10 +62,10 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {loading ? (
           <LoadingSpinner label={loadingLabel ?? V3_LABELS.loading} />
         ) : (
-          leftIcon
+          start
         )}
         {children}
-        {!loading ? rightIcon : null}
+        {!loading ? end : null}
       </BaseButton>
     );
   },

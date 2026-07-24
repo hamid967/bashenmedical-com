@@ -10,6 +10,7 @@ import * as React from "react";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { InlineError } from "./state";
+import { shouldAutoDir } from "./rtl";
 
 export interface FieldProps {
   label?: React.ReactNode;
@@ -41,23 +42,42 @@ export function Field({
   const errorId = htmlFor ? `${htmlFor}-error` : undefined;
 
   const control = React.isValidElement(children)
-    ? React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
-        id: (children.props as { id?: string }).id ?? htmlFor,
-        "aria-invalid": error ? true : undefined,
-        "aria-busy": loading || undefined,
-        "aria-disabled": disabled || undefined,
-        disabled:
-          disabled ??
-          (children.props as { disabled?: boolean }).disabled,
-        "aria-describedby":
-          [error ? errorId : null, help ? helpId : null].filter(Boolean).join(" ") || undefined,
-      })
+    ? (() => {
+        const childProps = children.props as {
+          id?: string;
+          disabled?: boolean;
+          dir?: string;
+          type?: string;
+        };
+        // Auto-apply `dir="auto"` on free-text inputs so the browser aligns
+        // user content by its own script (Arabic UI + English email → both
+        // read correctly without per-field overrides).
+        const isTextInput =
+          typeof (children as React.ReactElement).type === "string"
+            ? ((children as React.ReactElement).type === "input" ||
+                (children as React.ReactElement).type === "textarea")
+            : true; // custom input components (e.g. shadcn Input) forward `dir`.
+        const shouldAuto =
+          isTextInput &&
+          !childProps.dir &&
+          shouldAutoDir(childProps.type);
+        return React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
+          id: childProps.id ?? htmlFor,
+          "aria-invalid": error ? true : undefined,
+          "aria-busy": loading || undefined,
+          "aria-disabled": disabled || undefined,
+          disabled: disabled ?? childProps.disabled,
+          ...(shouldAuto ? { dir: "auto" } : {}),
+          "aria-describedby":
+            [error ? errorId : null, help ? helpId : null].filter(Boolean).join(" ") || undefined,
+        });
+      })()
     : children;
 
   const labelNode = label ? (
     <Label htmlFor={htmlFor} className={cn(inline && "text-sm", disabled && "opacity-60")}>
       {label}
-      {required ? <span className="text-destructive"> *</span> : null}
+      {required ? <span className="text-destructive ms-1">*</span> : null}
     </Label>
   ) : null;
 
