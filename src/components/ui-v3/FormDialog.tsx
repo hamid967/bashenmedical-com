@@ -71,7 +71,7 @@ export function FormDialog({
     <Dialog open={open} onOpenChange={(v) => (!busy ? onOpenChange(v) : null)}>
       <DialogContent className={cn("max-w-lg", className)} aria-busy={busy || undefined}>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <DialogHeader>
+          <DialogHeader className="sm:text-start">
             <DialogTitle>{title}</DialogTitle>
             {description ? <DialogDescription>{description}</DialogDescription> : null}
           </DialogHeader>
@@ -79,7 +79,8 @@ export function FormDialog({
             <InlineError variant="banner">{error}</InlineError>
           ) : null}
           <div className="space-y-4">{children}</div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:space-x-0">
+
             <Button
               type="button"
               variant="outline"
