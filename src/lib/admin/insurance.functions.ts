@@ -119,7 +119,13 @@ export const decideInsuranceApproval = createServerFn({ method: "POST" })
     }`;
     const mergedNotes = existing.notes ? `${existing.notes}\n${noteLine}` : noteLine;
 
-    const patch: Record<string, unknown> = {
+    const patch: {
+      status: "approved" | "rejected";
+      reviewed_at: string;
+      notes: string;
+      approved_amount?: number;
+      patient_share?: number;
+    } = {
       status: data.decision,
       reviewed_at: stamp,
       notes: mergedNotes,
@@ -136,10 +142,10 @@ export const decideInsuranceApproval = createServerFn({ method: "POST" })
     if (updErr) throw new Error(updErr.message);
 
     await supabaseAdmin.from("audit_logs").insert({
-      user_id: context.userId,
+      actor_id: context.userId,
       action: `insurance_approval.${data.decision}`,
-      resource_type: "insurance_approvals",
-      resource_id: data.id,
+      entity_type: "insurance_approvals",
+      entity_id: data.id,
       metadata: {
         note: data.note ?? null,
         approved_amount: data.approved_amount ?? null,
