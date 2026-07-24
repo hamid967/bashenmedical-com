@@ -30,6 +30,7 @@ import {
 import { Mail, MessageCircle, Smartphone, BellRing, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PushSubscriptionCard } from "@/components/PushSubscriptionCard";
+import { InstallAppCard } from "@/components/InstallAppCard";
 import { useHasConsent } from "@/hooks/useHasConsent";
 import { ShieldOff } from "lucide-react";
 
