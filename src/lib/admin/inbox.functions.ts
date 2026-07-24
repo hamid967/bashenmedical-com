@@ -87,6 +87,7 @@ export type InboxItem = {
   created_at: string;
   updated_at: string;
 };
+type Json = string | number | boolean | null | { [k: string]: Json } | Json[];
 
 export type InboxEvent = {
   id: string;
