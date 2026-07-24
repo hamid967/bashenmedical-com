@@ -121,9 +121,11 @@ function NotifLogsPage() {
   const qc = useQueryClient();
   const logs = useSuspenseQuery(logsQuery(filters));
   const stats = useSuspenseQuery(statsQuery(filters.windowHours));
+  const kpis = useSuspenseQuery(kpisQuery());
 
   const rows = logs.data;
   const s = stats.data;
+  const k = kpis.data;
 
   return (
     <div className="container-app py-6 space-y-6" dir="rtl">
