@@ -140,6 +140,13 @@ export type DataTableV2Props<T> = {
   ariaLabel?: string;
   /** Visually-hidden <caption> text summarising the table. */
   caption?: string;
+
+  /**
+   * Stable key for persisting user preferences (sort direction/column and
+   * page size) to `localStorage` across sessions. Omit to disable.
+   * Use a unique value per table (e.g. "admin.appointments").
+   */
+  persistKey?: string;
 };
 
 /* ────────────────────────────────────────────────────────────
