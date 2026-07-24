@@ -163,7 +163,20 @@ export const updateAdminArticle = createServerFn({ method: "POST" })
     if (cErr) throw new Error(cErr.message);
     if (!current) throw new Error("المقال غير موجود");
 
-    const patch: Record<string, unknown> = {
+    const patch: {
+      title_ar: string;
+      title_en: string | null;
+      excerpt_ar: string;
+      excerpt_en: string | null;
+      content_ar: string;
+      content_en: string | null;
+      cover_image_url: string | null;
+      author_name: string | null;
+      category_id: string | null;
+      reading_minutes: number;
+      is_published: boolean;
+      published_at?: string;
+    } = {
       title_ar: data.title_ar,
       title_en: data.title_en ?? null,
       excerpt_ar: data.excerpt_ar,
