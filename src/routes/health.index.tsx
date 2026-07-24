@@ -86,7 +86,20 @@ export const Route = createFileRoute("/health/")({
         { name: "twitter:card", content: "summary_large_image" },
       ],
       links: [{ rel: "canonical", href: url }],
-      scripts: [{ type: "application/ld+json", children: JSON.stringify(blogLd) }],
+      scripts: [
+        { type: "application/ld+json", children: JSON.stringify(blogLd) },
+        {
+          type: "application/ld+json",
+          children: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE_URL },
+              { "@type": "ListItem", position: 2, name: "المدونة الصحية", item: url },
+            ],
+          }),
+        },
+      ],
     };
   },
   component: HealthIndex,
