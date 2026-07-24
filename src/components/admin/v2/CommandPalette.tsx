@@ -34,6 +34,8 @@ import {
   History,
   Users,
   Stethoscope,
+  CalendarCheck,
+  Inbox,
   type LucideIcon,
 } from "lucide-react";
 import { globalSearch } from "@/lib/admin/global-search.functions";
@@ -381,6 +383,62 @@ export function CommandPalette({
                     ))}
                   </Command.Group>
                 )}
+                {searchQ.data.appointments.length > 0 && (
+                  <Command.Group heading="المواعيد">
+                    {searchQ.data.appointments.map((a) => (
+                      <Command.Item
+                        key={`a-${a.id}`}
+                        value={`appt-${a.id}-${a.reference_number ?? ""}-${a.patient_name}`}
+                        onSelect={() =>
+                          go({
+                            to: `/admin/appointments?appointment=${a.id}`,
+                            label: a.reference_number ?? a.patient_name,
+                          })
+                        }
+                      >
+                        <CalendarCheck className="h-4 w-4 opacity-70" aria-hidden="true" />
+                        <span className="truncate">
+                          {a.reference_number ? `${a.reference_number} · ` : ""}
+                          {a.patient_name}
+                        </span>
+                        <span
+                          className="mr-auto text-[11px] truncate"
+                          style={{ color: "var(--ac-muted)" }}
+                        >
+                          {a.date?.slice(0, 10) ?? "—"} · {a.status}
+                        </span>
+                      </Command.Item>
+                    ))}
+                  </Command.Group>
+                )}
+                {searchQ.data.requests.length > 0 && (
+                  <Command.Group heading="الطلبات">
+                    {searchQ.data.requests.map((r) => (
+                      <Command.Item
+                        key={`r-${r.id}`}
+                        value={`req-${r.id}-${r.request_number ?? ""}-${r.full_name}`}
+                        onSelect={() =>
+                          go({
+                            to: `/admin/service-inquiries?inquiry=${r.id}`,
+                            label: r.request_number ?? r.full_name,
+                          })
+                        }
+                      >
+                        <Inbox className="h-4 w-4 opacity-70" aria-hidden="true" />
+                        <span className="truncate">
+                          {r.request_number ? `${r.request_number} · ` : ""}
+                          {r.full_name}
+                        </span>
+                        <span
+                          className="mr-auto text-[11px] truncate"
+                          style={{ color: "var(--ac-muted)" }}
+                        >
+                          {r.phone ?? "—"} · {r.status ?? "—"}
+                        </span>
+                      </Command.Item>
+                    ))}
+                  </Command.Group>
+                )}
               </>
             )}
 
@@ -426,7 +484,29 @@ export function CommandPalette({
               </Command.Group>
             )}
 
-            {/* Recents — only when not actively searching */}
+            {/* Query suggestions — surfaced when idle or with short input */}
+            {(!isSearching || query.trim().length < 2) && (
+              <Command.Group heading="اقتراحات سريعة">
+                {[
+                  { to: "/admin/appointments?range=today", label: "مواعيد اليوم", icon: CalendarCheck },
+                  { to: "/admin/appointments?status=pending", label: "مواعيد بانتظار التأكيد", icon: CalendarCheck },
+                  { to: "/admin/service-inquiries?status=new", label: "طلبات جديدة", icon: Inbox },
+                  { to: "/admin/service-inquiries?status=in_progress", label: "طلبات قيد المعالجة", icon: Inbox },
+                  { to: "/patients-management", label: "المرضى", icon: Users },
+                  { to: "/doctors-management", label: "الأطباء", icon: Stethoscope },
+                ].map((s) => (
+                  <Command.Item
+                    key={`sugg-${s.to}`}
+                    value={`sugg-${s.to}-${s.label}`}
+                    onSelect={() => go({ to: s.to, label: s.label })}
+                  >
+                    <s.icon className="h-4 w-4 opacity-70" aria-hidden="true" />
+                    <span className="truncate">{s.label}</span>
+                  </Command.Item>
+                ))}
+              </Command.Group>
+            )}
+
             {!isSearching && recentItems.length > 0 && (
               <Command.Group heading="آخر الصفحات">
                 {recentItems.map((r) => {
