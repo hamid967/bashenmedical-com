@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import {
   getCmsEntry, saveCmsVersion, submitCmsForReview, reviewCmsEntry,
   publishCmsEntry, scheduleCmsEntry, archiveCmsEntry, rollbackCmsVersion,
-  createCmsPreviewToken, listCmsAudit, getCmsRoleInfo,
+  createCmsPreviewToken, listCmsAudit, getCmsRoleInfo, getCmsVersion,
 } from "@/lib/admin/cms/cms.functions";
 import { CMS_KINDS, type CmsKind, type FieldDef } from "@/lib/admin/cms/schemas";
 import { Card } from "@/components/ui-v3";
