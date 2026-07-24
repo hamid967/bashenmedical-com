@@ -109,16 +109,16 @@ for (const p of pairs) {
     continue;
   }
   const ratio = contrast(fg, bg);
-  const threshold = p.large ? LARGE_MIN : MIN;
-  const passed = ratio >= threshold;
-  if (!passed) failures += 1;
+  const threshold = p.decorative ? null : p.large ? LARGE_MIN : MIN;
+  const passed = threshold == null ? true : ratio >= threshold;
+  if (!passed && !p.decorative) failures += 1;
   results.push({
     ...p,
     fgHex: fg,
     bgHex: bg,
     ratio: Number(ratio.toFixed(2)),
     threshold,
-    status: passed ? "pass" : "fail",
+    status: p.decorative ? "info" : passed ? "pass" : "fail",
   });
 }
 
