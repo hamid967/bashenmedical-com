@@ -140,7 +140,7 @@ export const listAiIncidentEvents = createServerFn({ method: "GET" })
       eventType: r.event_type,
       actorRole: r.actor_role ?? null,
       actorUserId: r.actor_user_id ?? null,
-      payload: r.payload ?? null,
+      payload: r.payload ? JSON.stringify(r.payload) : null,
       createdAt: r.created_at,
     }));
   });
