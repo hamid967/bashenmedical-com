@@ -17,6 +17,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import {
   AlertTriangle,
+  CalendarClock,
   CheckCircle2,
   ClipboardList,
   Loader2,
@@ -26,6 +27,7 @@ import {
   SkipForward,
   UserCheck,
   UserX,
+  X,
   XCircle,
 } from "lucide-react";
 import { z } from "zod";
@@ -34,8 +36,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 import { useActiveBranch } from "@/lib/active-branch";
 import {
+  getPatientSnapshot,
   listQueue,
   listTodayAppointments,
+  rescheduleAppointment,
   updateAppointmentStatus,
   updateQueueStatus,
 } from "@/lib/admin/front-desk.functions";
