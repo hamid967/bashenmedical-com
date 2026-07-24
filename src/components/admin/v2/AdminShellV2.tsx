@@ -58,18 +58,19 @@ type NavGroup = { title: string; items: NavItem[] };
 const NAV: NavGroup[] = [
   {
     title: "عام",
-    items: [{ to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard }],
-  },
-
-  {
-    title: "العمليات",
     items: [
+      { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard },
       {
         to: "/admin/inbox",
         label: "الصندوق الموحد",
         icon: Inbox,
         roles: ["admin", "super_admin", "reception"],
       },
+    ],
+  },
+  {
+    title: "العمليات اليومية",
+    items: [
       {
         to: "/appointments-queue",
         label: "طابور المواعيد",
@@ -78,10 +79,10 @@ const NAV: NavGroup[] = [
       },
       { to: "/calendar", label: "التقويم", icon: CalendarCheck },
       {
-        to: "/patients-management",
-        label: "المرضى",
-        icon: Users,
-        roles: ["admin", "reception", "doctor", "nurse"],
+        to: "/admin/appointments",
+        label: "المواعيد (Admin)",
+        icon: CalendarCheck,
+        roles: ["admin", "super_admin"],
       },
       {
         to: "/orders-unified",
@@ -107,11 +108,16 @@ const NAV: NavGroup[] = [
         icon: MessageSquare,
         roles: ["admin", "super_admin"],
       },
+    ],
+  },
+  {
+    title: "المرضى والمستخدمون",
+    items: [
       {
-        to: "/admin/appointments",
-        label: "المواعيد (Admin)",
-        icon: CalendarCheck,
-        roles: ["admin", "super_admin"],
+        to: "/patients-management",
+        label: "المرضى",
+        icon: Users,
+        roles: ["admin", "reception", "doctor", "nurse"],
       },
       {
         to: "/admin/patients",
@@ -123,18 +129,6 @@ const NAV: NavGroup[] = [
         to: "/admin/users",
         label: "المستخدمون (Admin)",
         icon: Users,
-        roles: ["admin", "super_admin"],
-      },
-      {
-        to: "/admin/schedules",
-        label: "الجداول والإجازات",
-        icon: ClipboardList,
-        roles: ["admin", "super_admin"],
-      },
-      {
-        to: "/admin/reports",
-        label: "التقارير (Admin)",
-        icon: FileText,
         roles: ["admin", "super_admin"],
       },
     ],
@@ -150,7 +144,28 @@ const NAV: NavGroup[] = [
         icon: ClipboardList,
         roles: ["admin", "hr"],
       },
+      {
+        to: "/admin/schedules",
+        label: "الجداول والإجازات",
+        icon: ClipboardList,
+        roles: ["admin", "super_admin"],
+      },
       { to: "/nurses", label: "التمريض", icon: UserCog, roles: ["admin", "hr", "nurse"] },
+    ],
+  },
+  {
+    title: "الكتالوج",
+    items: [
+      { to: "/admin/branches", label: "الفروع", icon: Building2, roles: ["admin"] },
+      { to: "/admin/specialties", label: "التخصصات", icon: Stethoscope, roles: ["admin"] },
+      { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Package, roles: ["admin"] },
+    ],
+  },
+  {
+    title: "المحتوى والوسائط",
+    items: [
+      { to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] },
+      { to: "/admin/files", label: "الملفات", icon: ImageIcon, roles: ["admin"] },
     ],
   },
   {
@@ -171,24 +186,20 @@ const NAV: NavGroup[] = [
       },
       { to: "/corporate-admin", label: "الشركات", icon: Building2, roles: ["admin"] },
       { to: "/reports", label: "التقارير", icon: FileBarChart, roles: ["admin"] },
+      {
+        to: "/admin/reports",
+        label: "التقارير (Admin)",
+        icon: FileText,
+        roles: ["admin", "super_admin"],
+      },
     ],
   },
   {
-    title: "منشئ الموقع",
-    items: [
-      { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, roles: ["super_admin"] },
-      { to: "/owner/pages", label: "الصفحات", icon: FileText, roles: ["super_admin"] },
-      { to: "/owner/services", label: "الخدمات", icon: Stethoscope, roles: ["super_admin"] },
-      { to: "/owner/accounts", label: "الحسابات", icon: Users, roles: ["super_admin"] },
-      { to: "/owner/settings", label: "إعدادات الموقع", icon: Settings, roles: ["super_admin"] },
-      { to: "/owner/security", label: "الأمان (MFA)", icon: KeyRound, roles: ["super_admin"] },
-      { to: "/owner/audit", label: "سجل النشاط", icon: ScrollText, roles: ["super_admin"] },
-    ],
-  },
-  {
-    title: "أدوات",
+    title: "الذكاء والأدوات",
     items: [
       { to: "/admin/ai/overview", label: "نظرة AI الشاملة", icon: Sparkles, roles: ["admin"] },
+      { to: "/admin/ai-streaming", label: "AI Streaming", icon: Sparkles, roles: ["admin"] },
+      { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       {
         to: "/admin/design-tokens",
         label: "Design Tokens",
@@ -208,16 +219,10 @@ const NAV: NavGroup[] = [
         roles: ["admin", "super_admin"],
       },
       { to: "/mcp-status", label: "حالة MCP", icon: Activity, roles: ["admin", "super_admin"] },
-      {
-        to: "/report-downloads-audit",
-        label: "تدقيق تنزيلات التقارير",
-        icon: ScrollText,
-        roles: ["admin"],
-      },
     ],
   },
   {
-    title: "الحوكمة",
+    title: "الحوكمة والأمان",
     items: [
       { to: "/rbac", label: "الأدوار", icon: ShieldCheck, roles: ["admin"] },
       {
@@ -226,8 +231,20 @@ const NAV: NavGroup[] = [
         icon: ShieldCheck,
         roles: ["admin"],
       },
-      { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, roles: ["admin"] },
+      { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ScrollText, roles: ["admin"] },
       { to: "/admin/booking-trace", label: "تتبع الحجوزات", icon: ShieldCheck, roles: ["admin"] },
+      {
+        to: "/report-downloads-audit",
+        label: "تدقيق تنزيلات التقارير",
+        icon: ScrollText,
+        roles: ["admin"],
+      },
+      { to: "/admin/notification-logs", label: "الإشعارات", icon: Bell, roles: ["admin"] },
+    ],
+  },
+  {
+    title: "المراقبة والأداء",
+    items: [
       { to: "/admin/web-vitals", label: "Web Vitals", icon: Gauge, roles: ["admin"] },
       {
         to: "/admin/visual-analytics",
@@ -235,24 +252,33 @@ const NAV: NavGroup[] = [
         icon: FileBarChart,
         roles: ["admin"],
       },
-      { to: "/admin/notification-logs", label: "الإشعارات", icon: Bell, roles: ["admin"] },
+      { to: "/admin/booking-funnel", label: "قمع الحجوزات", icon: FileBarChart, roles: ["admin"] },
       { to: "/admin/no-show-risk", label: "توقّع الغياب", icon: ShieldCheck, roles: ["admin"] },
       { to: "/admin/realtime-monitor", label: "مراقبة Realtime", icon: Gauge, roles: ["admin"] },
-      { to: "/admin/booking-funnel", label: "قمع الحجوزات", icon: FileBarChart, roles: ["admin"] },
-      { to: "/admin/v3", label: "ترقية V3", icon: Sparkles, roles: ["admin"] },
-      { to: "/admin/ai-streaming", label: "AI Streaming", icon: Sparkles, roles: ["admin"] },
-      { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       { to: "/admin/super/monitoring", label: "صحة النظام", icon: Gauge, roles: ["admin"] },
       { to: "/admin/services-health", label: "حالة الخدمات", icon: Activity, roles: ["admin"] },
-      { to: "/admin/integrations", label: "التكاملات", icon: Activity, roles: ["admin"] },
+    ],
+  },
+  {
+    title: "الإعدادات والتكاملات",
+    items: [
       { to: "/admin/settings", label: "إعدادات النظام", icon: Settings, roles: ["admin"] },
-      { to: "/clinic-settings", label: "الإعدادات", icon: Settings, roles: ["admin"] },
-      { to: "/admin/service-catalog", label: "كتالوج الخدمات", icon: Settings, roles: ["admin"] },
-      { to: "/admin/branches", label: "الفروع", icon: Building2, roles: ["admin"] },
-      { to: "/admin/specialties", label: "التخصصات", icon: Stethoscope, roles: ["admin"] },
-      { to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] },
-      { to: "/admin/files", label: "الملفات", icon: ImageIcon, roles: ["admin"] },
+      { to: "/admin/integrations", label: "التكاملات", icon: Activity, roles: ["admin"] },
+      { to: "/clinic-settings", label: "إعدادات العيادة", icon: Settings, roles: ["admin"] },
+      { to: "/admin/v3", label: "ترقية V3", icon: Sparkles, roles: ["admin"] },
       { to: "/admin/classic", label: "النسخة الكلاسيكية", icon: Settings, roles: ["admin"] },
+    ],
+  },
+  {
+    title: "منشئ الموقع",
+    items: [
+      { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, roles: ["super_admin"] },
+      { to: "/owner/pages", label: "الصفحات", icon: FileText, roles: ["super_admin"] },
+      { to: "/owner/services", label: "الخدمات", icon: Stethoscope, roles: ["super_admin"] },
+      { to: "/owner/accounts", label: "الحسابات", icon: Users, roles: ["super_admin"] },
+      { to: "/owner/settings", label: "إعدادات الموقع", icon: Settings, roles: ["super_admin"] },
+      { to: "/owner/security", label: "الأمان (MFA)", icon: KeyRound, roles: ["super_admin"] },
+      { to: "/owner/audit", label: "سجل النشاط", icon: ScrollText, roles: ["super_admin"] },
     ],
   },
 ];
