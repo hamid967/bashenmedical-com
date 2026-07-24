@@ -48,7 +48,15 @@ type ApptStatus =
   | "pending_verification"
   | "pending_payment"
   | "checked_in"
-  | "in_progress";
+  | "in_progress"
+  | "slot_held"
+  | "pending_insurance"
+  | "pending_confirmation"
+  | "arrived"
+  | "waiting"
+  | "called"
+  | "in_consultation"
+  | "rescheduled";
 
 const appointmentsQuery = (scope: Scope) =>
   queryOptions({
