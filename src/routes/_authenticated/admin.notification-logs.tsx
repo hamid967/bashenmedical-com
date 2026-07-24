@@ -21,6 +21,7 @@ import {
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 import {
   getNotificationDeliveryStats,
+  getNotificationDeliveryKpis,
   getNotificationDeliveryLogDetail,
   listNotificationDeliveryLogs,
   retryNotificationDeliveryLog,
@@ -28,6 +29,7 @@ import {
   type NotificationDeliveryLog,
   type NotificationDeliveryLogDetail,
   type NotificationDeliveryStats,
+  type NotificationDeliveryKpis,
 } from "@/lib/admin/notification-logs.functions";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { X, FlaskConical, RotateCw, Download } from "lucide-react";
