@@ -135,7 +135,6 @@ import { Route as AuthenticatedAdminContentAnalyticsRouteImport } from './routes
 import { Route as AuthenticatedAdminDesignTokensRouteImport } from './routes/_authenticated/admin.design-tokens'
 import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authenticated/admin.doctors'
 import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
-import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
 import { Route as AuthenticatedAdminInsuranceRouteImport } from './routes/_authenticated/admin.insurance'
 import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin.integrations'
 import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_authenticated/admin.no-show-detail'
@@ -937,11 +936,6 @@ const AuthenticatedAdminDoctorsRoute =
 const AuthenticatedAdminFilesRoute = AuthenticatedAdminFilesRouteImport.update({
   id: '/files',
   path: '/files',
-  getParentRoute: () => AuthenticatedAdminRoute,
-} as any)
-const AuthenticatedAdminInboxRoute = AuthenticatedAdminInboxRouteImport.update({
-  id: '/inbox',
-  path: '/inbox',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedAdminInsuranceRoute =
@@ -1832,7 +1826,6 @@ export interface FileRoutesByFullPath {
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
-  '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
@@ -2085,7 +2078,6 @@ export interface FileRoutesByTo {
   '/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
-  '/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
@@ -2345,7 +2337,6 @@ export interface FileRoutesById {
   '/_authenticated/admin/design-tokens': typeof AuthenticatedAdminDesignTokensRoute
   '/_authenticated/admin/doctors': typeof AuthenticatedAdminDoctorsRoute
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
-  '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRoute
   '/_authenticated/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
   '/_authenticated/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
@@ -2605,7 +2596,6 @@ export interface FileRouteTypes {
     | '/admin/design-tokens'
     | '/admin/doctors'
     | '/admin/files'
-    | '/admin/inbox'
     | '/admin/insurance'
     | '/admin/integrations'
     | '/admin/no-show-detail'
@@ -2858,7 +2848,6 @@ export interface FileRouteTypes {
     | '/admin/design-tokens'
     | '/admin/doctors'
     | '/admin/files'
-    | '/admin/inbox'
     | '/admin/insurance'
     | '/admin/integrations'
     | '/admin/no-show-detail'
@@ -3117,7 +3106,6 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/design-tokens'
     | '/_authenticated/admin/doctors'
     | '/_authenticated/admin/files'
-    | '/_authenticated/admin/inbox'
     | '/_authenticated/admin/insurance'
     | '/_authenticated/admin/integrations'
     | '/_authenticated/admin/no-show-detail'
@@ -4224,13 +4212,6 @@ declare module '@tanstack/react-router' {
       path: '/files'
       fullPath: '/admin/files'
       preLoaderRoute: typeof AuthenticatedAdminFilesRouteImport
-      parentRoute: typeof AuthenticatedAdminRoute
-    }
-    '/_authenticated/admin/inbox': {
-      id: '/_authenticated/admin/inbox'
-      path: '/inbox'
-      fullPath: '/admin/inbox'
-      preLoaderRoute: typeof AuthenticatedAdminInboxRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/insurance': {
@@ -5350,7 +5331,6 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminDesignTokensRoute: typeof AuthenticatedAdminDesignTokensRoute
   AuthenticatedAdminDoctorsRoute: typeof AuthenticatedAdminDoctorsRoute
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRouteWithChildren
-  AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRoute
   AuthenticatedAdminInsuranceRoute: typeof AuthenticatedAdminInsuranceRouteWithChildren
   AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRouteWithChildren
   AuthenticatedAdminNoShowDetailRoute: typeof AuthenticatedAdminNoShowDetailRoute
@@ -5400,7 +5380,6 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminDesignTokensRoute: AuthenticatedAdminDesignTokensRoute,
   AuthenticatedAdminDoctorsRoute: AuthenticatedAdminDoctorsRoute,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRouteWithChildren,
-  AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRoute,
   AuthenticatedAdminInsuranceRoute:
     AuthenticatedAdminInsuranceRouteWithChildren,
   AuthenticatedAdminIntegrationsRoute:
