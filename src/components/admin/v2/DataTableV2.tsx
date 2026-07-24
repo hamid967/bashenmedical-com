@@ -185,10 +185,15 @@ export function DataTableV2<T>({
   className,
   ariaLabel = "جدول البيانات",
   caption,
+  persistKey,
 }: DataTableV2Props<T>) {
   const visibleColumns = useMemo(() => columns.filter((c) => !c.hidden), [columns]);
   const hasColumnSearch = visibleColumns.some((c) => c.searchable);
   const hasFilters = visibleColumns.some((c) => c.filter);
+
+  /* ── Persistence: hydrate saved sort + perPage on first mount ── */
+  const storageKey = persistKey ? `dtv2:${persistKey}` : null;
+  const hydratedRef = useRef(false);
 
   /* Fallback local client-side pagination when server-side isn't wired. */
   const [localPage, setLocalPage] = useState(1);
