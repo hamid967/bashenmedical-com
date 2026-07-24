@@ -12,6 +12,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { MediaField } from "@/components/admin/MediaPicker";
 
 export const Route = createFileRoute("/_authenticated/admin/cms/$kind/$id")({
   head: () => ({ meta: [{ title: "محرر المحتوى" }] }),
@@ -165,7 +166,7 @@ function CmsEditor() {
           <TextInput label="Canonical URL" value={seo.canonical ?? ""} onChange={(v) => setSeo({ ...seo, canonical: v })} />
           <TextInput label="og:title" value={seo.og_title ?? ""} onChange={(v) => setSeo({ ...seo, og_title: v })} />
           <TextInput label="og:description" value={seo.og_description ?? ""} onChange={(v) => setSeo({ ...seo, og_description: v })} textarea />
-          <TextInput label="og:image URL" value={ogImage} onChange={setOgImage} />
+          <MediaField label="og:image" value={ogImage} onChange={setOgImage} />
         </Card>
       )}
 
@@ -244,6 +245,9 @@ function FieldsEditor({
         if (f.type === "list") {
           return <ListField key={f.name} f={f} value={Array.isArray(v) ? v : []} onChange={set} />;
         }
+        if (f.type === "image") {
+          return <MediaField key={f.name} label={f.label + (f.required ? " *" : "")} value={v ?? ""} onChange={set} />;
+        }
         const textarea = f.type === "textarea" || f.type === "rich";
         return (
           <TextInput
@@ -252,7 +256,7 @@ function FieldsEditor({
             value={v ?? ""}
             onChange={set}
             textarea={textarea}
-            placeholder={f.type === "url" || f.type === "image" ? "https://…" : undefined}
+            placeholder={f.type === "url" ? "https://…" : undefined}
           />
         );
       })}
