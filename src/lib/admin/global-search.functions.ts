@@ -44,7 +44,7 @@ export const globalSearch = createServerFn({ method: "POST" })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb: any = context.supabase;
 
-    const [pRes, dRes, aRes] = await Promise.all([
+    const [pRes, dRes, aRes, rRes] = await Promise.all([
       sb
         .from("patients")
         .select("id, full_name, mrn, phone")
@@ -57,9 +57,19 @@ export const globalSearch = createServerFn({ method: "POST" })
         .limit(8),
       sb
         .from("appointments")
-        .select("id, appointment_date, status, patients(full_name)")
-        .ilike("patients.full_name", `%${q}%`)
+        .select("id, reference_number, appointment_date, status, patients!inner(full_name)")
+        .or(
+          `reference_number.ilike.%${q}%,patients.full_name.ilike.%${q}%`,
+        )
         .order("appointment_date", { ascending: false })
+        .limit(6),
+      sb
+        .from("service_inquiries")
+        .select("id, request_number, full_name, mobile_e164, mobile_number, internal_status")
+        .or(
+          `request_number.ilike.%${q}%,full_name.ilike.%${q}%,mobile_e164.ilike.%${q}%,mobile_number.ilike.%${q}%`,
+        )
+        .order("created_at", { ascending: false })
         .limit(6),
     ]);
 
@@ -81,9 +91,18 @@ export const globalSearch = createServerFn({ method: "POST" })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       appointments: (aRes.data ?? []).map((r: any) => ({
         id: r.id,
+        reference_number: r.reference_number ?? null,
         patient_name: r.patients?.full_name ?? "—",
         date: r.appointment_date,
         status: r.status,
+      })),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      requests: (rRes.data ?? []).map((r: any) => ({
+        id: r.id,
+        request_number: r.request_number ?? null,
+        full_name: r.full_name ?? "—",
+        phone: maskPhone(r.mobile_e164 ?? r.mobile_number ?? null),
+        status: r.internal_status ?? null,
       })),
     };
   });
