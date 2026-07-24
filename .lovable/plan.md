@@ -1,86 +1,77 @@
-# Phase 6 — Patient Content & Recommendation Engine
+# Phase 7 — Enterprise Medical Admin Command Center
 
-Build a configurable content engine that powers the patient dashboard "cards" (announcements, offers, screening campaigns, new services, reminders, doctor spotlights, nearest-slot suggestions, related services) with bilingual content, moderation workflow, targeting, and click/impression analytics.
+Rebuild `/admin` as the central control system with a unified shell, 26 modules, and a real-data KPI dashboard. Ship in 6 batches so each is reviewable and testable.
 
-## 1. Data model (single migration)
+The current codebase already ships `AdminShellV2`, `CommandPaletteV3`, doctors CRUD, unified inbox, audit logs, content, visual analytics, web vitals, realtime monitor, role-permissions matrix, and AI dashboards. Phase 7 consolidates them under one shell, fills gaps, and standardizes states.
 
-New tables (all with `GRANT` + RLS + `updated_at` trigger):
+## Batch 1 — Shell + Chrome (foundation)
+- Extend `AdminShellV2`:
+  - Collapsible sidebar with grouped modules (Operations / Clinical / Content / Governance / System) and persisted collapse state.
+  - Sticky top command bar: global search input (opens palette), branch switcher, language switcher, notification center trigger, AI assistant trigger, user menu.
+  - Mobile responsive drawer nav (`Sheet`) with the same tree.
+  - Breadcrumbs derived from the active TanStack route.
+  - Keep light theme only (per project memory: dark mode removed). Provide a density toggle (comfortable/compact) instead of theme switcher.
+- Unify `CommandPaletteV3` shortcuts (⌘/Ctrl+K) and route-jump entries for all 26 modules + quick actions (New appointment, New patient, New article, Broadcast content).
+- Notification center: pull from existing `notifications` table (already wired for admins).
+- AI Assistant Panel: side sheet reusing existing admin AI chat route.
 
-- `content_items`
-  - `type` enum: `announcement | offer | screening | new_service | reminder | doctor_spotlight | nearest_slot | suggested_service`
-  - `status` enum: `draft | review | approved | scheduled | published | archived`
-  - `title_ar/title_en`, `body_ar/body_en`, `excerpt_ar/excerpt_en`
-  - `image_url`, `cta_label_ar/en`, `cta_href`
-  - `starts_at`, `ends_at`, `priority` (int, higher = first)
-  - `branch_id` (nullable = all branches), `specialty_id` (nullable)
-  - `audience` jsonb: `{ languages?: ['ar','en'], hasBookedSpecialty?: uuid[], preferredBranch?: uuid[], newPatientOnly?: bool, minAgeYears?, maxAgeYears? }`
-  - `is_promotional` bool (drives the "إعلان" label)
-  - `disabled_at` timestamptz (immediate kill switch, independent of status)
-  - `created_by`, `approved_by`, timestamps
+## Batch 2 — Real-data Overview KPIs
+Replace the current mixed real/mock KPI grid with 14 real-data KPIs. Add one server function `getCommandCenterKpisV2` returning all metrics in a single call with previous-period comparison:
 
-- `content_item_versions` — audit history of every status/content change.
+| KPI | Source |
+|---|---|
+| Today's appointments | `appointments` where date=today |
+| Confirmed appointments | status=confirmed today |
+| Pending requests | `service_inquiries` status=pending + `appointments` status=pending |
+| Cancellations | `appointments` status=cancelled today |
+| No-show rate | `appointments` no_show / total (7d) |
+| Clinic occupancy | booked slots / available slots today |
+| Available slots | `availability_slots` remaining today |
+| New patients | `patients` created today |
+| Pending reports | `medical_reports`/`lab_reports`/`radiology_reports` status=pending |
+| Insurance approvals | `insurance_approvals` status=pending |
+| Unpaid invoices | `invoices` status=unpaid |
+| WhatsApp requests | `service_inquiries` source=whatsapp today |
+| Support requests | `complaints` open |
+| Integration failures | `integration_logs` status=error (24h) |
 
-- `content_impressions` — `(item_id, user_id nullable, session_id, shown_at, surface)`; append-only.
-- `content_clicks` — same shape + `href_at_click`.
-- Materialized daily rollup `content_item_stats` refreshed by pg_cron.
+Each KPI card: Loading skeleton, Error retry, Empty ("no data yet"), and a drill-down `Link` to its module route with matching filters. Uses `FeatureErrorBoundary` and `states/index` primitives.
 
-Indexes: `(status, starts_at, ends_at)`, `(type, priority DESC)`, `(branch_id)`.
+## Batch 3 — Module route audit + fill gaps
+Ensure a route exists under `/admin/*` for every listed module. Existing → reuse. Missing → create thin index shells (list + filters + accessible enterprise table with sort/paginate) wired to existing server fns:
 
-RLS:
-- Patients: no direct SELECT — everything served by server functions.
-- `content_editor`, `admin`, `super_admin`: full CRUD via `has_role`.
-- `service_role`: all.
+- Existing: Overview, Inbox (Unified Requests), Appointments, Patients, Doctors, Content, Content Analytics, Audit Logs, Role-Permissions Matrix, Web Vitals, Realtime Monitor, AI Streaming, Visual Analytics.
+- Create thin shells: Schedules, Reports, Billing, Insurance, WhatsApp Requests (filter of Inbox), Support (Complaints), Offers (filter of Content), Announcements (filter of Content), Services, Specialties, Branches, Articles (Health articles), Files (Media Library), Analytics (index linking sub-dashboards), Users, Roles, Integrations, AI Settings, System Settings, System Health.
 
-## 2. Server layer
+Each thin shell uses one shared `EnterpriseTable` component (Batch 4).
 
-`src/lib/content/content.functions.ts` (patient-facing, `requireSupabaseAuth`):
-- `getPatientContentFeed({ surface, limit })` — resolves the current patient's profile (preferred branch, language, booked specialties from `appointments`), then queries `content_items` where `status='published' AND disabled_at IS NULL AND now() BETWEEN starts_at AND ends_at`, applies audience filters in SQL, orders by `priority DESC, starts_at DESC`. Returns bilingual DTO ready for the dashboard.
-- `logContentImpression(itemId, surface)` and `logContentClick(itemId, surface, href)` — insert rows; use `pg_net`-safe fire-and-forget from the client via a small `/api/public/content/track` route so we don't block navigation.
+## Batch 4 — Accessible Enterprise Table primitive
+New `src/components/admin/v3/EnterpriseTable.tsx`:
+- Semantic `<table>` with `role`, `aria-sort`, sticky header, keyboard row focus.
+- Column defs, server-driven sort/pagination/filter props.
+- Built-in Loading / Error / Empty / PermissionDenied states via `states/index`.
+- Row actions dropdown, bulk selection, RTL-aware.
+Adopt in Doctors and Appointments first; roll into other modules over time.
 
-`src/lib/admin/content.functions.ts` (admin, `assertHasRole('content_editor'|'admin'|'super_admin')`):
-- `listContentItems`, `getContentItem`, `upsertContentItem`, `transitionStatus` (enforces `draft→review→approved→scheduled→published→archived` graph), `toggleDisabled(itemId, disabled)`, `getContentStats(itemId, range)`.
+## Batch 5 — Instant client navigation + polish
+- Add `preload="intent"` on all sidebar `Link`s.
+- Register hover-preload for palette results.
+- Confirm every `/admin/*` route has `errorComponent` + `notFoundComponent` (spot-fix any missing).
+- Set `head()` per route: unique title, `noindex`.
 
-Nearest-slot / doctor-spotlight items are computed live: `type='nearest_slot'` rows carry only the query (`specialty_id`, `branch_id`) and the resolver hydrates the actual next available slot from existing `getAvailability` helpers at read time — no stale slots stored.
+## Batch 6 — Tests
+- `tests/e2e/admin_shell_navigation.py`: sidebar collapse persistence, palette open with ⌘K, branch switch, breadcrumb accuracy, mobile drawer.
+- `tests/e2e/admin_kpis_real_data.py`: seed known rows, assert each KPI value + drill-down link target.
+- `tests/react/enterprise-table.test.tsx`: sort, empty, error, keyboard nav.
+- CI: add to existing e2e workflow.
 
-## 3. Patient dashboard integration
+## Out of scope (explicit)
+- Dark mode (removed per project memory; ship density toggle instead).
+- Rewriting existing working modules (Doctors, Inbox, Content, Audit) — only re-skin under new shell.
+- New backend features beyond the KPI aggregator.
 
-- New component `src/components/patient/ContentFeed.tsx` renders a card row per surface (`dashboard_hero`, `dashboard_bento`, `dashboard_footer`).
-- Each card is bilingual (uses `profile.preferred_language`), shows an "إعلان / Sponsored" chip when `is_promotional`, and never overlays or blocks primary CTAs — it sits below the "required actions" section on the dashboard, above announcements.
-- IntersectionObserver-based impression logging (dedupe per session).
-- Click → `logContentClick` → navigate to `cta_href`.
-- Replaces the current hard-coded `announcements` and `offers` blocks in `patient.index.tsx` with the new feed (announcements/offers are just two `type` values now).
+## Deliverables per batch
+Each batch ends with: files changed, screenshots of key screens, `bun run build:dev` + typecheck clean, and any migration listed separately for approval.
 
-## 4. Admin console
-
-`src/routes/_authenticated/admin.content.tsx` + child routes:
-- List with filters (type, status, branch, date).
-- Editor with bilingual tabs, image picker (existing `MediaPicker`), audience builder, CTA config, scheduling.
-- Status transition buttons; "Disable now" kill switch always visible.
-- Analytics tab: impressions, clicks, CTR by day, top branches.
-
-## 5. Safety rules
-
-- Server never returns diagnostic language: content is authored copy only; no inference of undiagnosed conditions. Add a lint list of banned phrases enforced in `upsertContentItem` (rejects medical claim keywords in `body_*`).
-- Promotional items require `is_promotional=true` and are always rendered with the sponsored label; screening/reminder types cannot be marked promotional.
-- Recommendation inputs limited to: preferred branch, language, general prefs, previously booked specialty, availability. No health-record derived targeting.
-
-## 6. Tests
-
-- `tests/unit/content-audience-match.test.ts` — audience filter unit tests.
-- `tests/rls/content-items-rls.test.ts` — non-editor cannot mutate.
-- `tests/e2e/patient_content_feed.py` — feed renders, impression + click logged, disabled item disappears within one refetch.
-
-## 7. Rollout
-
-1. Migration + grants + RLS.
-2. Server functions + tracking route.
-3. Admin CRUD console.
-4. Patient dashboard feed (behind `content_feed` V3 flag, default on for patients).
-5. Backfill: migrate existing `announcements` rows into `content_items` as `type='announcement'`.
-
-## Technical details
-
-- Reuse `has_role(uuid, app_role)` for RLS; add `'content_editor'` to `app_role` if not already present (it exists — verified in earlier phases).
-- Live nearest-slot resolution reuses `/api/public/book/availability` internals, not a duplicate query.
-- Tracking route is public (`/api/public/content/track`) with Zod validation, per-IP rate limit via existing `src/lib/rate-limit.server.ts`, and signature-free anon inserts scoped by RLS `WITH CHECK (true)` on the two log tables only.
-- All timestamps stored UTC; audience/date evaluation done in SQL with `now()` to keep the query index-friendly.
+## Approval question
+Confirm the batch order and that shipping without dark mode (density toggle instead) is acceptable, or tell me to re-add a light/dark toggle. I'll start Batch 1 on approval.
