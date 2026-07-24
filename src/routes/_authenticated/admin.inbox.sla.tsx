@@ -179,6 +179,10 @@ function SlaPage() {
         />
       </div>
 
+      <AlertConfigCard />
+
+
+
       {/* Thresholds legend */}
       <Card className="p-4">
         <div className="text-sm font-semibold mb-2">حدود SLA (بحسب الأولوية)</div>
