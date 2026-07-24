@@ -102,6 +102,12 @@ const NAV: NavGroup[] = [
         roles: ["admin", "reception"],
       },
       {
+        to: "/admin/whatsapp",
+        label: "طلبات واتساب (Admin)",
+        icon: MessageSquare,
+        roles: ["admin", "super_admin"],
+      },
+      {
         to: "/admin/appointments",
         label: "المواعيد (Admin)",
         icon: CalendarCheck,
