@@ -542,3 +542,27 @@ export const listCmsAudit = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return rows ?? [];
   });
+
+/* ============== version diff ============== */
+
+export const getCmsVersion = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) =>
+    z.object({
+      entry_id: z.string().uuid(),
+      version_id: z.string().uuid(),
+    }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertCmsEditor(context);
+    const { data: v, error } = await context.supabase
+      .from("cms_versions")
+      .select("id, version_no, payload_ar, payload_en, seo, og_image_url, note, author_id, created_at")
+      .eq("id", data.version_id)
+      .eq("entry_id", data.entry_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!v) throw new Error("النسخة غير موجودة");
+    return v;
+  });
+
