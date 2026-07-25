@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw, ShieldCheck, ShieldAlert, Timer, AlertTriangle } from "lucide-react";
-import { getNphiesLogs, getNphiesConfig } from "@/lib/admin/nphies.functions";
+import { getNphiesLogs, getNphiesConfig, pingNphiesConnection } from "@/lib/admin/nphies.functions";
 
 const WINDOWS = [1, 6, 24, 24 * 7, 24 * 30];
 const MODES = ["all", "mock", "sandbox", "live"] as const;
