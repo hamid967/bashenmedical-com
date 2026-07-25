@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   RefreshCw,
   AlertTriangle,
@@ -12,10 +14,17 @@ import {
   ShieldAlert,
   CheckCircle2,
   ExternalLink,
+  Pencil,
+  History,
+  X,
 } from "lucide-react";
 import {
   getReconciliationDetail,
+  applyReconciliationAdjustment,
+  revokeReconciliationAdjustment,
   type ReconciliationFieldDiff,
+  type ReconciliationAdjustmentRow,
+  type ReconciliationNphiesCandidate,
 } from "@/lib/admin/reconciliation.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/reconciliation/$invoiceId")({
@@ -87,7 +96,17 @@ function ReconciliationDetailPage() {
     );
   }
 
-  const { row, invoice, payments, refunds, nphies, fieldDiffs, flagsExplained } = q.data;
+  const {
+    row,
+    invoice,
+    payments,
+    refunds,
+    nphies,
+    fieldDiffs,
+    flagsExplained,
+    activeAdjustment,
+    adjustmentHistory,
+  } = q.data;
   const ccy = invoice.currency;
 
   return (
@@ -170,6 +189,17 @@ function ReconciliationDetailPage() {
           الفاتورة مطابقة بالكامل — لا توجد فروقات.
         </section>
       )}
+
+      {/* Manual adjustment tools */}
+      <AdjustmentPanel
+        invoiceId={invoice.id}
+        currency={ccy}
+        activeAdjustment={activeAdjustment}
+        history={adjustmentHistory}
+        nphiesCandidates={nphies}
+      />
+
+
 
       {/* Field-level diffs */}
       <section>
@@ -526,3 +556,379 @@ function SourceCard({
     <div className="opacity-70">{inner}</div>
   );
 }
+
+function AdjustmentPanel({
+  invoiceId,
+  currency,
+  activeAdjustment,
+  history,
+  nphiesCandidates,
+}: {
+  invoiceId: string;
+  currency: string;
+  activeAdjustment: ReconciliationAdjustmentRow | null;
+  history: ReconciliationAdjustmentRow[];
+  nphiesCandidates: ReconciliationNphiesCandidate[];
+}) {
+  const qc = useQueryClient();
+  const applyFn = useServerFn(applyReconciliationAdjustment);
+  const revokeFn = useServerFn(revokeReconciliationAdjustment);
+  const [open, setOpen] = useState(false);
+  const [linkMode, setLinkMode] = useState<"keep" | "link" | "unlink">(
+    activeAdjustment?.unlink_nphies
+      ? "unlink"
+      : activeAdjustment?.linked_nphies_request_id
+        ? "link"
+        : "keep",
+  );
+  const [linkedId, setLinkedId] = useState<string>(
+    activeAdjustment?.linked_nphies_request_id ?? "",
+  );
+  const [overrideShareEnabled, setOverrideShareEnabled] = useState(
+    activeAdjustment?.override_expected_share != null,
+  );
+  const [overrideShare, setOverrideShare] = useState<string>(
+    activeAdjustment?.override_expected_share != null
+      ? String(activeAdjustment.override_expected_share)
+      : "",
+  );
+  const [statusOverride, setStatusOverride] = useState<string>(
+    activeAdjustment?.override_invoice_status ?? "",
+  );
+  const [resolved, setResolved] = useState<boolean>(!!activeAdjustment?.resolved);
+  const [reason, setReason] = useState<string>("");
+
+  type ApplyPayload = {
+    invoice_id: string;
+    reason: string;
+    unlink_nphies?: boolean;
+    linked_nphies_request_id?: string | null;
+    override_expected_share?: number | null;
+    override_invoice_status?:
+      | "issued"
+      | "pending"
+      | "paid"
+      | "cancelled"
+      | "refunded"
+      | null;
+    resolved?: boolean;
+  };
+
+  const apply = useMutation({
+    mutationFn: (data: ApplyPayload) => applyFn({ data }),
+    onSuccess: () => {
+      toast.success("تم حفظ التعديل");
+      setOpen(false);
+      setReason("");
+      qc.invalidateQueries({ queryKey: ["admin-reconciliation-detail", invoiceId] });
+      qc.invalidateQueries({ queryKey: ["admin-reconciliation"] });
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الحفظ"),
+  });
+
+  const revoke = useMutation({
+    mutationFn: (data: { id: string; revoke_reason: string }) => revokeFn({ data }),
+    onSuccess: () => {
+      toast.success("تم إلغاء التعديل");
+      qc.invalidateQueries({ queryKey: ["admin-reconciliation-detail", invoiceId] });
+      qc.invalidateQueries({ queryKey: ["admin-reconciliation"] });
+    },
+    onError: (e: unknown) => toast.error(e instanceof Error ? e.message : "تعذّر الإلغاء"),
+  });
+
+  const submit = () => {
+    if (reason.trim().length < 3) {
+      toast.error("سبب التعديل مطلوب (٣ أحرف على الأقل)");
+      return;
+    }
+    const payload: ApplyPayload = {
+      invoice_id: invoiceId,
+      reason: reason.trim(),
+      unlink_nphies: linkMode === "unlink",
+      linked_nphies_request_id: linkMode === "link" && linkedId ? linkedId : null,
+      override_expected_share:
+        overrideShareEnabled && overrideShare !== "" ? Number(overrideShare) : null,
+      override_invoice_status:
+        (statusOverride || null) as
+          | "issued"
+          | "pending"
+          | "paid"
+          | "cancelled"
+          | "refunded"
+          | null,
+      resolved,
+    };
+    apply.mutate(payload);
+  };
+
+  return (
+    <section className="rounded-lg border">
+      <header className="flex items-center justify-between gap-3 border-b px-4 py-3">
+        <div className="flex items-center gap-2">
+          <Pencil className="h-4 w-4" aria-hidden="true" />
+          <h2 className="text-sm font-semibold">أدوات التعديل اليدوي للمطابقة</h2>
+          {activeAdjustment ? (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] text-primary">
+              تعديل نشط
+            </span>
+          ) : null}
+        </div>
+        <button
+          type="button"
+          onClick={() => setOpen((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-xs hover:bg-muted"
+        >
+          {open ? (
+            <>
+              <X className="h-3.5 w-3.5" /> إغلاق
+            </>
+          ) : (
+            <>
+              <Pencil className="h-3.5 w-3.5" /> {activeAdjustment ? "استبدال التعديل" : "تعديل يدوي"}
+            </>
+          )}
+        </button>
+      </header>
+
+      {activeAdjustment ? (
+        <div className="border-b bg-primary/5 px-4 py-3 text-sm">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <div className="font-semibold">التعديل الحالي</div>
+              <div className="mt-1 text-xs text-muted-foreground">
+                بواسطة {activeAdjustment.created_by_name ?? "—"} •{" "}
+                {new Date(activeAdjustment.created_at).toLocaleString("ar-SA")}
+              </div>
+              <div className="mt-2">
+                <span className="text-xs text-muted-foreground">السبب:</span>{" "}
+                <span className="font-medium">{activeAdjustment.reason}</span>
+              </div>
+              <ul className="mt-2 space-y-0.5 text-xs">
+                {activeAdjustment.unlink_nphies && <li>• فصل مطالبة NPHIES</li>}
+                {activeAdjustment.linked_nphies_request_id && (
+                  <li>
+                    • ربط مطالبة NPHIES:{" "}
+                    <span className="font-mono">
+                      {activeAdjustment.linked_nphies_request_id.slice(0, 8)}
+                    </span>
+                  </li>
+                )}
+                {activeAdjustment.override_expected_share != null && (
+                  <li>
+                    • حصة المريض المتوقعة: {money(activeAdjustment.override_expected_share, currency)}
+                  </li>
+                )}
+                {activeAdjustment.override_invoice_status && (
+                  <li>• حالة الفاتورة: {activeAdjustment.override_invoice_status}</li>
+                )}
+                {activeAdjustment.resolved && <li>• تم الإقرار (Resolved)</li>}
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const r = window.prompt("سبب إلغاء التعديل:", "");
+                if (r && r.trim().length >= 3) {
+                  revoke.mutate({ id: activeAdjustment.id, revoke_reason: r.trim() });
+                } else if (r != null) {
+                  toast.error("السبب قصير جداً");
+                }
+              }}
+              disabled={revoke.isPending}
+              className="inline-flex items-center gap-1 rounded-md border border-destructive/30 px-3 py-1.5 text-xs text-destructive hover:bg-destructive/10"
+            >
+              <Undo2 className="h-3.5 w-3.5" /> إلغاء التعديل
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {open && (
+        <div className="space-y-4 px-4 py-4">
+          <fieldset className="space-y-2">
+            <legend className="text-xs font-semibold text-muted-foreground">مطالبة NPHIES</legend>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="linkMode"
+                checked={linkMode === "keep"}
+                onChange={() => setLinkMode("keep")}
+              />
+              <span>الإبقاء على المطابقة التلقائية</span>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="linkMode"
+                checked={linkMode === "link"}
+                onChange={() => setLinkMode("link")}
+              />
+              <span>ربط مطالبة محددة</span>
+            </label>
+            {linkMode === "link" && (
+              <select
+                value={linkedId}
+                onChange={(e) => setLinkedId(e.target.value)}
+                className="ms-6 w-full max-w-md rounded-md border bg-background px-2 py-1.5 text-sm"
+              >
+                <option value="">— اختر مطالبة —</option>
+                {nphiesCandidates.map((n) => (
+                  <option key={n.id} value={n.id}>
+                    {new Date(n.created_at).toLocaleString("ar-SA")} •{" "}
+                    {n.eligible === true ? "مؤهل" : n.eligible === false ? "غير مؤهل" : "—"} •
+                    تغطية {money(n.covered_amount, currency)} • حصة {money(n.patient_share, currency)}
+                  </option>
+                ))}
+              </select>
+            )}
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="radio"
+                name="linkMode"
+                checked={linkMode === "unlink"}
+                onChange={() => setLinkMode("unlink")}
+              />
+              <span>فصل المطالبة (اعتبار الفاتورة نقدية)</span>
+            </label>
+          </fieldset>
+
+          <fieldset className="space-y-2">
+            <legend className="text-xs font-semibold text-muted-foreground">
+              حصة المريض المتوقعة
+            </legend>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={overrideShareEnabled}
+                onChange={(e) => setOverrideShareEnabled(e.target.checked)}
+              />
+              <span>تجاوز القيمة يدوياً</span>
+            </label>
+            {overrideShareEnabled && (
+              <div className="ms-6 flex items-center gap-2">
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={overrideShare}
+                  onChange={(e) => setOverrideShare(e.target.value)}
+                  className="w-40 rounded-md border bg-background px-2 py-1.5 text-sm tabular-nums"
+                />
+                <span className="text-xs text-muted-foreground">{currency}</span>
+              </div>
+            )}
+          </fieldset>
+
+          <fieldset className="space-y-2">
+            <legend className="text-xs font-semibold text-muted-foreground">حالة الفاتورة</legend>
+            <select
+              value={statusOverride}
+              onChange={(e) => setStatusOverride(e.target.value)}
+              className="w-full max-w-xs rounded-md border bg-background px-2 py-1.5 text-sm"
+            >
+              <option value="">— لا تغيير —</option>
+              <option value="issued">issued</option>
+              <option value="pending">pending</option>
+              <option value="paid">paid</option>
+              <option value="cancelled">cancelled</option>
+              <option value="refunded">refunded</option>
+            </select>
+          </fieldset>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input
+              type="checkbox"
+              checked={resolved}
+              onChange={(e) => setResolved(e.target.checked)}
+            />
+            <span>وسم الفرق كمعالج (Resolved)</span>
+          </label>
+
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+              سبب التعديل <span className="text-destructive">*</span>
+            </label>
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              rows={3}
+              maxLength={1000}
+              placeholder="مثال: خطأ في إسناد المطالبة — تم التحقق مع قسم التأمين"
+              className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+            />
+            <div className="mt-1 text-[11px] text-muted-foreground">
+              يُحفظ السبب في سجل المراجعة ولا يمكن تعديله لاحقاً.
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="button"
+              onClick={submit}
+              disabled={apply.isPending}
+              className="rounded-md bg-primary px-3 py-1.5 text-sm text-primary-foreground hover:bg-primary/90 disabled:opacity-60"
+            >
+              {apply.isPending ? "جارٍ الحفظ…" : "حفظ التعديل"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {history.length > 0 && (
+        <div className="border-t px-4 py-3">
+          <h3 className="text-xs font-semibold text-muted-foreground flex items-center gap-1 mb-2">
+            <History className="h-3.5 w-3.5" /> سجل التعديلات ({history.length})
+          </h3>
+          <ul className="space-y-2 text-sm">
+            {history.map((h) => (
+              <li
+                key={h.id}
+                className={`rounded-md border p-3 ${
+                  h.revoked_at ? "opacity-60 line-through decoration-muted-foreground/50" : ""
+                }`}
+              >
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div>
+                    <div className="text-xs text-muted-foreground">
+                      {new Date(h.created_at).toLocaleString("ar-SA")} • {h.created_by_name ?? "—"}
+                    </div>
+                    <div className="mt-1 font-medium">{h.reason}</div>
+                    <div className="mt-1 flex flex-wrap gap-1 text-[10px]">
+                      {h.unlink_nphies && <Tag>فصل NPHIES</Tag>}
+                      {h.linked_nphies_request_id && <Tag>ربط NPHIES</Tag>}
+                      {h.override_expected_share != null && (
+                        <Tag>حصة={money(h.override_expected_share, currency)}</Tag>
+                      )}
+                      {h.override_invoice_status && <Tag>حالة={h.override_invoice_status}</Tag>}
+                      {h.resolved && <Tag>Resolved</Tag>}
+                    </div>
+                    {h.revoked_at && (
+                      <div className="mt-2 text-[11px] text-muted-foreground no-underline">
+                        أُلغي بواسطة {h.revoked_by_name ?? "—"} في{" "}
+                        {new Date(h.revoked_at).toLocaleString("ar-SA")} — {h.revoke_reason}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Tag({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">{children}</span>
+  );
+}
+

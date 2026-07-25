@@ -6514,6 +6514,69 @@ export type Database = {
           },
         ]
       }
+      reconciliation_adjustments: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          invoice_id: string
+          linked_nphies_request_id: string | null
+          override_expected_share: number | null
+          override_invoice_status: string | null
+          reason: string
+          resolved: boolean
+          revoke_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          unlink_nphies: boolean
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          invoice_id: string
+          linked_nphies_request_id?: string | null
+          override_expected_share?: number | null
+          override_invoice_status?: string | null
+          reason: string
+          resolved?: boolean
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          unlink_nphies?: boolean
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          invoice_id?: string
+          linked_nphies_request_id?: string | null
+          override_expected_share?: number | null
+          override_invoice_status?: string | null
+          reason?: string
+          resolved?: boolean
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          unlink_nphies?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reconciliation_adjustments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reconciliation_adjustments_linked_nphies_request_id_fkey"
+            columns: ["linked_nphies_request_id"]
+            isOneToOne: false
+            referencedRelation: "nphies_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       refunds: {
         Row: {
           amount: number

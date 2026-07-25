@@ -44,6 +44,8 @@ export type ReconciliationRow = {
   variance: number;
   currency: string;
   flags: string[];
+  adjusted: boolean;
+  adjustment_reason: string | null;
 };
 
 export type ReconciliationSummary = {
@@ -170,36 +172,91 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
     }
     const matchedNphiesIds = new Set<string>();
 
+    // 3.5) Active adjustments for these invoices
+    const adjustmentsByInvoice = new Map<string, any>();
+    const extraNphiesIds: string[] = [];
+    if (invoiceIds.length > 0) {
+      const { data: adjs, error: adjErr } = await context.supabase
+        .from("reconciliation_adjustments")
+        .select(
+          "id, invoice_id, linked_nphies_request_id, unlink_nphies, override_expected_share, override_invoice_status, resolved, reason, created_at",
+        )
+        .in("invoice_id", invoiceIds)
+        .is("revoked_at", null)
+        .order("created_at", { ascending: false });
+      if (adjErr) throw new Error(adjErr.message);
+      for (const a of adjs ?? []) {
+        if (!adjustmentsByInvoice.has(a.invoice_id)) {
+          adjustmentsByInvoice.set(a.invoice_id, a);
+          if (a.linked_nphies_request_id) extraNphiesIds.push(a.linked_nphies_request_id);
+        }
+      }
+    }
+    // Load NPHIES rows referenced by adjustments but not in the day window
+    const extraNphiesById = new Map<string, any>();
+    if (extraNphiesIds.length > 0) {
+      const { data: extras } = await context.supabase
+        .from("nphies_requests")
+        .select(
+          "id, created_at, mode, doctor_id, patient_national_id, covered_amount, patient_share, eligible, http_status",
+        )
+        .in("id", extraNphiesIds);
+      for (const n of extras ?? []) extraNphiesById.set(n.id, n);
+    }
+
     // 4) Merge into rows
     const rows: ReconciliationRow[] = invoiceRows.map((inv) => {
       const appt = inv.appointment ?? null;
       const patient = inv.patient ?? null;
       const nationalId = patient?.national_id ?? appt?.national_id ?? null;
       const doctorId = appt?.doctor_id ?? null;
-      const nphiesMatch =
+      const adjustment = adjustmentsByInvoice.get(inv.id) ?? null;
+
+      let nphiesMatch: any =
         doctorId && nationalId ? nphiesByKey.get(`${doctorId}|${nationalId}`) : null;
+      if (adjustment?.unlink_nphies) nphiesMatch = null;
+      if (adjustment?.linked_nphies_request_id) {
+        nphiesMatch =
+          extraNphiesById.get(adjustment.linked_nphies_request_id) ??
+          nphiesRows.find((n: any) => n.id === adjustment.linked_nphies_request_id) ??
+          nphiesMatch;
+      }
       if (nphiesMatch) matchedNphiesIds.add(nphiesMatch.id);
 
+      const effectiveStatus: string | null = adjustment?.override_invoice_status ?? inv.status ?? null;
       const billed = Number(inv.total ?? 0);
       const pay = paymentsByInvoice.get(inv.id) ?? { collected: 0, refunded: 0 };
       const netCollected = pay.collected - pay.refunded;
       const covered = nphiesMatch?.covered_amount != null ? Number(nphiesMatch.covered_amount) : null;
       const patientShare =
         nphiesMatch?.patient_share != null ? Number(nphiesMatch.patient_share) : null;
-      const expectedShare = patientShare != null ? patientShare : covered != null ? billed - covered : null;
+      const baseExpected =
+        patientShare != null ? patientShare : covered != null ? billed - covered : null;
+      const expectedShare =
+        adjustment?.override_expected_share != null
+          ? Number(adjustment.override_expected_share)
+          : baseExpected;
       const variance = expectedShare != null ? netCollected - expectedShare : netCollected - billed;
 
       const flags: string[] = [];
       if (Math.abs(variance) > 0.009) flags.push("variance");
       if (!nphiesMatch && appt?.insurance_provider_id) flags.push("missing_nphies");
-      if (inv.status !== "paid" && netCollected >= billed - 0.009) flags.push("collected_not_marked_paid");
-      if (inv.status === "paid" && netCollected + 0.009 < billed) flags.push("marked_paid_underpaid");
+      if (effectiveStatus !== "paid" && netCollected >= billed - 0.009)
+        flags.push("collected_not_marked_paid");
+      if (effectiveStatus === "paid" && netCollected + 0.009 < billed)
+        flags.push("marked_paid_underpaid");
       if (billed === 0) flags.push("zero_billed");
+      if (adjustment?.resolved) {
+        // Resolved adjustments suppress the variance flag; keep an explicit marker.
+        const idx = flags.indexOf("variance");
+        if (idx >= 0) flags.splice(idx, 1);
+        flags.push("resolved");
+      }
 
       return {
         invoice_id: inv.id,
         invoice_number: inv.invoice_number ?? null,
-        status: inv.status ?? null,
+        status: effectiveStatus,
         appointment_id: appt?.id ?? null,
         appointment_ref: appt?.reference_number ?? null,
         branch_id: appt?.branch_id ?? null,
@@ -221,8 +278,11 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
         variance: Number(variance.toFixed(2)),
         currency: inv.currency ?? "SAR",
         flags,
+        adjusted: !!adjustment,
+        adjustment_reason: adjustment?.reason ?? null,
       };
     });
+
 
     // 5) Unmatched NPHIES rows (potential leakage / claims without invoice)
     const unmatchedNphies = nphiesRows
@@ -343,6 +403,26 @@ export type ReconciliationDetail = {
   nphies: ReconciliationNphiesCandidate[];
   fieldDiffs: ReconciliationFieldDiff[];
   flagsExplained: Array<{ code: string; label: string; detail: string }>;
+  activeAdjustment: ReconciliationAdjustmentRow | null;
+  adjustmentHistory: ReconciliationAdjustmentRow[];
+};
+
+export type ReconciliationAdjustmentRow = {
+  id: string;
+  invoice_id: string;
+  linked_nphies_request_id: string | null;
+  unlink_nphies: boolean;
+  override_expected_share: number | null;
+  override_invoice_status: string | null;
+  resolved: boolean;
+  reason: string;
+  created_by: string;
+  created_by_name: string | null;
+  created_at: string;
+  revoked_at: string | null;
+  revoked_by: string | null;
+  revoked_by_name: string | null;
+  revoke_reason: string | null;
 };
 
 const FLAG_DETAILS: Record<string, { label: string; detail: string }> = {
@@ -366,6 +446,10 @@ const FLAG_DETAILS: Record<string, { label: string; detail: string }> = {
   zero_billed: {
     label: "قيمة صفرية",
     detail: "إجمالي الفاتورة يساوي صفر — يحتاج مراجعة يدوية.",
+  },
+  resolved: {
+    label: "تم الإقرار يدوياً",
+    detail: "تمت مراجعة الفرق يدوياً واعتباره مقبولاً؛ راجع سبب التعديل.",
   },
 };
 
@@ -468,29 +552,127 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       const preferred = base.find((n) => n.eligible === true) ?? base[0] ?? null;
       nphies = base.map((n) => ({ ...n, matched: preferred ? n.id === preferred.id : false }));
     }
-    const primary = nphies.find((n) => n.matched) ?? null;
+    // Fetch adjustment history for this invoice
+    const { data: adjRows, error: adjErr } = await context.supabase
+      .from("reconciliation_adjustments")
+      .select(
+        "id, invoice_id, linked_nphies_request_id, unlink_nphies, override_expected_share, override_invoice_status, resolved, reason, created_by, created_at, revoked_at, revoked_by, revoke_reason",
+      )
+      .eq("invoice_id", data.invoice_id)
+      .order("created_at", { ascending: false });
+    if (adjErr) throw new Error(adjErr.message);
+    const adjRaw = (adjRows ?? []) as any[];
+
+    // Resolve user names for creators / revokers
+    const userIds = Array.from(
+      new Set(
+        adjRaw.flatMap((a) => [a.created_by, a.revoked_by]).filter(Boolean),
+      ),
+    ) as string[];
+    const userNames = new Map<string, string>();
+    if (userIds.length > 0) {
+      const { data: profs } = await context.supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", userIds);
+      for (const p of (profs ?? []) as any[]) {
+        userNames.set(p.id, p.full_name || p.id.slice(0, 8));
+      }
+    }
+
+    const adjustmentHistory: ReconciliationAdjustmentRow[] = adjRaw.map((a) => ({
+      id: a.id,
+      invoice_id: a.invoice_id,
+      linked_nphies_request_id: a.linked_nphies_request_id,
+      unlink_nphies: !!a.unlink_nphies,
+      override_expected_share: a.override_expected_share != null ? Number(a.override_expected_share) : null,
+      override_invoice_status: a.override_invoice_status,
+      resolved: !!a.resolved,
+      reason: a.reason,
+      created_by: a.created_by,
+      created_by_name: userNames.get(a.created_by) ?? null,
+      created_at: a.created_at,
+      revoked_at: a.revoked_at,
+      revoked_by: a.revoked_by,
+      revoked_by_name: a.revoked_by ? (userNames.get(a.revoked_by) ?? null) : null,
+      revoke_reason: a.revoke_reason,
+    }));
+    const activeAdjustment = adjustmentHistory.find((a) => a.revoked_at == null) ?? null;
+
+    // If an adjustment links a NPHIES request not in the day window, load it
+    let primary = nphies.find((n) => n.matched) ?? null;
+    if (activeAdjustment?.unlink_nphies) {
+      primary = null;
+      nphies = nphies.map((n) => ({ ...n, matched: false }));
+    } else if (activeAdjustment?.linked_nphies_request_id) {
+      const linkedId = activeAdjustment.linked_nphies_request_id;
+      let existing = nphies.find((n) => n.id === linkedId) ?? null;
+      if (!existing) {
+        const { data: extra } = await context.supabase
+          .from("nphies_requests")
+          .select(
+            "id, created_at, mode, eligible, reason, coverage_percent, consultation_fee, covered_amount, patient_share, http_status, error_message, policy_number, member_id",
+          )
+          .eq("id", linkedId)
+          .maybeSingle();
+        if (extra) {
+          const ext: ReconciliationNphiesCandidate = {
+            id: extra.id,
+            created_at: extra.created_at,
+            mode: extra.mode,
+            eligible: extra.eligible,
+            reason: extra.reason,
+            coverage_percent: fmtNum(extra.coverage_percent),
+            consultation_fee: fmtNum(extra.consultation_fee),
+            covered_amount: fmtNum(extra.covered_amount),
+            patient_share: fmtNum(extra.patient_share),
+            http_status: extra.http_status,
+            error_message: extra.error_message,
+            policy_number: extra.policy_number,
+            member_id: extra.member_id,
+            matched: true,
+          };
+          nphies = [ext, ...nphies.map((n) => ({ ...n, matched: false }))];
+          existing = ext;
+        }
+      } else {
+        nphies = nphies.map((n) => ({ ...n, matched: n.id === linkedId }));
+      }
+      primary = existing;
+    }
 
     const billed = Number((inv as any).total ?? 0);
     const covered = primary?.covered_amount ?? null;
     const patientShare = primary?.patient_share ?? null;
-    const expectedShare =
+    const baseExpected =
       patientShare != null ? patientShare : covered != null ? billed - covered : null;
+    const expectedShare =
+      activeAdjustment?.override_expected_share != null
+        ? activeAdjustment.override_expected_share
+        : baseExpected;
     const variance = expectedShare != null ? netCollected - expectedShare : netCollected - billed;
+    const effectiveStatus: string | null =
+      activeAdjustment?.override_invoice_status ?? (inv as any).status ?? null;
 
     const flags: string[] = [];
     if (Math.abs(variance) > 0.009) flags.push("variance");
     if (!primary && appt?.insurance_provider_id) flags.push("missing_nphies");
-    if ((inv as any).status !== "paid" && netCollected >= billed - 0.009)
+    if (effectiveStatus !== "paid" && netCollected >= billed - 0.009)
       flags.push("collected_not_marked_paid");
-    if ((inv as any).status === "paid" && netCollected + 0.009 < billed)
+    if (effectiveStatus === "paid" && netCollected + 0.009 < billed)
       flags.push("marked_paid_underpaid");
     if (billed === 0) flags.push("zero_billed");
+    if (activeAdjustment?.resolved) {
+      const idx = flags.indexOf("variance");
+      if (idx >= 0) flags.splice(idx, 1);
+      flags.push("resolved");
+    }
 
     const currency: string = (inv as any).currency ?? "SAR";
     const row: ReconciliationRow = {
       invoice_id: (inv as any).id,
       invoice_number: (inv as any).invoice_number ?? null,
-      status: (inv as any).status ?? null,
+      status: effectiveStatus,
       appointment_id: appt?.id ?? null,
       appointment_ref: appt?.reference_number ?? null,
       branch_id: appt?.branch_id ?? null,
@@ -512,7 +694,10 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       variance: round2(variance),
       currency,
       flags,
+      adjusted: !!activeAdjustment,
+      adjustment_reason: activeAdjustment?.reason ?? null,
     };
+
 
     const fieldDiffs: ReconciliationFieldDiff[] = [];
     const pushMoney = (
@@ -624,5 +809,154 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       nphies,
       fieldDiffs,
       flagsExplained,
+      activeAdjustment,
+      adjustmentHistory,
     };
   });
+
+/* ============================================================
+ * Manual reconciliation adjustments — CRUD
+ * ============================================================ */
+
+const applySchema = z
+  .object({
+    invoice_id: z.string().uuid(),
+    reason: z.string().trim().min(3, "السبب مطلوب (٣ أحرف على الأقل)").max(1000),
+    linked_nphies_request_id: z.string().uuid().nullable().optional(),
+    unlink_nphies: z.boolean().optional(),
+    override_expected_share: z.number().finite().min(0).max(10_000_000).nullable().optional(),
+    override_invoice_status: z
+      .enum(["issued", "pending", "paid", "cancelled", "refunded"])
+      .nullable()
+      .optional(),
+    resolved: z.boolean().optional(),
+  })
+  .refine(
+    (v) =>
+      !!v.linked_nphies_request_id ||
+      v.unlink_nphies === true ||
+      v.override_expected_share != null ||
+      v.override_invoice_status != null ||
+      v.resolved === true,
+    { message: "يجب اختيار تعديل واحد على الأقل" },
+  );
+
+export const listReconciliationAdjustments = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => z.object({ invoice_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }): Promise<ReconciliationAdjustmentRow[]> => {
+    await assertHasRole(context.supabase, context.userId, "admin");
+    const { data: rows, error } = await context.supabase
+      .from("reconciliation_adjustments")
+      .select(
+        "id, invoice_id, linked_nphies_request_id, unlink_nphies, override_expected_share, override_invoice_status, resolved, reason, created_by, created_at, revoked_at, revoked_by, revoke_reason",
+      )
+      .eq("invoice_id", data.invoice_id)
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    const raw = (rows ?? []) as any[];
+    const userIds = Array.from(
+      new Set(raw.flatMap((r) => [r.created_by, r.revoked_by]).filter(Boolean)),
+    ) as string[];
+    const names = new Map<string, string>();
+    if (userIds.length > 0) {
+      const { data: profs } = await context.supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in("id", userIds);
+      for (const p of (profs ?? []) as any[]) {
+        names.set(p.id, p.full_name || p.id.slice(0, 8));
+      }
+    }
+    return raw.map((a) => ({
+      id: a.id,
+      invoice_id: a.invoice_id,
+      linked_nphies_request_id: a.linked_nphies_request_id,
+      unlink_nphies: !!a.unlink_nphies,
+      override_expected_share:
+        a.override_expected_share != null ? Number(a.override_expected_share) : null,
+      override_invoice_status: a.override_invoice_status,
+      resolved: !!a.resolved,
+      reason: a.reason,
+      created_by: a.created_by,
+      created_by_name: names.get(a.created_by) ?? null,
+      created_at: a.created_at,
+      revoked_at: a.revoked_at,
+      revoked_by: a.revoked_by,
+      revoked_by_name: a.revoked_by ? (names.get(a.revoked_by) ?? null) : null,
+      revoke_reason: a.revoke_reason,
+    }));
+  });
+
+export const applyReconciliationAdjustment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => applySchema.parse(d))
+  .handler(async ({ data, context }): Promise<{ id: string }> => {
+    await assertHasRole(context.supabase, context.userId, "admin");
+
+    // Verify invoice exists
+    const { data: inv, error: invErr } = await context.supabase
+      .from("invoices")
+      .select("id")
+      .eq("id", data.invoice_id)
+      .maybeSingle();
+    if (invErr) throw new Error(invErr.message);
+    if (!inv) throw new Error("الفاتورة غير موجودة");
+
+    // Revoke previous active adjustment for this invoice
+    const nowIso = new Date().toISOString();
+    const { error: revErr } = await context.supabase
+      .from("reconciliation_adjustments")
+      .update({
+        revoked_at: nowIso,
+        revoked_by: context.userId,
+        revoke_reason: "استبدال بتعديل جديد",
+      })
+      .eq("invoice_id", data.invoice_id)
+      .is("revoked_at", null);
+    if (revErr) throw new Error(revErr.message);
+
+    const payload = {
+      invoice_id: data.invoice_id,
+      linked_nphies_request_id: data.linked_nphies_request_id ?? null,
+      unlink_nphies: data.unlink_nphies ?? false,
+      override_expected_share: data.override_expected_share ?? null,
+      override_invoice_status: data.override_invoice_status ?? null,
+      resolved: data.resolved ?? false,
+      reason: data.reason.trim(),
+      created_by: context.userId,
+    };
+    const { data: inserted, error: insErr } = await context.supabase
+      .from("reconciliation_adjustments")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (insErr) throw new Error(insErr.message);
+    return { id: inserted.id };
+  });
+
+export const revokeReconciliationAdjustment = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        revoke_reason: z.string().trim().min(3, "سبب الإلغاء مطلوب").max(1000),
+      })
+      .parse(d),
+  )
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    await assertHasRole(context.supabase, context.userId, "admin");
+    const { error } = await context.supabase
+      .from("reconciliation_adjustments")
+      .update({
+        revoked_at: new Date().toISOString(),
+        revoked_by: context.userId,
+        revoke_reason: data.revoke_reason.trim(),
+      })
+      .eq("id", data.id)
+      .is("revoked_at", null);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
