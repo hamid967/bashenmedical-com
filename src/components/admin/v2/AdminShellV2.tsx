@@ -9,6 +9,7 @@ import { ThemeSwitcher, useAdminTheme } from "./ThemeSwitcher";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { QuickActions } from "./QuickActions";
 import { BranchSwitcher } from "./BranchSwitcher";
+import { TenantSwitcher } from "./TenantSwitcher";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 import type { AdminRole } from "@/components/admin/types";
 import {
@@ -658,6 +659,7 @@ export function AdminShellV2({
             <span className="hidden sm:inline">المساعد</span>
           </button>
 
+          <TenantSwitcher />
           <BranchSwitcher />
 
           <LanguageSwitcher className="hidden sm:inline-flex" />
