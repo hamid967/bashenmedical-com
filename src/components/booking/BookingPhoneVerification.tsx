@@ -55,6 +55,8 @@ export function BookingPhoneVerification({
 
   const alreadyVerified = !!verifiedPhone && verifiedPhone === phone.trim();
 
+  const [softBypass, setSoftBypass] = useState(false);
+
   async function send() {
     if (cooldownActive) return;
     setErr(null);
@@ -77,6 +79,13 @@ export function BookingPhoneVerification({
         const wait = res.resendAfterSeconds ?? 60;
         setCooldownUntil(Date.now() + wait * 1000);
         setNow(Date.now());
+        // Server used the soft-bypass path (provider not configured):
+        // treat the phone as accepted and let the parent proceed. The
+        // reservation is stamped for staff follow-up.
+        if ((res as { softBypass?: boolean }).softBypass) {
+          setSoftBypass(true);
+          onVerified(res.challengeId, phone.trim());
+        }
       }
     } catch {
       setErr(t("verification.errors.generic"));
@@ -84,6 +93,7 @@ export function BookingPhoneVerification({
       setSending(false);
     }
   }
+
 
 
   async function check() {
