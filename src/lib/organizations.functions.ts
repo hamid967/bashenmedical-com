@@ -16,8 +16,12 @@ export const listMyOrganizations = createServerFn({ method: "GET" })
   .handler(async ({ context }): Promise<OrganizationRow[]> => {
     const { data, error } = await context.supabase
       .from("organizations")
-      .select("id, name, slug")
-      .order("name", { ascending: true });
+      .select("id, name_ar, name_en, slug")
+      .order("name_ar", { ascending: true });
     if (error) throw new Error(error.message);
-    return (data ?? []) as OrganizationRow[];
+    return (data ?? []).map((o) => ({
+      id: o.id,
+      name: o.name_ar || o.name_en,
+      slug: o.slug ?? null,
+    }));
   });
