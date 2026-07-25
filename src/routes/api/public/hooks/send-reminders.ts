@@ -13,6 +13,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import webpush from "web-push";
+import { sendFcm, fcmConfigured, deriveDeepLink } from "@/lib/notifications/fcm.server";
 
 type PendingRow = {
   id: string;
@@ -27,11 +28,13 @@ type PendingRow = {
 
 type Sub = {
   id: string;
-  endpoint: string;
-  p256dh: string;
-  auth: string;
+  endpoint: string | null;
+  p256dh: string | null;
+  auth: string | null;
   user_id: string;
   failure_count: number;
+  platform: "web" | "ios" | "android" | null;
+  native_token: string | null;
 };
 
 const DEFAULT_STAFF_ROLES = ["admin", "reception", "super_admin"] as const;
