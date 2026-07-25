@@ -11,6 +11,8 @@ import {
   countUnreadNotifications,
 } from "@/lib/notifications.functions";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { setNativeBadge } from "@/lib/native/badge";
+import { initNativePushHandlers } from "@/lib/native/push-native";
 
 type NotificationRow = {
   id: string;
@@ -83,6 +85,19 @@ export function NotificationBell() {
       supabase.removeChannel(channel);
     };
   }, [signedIn, qc]);
+
+  // Sync the native app icon badge with the unread count, and install
+  // push handlers (deep-link taps + foreground badge bumps) once.
+  useEffect(() => {
+    if (!signedIn) return;
+    void initNativePushHandlers({
+      onReceived: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    });
+  }, [signedIn, qc]);
+  useEffect(() => {
+    if (!signedIn) return;
+    void setNativeBadge(countQuery.data?.count ?? 0);
+  }, [signedIn, countQuery.data?.count]);
 
   // Close on outside click
   useEffect(() => {

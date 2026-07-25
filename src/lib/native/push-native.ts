@@ -10,6 +10,7 @@
  * loadable in the plain web bundle (which never installs Capacitor plugins).
  */
 import { isNative, nativePlatform } from "./bridge";
+import { setNativeBadge } from "./badge";
 
 type RegisterResult =
   | { ok: true; token: string; platform: "ios" | "android" }
@@ -105,3 +106,59 @@ export async function registerNativePushForCurrentUser(
     void Push.register();
   });
 }
+
+/**
+ * Register handlers for foreground pushes and notification taps.
+ * Idempotent — repeated calls are a no-op. Should be invoked once at
+ * shell mount for signed-in users so deep links and badge updates work
+ * even before/without a fresh device registration this session.
+ */
+let handlersInstalled = false;
+export async function initNativePushHandlers(options?: {
+  onReceived?: () => void;
+}): Promise<void> {
+  if (!isNative() || handlersInstalled) return;
+  const Push = await loadPushPlugin();
+  if (!Push) return;
+  handlersInstalled = true;
+
+  // Foreground push: bump the badge from the payload if present and let
+  // the app refetch its notification list so the bell updates instantly.
+  void Push.addListener("pushNotificationReceived", (payload) => {
+    const data = ((payload as { data?: Record<string, unknown> })?.data ?? {}) as Record<string, unknown>;
+    const badgeRaw = data.badge;
+    const n = typeof badgeRaw === "number" ? badgeRaw : Number(badgeRaw);
+    if (Number.isFinite(n) && n >= 0) void setNativeBadge(n);
+    try {
+      options?.onReceived?.();
+    } catch {
+      /* callback is best-effort */
+    }
+  });
+
+  // Tap on a notification (foreground OR background). Route to the
+  // in-app deep link when the server sent one; fall back to the
+  // notifications inbox.
+  void Push.addListener("pushNotificationActionPerformed", (payload) => {
+    const notif = (payload as { notification?: { data?: Record<string, unknown> } })
+      ?.notification;
+    const data = (notif?.data ?? {}) as Record<string, unknown>;
+    const linkRaw = typeof data.deepLink === "string" ? data.deepLink : undefined;
+    if (typeof window === "undefined") return;
+    const fallback = "/patient/notifications";
+    try {
+      const target = linkRaw
+        ? new URL(linkRaw, window.location.origin)
+        : new URL(fallback, window.location.origin);
+      // Same-origin → SPA navigation inside the Capacitor WebView.
+      if (target.origin === window.location.origin) {
+        window.location.href = target.pathname + target.search + target.hash;
+      } else {
+        window.location.href = target.toString();
+      }
+    } catch {
+      window.location.href = fallback;
+    }
+  });
+}
+
