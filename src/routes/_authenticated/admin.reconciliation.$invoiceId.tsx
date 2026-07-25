@@ -190,6 +190,17 @@ function ReconciliationDetailPage() {
         </section>
       )}
 
+      {/* Manual adjustment tools */}
+      <AdjustmentPanel
+        invoiceId={invoice.id}
+        currency={ccy}
+        activeAdjustment={activeAdjustment}
+        history={adjustmentHistory}
+        nphiesCandidates={nphies}
+      />
+
+
+
       {/* Field-level diffs */}
       <section>
         <h2 className="text-lg font-semibold mb-3">مقارنة الحقول</h2>
