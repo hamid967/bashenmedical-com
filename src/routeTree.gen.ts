@@ -160,6 +160,7 @@ import { Route as AuthenticatedAdminOpsHubRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminPatientsRouteImport } from './routes/_authenticated/admin.patients'
 import { Route as AuthenticatedAdminRadiologyRouteImport } from './routes/_authenticated/admin.radiology'
 import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
+import { Route as AuthenticatedAdminReconciliationRouteImport } from './routes/_authenticated/admin.reconciliation'
 import { Route as AuthenticatedAdminReleaseGateRouteImport } from './routes/_authenticated/admin.release-gate'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
 import { Route as AuthenticatedAdminReservationsUsageRouteImport } from './routes/_authenticated/admin.reservations-usage'
@@ -1117,6 +1118,12 @@ const AuthenticatedAdminRealtimeMonitorRoute =
   AuthenticatedAdminRealtimeMonitorRouteImport.update({
     id: '/realtime-monitor',
     path: '/realtime-monitor',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminReconciliationRoute =
+  AuthenticatedAdminReconciliationRouteImport.update({
+    id: '/reconciliation',
+    path: '/reconciliation',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminReleaseGateRoute =
@@ -2086,6 +2093,7 @@ export interface FileRoutesByFullPath {
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/radiology': typeof AuthenticatedAdminRadiologyRoute
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/admin/reconciliation': typeof AuthenticatedAdminReconciliationRoute
   '/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -2373,6 +2381,7 @@ export interface FileRoutesByTo {
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/admin/radiology': typeof AuthenticatedAdminRadiologyRoute
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/admin/reconciliation': typeof AuthenticatedAdminReconciliationRoute
   '/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -2667,6 +2676,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
   '/_authenticated/admin/radiology': typeof AuthenticatedAdminRadiologyRoute
   '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
+  '/_authenticated/admin/reconciliation': typeof AuthenticatedAdminReconciliationRoute
   '/_authenticated/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
   '/_authenticated/admin/reservations-usage': typeof AuthenticatedAdminReservationsUsageRoute
@@ -2961,6 +2971,7 @@ export interface FileRouteTypes {
     | '/admin/patients'
     | '/admin/radiology'
     | '/admin/realtime-monitor'
+    | '/admin/reconciliation'
     | '/admin/release-gate'
     | '/admin/reports'
     | '/admin/reservations-usage'
@@ -3248,6 +3259,7 @@ export interface FileRouteTypes {
     | '/admin/patients'
     | '/admin/radiology'
     | '/admin/realtime-monitor'
+    | '/admin/reconciliation'
     | '/admin/release-gate'
     | '/admin/reports'
     | '/admin/reservations-usage'
@@ -3541,6 +3553,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/patients'
     | '/_authenticated/admin/radiology'
     | '/_authenticated/admin/realtime-monitor'
+    | '/_authenticated/admin/reconciliation'
     | '/_authenticated/admin/release-gate'
     | '/_authenticated/admin/reports'
     | '/_authenticated/admin/reservations-usage'
@@ -4846,6 +4859,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminRealtimeMonitorRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/reconciliation': {
+      id: '/_authenticated/admin/reconciliation'
+      path: '/reconciliation'
+      fullPath: '/admin/reconciliation'
+      preLoaderRoute: typeof AuthenticatedAdminReconciliationRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/release-gate': {
       id: '/_authenticated/admin/release-gate'
       path: '/release-gate'
@@ -6105,6 +6125,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPatientsRoute: typeof AuthenticatedAdminPatientsRouteWithChildren
   AuthenticatedAdminRadiologyRoute: typeof AuthenticatedAdminRadiologyRoute
   AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
+  AuthenticatedAdminReconciliationRoute: typeof AuthenticatedAdminReconciliationRoute
   AuthenticatedAdminReleaseGateRoute: typeof AuthenticatedAdminReleaseGateRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
   AuthenticatedAdminReservationsUsageRoute: typeof AuthenticatedAdminReservationsUsageRoute
@@ -6175,6 +6196,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminRadiologyRoute: AuthenticatedAdminRadiologyRoute,
   AuthenticatedAdminRealtimeMonitorRoute:
     AuthenticatedAdminRealtimeMonitorRoute,
+  AuthenticatedAdminReconciliationRoute: AuthenticatedAdminReconciliationRoute,
   AuthenticatedAdminReleaseGateRoute: AuthenticatedAdminReleaseGateRoute,
   AuthenticatedAdminReportsRoute: AuthenticatedAdminReportsRoute,
   AuthenticatedAdminReservationsUsageRoute:
