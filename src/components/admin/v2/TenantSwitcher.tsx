@@ -8,6 +8,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useActiveTenant } from "@/lib/active-tenant";
+import { logTenantSwitch } from "@/lib/admin/tenant-audit.functions";
+
+/**
+ * Fires an audit event for every explicit tenant switch. Failures are
+ * swallowed so a flaky audit write can never block the UI change.
+ */
+function auditSwitch(
+  fromId: string | null,
+  toId: string | null,
+  toName: string | null,
+) {
+  if (fromId === toId) return;
+  void logTenantSwitch({
+    data: {
+      fromOrganizationId: fromId,
+      toOrganizationId: toId,
+      toOrganizationName: toName,
+      source: "tenant_switcher",
+    },
+  }).catch((e) => {
+    console.warn("[TenantSwitcher] audit log failed", (e as Error)?.message);
+  });
+}
 
 /**
  * Global tenant/organization switcher for the admin command bar.
@@ -50,7 +73,13 @@ export function TenantSwitcher() {
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>اختر المؤسسة</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => setTenantId(null)} className="gap-2">
+        <DropdownMenuItem
+          onSelect={() => {
+            auditSwitch(tenantId, null, null);
+            setTenantId(null);
+          }}
+          className="gap-2"
+        >
           <Layers className="h-4 w-4 opacity-80" />
           <span className="flex-1">كل المؤسسات</span>
           {!tenantId && <Check className="h-4 w-4 opacity-80" />}
@@ -71,7 +100,10 @@ export function TenantSwitcher() {
           return (
             <DropdownMenuItem
               key={o.id}
-              onSelect={() => setTenantId(o.id)}
+              onSelect={() => {
+                auditSwitch(tenantId, o.id, o.name);
+                setTenantId(o.id);
+              }}
               className="gap-2"
             >
               <Building className="h-4 w-4 opacity-80" />
