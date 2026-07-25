@@ -118,7 +118,6 @@ function NphiesLogsPage() {
           </div>
         </div>
         <PingButton />
-      </section>
         {cfg.warnings.length > 0 && (
           <ul className="mt-3 text-xs list-disc ps-5 space-y-0.5">
             {cfg.warnings.map((w, i) => (
