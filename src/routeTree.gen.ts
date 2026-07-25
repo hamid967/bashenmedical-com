@@ -143,9 +143,11 @@ import { Route as AuthenticatedAdminDoctorsRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminExecutiveRouteImport } from './routes/_authenticated/admin.executive'
 import { Route as AuthenticatedAdminFilesRouteImport } from './routes/_authenticated/admin.files'
 import { Route as AuthenticatedAdminFrontDeskRouteImport } from './routes/_authenticated/admin.front-desk'
+import { Route as AuthenticatedAdminHisRouteImport } from './routes/_authenticated/admin.his'
 import { Route as AuthenticatedAdminInboxRouteImport } from './routes/_authenticated/admin.inbox'
 import { Route as AuthenticatedAdminInsuranceRouteImport } from './routes/_authenticated/admin.insurance'
 import { Route as AuthenticatedAdminIntegrationsRouteImport } from './routes/_authenticated/admin.integrations'
+import { Route as AuthenticatedAdminLabRouteImport } from './routes/_authenticated/admin.lab'
 import { Route as AuthenticatedAdminNoShowDetailRouteImport } from './routes/_authenticated/admin.no-show-detail'
 import { Route as AuthenticatedAdminNoShowRiskRouteImport } from './routes/_authenticated/admin.no-show-risk'
 import { Route as AuthenticatedAdminNoShowStatsRouteImport } from './routes/_authenticated/admin.no-show-stats'
@@ -155,6 +157,7 @@ import { Route as AuthenticatedAdminNphiesLogsRouteImport } from './routes/_auth
 import { Route as AuthenticatedAdminObservabilityRouteImport } from './routes/_authenticated/admin.observability'
 import { Route as AuthenticatedAdminOpsHubRouteImport } from './routes/_authenticated/admin.ops-hub'
 import { Route as AuthenticatedAdminPatientsRouteImport } from './routes/_authenticated/admin.patients'
+import { Route as AuthenticatedAdminRadiologyRouteImport } from './routes/_authenticated/admin.radiology'
 import { Route as AuthenticatedAdminRealtimeMonitorRouteImport } from './routes/_authenticated/admin.realtime-monitor'
 import { Route as AuthenticatedAdminReleaseGateRouteImport } from './routes/_authenticated/admin.release-gate'
 import { Route as AuthenticatedAdminReportsRouteImport } from './routes/_authenticated/admin.reports'
@@ -1012,6 +1015,11 @@ const AuthenticatedAdminFrontDeskRoute =
     path: '/front-desk',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminHisRoute = AuthenticatedAdminHisRouteImport.update({
+  id: '/his',
+  path: '/his',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminInboxRoute = AuthenticatedAdminInboxRouteImport.update({
   id: '/inbox',
   path: '/inbox',
@@ -1029,6 +1037,11 @@ const AuthenticatedAdminIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminLabRoute = AuthenticatedAdminLabRouteImport.update({
+  id: '/lab',
+  path: '/lab',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminNoShowDetailRoute =
   AuthenticatedAdminNoShowDetailRouteImport.update({
     id: '/no-show-detail',
@@ -1081,6 +1094,12 @@ const AuthenticatedAdminPatientsRoute =
   AuthenticatedAdminPatientsRouteImport.update({
     id: '/patients',
     path: '/patients',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminRadiologyRoute =
+  AuthenticatedAdminRadiologyRouteImport.update({
+    id: '/radiology',
+    path: '/radiology',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminRealtimeMonitorRoute =
@@ -2016,9 +2035,11 @@ export interface FileRoutesByFullPath {
   '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
+  '/admin/his': typeof AuthenticatedAdminHisRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRouteWithChildren
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
+  '/admin/lab': typeof AuthenticatedAdminLabRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -2028,6 +2049,7 @@ export interface FileRoutesByFullPath {
   '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
+  '/admin/radiology': typeof AuthenticatedAdminRadiologyRoute
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -2295,9 +2317,11 @@ export interface FileRoutesByTo {
   '/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
+  '/admin/his': typeof AuthenticatedAdminHisRoute
   '/admin/inbox': typeof AuthenticatedAdminInboxRouteWithChildren
   '/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
+  '/admin/lab': typeof AuthenticatedAdminLabRoute
   '/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -2307,6 +2331,7 @@ export interface FileRoutesByTo {
   '/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
+  '/admin/radiology': typeof AuthenticatedAdminRadiologyRoute
   '/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -2581,9 +2606,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/executive': typeof AuthenticatedAdminExecutiveRoute
   '/_authenticated/admin/files': typeof AuthenticatedAdminFilesRouteWithChildren
   '/_authenticated/admin/front-desk': typeof AuthenticatedAdminFrontDeskRoute
+  '/_authenticated/admin/his': typeof AuthenticatedAdminHisRoute
   '/_authenticated/admin/inbox': typeof AuthenticatedAdminInboxRouteWithChildren
   '/_authenticated/admin/insurance': typeof AuthenticatedAdminInsuranceRouteWithChildren
   '/_authenticated/admin/integrations': typeof AuthenticatedAdminIntegrationsRouteWithChildren
+  '/_authenticated/admin/lab': typeof AuthenticatedAdminLabRoute
   '/_authenticated/admin/no-show-detail': typeof AuthenticatedAdminNoShowDetailRoute
   '/_authenticated/admin/no-show-risk': typeof AuthenticatedAdminNoShowRiskRoute
   '/_authenticated/admin/no-show-stats': typeof AuthenticatedAdminNoShowStatsRoute
@@ -2593,6 +2620,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/observability': typeof AuthenticatedAdminObservabilityRoute
   '/_authenticated/admin/ops-hub': typeof AuthenticatedAdminOpsHubRoute
   '/_authenticated/admin/patients': typeof AuthenticatedAdminPatientsRouteWithChildren
+  '/_authenticated/admin/radiology': typeof AuthenticatedAdminRadiologyRoute
   '/_authenticated/admin/realtime-monitor': typeof AuthenticatedAdminRealtimeMonitorRoute
   '/_authenticated/admin/release-gate': typeof AuthenticatedAdminReleaseGateRoute
   '/_authenticated/admin/reports': typeof AuthenticatedAdminReportsRoute
@@ -2867,9 +2895,11 @@ export interface FileRouteTypes {
     | '/admin/executive'
     | '/admin/files'
     | '/admin/front-desk'
+    | '/admin/his'
     | '/admin/inbox'
     | '/admin/insurance'
     | '/admin/integrations'
+    | '/admin/lab'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -2879,6 +2909,7 @@ export interface FileRouteTypes {
     | '/admin/observability'
     | '/admin/ops-hub'
     | '/admin/patients'
+    | '/admin/radiology'
     | '/admin/realtime-monitor'
     | '/admin/release-gate'
     | '/admin/reports'
@@ -3146,9 +3177,11 @@ export interface FileRouteTypes {
     | '/admin/executive'
     | '/admin/files'
     | '/admin/front-desk'
+    | '/admin/his'
     | '/admin/inbox'
     | '/admin/insurance'
     | '/admin/integrations'
+    | '/admin/lab'
     | '/admin/no-show-detail'
     | '/admin/no-show-risk'
     | '/admin/no-show-stats'
@@ -3158,6 +3191,7 @@ export interface FileRouteTypes {
     | '/admin/observability'
     | '/admin/ops-hub'
     | '/admin/patients'
+    | '/admin/radiology'
     | '/admin/realtime-monitor'
     | '/admin/release-gate'
     | '/admin/reports'
@@ -3431,9 +3465,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/executive'
     | '/_authenticated/admin/files'
     | '/_authenticated/admin/front-desk'
+    | '/_authenticated/admin/his'
     | '/_authenticated/admin/inbox'
     | '/_authenticated/admin/insurance'
     | '/_authenticated/admin/integrations'
+    | '/_authenticated/admin/lab'
     | '/_authenticated/admin/no-show-detail'
     | '/_authenticated/admin/no-show-risk'
     | '/_authenticated/admin/no-show-stats'
@@ -3443,6 +3479,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/observability'
     | '/_authenticated/admin/ops-hub'
     | '/_authenticated/admin/patients'
+    | '/_authenticated/admin/radiology'
     | '/_authenticated/admin/realtime-monitor'
     | '/_authenticated/admin/release-gate'
     | '/_authenticated/admin/reports'
@@ -4622,6 +4659,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminFrontDeskRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/his': {
+      id: '/_authenticated/admin/his'
+      path: '/his'
+      fullPath: '/admin/his'
+      preLoaderRoute: typeof AuthenticatedAdminHisRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/inbox': {
       id: '/_authenticated/admin/inbox'
       path: '/inbox'
@@ -4641,6 +4685,13 @@ declare module '@tanstack/react-router' {
       path: '/integrations'
       fullPath: '/admin/integrations'
       preLoaderRoute: typeof AuthenticatedAdminIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/lab': {
+      id: '/_authenticated/admin/lab'
+      path: '/lab'
+      fullPath: '/admin/lab'
+      preLoaderRoute: typeof AuthenticatedAdminLabRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/no-show-detail': {
@@ -4704,6 +4755,13 @@ declare module '@tanstack/react-router' {
       path: '/patients'
       fullPath: '/admin/patients'
       preLoaderRoute: typeof AuthenticatedAdminPatientsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/radiology': {
+      id: '/_authenticated/admin/radiology'
+      path: '/radiology'
+      fullPath: '/admin/radiology'
+      preLoaderRoute: typeof AuthenticatedAdminRadiologyRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/realtime-monitor': {
@@ -5927,9 +5985,11 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminExecutiveRoute: typeof AuthenticatedAdminExecutiveRoute
   AuthenticatedAdminFilesRoute: typeof AuthenticatedAdminFilesRouteWithChildren
   AuthenticatedAdminFrontDeskRoute: typeof AuthenticatedAdminFrontDeskRoute
+  AuthenticatedAdminHisRoute: typeof AuthenticatedAdminHisRoute
   AuthenticatedAdminInboxRoute: typeof AuthenticatedAdminInboxRouteWithChildren
   AuthenticatedAdminInsuranceRoute: typeof AuthenticatedAdminInsuranceRouteWithChildren
   AuthenticatedAdminIntegrationsRoute: typeof AuthenticatedAdminIntegrationsRouteWithChildren
+  AuthenticatedAdminLabRoute: typeof AuthenticatedAdminLabRoute
   AuthenticatedAdminNoShowDetailRoute: typeof AuthenticatedAdminNoShowDetailRoute
   AuthenticatedAdminNoShowRiskRoute: typeof AuthenticatedAdminNoShowRiskRoute
   AuthenticatedAdminNoShowStatsRoute: typeof AuthenticatedAdminNoShowStatsRoute
@@ -5939,6 +5999,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminObservabilityRoute: typeof AuthenticatedAdminObservabilityRoute
   AuthenticatedAdminOpsHubRoute: typeof AuthenticatedAdminOpsHubRoute
   AuthenticatedAdminPatientsRoute: typeof AuthenticatedAdminPatientsRouteWithChildren
+  AuthenticatedAdminRadiologyRoute: typeof AuthenticatedAdminRadiologyRoute
   AuthenticatedAdminRealtimeMonitorRoute: typeof AuthenticatedAdminRealtimeMonitorRoute
   AuthenticatedAdminReleaseGateRoute: typeof AuthenticatedAdminReleaseGateRoute
   AuthenticatedAdminReportsRoute: typeof AuthenticatedAdminReportsRoute
@@ -5989,11 +6050,13 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminExecutiveRoute: AuthenticatedAdminExecutiveRoute,
   AuthenticatedAdminFilesRoute: AuthenticatedAdminFilesRouteWithChildren,
   AuthenticatedAdminFrontDeskRoute: AuthenticatedAdminFrontDeskRoute,
+  AuthenticatedAdminHisRoute: AuthenticatedAdminHisRoute,
   AuthenticatedAdminInboxRoute: AuthenticatedAdminInboxRouteWithChildren,
   AuthenticatedAdminInsuranceRoute:
     AuthenticatedAdminInsuranceRouteWithChildren,
   AuthenticatedAdminIntegrationsRoute:
     AuthenticatedAdminIntegrationsRouteWithChildren,
+  AuthenticatedAdminLabRoute: AuthenticatedAdminLabRoute,
   AuthenticatedAdminNoShowDetailRoute: AuthenticatedAdminNoShowDetailRoute,
   AuthenticatedAdminNoShowRiskRoute: AuthenticatedAdminNoShowRiskRoute,
   AuthenticatedAdminNoShowStatsRoute: AuthenticatedAdminNoShowStatsRoute,
@@ -6004,6 +6067,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminObservabilityRoute: AuthenticatedAdminObservabilityRoute,
   AuthenticatedAdminOpsHubRoute: AuthenticatedAdminOpsHubRoute,
   AuthenticatedAdminPatientsRoute: AuthenticatedAdminPatientsRouteWithChildren,
+  AuthenticatedAdminRadiologyRoute: AuthenticatedAdminRadiologyRoute,
   AuthenticatedAdminRealtimeMonitorRoute:
     AuthenticatedAdminRealtimeMonitorRoute,
   AuthenticatedAdminReleaseGateRoute: AuthenticatedAdminReleaseGateRoute,
