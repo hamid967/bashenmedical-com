@@ -104,6 +104,7 @@ export type Database = {
           lang: string
           last_activity_at: string
           metadata: Json
+          organization_id: string | null
           scope: Database["public"]["Enums"]["ai_scope"]
           started_at: string
           title: string | null
@@ -117,6 +118,7 @@ export type Database = {
           lang?: string
           last_activity_at?: string
           metadata?: Json
+          organization_id?: string | null
           scope?: Database["public"]["Enums"]["ai_scope"]
           started_at?: string
           title?: string | null
@@ -130,12 +132,21 @@ export type Database = {
           lang?: string
           last_activity_at?: string
           metadata?: Json
+          organization_id?: string | null
           scope?: Database["public"]["Enums"]["ai_scope"]
           started_at?: string
           title?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_conversations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_feature_flags: {
         Row: {
@@ -276,6 +287,7 @@ export type Database = {
           id: string
           kind: string
           model: string | null
+          organization_id: string | null
           payload: Json
           priority: string
           scope: string
@@ -290,6 +302,7 @@ export type Database = {
           id?: string
           kind: string
           model?: string | null
+          organization_id?: string | null
           payload?: Json
           priority?: string
           scope: string
@@ -304,6 +317,7 @@ export type Database = {
           id?: string
           kind?: string
           model?: string | null
+          organization_id?: string | null
           payload?: Json
           priority?: string
           scope?: string
@@ -311,7 +325,15 @@ export type Database = {
           status?: string
           title?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_recommendations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_safety_incidents: {
         Row: {
@@ -323,6 +345,7 @@ export type Database = {
           id: string
           inbox_item_id: string | null
           kind: string
+          organization_id: string | null
           severity: string
         }
         Insert: {
@@ -334,6 +357,7 @@ export type Database = {
           id?: string
           inbox_item_id?: string | null
           kind: string
+          organization_id?: string | null
           severity?: string
         }
         Update: {
@@ -345,6 +369,7 @@ export type Database = {
           id?: string
           inbox_item_id?: string | null
           kind?: string
+          organization_id?: string | null
           severity?: string
         }
         Relationships: [
@@ -362,6 +387,13 @@ export type Database = {
             referencedRelation: "inbox_items"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ai_safety_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ai_stream_events: {
@@ -376,6 +408,7 @@ export type Database = {
           id: string
           latency_ms: number
           model: string | null
+          organization_id: string | null
           prompt_tokens: number | null
           resume_attempts: number
           surface: string
@@ -393,6 +426,7 @@ export type Database = {
           id?: string
           latency_ms?: number
           model?: string | null
+          organization_id?: string | null
           prompt_tokens?: number | null
           resume_attempts?: number
           surface: string
@@ -410,13 +444,22 @@ export type Database = {
           id?: string
           latency_ms?: number
           model?: string | null
+          organization_id?: string | null
           prompt_tokens?: number | null
           resume_attempts?: number
           surface?: string
           ttfb_ms?: number | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_stream_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ai_tool_invocations: {
         Row: {
@@ -427,6 +470,7 @@ export type Database = {
           id: string
           input: Json
           latency_ms: number | null
+          organization_id: string | null
           output: Json | null
           status: string
           tool: string
@@ -439,6 +483,7 @@ export type Database = {
           id?: string
           input?: Json
           latency_ms?: number | null
+          organization_id?: string | null
           output?: Json | null
           status?: string
           tool: string
@@ -451,6 +496,7 @@ export type Database = {
           id?: string
           input?: Json
           latency_ms?: number | null
+          organization_id?: string | null
           output?: Json | null
           status?: string
           tool?: string
@@ -463,6 +509,13 @@ export type Database = {
             referencedRelation: "ai_conversations"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "ai_tool_invocations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
       }
       ai_usage_costs: {
@@ -470,6 +523,7 @@ export type Database = {
           cost_usd: number
           day: string
           model: string
+          organization_id: string | null
           requests: number
           tokens_in: number
           tokens_out: number
@@ -478,6 +532,7 @@ export type Database = {
           cost_usd?: number
           day: string
           model: string
+          organization_id?: string | null
           requests?: number
           tokens_in?: number
           tokens_out?: number
@@ -486,11 +541,20 @@ export type Database = {
           cost_usd?: number
           day?: string
           model?: string
+          organization_id?: string | null
           requests?: number
           tokens_in?: number
           tokens_out?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_costs_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       api_permission_errors: {
         Row: {
@@ -1855,6 +1919,7 @@ export type Database = {
           id: string
           internal_notes: string | null
           message: string
+          organization_id: string | null
           patient_email: string | null
           patient_name: string
           patient_phone: string
@@ -1877,6 +1942,7 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           message: string
+          organization_id?: string | null
           patient_email?: string | null
           patient_name: string
           patient_phone: string
@@ -1899,6 +1965,7 @@ export type Database = {
           id?: string
           internal_notes?: string | null
           message?: string
+          organization_id?: string | null
           patient_email?: string | null
           patient_name?: string
           patient_phone?: string
@@ -1908,7 +1975,15 @@ export type Database = {
           type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "complaints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       consent_records: {
         Row: {
@@ -4237,6 +4312,7 @@ export type Database = {
           appointment_id: string
           computed_at: string
           model: string | null
+          organization_id: string | null
           recommendation: string | null
           risk: number
           top_factors: Json
@@ -4245,6 +4321,7 @@ export type Database = {
           appointment_id: string
           computed_at?: string
           model?: string | null
+          organization_id?: string | null
           recommendation?: string | null
           risk: number
           top_factors?: Json
@@ -4253,6 +4330,7 @@ export type Database = {
           appointment_id?: string
           computed_at?: string
           model?: string | null
+          organization_id?: string | null
           recommendation?: string | null
           risk?: number
           top_factors?: Json
@@ -4263,6 +4341,13 @@ export type Database = {
             columns: ["appointment_id"]
             isOneToOne: true
             referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "no_show_predictions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -4649,6 +4734,71 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          metadata: Json
+          name_ar: string
+          name_en: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name_ar: string
+          name_en: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          metadata?: Json
+          name_ar?: string
+          name_en?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       otp_challenges: {
         Row: {
@@ -8520,6 +8670,11 @@ export type Database = {
         Returns: boolean
       }
       user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
+      user_in_org: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_org_ids: { Args: { _user_id: string }; Returns: string[] }
       verify_appointment_by_reference: {
         Args: { _phone_last4: string; _reference: string }
         Returns: {
