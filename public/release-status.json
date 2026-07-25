@@ -1,14 +1,12 @@
 {
-  "generatedAt": "2026-07-25T20:30:00.000Z",
+  "generatedAt": "2026-07-25T20:41:00.000Z",
   "commitSha": null,
   "runId": null,
   "runUrl": null,
   "evaluation": {
-    "verdict": "NO_GO",
-    "evaluatedAt": "2026-07-25T20:30:00.000Z",
-    "blockingFailures": [
-      "staging_approval"
-    ],
+    "verdict": "GO",
+    "evaluatedAt": "2026-07-25T20:41:00.000Z",
+    "blockingFailures": [],
     "advisoryWarnings": [],
     "checks": [
       {
