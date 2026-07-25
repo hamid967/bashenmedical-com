@@ -28,6 +28,7 @@
     "prepare": "husky",
     "check:rls": "bash scripts/pre-push-rls-checks.sh",
     "test:react": "bun test tests/react/",
+    "test:vitest": "vitest run --config vitest.config.ts",
     "test:all": "bash scripts/run-tests.sh",
     "test:compare-ci": "bash scripts/compare-ci.sh",
     "test:act": "bash scripts/run-act.sh",
@@ -129,6 +130,7 @@
     "vite": "^8.1.5",
     "vite-imagetools": "^10.0.1",
     "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.10",
     "workbox-window": "^7.4.1"
   }
 }
