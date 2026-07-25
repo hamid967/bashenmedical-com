@@ -149,3 +149,12 @@ export const getNphiesConfig = createServerFn({ method: "GET" })
     const { getConfigReport } = await import("@/lib/nphies/adapter.server");
     return getConfigReport();
   });
+
+/** Admin-only NPHIES connection test — pings OAuth token endpoint. */
+export const pingNphiesConnection = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    const { pingNphies } = await import("@/lib/nphies/adapter.server");
+    return pingNphies();
+  });

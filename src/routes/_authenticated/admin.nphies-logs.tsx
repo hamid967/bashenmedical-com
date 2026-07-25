@@ -7,7 +7,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { RefreshCw, ShieldCheck, ShieldAlert, Timer, AlertTriangle } from "lucide-react";
-import { getNphiesLogs, getNphiesConfig } from "@/lib/admin/nphies.functions";
+import { getNphiesLogs, getNphiesConfig, pingNphiesConnection } from "@/lib/admin/nphies.functions";
 
 const WINDOWS = [1, 6, 24, 24 * 7, 24 * 30];
 const MODES = ["all", "mock", "sandbox", "live"] as const;
@@ -117,6 +117,7 @@ function NphiesLogsPage() {
             <ConfigBadge ok={cfg.live_allowed} label="ALLOW_LIVE" />
           </div>
         </div>
+        <PingButton />
         {cfg.warnings.length > 0 && (
           <ul className="mt-3 text-xs list-disc ps-5 space-y-0.5">
             {cfg.warnings.map((w, i) => (
@@ -291,5 +292,48 @@ function ConfigBadge({ ok, label }: { ok: boolean; label: string }) {
     >
       {label}
     </span>
+  );
+}
+
+function PingButton() {
+  const [state, setState] = useState<
+    { ok: boolean; message: string; latency_ms: number; mode: string } | null
+  >(null);
+  const [busy, setBusy] = useState(false);
+  async function run() {
+    setBusy(true);
+    try {
+      const res = await pingNphiesConnection({});
+      setState(res);
+    } catch (e) {
+      setState({
+        ok: false,
+        message: e instanceof Error ? e.message : String(e),
+        latency_ms: 0,
+        mode: "unknown",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-3 flex items-center gap-3 flex-wrap">
+      <button
+        onClick={run}
+        disabled={busy}
+        className="px-3 py-1.5 text-xs rounded-md border bg-background hover:bg-muted disabled:opacity-50"
+      >
+        {busy ? "جارٍ الاختبار…" : "اختبار الاتصال بـ NPHIES"}
+      </button>
+      {state && (
+        <span
+          className={`text-xs font-mono ${
+            state.ok ? "text-emerald-700" : "text-destructive"
+          }`}
+        >
+          {state.ok ? "✓" : "✗"} [{state.mode}] {state.message} · {state.latency_ms}ms
+        </span>
+      )}
+    </div>
   );
 }

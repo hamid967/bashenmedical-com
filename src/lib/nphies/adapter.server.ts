@@ -15,6 +15,12 @@
  */
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
+import {
+  validateEligibilityRequest,
+  validateEligibilityResponse,
+  summarizeIssues,
+  type FhirIssue,
+} from "./fhir-validator";
 
 export type NphiesMode = "mock" | "sandbox" | "live";
 
@@ -128,20 +134,17 @@ async function mockDriver(input: EligibilityInput): Promise<EligibilityResult> {
   };
 }
 
-/**
- * Real NPHIES HTTP driver. Uses OAuth client-credentials to mint a short-lived
- * token, then posts a minimal FHIR CoverageEligibilityRequest. Errors are
- * surfaced verbatim so the audit log captures them.
- */
-async function httpDriver(
-  input: EligibilityInput,
-  mode: "sandbox" | "live",
-): Promise<EligibilityResult> {
+/** In-memory OAuth token cache — trimmed 30s before expiry to avoid boundary 401s. */
+let cachedToken: { token: string; expiresAt: number } | null = null;
+
+async function getAccessToken(): Promise<string> {
+  const now = Date.now();
+  if (cachedToken && cachedToken.expiresAt - 30_000 > now) return cachedToken.token;
+
   const baseUrl = process.env.NPHIES_BASE_URL!.replace(/\/+$/, "");
   const clientId = process.env.NPHIES_CLIENT_ID!;
   const clientSecret = process.env.NPHIES_CLIENT_SECRET!;
 
-  // 1) Token
   const tokenRes = await fetch(`${baseUrl}/oauth/token`, {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -151,18 +154,23 @@ async function httpDriver(
       client_secret: clientSecret,
     }),
   });
-  if (!tokenRes.ok) {
-    throw new Error(`NPHIES token error: ${tokenRes.status}`);
-  }
-  const { access_token } = (await tokenRes.json()) as { access_token?: string };
-  if (!access_token) throw new Error("NPHIES token: no access_token");
+  if (!tokenRes.ok) throw new Error(`NPHIES token error: ${tokenRes.status}`);
+  const body = (await tokenRes.json()) as { access_token?: string; expires_in?: number };
+  if (!body.access_token) throw new Error("NPHIES token: no access_token");
+  cachedToken = {
+    token: body.access_token,
+    expiresAt: now + (body.expires_in ?? 300) * 1000,
+  };
+  return body.access_token;
+}
 
-  // 2) Eligibility (minimal FHIR CoverageEligibilityRequest scaffold)
-  const payload = {
+function buildEligibilityRequest(input: EligibilityInput, mode: "sandbox" | "live") {
+  return {
     resourceType: "CoverageEligibilityRequest",
     status: "active",
     purpose: ["validation", "benefits"],
     patient: { identifier: { value: input.patient_national_id ?? "" } },
+    servicedDate: new Date().toISOString().slice(0, 10),
     insurance: [
       {
         coverage: {
@@ -173,18 +181,44 @@ async function httpDriver(
     provider: { identifier: { value: input.provider_id } },
     _meta: { mode },
   };
+}
+
+/**
+ * Real NPHIES HTTP driver. Uses OAuth client-credentials (cached), then posts
+ * a FHIR CoverageEligibilityRequest that was validated locally beforehand.
+ * Any FHIR issues found are attached to the thrown error / returned result so
+ * the audit log captures them for triage.
+ */
+async function httpDriver(
+  input: EligibilityInput,
+  mode: "sandbox" | "live",
+): Promise<{ result: EligibilityResult; issues: FhirIssue[] }> {
+  const baseUrl = process.env.NPHIES_BASE_URL!.replace(/\/+$/, "");
+
+  const payload = buildEligibilityRequest(input, mode);
+  const reqIssues = validateEligibilityRequest(payload);
+  if (reqIssues.some((i) => i.severity === "error")) {
+    throw new Error(`FHIR request invalid: ${summarizeIssues(reqIssues)}`);
+  }
+
+  const access_token = await getAccessToken();
+
   const res = await fetch(`${baseUrl}/CoverageEligibilityRequest`, {
     method: "POST",
     headers: {
       "content-type": "application/fhir+json",
+      accept: "application/fhir+json",
       authorization: `Bearer ${access_token}`,
     },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error(`NPHIES eligibility error: ${res.status}`);
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`NPHIES eligibility error: ${res.status} ${text.slice(0, 240)}`);
+  }
   const body = (await res.json()) as any;
+  const respIssues = validateEligibilityResponse(body);
 
-  // FHIR response mapping — pull the first insurance benefit summary.
   const bene = body?.insurance?.[0] ?? {};
   const item = bene?.item?.[0] ?? {};
   const coveragePct =
@@ -200,14 +234,47 @@ async function httpDriver(
     consultationFee != null && coveredAmount != null ? consultationFee - coveredAmount : null;
 
   return {
-    eligible: bene?.inforce === true || body?.outcome === "complete",
-    reason: body?.disposition ?? "nphies_response",
-    coverage_percent: coveragePct,
-    consultation_fee: consultationFee,
-    covered_amount: coveredAmount,
-    patient_share: patientShare,
-    coverage_tier: bene?.coverage?.classification ?? null,
+    result: {
+      eligible: bene?.inforce === true || body?.outcome === "complete",
+      reason: body?.disposition ?? "nphies_response",
+      coverage_percent: coveragePct,
+      consultation_fee: consultationFee,
+      covered_amount: coveredAmount,
+      patient_share: patientShare,
+      coverage_tier: bene?.coverage?.classification ?? null,
+    },
+    issues: [...reqIssues, ...respIssues],
   };
+}
+
+/** Ping the NPHIES OAuth endpoint — used by admin "test connection" button. */
+export async function pingNphies(): Promise<{
+  ok: boolean;
+  latency_ms: number;
+  mode: NphiesMode;
+  message: string;
+}> {
+  const { mode } = resolveMode();
+  const started = Date.now();
+  if (mode === "mock") {
+    return { ok: true, latency_ms: 0, mode, message: "mock mode — no external call" };
+  }
+  try {
+    await getAccessToken();
+    return {
+      ok: true,
+      latency_ms: Date.now() - started,
+      mode,
+      message: "OAuth token endpoint reachable",
+    };
+  } catch (err) {
+    return {
+      ok: false,
+      latency_ms: Date.now() - started,
+      mode,
+      message: err instanceof Error ? err.message : String(err),
+    };
+  }
 }
 
 async function logRequest(row: {
@@ -252,14 +319,22 @@ export async function checkEligibility(
   const { mode, report } = resolveMode();
   const started = Date.now();
   try {
-    const result =
-      mode === "mock" ? await mockDriver(input) : await httpDriver(input, mode);
+    let result: EligibilityResult;
+    let issues: FhirIssue[] = [];
+    if (mode === "mock") {
+      result = await mockDriver(input);
+    } else {
+      const out = await httpDriver(input, mode);
+      result = out.result;
+      issues = out.issues;
+    }
     await logRequest({
       mode,
       input,
       result,
       latency_ms: Date.now() - started,
       http_status: 200,
+      error_message: issues.length ? summarizeIssues(issues) : null,
     });
     return { mode, result, config: report };
   } catch (err) {
