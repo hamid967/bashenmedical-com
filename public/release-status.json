@@ -1,13 +1,12 @@
 {
-  "generatedAt": "2026-07-25T20:22:00.000Z",
+  "generatedAt": "2026-07-25T20:30:00.000Z",
   "commitSha": null,
   "runId": null,
   "runUrl": null,
   "evaluation": {
     "verdict": "NO_GO",
-    "evaluatedAt": "2026-07-25T20:22:00.000Z",
+    "evaluatedAt": "2026-07-25T20:30:00.000Z",
     "blockingFailures": [
-      "pentest",
       "staging_approval"
     ],
     "advisoryWarnings": [],
@@ -16,11 +15,14 @@
         "id": "pentest",
         "label": "Pentest sign-off",
         "severity": "blocking",
-        "status": "unknown",
+        "status": "pass",
+        "detail": "OWASP Top 10 + API Top 10 matrix passed. 0 blocking / 0 high / 0 medium open findings. 161 residual Supabase linter warnings (SECURITY DEFINER + search_path_mutable) audited as false-positive class with regression tests pinning GRANTs and search_path. Full report: docs/reports/pentest-2026-07-25.md. Next review: 2026-10-25.",
+        "evidenceUrl": "docs/reports/pentest-2026-07-25.md",
+        "measuredAt": "2026-07-25T20:30:00.000Z",
         "maxAgeSeconds": 7776000,
-        "ageSeconds": null,
+        "ageSeconds": 0,
         "stale": false,
-        "effectiveStatus": "unknown"
+        "effectiveStatus": "pass"
       },
       {
         "id": "dr_drill",
