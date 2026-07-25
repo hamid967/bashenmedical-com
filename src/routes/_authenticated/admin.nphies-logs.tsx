@@ -294,3 +294,46 @@ function ConfigBadge({ ok, label }: { ok: boolean; label: string }) {
     </span>
   );
 }
+
+function PingButton() {
+  const [state, setState] = useState<
+    { ok: boolean; message: string; latency_ms: number; mode: string } | null
+  >(null);
+  const [busy, setBusy] = useState(false);
+  async function run() {
+    setBusy(true);
+    try {
+      const res = await pingNphiesConnection({});
+      setState(res);
+    } catch (e) {
+      setState({
+        ok: false,
+        message: e instanceof Error ? e.message : String(e),
+        latency_ms: 0,
+        mode: "unknown",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="mt-3 flex items-center gap-3 flex-wrap">
+      <button
+        onClick={run}
+        disabled={busy}
+        className="px-3 py-1.5 text-xs rounded-md border bg-background hover:bg-muted disabled:opacity-50"
+      >
+        {busy ? "جارٍ الاختبار…" : "اختبار الاتصال بـ NPHIES"}
+      </button>
+      {state && (
+        <span
+          className={`text-xs font-mono ${
+            state.ok ? "text-emerald-700" : "text-destructive"
+          }`}
+        >
+          {state.ok ? "✓" : "✗"} [{state.mode}] {state.message} · {state.latency_ms}ms
+        </span>
+      )}
+    </div>
+  );
+}
