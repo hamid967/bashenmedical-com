@@ -3,6 +3,11 @@
  * Read no-show predictions, AI recommendations, and AI-classified complaints.
  * Mutations (decide on recommendation, override classification) require
  * `admin` or `super_admin` role via `_guard.assertHasRole`.
+ *
+ * Multi-tenant: all list fns accept an optional `organizationId` filter so
+ * the admin console TenantSwitcher can scope AI Insights to a single org.
+ * RLS already restricts rows to orgs the caller belongs to; this filter
+ * narrows further within that visibility.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -24,22 +29,25 @@ export interface NoShowPredictionRow {
 
 export const listNoShowPredictions = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((i: { minRisk?: number; limit?: number }) =>
+  .validator((i: { minRisk?: number; limit?: number; organizationId?: string | null }) =>
     z
       .object({
         minRisk: z.number().min(0).max(1).default(0.5),
         limit: z.number().int().min(1).max(500).default(100),
+        organizationId: z.string().uuid().nullable().optional(),
       })
       .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    const { data: rows, error } = await context.supabase
+    let q = context.supabase
       .from("no_show_predictions")
       .select(
         "appointment_id, risk, top_factors, recommendation, computed_at, appointments!inner(appointment_date, appointment_time, branch_id, doctor_id, status)",
       )
-      .gte("risk", data.minRisk)
+      .gte("risk", data.minRisk);
+    if (data.organizationId) q = q.eq("organization_id", data.organizationId);
+    const { data: rows, error } = await q
       .order("risk", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
@@ -59,20 +67,28 @@ export const listNoShowPredictions = createServerFn({ method: "GET" })
 
 export const listAiRecommendations = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((i: { status?: "open" | "accepted" | "dismissed"; limit?: number }) =>
-    z
-      .object({
-        status: z.enum(["open", "accepted", "dismissed"]).default("open"),
-        limit: z.number().int().min(1).max(200).default(50),
-      })
-      .parse(i ?? {}),
+  .validator(
+    (i: {
+      status?: "open" | "accepted" | "dismissed";
+      limit?: number;
+      organizationId?: string | null;
+    }) =>
+      z
+        .object({
+          status: z.enum(["open", "accepted", "dismissed"]).default("open"),
+          limit: z.number().int().min(1).max(200).default(50),
+          organizationId: z.string().uuid().nullable().optional(),
+        })
+        .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    const { data: rows, error } = await context.supabase
+    let q = context.supabase
       .from("ai_recommendations")
       .select("*")
-      .eq("status", data.status)
+      .eq("status", data.status);
+    if (data.organizationId) q = q.eq("organization_id", data.organizationId);
+    const { data: rows, error } = await q
       .order("generated_at", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
@@ -102,17 +118,24 @@ export const decideAiRecommendation = createServerFn({ method: "POST" })
 
 export const listClassifiedComplaints = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((i: { limit?: number }) =>
-    z.object({ limit: z.number().int().min(1).max(500).default(100) }).parse(i ?? {}),
+  .validator((i: { limit?: number; organizationId?: string | null }) =>
+    z
+      .object({
+        limit: z.number().int().min(1).max(500).default(100),
+        organizationId: z.string().uuid().nullable().optional(),
+      })
+      .parse(i ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    const { data: rows, error } = await context.supabase
+    let q = context.supabase
       .from("complaints")
       .select(
         "id, reference, type, status, department, ai_category, ai_severity, ai_suggested_owner, ai_classified_at, ai_model, created_at",
       )
-      .not("ai_classified_at", "is", null)
+      .not("ai_classified_at", "is", null);
+    if (data.organizationId) q = q.eq("organization_id", data.organizationId);
+    const { data: rows, error } = await q
       .order("ai_classified_at", { ascending: false })
       .limit(data.limit);
     if (error) throw new Error(error.message);
