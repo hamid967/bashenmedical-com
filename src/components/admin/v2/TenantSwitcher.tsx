@@ -8,6 +8,29 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useActiveTenant } from "@/lib/active-tenant";
+import { logTenantSwitch } from "@/lib/admin/tenant-audit.functions";
+
+/**
+ * Fires an audit event for every explicit tenant switch. Failures are
+ * swallowed so a flaky audit write can never block the UI change.
+ */
+function auditSwitch(
+  fromId: string | null,
+  toId: string | null,
+  toName: string | null,
+) {
+  if (fromId === toId) return;
+  void logTenantSwitch({
+    data: {
+      fromOrganizationId: fromId,
+      toOrganizationId: toId,
+      toOrganizationName: toName,
+      source: "tenant_switcher",
+    },
+  }).catch((e) => {
+    console.warn("[TenantSwitcher] audit log failed", (e as Error)?.message);
+  });
+}
 
 /**
  * Global tenant/organization switcher for the admin command bar.
