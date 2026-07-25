@@ -10,6 +10,7 @@
  * loadable in the plain web bundle (which never installs Capacitor plugins).
  */
 import { isNative, nativePlatform } from "./bridge";
+import { setNativeBadge } from "./badge";
 
 type RegisterResult =
   | { ok: true; token: string; platform: "ios" | "android" }
