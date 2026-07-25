@@ -118,7 +118,6 @@ export function BaeshenAssistant() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, busy]);
 
-
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || busy) return;
@@ -220,19 +219,15 @@ export function BaeshenAssistant() {
           return { ok: false, message: budgetBlockMessage(c, isAr ? "ar" : "en") };
         },
         onRetry: (phase) => {
-          if (phase === "reconnecting")
-            setError(t("errors.connectionLost"));
+          if (phase === "reconnecting") setError(t("errors.connectionLost"));
           else if (phase === "resumed") setError(null);
-          else if (phase === "failed")
-            setError(t("errors.resumeFailed"));
+          else if (phase === "failed") setError(t("errors.resumeFailed"));
         },
         mapStatusError: (s) => {
           if (s === 503) return t("errors.disabled");
-          if (s === 429)
-            return t("errors.rateLimited");
+          if (s === 429) return t("errors.rateLimited");
           if (s === 402) return t("errors.creditsOut");
-          if (s === 401)
-            return t("errors.sessionExpired");
+          if (s === 401) return t("errors.sessionExpired");
           return t("errors.connect");
         },
       });
@@ -359,9 +354,7 @@ export function BaeshenAssistant() {
               {t("title")}
             </SheetTitle>
             <div className="mt-1 flex items-center justify-between gap-2 text-xs text-muted-foreground">
-              <span className="min-w-0 truncate">
-                {t("subtitle")}
-              </span>
+              <span className="min-w-0 truncate">{t("subtitle")}</span>
               <div className="flex shrink-0 items-center gap-1">
                 <label
                   className="inline-flex cursor-pointer items-center gap-1 rounded px-2 py-1 hover:bg-muted"
@@ -420,12 +413,8 @@ export function BaeshenAssistant() {
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
             {showEmergency && (
               <div className="mb-3 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
-                <div className="font-semibold text-destructive">
-                  {t("emergencyBadge")}
-                </div>
-                <p className="mt-1 text-foreground/90">
-                  {t("emergencyText")}
-                </p>
+                <div className="font-semibold text-destructive">{t("emergencyBadge")}</div>
+                <p className="mt-1 text-foreground/90">{t("emergencyText")}</p>
                 <a
                   href="tel:997"
                   className="mt-2 inline-flex items-center gap-1 rounded bg-destructive px-3 py-1 text-xs font-medium text-destructive-foreground"
@@ -438,9 +427,7 @@ export function BaeshenAssistant() {
 
             {messages.length === 0 && (
               <div className="space-y-3">
-                <p className="text-sm text-muted-foreground">
-                  {t("welcome")}
-                </p>
+                <p className="text-sm text-muted-foreground">{t("welcome")}</p>
                 <div className="grid gap-2">
                   {suggestions.map((s) => (
                     <button
@@ -566,9 +553,7 @@ export function BaeshenAssistant() {
               </Button>
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-muted-foreground">
-              <span>
-                {t("piiWarning")}
-              </span>
+              <span>{t("piiWarning")}</span>
               <a
                 href={whatsappUrl(t("whatsappPrefill"))}
                 target="_blank"

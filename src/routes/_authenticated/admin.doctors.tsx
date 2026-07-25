@@ -90,8 +90,7 @@ export function AdminDoctorsPage() {
 
   const branches = branchesQ.data ?? [];
   const specialties = specialtiesQ.data ?? [];
-  const branchName = (id: string | null) =>
-    branches.find((b: any) => b.id === id)?.name_ar ?? "—";
+  const branchName = (id: string | null) => branches.find((b: any) => b.id === id)?.name_ar ?? "—";
   const specialtyName = (id: string | null) =>
     specialties.find((s: any) => s.id === id)?.name_ar ?? "—";
 

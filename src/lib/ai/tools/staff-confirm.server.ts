@@ -43,11 +43,10 @@ interface TokenPayload {
   e: number; // exp (ms since epoch)
 }
 
-export function mintConfirmToken(input: {
-  userId: string;
-  tool: string;
-  params: unknown;
-}): { token: string; expiresAt: number } {
+export function mintConfirmToken(input: { userId: string; tool: string; params: unknown }): {
+  token: string;
+  expiresAt: number;
+} {
   const payload: TokenPayload = {
     u: input.userId,
     t: input.tool,

@@ -662,9 +662,7 @@ function ManagePage() {
                 <Button
                   type="submit"
                   disabled={
-                    verifyOtp.isPending ||
-                    code.length !== 6 ||
-                    (HCAPTCHA_ENABLED && !captchaToken)
+                    verifyOtp.isPending || code.length !== 6 || (HCAPTCHA_ENABLED && !captchaToken)
                   }
                   className="flex-1 h-11"
                 >

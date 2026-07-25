@@ -12,10 +12,7 @@ import {
   Loader2,
   X,
 } from "lucide-react";
-import {
-  getSystemSetting,
-  updateSystemSetting,
-} from "@/lib/admin/system-settings.functions";
+import { getSystemSetting, updateSystemSetting } from "@/lib/admin/system-settings.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/settings/$key")({
   head: ({ params }) => ({
@@ -40,9 +37,7 @@ export const Route = createFileRoute("/_authenticated/admin/settings/$key")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="container-app py-16 text-center text-muted-foreground">
-      الإعداد غير موجود.
-    </div>
+    <div className="container-app py-16 text-center text-muted-foreground">الإعداد غير موجود.</div>
   ),
   component: SettingDetail,
 });
@@ -131,10 +126,7 @@ function SettingDetail() {
   return (
     <div className="container-app py-6 space-y-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link
-          to="/admin/settings"
-          className="hover:text-foreground inline-flex items-center gap-1"
-        >
+        <Link to="/admin/settings" className="hover:text-foreground inline-flex items-center gap-1">
           <ArrowRight className="h-4 w-4" /> إعدادات النظام
         </Link>
         <span>/</span>
@@ -184,9 +176,7 @@ function SettingDetail() {
         <>
           <section className="rounded-lg border bg-card p-4 space-y-2">
             <MetaRow label="الفئة" value={query.data.category} />
-            {!isEditing && (
-              <MetaRow label="الوصف" value={query.data.description ?? "—"} />
-            )}
+            {!isEditing && <MetaRow label="الوصف" value={query.data.description ?? "—"} />}
             <MetaRow
               label="آخر تحديث"
               value={new Date(query.data.updated_at).toLocaleString("ar-SA")}
@@ -211,10 +201,7 @@ function SettingDetail() {
               )}
 
               <div>
-                <label
-                  htmlFor="setting-description"
-                  className="block text-sm font-medium mb-1.5"
-                >
+                <label htmlFor="setting-description" className="block text-sm font-medium mb-1.5">
                   الوصف
                 </label>
                 <input
@@ -230,10 +217,7 @@ function SettingDetail() {
               </div>
 
               <div>
-                <label
-                  htmlFor="setting-value"
-                  className="block text-sm font-medium mb-1.5"
-                >
+                <label htmlFor="setting-value" className="block text-sm font-medium mb-1.5">
                   القيمة (JSON)
                 </label>
                 <textarea
@@ -253,11 +237,7 @@ function SettingDetail() {
                   }`}
                 />
                 {jsonError && (
-                  <p
-                    id="setting-value-err"
-                    role="alert"
-                    className="mt-1 text-xs text-destructive"
-                  >
+                  <p id="setting-value-err" role="alert" className="mt-1 text-xs text-destructive">
                     JSON غير صالح: {jsonError}
                   </p>
                 )}
@@ -301,15 +281,7 @@ function SettingDetail() {
   );
 }
 
-function MetaRow({
-  label,
-  value,
-  mono,
-}: {
-  label: string;
-  value: string;
-  mono?: boolean;
-}) {
+function MetaRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className="flex items-start justify-between gap-4 py-1 border-b last:border-b-0">
       <span className="text-xs text-muted-foreground shrink-0">{label}</span>
@@ -317,4 +289,3 @@ function MetaRow({
     </div>
   );
 }
-

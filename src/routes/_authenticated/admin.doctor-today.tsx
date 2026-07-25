@@ -9,16 +9,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
-import {
-  Stethoscope,
-  Play,
-  Save,
-  CheckCircle2,
-  CalendarPlus,
-  Loader2,
-  X,
-} from "lucide-react";
-
+import { Stethoscope, Play, Save, CheckCircle2, CalendarPlus, Loader2, X } from "lucide-react";
 
 import {
   listMyTodayAppointments,
@@ -31,7 +22,10 @@ export const Route = createFileRoute("/_authenticated/admin/doctor-today")({
   head: () => ({
     meta: [
       { title: "شاشة الطبيب — اليوم | باعشن الطبي" },
-      { name: "description", content: "قائمة مواعيد اليوم للطبيب، بدء الكشف، توثيق الزيارة، وحجز متابعة." },
+      {
+        name: "description",
+        content: "قائمة مواعيد اليوم للطبيب، بدء الكشف، توثيق الزيارة، وحجز متابعة.",
+      },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -63,14 +57,16 @@ function DoctorTodayPage() {
   const [openVisit, setOpenVisit] = useState<{ appt: ApptRow; visit_id: string } | null>(null);
   const [openFollowUp, setOpenFollowUp] = useState<ApptRow | null>(null);
 
-  const rows: ApptRow[] = ((query.data?.rows as unknown as ApptRow[]) ?? []);
+  const rows: ApptRow[] = (query.data?.rows as unknown as ApptRow[]) ?? [];
 
   return (
     <div className="mx-auto max-w-5xl space-y-4 p-4">
       <header className="flex items-center gap-2">
         <Stethoscope className="h-5 w-5 text-primary" />
         <h1 className="text-lg font-semibold">مواعيدي اليوم</h1>
-        <span className="text-xs text-muted-foreground">{query.data ? `${rows.length} حجز` : ""}</span>
+        <span className="text-xs text-muted-foreground">
+          {query.data ? `${rows.length} حجز` : ""}
+        </span>
       </header>
 
       {query.isLoading ? (
@@ -108,7 +104,11 @@ function DoctorTodayPage() {
       )}
 
       {openVisit ? (
-        <VisitDialog appt={openVisit.appt} visitId={openVisit.visit_id} onClose={() => setOpenVisit(null)} />
+        <VisitDialog
+          appt={openVisit.appt}
+          visitId={openVisit.visit_id}
+          onClose={() => setOpenVisit(null)}
+        />
       ) : null}
       {openFollowUp ? (
         <FollowUpDialog appt={openFollowUp} onClose={() => setOpenFollowUp(null)} />
@@ -158,7 +158,13 @@ function DoctorRow({
           {canStart ? (
             <ActionBtn
               onClick={() => start.mutate()}
-              icon={start.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Play className="h-3 w-3" />}
+              icon={
+                start.isPending ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Play className="h-3 w-3" />
+                )
+              }
               label="بدء الكشف"
               variant="success"
               disabled={start.isPending}
@@ -265,7 +271,11 @@ function VisitDialog({
             onClick={() => mutate.mutate(false)}
             className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-40"
           >
-            {mutate.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+            {mutate.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
             حفظ
           </button>
           <button
@@ -274,7 +284,11 @@ function VisitDialog({
             onClick={() => mutate.mutate(true)}
             className="inline-flex items-center gap-1 rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40"
           >
-            {mutate.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+            {mutate.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CheckCircle2 className="h-4 w-4" />
+            )}
             إنهاء الكشف
           </button>
         </div>
@@ -314,21 +328,41 @@ function FollowUpDialog({ appt, onClose }: { appt: ApptRow; onClose: () => void 
         </p>
         <label className="block space-y-1">
           <span className="text-xs">من تاريخ</span>
-          <input type="date" value={from} onChange={(e) => setFrom(e.target.value)} className="h-9 w-full rounded-md border bg-background px-2 text-sm" />
+          <input
+            type="date"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+          />
         </label>
         <label className="block space-y-1">
           <span className="text-xs">إلى تاريخ</span>
-          <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="h-9 w-full rounded-md border bg-background px-2 text-sm" />
+          <input
+            type="date"
+            value={to}
+            onChange={(e) => setTo(e.target.value)}
+            className="h-9 w-full rounded-md border bg-background px-2 text-sm"
+          />
         </label>
         <label className="block space-y-1">
           <span className="text-xs">ملاحظات</span>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} maxLength={500} className="w-full rounded-md border bg-background p-2 text-sm" />
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={2}
+            maxLength={500}
+            className="w-full rounded-md border bg-background p-2 text-sm"
+          />
         </label>
         {mutate.isError ? (
           <p className="text-xs text-destructive">{(mutate.error as Error).message}</p>
         ) : null}
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md border px-3 py-1.5 text-sm hover:bg-muted"
+          >
             إلغاء
           </button>
           <button
@@ -337,7 +371,11 @@ function FollowUpDialog({ appt, onClose }: { appt: ApptRow; onClose: () => void 
             onClick={() => mutate.mutate()}
             className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground disabled:opacity-40"
           >
-            {mutate.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarPlus className="h-4 w-4" />}
+            {mutate.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <CalendarPlus className="h-4 w-4" />
+            )}
             تسجيل الطلب
           </button>
         </div>
@@ -356,13 +394,18 @@ function StatusBadge({ status }: { status: string }) {
     checked_in: { label: "مسجّل", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
     waiting: { label: "بالانتظار", cls: "bg-amber-500/15 text-amber-700 dark:text-amber-300" },
     called: { label: "نودي", cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" },
-    in_consultation: { label: "قيد الكشف", cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300" },
+    in_consultation: {
+      label: "قيد الكشف",
+      cls: "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+    },
     completed: { label: "منجز", cls: "bg-emerald-600/20 text-emerald-800 dark:text-emerald-200" },
     cancelled: { label: "ملغي", cls: "bg-destructive/15 text-destructive" },
     no_show: { label: "لم يحضر", cls: "bg-destructive/15 text-destructive" },
   };
   const cfg = map[status] ?? { label: status, cls: "bg-muted text-foreground" };
-  return <span className={`inline-flex rounded px-1.5 py-0.5 text-xs ${cfg.cls}`}>{cfg.label}</span>;
+  return (
+    <span className={`inline-flex rounded px-1.5 py-0.5 text-xs ${cfg.cls}`}>{cfg.label}</span>
+  );
 }
 
 function ActionBtn({
@@ -445,7 +488,12 @@ function DialogShell({
       >
         <header className="mb-3 flex items-center justify-between border-b pb-2">
           <h2 className="text-sm font-semibold">{title}</h2>
-          <button type="button" onClick={onClose} className="rounded p-1 hover:bg-muted" aria-label="إغلاق">
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded p-1 hover:bg-muted"
+            aria-label="إغلاق"
+          >
             <X className="h-4 w-4" />
           </button>
         </header>

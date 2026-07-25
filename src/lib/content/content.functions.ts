@@ -92,8 +92,7 @@ export const getPatientContentFeed = createServerFn({ method: "GET" })
         .limit(20),
     ]);
 
-    const lang =
-      (profileRes.data?.preferred_language as "ar" | "en" | undefined) ?? "ar";
+    const lang = (profileRes.data?.preferred_language as "ar" | "en" | undefined) ?? "ar";
     const preferredBranch = profileRes.data?.default_branch_id ?? null;
     const bookedSpecialties = Array.from(
       new Set(
@@ -131,19 +130,14 @@ export const getPatientContentFeed = createServerFn({ method: "GET" })
       id: row.id,
       type: row.type,
       title: lang === "en" ? row.title_en || row.title_ar : row.title_ar || row.title_en,
-      body:
-        lang === "en"
-          ? row.body_en ?? row.body_ar
-          : row.body_ar ?? row.body_en,
+      body: lang === "en" ? (row.body_en ?? row.body_ar) : (row.body_ar ?? row.body_en),
       excerpt:
-        lang === "en"
-          ? row.excerpt_en ?? row.excerpt_ar
-          : row.excerpt_ar ?? row.excerpt_en,
+        lang === "en" ? (row.excerpt_en ?? row.excerpt_ar) : (row.excerpt_ar ?? row.excerpt_en),
       image_url: row.image_url,
       cta_label:
         lang === "en"
-          ? row.cta_label_en ?? row.cta_label_ar
-          : row.cta_label_ar ?? row.cta_label_en,
+          ? (row.cta_label_en ?? row.cta_label_ar)
+          : (row.cta_label_ar ?? row.cta_label_en),
       cta_href: row.cta_href,
       is_promotional: row.is_promotional,
       priority: row.priority,

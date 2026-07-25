@@ -38,7 +38,6 @@ import {
   Bell,
   FileText,
   Palette,
-  
   Menu as MenuIcon,
   ScrollText,
   KeyRound,
@@ -193,9 +192,7 @@ const NAV: NavGroup[] = [
   },
   {
     title: "المحتوى والوسائط",
-    items: [
-      { to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] },
-    ],
+    items: [{ to: "/admin/articles", label: "المقالات", icon: FileText, roles: ["admin"] }],
   },
   {
     title: "الموارد",
@@ -227,7 +224,7 @@ const NAV: NavGroup[] = [
     title: "الذكاء والأدوات",
     items: [
       { to: "/admin/ai/overview", label: "نظرة AI الشاملة", icon: Sparkles, roles: ["admin"] },
-      
+
       { to: "/admin/ai-usage", label: "استخدام AI", icon: Sparkles, roles: ["admin"] },
       {
         to: "/admin/design-tokens",
@@ -665,7 +662,6 @@ export function AdminShellV2({
           <LanguageSwitcher className="hidden sm:inline-flex" />
 
           <QuickActions />
-
 
           <ThemeSwitcher theme={theme} onToggle={toggleTheme} />
 

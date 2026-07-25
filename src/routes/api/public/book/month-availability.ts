@@ -59,7 +59,8 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "reads" });
+        if (_rl) return _rl;
         const url = new URL(request.url);
         const parsed = QuerySchema.safeParse({
           year: url.searchParams.get("year"),

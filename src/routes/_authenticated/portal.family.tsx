@@ -26,13 +26,7 @@ import { getMyProfile, updateMyProfile } from "@/lib/portal/portal.functions";
 import { Button } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
 import { Label } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,

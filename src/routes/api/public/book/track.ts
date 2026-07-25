@@ -46,7 +46,8 @@ export const Route = createFileRoute("/api/public/book/track")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "reads" });
+        if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();

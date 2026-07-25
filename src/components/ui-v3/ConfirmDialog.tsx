@@ -19,12 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
-import {
-  InlineError,
-  LoadingSpinner,
-  V3_LABELS,
-  useAsyncAction,
-} from "./state";
+import { InlineError, LoadingSpinner, V3_LABELS, useAsyncAction } from "./state";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -80,7 +75,6 @@ export function ConfirmDialog({
           <InlineError variant="banner">{error}</InlineError>
         ) : null}
         <AlertDialogFooter className="gap-2 sm:space-x-0">
-
           <AlertDialogCancel disabled={busy} aria-disabled={busy || undefined}>
             {cancelLabel}
           </AlertDialogCancel>
@@ -91,8 +85,7 @@ export function ConfirmDialog({
             aria-busy={busy || undefined}
             data-loading={busy || undefined}
             className={cn(
-              destructive &&
-                "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+              destructive && "bg-destructive text-destructive-foreground hover:bg-destructive/90",
             )}
           >
             {busy ? <LoadingSpinner label={V3_LABELS.processing} /> : null}

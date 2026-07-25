@@ -67,13 +67,14 @@ export function BookingPhoneVerification({
       });
       if (!res.ok) {
         // Honour the server-enforced cooldown / rate-limit windows.
-        const retry =
-          (res as { retryAfterSeconds?: number }).retryAfterSeconds ?? 0;
+        const retry = (res as { retryAfterSeconds?: number }).retryAfterSeconds ?? 0;
         if (retry > 0) {
           setCooldownUntil(Date.now() + retry * 1000);
           setNow(Date.now());
         }
-        setErr(t(`verification.errors.${res.error}`, { defaultValue: t("verification.errors.generic") }));
+        setErr(
+          t(`verification.errors.${res.error}`, { defaultValue: t("verification.errors.generic") }),
+        );
       } else {
         setSentId(res.challengeId);
         const wait = res.resendAfterSeconds ?? 60;
@@ -94,8 +95,6 @@ export function BookingPhoneVerification({
     }
   }
 
-
-
   async function check() {
     if (!sentId || !/^\d{6}$/.test(code)) {
       setErr(t("verification.errors.invalid_code"));
@@ -106,7 +105,9 @@ export function BookingPhoneVerification({
     try {
       const res = await verify({ data: { challengeId: sentId, code } });
       if (!res.ok) {
-        setErr(t(`verification.errors.${res.error}`, { defaultValue: t("verification.errors.generic") }));
+        setErr(
+          t(`verification.errors.${res.error}`, { defaultValue: t("verification.errors.generic") }),
+        );
       } else {
         onVerified(sentId, phone.trim());
       }
@@ -133,16 +134,13 @@ export function BookingPhoneVerification({
     );
   }
 
-
   return (
     <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-sm">
       <div className="flex items-center gap-2 font-semibold mb-2">
         <MessageCircle className="h-4 w-4" aria-hidden="true" />
         <span>{t("verification.title")}</span>
       </div>
-      <p className="text-muted-foreground mb-3">
-        {t("verification.hint", { phone })}
-      </p>
+      <p className="text-muted-foreground mb-3">{t("verification.hint", { phone })}</p>
 
       {!sentId ? (
         <Button
@@ -198,7 +196,6 @@ export function BookingPhoneVerification({
           </button>
         </div>
       )}
-
 
       {err && (
         <p className="mt-2 text-xs text-destructive" role="alert">

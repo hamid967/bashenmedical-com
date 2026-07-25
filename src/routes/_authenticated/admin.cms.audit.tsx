@@ -19,7 +19,9 @@ function AuditPage() {
   return (
     <div className="space-y-4 p-4" dir="rtl">
       <div className="flex items-center gap-3">
-        <Link to="/admin/cms" className="text-sm underline">← اللوحة</Link>
+        <Link to="/admin/cms" className="text-sm underline">
+          ← اللوحة
+        </Link>
         <h1 className="text-xl font-bold">سجل التدقيق</h1>
       </div>
       <Card className="p-0 overflow-hidden">
@@ -34,7 +36,11 @@ function AuditPage() {
           </thead>
           <tbody>
             {data.length === 0 && (
-              <tr><td className="p-4 text-muted-foreground" colSpan={4}>لا يوجد سجل بعد.</td></tr>
+              <tr>
+                <td className="p-4 text-muted-foreground" colSpan={4}>
+                  لا يوجد سجل بعد.
+                </td>
+              </tr>
             )}
             {data.map((a: any) => (
               <tr key={a.id} className="border-t">

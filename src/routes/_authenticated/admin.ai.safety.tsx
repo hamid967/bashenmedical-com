@@ -127,9 +127,7 @@ function AiSafetyPage() {
       </div>
 
       {q.isLoading && <p className="text-sm text-muted-foreground">جاري التحميل…</p>}
-      {q.error && (
-        <p className="text-sm text-destructive">تعذّر تحميل حوادث الأمان.</p>
-      )}
+      {q.error && <p className="text-sm text-destructive">تعذّر تحميل حوادث الأمان.</p>}
 
       {q.data && (
         <>
@@ -152,9 +150,11 @@ function AiSafetyPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-semibold">
-                  {q.data.incidents.filter(
-                    (i) => i.severity === "critical" || i.severity === "high",
-                  ).length}
+                  {
+                    q.data.incidents.filter(
+                      (i) => i.severity === "critical" || i.severity === "high",
+                    ).length
+                  }
                 </p>
               </CardContent>
             </Card>

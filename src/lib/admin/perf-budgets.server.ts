@@ -21,8 +21,7 @@ export type PerfSweepResult = {
 };
 
 const appUrl = (): string =>
-  process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ||
-  "https://bashenmedical-com.lovable.app";
+  process.env.PUBLIC_APP_URL?.replace(/\/$/, "") || "https://bashenmedical-com.lovable.app";
 
 function pct(sorted: number[], p: number): number | null {
   if (!sorted.length) return null;

@@ -36,8 +36,7 @@ export type SweepResult = {
 };
 
 const appUrl = (): string =>
-  process.env.PUBLIC_APP_URL?.replace(/\/$/, "") ||
-  "https://bashenmedical-com.lovable.app";
+  process.env.PUBLIC_APP_URL?.replace(/\/$/, "") || "https://bashenmedical-com.lovable.app";
 
 export async function runSweep(): Promise<SweepResult> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -103,9 +102,7 @@ export async function runSweep(): Promise<SweepResult> {
     .from("sla_alert_log")
     .select("item_id, kind")
     .in("item_id", ids);
-  const alreadyAlerted = new Set(
-    (alerted ?? []).map((a: any) => `${a.item_id}:${a.kind}`),
-  );
+  const alreadyAlerted = new Set((alerted ?? []).map((a: any) => `${a.item_id}:${a.kind}`));
 
   const now = Date.now();
   type Breach = {
@@ -127,12 +124,22 @@ export async function runSweep(): Promise<SweepResult> {
     if (respMs === undefined) {
       const overdue = ageMs - t.firstResponseMin * 60_000;
       if (overdue > 0 && !alreadyAlerted.has(`${it.id}:response`)) {
-        breaches.push({ item: it, kind: "response", overdueMs: overdue, thresholdMin: t.firstResponseMin });
+        breaches.push({
+          item: it,
+          kind: "response",
+          overdueMs: overdue,
+          thresholdMin: t.firstResponseMin,
+        });
       }
     }
     const overdueResol = ageMs - t.resolutionMin * 60_000;
     if (overdueResol > 0 && !alreadyAlerted.has(`${it.id}:resolution`)) {
-      breaches.push({ item: it, kind: "resolution", overdueMs: overdueResol, thresholdMin: t.resolutionMin });
+      breaches.push({
+        item: it,
+        kind: "resolution",
+        overdueMs: overdueResol,
+        thresholdMin: t.resolutionMin,
+      });
     }
   }
 

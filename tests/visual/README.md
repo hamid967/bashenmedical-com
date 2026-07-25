@@ -26,6 +26,7 @@ python3 scripts/ci/ensure-e2e-patient.py
 ```
 
 السكربت (idempotent) يقوم بـ:
+
 1. إنشاء/تحديث المستخدم في Supabase Auth مع `email_confirm=true`.
 2. مزامنة كلمة السر مع `E2E_PATIENT_PASSWORD` (ضدّ التدوير).
 3. `upsert` صف في `public.profiles` بالاسم/الجوال ليكون المحتوى ثابتاً.
@@ -38,20 +39,20 @@ python3 scripts/ci/ensure-e2e-patient.py
 
 في `.github/workflows/ci.yml` توجد خطوتان مُفعّلتان تلقائياً عندما تتوفر
 أسرار `E2E_PATIENT_EMAIL` و`E2E_PATIENT_PASSWORD`:
+
 - **Ensure E2E patient user exists** — تنفّذ السكربت أعلاه.
 - **Run portal Visual Regression** — تشغّل الاختبار وترفع `tests/visual/diffs/**` كـartifact عند الفشل.
 
-
 ## متغيرات البيئة
 
-| Var | افتراضي | الغرض |
-|---|---|---|
-| `E2E_BASE_URL` | `http://localhost:8080` | عنوان تطبيق الاختبار |
-| `E2E_PATIENT_EMAIL` / `E2E_PATIENT_PASSWORD` | — | تسجيل دخول مريض ثابت في CI |
-| `LOVABLE_BROWSER_SUPABASE_*` | — | جلسة مُحقنة داخل السَّندبوكس |
-| `UPDATE_BASELINES` | `0` | `1` = اكتب baselines بدل المقارنة |
-| `VISUAL_PIXEL_TOLERANCE` | `0.005` (0.5%) | نسبة البكسلات المختلفة المسموحة |
-| `VISUAL_CHANNEL_TOLERANCE` | `8` | الفرق اللوني لكل قناة (0–255) |
+| Var                                          | افتراضي                 | الغرض                             |
+| -------------------------------------------- | ----------------------- | --------------------------------- |
+| `E2E_BASE_URL`                               | `http://localhost:8080` | عنوان تطبيق الاختبار              |
+| `E2E_PATIENT_EMAIL` / `E2E_PATIENT_PASSWORD` | —                       | تسجيل دخول مريض ثابت في CI        |
+| `LOVABLE_BROWSER_SUPABASE_*`                 | —                       | جلسة مُحقنة داخل السَّندبوكس      |
+| `UPDATE_BASELINES`                           | `0`                     | `1` = اكتب baselines بدل المقارنة |
+| `VISUAL_PIXEL_TOLERANCE`                     | `0.005` (0.5%)          | نسبة البكسلات المختلفة المسموحة   |
+| `VISUAL_CHANNEL_TOLERANCE`                   | `8`                     | الفرق اللوني لكل قناة (0–255)     |
 
 ## آلية عمل الاستقرار
 
@@ -73,11 +74,13 @@ python3 scripts/ci/ensure-e2e-patient.py
 ## عند فشل الاختبار
 
 المخرجات:
+
 - `tests/visual/diffs/<slug>.actual.png` — اللقطة الفعلية.
 - `tests/visual/diffs/<slug>.diff.png` — خريطة الفروق (مضخّمة 8×).
 - المرجع تحت `tests/visual/baselines/<slug>.png`.
 
 قرّر:
+
 - إن كان التغيير **مقصوداً**: راجع الـdiff بصرياً ثم شغّل الأمر مع
   `UPDATE_BASELINES=1` لتحديث المرجع، وارفعه ضمن نفس الـPR.
 - إن كان **غير مقصود**: خفّض الحدّ الأدنى للتغيير أو أصلح المكوّن.

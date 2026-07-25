@@ -17,7 +17,6 @@ import { Button } from "@/components/ui-v3";
 import { AlertTriangle, Bell, Timer, CheckCircle2, Inbox as InboxIcon } from "lucide-react";
 import { toast } from "sonner";
 
-
 function fmtDuration(ms: number | null): string {
   if (ms == null) return "—";
   const s = Math.max(0, Math.round(ms / 1000));
@@ -70,9 +69,7 @@ export function SlaPage() {
   const statusOptions = useMemo(() => data.byStatus.map((b) => b.key), [data.byStatus]);
 
   const branchLabelOf = (id: string | null) =>
-    !id
-      ? "بدون فرع"
-      : branchOptions.find((b) => b.key === id)?.label ?? id.slice(0, 8);
+    !id ? "بدون فرع" : (branchOptions.find((b) => b.key === id)?.label ?? id.slice(0, 8));
 
   const exportCsv = () => {
     const header = [
@@ -189,8 +186,6 @@ export function SlaPage() {
       </div>
 
       <AlertConfigCard />
-
-
 
       {/* Thresholds legend */}
       <Card className="p-4">
@@ -373,7 +368,6 @@ export function SlaPage() {
           </div>
         )}
       </Card>
-
     </div>
   );
 }
@@ -554,17 +548,11 @@ function AlertConfigCard() {
 
       <div className="grid gap-3 md:grid-cols-2">
         <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={(e) => setEnabled(e.target.checked)}
-          />
+          <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} />
           تفعيل التنبيهات
         </label>
         <label className="text-sm">
-          <span className="block text-xs text-muted-foreground mb-1">
-            الحد الأدنى للأولوية
-          </span>
+          <span className="block text-xs text-muted-foreground mb-1">الحد الأدنى للأولوية</span>
           <select
             value={minPriority}
             onChange={(e) => setMinPriority(e.target.value as any)}
@@ -577,9 +565,7 @@ function AlertConfigCard() {
           </select>
         </label>
         <label className="text-sm md:col-span-2">
-          <span className="block text-xs text-muted-foreground mb-1">
-            رابط Webhook (HTTPS)
-          </span>
+          <span className="block text-xs text-muted-foreground mb-1">رابط Webhook (HTTPS)</span>
           <input
             type="url"
             value={webhookUrl}
@@ -646,9 +632,7 @@ function AlertConfigCard() {
             ) : (
               <AlertTriangle className="w-4 h-4 text-red-600" />
             )}
-            <span className="font-semibold">
-              {testResult.ok ? "نجح الاختبار" : "فشل الاختبار"}
-            </span>
+            <span className="font-semibold">{testResult.ok ? "نجح الاختبار" : "فشل الاختبار"}</span>
             <span className="text-muted-foreground">
               HTTP {testResult.status ?? "—"} • {testResult.duration_ms}ms
             </span>
@@ -661,9 +645,7 @@ function AlertConfigCard() {
             </button>
           </div>
           {testResult.error && (
-            <div className="mb-2 text-red-700 dark:text-red-400">
-              خطأ: {testResult.error}
-            </div>
+            <div className="mb-2 text-red-700 dark:text-red-400">خطأ: {testResult.error}</div>
           )}
           {testResult.response_body && (
             <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all rounded bg-background/60 p-2 font-mono text-[11px]">
@@ -675,4 +657,3 @@ function AlertConfigCard() {
     </Card>
   );
 }
-

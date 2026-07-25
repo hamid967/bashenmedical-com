@@ -22,13 +22,7 @@ import {
 } from "@/components/ui-v3";
 import { getMyMedicalReportFileUrl } from "@/lib/portal/reports.functions";
 
-export function ReportViewerDialog({
-  reportId,
-  title,
-}: {
-  reportId: string;
-  title: string;
-}) {
+export function ReportViewerDialog({ reportId, title }: { reportId: string; title: string }) {
   const [open, setOpen] = useState(false);
   const [url, setUrl] = useState<string | null>(null);
   const [expires, setExpires] = useState<number | null>(null);
@@ -67,9 +61,7 @@ export function ReportViewerDialog({
     }
   }
 
-  const secondsLeft = expires
-    ? Math.max(0, Math.floor((expires - Date.now()) / 1000))
-    : null;
+  const secondsLeft = expires ? Math.max(0, Math.floor((expires - Date.now()) / 1000)) : null;
 
   return (
     <Dialog open={open} onOpenChange={handleOpen}>
@@ -124,11 +116,7 @@ export function ReportViewerDialog({
                 </a>
               </Button>
             )}
-            <Button
-              size="sm"
-              onClick={() => download.mutate()}
-              disabled={download.isPending}
-            >
+            <Button size="sm" onClick={() => download.mutate()} disabled={download.isPending}>
               <Download className="me-1 h-3 w-3" aria-hidden />
               تحميل موقّع
             </Button>

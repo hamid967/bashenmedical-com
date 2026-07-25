@@ -56,9 +56,7 @@ export function ActiveSubjectSwitcher({ lang = "ar" }: { lang?: "ar" | "en" }) {
 
         <DropdownMenuItem onSelect={() => setSubject({ kind: "self" })}>
           <UserRound className="me-2 h-4 w-4" aria-hidden />
-          <span className="flex-1 truncate">
-            {lang === "ar" ? "حسابي" : "My account"}
-          </span>
+          <span className="flex-1 truncate">{lang === "ar" ? "حسابي" : "My account"}</span>
           {subject.kind === "self" && <Check className="h-4 w-4 text-primary" aria-hidden />}
         </DropdownMenuItem>
 

@@ -43,7 +43,9 @@ function classifyAudit(action: string): AdminFeedSeverity {
   if (/(fail|error|deny|denied|reject|revoke|delete|remove|breach|unauthorized|forbidden)/.test(a))
     return "danger";
   if (/(warn|expire|risk|suspend|block|hold|cancel)/.test(a)) return "warning";
-  if (/(create|insert|add|approve|confirm|success|complete|check_in|checkin|paid|grant|login)/.test(a))
+  if (
+    /(create|insert|add|approve|confirm|success|complete|check_in|checkin|paid|grant|login)/.test(a)
+  )
     return "success";
   return "info";
 }
@@ -89,8 +91,7 @@ export const listAdminFeed = createServerFn({ method: "GET" })
   .handler(async ({ data, context }) => {
     await assertConsoleAccess({ supabase: context.supabase, userId: context.userId });
     const sb = context.supabase;
-    const sinceIso =
-      data.since ?? new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const sinceIso = data.since ?? new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     const wantAll = !data.category;
     const want = (c: AdminFeedCategory) => wantAll || data.category === c;
 

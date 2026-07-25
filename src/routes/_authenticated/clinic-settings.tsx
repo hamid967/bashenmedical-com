@@ -11,7 +11,10 @@ export const Route = createFileRoute("/_authenticated/clinic-settings")({
   head: () => ({
     meta: [
       { title: "إعدادات المجمع — لوحة الإدارة | مجمع باعشن الطبي" },
-      { name: "description", content: "إدارة معلومات المجمع الطبي، ساعات العمل، وسائل التواصل، والعنوان." },
+      {
+        name: "description",
+        content: "إدارة معلومات المجمع الطبي، ساعات العمل، وسائل التواصل، والعنوان.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "إعدادات المجمع — لوحة الإدارة" },
       { property: "og:description", content: "أداة إدارية لتحرير بيانات المجمع." },

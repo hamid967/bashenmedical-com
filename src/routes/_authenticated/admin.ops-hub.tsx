@@ -27,8 +27,7 @@ export const Route = createFileRoute("/_authenticated/admin/ops-hub")({
       { title: "مركز العمليات — لوحة الإدارة الموحدة" },
       {
         name: "description",
-        content:
-          "مركز موحّد للصندوق الوارد، تنبيهات SLA، وسجل التدقيق داخل لوحة الإدارة.",
+        content: "مركز موحّد للصندوق الوارد، تنبيهات SLA، وسجل التدقيق داخل لوحة الإدارة.",
       },
       { name: "robots", content: "noindex,nofollow" },
     ],

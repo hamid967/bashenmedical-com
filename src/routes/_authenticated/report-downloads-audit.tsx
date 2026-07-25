@@ -405,7 +405,10 @@ export const Route = createFileRoute("/_authenticated/report-downloads-audit")({
   head: () => ({
     meta: [
       { title: "سجل تنزيلات التقارير — لوحة الإدارة | مجمع باعشن الطبي" },
-      { name: "description", content: "تدقيق عمليات تنزيل تقارير المختبر والأشعة من قبل المستخدمين." },
+      {
+        name: "description",
+        content: "تدقيق عمليات تنزيل تقارير المختبر والأشعة من قبل المستخدمين.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "سجل تنزيلات التقارير" },
       { property: "og:description", content: "أداة إدارية لتدقيق تنزيلات التقارير الطبية." },

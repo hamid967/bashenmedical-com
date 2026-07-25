@@ -85,7 +85,8 @@ async function main() {
         reminder_24h: true,
         reminder_2h: true,
       })
-      .select("id").single();
+      .select("id")
+      .single();
     if (error) throw error;
     const id = data.id as string;
     createdAppts.push(id);
@@ -104,27 +105,39 @@ async function main() {
 
     // ── list_reminder_preferences_by_ref (anon) ─────────────────────
     await test("by_ref: anon gets rows with matching ref+phone", async () => {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: ownerRef, _phone: ownerPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: ownerRef,
+          _phone: ownerPhone,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `expected >=1 rows, got ${rows.length}`);
     });
 
     await test("by_ref: wrong phone returns 0 rows (no cross-phone leak)", async () => {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: ownerRef, _phone: otherPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: ownerRef,
+          _phone: otherPhone,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `leaked ${rows.length} rows for mismatched phone`);
     });
 
     await test("by_ref: unknown ref returns 0 rows", async () => {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: "deadbeef", _phone: ownerPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: "deadbeef",
+          _phone: ownerPhone,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `leaked ${rows.length} rows for unknown ref`);
@@ -132,18 +145,26 @@ async function main() {
 
     await test("by_ref: swapped phone from another real appt returns 0 rows", async () => {
       // ownerRef but phone from other appt: still must not leak owner rows.
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: otherRef, _phone: ownerPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: otherRef,
+          _phone: ownerPhone,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `leaked ${rows.length} rows for phone/ref mismatch`);
     });
 
     await test("by_ref: empty phone → 0 rows", async () => {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: ownerRef, _phone: "",
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: ownerRef,
+          _phone: "",
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `leaked ${rows.length} rows for empty phone`);
@@ -154,32 +175,46 @@ async function main() {
       // to the caller's own appts. We assert the function does not leak OTHER phones'
       // rows: with empty ref + owner phone, we should get only owner's rows (or 0 if
       // the impl also rejects empty ref). Either way — no rows from `otherAppt`.
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: "", _phone: otherPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: "",
+          _phone: otherPhone,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
-      const rows = ((data ?? []) as Array<{ id: string }>);
+      const rows = (data ?? []) as Array<{ id: string }>;
       // Must not contain rows from the owner's appointment.
       const { data: ownerRows } = await admin
-        .from("reminder_preference_audit").select("id").eq("appointment_id", ownerAppt);
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("appointment_id", ownerAppt);
       const ownerIds = new Set((ownerRows ?? []).map((r) => r.id));
       const leaked = rows.filter((r) => ownerIds.has(r.id));
       assert(leaked.length === 0, `leaked ${leaked.length} owner rows via empty ref + other phone`);
     });
 
     await test("by_ref: null ref → error or 0 rows (no leak)", async () => {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: null, _phone: ownerPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: null,
+          _phone: ownerPhone,
+        } as never,
+      );
       // Postgres may reject nulls; both outcomes are acceptable as long as no rows leak.
       const rows = (data ?? []) as unknown[];
       assert(error !== null || rows.length === 0, `null ref leaked ${rows.length} rows`);
     });
 
     await test("by_ref: uppercase ref still matches (case-insensitive)", async () => {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: ownerRef.toUpperCase(), _phone: ownerPhone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: ownerRef.toUpperCase(),
+          _phone: ownerPhone,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `case-insensitive lookup failed, got ${rows.length}`);
@@ -187,9 +222,13 @@ async function main() {
 
     // ── Extended by_ref coverage (parity with my_audit) ─────────────
     async function byRef(ref: unknown, phone: unknown) {
-      const { data, error } = await anon.rpc("list_reminder_preferences_by_ref" as never, {
-        _ref: ref, _phone: phone,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "list_reminder_preferences_by_ref" as never,
+        {
+          _ref: ref,
+          _phone: phone,
+        } as never,
+      );
       return { data: (data ?? []) as Array<{ id: string }>, error };
     }
 
@@ -242,13 +281,16 @@ async function main() {
       const b = extraOther.replace(/-/g, "");
       let prefix = "";
       for (let i = 0; i < Math.min(a.length, b.length); i++) {
-        if (a[i] === b[i]) prefix += a[i]; else break;
+        if (a[i] === b[i]) prefix += a[i];
+        else break;
       }
       if (prefix.length === 0) prefix = a[0];
       const r = await byRef(prefix, ownerPhone);
       assert(!r.error, `err: ${r.error?.message}`);
       const { data: otherAuditRows } = await admin
-        .from("reminder_preference_audit").select("id").eq("appointment_id", extraOther);
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("appointment_id", extraOther);
       const otherIds = new Set((otherAuditRows ?? []).map((row) => row.id));
       const leaked = r.data.filter((row) => otherIds.has(row.id));
       assert(leaked.length === 0, `shared-prefix ref leaked ${leaked.length} other-phone rows`);
@@ -278,53 +320,71 @@ async function main() {
     const otherC = await signIn(otherU.email, otherU.password);
 
     await test("my_audit: owner phone matches → rows returned", async () => {
-      const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const { data, error } = await ownerC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `expected >=1 rows for owner, got ${rows.length}`);
     });
 
     await test("my_audit: different phone → 0 rows (rejects other's appt)", async () => {
-      const { data, error } = await otherC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const { data, error } = await otherC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `leaked ${rows.length} rows to non-owner`);
     });
 
     await test("my_audit: anon (no session) → 0 rows", async () => {
-      const { data, error } = await anon.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const { data, error } = await anon.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `anon leaked ${rows.length} rows`);
     });
 
     await test("my_audit: random appointment id → 0 rows", async () => {
-      const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: "00000000-0000-0000-0000-000000000000",
-      } as never);
+      const { data, error } = await ownerC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: "00000000-0000-0000-0000-000000000000",
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `leaked ${rows.length} rows for random id`);
     });
 
     await test("my_audit: malformed uuid → error, no leak", async () => {
-      const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: "not-a-uuid",
-      } as never);
+      const { data, error } = await ownerC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: "not-a-uuid",
+        } as never,
+      );
       const rows = (data ?? []) as unknown[];
       assert(error !== null || rows.length === 0, `malformed uuid leaked ${rows.length} rows`);
     });
 
     await test("my_audit: null appointment id → error or 0 rows", async () => {
-      const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: null,
-      } as never);
+      const { data, error } = await ownerC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: null,
+        } as never,
+      );
       const rows = (data ?? []) as unknown[];
       assert(error !== null || rows.length === 0, `null id leaked ${rows.length} rows`);
     });
@@ -335,9 +395,12 @@ async function main() {
       // Clear the profile phone AFTER creation to simulate a user without phone linkage.
       await admin.from("profiles").update({ phone: null }).eq("id", noPhoneU.userId);
       const noPhoneC = await signIn(noPhoneU.email, noPhoneU.password);
-      const { data, error } = await noPhoneC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const { data, error } = await noPhoneC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `user without profile phone leaked ${rows.length} rows`);
@@ -350,13 +413,19 @@ async function main() {
       const del = await admin.from("profiles").delete().eq("id", noRowU.userId);
       assert(!del.error, `profile delete failed: ${del.error?.message}`);
       const { data: check } = await admin
-        .from("profiles").select("id").eq("id", noRowU.userId).maybeSingle();
+        .from("profiles")
+        .select("id")
+        .eq("id", noRowU.userId)
+        .maybeSingle();
       assert(check === null, "profile row still present after delete — precondition failed");
 
       const noRowC = await signIn(noRowU.email, noRowU.password);
-      const { data, error } = await noRowC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const { data, error } = await noRowC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `user without profile row leaked ${rows.length} rows`);
@@ -370,9 +439,12 @@ async function main() {
       await admin.from("profiles").delete().eq("id", noRow2.userId);
       const noRow2C = await signIn(noRow2.email, noRow2.password);
       for (const id of [ownerAppt, otherAppt]) {
-        const { data, error } = await noRow2C.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await noRow2C.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(rows.length === 0, `no-profile user leaked ${rows.length} rows for appt ${id}`);
@@ -385,31 +457,45 @@ async function main() {
       createdUsers.push(midU.userId);
       const midC = await signIn(midU.email, midU.password);
 
-      const before = await midC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const before = await midC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!before.error, `pre-del err: ${before.error?.message}`);
-      assert(((before.data ?? []) as unknown[]).length >= 1, "expected access before profile delete");
+      assert(
+        ((before.data ?? []) as unknown[]).length >= 1,
+        "expected access before profile delete",
+      );
 
       await admin.from("profiles").delete().eq("id", midU.userId);
 
-      const after = await midC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const after = await midC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!after.error, `post-del err: ${after.error?.message}`);
       const rows = (after.data ?? []) as unknown[];
-      assert(rows.length === 0, `access not revoked after profile delete, still saw ${rows.length}`);
+      assert(
+        rows.length === 0,
+        `access not revoked after profile delete, still saw ${rows.length}`,
+      );
     });
-
 
     const ownerAppt2 = await seedAppt(ownerPhone);
     const otherAppt2 = await seedAppt(otherPhone);
 
     await test("my_audit: owner sees rows for each of their own appts, one at a time", async () => {
       for (const id of [ownerAppt, ownerAppt2]) {
-        const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await ownerC.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(rows.length >= 1, `owner missed own appt ${id}`);
@@ -418,9 +504,12 @@ async function main() {
 
     await test("my_audit: owner cannot read either of other's appts", async () => {
       for (const id of [otherAppt, otherAppt2]) {
-        const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await ownerC.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(rows.length === 0, `owner leaked ${rows.length} rows from other's appt ${id}`);
@@ -429,9 +518,12 @@ async function main() {
 
     await test("my_audit: other user cannot read either of owner's appts", async () => {
       for (const id of [ownerAppt, ownerAppt2]) {
-        const { data, error } = await otherC.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await otherC.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(rows.length === 0, `other leaked ${rows.length} rows from owner's appt ${id}`);
@@ -440,19 +532,26 @@ async function main() {
 
     await test("my_audit: returned rows belong ONLY to the requested appointment", async () => {
       // Regression guard: fn must filter by _appointment_id, not just by phone.
-      const { data, error } = await ownerC.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: ownerAppt,
-      } as never);
+      const { data, error } = await ownerC.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: ownerAppt,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
-      const rows = ((data ?? []) as Array<{ id: string }>);
+      const rows = (data ?? []) as Array<{ id: string }>;
       const { data: expected } = await admin
-        .from("reminder_preference_audit").select("id").eq("appointment_id", ownerAppt);
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("appointment_id", ownerAppt);
       const expectedIds = new Set((expected ?? []).map((r) => r.id));
       for (const r of rows) {
         assert(expectedIds.has(r.id), `row ${r.id} does not belong to appt ${ownerAppt}`);
       }
       const { data: appt2 } = await admin
-        .from("reminder_preference_audit").select("id").eq("appointment_id", ownerAppt2);
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("appointment_id", ownerAppt2);
       const appt2Ids = new Set((appt2 ?? []).map((r) => r.id));
       const bleed = rows.filter((r) => appt2Ids.has(r.id));
       assert(bleed.length === 0, `bled ${bleed.length} rows from sibling own-appt`);
@@ -463,12 +562,18 @@ async function main() {
       // and lose access to own — matching is dynamic on profile.phone, not cached.
       await admin.from("profiles").update({ phone: otherPhone }).eq("id", ownerU.userId);
       try {
-        const gain = await ownerC.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: otherAppt,
-        } as never);
-        const lose = await ownerC.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: ownerAppt,
-        } as never);
+        const gain = await ownerC.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: otherAppt,
+          } as never,
+        );
+        const lose = await ownerC.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: ownerAppt,
+          } as never,
+        );
         assert(!gain.error && !lose.error, "rpc err");
         const gained = ((gain.data ?? []) as unknown[]).length;
         const kept = ((lose.data ?? []) as unknown[]).length;
@@ -500,12 +605,13 @@ async function main() {
     await test("my_audit: profile phone with SPACES matches plain-digit appt", async () => {
       const apptId = await seedForDigits(fmtDigits);
       const spaced = fmtDigits.replace(/(\d{3})(\d{3})/, "$1 $2 ");
-      const { c } = await makeUserWithProfilePhone(
-        `rpa-fmt-space-${stamp}@test.local`, spaced,
+      const { c } = await makeUserWithProfilePhone(`rpa-fmt-space-${stamp}@test.local`, spaced);
+      const { data, error } = await c.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
       );
-      const { data, error } = await c.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `spaced profile phone failed to match, got ${rows.length}`);
@@ -514,12 +620,13 @@ async function main() {
     await test("my_audit: profile phone with DASHES matches plain-digit appt", async () => {
       const apptId = await seedForDigits(fmtDigits);
       const dashed = fmtDigits.slice(0, 4) + "-" + fmtDigits.slice(4);
-      const { c } = await makeUserWithProfilePhone(
-        `rpa-fmt-dash-${stamp}@test.local`, dashed,
+      const { c } = await makeUserWithProfilePhone(`rpa-fmt-dash-${stamp}@test.local`, dashed);
+      const { data, error } = await c.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
       );
-      const { data, error } = await c.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `dashed profile phone failed to match, got ${rows.length}`);
@@ -529,12 +636,13 @@ async function main() {
       const apptId = await seedForDigits(fmtDigits);
       // Wrap the first 3 digits in parens and add a leading '+' — non-digits are stripped.
       const wrapped = "+(" + fmtDigits.slice(0, 3) + ") " + fmtDigits.slice(3);
-      const { c } = await makeUserWithProfilePhone(
-        `rpa-fmt-paren-${stamp}@test.local`, wrapped,
+      const { c } = await makeUserWithProfilePhone(`rpa-fmt-paren-${stamp}@test.local`, wrapped);
+      const { data, error } = await c.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
       );
-      const { data, error } = await c.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `parens/plus profile phone failed to match, got ${rows.length}`);
@@ -547,15 +655,19 @@ async function main() {
       const apptDigits = "0500999" + String(stamp).slice(-3);
       const apptId = await seedForDigits(apptDigits);
       const intl = "+966" + apptDigits.slice(1); // drops leading 0, prepends 966
-      const { c } = await makeUserWithProfilePhone(
-        `rpa-fmt-intl-${stamp}@test.local`, intl,
+      const { c } = await makeUserWithProfilePhone(`rpa-fmt-intl-${stamp}@test.local`, intl);
+      const { data, error } = await c.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
       );
-      const { data, error } = await c.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
-      assert(rows.length === 0, `country-code variant should NOT match, leaked ${rows.length} rows`);
+      assert(
+        rows.length === 0,
+        `country-code variant should NOT match, leaked ${rows.length} rows`,
+      );
     });
 
     await test("my_audit: profile phone with EXTRA leading zeros does NOT match", async () => {
@@ -564,38 +676,40 @@ async function main() {
       const apptId = await seedForDigits(apptDigits);
       const withLeading = "00" + apptDigits; // e.g. "000522..." != "0522..."
       const { c } = await makeUserWithProfilePhone(
-        `rpa-fmt-lead0-${stamp}@test.local`, withLeading,
+        `rpa-fmt-lead0-${stamp}@test.local`,
+        withLeading,
       );
-      const { data, error } = await c.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
+      const { data, error } = await c.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length === 0, `extra leading zeros should NOT match, leaked ${rows.length} rows`);
     });
 
-
     // ── Blank / non-digit profile.phone values (must not leak anything) ─
     // These strings all normalize to "" via regexp_replace(phone,'\D','','g').
     // The function must NOT return rows for any appt, because a real appt's
     // patient_phone normalizes to a non-empty digit string.
-    async function assertBlankPhoneLeaksNothing(
-      label: string,
-      profilePhone: string,
-    ) {
+    async function assertBlankPhoneLeaksNothing(label: string, profilePhone: string) {
       const u = await createUserWithPhone(
         `rpa-blank-${label}-${stamp}@test.local`,
         "0599000000", // any placeholder; overwritten next line
       );
       createdUsers.push(u.userId);
-      const upd = await admin
-        .from("profiles").update({ phone: profilePhone }).eq("id", u.userId);
+      const upd = await admin.from("profiles").update({ phone: profilePhone }).eq("id", u.userId);
       assert(!upd.error, `profile update failed: ${upd.error?.message}`);
       const c = await signIn(u.email, u.password);
       for (const id of [ownerAppt, otherAppt]) {
-        const { data, error } = await c.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await c.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err (${label}) on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(
@@ -637,8 +751,7 @@ async function main() {
         "0599111111", // placeholder; overwritten
       );
       createdUsers.push(u.userId);
-      const upd = await admin
-        .from("profiles").update({ phone: profilePhone }).eq("id", u.userId);
+      const upd = await admin.from("profiles").update({ phone: profilePhone }).eq("id", u.userId);
       assert(!upd.error, `profile update failed: ${upd.error?.message}`);
       const c = await signIn(u.email, u.password);
       return { userId: u.userId, client: c };
@@ -652,9 +765,12 @@ async function main() {
     await test("my_audit: profile.phone with LATIN LETTERS around correct digits still matches own", async () => {
       const junk = "abc" + mixOwnerPhone + "xyz";
       const { client } = await makeMixedUser("letters", junk);
-      const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: mixApptId,
-      } as never);
+      const { data, error } = await client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: mixApptId,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `letters-wrapped digits failed to match, got ${rows.length}`);
@@ -662,11 +778,18 @@ async function main() {
 
     await test("my_audit: profile.phone with EMOJI inside digits still matches own", async () => {
       const withEmoji =
-        mixOwnerPhone.slice(0, 3) + "📞" + mixOwnerPhone.slice(3, 6) + "✨" + mixOwnerPhone.slice(6);
+        mixOwnerPhone.slice(0, 3) +
+        "📞" +
+        mixOwnerPhone.slice(3, 6) +
+        "✨" +
+        mixOwnerPhone.slice(6);
       const { client } = await makeMixedUser("emoji", withEmoji);
-      const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: mixApptId,
-      } as never);
+      const { data, error } = await client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: mixApptId,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `emoji-inside digits failed to match, got ${rows.length}`);
@@ -675,9 +798,12 @@ async function main() {
     await test("my_audit: profile.phone with ZERO-WIDTH SPACE inside digits still matches own", async () => {
       const zwsp = mixOwnerPhone.slice(0, 4) + "\u200B\u200C" + mixOwnerPhone.slice(4);
       const { client } = await makeMixedUser("zwsp", zwsp);
-      const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: mixApptId,
-      } as never);
+      const { data, error } = await client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: mixApptId,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       const rows = (data ?? []) as unknown[];
       assert(rows.length >= 1, `zwsp-inside digits failed to match, got ${rows.length}`);
@@ -691,9 +817,12 @@ async function main() {
       );
       const { client } = await makeMixedUser("arabic-indic", arabicIndic);
       for (const id of [mixApptId, ownerAppt, otherAppt]) {
-        const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await client.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(rows.length === 0, `arabic-indic digits leaked ${rows.length} rows for appt ${id}`);
@@ -705,9 +834,12 @@ async function main() {
       const bogus = "hello" + "1029384756" + "world";
       const { client } = await makeMixedUser("bogus", bogus);
       for (const id of [mixApptId, ownerAppt, otherAppt]) {
-        const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: id,
-        } as never);
+        const { data, error } = await client.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: id,
+          } as never,
+        );
         assert(!error, `err on ${id}: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         assert(rows.length === 0, `bogus mixed phone leaked ${rows.length} rows for appt ${id}`);
@@ -734,9 +866,12 @@ async function main() {
     });
 
     async function callMyLocal(client: SupabaseClient, apptId: string) {
-      const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
+      const { data, error } = await client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
+      );
       assert(!error, `err: ${error?.message}`);
       return ((data ?? []) as unknown[]).length;
     }
@@ -779,9 +914,9 @@ async function main() {
     }
 
     await test("my_audit: heterogeneous group — each user sees only their own; no-profile users see nothing", async () => {
-      const userA      = await mkUser("A",      { phone: phA });
-      const userB      = await mkUser("B",      { phone: phB });
-      const userNoRow  = await mkUser("norow",  { phone: phC, deleteRow: true });
+      const userA = await mkUser("A", { phone: phA });
+      const userB = await mkUser("B", { phone: phB });
+      const userNoRow = await mkUser("norow", { phone: phC, deleteRow: true });
       const userNullPh = await mkUser("nullph", { phone: null });
 
       const scenarios: Array<{
@@ -789,17 +924,36 @@ async function main() {
         client: SupabaseClient;
         expected: Record<string, "own" | "empty">;
       }> = [
-        { who: "userA",      client: userA.client,      expected: { [apptA]: "own",   [apptB]: "empty", [apptC]: "empty" } },
-        { who: "userB",      client: userB.client,      expected: { [apptA]: "empty", [apptB]: "own",   [apptC]: "empty" } },
-        { who: "userNoRow",  client: userNoRow.client,  expected: { [apptA]: "empty", [apptB]: "empty", [apptC]: "empty" } },
-        { who: "userNullPh", client: userNullPh.client, expected: { [apptA]: "empty", [apptB]: "empty", [apptC]: "empty" } },
+        {
+          who: "userA",
+          client: userA.client,
+          expected: { [apptA]: "own", [apptB]: "empty", [apptC]: "empty" },
+        },
+        {
+          who: "userB",
+          client: userB.client,
+          expected: { [apptA]: "empty", [apptB]: "own", [apptC]: "empty" },
+        },
+        {
+          who: "userNoRow",
+          client: userNoRow.client,
+          expected: { [apptA]: "empty", [apptB]: "empty", [apptC]: "empty" },
+        },
+        {
+          who: "userNullPh",
+          client: userNullPh.client,
+          expected: { [apptA]: "empty", [apptB]: "empty", [apptC]: "empty" },
+        },
       ];
 
       for (const s of scenarios) {
         for (const [apptId, expect] of Object.entries(s.expected)) {
-          const { data, error } = await s.client.rpc("my_reminder_preference_audit" as never, {
-            _appointment_id: apptId,
-          } as never);
+          const { data, error } = await s.client.rpc(
+            "my_reminder_preference_audit" as never,
+            {
+              _appointment_id: apptId,
+            } as never,
+          );
           assert(!error, `${s.who} err on ${apptId}: ${error?.message}`);
           const rows = (data ?? []) as unknown[];
           if (expect === "own") {
@@ -850,15 +1004,24 @@ async function main() {
       const u2 = await mkUser("shared2", { phone: sharedPh });
       const uOut = await mkUser("outsider", { phone: "0999000000", deleteRow: true });
 
-      const r1 = await u1.client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: sharedAppt,
-      } as never);
-      const r2 = await u2.client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: sharedAppt,
-      } as never);
-      const r3 = await uOut.client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: sharedAppt,
-      } as never);
+      const r1 = await u1.client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: sharedAppt,
+        } as never,
+      );
+      const r2 = await u2.client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: sharedAppt,
+        } as never,
+      );
+      const r3 = await uOut.client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: sharedAppt,
+        } as never,
+      );
       assert(!r1.error && !r2.error && !r3.error, "rpc err in shared-phone test");
       assert(((r1.data ?? []) as unknown[]).length >= 1, "shared user #1 missed shared appt");
       assert(((r2.data ?? []) as unknown[]).length >= 1, "shared user #2 missed shared appt");
@@ -889,9 +1052,12 @@ async function main() {
         ["norow→Y", noRowUser.client, apptY, "empty"],
       ];
       for (const [label, client, apptId, expect] of expectations) {
-        const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-          _appointment_id: apptId,
-        } as never);
+        const { data, error } = await client.rpc(
+          "my_reminder_preference_audit" as never,
+          {
+            _appointment_id: apptId,
+          } as never,
+        );
         assert(!error, `${label} err: ${error?.message}`);
         const rows = (data ?? []) as unknown[];
         if (expect === "own") {
@@ -902,20 +1068,16 @@ async function main() {
       }
     });
 
-
-
-
-
-
-
-
     // ── Rapid interleaved calls across a live profile.phone change ──
     // Guards against any per-session/per-user caching on the server side.
     // Assumes ownerU.phone == ownerPhone and otherU.phone == otherPhone at start.
     async function callMy(client: SupabaseClient, apptId: string) {
-      const { data, error } = await client.rpc("my_reminder_preference_audit" as never, {
-        _appointment_id: apptId,
-      } as never);
+      const { data, error } = await client.rpc(
+        "my_reminder_preference_audit" as never,
+        {
+          _appointment_id: apptId,
+        } as never,
+      );
       assert(!error, `err on ${apptId}: ${error?.message}`);
       return ((data ?? []) as unknown[]).length;
     }
@@ -959,11 +1121,11 @@ async function main() {
       await admin.from("profiles").update({ phone: otherPhone }).eq("id", ownerU.userId);
       try {
         const results = await Promise.all([
-          callMy(ownerC, otherAppt),   // gain
-          callMy(otherC, otherAppt),   // keep
-          callMy(ownerC, ownerAppt),   // lose
-          callMy(otherC, ownerAppt),   // never
-          callMy(ownerC, otherAppt),   // gain (repeat)
+          callMy(ownerC, otherAppt), // gain
+          callMy(otherC, otherAppt), // keep
+          callMy(ownerC, ownerAppt), // lose
+          callMy(otherC, ownerAppt), // never
+          callMy(ownerC, otherAppt), // gain (repeat)
         ]);
         assert(results[0] >= 1, `concurrent owner→other gain failed: ${results[0]}`);
         assert(results[1] >= 1, `concurrent other→other keep failed: ${results[1]}`);
@@ -985,13 +1147,6 @@ async function main() {
       assert((await callMy(ownerC, ownerAppt)) >= 1, "after restore: owner didn't regain own");
       assert((await callMy(ownerC, otherAppt)) === 0, "after restore: owner still saw other");
     });
-
-
-
-
-
-
-
   } finally {
     if (createdAppts.length) {
       await admin.from("appointments").delete().in("id", createdAppts);
@@ -1005,4 +1160,7 @@ async function main() {
   if (failed > 0) process.exit(1);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

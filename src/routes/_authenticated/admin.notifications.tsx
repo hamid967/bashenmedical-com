@@ -25,7 +25,10 @@ export const Route = createFileRoute("/_authenticated/admin/notifications")({
   head: () => ({
     meta: [
       { title: "مركز الإشعارات | مركز باعشن" },
-      { name: "description", content: "مركز الإشعارات الموحد: صحة النظام، فشل التكاملات وتحديثات الطلبات." },
+      {
+        name: "description",
+        content: "مركز الإشعارات الموحد: صحة النظام، فشل التكاملات وتحديثات الطلبات.",
+      },
       { property: "og:title", content: "مركز الإشعارات | مركز باعشن" },
       { property: "og:description", content: "تدفق موحد لإشعارات الإدارة مع روابط مباشرة." },
       { property: "og:url", content: "https://bashenmedical.com/admin/notifications" },
@@ -81,7 +84,13 @@ function AdminNotificationsPage() {
   });
 
   const items: AdminFeedItem[] = data?.items ?? [];
-  const counts = data?.counts ?? { total: 0, system_health: 0, integration: 0, request: 0, audit: 0 };
+  const counts = data?.counts ?? {
+    total: 0,
+    system_health: 0,
+    integration: 0,
+    request: 0,
+    audit: 0,
+  };
 
   const tabs: Array<{ id: TabKey; label: string; count: number }> = [
     { id: "all", label: "الكل", count: counts.total },

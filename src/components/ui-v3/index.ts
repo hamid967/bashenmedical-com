@@ -78,12 +78,7 @@ export {
   SelectGroup,
   SelectLabel,
 } from "@/components/ui/select";
-export {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+export { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export {
   Card,
   CardContent,
@@ -111,14 +106,5 @@ export {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-export {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-export {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+export { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";

@@ -61,9 +61,7 @@ function AppointmentsPage() {
       (a) => a.appointment_date >= now && !["cancelled", "no_show", "completed"].includes(a.status),
     ),
     pending: items.filter((a) => ["pending", "waitlist"].includes(a.status)),
-    previous: items.filter(
-      (a) => a.appointment_date < now && a.status !== "cancelled",
-    ),
+    previous: items.filter((a) => a.appointment_date < now && a.status !== "cancelled"),
     cancelled: items.filter((a) => a.status === "cancelled"),
   };
 

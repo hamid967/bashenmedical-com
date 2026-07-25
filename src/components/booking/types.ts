@@ -79,7 +79,6 @@ export const INITIAL: State = {
   verifiedPhone: null,
 };
 
-
 export type Action =
   | { t: "set"; p: Partial<State> }
   | { t: "setPatient"; p: Partial<State["patient"]> }
@@ -121,7 +120,7 @@ export const DRAFT_EXPIRY_WARN_MS = 30 * 60 * 1000;
 
 export type DraftEnvelope = {
   version: number;
-  savedAt: number;   // epoch ms — when the draft was written
+  savedAt: number; // epoch ms — when the draft was written
   expiresAt: number; // epoch ms — hard cutoff; ignored after this
   state: State;
 };
@@ -198,12 +197,20 @@ export function loadDraft(initial: Partial<State>): State {
       // Best-effort: peek at legacy `_savedAt` for observability, then drop.
       const legacy = parsed as LegacyFlatDraft | null;
       void legacy?._v;
-      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
       return { ...INITIAL, ...initial };
     }
 
     if (parsed.version !== DRAFT_VERSION || now >= parsed.expiresAt) {
-      try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+      } catch {
+        /* ignore */
+      }
       return { ...INITIAL, ...initial };
     }
 
@@ -221,12 +228,10 @@ export function loadDraft(initial: Partial<State>): State {
       patient: { ...INITIAL.patient, ...(clean.patient ?? {}) },
       ...initial,
     };
-
   } catch {
     return { ...INITIAL, ...initial };
   }
 }
-
 
 /* ---------------- Availability response ---------------- */
 export type AvailResp = { ok: boolean; times: string[]; booked: string[] };
@@ -363,10 +368,7 @@ export const insuranceSchema = z
   .object({
     payerType: z.enum(["self", "insurance"], { message: "insurance.errors.payerRequired" }),
     insuranceProviderId: z.string().nullable(),
-    insuranceEstimate: z
-      .object({ eligible: z.boolean() })
-      .passthrough()
-      .nullable(),
+    insuranceEstimate: z.object({ eligible: z.boolean() }).passthrough().nullable(),
   })
   .superRefine((v, ctx) => {
     if (v.payerType === "self") return;

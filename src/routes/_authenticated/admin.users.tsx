@@ -143,7 +143,10 @@ export function AdminUsersRoute() {
         role="search"
       >
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Search
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <input
             type="search"
             value={qInput}

@@ -18,10 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  getClientErrorFingerprints,
-  listClientErrors,
-} from "@/lib/admin/observability.functions";
+import { getClientErrorFingerprints, listClientErrors } from "@/lib/admin/observability.functions";
 
 const WINDOWS = [
   { label: "1h", value: 1 },
@@ -104,16 +101,12 @@ export function ErrorsPanel() {
                   <TableRow
                     key={g.fingerprint}
                     className={`cursor-pointer ${selected === g.fingerprint ? "bg-muted" : ""}`}
-                    onClick={() =>
-                      setSelected(selected === g.fingerprint ? null : g.fingerprint)
-                    }
+                    onClick={() => setSelected(selected === g.fingerprint ? null : g.fingerprint)}
                   >
                     <TableCell className="max-w-[220px] truncate font-mono text-xs">
                       {g.message}
                     </TableCell>
-                    <TableCell className="max-w-[140px] truncate text-xs">
-                      {g.route}
-                    </TableCell>
+                    <TableCell className="max-w-[140px] truncate text-xs">{g.route}</TableCell>
                     <TableCell className="text-end">
                       <Badge variant="secondary">{g.count}</Badge>
                     </TableCell>
@@ -121,7 +114,10 @@ export function ErrorsPanel() {
                 ))}
                 {!groupsQ.isLoading && (groupsQ.data?.groups ?? []).length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="py-8 text-center text-xs text-muted-foreground">
+                    <TableCell
+                      colSpan={3}
+                      className="py-8 text-center text-xs text-muted-foreground"
+                    >
                       لا توجد أخطاء ضمن هذه النافذة.
                     </TableCell>
                   </TableRow>
@@ -162,7 +158,10 @@ export function ErrorsPanel() {
                 ))}
                 {(detailsQ.data?.rows ?? []).length === 0 && (
                   <TableRow>
-                    <TableCell colSpan={3} className="py-8 text-center text-xs text-muted-foreground">
+                    <TableCell
+                      colSpan={3}
+                      className="py-8 text-center text-xs text-muted-foreground"
+                    >
                       لا توجد تفاصيل.
                     </TableCell>
                   </TableRow>

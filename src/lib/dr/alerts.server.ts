@@ -63,9 +63,7 @@ export async function dispatchDrillAlert(
 
 export function buildAlertText(r: DrillReport): string {
   const breachLine = r.budgets_breached.length
-    ? r.budgets_breached
-        .map((b) => `${b.kind}=${b.actual}>${b.budget}`)
-        .join(", ")
+    ? r.budgets_breached.map((b) => `${b.kind}=${b.actual}>${b.budget}`).join(", ")
     : "no-breaches";
   return `DR drill ${r.drill_id} ${r.status.toUpperCase()} — RPO=${r.measurements.rpo_seconds}s RTO=${r.measurements.rto_seconds}s (${breachLine})`;
 }

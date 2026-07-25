@@ -39,7 +39,8 @@ export const Route = createFileRoute("/api/ai/action")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "ai_chat" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "ai_chat" });
+        if (_rl) return _rl;
         const auth = await readAuthUser(request);
         if (!auth) return json({ error: "unauthenticated" }, 401);
 
@@ -75,7 +76,6 @@ export const Route = createFileRoute("/api/ai/action")({
         if (!parsed.success) {
           return json({ error: "invalid_params", details: parsed.error.flatten() }, 400);
         }
-
 
         const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
           auth: { persistSession: false, autoRefreshToken: false },

@@ -150,7 +150,6 @@ function AdminIntegrationsRoute() {
         <h2 className="text-sm font-medium text-muted-foreground">حالة التكاملات</h2>
       </div>
 
-
       <div className="rounded-lg border bg-card overflow-hidden">
         {query.isLoading ? (
           <SkeletonRows />

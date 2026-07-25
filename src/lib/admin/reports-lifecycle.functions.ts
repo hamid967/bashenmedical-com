@@ -15,11 +15,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { assertHasAnyRole } from "./_guard";
 
-async function requirePermission(
-  supabase: any,
-  userId: string,
-  key: string,
-): Promise<void> {
+async function requirePermission(supabase: any, userId: string, key: string): Promise<void> {
   const { data, error } = await supabase.rpc("has_permission", {
     _user_id: userId,
     _permission_key: key,
@@ -28,10 +24,7 @@ async function requirePermission(
   if (data !== true) throw new Error("ليست لديك صلاحية تنفيذ هذه العملية.");
 }
 
-async function nextVersionNumber(
-  supabase: any,
-  reportId: string,
-): Promise<number> {
+async function nextVersionNumber(supabase: any, reportId: string): Promise<number> {
   const { data, error } = await supabase
     .from("report_versions")
     .select("version_number")
@@ -77,11 +70,7 @@ export const saveMedicalReportDraft = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "reports.medical.publish",
-    );
+    await requirePermission(context.supabase, context.userId, "reports.medical.publish");
     const patch: Record<string, any> = { updated_at: new Date().toISOString() };
     if (data.title_ar !== undefined) patch.title_ar = data.title_ar;
     if (data.title_en !== undefined) patch.title_en = data.title_en;
@@ -122,11 +111,7 @@ export const publishMedicalReport = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "reports.medical.publish",
-    );
+    await requirePermission(context.supabase, context.userId, "reports.medical.publish");
 
     const { data: before, error: e0 } = await context.supabase
       .from("medical_reports")
@@ -136,8 +121,7 @@ export const publishMedicalReport = createServerFn({ method: "POST" })
     if (e0) throw new Error(e0.message);
     if (!before) throw new Error("التقرير غير موجود.");
     if (before.status === "revoked") throw new Error("لا يمكن نشر تقرير مسحوب.");
-    if (before.status === "published")
-      throw new Error("التقرير منشور بالفعل.");
+    if (before.status === "published") throw new Error("التقرير منشور بالفعل.");
 
     const patch: Record<string, any> = {
       status: "published",
@@ -177,11 +161,7 @@ export const revokeMedicalReport = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "reports.medical.revoke",
-    );
+    await requirePermission(context.supabase, context.userId, "reports.medical.revoke");
 
     const { data: before, error: e0 } = await context.supabase
       .from("medical_reports")
@@ -218,11 +198,7 @@ export const submitMedicalReportForReview = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "reports.medical.publish",
-    );
+    await requirePermission(context.supabase, context.userId, "reports.medical.publish");
     const { data: before } = await context.supabase
       .from("medical_reports")
       .select("status")
@@ -251,11 +227,7 @@ export const signMedicalReportUrl = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "reports.medical.view",
-    );
+    await requirePermission(context.supabase, context.userId, "reports.medical.view");
     const { data: row, error } = await context.supabase
       .from("medical_reports")
       .select("id, file_path, status")
@@ -282,11 +254,7 @@ export const listMedicalReportVersions = createServerFn({ method: "GET" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "reports.medical.view",
-    );
+    await requirePermission(context.supabase, context.userId, "reports.medical.view");
     const { data: rows, error } = await context.supabase
       .from("report_versions")
       .select("id, version_number, summary, file_path, changed_by, changed_at")

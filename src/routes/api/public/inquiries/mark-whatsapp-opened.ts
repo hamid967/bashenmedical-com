@@ -28,7 +28,8 @@ export const Route = createFileRoute("/api/public/inquiries/mark-whatsapp-opened
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "inquiries" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "inquiries" });
+        if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();

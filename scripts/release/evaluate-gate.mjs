@@ -76,7 +76,10 @@ const inputs = [
 
 const evaluation = evaluateGate(inputs);
 
-const outPath = resolve(process.cwd(), process.env.RELEASE_STATUS_PATH || "public/release-status.json");
+const outPath = resolve(
+  process.cwd(),
+  process.env.RELEASE_STATUS_PATH || "public/release-status.json",
+);
 mkdirSync(dirname(outPath), { recursive: true });
 writeFileSync(
   outPath,
@@ -109,6 +112,8 @@ if (process.env.GITHUB_OUTPUT) {
 }
 
 if (evaluation.verdict === "NO_GO") {
-  console.error(`::error::Release gate NO_GO — blocking: ${evaluation.blockingFailures.join(", ") || "(stale)"}`);
+  console.error(
+    `::error::Release gate NO_GO — blocking: ${evaluation.blockingFailures.join(", ") || "(stale)"}`,
+  );
   process.exit(2);
 }

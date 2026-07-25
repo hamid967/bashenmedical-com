@@ -127,9 +127,7 @@ describe("payment failure — idempotency + log integrity", () => {
     // First call resolves and records; subsequent parallel calls arrive
     // AFTER the terminal row is written and replay the recorded result.
     const first = await ledger.execute(key, run);
-    const results = await Promise.all(
-      Array.from({ length: 25 }, () => ledger.execute(key, run)),
-    );
+    const results = await Promise.all(Array.from({ length: 25 }, () => ledger.execute(key, run)));
 
     expect(sideEffectCount).toBe(1);
     expect(results.every((r) => r.receipt === first.receipt)).toBe(true);

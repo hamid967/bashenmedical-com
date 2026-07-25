@@ -12,14 +12,15 @@ import {
   X,
   Pencil,
 } from "lucide-react";
-import { getAdminArticle, updateAdminArticle, listAdminArticles } from "@/lib/admin/articles.functions";
+import {
+  getAdminArticle,
+  updateAdminArticle,
+  listAdminArticles,
+} from "@/lib/admin/articles.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/articles/$id")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل المقال | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل المقال | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error, reset }) => (
     <div className="container-app py-16 text-center">
@@ -225,7 +226,10 @@ function ArticleDetail() {
       </header>
 
       {mutation.isError && (
-        <div role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+        <div
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive"
+        >
           <AlertTriangle className="inline h-4 w-4 me-1" />
           {(mutation.error as Error)?.message ?? "تعذّر الحفظ"}
         </div>
@@ -234,7 +238,11 @@ function ArticleDetail() {
       {!editing ? (
         <>
           <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Info label="الحالة" value={article.is_published ? "منشور" : "مسودّة"} tone={article.is_published ? "success" : undefined} />
+            <Info
+              label="الحالة"
+              value={article.is_published ? "منشور" : "مسودّة"}
+              tone={article.is_published ? "success" : undefined}
+            />
             <Info label="دقائق القراءة" value={String(article.reading_minutes)} />
             <Info label="التصنيف" value={article.health_categories?.name_ar ?? "—"} />
             <Info label="الكاتب" value={article.author_name ?? "—"} />
@@ -298,7 +306,9 @@ function ArticleDetail() {
               >
                 <option value="">بدون تصنيف</option>
                 {cats.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name_ar}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name_ar}
+                  </option>
                 ))}
               </select>
             </Field>

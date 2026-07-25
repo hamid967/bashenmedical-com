@@ -47,9 +47,7 @@ export const listNoShowPredictions = createServerFn({ method: "GET" })
       )
       .gte("risk", data.minRisk);
     if (data.organizationId) q = q.eq("organization_id", data.organizationId);
-    const { data: rows, error } = await q
-      .order("risk", { ascending: false })
-      .limit(data.limit);
+    const { data: rows, error } = await q.order("risk", { ascending: false }).limit(data.limit);
     if (error) throw new Error(error.message);
     return (rows ?? []).map((r: any) => ({
       appointment_id: r.appointment_id,
@@ -83,10 +81,7 @@ export const listAiRecommendations = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    let q = context.supabase
-      .from("ai_recommendations")
-      .select("*")
-      .eq("status", data.status);
+    let q = context.supabase.from("ai_recommendations").select("*").eq("status", data.status);
     if (data.organizationId) q = q.eq("organization_id", data.organizationId);
     const { data: rows, error } = await q
       .order("generated_at", { ascending: false })
@@ -98,9 +93,7 @@ export const listAiRecommendations = createServerFn({ method: "GET" })
 export const decideAiRecommendation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((i: { id: string; decision: "accepted" | "dismissed" }) =>
-    z
-      .object({ id: z.string().uuid(), decision: z.enum(["accepted", "dismissed"]) })
-      .parse(i),
+    z.object({ id: z.string().uuid(), decision: z.enum(["accepted", "dismissed"]) }).parse(i),
   )
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
@@ -145,12 +138,7 @@ export const listClassifiedComplaints = createServerFn({ method: "GET" })
 export const overrideComplaintClassification = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator(
-    (i: {
-      id: string;
-      ai_category?: string;
-      ai_severity?: string;
-      ai_suggested_owner?: string;
-    }) =>
+    (i: { id: string; ai_category?: string; ai_severity?: string; ai_suggested_owner?: string }) =>
       z
         .object({
           id: z.string().uuid(),

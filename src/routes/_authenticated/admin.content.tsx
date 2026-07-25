@@ -23,27 +23,9 @@ import { Input } from "@/components/ui-v3";
 import { Textarea } from "@/components/ui-v3";
 import { Label } from "@/components/ui-v3";
 import { Switch } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui-v3";
 import { toast } from "sonner";
 import { Ban, PlayCircle, Plus, BarChart3 } from "lucide-react";
 
@@ -58,14 +40,7 @@ const TYPES = [
   "suggested_service",
 ] as const;
 
-const STATUSES = [
-  "draft",
-  "review",
-  "approved",
-  "scheduled",
-  "published",
-  "archived",
-] as const;
+const STATUSES = ["draft", "review", "approved", "scheduled", "published", "archived"] as const;
 
 type Row = {
   id: string;
@@ -122,8 +97,7 @@ export function ContentAdminPage() {
   });
 
   const disableMut = useMutation({
-    mutationFn: (args: { id: string; disabled: boolean }) =>
-      toggleContentDisabled({ data: args }),
+    mutationFn: (args: { id: string; disabled: boolean }) => toggleContentDisabled({ data: args }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "content-items"] });
       toast.success("تم التحديث");
@@ -161,20 +135,28 @@ export function ContentAdminPage() {
           <CardTitle className="text-base">العناصر</CardTitle>
           <div className="flex items-center gap-2">
             <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-40"><SelectValue placeholder="النوع" /></SelectTrigger>
+              <SelectTrigger className="w-40">
+                <SelectValue placeholder="النوع" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">كل الأنواع</SelectItem>
                 {TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-36"><SelectValue placeholder="الحالة" /></SelectTrigger>
+              <SelectTrigger className="w-36">
+                <SelectValue placeholder="الحالة" />
+              </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">كل الحالات</SelectItem>
                 {STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>{s}</SelectItem>
+                  <SelectItem key={s} value={s}>
+                    {s}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -205,12 +187,18 @@ export function ContentAdminPage() {
                       <div className="flex items-center gap-2">
                         <span className="truncate">{r.title_ar}</span>
                         {r.is_promotional && (
-                          <Badge variant="secondary" className="text-[10px]">إعلان</Badge>
+                          <Badge variant="secondary" className="text-[10px]">
+                            إعلان
+                          </Badge>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell><Badge variant="outline">{r.type}</Badge></TableCell>
-                    <TableCell><Badge>{r.status}</Badge></TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{r.type}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <Badge>{r.status}</Badge>
+                    </TableCell>
                     <TableCell>{r.priority}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">
                       {formatRange(r.starts_at, r.ends_at)}
@@ -238,16 +226,16 @@ export function ContentAdminPage() {
                           </SelectTrigger>
                           <SelectContent>
                             {STATUSES.map((s) => (
-                              <SelectItem key={s} value={s}>{s}</SelectItem>
+                              <SelectItem key={s} value={s}>
+                                {s}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                         <Button
                           size="sm"
                           variant={r.disabled_at ? "outline" : "destructive"}
-                          onClick={() =>
-                            disableMut.mutate({ id: r.id, disabled: !r.disabled_at })
-                          }
+                          onClick={() => disableMut.mutate({ id: r.id, disabled: !r.disabled_at })}
                           title={r.disabled_at ? "إعادة تفعيل" : "تعطيل فورًا"}
                         >
                           {r.disabled_at ? (
@@ -375,9 +363,15 @@ function EditorSheet({
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="النوع">
               <Select value={form.type} onValueChange={(v) => set("type", v as Row["type"])}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  {TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                  {TYPES.map((t) => (
+                    <SelectItem key={t} value={t}>
+                      {t}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </Field>
@@ -400,34 +394,61 @@ function EditorSheet({
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="مقتطف (عربي)">
-              <Textarea value={form.excerpt_ar ?? ""} onChange={(e) => set("excerpt_ar", e.target.value)} />
+              <Textarea
+                value={form.excerpt_ar ?? ""}
+                onChange={(e) => set("excerpt_ar", e.target.value)}
+              />
             </Field>
             <Field label="Excerpt (EN)">
-              <Textarea value={form.excerpt_en ?? ""} onChange={(e) => set("excerpt_en", e.target.value)} />
+              <Textarea
+                value={form.excerpt_en ?? ""}
+                onChange={(e) => set("excerpt_en", e.target.value)}
+              />
             </Field>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="النص الكامل (عربي)">
-              <Textarea rows={4} value={form.body_ar ?? ""} onChange={(e) => set("body_ar", e.target.value)} />
+              <Textarea
+                rows={4}
+                value={form.body_ar ?? ""}
+                onChange={(e) => set("body_ar", e.target.value)}
+              />
             </Field>
             <Field label="Body (EN)">
-              <Textarea rows={4} value={form.body_en ?? ""} onChange={(e) => set("body_en", e.target.value)} />
+              <Textarea
+                rows={4}
+                value={form.body_en ?? ""}
+                onChange={(e) => set("body_en", e.target.value)}
+              />
             </Field>
           </div>
 
           <Field label="رابط الصورة">
-            <Input value={form.image_url ?? ""} onChange={(e) => set("image_url", e.target.value)} />
+            <Input
+              value={form.image_url ?? ""}
+              onChange={(e) => set("image_url", e.target.value)}
+            />
           </Field>
 
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="نص الزر (عربي)">
-              <Input value={form.cta_label_ar ?? ""} onChange={(e) => set("cta_label_ar", e.target.value)} />
+              <Input
+                value={form.cta_label_ar ?? ""}
+                onChange={(e) => set("cta_label_ar", e.target.value)}
+              />
             </Field>
             <Field label="Button (EN)">
-              <Input value={form.cta_label_en ?? ""} onChange={(e) => set("cta_label_en", e.target.value)} />
+              <Input
+                value={form.cta_label_en ?? ""}
+                onChange={(e) => set("cta_label_en", e.target.value)}
+              />
             </Field>
             <Field label="الرابط">
-              <Input value={form.cta_href ?? ""} onChange={(e) => set("cta_href", e.target.value)} placeholder="/services" />
+              <Input
+                value={form.cta_href ?? ""}
+                onChange={(e) => set("cta_href", e.target.value)}
+                placeholder="/services"
+              />
             </Field>
           </div>
 
@@ -457,16 +478,10 @@ function EditorSheet({
 
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label="فرع مستهدف (اختياري)">
-              <BranchSelect
-                value={form.branch_id}
-                onChange={(v) => set("branch_id", v)}
-              />
+              <BranchSelect value={form.branch_id} onChange={(v) => set("branch_id", v)} />
             </Field>
             <Field label="تخصص مستهدف (اختياري)">
-              <SpecialtySelect
-                value={form.specialty_id}
-                onChange={(v) => set("specialty_id", v)}
-              />
+              <SpecialtySelect value={form.specialty_id} onChange={(v) => set("specialty_id", v)} />
             </Field>
           </div>
 
@@ -487,7 +502,9 @@ function EditorSheet({
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose}>إلغاء</Button>
+            <Button variant="outline" onClick={onClose}>
+              إلغاء
+            </Button>
             <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>
               حفظ
             </Button>
@@ -583,11 +600,15 @@ function BranchSelect({
       value={value ?? "__none__"}
       onValueChange={(v) => onChange(v === "__none__" ? null : v)}
     >
-      <SelectTrigger><SelectValue placeholder="بدون تخصيص" /></SelectTrigger>
+      <SelectTrigger>
+        <SelectValue placeholder="بدون تخصيص" />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="__none__">— بدون —</SelectItem>
         {(data ?? []).map((b) => (
-          <SelectItem key={b.id} value={b.id}>{b.name_ar}</SelectItem>
+          <SelectItem key={b.id} value={b.id}>
+            {b.name_ar}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>
@@ -611,11 +632,15 @@ function SpecialtySelect({
       value={value ?? "__none__"}
       onValueChange={(v) => onChange(v === "__none__" ? null : v)}
     >
-      <SelectTrigger><SelectValue placeholder="بدون تخصيص" /></SelectTrigger>
+      <SelectTrigger>
+        <SelectValue placeholder="بدون تخصيص" />
+      </SelectTrigger>
       <SelectContent>
         <SelectItem value="__none__">— بدون —</SelectItem>
         {((data ?? []) as Array<{ id: string; name_ar: string }>).map((s) => (
-          <SelectItem key={s.id} value={s.id}>{s.name_ar}</SelectItem>
+          <SelectItem key={s.id} value={s.id}>
+            {s.name_ar}
+          </SelectItem>
         ))}
       </SelectContent>
     </Select>
@@ -647,8 +672,7 @@ function AudienceEditor({
   const toggle = (arr: string[], id: string): string[] =>
     arr.includes(id) ? arr.filter((x) => x !== id) : [...arr, id];
 
-  const setLangs = (l: string[]) =>
-    onChange({ ...value, languages: l.length ? l : undefined });
+  const setLangs = (l: string[]) => onChange({ ...value, languages: l.length ? l : undefined });
   const setBranches = (b: string[]) =>
     onChange({ ...value, preferredBranch: b.length ? b : undefined });
   const setSpecialties = (s: string[]) =>
@@ -715,4 +739,3 @@ function AudienceEditor({
     </div>
   );
 }
-

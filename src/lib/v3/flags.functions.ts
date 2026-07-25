@@ -159,12 +159,14 @@ export const getV3Rollout = createServerFn({ method: "GET" })
       .in("key", keys);
     if (error) throw new Error(error.message);
     const map = new Map(
-      ((data ?? []) as Array<{
-        key: string;
-        enabled: boolean;
-        notes: string | null;
-        updated_at: string;
-      }>).map((r) => [r.key, r]),
+      (
+        (data ?? []) as Array<{
+          key: string;
+          enabled: boolean;
+          notes: string | null;
+          updated_at: string;
+        }>
+      ).map((r) => [r.key, r]),
     );
 
     const flags: V3FlagState[] = V3_FLAGS.map((def) => {
@@ -219,18 +221,16 @@ export const setV3Flag = createServerFn({ method: "POST" })
     if (!V3_FLAGS.some((f) => f.key === data.key)) {
       throw new Error("مفتاح غير معروف");
     }
-    const { error } = await context.supabase
-      .from("ai_feature_flags")
-      .upsert(
-        {
-          key: data.key,
-          enabled: data.enabled,
-          notes: data.notes ?? null,
-          updated_by: context.userId,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "key" },
-      );
+    const { error } = await context.supabase.from("ai_feature_flags").upsert(
+      {
+        key: data.key,
+        enabled: data.enabled,
+        notes: data.notes ?? null,
+        updated_by: context.userId,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "key" },
+    );
     if (error) throw new Error(error.message);
     // Bust in-instance caches so the toggle takes effect on the next request
     // without waiting for TTL (other workers pick it up within their own TTL).

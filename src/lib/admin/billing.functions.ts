@@ -85,11 +85,7 @@ export const getAdminInvoice = createServerFn({ method: "GET" })
 // ---------------------------------------------------------------
 import { assertHasAnyRole } from "./_guard";
 
-async function requirePermission(
-  supabase: any,
-  userId: string,
-  key: string,
-): Promise<void> {
+async function requirePermission(supabase: any, userId: string, key: string): Promise<void> {
   const { data, error } = await supabase.rpc("has_permission", {
     _user_id: userId,
     _permission_key: key,
@@ -171,8 +167,7 @@ export const recordPayment = createServerFn({ method: "POST" })
     const paid = (sums ?? [])
       .filter((p: any) => p.status === "succeeded")
       .reduce((a: number, b: any) => a + Number(b.amount), 0);
-    const nextStatus =
-      paid >= Number(inv.total) ? "paid" : paid > 0 ? "partially_paid" : "pending";
+    const nextStatus = paid >= Number(inv.total) ? "paid" : paid > 0 ? "partially_paid" : "pending";
     await context.supabase
       .from("invoices")
       .update({
@@ -206,7 +201,9 @@ export const voidInvoice = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!inv) throw new Error("الفاتورة غير موجودة.");
     if (inv.status === "paid" || inv.status === "partially_paid")
-      throw new Error("لا يمكن إلغاء فاتورة مدفوعة (كليًا أو جزئيًا) — أنشئ استرداد بدلاً من الإلغاء.");
+      throw new Error(
+        "لا يمكن إلغاء فاتورة مدفوعة (كليًا أو جزئيًا) — أنشئ استرداد بدلاً من الإلغاء.",
+      );
     if (inv.status === "cancelled") throw new Error("الفاتورة ملغاة مسبقاً.");
 
     const { error } = await context.supabase
@@ -239,8 +236,7 @@ export const requestRefund = createServerFn({ method: "POST" })
       .eq("id", data.payment_id)
       .maybeSingle();
     if (!pay) throw new Error("الدفعة غير موجودة.");
-    if (pay.status !== "succeeded")
-      throw new Error("يمكن استرداد الدفعات الناجحة فقط.");
+    if (pay.status !== "succeeded") throw new Error("يمكن استرداد الدفعات الناجحة فقط.");
     if (Number(data.amount) > Number(pay.amount))
       throw new Error("قيمة الاسترداد تتجاوز قيمة الدفعة.");
 

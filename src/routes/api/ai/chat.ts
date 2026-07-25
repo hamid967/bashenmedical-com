@@ -180,7 +180,8 @@ export const Route = createFileRoute("/api/ai/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "ai_chat" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "ai_chat" });
+        if (_rl) return _rl;
         // Master kill switch
         const enabled = await getFeatureFlag("ai.assistant.enabled");
         if (!enabled) return new Response("assistant_disabled", { status: 503 });
@@ -259,7 +260,6 @@ export const Route = createFileRoute("/api/ai/chat")({
             scope === "staff"
               ? await loadStaffSnapshot(auth.userId, auth.token, staffRoles)
               : await loadPatientSnapshot(auth.userId, auth.token);
-
         }
 
         // Mask sensitive tokens in each user message before sending upstream
@@ -306,8 +306,6 @@ export const Route = createFileRoute("/api/ai/chat")({
               ? `النطاق الحالي: staff. الأدوار: ${staffRoles.join(", ") || "unknown"}. اللغة: ${lang}. ${staffMutationsOn ? "الأدوات التعديلية مفعّلة بتأكيد صريح لكل خطوة." : "قراءة فقط — ممنوع كتلة action."}`
               : `النطاق الحالي: ${scope}. اللغة: ${lang}. لا تُنفّذ أي إجراء تعديلي؛ اقترح فقط.`,
         });
-
-
 
         const resumePartial =
           typeof body.resume_partial === "string" ? body.resume_partial.trim() : "";

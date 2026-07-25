@@ -52,9 +52,7 @@ export const listAdminSpecialties = createServerFn({ method: "GET" })
     if (data.status === "inactive") q = q.eq("is_active", false);
     if (data.q) {
       const like = `%${data.q.replace(/[%_]/g, "\\$&")}%`;
-      q = q.or(
-        `name_ar.ilike.${like},name_en.ilike.${like},slug.ilike.${like}`,
-      );
+      q = q.or(`name_ar.ilike.${like},name_en.ilike.${like},slug.ilike.${like}`);
     }
 
     const { data: rows, error } = await q;

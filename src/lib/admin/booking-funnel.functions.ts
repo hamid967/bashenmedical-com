@@ -55,10 +55,7 @@ const Input = z.object({
   limit: z.number().int().min(500).max(20_000).default(10_000),
 });
 
-function classifySource(row: {
-  is_demo: boolean | null;
-  patient_id: string | null;
-}): FunnelSource {
+function classifySource(row: { is_demo: boolean | null; patient_id: string | null }): FunnelSource {
   if (row.is_demo) return "demo";
   if (row.patient_id) return "registered";
   return "guest";
@@ -109,22 +106,22 @@ export const getBookingFunnel = createServerFn({ method: "GET" })
     // Lookup lists (branches + doctors) for the filter dropdowns.
     const [branchesRes, doctorsRes] = await Promise.all([
       context.supabase.from("branches").select("id, name_ar, name_en").order("name_ar"),
-      context.supabase
-        .from("doctors")
-        .select("id, name_ar, name_en")
-        .order("name_ar")
-        .limit(500),
+      context.supabase.from("doctors").select("id, name_ar, name_en").order("name_ar").limit(500),
     ]);
-    const branches = ((branchesRes.data ?? []) as Array<{
-      id: string;
-      name_ar: string | null;
-      name_en: string | null;
-    }>).map((b) => ({ id: b.id, name: b.name_ar || b.name_en || b.id.slice(0, 8) }));
-    const doctors = ((doctorsRes.data ?? []) as Array<{
-      id: string;
-      name_ar: string | null;
-      name_en: string | null;
-    }>).map((d) => ({ id: d.id, name: d.name_ar || d.name_en || d.id.slice(0, 8) }));
+    const branches = (
+      (branchesRes.data ?? []) as Array<{
+        id: string;
+        name_ar: string | null;
+        name_en: string | null;
+      }>
+    ).map((b) => ({ id: b.id, name: b.name_ar || b.name_en || b.id.slice(0, 8) }));
+    const doctors = (
+      (doctorsRes.data ?? []) as Array<{
+        id: string;
+        name_ar: string | null;
+        name_en: string | null;
+      }>
+    ).map((d) => ({ id: d.id, name: d.name_ar || d.name_en || d.id.slice(0, 8) }));
 
     const branchName = new Map(branches.map((b) => [b.id, b.name]));
     const doctorName = new Map(doctors.map((d) => [d.id, d.name]));
@@ -161,8 +158,7 @@ export const getBookingFunnel = createServerFn({ method: "GET" })
         });
     }
 
-    const confirmed =
-      (totalsByStatus.confirmed ?? 0) + (totalsByStatus.completed ?? 0);
+    const confirmed = (totalsByStatus.confirmed ?? 0) + (totalsByStatus.completed ?? 0);
 
     return {
       windowDays: data.windowDays,
@@ -173,14 +169,14 @@ export const getBookingFunnel = createServerFn({ method: "GET" })
       byBranch: Array.from(byBranch.entries())
         .map(([id, count]) => ({
           branch_id: id,
-          name: id ? branchName.get(id) ?? id.slice(0, 8) : "— بدون فرع",
+          name: id ? (branchName.get(id) ?? id.slice(0, 8)) : "— بدون فرع",
           count,
         }))
         .sort((a, b) => b.count - a.count),
       byDoctor: Array.from(byDoctor.entries())
         .map(([id, count]) => ({
           doctor_id: id,
-          name: id ? doctorName.get(id) ?? id.slice(0, 8) : "— بدون طبيب",
+          name: id ? (doctorName.get(id) ?? id.slice(0, 8)) : "— بدون طبيب",
           count,
         }))
         .sort((a, b) => b.count - a.count)

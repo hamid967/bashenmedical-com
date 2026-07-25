@@ -56,7 +56,9 @@ function CmsListPage() {
   return (
     <div className="space-y-4 p-4" dir="rtl">
       <div className="flex items-center gap-3">
-        <Link to="/admin/cms" className="text-sm underline">← اللوحة</Link>
+        <Link to="/admin/cms" className="text-sm underline">
+          ← اللوحة
+        </Link>
         <h1 className="text-xl font-bold">{def.label}</h1>
         {def.singleton && <Badge variant="secondary">مفرد</Badge>}
       </div>
@@ -119,16 +121,26 @@ function CmsListPage() {
           </thead>
           <tbody>
             {(data ?? []).length === 0 && (
-              <tr><td className="p-3 text-muted-foreground" colSpan={5}>لا توجد عناصر.</td></tr>
+              <tr>
+                <td className="p-3 text-muted-foreground" colSpan={5}>
+                  لا توجد عناصر.
+                </td>
+              </tr>
             )}
             {(data ?? []).map((r: any) => (
               <tr key={r.id} className="border-t hover:bg-accent/30">
                 <td className="p-2">
-                  <Link to="/admin/cms/$kind/$id" params={{ kind, id: r.id }} className="hover:underline">
+                  <Link
+                    to="/admin/cms/$kind/$id"
+                    params={{ kind, id: r.id }}
+                    className="hover:underline"
+                  >
                     {r.title ?? "(بدون عنوان)"}
                   </Link>
                 </td>
-                <td className="p-2"><Badge variant="outline">{r.status}</Badge></td>
+                <td className="p-2">
+                  <Badge variant="outline">{r.status}</Badge>
+                </td>
                 <td className="p-2">
                   <CompletenessPill pct={r.locale_completeness?.ar ?? 0} />
                 </td>
@@ -149,8 +161,10 @@ function CmsListPage() {
 
 function CompletenessPill({ pct }: { pct: number }) {
   const color =
-    pct >= 100 ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
-    : pct > 0 ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
-    : "bg-red-500/15 text-red-700 dark:text-red-300";
+    pct >= 100
+      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+      : pct > 0
+        ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+        : "bg-red-500/15 text-red-700 dark:text-red-300";
   return <span className={`inline-block text-[11px] rounded px-2 py-0.5 ${color}`}>{pct}%</span>;
 }

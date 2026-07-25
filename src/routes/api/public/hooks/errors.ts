@@ -33,8 +33,7 @@ const CORS_HEADERS = {
 export const Route = createFileRoute("/api/public/hooks/errors")({
   server: {
     handlers: {
-      OPTIONS: async () =>
-        new Response(null, { status: 204, headers: CORS_HEADERS }),
+      OPTIONS: async () => new Response(null, { status: 204, headers: CORS_HEADERS }),
       POST: async ({ request }) => {
         const limited = await applyRateLimit(request, { category: "reads" });
         if (limited) {

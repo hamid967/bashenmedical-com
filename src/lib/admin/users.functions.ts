@@ -57,14 +57,12 @@ export const listAdminUsers = createServerFn({ method: "GET" })
     if (data.branch_id) q = q.eq("default_branch_id", data.branch_id);
     if (data.q) {
       const like = `%${data.q.replace(/[%_]/g, "\\$&")}%`;
-      q = q.or(
-        `full_name.ilike.${like},phone.ilike.${like},verified_phone.ilike.${like}`,
-      );
+      q = q.or(`full_name.ilike.${like},phone.ilike.${like},verified_phone.ilike.${like}`);
     }
 
     const { data: rowsRaw, error, count } = await q;
     if (error) throw new Error(error.message);
-    const rows = ((rowsRaw ?? []) as unknown) as Array<Record<string, unknown> & { id: string }>;
+    const rows = (rowsRaw ?? []) as unknown as Array<Record<string, unknown> & { id: string }>;
 
     const ids = rows.map((r) => r.id);
     let rolesByUser: Record<string, string[]> = {};

@@ -12,8 +12,7 @@
  */
 import type { CapacitorConfig } from "@capacitor/cli";
 
-const SERVER_URL =
-  process.env.BAESHEN_NATIVE_SERVER_URL?.trim() || "https://bashenmedical.com";
+const SERVER_URL = process.env.BAESHEN_NATIVE_SERVER_URL?.trim() || "https://bashenmedical.com";
 
 const config: CapacitorConfig = {
   appId: "com.baeshenmedical.patient",

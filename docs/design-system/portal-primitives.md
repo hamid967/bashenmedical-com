@@ -19,17 +19,17 @@
 
 ## 2) خريطة التوكنات (`--ds-*`)
 
-| المجموعة | التوكن | استخدامه |
-|---|---|---|
-| العلامة | `--ds-brand-50/500/700/800` | خلفيات ناعمة، الأزرار الأساسية، النصوص المؤكَّدة |
-| المميّز | `--ds-accent-500` | تأكيدات دافئة، شارات لون ثانوي |
-| الحالات | `--ds-success/warning/error/info-500` + `-50` | Toasts، شارات، رسائل تحقق |
-| الحبر (نصوص) | `--ds-ink-900/600/400` | العنوان / الوصف / التلميح |
-| الحدود | `--ds-border` `--ds-border-strong` | فواصل، مدخلات، بطاقات |
-| الأنصاف | `--ds-radius-sm/md/lg/xl/2xl` | 10 / 14 / 20 / 28 / 36 px |
-| الظلال | `--ds-shadow-sm/md/lg/glow` | البطاقات، الرفع، تركيز focus |
-| الحركة | `--ds-dur-fast/base/slow` + `--ds-ease-out/in-out` | 120 / 220 / 360 ms |
-| الأيقونات | `--ds-icon-sm/md/lg` | 16 / 20 / 24 px |
+| المجموعة     | التوكن                                             | استخدامه                                         |
+| ------------ | -------------------------------------------------- | ------------------------------------------------ |
+| العلامة      | `--ds-brand-50/500/700/800`                        | خلفيات ناعمة، الأزرار الأساسية، النصوص المؤكَّدة |
+| المميّز      | `--ds-accent-500`                                  | تأكيدات دافئة، شارات لون ثانوي                   |
+| الحالات      | `--ds-success/warning/error/info-500` + `-50`      | Toasts، شارات، رسائل تحقق                        |
+| الحبر (نصوص) | `--ds-ink-900/600/400`                             | العنوان / الوصف / التلميح                        |
+| الحدود       | `--ds-border` `--ds-border-strong`                 | فواصل، مدخلات، بطاقات                            |
+| الأنصاف      | `--ds-radius-sm/md/lg/xl/2xl`                      | 10 / 14 / 20 / 28 / 36 px                        |
+| الظلال       | `--ds-shadow-sm/md/lg/glow`                        | البطاقات، الرفع، تركيز focus                     |
+| الحركة       | `--ds-dur-fast/base/slow` + `--ds-ease-out/in-out` | 120 / 220 / 360 ms                               |
+| الأيقونات    | `--ds-icon-sm/md/lg`                               | 16 / 20 / 24 px                                  |
 
 > **قاعدة**: أي لون/ظل/زمن مذكور بحرفية داخل مكوّن portal يعني أنه يجب أن يتحوّل إلى `var(--ds-*)`.
 
@@ -39,18 +39,18 @@
 
 كلها من `@/components/portal/ui`:
 
-| المكوّن | متى تستخدمه |
-|---|---|
-| `PortalPageHeader` | ترويسة الصفحة (Breadcrumbs + eyebrow + عنوان + وصف + إجراءات) |
-| `PortalSection` | قسم داخل الصفحة بعنوان ووصف |
-| `PortalCard` (+ `Header/Body/Footer`) | البطاقة الأساسية، متغيرات: `default/elevated/sunken/outline` |
-| `PortalStatCard` | KPI مع أيقونة، اتجاه، تلميح |
-| `PortalBadge` | شارة حالة (`default/success/warning/error/muted`) |
-| `PortalDataList` | قائمة تعريفات (dt/dd) لعرض بيانات مقروءة |
-| `PortalEmptyState` | حالة فارغة موحّدة |
-| `PortalSkeleton` / `PortalCardSkeleton` | حالات التحميل |
-| **`PortalButton`** | كل الأزرار داخل portal (`primary/secondary/ghost/outline/danger` × `sm/md/lg`) |
-| **`PortalInput`** | كل مدخلات النص (label + hint + error + leading/trailing icon) |
+| المكوّن                                 | متى تستخدمه                                                                    |
+| --------------------------------------- | ------------------------------------------------------------------------------ |
+| `PortalPageHeader`                      | ترويسة الصفحة (Breadcrumbs + eyebrow + عنوان + وصف + إجراءات)                  |
+| `PortalSection`                         | قسم داخل الصفحة بعنوان ووصف                                                    |
+| `PortalCard` (+ `Header/Body/Footer`)   | البطاقة الأساسية، متغيرات: `default/elevated/sunken/outline`                   |
+| `PortalStatCard`                        | KPI مع أيقونة، اتجاه، تلميح                                                    |
+| `PortalBadge`                           | شارة حالة (`default/success/warning/error/muted`)                              |
+| `PortalDataList`                        | قائمة تعريفات (dt/dd) لعرض بيانات مقروءة                                       |
+| `PortalEmptyState`                      | حالة فارغة موحّدة                                                              |
+| `PortalSkeleton` / `PortalCardSkeleton` | حالات التحميل                                                                  |
+| **`PortalButton`**                      | كل الأزرار داخل portal (`primary/secondary/ghost/outline/danger` × `sm/md/lg`) |
+| **`PortalInput`**                       | كل مدخلات النص (label + hint + error + leading/trailing icon)                  |
 
 ---
 
@@ -60,8 +60,13 @@
 
 ```tsx
 import {
-  PortalPageHeader, PortalSection, PortalCard, PortalCardBody,
-  PortalButton, PortalBadge, PortalStatCard,
+  PortalPageHeader,
+  PortalSection,
+  PortalCard,
+  PortalCardBody,
+  PortalButton,
+  PortalBadge,
+  PortalStatCard,
 } from "@/components/portal/ui";
 import { Calendar, Plus } from "lucide-react";
 
@@ -135,12 +140,16 @@ import { Mail, Phone } from "lucide-react";
         onChange={(e) => setPhone(e.target.value)}
       />
       <div className="flex gap-2 justify-end">
-        <PortalButton variant="ghost" type="button" onClick={onCancel}>إلغاء</PortalButton>
-        <PortalButton variant="primary" type="submit" loading={saving}>حفظ</PortalButton>
+        <PortalButton variant="ghost" type="button" onClick={onCancel}>
+          إلغاء
+        </PortalButton>
+        <PortalButton variant="primary" type="submit" loading={saving}>
+          حفظ
+        </PortalButton>
       </div>
     </form>
   </PortalCardBody>
-</PortalCard>
+</PortalCard>;
 ```
 
 ### 4.3 شارات الحالة
@@ -184,16 +193,16 @@ import { Mail, Phone } from "lucide-react";
 
 ## 5) الأنماط الممنوعة (Anti-patterns)
 
-| ❌ ممنوع | ✅ البديل |
-|---|---|
-| `className="bg-white rounded-2xl border p-5"` | `<PortalCard><PortalCardBody>…</PortalCardBody></PortalCard>` |
-| `className="text-red-500"` | `style={{ color: "var(--ds-error-500)" }}` أو `<PortalBadge variant="error">` |
-| `className="bg-red-50 text-red-600"` | `<PortalBadge variant="error">` |
-| `className="bg-black/40"` (خلفية modal) | `style={{ background: "color-mix(in oklab, var(--ds-ink-900) 40%, transparent)" }}` |
-| `<button className="bg-teal-700 text-white …">` | `<PortalButton variant="primary">` |
-| `<input className="border rounded px-3 h-10">` | `<PortalInput label="…" />` |
-| `transition-all duration-300` | `transition-[…] duration-[var(--ds-dur-base)] ease-[var(--ds-ease-out)]` |
-| `@import "https://fonts.googleapis.com/…"` داخل styles.css | `<link>` في `src/routes/__root.tsx` (Tailwind v4) |
+| ❌ ممنوع                                                   | ✅ البديل                                                                           |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `className="bg-white rounded-2xl border p-5"`              | `<PortalCard><PortalCardBody>…</PortalCardBody></PortalCard>`                       |
+| `className="text-red-500"`                                 | `style={{ color: "var(--ds-error-500)" }}` أو `<PortalBadge variant="error">`       |
+| `className="bg-red-50 text-red-600"`                       | `<PortalBadge variant="error">`                                                     |
+| `className="bg-black/40"` (خلفية modal)                    | `style={{ background: "color-mix(in oklab, var(--ds-ink-900) 40%, transparent)" }}` |
+| `<button className="bg-teal-700 text-white …">`            | `<PortalButton variant="primary">`                                                  |
+| `<input className="border rounded px-3 h-10">`             | `<PortalInput label="…" />`                                                         |
+| `transition-all duration-300`                              | `transition-[…] duration-[var(--ds-dur-base)] ease-[var(--ds-ease-out)]`            |
+| `@import "https://fonts.googleapis.com/…"` داخل styles.css | `<link>` في `src/routes/__root.tsx` (Tailwind v4)                                   |
 
 ---
 
@@ -217,18 +226,19 @@ import { Mail, Phone } from "lucide-react";
 /* src/styles.css */
 :root {
   /* لون جديد لحالة "info" — قيمة oklch حقيقية، لا مرجع */
-  --ds-info:        oklch(0.62 0.14 240);
-  --ds-info-50:     oklch(0.96 0.03 240);
-  --ds-info-fg:     oklch(0.99 0 0);
+  --ds-info: oklch(0.62 0.14 240);
+  --ds-info-50: oklch(0.96 0.03 240);
+  --ds-info-fg: oklch(0.99 0 0);
 }
 .dark {
-  --ds-info:        oklch(0.68 0.14 240);
-  --ds-info-50:     oklch(0.24 0.05 240);
-  --ds-info-fg:     oklch(0.99 0 0);
+  --ds-info: oklch(0.68 0.14 240);
+  --ds-info-50: oklch(0.24 0.05 240);
+  --ds-info-fg: oklch(0.99 0 0);
 }
 ```
 
 قواعد التسمية:
+
 - بادئة `--ds-` إجبارية.
 - المجموعة الدلالية أولًا ثم التدرّج: `--ds-<role>[-<shade|fg|border>]`.
 - استخدم `oklch(...)` دائمًا (متسق إدراكيًا مع بقية النظام). لا `#hex` ولا `hsl()`.
@@ -241,9 +251,9 @@ import { Mail, Phone } from "lucide-react";
 ```css
 .portal-root {
   /* … */
-  --portal-info:     var(--ds-info);
-  --portal-info-50:  var(--ds-info-50);
-  --portal-on-info:  var(--ds-info-fg);
+  --portal-info: var(--ds-info);
+  --portal-info-50: var(--ds-info-50);
+  --portal-on-info: var(--ds-info-fg);
 }
 ```
 
@@ -289,6 +299,7 @@ python3 tests/visual/portal_visual_regression.py  # 0 فروق بصرية
 ```
 
 عند تغيير قيمة توكن قائم (ليس إضافة)، توقّع فرقًا بصريًا مقصودًا:
+
 1. شغّل visual regression → راجع `/mnt/documents/visual-regression/report.html`.
 2. إن كان الفرق مقصودًا، حدّث اللقطات الأساسية: `python3 tests/visual/portal_visual_regression.py --update-baseline`.
 3. اذكر الـPRIMITIVE المتغيّر ونطاق الأثر في وصف الـPR.
@@ -311,4 +322,3 @@ python3 tests/visual/portal_visual_regression.py  # 0 فروق بصرية
 - أداة الترحيل الآلي: `scripts/codemod-portal-tokens.mjs` (`bun run codemod:portal-tokens -- --list-rules`).
 - تدقيق الحالة الحالية: [`audit-2026-07.md`](./audit-2026-07.md).
 - خارطة ترحيل portal v2: [`portal-v2.md`](./portal-v2.md).
-

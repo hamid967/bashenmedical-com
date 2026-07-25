@@ -53,9 +53,12 @@ export const listInsuranceApprovals = createServerFn({ method: "GET" })
     const v = (raw ?? {}) as Record<string, unknown>;
     return {
       status: typeof v.status === "string" && v.status ? (v.status as string) : undefined,
-      provider_id: typeof v.provider_id === "string" && v.provider_id ? (v.provider_id as string) : undefined,
-      branch_id: typeof v.branch_id === "string" && v.branch_id ? (v.branch_id as string) : undefined,
-      patient_id: typeof v.patient_id === "string" && v.patient_id ? (v.patient_id as string) : undefined,
+      provider_id:
+        typeof v.provider_id === "string" && v.provider_id ? (v.provider_id as string) : undefined,
+      branch_id:
+        typeof v.branch_id === "string" && v.branch_id ? (v.branch_id as string) : undefined,
+      patient_id:
+        typeof v.patient_id === "string" && v.patient_id ? (v.patient_id as string) : undefined,
       q: typeof v.q === "string" && v.q ? (v.q as string).trim().slice(0, 100) : undefined,
       from: typeof v.from === "string" && v.from ? (v.from as string) : undefined,
       to: typeof v.to === "string" && v.to ? (v.to as string) : undefined,
@@ -77,9 +80,7 @@ export const listInsuranceApprovals = createServerFn({ method: "GET" })
     if (data.to) q = q.lte("created_at", data.to);
     if (data.q) {
       const pat = `%${data.q}%`;
-      q = q.or(
-        `request_number.ilike.${pat},service_description.ilike.${pat},notes.ilike.${pat}`,
-      );
+      q = q.or(`request_number.ilike.${pat},service_description.ilike.${pat},notes.ilike.${pat}`);
     }
     q = q.range(data.offset, data.offset + data.limit - 1);
 
@@ -120,7 +121,11 @@ export const getInsuranceApproval = createServerFn({ method: "GET" })
   .handler(async ({ context, data }) => {
     await assertHasAnyRole(context.supabase, context.userId, [...ROLES]);
     const [approvalRes, eventsRes] = await Promise.all([
-      context.supabase.from("insurance_approvals").select(APPROVAL_COLS).eq("id", data.id).maybeSingle(),
+      context.supabase
+        .from("insurance_approvals")
+        .select(APPROVAL_COLS)
+        .eq("id", data.id)
+        .maybeSingle(),
       context.supabase
         .from("insurance_approval_events")
         .select("id, from_status, to_status, note, meta, actor_user_id, created_at")
@@ -149,7 +154,8 @@ export const transitionInsuranceApproval = createServerFn({ method: "POST" })
       patient_share?: number;
       missing_documents?: string[];
     };
-    if (!v.approval_id || typeof v.approval_id !== "string") throw new Error("APPROVAL_ID_REQUIRED");
+    if (!v.approval_id || typeof v.approval_id !== "string")
+      throw new Error("APPROVAL_ID_REQUIRED");
     if (!v.to_status || !(INSURANCE_STATUSES as readonly string[]).includes(v.to_status)) {
       throw new Error("INVALID_STATUS");
     }
@@ -177,12 +183,15 @@ export const transitionInsuranceApproval = createServerFn({ method: "POST" })
     if (data.patient_share !== undefined) meta.patient_share = data.patient_share;
     if (data.missing_documents !== undefined) meta.missing_documents = data.missing_documents;
 
-    const { data: row, error } = await (context.supabase as any).rpc("transition_insurance_approval", {
-      _approval_id: data.approval_id,
-      _to_status: data.to_status,
-      _note: data.note ?? null,
-      _meta: meta as unknown as any,
-    });
+    const { data: row, error } = await (context.supabase as any).rpc(
+      "transition_insurance_approval",
+      {
+        _approval_id: data.approval_id,
+        _to_status: data.to_status,
+        _note: data.note ?? null,
+        _meta: meta as unknown as any,
+      },
+    );
     if (error) {
       const msg = error.message || "";
       if (msg.includes("ILLEGAL_TRANSITION")) throw new Error("انتقال حالة غير مسموح.");

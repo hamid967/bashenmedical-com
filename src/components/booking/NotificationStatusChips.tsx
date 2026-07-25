@@ -1,10 +1,23 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Mail, MessageSquare, MessageCircle, CheckCircle2, XCircle, Loader2, HelpCircle } from "lucide-react";
+import {
+  Mail,
+  MessageSquare,
+  MessageCircle,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  HelpCircle,
+} from "lucide-react";
 
 type Channel = "sms" | "whatsapp" | "email";
 type Status = "sent" | "failed" | "pending" | "unknown";
-type ChannelStatus = { channel: Channel; status: Status; updated_at: string | null; attempts: number };
+type ChannelStatus = {
+  channel: Channel;
+  status: Status;
+  updated_at: string | null;
+  attempts: number;
+};
 
 const ICONS: Record<Channel, React.ComponentType<{ className?: string }>> = {
   sms: MessageSquare,
@@ -73,8 +86,7 @@ export function NotificationStatusChips({
           if (!cancelled) setError("unavailable");
         } else {
           const j = (await res.json()) as
-            | { ok: true; channels: ChannelStatus[] }
-            | { ok: false; message?: string };
+            { ok: true; channels: ChannelStatus[] } | { ok: false; message?: string };
           if (!cancelled && j.ok) {
             latest = j.channels;
             setItems(j.channels);
@@ -121,9 +133,7 @@ export function NotificationStatusChips({
       aria-label={t("success.notifTitle", "حالة تسليم الإشعارات")}
     >
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold">
-          {t("success.notifTitle", "حالة تسليم الإشعارات")}
-        </h3>
+        <h3 className="text-sm font-semibold">{t("success.notifTitle", "حالة تسليم الإشعارات")}</h3>
         <span className="text-[10px] text-muted-foreground">
           {t("success.notifAutoRefresh", "يتم التحديث تلقائيًا")}
         </span>
@@ -132,10 +142,7 @@ export function NotificationStatusChips({
         {list.map((c) => {
           const Icon = ICONS[c.channel];
           const label = t(`success.notifChannel.${c.channel}`, c.channel.toUpperCase());
-          const statusLabel = t(
-            `success.notifStatus.${c.status}`,
-            c.status,
-          );
+          const statusLabel = t(`success.notifStatus.${c.status}`, c.status);
           return (
             <li
               key={c.channel}
@@ -154,10 +161,7 @@ export function NotificationStatusChips({
         })}
       </ul>
       <p className="mt-2 text-[11px] text-muted-foreground">
-        {t(
-          "success.notifHint",
-          "قد يستغرق تسليم الرسائل حتى دقيقتين. سنستمر بالتحديث تلقائيًا.",
-        )}
+        {t("success.notifHint", "قد يستغرق تسليم الرسائل حتى دقيقتين. سنستمر بالتحديث تلقائيًا.")}
       </p>
     </div>
   );

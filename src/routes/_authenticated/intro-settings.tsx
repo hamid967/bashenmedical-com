@@ -8,13 +8,7 @@ import { Input } from "@/components/ui-v3";
 import { Label } from "@/components/ui-v3";
 import { Switch } from "@/components/ui-v3";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import { Separator } from "@/components/ui-v3";
 import {
   DEFAULT_INTRO_SETTINGS,

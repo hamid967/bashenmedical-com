@@ -24,17 +24,10 @@ const ROOT = process.cwd();
 const BASELINE_PATH = join(ROOT, "scripts", "portal-tokens-baseline.json");
 const UPDATE_BASELINE = process.argv.includes("--update-baseline");
 const STRICT_CHANGED = process.argv.includes("--strict-changed");
-const BASE_REF =
-  process.env.LINT_BASE_REF ||
-  process.env.GITHUB_BASE_REF ||
-  "origin/main";
-
+const BASE_REF = process.env.LINT_BASE_REF || process.env.GITHUB_BASE_REF || "origin/main";
 
 // المسارات المُراقَبة
-const TARGET_DIRS = [
-  "src/routes/_authenticated",
-  "src/components/portal",
-];
+const TARGET_DIRS = ["src/routes/_authenticated", "src/components/portal"];
 
 // الملفات التي يُسمح لها بتجاوز القاعدة (نية تصميم موثّقة)
 const FILE_EXCEPTIONS = new Set([
@@ -77,8 +70,7 @@ const RULES = [
   },
   {
     pattern: /className="[^"]*\brgba?\s*\([^"]*"/,
-    reason:
-      "لا تكتب rgb()/rgba() داخل className. عرِّف token في src/styles.css.",
+    reason: "لا تكتب rgb()/rgba() داخل className. عرِّف token في src/styles.css.",
   },
 ];
 
@@ -99,9 +91,7 @@ function walk(dir, out = []) {
   return out;
 }
 
-const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d))).filter(
-  isPortalFile,
-);
+const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d))).filter(isPortalFile);
 
 const counts = {}; // file(rel) → violations
 const details = []; // {rel,line,match,reason,text}
@@ -114,11 +104,7 @@ for (const file of files) {
     const line = lines[i];
     if (line.includes("tokens-allow")) continue;
     const trimmed = line.trim();
-    if (
-      trimmed.startsWith("*") ||
-      trimmed.startsWith("//") ||
-      trimmed.startsWith("/*")
-    ) {
+    if (trimmed.startsWith("*") || trimmed.startsWith("//") || trimmed.startsWith("/*")) {
       continue;
     }
     for (const rule of RULES) {
@@ -137,14 +123,11 @@ for (const file of files) {
   }
 }
 
-
 // ── وضع صارم على الأسطر المُعدَّلة فقط (pre-merge zero-tolerance) ──
 // يرفض أي انتهاك جديد أُدخل في diff مقابل BASE_REF ويشير للمصدر بدقّة سطر:عمود.
 if (STRICT_CHANGED) {
   const changed = collectChangedLines(BASE_REF); // Map<rel, Set<lineNo>>
-  const offenders = details.filter(
-    (d) => changed.get(d.rel)?.has(d.line),
-  );
+  const offenders = details.filter((d) => changed.get(d.rel)?.has(d.line));
   if (offenders.length === 0) {
     const trackedRels = [...changed.keys()].filter((r) =>
       files.some((f) => relative(ROOT, f).replaceAll("\\", "/") === r),
@@ -173,10 +156,7 @@ if (STRICT_CHANGED) {
 
 // وضع تحديث الـ baseline
 if (UPDATE_BASELINE) {
-  writeFileSync(
-    BASELINE_PATH,
-    JSON.stringify({ files: counts }, null, 2) + "\n",
-  );
+  writeFileSync(BASELINE_PATH, JSON.stringify({ files: counts }, null, 2) + "\n");
   console.log(
     `✓ حُدِّث baseline (${Object.keys(counts).length} ملف · ${details.length} انتهاك سابق مقبول).\n` +
       `  ${relative(ROOT, BASELINE_PATH)}\n` +
@@ -218,9 +198,7 @@ if (regressions.length > 0) {
   }
   console.error(
     `\nتراجع Design Tokens v2 في ${regressions.length} ملف:\n` +
-      regressions
-        .map((r) => `  - ${r.rel}: ${r.actual} (المسموح ${r.allowed})`)
-        .join("\n") +
+      regressions.map((r) => `  - ${r.rel}: ${r.actual} (المسموح ${r.allowed})`).join("\n") +
       `\n\nإما أن تُصلح الانتهاكات (راجع /admin/design-tokens) أو تضع  // tokens-allow  عند الحاجة الحقيقية.\n` +
       `عند إتمام إصلاح فعلي شغّل:  bun run lint:portal-tokens:update`,
   );
@@ -243,19 +221,20 @@ console.log(
 // ─────────────────────────────────────────────────────────────────────
 function collectChangedLines(baseRef) {
   const result = new Map();
-  const targeted = new Set(
-    files.map((f) => relative(ROOT, f).replaceAll("\\", "/")),
-  );
+  const targeted = new Set(files.map((f) => relative(ROOT, f).replaceAll("\\", "/")));
 
   let raw = "";
   const attempts = [baseRef, "HEAD~1", "HEAD"];
   for (const ref of attempts) {
     try {
-      raw = execSync(`git diff --unified=0 --no-color ${ref} -- ${[...targeted].map((p) => `'${p}'`).join(" ") || "'/dev/null'"}`, {
-        cwd: ROOT,
-        stdio: ["ignore", "pipe", "ignore"],
-        maxBuffer: 20 * 1024 * 1024,
-      }).toString();
+      raw = execSync(
+        `git diff --unified=0 --no-color ${ref} -- ${[...targeted].map((p) => `'${p}'`).join(" ") || "'/dev/null'"}`,
+        {
+          cwd: ROOT,
+          stdio: ["ignore", "pipe", "ignore"],
+          maxBuffer: 20 * 1024 * 1024,
+        },
+      ).toString();
       if (raw) break;
     } catch {
       // جرّب المرجع التالي
@@ -286,4 +265,3 @@ function collectChangedLines(baseRef) {
   }
   return result;
 }
-

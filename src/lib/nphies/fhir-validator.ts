@@ -25,9 +25,7 @@ export interface CoverageEligibilityRequestLike {
   servicedDate?: string;
 }
 
-export function validateEligibilityRequest(
-  payload: unknown,
-): FhirIssue[] {
+export function validateEligibilityRequest(payload: unknown): FhirIssue[] {
   const issues: FhirIssue[] = [];
   const p = (payload ?? {}) as CoverageEligibilityRequestLike;
 
@@ -49,7 +47,8 @@ export function validateEligibilityRequest(
     issues.push({
       severity: "error",
       path: "purpose",
-      message: "purpose must include at least one of validation|benefits|discovery|auth-requirements",
+      message:
+        "purpose must include at least one of validation|benefits|discovery|auth-requirements",
     });
   }
   const patientId = p.patient?.identifier?.value?.trim();
@@ -100,9 +99,7 @@ export interface CoverageEligibilityResponseLike {
   }>;
 }
 
-export function validateEligibilityResponse(
-  payload: unknown,
-): FhirIssue[] {
+export function validateEligibilityResponse(payload: unknown): FhirIssue[] {
   const issues: FhirIssue[] = [];
   const p = (payload ?? {}) as CoverageEligibilityResponseLike;
 

@@ -71,10 +71,10 @@ Every SEV-1 or SEV-2 must add a regression test **before** the incident is close
 
 ## 8. Contacts
 
-| Role                | Channel                                    |
-| ------------------- | ------------------------------------------ |
-| On-call engineer    | PagerDuty rotation `bashen-primary`        |
-| Legal / DPO         | Internal — see org phonebook               |
-| Supabase support    | Support ticket + Slack shared channel      |
-| Cloudflare support  | Enterprise portal                          |
-| KSA MoH / NPHIES    | Compliance lead                            |
+| Role               | Channel                               |
+| ------------------ | ------------------------------------- |
+| On-call engineer   | PagerDuty rotation `bashen-primary`   |
+| Legal / DPO        | Internal — see org phonebook          |
+| Supabase support   | Support ticket + Slack shared channel |
+| Cloudflare support | Enterprise portal                     |
+| KSA MoH / NPHIES   | Compliance lead                       |

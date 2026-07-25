@@ -137,18 +137,56 @@ export function FilesList() {
       </header>
 
       {uploadError && (
-        <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive flex items-center justify-between">
+        <div
+          role="alert"
+          className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive flex items-center justify-between"
+        >
           <span>{uploadError}</span>
-          <button onClick={() => setUploadError(null)} aria-label="إغلاق"><X className="h-4 w-4" /></button>
+          <button onClick={() => setUploadError(null)} aria-label="إغلاق">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       <section aria-label="مؤشرات الملفات" className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <KpiCard label="إجمالي الملفات" value={query.data?.kpis.total} icon={FolderOpen} loading={query.isLoading} error={query.isError} />
-        <KpiCard label="الصور" value={query.data?.kpis.images} icon={ImageIcon} loading={query.isLoading} error={query.isError} tone="success" />
-        <KpiCard label="ملفات أخرى" value={query.data?.kpis.other} icon={FileText} loading={query.isLoading} error={query.isError} tone="muted" />
-        <KpiCard label="الحجم الكلي" value={query.data?.kpis.total_bytes} icon={HardDrive} loading={query.isLoading} error={query.isError} format="bytes" />
-        <KpiCard label="رُفعت اليوم" value={query.data?.kpis.uploaded_today} icon={CalendarDays} loading={query.isLoading} error={query.isError} />
+        <KpiCard
+          label="إجمالي الملفات"
+          value={query.data?.kpis.total}
+          icon={FolderOpen}
+          loading={query.isLoading}
+          error={query.isError}
+        />
+        <KpiCard
+          label="الصور"
+          value={query.data?.kpis.images}
+          icon={ImageIcon}
+          loading={query.isLoading}
+          error={query.isError}
+          tone="success"
+        />
+        <KpiCard
+          label="ملفات أخرى"
+          value={query.data?.kpis.other}
+          icon={FileText}
+          loading={query.isLoading}
+          error={query.isError}
+          tone="muted"
+        />
+        <KpiCard
+          label="الحجم الكلي"
+          value={query.data?.kpis.total_bytes}
+          icon={HardDrive}
+          loading={query.isLoading}
+          error={query.isError}
+          format="bytes"
+        />
+        <KpiCard
+          label="رُفعت اليوم"
+          value={query.data?.kpis.uploaded_today}
+          icon={CalendarDays}
+          loading={query.isLoading}
+          error={query.isError}
+        />
       </section>
 
       <section className="flex flex-wrap items-center gap-2">
@@ -214,12 +252,11 @@ export function FilesList() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {query.data.rows.map((f) => (
-            <div key={f.id} className="group relative rounded-lg border bg-card overflow-hidden hover:shadow-md transition">
-              <Link
-                to="/admin/files/$id"
-                params={{ id: f.id }}
-                className="block"
-              >
+            <div
+              key={f.id}
+              className="group relative rounded-lg border bg-card overflow-hidden hover:shadow-md transition"
+            >
+              <Link to="/admin/files/$id" params={{ id: f.id }} className="block">
                 <div className="aspect-square bg-muted/40 flex items-center justify-center overflow-hidden">
                   {f.is_image ? (
                     <img

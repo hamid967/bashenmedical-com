@@ -19,7 +19,12 @@ export type AdminLabReport = {
   ordered_by: string | null;
   released_at: string | null;
   created_at: string;
-  patient?: { id: string; full_name_ar: string | null; mrn: string | null; phone: string | null } | null;
+  patient?: {
+    id: string;
+    full_name_ar: string | null;
+    mrn: string | null;
+    phone: string | null;
+  } | null;
 };
 
 async function assertLabAccess(ctx: { supabase: any; userId: string }) {
@@ -58,7 +63,8 @@ export const listAdminLabReports = createServerFn({ method: "GET" })
       .range(data.offset, data.offset + data.limit - 1);
     if (data.status === "released") q = q.not("released_at", "is", null);
     else if (data.status === "pending") q = q.is("released_at", null).eq("status", "pending");
-    else if (data.status === "in_progress") q = q.is("released_at", null).eq("status", "in_progress");
+    else if (data.status === "in_progress")
+      q = q.is("released_at", null).eq("status", "in_progress");
     if (data.q) {
       const like = `%${data.q.replace(/[%_]/g, "\\$&")}%`;
       q = q.or(`title.ilike.${like},test_type.ilike.${like}`);
@@ -75,7 +81,11 @@ const UpsertInput = z.object({
   test_type: z.string().trim().max(120).nullable().optional(),
   summary: z.string().trim().max(4000).nullable().optional(),
   status: z.enum(["pending", "in_progress", "released"]).default("pending"),
-  report_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
+  report_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
   file_path: z.string().trim().max(1024).nullable().optional(),
 });
 
@@ -95,7 +105,10 @@ export const upsertLabReport = createServerFn({ method: "POST" })
       ordered_by: context.userId,
     };
     if (data.id) {
-      const { error } = await (context.supabase as any).from("lab_reports").update(payload).eq("id", data.id);
+      const { error } = await (context.supabase as any)
+        .from("lab_reports")
+        .update(payload)
+        .eq("id", data.id);
       if (error) throw new Error(error.message);
       return { ok: true, id: data.id };
     }

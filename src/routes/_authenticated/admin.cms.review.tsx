@@ -24,7 +24,9 @@ function ReviewQueue() {
   return (
     <div className="space-y-4 p-4" dir="rtl">
       <div className="flex items-center gap-3">
-        <Link to="/admin/cms" className="text-sm underline">← اللوحة</Link>
+        <Link to="/admin/cms" className="text-sm underline">
+          ← اللوحة
+        </Link>
         <h1 className="text-xl font-bold">طابور المراجعة</h1>
         <Badge variant="secondary">{data.length}</Badge>
       </div>
@@ -40,13 +42,21 @@ function ReviewQueue() {
           </thead>
           <tbody>
             {data.length === 0 && (
-              <tr><td className="p-4 text-muted-foreground" colSpan={4}>لا توجد عناصر بانتظار المراجعة.</td></tr>
+              <tr>
+                <td className="p-4 text-muted-foreground" colSpan={4}>
+                  لا توجد عناصر بانتظار المراجعة.
+                </td>
+              </tr>
             )}
             {data.map((r: any) => (
               <tr key={r.id} className="border-t hover:bg-accent/30">
                 <td className="p-2 text-xs">{(CMS_KINDS as any)[r.kind]?.label ?? r.kind}</td>
                 <td className="p-2">
-                  <Link to="/admin/cms/$kind/$id" params={{ kind: r.kind, id: r.id }} className="hover:underline">
+                  <Link
+                    to="/admin/cms/$kind/$id"
+                    params={{ kind: r.kind, id: r.id }}
+                    className="hover:underline"
+                  >
                     {r.title ?? "(بدون عنوان)"}
                   </Link>
                 </td>

@@ -328,7 +328,10 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
   });
 
   const canRecord = invoice.status !== "cancelled" && invoice.status !== "paid";
-  const canVoid = invoice.status !== "paid" && invoice.status !== "partially_paid" && invoice.status !== "cancelled";
+  const canVoid =
+    invoice.status !== "paid" &&
+    invoice.status !== "partially_paid" &&
+    invoice.status !== "cancelled";
 
   return (
     <>
@@ -366,7 +369,8 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
                     <div className="font-semibold">
-                      {Number(p.amount).toLocaleString("ar-SA")} {invoice.currency ?? "SAR"} · {p.method}
+                      {Number(p.amount).toLocaleString("ar-SA")} {invoice.currency ?? "SAR"} ·{" "}
+                      {p.method}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {p.status} · {p.paid_at ? new Date(p.paid_at).toLocaleString("ar-SA") : "—"}
@@ -387,10 +391,7 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
                 {p.refunds && p.refunds.length > 0 && (
                   <ul className="mt-2 space-y-1 border-t pt-2 text-xs">
                     {p.refunds.map((r: any) => (
-                      <li
-                        key={r.id}
-                        className="flex flex-wrap items-center justify-between gap-2"
-                      >
+                      <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
                         <span>
                           <span className="font-mono">{r.receipt_reference}</span> ·{" "}
                           {Number(r.amount).toLocaleString("ar-SA")} · {r.status}
@@ -399,17 +400,13 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
                           {r.status === "pending" && (
                             <>
                               <button
-                                onClick={() =>
-                                  decide.mutate({ id: r.id, decision: "approved" })
-                                }
+                                onClick={() => decide.mutate({ id: r.id, decision: "approved" })}
                                 className="rounded border px-2 py-0.5 hover:bg-muted"
                               >
                                 اعتماد
                               </button>
                               <button
-                                onClick={() =>
-                                  decide.mutate({ id: r.id, decision: "rejected" })
-                                }
+                                onClick={() => decide.mutate({ id: r.id, decision: "rejected" })}
                                 className="rounded border border-destructive/40 px-2 py-0.5 text-destructive hover:bg-destructive/10"
                               >
                                 رفض
@@ -418,9 +415,7 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
                           )}
                           {r.status === "approved" && (
                             <button
-                              onClick={() =>
-                                decide.mutate({ id: r.id, decision: "completed" })
-                              }
+                              onClick={() => decide.mutate({ id: r.id, decision: "completed" })}
                               className="rounded border border-emerald-400 px-2 py-0.5 text-emerald-700 hover:bg-emerald-50"
                             >
                               تنفيذ
@@ -462,13 +457,21 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
                 onChange={(e) => setPayMethod(e.target.value)}
                 className="mt-1 w-full rounded-md border p-2"
               >
-                {["cash", "bank_transfer", "mada", "visa", "mastercard", "apple_pay", "stc_pay", "insurance", "other"].map(
-                  (m) => (
-                    <option key={m} value={m}>
-                      {m}
-                    </option>
-                  ),
-                )}
+                {[
+                  "cash",
+                  "bank_transfer",
+                  "mada",
+                  "visa",
+                  "mastercard",
+                  "apple_pay",
+                  "stc_pay",
+                  "insurance",
+                  "other",
+                ].map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="block">

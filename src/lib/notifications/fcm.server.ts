@@ -25,8 +25,8 @@ function b64url(input: ArrayBuffer | Uint8Array | string): string {
     typeof input === "string"
       ? new TextEncoder().encode(input)
       : input instanceof Uint8Array
-      ? input
-      : new Uint8Array(input);
+        ? input
+        : new Uint8Array(input);
   let s = "";
   for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
   return btoa(s).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
@@ -96,8 +96,7 @@ async function getAccessToken(sa: ServiceAccount): Promise<string> {
 }
 
 export type FcmSendResult =
-  | { ok: true }
-  | { ok: false; error: string; unregistered: boolean; skipped?: boolean };
+  { ok: true } | { ok: false; error: string; unregistered: boolean; skipped?: boolean };
 
 export function fcmConfigured(): boolean {
   return loadServiceAccount() !== null;
@@ -113,7 +112,13 @@ export async function sendFcm(opts: {
   deepLink?: string;
 }): Promise<FcmSendResult> {
   const sa = loadServiceAccount();
-  if (!sa) return { ok: false, error: "FCM_SERVICE_ACCOUNT_JSON missing", unregistered: false, skipped: true };
+  if (!sa)
+    return {
+      ok: false,
+      error: "FCM_SERVICE_ACCOUNT_JSON missing",
+      unregistered: false,
+      skipped: true,
+    };
 
   const dataPayload: Record<string, string> = {};
   for (const [k, v] of Object.entries(opts.data ?? {})) dataPayload[k] = String(v);
@@ -149,17 +154,14 @@ export async function sendFcm(opts: {
     };
   }
 
-  const res = await fetch(
-    `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message }),
+  const res = await fetch(`https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
     },
-  );
+    body: JSON.stringify({ message }),
+  });
   if (res.ok) return { ok: true };
   const text = await res.text();
   const unregistered =

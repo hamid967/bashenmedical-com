@@ -6,17 +6,18 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import {
-  assertCmsEditor,
-  assertCmsPublisher,
-  getCmsRole,
-} from "./_guard";
+import { assertCmsEditor, assertCmsPublisher, getCmsRole } from "./_guard";
 import { computeCompleteness, CMS_KINDS, type CmsKind } from "./schemas";
 
 const KIND_VALUES = Object.keys(CMS_KINDS) as [CmsKind, ...CmsKind[]];
 const KindSchema = z.enum(KIND_VALUES);
 const StatusSchema = z.enum([
-  "draft", "in_review", "approved", "scheduled", "published", "archived",
+  "draft",
+  "in_review",
+  "approved",
+  "scheduled",
+  "published",
+  "archived",
 ]);
 
 /* ----------------------- audit helper ----------------------- */
@@ -69,26 +70,28 @@ export const getCmsDashboard = createServerFn({ method: "GET" })
         published: by("published"),
         archived: by("archived"),
       },
-      recent: rows
-        .sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1))
-        .slice(0, 20),
+      recent: rows.sort((a, b) => (a.updated_at < b.updated_at ? 1 : -1)).slice(0, 20),
     };
   });
 
 export const listCmsEntries = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      kind: KindSchema,
-      status: StatusSchema.optional(),
-      q: z.string().max(200).optional(),
-    }).parse(d),
+    z
+      .object({
+        kind: KindSchema,
+        status: StatusSchema.optional(),
+        q: z.string().max(200).optional(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertCmsEditor(context);
     let q = context.supabase
       .from("cms_entries")
-      .select("id, kind, entity_id, slug, title, status, scheduled_at, published_at, locale_completeness, updated_at")
+      .select(
+        "id, kind, entity_id, slug, title, status, scheduled_at, published_at, locale_completeness, updated_at",
+      )
       .eq("kind", data.kind)
       .order("updated_at", { ascending: false })
       .limit(500);
@@ -114,26 +117,31 @@ export const getCmsEntry = createServerFn({ method: "GET" })
 
     const { data: versions } = await context.supabase
       .from("cms_versions")
-      .select("id, version_no, payload_ar, payload_en, seo, og_image_url, note, author_id, created_at")
+      .select(
+        "id, version_no, payload_ar, payload_en, seo, og_image_url, note, author_id, created_at",
+      )
       .eq("entry_id", data.id)
       .order("version_no", { ascending: false })
       .limit(50);
 
     const currentId = (entry as any).current_version_id;
-    const current = (versions ?? []).find((v: any) => v.id === currentId) ?? (versions ?? [])[0] ?? null;
+    const current =
+      (versions ?? []).find((v: any) => v.id === currentId) ?? (versions ?? [])[0] ?? null;
     return { entry, current, versions: versions ?? [] };
   });
 
 /* ============== create / save ============== */
 
 const PayloadSchema = z.record(z.any());
-const SeoSchema = z.object({
-  title: z.string().max(200).optional(),
-  description: z.string().max(500).optional(),
-  canonical: z.string().max(500).optional(),
-  og_title: z.string().max(200).optional(),
-  og_description: z.string().max(500).optional(),
-}).partial();
+const SeoSchema = z
+  .object({
+    title: z.string().max(200).optional(),
+    description: z.string().max(500).optional(),
+    canonical: z.string().max(500).optional(),
+    og_title: z.string().max(200).optional(),
+    og_description: z.string().max(500).optional(),
+  })
+  .partial();
 
 const CreateSchema = z.object({
   kind: KindSchema,
@@ -247,11 +255,10 @@ export const saveCmsVersion = createServerFn({ method: "POST" })
       })
       .eq("id", data.entry_id);
 
-    await audit(
-      context.supabase, context.userId, "save",
-      data.entry_id, newVer.id, null,
-      { version_no: nextNo, completeness },
-    );
+    await audit(context.supabase, context.userId, "save", data.entry_id, newVer.id, null, {
+      version_no: nextNo,
+      completeness,
+    });
     return { version_id: newVer.id, version_no: nextNo, completeness };
   });
 
@@ -261,8 +268,7 @@ const IdOnly = z.object({ entry_id: z.string().uuid() });
 const IdWithComment = IdOnly.extend({ comment: z.string().max(1000).optional() });
 
 async function loadEntry(supabase: any, id: string) {
-  const { data, error } = await supabase
-    .from("cms_entries").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await supabase.from("cms_entries").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Entry not found");
   return data as any;
@@ -282,22 +288,33 @@ export const submitCmsForReview = createServerFn({ method: "POST" })
     const kindDef = CMS_KINDS[entry.kind as CmsKind];
     if (kindDef?.bilingual) {
       const en = entry.locale_completeness?.en ?? 0;
-      if (en < 100) throw new Error("الإنجليزية غير مكتملة — هذا النوع يتطلب ترجمة كاملة قبل التقديم.");
+      if (en < 100)
+        throw new Error("الإنجليزية غير مكتملة — هذا النوع يتطلب ترجمة كاملة قبل التقديم.");
     }
 
-    await context.supabase.from("cms_entries")
+    await context.supabase
+      .from("cms_entries")
       .update({ status: "in_review", updated_by: context.userId })
       .eq("id", data.entry_id);
-    await audit(context.supabase, context.userId, "submit",
-      data.entry_id, entry.current_version_id, { status: entry.status }, { status: "in_review" });
+    await audit(
+      context.supabase,
+      context.userId,
+      "submit",
+      data.entry_id,
+      entry.current_version_id,
+      { status: entry.status },
+      { status: "in_review" },
+    );
     return { ok: true };
   });
 
 export const reviewCmsEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => IdWithComment.extend({
-    decision: z.enum(["approved", "rejected", "changes_requested"]),
-  }).parse(d))
+  .validator((d: unknown) =>
+    IdWithComment.extend({
+      decision: z.enum(["approved", "rejected", "changes_requested"]),
+    }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertCmsPublisher(context);
     const entry = await loadEntry(context.supabase, data.entry_id);
@@ -316,22 +333,30 @@ export const reviewCmsEntry = createServerFn({ method: "POST" })
       comment: data.comment ?? null,
     });
     const nextStatus =
-      data.decision === "approved" ? "approved"
-      : data.decision === "rejected" ? "archived"
-      : "draft";
-    await context.supabase.from("cms_entries")
+      data.decision === "approved"
+        ? "approved"
+        : data.decision === "rejected"
+          ? "archived"
+          : "draft";
+    await context.supabase
+      .from("cms_entries")
       .update({
         status: nextStatus,
         archived_at: nextStatus === "archived" ? new Date().toISOString() : null,
         updated_by: context.userId,
       })
       .eq("id", data.entry_id);
-    await audit(context.supabase, context.userId, `review_${data.decision}`,
-      data.entry_id, entry.current_version_id,
-      { status: "in_review" }, { status: nextStatus, comment: data.comment ?? null });
+    await audit(
+      context.supabase,
+      context.userId,
+      `review_${data.decision}`,
+      data.entry_id,
+      entry.current_version_id,
+      { status: "in_review" },
+      { status: nextStatus, comment: data.comment ?? null },
+    );
     return { ok: true, status: nextStatus };
   });
-
 
 export const publishCmsEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -343,7 +368,8 @@ export const publishCmsEntry = createServerFn({ method: "POST" })
       throw new Error("لا يمكن نشر عنصر بهذه الحالة.");
     }
     const now = new Date().toISOString();
-    await context.supabase.from("cms_entries")
+    await context.supabase
+      .from("cms_entries")
       .update({
         status: "published",
         published_at: now,
@@ -351,18 +377,26 @@ export const publishCmsEntry = createServerFn({ method: "POST" })
         updated_by: context.userId,
       })
       .eq("id", data.entry_id);
-    await audit(context.supabase, context.userId, "publish",
-      data.entry_id, entry.current_version_id,
-      { status: entry.status }, { status: "published", published_at: now });
+    await audit(
+      context.supabase,
+      context.userId,
+      "publish",
+      data.entry_id,
+      entry.current_version_id,
+      { status: entry.status },
+      { status: "published", published_at: now },
+    );
     return { ok: true };
   });
 
 export const scheduleCmsEntry = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => IdOnly.extend({
-    publish_at: z.string().datetime(),
-    unpublish_at: z.string().datetime().optional(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    IdOnly.extend({
+      publish_at: z.string().datetime(),
+      unpublish_at: z.string().datetime().optional(),
+    }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertCmsPublisher(context);
     const entry = await loadEntry(context.supabase, data.entry_id);
@@ -376,12 +410,19 @@ export const scheduleCmsEntry = createServerFn({ method: "POST" })
       unpublish_at: data.unpublish_at ?? null,
       created_by: context.userId,
     });
-    await context.supabase.from("cms_entries")
+    await context.supabase
+      .from("cms_entries")
       .update({ status: "scheduled", scheduled_at: data.publish_at, updated_by: context.userId })
       .eq("id", data.entry_id);
-    await audit(context.supabase, context.userId, "schedule",
-      data.entry_id, entry.current_version_id,
-      { status: entry.status }, { status: "scheduled", publish_at: data.publish_at });
+    await audit(
+      context.supabase,
+      context.userId,
+      "schedule",
+      data.entry_id,
+      entry.current_version_id,
+      { status: entry.status },
+      { status: "scheduled", publish_at: data.publish_at },
+    );
     return { ok: true };
   });
 
@@ -392,20 +433,29 @@ export const archiveCmsEntry = createServerFn({ method: "POST" })
     await assertCmsPublisher(context);
     const entry = await loadEntry(context.supabase, data.entry_id);
     const now = new Date().toISOString();
-    await context.supabase.from("cms_entries")
+    await context.supabase
+      .from("cms_entries")
       .update({ status: "archived", archived_at: now, updated_by: context.userId })
       .eq("id", data.entry_id);
-    await audit(context.supabase, context.userId, "archive",
-      data.entry_id, entry.current_version_id,
-      { status: entry.status }, { status: "archived" });
+    await audit(
+      context.supabase,
+      context.userId,
+      "archive",
+      data.entry_id,
+      entry.current_version_id,
+      { status: entry.status },
+      { status: "archived" },
+    );
     return { ok: true };
   });
 
 export const rollbackCmsVersion = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => IdOnly.extend({
-    version_id: z.string().uuid(),
-  }).parse(d))
+  .validator((d: unknown) =>
+    IdOnly.extend({
+      version_id: z.string().uuid(),
+    }).parse(d),
+  )
   .handler(async ({ data, context }) => {
     await assertCmsPublisher(context);
     const entry = await loadEntry(context.supabase, data.entry_id);
@@ -448,7 +498,8 @@ export const rollbackCmsVersion = createServerFn({ method: "POST" })
       en: computeCompleteness(entry.kind as CmsKind, target.payload_en as any),
     };
     const now = new Date().toISOString();
-    await context.supabase.from("cms_entries")
+    await context.supabase
+      .from("cms_entries")
       .update({
         current_version_id: newVer.id,
         status: "published",
@@ -458,10 +509,15 @@ export const rollbackCmsVersion = createServerFn({ method: "POST" })
       })
       .eq("id", data.entry_id);
 
-    await audit(context.supabase, context.userId, "rollback",
-      data.entry_id, newVer.id,
+    await audit(
+      context.supabase,
+      context.userId,
+      "rollback",
+      data.entry_id,
+      newVer.id,
       { current_version_id: entry.current_version_id, status: entry.status },
-      { current_version_id: newVer.id, status: "published", from_version: target.version_no });
+      { current_version_id: newVer.id, status: "published", from_version: target.version_no },
+    );
     return { ok: true, version_no: nextNo };
   });
 
@@ -502,7 +558,10 @@ export const getCmsPreview = createServerFn({ method: "GET" })
       throw new Error("انتهت صلاحية رمز المعاينة");
     }
     const { data: ver } = await context.supabase
-      .from("cms_versions").select("*").eq("id", row.version_id).maybeSingle();
+      .from("cms_versions")
+      .select("*")
+      .eq("id", row.version_id)
+      .maybeSingle();
     return { version: ver };
   });
 
@@ -525,16 +584,20 @@ export const listCmsReviewQueue = createServerFn({ method: "GET" })
 export const listCmsAudit = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      entry_id: z.string().uuid().optional(),
-      limit: z.number().int().min(1).max(500).default(100),
-    }).parse(d),
+    z
+      .object({
+        entry_id: z.string().uuid().optional(),
+        limit: z.number().int().min(1).max(500).default(100),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertCmsEditor(context);
     let q = context.supabase
       .from("cms_audit")
-      .select("id, entry_id, version_id, actor_id, action, before_snapshot, after_snapshot, created_at")
+      .select(
+        "id, entry_id, version_id, actor_id, action, before_snapshot, after_snapshot, created_at",
+      )
       .order("created_at", { ascending: false })
       .limit(data.limit);
     if (data.entry_id) q = q.eq("entry_id", data.entry_id);
@@ -548,16 +611,20 @@ export const listCmsAudit = createServerFn({ method: "GET" })
 export const getCmsVersion = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) =>
-    z.object({
-      entry_id: z.string().uuid(),
-      version_id: z.string().uuid(),
-    }).parse(d),
+    z
+      .object({
+        entry_id: z.string().uuid(),
+        version_id: z.string().uuid(),
+      })
+      .parse(d),
   )
   .handler(async ({ data, context }) => {
     await assertCmsEditor(context);
     const { data: v, error } = await context.supabase
       .from("cms_versions")
-      .select("id, version_no, payload_ar, payload_en, seo, og_image_url, note, author_id, created_at")
+      .select(
+        "id, version_no, payload_ar, payload_en, seo, og_image_url, note, author_id, created_at",
+      )
       .eq("id", data.version_id)
       .eq("entry_id", data.entry_id)
       .maybeSingle();
@@ -565,4 +632,3 @@ export const getCmsVersion = createServerFn({ method: "GET" })
     if (!v) throw new Error("النسخة غير موجودة");
     return v;
   });
-

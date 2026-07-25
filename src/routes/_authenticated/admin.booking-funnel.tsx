@@ -67,10 +67,7 @@ const funnelQuery = (f: Filters) =>
 
 export const Route = createFileRoute("/_authenticated/admin/booking-funnel")({
   head: () => ({
-    meta: [
-      { title: "قمع الحجوزات | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "قمع الحجوزات | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   loader: ({ context }) =>
     context.queryClient.ensureQueryData(
@@ -122,12 +119,20 @@ function BookingFunnelPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <BreakdownCard
             title="حسب الفرع"
-            rows={data.byBranch.map((r) => ({ key: r.branch_id ?? "-", label: r.name, count: r.count }))}
+            rows={data.byBranch.map((r) => ({
+              key: r.branch_id ?? "-",
+              label: r.name,
+              count: r.count,
+            }))}
             total={data.total}
           />
           <BreakdownCard
             title="أعلى الأطباء"
-            rows={data.byDoctor.map((r) => ({ key: r.doctor_id ?? "-", label: r.name, count: r.count }))}
+            rows={data.byDoctor.map((r) => ({
+              key: r.doctor_id ?? "-",
+              label: r.name,
+              count: r.count,
+            }))}
             total={data.total}
           />
         </div>
@@ -324,7 +329,9 @@ function FunnelBar({ data }: { data: FunnelSummary }) {
           const pct = Math.round((count / max) * 100);
           return (
             <div key={s} className="flex items-center gap-2 text-xs">
-              <span className={`inline-block px-2 py-0.5 rounded-full border ${STATUS_TONE[s]} min-w-[140px] text-center`}>
+              <span
+                className={`inline-block px-2 py-0.5 rounded-full border ${STATUS_TONE[s]} min-w-[140px] text-center`}
+              >
                 {STATUS_LABEL[s]}
               </span>
               <span className="h-2 rounded-full bg-slate-100 flex-1 overflow-hidden">
@@ -368,10 +375,7 @@ function BreakdownCard({
               <div key={r.key} className="flex items-center gap-2 text-xs">
                 <span className="min-w-[140px] truncate">{r.label}</span>
                 <span className="h-2 rounded-full bg-slate-100 flex-1 overflow-hidden">
-                  <span
-                    className="block h-full bg-sky-400"
-                    style={{ width: `${pct}%` }}
-                  />
+                  <span className="block h-full bg-sky-400" style={{ width: `${pct}%` }} />
                 </span>
                 <span className="tabular-nums w-12 text-end font-semibold">
                   {r.count.toLocaleString("ar-EG")}
@@ -410,16 +414,18 @@ function DetailTable({ data }: { data: FunnelSummary }) {
             {rows.map((r, i) => (
               <tr key={i} className="border-t border-[color:var(--ac-line)]">
                 <td className="py-1.5 pr-2">
-                  <span className={`inline-block px-2 py-0.5 rounded-full border ${STATUS_TONE[r.status]}`}>
+                  <span
+                    className={`inline-block px-2 py-0.5 rounded-full border ${STATUS_TONE[r.status]}`}
+                  >
                     {STATUS_LABEL[r.status]}
                   </span>
                 </td>
                 <td className="py-1.5 px-2">{SOURCE_LABEL[r.source]}</td>
                 <td className="py-1.5 px-2">
-                  {r.branch_id ? branchName.get(r.branch_id) ?? r.branch_id.slice(0, 8) : "—"}
+                  {r.branch_id ? (branchName.get(r.branch_id) ?? r.branch_id.slice(0, 8)) : "—"}
                 </td>
                 <td className="py-1.5 px-2">
-                  {r.doctor_id ? doctorName.get(r.doctor_id) ?? r.doctor_id.slice(0, 8) : "—"}
+                  {r.doctor_id ? (doctorName.get(r.doctor_id) ?? r.doctor_id.slice(0, 8)) : "—"}
                 </td>
                 <td className="py-1.5 pl-2 tabular-nums font-semibold">
                   {r.count.toLocaleString("ar-EG")}

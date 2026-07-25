@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { CheckCircle2, Loader2, ShieldCheck, XCircle, AlertTriangle, FileClock } from "lucide-react";
+import {
+  CheckCircle2,
+  Loader2,
+  ShieldCheck,
+  XCircle,
+  AlertTriangle,
+  FileClock,
+} from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import {
   AlertDialog,
@@ -98,7 +105,10 @@ export function AssistantActionCard({ action, conversationId, isAr }: Props) {
         confirmToken: payload.confirm_token,
       });
     } catch {
-      setState({ kind: "error", message: t("تعذّر الاتصال بالخادم.", "Could not reach the server.") });
+      setState({
+        kind: "error",
+        message: t("تعذّر الاتصال بالخادم.", "Could not reach the server."),
+      });
     }
   }
 
@@ -126,12 +136,18 @@ export function AssistantActionCard({ action, conversationId, isAr }: Props) {
         return;
       }
       if (!res.ok || !payload.ok) {
-        setState({ kind: "error", message: payload.error || t("تعذّر تنفيذ الإجراء.", "Action failed.") });
+        setState({
+          kind: "error",
+          message: payload.error || t("تعذّر تنفيذ الإجراء.", "Action failed."),
+        });
         return;
       }
       setState({ kind: "done", message: successMessage(action.tool, t) });
     } catch {
-      setState({ kind: "error", message: t("تعذّر الاتصال بالخادم.", "Could not reach the server.") });
+      setState({
+        kind: "error",
+        message: t("تعذّر الاتصال بالخادم.", "Could not reach the server."),
+      });
     }
   }
 
@@ -159,7 +175,10 @@ export function AssistantActionCard({ action, conversationId, isAr }: Props) {
       }
       setState({ kind: "done", message: successMessage(action.tool, t) });
     } catch {
-      setState({ kind: "error", message: t("تعذّر الاتصال بالخادم.", "Could not reach the server.") });
+      setState({
+        kind: "error",
+        message: t("تعذّر الاتصال بالخادم.", "Could not reach the server."),
+      });
     }
   }
 
@@ -180,11 +199,9 @@ export function AssistantActionCard({ action, conversationId, isAr }: Props) {
     );
   }
 
-  const dialogSummary =
-    state.kind === "prepared" ? state.summary : action.summary ?? "";
+  const dialogSummary = state.kind === "prepared" ? state.summary : (action.summary ?? "");
   const canConfirm =
-    (isPatient && state.kind !== "running") ||
-    (isStaff && state.kind === "prepared");
+    (isPatient && state.kind !== "running") || (isStaff && state.kind === "prepared");
 
   return (
     <div className="mt-2 rounded-lg border bg-card p-3">
@@ -226,7 +243,10 @@ export function AssistantActionCard({ action, conversationId, isAr }: Props) {
           </div>
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
             <FileClock className="h-3 w-3" />
-            {t("تم تسجيل هذا الإجراء في سجل التدقيق.", "This action was recorded in the audit log.")}
+            {t(
+              "تم تسجيل هذا الإجراء في سجل التدقيق.",
+              "This action was recorded in the audit log.",
+            )}
           </div>
         </div>
       )}
@@ -238,7 +258,13 @@ export function AssistantActionCard({ action, conversationId, isAr }: Props) {
         </div>
       )}
 
-      <AlertDialog open={open} onOpenChange={(v) => { setOpen(v); if (!v && state.kind === "prepared") setState({ kind: "idle" }); }}>
+      <AlertDialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (!v && state.kind === "prepared") setState({ kind: "idle" });
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t("تأكيد الإجراء", "Confirm action")}</AlertDialogTitle>
@@ -346,9 +372,12 @@ function mapStaffError(
     case "execute_failed":
       return t("فشل التنفيذ.", "Execution failed.");
     default:
-      return code || (status === 429
-        ? t("عدد المحاولات كثير، حاول لاحقًا.", "Too many attempts, try later.")
-        : t("تعذّر تنفيذ الإجراء.", "Action failed."));
+      return (
+        code ||
+        (status === 429
+          ? t("عدد المحاولات كثير، حاول لاحقًا.", "Too many attempts, try later.")
+          : t("تعذّر تنفيذ الإجراء.", "Action failed."))
+      );
   }
 }
 

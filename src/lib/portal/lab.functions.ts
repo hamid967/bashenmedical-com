@@ -97,9 +97,7 @@ export const getLabFileUrl = createServerFn({ method: "POST" })
       file_path: data.path,
       bucket: "lab-reports",
     });
-    const { recordSensitiveAccess } = await import(
-      "@/lib/audit/sensitive-access.server"
-    );
+    const { recordSensitiveAccess } = await import("@/lib/audit/sensitive-access.server");
     await recordSensitiveAccess({
       supabase,
       actorId: userId,

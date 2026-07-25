@@ -126,10 +126,7 @@ export function CommandPalette({
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Flatten nav for lookups (recents label resolution, current route match).
-  const flatNav = useMemo<PaletteNavItem[]>(
-    () => navGroups.flatMap((g) => g.items),
-    [navGroups],
-  );
+  const flatNav = useMemo<PaletteNavItem[]>(() => navGroups.flatMap((g) => g.items), [navGroups]);
 
   // Reset + focus when opening; refresh recents each time.
   useEffect(() => {
@@ -271,9 +268,7 @@ export function CommandPalette({
   const recentItems = useMemo(() => {
     if (!recents.length) return [] as PaletteNavItem[];
     const byTo = new Map(flatNav.map((i) => [i.to, i]));
-    return recents
-      .map((r) => byTo.get(r.to))
-      .filter((v): v is PaletteNavItem => Boolean(v));
+    return recents.map((r) => byTo.get(r.to)).filter((v): v is PaletteNavItem => Boolean(v));
   }, [flatNav, recents]);
 
   if (!open) return null;
@@ -488,10 +483,22 @@ export function CommandPalette({
             {(!isSearching || query.trim().length < 2) && (
               <Command.Group heading="اقتراحات سريعة">
                 {[
-                  { to: "/admin/appointments?range=today", label: "مواعيد اليوم", icon: CalendarCheck },
-                  { to: "/admin/appointments?status=pending", label: "مواعيد بانتظار التأكيد", icon: CalendarCheck },
+                  {
+                    to: "/admin/appointments?range=today",
+                    label: "مواعيد اليوم",
+                    icon: CalendarCheck,
+                  },
+                  {
+                    to: "/admin/appointments?status=pending",
+                    label: "مواعيد بانتظار التأكيد",
+                    icon: CalendarCheck,
+                  },
                   { to: "/admin/service-inquiries?status=new", label: "طلبات جديدة", icon: Inbox },
-                  { to: "/admin/service-inquiries?status=in_progress", label: "طلبات قيد المعالجة", icon: Inbox },
+                  {
+                    to: "/admin/service-inquiries?status=in_progress",
+                    label: "طلبات قيد المعالجة",
+                    icon: Inbox,
+                  },
                   { to: "/patients-management", label: "المرضى", icon: Users },
                   { to: "/doctors-management", label: "الأطباء", icon: Stethoscope },
                 ].map((s) => (
@@ -541,10 +548,7 @@ export function CommandPalette({
               const items = isSearching
                 ? g.items.filter((i) => {
                     const q = query.trim().toLowerCase();
-                    return (
-                      i.label.toLowerCase().includes(q) ||
-                      i.to.toLowerCase().includes(q)
-                    );
+                    return i.label.toLowerCase().includes(q) || i.to.toLowerCase().includes(q);
                   })
                 : g.items;
               if (items.length === 0) return null;

@@ -5,10 +5,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import {
-  listMyMedicalReports,
-  listMyReportDownloads,
-} from "@/lib/portal/reports.functions";
+import { listMyMedicalReports, listMyReportDownloads } from "@/lib/portal/reports.functions";
 import { EmptyState } from "@/components/states";
 import { patientRouteStates } from "@/components/states/patient-route-states";
 import { Card, CardContent } from "@/components/ui-v3";
@@ -71,9 +68,7 @@ function ReportsPage() {
     all: items,
     lab: items.filter((r) => r.report_type === "lab"),
     radiology: items.filter((r) => r.report_type === "radiology"),
-    visit: items.filter(
-      (r) => r.report_type === "visit" || r.report_type === "visit_summary",
-    ),
+    visit: items.filter((r) => r.report_type === "visit" || r.report_type === "visit_summary"),
     certificate: items.filter(
       (r) => r.report_type === "certificate" || r.report_type === "medical_certificate",
     ),
@@ -162,15 +157,11 @@ function AccessHistorySheet() {
       <SheetContent side="left" className="w-full max-w-md overflow-y-auto">
         <SheetHeader>
           <SheetTitle>سجل الوصول للتقارير</SheetTitle>
-          <SheetDescription>
-            يعرض آخر محاولات فتح وتحميل التقارير من حسابك.
-          </SheetDescription>
+          <SheetDescription>يعرض آخر محاولات فتح وتحميل التقارير من حسابك.</SheetDescription>
         </SheetHeader>
 
         <div className="mt-4 space-y-2">
-          {history.isPending && (
-            <div className="text-sm text-muted-foreground">جارٍ التحميل…</div>
-          )}
+          {history.isPending && <div className="text-sm text-muted-foreground">جارٍ التحميل…</div>}
           {history.isError && (
             <div className="text-sm text-destructive">
               {(history.error as Error).message || "تعذر تحميل السجل."}
@@ -184,7 +175,9 @@ function AccessHistorySheet() {
               <div className="flex items-center justify-between gap-2">
                 <div className="text-sm font-medium">
                   {entry.report_title_ar ??
-                    (entry.report_type ? TYPE_LABEL[entry.report_type] ?? entry.report_type : "تقرير")}
+                    (entry.report_type
+                      ? (TYPE_LABEL[entry.report_type] ?? entry.report_type)
+                      : "تقرير")}
                 </div>
                 <Badge
                   variant={
@@ -208,9 +201,7 @@ function AccessHistorySheet() {
                 نسخة: {entry.version}
               </div>
               {entry.reason && (
-                <div className="mt-1 text-xs text-muted-foreground">
-                  السبب: {entry.reason}
-                </div>
+                <div className="mt-1 text-xs text-muted-foreground">السبب: {entry.reason}</div>
               )}
             </div>
           ))}

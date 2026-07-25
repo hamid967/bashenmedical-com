@@ -92,9 +92,7 @@ export async function assertPermissions(
   permissions: readonly PermissionKey[],
   branchId: string | null = null,
 ): Promise<true> {
-  const results = await Promise.all(
-    permissions.map((p) => hasPermission(ctx, p, branchId)),
-  );
+  const results = await Promise.all(permissions.map((p) => hasPermission(ctx, p, branchId)));
   if (results.some((ok) => !ok)) throw new Error(DENIED);
   return true;
 }
@@ -225,9 +223,9 @@ export async function assertRecordAccess(
  * `usePermissions` hook to gate UI affordances; the server still enforces
  * every write independently via `assertPermission`.
  */
-export async function listMyGrants(ctx: EnforceCtx): Promise<
-  Array<{ permission_key: string; branch_id: string | null }>
-> {
+export async function listMyGrants(
+  ctx: EnforceCtx,
+): Promise<Array<{ permission_key: string; branch_id: string | null }>> {
   const { data, error } = await ctx.supabase
     .from("user_roles")
     .select("branch_id, is_global, role_permissions:role ( permission_key )")

@@ -24,23 +24,14 @@ const STAFF_ROLES = [
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
 /** Returns the set of staff roles the user carries; empty array = not staff. */
-export async function detectStaffRoles(
-  userId: string,
-  token: string,
-): Promise<StaffRole[]> {
-  const sb = createClient(
-    process.env.SUPABASE_URL!,
-    process.env.SUPABASE_PUBLISHABLE_KEY!,
-    {
-      auth: { persistSession: false, autoRefreshToken: false },
-      global: { headers: { Authorization: `Bearer ${token}` } },
-    },
-  );
+export async function detectStaffRoles(userId: string, token: string): Promise<StaffRole[]> {
+  const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
   try {
     const checks = await Promise.all(
-      STAFF_ROLES.map((role) =>
-        sb.rpc("has_role", { _user_id: userId, _role: role }),
-      ),
+      STAFF_ROLES.map((role) => sb.rpc("has_role", { _user_id: userId, _role: role })),
     );
     return STAFF_ROLES.filter((_, i) => checks[i]?.data === true);
   } catch {
@@ -53,16 +44,11 @@ export async function loadStaffSnapshot(
   token: string,
   roles: readonly string[],
 ): Promise<string> {
-
   try {
-    const sb = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_PUBLISHABLE_KEY!,
-      {
-        auth: { persistSession: false, autoRefreshToken: false },
-        global: { headers: { Authorization: `Bearer ${token}` } },
-      },
-    );
+    const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
     const today = new Date().toISOString().slice(0, 10);
     const startOfDay = `${today}T00:00:00Z`;

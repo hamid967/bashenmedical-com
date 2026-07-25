@@ -13,6 +13,7 @@ UPDATE_BASELINES=1 python3 tests/e2e/portal_visual_regression.py
 ```
 
 Requires:
+
 - Dev server running at `http://localhost:8080`
 - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` in env (test patient is created + deleted)
 

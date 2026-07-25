@@ -25,7 +25,11 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
-import { submitBooking, clearBookingIdempotencyKey, getBookingCorrelationId } from "@/lib/booking-submit";
+import {
+  submitBooking,
+  clearBookingIdempotencyKey,
+  getBookingCorrelationId,
+} from "@/lib/booking-submit";
 import { getBookingSessionId } from "@/lib/booking-hold";
 import { Button } from "@/components/ui-v3";
 
@@ -68,11 +72,8 @@ import { bmcOgImageMeta } from "@/lib/og-meta";
 // before it flows to availability/hold/prefetch queries — those APIs treat
 // null-doctor as "aggregate across the specialty pool".
 const ANY_DOCTOR = "any" as const;
-const isConcreteDoctorId = (v: string | null): v is string =>
-  !!v && v !== ANY_DOCTOR;
-const asDoctorParam = (v: string | null): string | null =>
-  isConcreteDoctorId(v) ? v : null;
-
+const isConcreteDoctorId = (v: string | null): v is string => !!v && v !== ANY_DOCTOR;
+const asDoctorParam = (v: string | null): string | null => (isConcreteDoctorId(v) ? v : null);
 
 // Named-step mapping — user-visible URLs read like ?step=patient instead of
 // ?step=7. Numeric step remains the source of truth internally; the name is
@@ -234,9 +235,7 @@ function BookPage() {
    * strip sensitive OTP state, release any active hold, and route the user
    * back to step 1. Polling instead of a single setTimeout keeps the warning
    * accurate across sleep/wake and tab-focus resumes.                    */
-  const [draftExpiresAt, setDraftExpiresAt] = useState<number | null>(() =>
-    getDraftExpiresAt(),
-  );
+  const [draftExpiresAt, setDraftExpiresAt] = useState<number | null>(() => getDraftExpiresAt());
   useEffect(() => {
     // Refresh the cached expiresAt on every state change (save just ran).
     setDraftExpiresAt(getDraftExpiresAt());
@@ -255,12 +254,10 @@ function BookPage() {
     };
   }, []);
 
-
   // Focus target: the wizard card container is programmatically focused on
   // step change so keyboard/AT users start each step at its heading instead
   // of tabbing all the way from the page header.
   const stepCardRef = useRef<HTMLDivElement | null>(null);
-
 
   // Explicit step→URL sync helper: bumps state and writes the NAMED step
   // (e.g. ?step=patient) to the URL so links are self-describing. Popstate
@@ -305,9 +302,7 @@ function BookPage() {
       if (!raw) return;
       const asNum = parseInt(raw, 10);
       const s =
-        Number.isInteger(asNum) && asNum >= 1 && asNum <= MAX_STEP
-          ? asNum
-          : stepNumberOf(raw);
+        Number.isInteger(asNum) && asNum >= 1 && asNum <= MAX_STEP ? asNum : stepNumberOf(raw);
       if (s && s >= 1 && s <= MAX_STEP) dispatch({ t: "goto", step: s });
     };
     window.addEventListener("popstate", onPop);
@@ -325,7 +320,6 @@ function BookPage() {
     });
     return () => window.cancelAnimationFrame(id);
   }, [state.step]);
-
 
   // Auto-recover expired hold: when the 5-minute reservation lapses while
   // the user is past the time picker (steps 7–8), bounce back to step 6
@@ -413,9 +407,20 @@ function BookPage() {
   }, [state.doctorId, state.specialtyId, doctors]);
 
   const { data: avail } = useQuery({
-    queryKey: ["avail", state.date, asDoctorParam(state.doctorId), state.specialtyId, state.branchId],
+    queryKey: [
+      "avail",
+      state.date,
+      asDoctorParam(state.doctorId),
+      state.specialtyId,
+      state.branchId,
+    ],
     queryFn: () =>
-      fetchAvailability(state.date!, asDoctorParam(state.doctorId), state.specialtyId, state.branchId),
+      fetchAvailability(
+        state.date!,
+        asDoctorParam(state.doctorId),
+        state.specialtyId,
+        state.branchId,
+      ),
     enabled: !!state.date && state.step >= 6,
     staleTime: 20_000,
   });
@@ -442,7 +447,6 @@ function BookPage() {
     staleTime: 60_000,
   });
 
-
   const noWeekAvailability = useMemo(() => {
     if (!weekDates) return false;
     const today = new Date();
@@ -454,10 +458,7 @@ function BookPage() {
   }, [weekDates]);
 
   const patientValidation = useMemo(() => validatePatient(state.patient), [state.patient]);
-  const insuranceValidation = useMemo(
-    () => validateInsurance(state.patient),
-    [state.patient],
-  );
+  const insuranceValidation = useMemo(() => validateInsurance(state.patient), [state.patient]);
 
   // 5-minute slot hold: activates as soon as the patient reaches the time
   // picker with a doctor+date+time. Released on unmount, on tuple change,
@@ -546,7 +547,6 @@ function BookPage() {
     });
   }, [state.doctorId, state.specialtyId, state.branchId, queryClient]);
 
-
   // Prefetch the doctors list as soon as a specialty is chosen (step 3),
   // so StepDoctor at step 4 renders without a spinner.
   useEffect(() => {
@@ -557,7 +557,6 @@ function BookPage() {
       staleTime: 5 * 60_000,
     });
   }, [state.specialtyId, state.branchId, state.step, queryClient]);
-
 
   // Consistency guard: clamp state.step to the highest step whose
   // prerequisites are actually met. Runs on every state change so a
@@ -814,7 +813,6 @@ function BookPage() {
     }
   }
 
-
   /**
    * Clean restart of the wizard. On top of clearing local draft/result state
    * we also release any active server-side slot hold and drop sensitive OTP
@@ -849,16 +847,10 @@ function BookPage() {
   useEffect(() => {
     if (!draftExpiresAt) return;
     if (Date.now() < draftExpiresAt) return;
-    toast.info(
-      t(
-        "page.draftExpiredToast",
-        "انتهت صلاحية مسودة الحجز — تم البدء من جديد.",
-      ),
-    );
+    toast.info(t("page.draftExpiredToast", "انتهت صلاحية مسودة الحجز — تم البدء من جديد."));
     handleReset({ silent: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftExpiresAt]);
-
 
   const STEPS = [
     t("steps.service"),
@@ -881,10 +873,7 @@ function BookPage() {
   const displayedStep =
     state.step === SUCCESS_STEP
       ? SUCCESS_STEP
-      : Math.min(
-          state.step,
-          maxReachableStep(state, patientValidation.ok, insuranceValidation.ok),
-        );
+      : Math.min(state.step, maxReachableStep(state, patientValidation.ok, insuranceValidation.ok));
 
   const stepAnnounce =
     state.step === 9
@@ -945,11 +934,9 @@ function BookPage() {
               className="mt-4 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 flex flex-wrap items-center gap-3 justify-between"
             >
               <span>
-                {t(
-                  "page.draftExpiringSoon",
-                  "ستنتهي صلاحية مسودة الحجز خلال {{minutes}} دقيقة.",
-                  { minutes: Math.max(1, Math.round((draftExpiresAt - Date.now()) / 60_000)) },
-                )}
+                {t("page.draftExpiringSoon", "ستنتهي صلاحية مسودة الحجز خلال {{minutes}} دقيقة.", {
+                  minutes: Math.max(1, Math.round((draftExpiresAt - Date.now()) / 60_000)),
+                })}
               </span>
               <div className="flex gap-2">
                 <Button
@@ -974,7 +961,6 @@ function BookPage() {
             tabIndex={-1}
             className="rounded-2xl bg-card border border-border shadow-sm p-5 md:p-8 min-h-[420px] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
           >
-
             {state.step >= 6 &&
               state.step <= 8 &&
               state.time &&
@@ -1188,7 +1174,6 @@ function BookPage() {
                     emphasized={noWeekAvailability}
                   />
                 </div>
-
               </>
             )}
             {state.step === 7 && (
@@ -1225,7 +1210,10 @@ function BookPage() {
                 patientValid={patientValidation.ok}
                 onEditPatient={() => goto(7)}
                 onVerified={(challengeId, phone) =>
-                  dispatch({ t: "set", p: { verificationChallengeId: challengeId, verifiedPhone: phone } })
+                  dispatch({
+                    t: "set",
+                    p: { verificationChallengeId: challengeId, verifiedPhone: phone },
+                  })
                 }
               />
             )}
@@ -1268,7 +1256,6 @@ function BookPage() {
             onEdit={(step: number) => goto(step)}
           />
         )}
-
 
         {state.step < SUCCESS_STEP && (
           <div className="mt-4 flex items-center justify-between">

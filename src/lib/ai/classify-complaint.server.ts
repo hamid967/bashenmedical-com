@@ -42,8 +42,7 @@ export async function classifyComplaint(complaintId: string): Promise<Classifica
     messages: [
       {
         role: "system",
-        content:
-          `صنّف الشكوى الطبية. أعد JSON فقط بالحقول: ai_category (${CATEGORIES.join("|")}), ai_severity (${SEVERITIES.join("|")}), ai_suggested_owner (${OWNERS.join("|")}). بدون أي نص إضافي.`,
+        content: `صنّف الشكوى الطبية. أعد JSON فقط بالحقول: ai_category (${CATEGORIES.join("|")}), ai_severity (${SEVERITIES.join("|")}), ai_suggested_owner (${OWNERS.join("|")}). بدون أي نص إضافي.`,
       },
       {
         role: "user",

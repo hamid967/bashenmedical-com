@@ -86,7 +86,9 @@ await writeFile(join(dir, `${report.drill_id}.md`), renderReportMarkdown(report)
 console.log(`[dr] report written: artifacts/dr/${report.drill_id}.{json,md}`);
 
 const alert = await dispatchDrillAlert(report);
-console.log(`[dr] alert channel=${alert.channel} attempted=${alert.attempted} delivered=${alert.delivered}${alert.error ? ` error=${alert.error}` : ""}`);
+console.log(
+  `[dr] alert channel=${alert.channel} attempted=${alert.attempted} delivered=${alert.delivered}${alert.error ? ` error=${alert.error}` : ""}`,
+);
 
 if (report.status === "aborted") process.exit(2);
 if (report.status === "breached") process.exit(1);

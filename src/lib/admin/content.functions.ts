@@ -18,14 +18,7 @@ const ContentTypeEnum = z.enum([
   "nearest_slot",
   "suggested_service",
 ]);
-const StatusEnum = z.enum([
-  "draft",
-  "review",
-  "approved",
-  "scheduled",
-  "published",
-  "archived",
-]);
+const StatusEnum = z.enum(["draft", "review", "approved", "scheduled", "published", "archived"]);
 
 // Basic diagnostic/medical-claim guard: reject wording that reads like a
 // medical inference. Not exhaustive; supplements editorial review.
@@ -144,10 +137,7 @@ export const upsertContentItem = createServerFn({ method: "POST" })
     ensureNoClaims(data.body_en);
     ensureNoClaims(data.title_ar);
     ensureNoClaims(data.title_en);
-    if (
-      data.is_promotional &&
-      (data.type === "screening" || data.type === "reminder")
-    ) {
+    if (data.is_promotional && (data.type === "screening" || data.type === "reminder")) {
       throw new Error("لا يمكن وسم حملات الفحص أو التذكيرات كمحتوى ترويجي.");
     }
 
@@ -190,9 +180,7 @@ const ALLOWED: Record<string, string[]> = {
 
 export const transitionContentStatus = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) =>
-    z.object({ id: z.string().uuid(), to: StatusEnum }).parse(input),
-  )
+  .validator((input: unknown) => z.object({ id: z.string().uuid(), to: StatusEnum }).parse(input))
   .handler(async ({ context, data }) => {
     await assertEditor(context);
     const { data: current, error: e1 } = await context.supabase
@@ -254,7 +242,9 @@ export const toggleContentDisabled = createServerFn({ method: "POST" })
 export const getContentStats = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
-    z.object({ id: z.string().uuid(), days: z.number().int().min(1).max(90).optional() }).parse(input),
+    z
+      .object({ id: z.string().uuid(), days: z.number().int().min(1).max(90).optional() })
+      .parse(input),
   )
   .handler(async ({ context, data }) => {
     await assertEditor(context);

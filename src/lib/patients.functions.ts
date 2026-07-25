@@ -1,10 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
-import {
-  createPatientSignedUrl,
-  SIGNED_URL_TTL_SECONDS,
-} from "@/lib/storage/signed-url.server";
+import { createPatientSignedUrl, SIGNED_URL_TTL_SECONDS } from "@/lib/storage/signed-url.server";
 
 /**
  * Create a short-lived signed URL for a patient attachment.
@@ -59,9 +56,7 @@ export const getAttachmentSignedUrl = createServerFn({ method: "POST" })
           actor_id: userId,
           bucket: "patient-files",
         });
-        const { recordSensitiveAccess } = await import(
-          "@/lib/audit/sensitive-access.server"
-        );
+        const { recordSensitiveAccess } = await import("@/lib/audit/sensitive-access.server");
         await recordSensitiveAccess({
           supabase,
           actorId: userId,

@@ -61,9 +61,7 @@ function getClientMeta(): { ip: string | null; ua: string | null } {
   return { ip, ua };
 }
 
-export async function recordSensitiveAccess(
-  input: RecordSensitiveAccessInput,
-): Promise<void> {
+export async function recordSensitiveAccess(input: RecordSensitiveAccessInput): Promise<void> {
   const { ip, ua } = getClientMeta();
   try {
     await input.supabase.from("audit_logs").insert({
@@ -83,9 +81,6 @@ export async function recordSensitiveAccess(
     });
   } catch (e) {
     // Audit writes are best-effort — never block or leak the underlying error.
-    console.error(
-      "[recordSensitiveAccess] failed",
-      (e as Error)?.message ?? "unknown",
-    );
+    console.error("[recordSensitiveAccess] failed", (e as Error)?.message ?? "unknown");
   }
 }

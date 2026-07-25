@@ -84,9 +84,7 @@ function PatientDashboard() {
             {next ? (
               <div className="space-y-3">
                 <div>
-                  <div className="text-lg font-semibold">
-                    {next.doctor?.name_ar ?? "طبيبك"}
-                  </div>
+                  <div className="text-lg font-semibold">{next.doctor?.name_ar ?? "طبيبك"}</div>
                   <div className="text-sm text-muted-foreground">
                     {next.branch?.name_ar ?? ""}
                     {next.reason ? ` · ${next.reason}` : ""}
@@ -138,9 +136,7 @@ function PatientDashboard() {
             <div>
               <CalendarPlus className="mb-3 h-8 w-8" aria-hidden />
               <h3 className="text-lg font-bold">احجز موعدًا الآن</h3>
-              <p className="mt-1 text-sm opacity-90">
-                اختر التخصص والطبيب والفرع خلال دقائق.
-              </p>
+              <p className="mt-1 text-sm opacity-90">اختر التخصص والطبيب والفرع خلال دقائق.</p>
             </div>
             <Button asChild variant="secondary" className="mt-4 w-full">
               <Link to="/book">

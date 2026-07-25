@@ -39,7 +39,8 @@ export async function runCmsPublishSweep(): Promise<CmsPublishResult> {
         .eq("id", (entry as any).id);
       if (uerr) throw new Error(uerr.message);
 
-      await supabaseAdmin.from("cms_schedule")
+      await supabaseAdmin
+        .from("cms_schedule")
         .update({ job_state: "done", ran_at: now })
         .eq("entry_id", (entry as any).id)
         .eq("job_state", "pending");
@@ -54,7 +55,8 @@ export async function runCmsPublishSweep(): Promise<CmsPublishResult> {
       out.published++;
     } catch (e: any) {
       out.errors.push(`${(entry as any).id}: ${e?.message ?? "unknown"}`);
-      await supabaseAdmin.from("cms_schedule")
+      await supabaseAdmin
+        .from("cms_schedule")
         .update({ job_state: "error", ran_at: now, error: e?.message ?? "unknown" })
         .eq("entry_id", (entry as any).id)
         .eq("job_state", "pending");

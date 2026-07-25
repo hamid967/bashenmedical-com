@@ -27,13 +27,7 @@ export function sanitizeNext(next: string | null | undefined): string | null {
  * resolves the session and the server fn returns the role list.
  */
 export type PrimaryRole =
-  | "patient"
-  | "doctor"
-  | "admin"
-  | "super_admin"
-  | "content_manager"
-  | "staff"
-  | "unknown";
+  "patient" | "doctor" | "admin" | "super_admin" | "content_manager" | "staff" | "unknown";
 
 const HOME_BY_ROLE: Record<PrimaryRole, string> = {
   patient: "/patient",

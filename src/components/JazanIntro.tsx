@@ -94,7 +94,8 @@ function shouldShow(
   if (typeof window === "undefined") return { show: false, reason: "ssr" };
 
   // Never-block paths — booking, auth, patient portal, admin, owner, API, etc.
-  const prefixes = blockedPathPrefixes.length > 0 ? blockedPathPrefixes : DEFAULT_INTRO_BLOCKED_PREFIXES;
+  const prefixes =
+    blockedPathPrefixes.length > 0 ? blockedPathPrefixes : DEFAULT_INTRO_BLOCKED_PREFIXES;
   const path = window.location.pathname || "/";
   for (const p of prefixes) {
     if (p && path.startsWith(p)) return { show: false, reason: `blocked_path:${p}` };
@@ -102,9 +103,16 @@ function shouldShow(
 
   // Save-data / slow-network guard. Never block booking or login on weak links.
   try {
-    const conn = (navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string; downlink?: number; rtt?: number };
-    }).connection;
+    const conn = (
+      navigator as Navigator & {
+        connection?: {
+          saveData?: boolean;
+          effectiveType?: string;
+          downlink?: number;
+          rtt?: number;
+        };
+      }
+    ).connection;
     if (conn?.saveData) return { show: false, reason: "save_data" };
     const et = conn?.effectiveType;
     if (et === "2g" || et === "slow-2g" || et === "3g") {
@@ -121,7 +129,8 @@ function shouldShow(
   }
 
   try {
-    if (localStorage.getItem(DISABLED_KEY) === "1") return { show: false, reason: "user_opted_out" };
+    if (localStorage.getItem(DISABLED_KEY) === "1")
+      return { show: false, reason: "user_opted_out" };
     if (frequency === "every_visit") return { show: true };
     if (frequency === "once_per_session") {
       return sessionStorage.getItem(SESSION_KEY) === "1"
@@ -132,9 +141,7 @@ function shouldShow(
     const last = localStorage.getItem(STORAGE_KEY);
     if (!last) return { show: true };
     const ageMs = Date.now() - Number(last);
-    return ageMs > cooldownHours * 3_600_000
-      ? { show: true }
-      : { show: false, reason: "cooldown" };
+    return ageMs > cooldownHours * 3_600_000 ? { show: true } : { show: false, reason: "cooldown" };
   } catch {
     return { show: true };
   }
@@ -259,7 +266,6 @@ export function JazanIntro() {
     requestAnimationFrame(() => setVisible(true));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [introCfg.enabled, introCfg.frequency, introCfg.cooldownHours]);
-  
 
   useEffect(() => {
     if (!mounted) return;
@@ -296,16 +302,18 @@ export function JazanIntro() {
 
     // 2) Live network downgrade — if the connection turns slow/save-data
     // mid-intro, bail out immediately.
-    const conn = (navigator as Navigator & {
-      connection?: {
-        saveData?: boolean;
-        effectiveType?: string;
-        downlink?: number;
-        rtt?: number;
-        addEventListener?: (t: string, cb: () => void) => void;
-        removeEventListener?: (t: string, cb: () => void) => void;
-      };
-    }).connection;
+    const conn = (
+      navigator as Navigator & {
+        connection?: {
+          saveData?: boolean;
+          effectiveType?: string;
+          downlink?: number;
+          rtt?: number;
+          addEventListener?: (t: string, cb: () => void) => void;
+          removeEventListener?: (t: string, cb: () => void) => void;
+        };
+      }
+    ).connection;
     const onNetChange = () => {
       if (!conn) return;
       const et = conn.effectiveType;
@@ -359,8 +367,6 @@ export function JazanIntro() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mounted]);
-
-
 
   // Focus management: save previous focus, focus skip button, restore on unmount.
   // Escape closes; Tab is trapped inside the dialog.

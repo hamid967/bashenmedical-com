@@ -22,13 +22,7 @@
 import { checkRateLimit, getClientIp, rateLimitedResponse } from "@/lib/rate-limit.server";
 
 export type RateLimitCategory =
-  | "auth_otp"
-  | "booking"
-  | "reads"
-  | "inquiries"
-  | "insurance"
-  | "ai_chat"
-  | "webhook";
+  "auth_otp" | "booking" | "reads" | "inquiries" | "insurance" | "ai_chat" | "webhook";
 
 const PRESETS: Record<RateLimitCategory, { windowMs: number; max: number }[]> = {
   auth_otp: [

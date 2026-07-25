@@ -36,8 +36,7 @@ export type IntegrationHealth = {
 };
 
 const SUCCESS_STATUSES = new Set(["ok", "success", "succeeded", "200", "201"]);
-const isSuccess = (s: string | null | undefined) =>
-  !!s && SUCCESS_STATUSES.has(s.toLowerCase());
+const isSuccess = (s: string | null | undefined) => !!s && SUCCESS_STATUSES.has(s.toLowerCase());
 
 /**
  * Overview: aggregate every integration_key seen in the last window.

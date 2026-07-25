@@ -9,10 +9,7 @@ import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-import {
-  transformSource,
-  mapUtility,
-} from "../../scripts/codemod-portal-tokens.mjs";
+import { transformSource, mapUtility } from "../../scripts/codemod-portal-tokens.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(HERE, "fixtures");
@@ -59,9 +56,15 @@ describe("codemod-portal-tokens — fixtures", () => {
         writeFileSync(join(TMP, `${base}.diff.txt`), diff);
         writeFileSync(join(TMP, `${base}.actual.tsx`), actual);
         writeFileSync(join(TMP, `${base}.expected.tsx`), expected);
-        console.error(`\n─── DIFF (${base}) — saved to tests/codemod/.tmp/${base}.diff.txt ───\n${diff}`);
+        console.error(
+          `\n─── DIFF (${base}) — saved to tests/codemod/.tmp/${base}.diff.txt ───\n${diff}`,
+        );
       }
-      assert.equal(actual, expected, `مخرجات codemod تختلف عن expected لـ ${base} (راجع tests/codemod/.tmp/${base}.diff.txt)`);
+      assert.equal(
+        actual,
+        expected,
+        `مخرجات codemod تختلف عن expected لـ ${base} (راجع tests/codemod/.tmp/${base}.diff.txt)`,
+      );
       assert.ok(changed > 0 || input === expected, "إحصاء changed يجب أن يعكس التغييرات");
     });
   }
@@ -137,8 +140,14 @@ describe("codemod-portal-tokens — twMerge conflict handling", () => {
   test("twMerge مع short-circuit وternary لا يكسر البنية", () => {
     const src = `<button className={twMerge("bg-white text-slate-900", on && "bg-red-500 text-white", tone === "ok" ? "bg-emerald-50" : "bg-amber-50")} />`;
     const { src: out } = run(src);
-    assert.match(out, /on && "bg-\[color:var\(--portal-error\)\] text-\[color:var\(--portal-on-primary\)\]"/);
-    assert.match(out, /tone === "ok" \? "bg-\[color:var\(--portal-success-50\)\]" : "bg-\[color:var\(--portal-warning-50\)\]"/);
+    assert.match(
+      out,
+      /on && "bg-\[color:var\(--portal-error\)\] text-\[color:var\(--portal-on-primary\)\]"/,
+    );
+    assert.match(
+      out,
+      /tone === "ok" \? "bg-\[color:var\(--portal-success-50\)\]" : "bg-\[color:var\(--portal-warning-50\)\]"/,
+    );
     // البنية نفسها محفوظة (فاصلات، أقواس)
     assert.match(out, /twMerge\([^)]*\) } \/>|twMerge\([\s\S]*?\)/);
   });

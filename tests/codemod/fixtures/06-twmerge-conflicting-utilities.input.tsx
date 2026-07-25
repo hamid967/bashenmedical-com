@@ -21,11 +21,7 @@ export const A = ({ selected }: { selected: boolean }) => (
 export const B = ({ tone, big }: { tone: "ok" | "warn" | "err"; big: boolean }) => (
   <div
     className={twMerge(
-      clsx(
-        "bg-white text-gray-700",
-        "text-slate-900",
-        big && "text-black",
-      ),
+      clsx("bg-white text-gray-700", "text-slate-900", big && "text-black"),
       tone === "ok" && "bg-emerald-50 text-emerald-700",
       tone === "warn" && "bg-amber-50 text-amber-700",
       tone === "err" && "bg-red-50 text-red-700",

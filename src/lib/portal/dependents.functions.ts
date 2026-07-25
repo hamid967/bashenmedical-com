@@ -268,8 +268,6 @@ export const requestDependentVerification = createServerFn({ method: "POST" })
     return normalizeDependent(row);
   });
 
-
-
 /* -------------------- listDependentAppointments -------------------- */
 
 export type DependentAppointment = {

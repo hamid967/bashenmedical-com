@@ -199,10 +199,7 @@ function formatSeconds(s: number): string {
   return `${m}:${String(r).padStart(2, "0")}`;
 }
 
-function verifyErrorMessage(
-  code: string,
-  res: { attemptsRemaining?: number },
-): string {
+function verifyErrorMessage(code: string, res: { attemptsRemaining?: number }): string {
   switch (code) {
     case "invalid_code":
       return `الرمز غير صحيح. المحاولات المتبقية: ${res.attemptsRemaining ?? "?"}`;

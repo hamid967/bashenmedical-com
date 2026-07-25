@@ -55,7 +55,11 @@ for (const line of rootBody.split("\n")) {
 // --- Color math (sRGB → relative luminance → contrast) ---------------------
 function hexToRgb(hex) {
   let h = hex.replace("#", "");
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 3)
+    h = h
+      .split("")
+      .map((c) => c + c)
+      .join("");
   if (h.length === 8) h = h.slice(0, 6);
   const n = parseInt(h, 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
@@ -68,9 +72,7 @@ function relLuminance([r, g, b]) {
   return 0.2126 * chan(r) + 0.7152 * chan(g) + 0.0722 * chan(b);
 }
 function contrast(a, b) {
-  const [L1, L2] = [relLuminance(hexToRgb(a)), relLuminance(hexToRgb(b))].sort(
-    (x, y) => y - x,
-  );
+  const [L1, L2] = [relLuminance(hexToRgb(a)), relLuminance(hexToRgb(b))].sort((x, y) => y - x);
   return (L1 + 0.05) / (L2 + 0.05);
 }
 
@@ -131,8 +133,7 @@ const YEL = "\x1b[33m";
 const CYA = "\x1b[36m";
 const DIM = "\x1b[2m";
 const OFF = "\x1b[0m";
-const color = (s) =>
-  s === "pass" ? GREEN : s === "fail" ? RED : s === "info" ? CYA : YEL;
+const color = (s) => (s === "pass" ? GREEN : s === "fail" ? RED : s === "info" ? CYA : YEL);
 
 console.log(`\nContrast audit — src/styles.css :root (min ${MIN}, large ${LARGE_MIN})\n`);
 console.log(pad("role", 32), pad("fg", 22), pad("bg", 22), pad("ratio", 8), "status");

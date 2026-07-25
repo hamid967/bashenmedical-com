@@ -19,7 +19,10 @@ const REF_RE = /^(BMC-\d{8}-\d{4}|BAA-[0-9A-F]{8})$/;
 
 const schema = z.object({
   reference: z.string().trim().toUpperCase().regex(REF_RE, "invalid reference"),
-  phone_last4: z.string().trim().regex(/^\d{4}$/, "phone_last4"),
+  phone_last4: z
+    .string()
+    .trim()
+    .regex(/^\d{4}$/, "phone_last4"),
 });
 
 type Channel = "sms" | "whatsapp" | "email";

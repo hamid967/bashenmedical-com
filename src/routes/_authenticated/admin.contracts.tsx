@@ -94,14 +94,20 @@ function extractInternal(): InternalContract[] {
     while ((m = rx.exec(source)) !== null) {
       const [, name, method, chain] = m;
       const authenticated = /\.middleware\(\s*\[[^\]]*requireSupabaseAuth/.test(chain);
-      const validatorMatch =
-        chain.match(/\.(?:validator|inputValidator)\s*\(([\s\S]*?)\)\s*(?=\.|$)/);
-      const validator = validatorMatch
-        ? validatorMatch[1].trim().slice(0, 260)
-        : null;
+      const validatorMatch = chain.match(
+        /\.(?:validator|inputValidator)\s*\(([\s\S]*?)\)\s*(?=\.|$)/,
+      );
+      const validator = validatorMatch ? validatorMatch[1].trim().slice(0, 260) : null;
       const startIdx = m.index;
       const snippet = source.slice(startIdx, startIdx + 320).replace(/\s+/g, " ");
-      out.push({ file: path, name, method: method as "GET" | "POST", authenticated, validator, snippet });
+      out.push({
+        file: path,
+        name,
+        method: method as "GET" | "POST",
+        authenticated,
+        validator,
+        snippet,
+      });
     }
   }
   return out.sort((a, b) => a.name.localeCompare(b.name));
@@ -117,10 +123,7 @@ function extractPublic(): PublicRoute[] {
       source.matchAll(/\b(GET|POST|PUT|PATCH|DELETE|OPTIONS)\s*:\s*(?:async|\()/g),
     ).map((m) => m[1]);
     const uniq = Array.from(new Set(methods));
-    const snippet = source
-      .slice(0, 320)
-      .replace(/\s+/g, " ")
-      .trim();
+    const snippet = source.slice(0, 320).replace(/\s+/g, " ").trim();
     out.push({ file: path, path: routePath, methods: uniq, snippet });
   }
   return out.sort((a, b) => a.path.localeCompare(b.path));
@@ -140,29 +143,25 @@ const LEGAL_TEMPLATES: Array<{
     id: "patient-consent",
     title: "نموذج موافقة المريض على المعالجة",
     scope: "بيانات المريض · HIPAA/PDPL",
-    body:
-      "أوافق أنا الموقّع أدناه على تلقّي الخدمة الطبية في مجمّع باعشن الطبي وعلى معالجة بياناتي الشخصية والصحية وفقاً لسياسة الخصوصية المعتمدة. تشمل الموافقة الوصول للسجل الإلكتروني ومشاركة النتائج مع الأطباء المعالجين ومقدّمي التأمين المصرّح لهم فقط. يحق لي سحب هذه الموافقة كتابياً في أي وقت.",
+    body: "أوافق أنا الموقّع أدناه على تلقّي الخدمة الطبية في مجمّع باعشن الطبي وعلى معالجة بياناتي الشخصية والصحية وفقاً لسياسة الخصوصية المعتمدة. تشمل الموافقة الوصول للسجل الإلكتروني ومشاركة النتائج مع الأطباء المعالجين ومقدّمي التأمين المصرّح لهم فقط. يحق لي سحب هذه الموافقة كتابياً في أي وقت.",
   },
   {
     id: "corporate-agreement",
     title: "اتفاقية خدمات مع جهة اعتبارية",
     scope: "شركات · مؤسسات",
-    body:
-      "اتفقت الأطراف على تقديم خدمات طبية شاملة (فحص دوري، تلقيح، رعاية طارئة) لموظفي الطرف الثاني وفق التعرفة الملحقة، على أن يلتزم الطرف الأول بجودة الخدمة ومواعيد الاستجابة، ويلتزم الطرف الثاني بالسداد خلال 30 يوماً من تاريخ الفاتورة. تسري الاتفاقية لمدة 12 شهراً وتتجدد تلقائياً ما لم يُشعِر أحد الطرفين الآخر خطياً قبل 30 يوماً.",
+    body: "اتفقت الأطراف على تقديم خدمات طبية شاملة (فحص دوري، تلقيح، رعاية طارئة) لموظفي الطرف الثاني وفق التعرفة الملحقة، على أن يلتزم الطرف الأول بجودة الخدمة ومواعيد الاستجابة، ويلتزم الطرف الثاني بالسداد خلال 30 يوماً من تاريخ الفاتورة. تسري الاتفاقية لمدة 12 شهراً وتتجدد تلقائياً ما لم يُشعِر أحد الطرفين الآخر خطياً قبل 30 يوماً.",
   },
   {
     id: "dpa",
     title: "ملحق معالجة البيانات (DPA)",
     scope: "موردون · تكامل تقني",
-    body:
-      "يلتزم المعالج (المورّد) بمعالجة البيانات الشخصية بالنيابة عن المتحكّم (المجمّع) فقط للأغراض الموصوفة، وبتطبيق ضوابط أمنية مناسبة (تشفير في النقل والراحة، تحكم بالوصول، سجلات تدقيق)، وبإخطار المتحكم خلال 24 ساعة من علمه بأي حادث تسريب بيانات. يُحظر نقل البيانات خارج المملكة دون موافقة كتابية مسبقة.",
+    body: "يلتزم المعالج (المورّد) بمعالجة البيانات الشخصية بالنيابة عن المتحكّم (المجمّع) فقط للأغراض الموصوفة، وبتطبيق ضوابط أمنية مناسبة (تشفير في النقل والراحة، تحكم بالوصول، سجلات تدقيق)، وبإخطار المتحكم خلال 24 ساعة من علمه بأي حادث تسريب بيانات. يُحظر نقل البيانات خارج المملكة دون موافقة كتابية مسبقة.",
   },
   {
     id: "insurance-eligibility",
     title: "إقرار أهلية التأمين",
     scope: "قسم الفوترة · شركات التأمين",
-    body:
-      "يقرّ المريض/حامل الوثيقة بأن المعلومات التأمينية المقدَّمة صحيحة وحديثة، ويتحمّل شخصياً أي تكاليف يرفض التأمين تغطيتها لاحقاً بسبب انتهاء الأهلية أو تجاوز الحدود أو استثناءات الوثيقة. يُصرَّح للمجمّع بالتواصل مع شركة التأمين للتحقق من الأهلية والحصول على الموافقات المسبقة.",
+    body: "يقرّ المريض/حامل الوثيقة بأن المعلومات التأمينية المقدَّمة صحيحة وحديثة، ويتحمّل شخصياً أي تكاليف يرفض التأمين تغطيتها لاحقاً بسبب انتهاء الأهلية أو تجاوز الحدود أو استثناءات الوثيقة. يُصرَّح للمجمّع بالتواصل مع شركة التأمين للتحقق من الأهلية والحصول على الموافقات المسبقة.",
   },
 ];
 
@@ -183,16 +182,15 @@ function downloadText(filename: string, contents: string) {
 function ContractsPage() {
   const { tab } = useSearch({ from: "/_authenticated/admin/contracts" });
   const navigate = Route.useNavigate();
-  const setTab = (next: ContractTab) =>
-    navigate({ search: { tab: next }, replace: true });
+  const setTab = (next: ContractTab) => navigate({ search: { tab: next }, replace: true });
 
   return (
     <div className="space-y-6 p-4 md:p-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">توثيق العقود</h1>
         <p className="text-sm text-muted-foreground">
-          مرجع موحّد لعقود الـAPI الداخلية، ومسارات REST العامة، والقوالب
-          القانونية، وعقود البيانات (RLS).
+          مرجع موحّد لعقود الـAPI الداخلية، ومسارات REST العامة، والقوالب القانونية، وعقود البيانات
+          (RLS).
         </p>
       </header>
 
@@ -242,9 +240,7 @@ function InternalTab() {
     const needle = q.trim().toLowerCase();
     if (!needle) return items;
     return items.filter(
-      (it) =>
-        it.name.toLowerCase().includes(needle) ||
-        it.file.toLowerCase().includes(needle),
+      (it) => it.name.toLowerCase().includes(needle) || it.file.toLowerCase().includes(needle),
     );
   }, [items, q]);
 
@@ -301,9 +297,7 @@ function InternalTab() {
               </li>
             ))}
             {filtered.length === 0 && (
-              <li className="py-8 text-center text-sm text-muted-foreground">
-                لا نتائج.
-              </li>
+              <li className="py-8 text-center text-sm text-muted-foreground">لا نتائج.</li>
             )}
           </ul>
         </ScrollArea>
@@ -329,8 +323,8 @@ function PublicTab() {
         <div>
           <CardTitle>مسارات REST تحت /api/public/*</CardTitle>
           <p className="mt-1 text-xs text-muted-foreground">
-            {items.length} مسار — تتخطى المصادقة على النشر: يجب أن يتحقّق كل
-            handler يدوياً من التوقيع/الحد المسموح.
+            {items.length} مسار — تتخطى المصادقة على النشر: يجب أن يتحقّق كل handler يدوياً من
+            التوقيع/الحد المسموح.
           </p>
         </div>
         <div className="relative w-64">
@@ -362,9 +356,7 @@ function PublicTab() {
               </li>
             ))}
             {filtered.length === 0 && (
-              <li className="py-8 text-center text-sm text-muted-foreground">
-                لا نتائج.
-              </li>
+              <li className="py-8 text-center text-sm text-muted-foreground">لا نتائج.</li>
             )}
           </ul>
         </ScrollArea>
@@ -389,9 +381,7 @@ function LegalTab() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() =>
-                  downloadText(`${tpl.id}.txt`, `${tpl.title}\n\n${tpl.body}`)
-                }
+                onClick={() => downloadText(`${tpl.id}.txt`, `${tpl.title}\n\n${tpl.body}`)}
               >
                 <Download className="me-1 h-4 w-4" aria-hidden />
                 تنزيل
@@ -450,9 +440,7 @@ function DataTab() {
       </CardHeader>
       <CardContent>
         {query.isLoading && (
-          <p className="py-8 text-center text-sm text-muted-foreground">
-            جارِ التحميل…
-          </p>
+          <p className="py-8 text-center text-sm text-muted-foreground">جارِ التحميل…</p>
         )}
         {query.error && (
           <p className="py-8 text-center text-sm text-destructive">
@@ -497,16 +485,12 @@ function DataContractCard({ contract }: { contract: DataContract }) {
             {contract.columns.length} عمود · {contract.policies.length} سياسة
           </span>
         </span>
-        <span className="text-xs text-muted-foreground">
-          {open ? "طيّ" : "توسيع"}
-        </span>
+        <span className="text-xs text-muted-foreground">{open ? "طيّ" : "توسيع"}</span>
       </button>
       {open && (
         <div className="mt-3 grid gap-3 md:grid-cols-2">
           <div>
-            <h4 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
-              الأعمدة
-            </h4>
+            <h4 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">الأعمدة</h4>
             <ul className="space-y-1 font-mono text-xs">
               {contract.columns.map((col) => (
                 <li key={col.name} className="flex flex-wrap gap-x-2">

@@ -2,7 +2,7 @@ name: Performance Budgets (production)
 
 on:
   schedule:
-    - cron: "17 * * * *"   # hourly, offset from other crons
+    - cron: "17 * * * *" # hourly, offset from other crons
   workflow_dispatch:
   pull_request:
     branches: [main]

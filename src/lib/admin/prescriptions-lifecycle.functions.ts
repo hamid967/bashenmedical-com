@@ -12,11 +12,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { assertHasAnyRole } from "./_guard";
 
-async function requirePermission(
-  supabase: any,
-  userId: string,
-  key: string,
-): Promise<void> {
+async function requirePermission(supabase: any, userId: string, key: string): Promise<void> {
   const { data, error } = await supabase.rpc("has_permission", {
     _user_id: userId,
     _permission_key: key,
@@ -38,11 +34,7 @@ export const completePrescription = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "patients.clinical.write",
-    );
+    await requirePermission(context.supabase, context.userId, "patients.clinical.write");
     const { data: before } = await context.supabase
       .from("prescriptions")
       .select("status")
@@ -74,19 +66,14 @@ export const cancelPrescription = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "patients.clinical.write",
-    );
+    await requirePermission(context.supabase, context.userId, "patients.clinical.write");
     const { data: before } = await context.supabase
       .from("prescriptions")
       .select("status")
       .eq("id", data.id)
       .maybeSingle();
     if (!before) throw new Error("الوصفة غير موجودة.");
-    if (before.status === "cancelled")
-      throw new Error("الوصفة ملغاة مسبقاً.");
+    if (before.status === "cancelled") throw new Error("الوصفة ملغاة مسبقاً.");
     const { error } = await context.supabase
       .from("prescriptions")
       .update({
@@ -112,11 +99,7 @@ export const reviewPrescription = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin"]);
-    await requirePermission(
-      context.supabase,
-      context.userId,
-      "pharmacy.manage",
-    );
+    await requirePermission(context.supabase, context.userId, "pharmacy.manage");
     const { error } = await context.supabase
       .from("prescriptions")
       .update({

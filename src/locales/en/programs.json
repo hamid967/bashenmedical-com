@@ -30,7 +30,12 @@
         "Consultation with internal medicine and nutrition specialists",
         "Detailed digital medical report and follow-up plan"
       ],
-      "services": ["Platinum Full Checkup", "Heart Health Screening", "Diabetes Screening", "Hormones & Vitamins Panel"],
+      "services": [
+        "Platinum Full Checkup",
+        "Heart Health Screening",
+        "Diabetes Screening",
+        "Hormones & Vitamins Panel"
+      ],
       "applyLabel": "Browse packages and apply now",
       "secondaryLabel": "Medical Specialties"
     },
@@ -44,7 +49,12 @@
         "Awareness campaigns and seasonal vaccinations",
         "Dedicated account management and unified monthly billing"
       ],
-      "services": ["Pre-employment Screening", "On-site Periodic Clinics", "Occupational Health Programs", "Flu Vaccination"],
+      "services": [
+        "Pre-employment Screening",
+        "On-site Periodic Clinics",
+        "Occupational Health Programs",
+        "Flu Vaccination"
+      ],
       "applyLabel": "Request a corporate agreement",
       "secondaryLabel": "Contact the Corporate Team"
     },
@@ -86,7 +96,12 @@
         "Remote monitoring of glucose and blood pressure readings",
         "Nutrition and mental health consultations when needed"
       ],
-      "services": ["Diabetes Clinic", "Hypertension & Cardiology Clinic", "Asthma & Chest Clinic", "Health Education"],
+      "services": [
+        "Diabetes Clinic",
+        "Hypertension & Cardiology Clinic",
+        "Asthma & Chest Clinic",
+        "Health Education"
+      ],
       "applyLabel": "Enroll in the follow-up program",
       "secondaryLabel": "Diabetes & Heart Package"
     },
@@ -100,7 +115,12 @@
         "Alternative treatment options where available",
         "Full privacy and file encryption"
       ],
-      "services": ["Upload reports and imaging", "Consultant consultation", "Written medical report", "Proposed treatment plan"],
+      "services": [
+        "Upload reports and imaging",
+        "Consultant consultation",
+        "Written medical report",
+        "Proposed treatment plan"
+      ],
       "applyLabel": "Submit a second-opinion request",
       "secondaryLabel": "How does it work?"
     },
@@ -114,7 +134,12 @@
         "Remote lab result follow-up",
         "Fixed, insurance-approved pricing"
       ],
-      "services": ["General Consultation", "Pediatric Consultation", "Mental Health Consultation", "Chronic Disease Follow-up"],
+      "services": [
+        "General Consultation",
+        "Pediatric Consultation",
+        "Mental Health Consultation",
+        "Chronic Disease Follow-up"
+      ],
       "applyLabel": "Start an online consultation",
       "secondaryLabel": "Available Specialties"
     },
@@ -128,7 +153,12 @@
         "Accommodation and transportation booking",
         "Post-return remote follow-up"
       ],
-      "services": ["Pre-travel remote assessment", "Medical coordination", "Translation services", "Post-treatment follow-up"],
+      "services": [
+        "Pre-travel remote assessment",
+        "Medical coordination",
+        "Translation services",
+        "Post-treatment follow-up"
+      ],
       "applyLabel": "Submit an international patient request",
       "secondaryLabel": "Contact the International Office"
     }

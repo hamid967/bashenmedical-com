@@ -80,7 +80,6 @@ export function FormDialog({
           ) : null}
           <div className="space-y-4">{children}</div>
           <DialogFooter className="gap-2 sm:space-x-0">
-
             <Button
               type="button"
               variant="outline"

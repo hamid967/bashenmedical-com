@@ -355,7 +355,7 @@ export const getInboxSlaOverview = createServerFn({ method: "GET" })
       },
       byChannel: toBuckets(byChannelAgg, (k) => k),
       byBranch: toBuckets(byBranchAgg, (k) =>
-        k === "__none__" ? "بدون فرع" : branchNames.get(k) ?? k.slice(0, 8),
+        k === "__none__" ? "بدون فرع" : (branchNames.get(k) ?? k.slice(0, 8)),
       ),
       byStatus: toBuckets(byStatusAgg, (k) => k),
       breaches: breaches.slice(0, 100),

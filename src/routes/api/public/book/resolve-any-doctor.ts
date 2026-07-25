@@ -124,8 +124,7 @@ export const Route = createFileRoute("/api/public/book/resolve-any-doctor")({
             if ((timeMin - s) % step !== 0) continue;
             canWorkSlot.add(String(row.doctor_id));
           }
-          if (canWorkSlot.size === 0)
-            return json(200, { ok: false, error: "no_available_doctor" });
+          if (canWorkSlot.size === 0) return json(200, { ok: false, error: "no_available_doctor" });
 
           // 3) Exclude doctors on all-day leave for the date.
           const { data: leaves } = await supabaseAdmin
@@ -174,11 +173,15 @@ export const Route = createFileRoute("/api/public/book/resolve-any-doctor")({
             loadByDoctor.set(id, (loadByDoctor.get(id) ?? 0) + 1);
           }
           const free = candidates.filter(
-            (d) => canWorkSlot.has(d.id as string) && !onLeave.has(d.id as string) && !busy.has(d.id as string),
+            (d) =>
+              canWorkSlot.has(d.id as string) &&
+              !onLeave.has(d.id as string) &&
+              !busy.has(d.id as string),
           );
           if (free.length === 0) return json(200, { ok: false, error: "no_available_doctor" });
           free.sort(
-            (a, b) => (loadByDoctor.get(a.id as string) ?? 0) - (loadByDoctor.get(b.id as string) ?? 0),
+            (a, b) =>
+              (loadByDoctor.get(a.id as string) ?? 0) - (loadByDoctor.get(b.id as string) ?? 0),
           );
           const pick = free[0];
           return json(200, {

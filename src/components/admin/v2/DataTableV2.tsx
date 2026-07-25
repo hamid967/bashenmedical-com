@@ -28,13 +28,7 @@ import { Input } from "@/components/ui-v3";
 import { Button } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
 import { extractErrorMessage } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui-v3";
 import {
   AlertDialog,
@@ -263,7 +257,6 @@ export function DataTableV2<T>({
     }
   }, [storageKey, sort, effectivePagination.perPage]);
 
-
   /* When server-side isn't used, slice locally. */
   const displayedRows = useMemo(() => {
     if (pagination) return data; // server already sliced
@@ -361,7 +354,10 @@ export function DataTableV2<T>({
         {toolbarLeft}
         {onGlobalSearchChange && (
           <div className="relative min-w-0 flex-1 sm:max-w-xs">
-            <Search className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+            <Search
+              className="pointer-events-none absolute right-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
             <Input
               value={globalSearch ?? ""}
               onChange={(e) => onGlobalSearchChange(e.target.value)}
@@ -399,8 +395,8 @@ export function DataTableV2<T>({
                 <AlertDialogHeader>
                   <AlertDialogTitle>إعادة ضبط تفضيلات الجدول؟</AlertDialogTitle>
                   <AlertDialogDescription>
-                    سيتم مسح ترتيب الأعمدة وحجم الصفحة المحفوظَين لهذا الجدول
-                    والعودة إلى الإعدادات الافتراضية. لا يؤثر ذلك على البيانات.
+                    سيتم مسح ترتيب الأعمدة وحجم الصفحة المحفوظَين لهذا الجدول والعودة إلى الإعدادات
+                    الافتراضية. لا يؤثر ذلك على البيانات.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -563,7 +559,11 @@ export function DataTableV2<T>({
                         ? String(col.header)
                         : col.id;
                     return (
-                      <th key={`s-${col.id}`} scope="col" className={cn("px-2 pb-2", col.className)}>
+                      <th
+                        key={`s-${col.id}`}
+                        scope="col"
+                        className={cn("px-2 pb-2", col.className)}
+                      >
                         {col.searchable ? (
                           <Input
                             value={columnSearch?.[col.id] ?? ""}
@@ -699,7 +699,11 @@ export function DataTableV2<T>({
               })
             }
           >
-            <SelectTrigger id="dtv2-per-page" className="h-8 w-[74px] text-xs" aria-label="عدد الصفوف في كل صفحة">
+            <SelectTrigger
+              id="dtv2-per-page"
+              className="h-8 w-[74px] text-xs"
+              aria-label="عدد الصفوف في كل صفحة"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -714,7 +718,10 @@ export function DataTableV2<T>({
             {rangeStart}-{rangeEnd} من {effectivePagination.total}
           </span>
           {isFetching && !isLoading && (
-            <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" aria-label="جاري التحديث" />
+            <Loader2
+              className="h-3 w-3 animate-spin text-muted-foreground"
+              aria-label="جاري التحديث"
+            />
           )}
         </div>
         <div className="flex items-center gap-1">

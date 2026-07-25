@@ -62,7 +62,8 @@ export function reportBrowserError(
   const message =
     error instanceof Error ? error.message : typeof error === "string" ? error : String(error);
   if (!message || message.length > 2000) return;
-  const stack = error instanceof Error && error.stack ? String(error.stack).slice(0, 8000) : undefined;
+  const stack =
+    error instanceof Error && error.stack ? String(error.stack).slice(0, 8000) : undefined;
   const route = window.location.pathname + window.location.search;
   const mechanism = opts.mechanism ?? "manual";
   const fp = fingerprint(message, route, mechanism);

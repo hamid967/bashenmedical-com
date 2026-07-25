@@ -8,7 +8,16 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Brain, AlertTriangle, Lightbulb, MessageSquareWarning, Check, X, Link2, ShieldAlert } from "lucide-react";
+import {
+  Brain,
+  AlertTriangle,
+  Lightbulb,
+  MessageSquareWarning,
+  Check,
+  X,
+  Link2,
+  ShieldAlert,
+} from "lucide-react";
 import { getMyRoles } from "@/lib/admin.functions";
 import {
   listNoShowPredictions,
@@ -33,9 +42,7 @@ export const Route = createFileRoute("/_authenticated/admin/ai-insights")({
     }
   },
   component: AiInsightsPage,
-  errorComponent: ({ error }) => (
-    <div className="p-6 text-red-600">خطأ: {error.message}</div>
-  ),
+  errorComponent: ({ error }) => <div className="p-6 text-red-600">خطأ: {error.message}</div>,
 });
 
 type Tab = "no-show" | "recs" | "complaints";
@@ -57,8 +64,7 @@ function AiInsightsPage() {
 
   // Membership check runs only after orgs are loaded — otherwise we'd
   // flash a false "denied" state during initial hydration.
-  const isMember = (id: string | null) =>
-    !id || organizations.some((o) => o.id === id);
+  const isMember = (id: string | null) => !id || organizations.some((o) => o.id === id);
   const urlOrgAllowed = !urlOrgId || (!orgsLoading && isMember(urlOrgId));
   const denied = !!urlOrgId && !orgsLoading && !urlOrgAllowed;
 
@@ -75,11 +81,9 @@ function AiInsightsPage() {
     if (urlOrgAllowed && urlOrgId && urlOrgId !== storedTenantId) setTenantId(urlOrgId);
   }, [urlOrgAllowed, urlOrgId, storedTenantId, setTenantId]);
 
-  const setTab = (t: Tab) =>
-    navigate({ search: { ...search, tab: t }, replace: true });
+  const setTab = (t: Tab) => navigate({ search: { ...search, tab: t }, replace: true });
 
-  const clearUrlOrg = () =>
-    navigate({ search: { ...search, organizationId: "" }, replace: true });
+  const clearUrlOrg = () => navigate({ search: { ...search, organizationId: "" }, replace: true });
 
   const switchToOrg = (id: string) =>
     navigate({ search: { ...search, organizationId: id }, replace: true });
@@ -128,8 +132,8 @@ function AiInsightsPage() {
                 لا تملك صلاحية الوصول إلى هذه المؤسسة
               </div>
               <div className="text-sm text-red-700/90 dark:text-red-300/90 mt-0.5">
-                الرابط يشير إلى مؤسسة (<code className="font-mono text-xs">{urlOrgId}</code>) لست عضواً فيها.
-                نعرض حالياً بيانات مؤسستك الافتراضية.
+                الرابط يشير إلى مؤسسة (<code className="font-mono text-xs">{urlOrgId}</code>) لست
+                عضواً فيها. نعرض حالياً بيانات مؤسستك الافتراضية.
               </div>
             </div>
           </div>
@@ -154,13 +158,25 @@ function AiInsightsPage() {
       )}
 
       <nav className="flex gap-2 border-b">
-        <TabBtn active={tab === "no-show"} onClick={() => setTab("no-show")} icon={<AlertTriangle className="w-4 h-4" />}>
+        <TabBtn
+          active={tab === "no-show"}
+          onClick={() => setTab("no-show")}
+          icon={<AlertTriangle className="w-4 h-4" />}
+        >
           خطر عدم الحضور
         </TabBtn>
-        <TabBtn active={tab === "recs"} onClick={() => setTab("recs")} icon={<Lightbulb className="w-4 h-4" />}>
+        <TabBtn
+          active={tab === "recs"}
+          onClick={() => setTab("recs")}
+          icon={<Lightbulb className="w-4 h-4" />}
+        >
           التوصيات الذكية
         </TabBtn>
-        <TabBtn active={tab === "complaints"} onClick={() => setTab("complaints")} icon={<MessageSquareWarning className="w-4 h-4" />}>
+        <TabBtn
+          active={tab === "complaints"}
+          onClick={() => setTab("complaints")}
+          icon={<MessageSquareWarning className="w-4 h-4" />}
+        >
           تصنيف الشكاوى
         </TabBtn>
       </nav>
@@ -186,7 +202,9 @@ function TabBtn({
     <button
       onClick={onClick}
       className={`flex items-center gap-2 px-4 py-2 border-b-2 transition ${
-        active ? "border-primary text-primary font-semibold" : "border-transparent text-muted-foreground"
+        active
+          ? "border-primary text-primary font-semibold"
+          : "border-transparent text-muted-foreground"
       }`}
     >
       {icon}
@@ -343,12 +361,19 @@ function RiskBadge({ risk }: { risk: number }) {
   return <span className={`text-white text-xs px-2 py-0.5 rounded ${color}`}>{pct}%</span>;
 }
 function PriorityBadge({ priority }: { priority: string }) {
-  const color = priority === "high" ? "bg-red-600" : priority === "low" ? "bg-gray-500" : "bg-blue-600";
+  const color =
+    priority === "high" ? "bg-red-600" : priority === "low" ? "bg-gray-500" : "bg-blue-600";
   return <span className={`text-white text-xs px-2 py-0.5 rounded ${color}`}>{priority}</span>;
 }
 function SeverityBadge({ sev }: { sev: string | null }) {
   if (!sev) return <>—</>;
   const color =
-    sev === "critical" ? "bg-red-700" : sev === "high" ? "bg-orange-600" : sev === "low" ? "bg-gray-500" : "bg-blue-600";
+    sev === "critical"
+      ? "bg-red-700"
+      : sev === "high"
+        ? "bg-orange-600"
+        : sev === "low"
+          ? "bg-gray-500"
+          : "bg-blue-600";
   return <span className={`text-white text-xs px-2 py-0.5 rounded ${color}`}>{sev}</span>;
 }

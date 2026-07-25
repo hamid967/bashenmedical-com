@@ -2,13 +2,7 @@ import { useState } from "react";
 import { ClipboardList } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui-v3";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SummarySidebar } from "./SummarySidebar";
 import type { State } from "./types";
 

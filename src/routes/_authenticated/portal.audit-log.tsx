@@ -8,13 +8,7 @@ import { Button } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
 import { Label } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import { useI18n } from "@/lib/i18n";
 import {
   listMyAuditLog,

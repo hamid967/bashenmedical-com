@@ -55,8 +55,6 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-
-
       - name: Verify docs examples match lint:inserts rules
         run: bash tests/lint/book-docs-examples.sh
 
@@ -106,7 +104,6 @@ jobs:
       - name: Re-run perf budget (explicit, for clear CI logs)
         run: bun run perf:budget
 
-
   chaos-and-idempotency:
     name: Chaos — payment & notification fault injection
     runs-on: ubuntu-latest
@@ -135,8 +132,6 @@ jobs:
           # even when ENABLE_FAULT_INJECTION is unset in the environment.
           unset ENABLE_FAULT_INJECTION
           bun test tests/unit/fault-injection-idempotency.test.ts
-
-
 
   rls-tests-main:
     name: RLS integration tests (main — strict)
@@ -184,7 +179,6 @@ jobs:
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
-
 
       - name: Run tests/rls/* against live Supabase (strict)
         env:
@@ -393,8 +387,6 @@ jobs:
           E2E_MIN_AVAILABLE_SLOTS: "3"
         run: python scripts/ci/verify-e2e-booking-fixtures.py
 
-
-
       - name: Run booking E2E (AR full journey)
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
@@ -446,8 +438,6 @@ jobs:
           E2E_ARTIFACTS: ${{ github.workspace }}/e2e-artifacts
         run: python tests/e2e/book_center_form_render.py
 
-
-
       - name: Run public booking API edge cases E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
@@ -471,8 +461,6 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
         run: python tests/e2e/book_rpc_review_batch_29.py
-
-
 
       - name: Run portal complaints flow E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
@@ -604,7 +592,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-
       - name: Run waitlist offer confirm E2E
         if: steps.verify_secrets.outputs.has_secrets == 'true'
         env:
@@ -650,12 +637,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-
-
-
-
-
-
       - name: Cleanup E2E booking fixtures
         if: always() && steps.verify_secrets.outputs.has_secrets == 'true'
         env:
@@ -669,7 +650,6 @@ jobs:
           if [ -f preview.pid ]; then
             kill "$(cat preview.pid)" 2>/dev/null || true
           fi
-
 
       - name: Upload E2E artifacts (screenshots, video, trace) on failure
         id: upload_e2e_artifacts
@@ -763,8 +743,6 @@ jobs:
           header: e2e-booking-artifacts
           path: e2e-comment.md
 
-
-
   e2e-critical-post-a2:
     name: E2E critical paths (post-A2 verification)
     runs-on: ubuntu-latest
@@ -800,12 +778,12 @@ jobs:
         if: steps.gate.outputs.run == 'true'
       - uses: actions/setup-node@v4
         if: steps.gate.outputs.run == 'true'
-        with: { node-version: '20' }
+        with: { node-version: "20" }
       - uses: oven-sh/setup-bun@v2
         if: steps.gate.outputs.run == 'true'
       - uses: actions/setup-python@v5
         if: steps.gate.outputs.run == 'true'
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Install deps
         if: steps.gate.outputs.run == 'true'
         run: |
@@ -902,7 +880,7 @@ jobs:
           fi
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Install psycopg2
         run: python -m pip install --upgrade pip 'psycopg2-binary>=2.9'
       - name: Detect new migrations in this PR
@@ -949,7 +927,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
+        with: { python-version: "3.11" }
       - name: Install psycopg2
         run: python -m pip install --upgrade pip 'psycopg2-binary>=2.9'
       - name: Verify pinned A2/A3 REVOKEs still in force
@@ -966,7 +944,6 @@ jobs:
           name: a2-a3-pinned-report
           path: a2-a3-pinned-report.txt
           retention-days: 30
-
 
   record-deployment-marker:
     name: Register deployment marker for watchdog
@@ -997,7 +974,6 @@ jobs:
             -H "Content-Type: application/json" \
             -H "apikey: $ANON_KEY" \
             -d "{\"ref\":\"$REF\",\"notes\":\"pushed by ${{ github.actor }} sha ${{ github.sha }}\"}"
-
 
       - name: Sticky PR comment on failure
         if: failure() && github.event_name == 'pull_request'

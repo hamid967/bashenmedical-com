@@ -59,13 +59,7 @@ function fmtInt(x: number): string {
   return x.toLocaleString("ar-EG");
 }
 
-function BreakdownTable({
-  title,
-  rows,
-}: {
-  title: string;
-  rows: ContentAnalyticsRow[];
-}) {
+function BreakdownTable({ title, rows }: { title: string; rows: ContentAnalyticsRow[] }) {
   const max = Math.max(1, ...rows.map((r) => r.impressions));
   return (
     <Card>
@@ -128,13 +122,7 @@ function DailyChart({ data }: { data: ContentAnalyticsResult["daily"] }) {
   return (
     <div className="w-full overflow-x-auto">
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full" style={{ minWidth: 480 }}>
-        <line
-          x1={pad}
-          y1={h - pad}
-          x2={w - pad}
-          y2={h - pad}
-          stroke="hsl(var(--border))"
-        />
+        <line x1={pad} y1={h - pad} x2={w - pad} y2={h - pad} stroke="hsl(var(--border))" />
         <path d={path("impressions")} fill="none" stroke="hsl(var(--primary))" strokeWidth={2} />
         <path
           d={path("clicks")}
@@ -341,9 +329,7 @@ function ContentAnalyticsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">
-                  إجمالي المشاهدات
-                </CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">إجمالي المشاهدات</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold tabular-nums">
@@ -353,9 +339,7 @@ function ContentAnalyticsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">
-                  إجمالي النقرات
-                </CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">إجمالي النقرات</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold tabular-nums">
@@ -365,9 +349,7 @@ function ContentAnalyticsPage() {
             </Card>
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground">
-                  معدل النقر (CTR)
-                </CardTitle>
+                <CardTitle className="text-sm text-muted-foreground">معدل النقر (CTR)</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold tabular-nums">

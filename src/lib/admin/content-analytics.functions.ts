@@ -58,9 +58,7 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
   .handler(async ({ context, data }): Promise<ContentAnalyticsResult> => {
     await assertEditor(context);
     const to = data.to ?? new Date().toISOString();
-    const from =
-      data.from ??
-      new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
+    const from = data.from ?? new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString();
 
     const sel = (s: string): string => s;
 
@@ -95,17 +93,13 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
 
     // Referenced ids
     const itemIds = Array.from(
-      new Set([
-        ...impressions.map((r) => r.item_id),
-        ...clicks.map((r) => r.item_id),
-      ]),
+      new Set([...impressions.map((r) => r.item_id), ...clicks.map((r) => r.item_id)]),
     );
     const userIds = Array.from(
       new Set(
-        [
-          ...impressions.map((r) => r.user_id),
-          ...clicks.map((r) => r.user_id),
-        ].filter((v): v is string => !!v),
+        [...impressions.map((r) => r.user_id), ...clicks.map((r) => r.user_id)].filter(
+          (v): v is string => !!v,
+        ),
       ),
     );
 
@@ -113,11 +107,7 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
       itemIds.length
         ? context.supabase
             .from("content_items")
-            .select(
-              sel(
-                "id,title_ar,title_en,type,branch_id,audience,is_promotional",
-              ),
-            )
+            .select(sel("id,title_ar,title_en,type,branch_id,audience,is_promotional"))
             .in("id", itemIds)
         : Promise.resolve({ data: [], error: null }),
       userIds.length
@@ -143,11 +133,11 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
       default_branch_id: string | null;
     };
     const items = new Map<string, ItemMeta>();
-    for (const row of ((itemsRes.data ?? []) as unknown as ItemMeta[])) {
+    for (const row of (itemsRes.data ?? []) as unknown as ItemMeta[]) {
       items.set(row.id, row);
     }
     const profiles = new Map<string, ProfileMeta>();
-    for (const row of ((profilesRes.data ?? []) as unknown as ProfileMeta[])) {
+    for (const row of (profilesRes.data ?? []) as unknown as ProfileMeta[]) {
       profiles.set(row.id, row);
     }
 
@@ -165,11 +155,11 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
           .in("id", branchIds)
       : { data: [], error: null };
     const branches = new Map<string, { name_ar: string; name_en: string }>();
-    for (const b of ((branchesRes.data ?? []) as unknown as Array<{
+    for (const b of (branchesRes.data ?? []) as unknown as Array<{
       id: string;
       name_ar: string;
       name_en: string;
-    }>)) {
+    }>) {
       branches.set(b.id, { name_ar: b.name_ar, name_en: b.name_en });
     }
 
@@ -224,10 +214,7 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
       impArr: Array<{ key: string; label: string }>,
       clkArr: Array<{ key: string; label: string }>,
     ): ContentAnalyticsRow[] {
-      const m = new Map<
-        string,
-        { label: string; impressions: number; clicks: number }
-      >();
+      const m = new Map<string, { label: string; impressions: number; clicks: number }>();
       for (const r of impArr) {
         const e = m.get(r.key) ?? {
           label: r.label,
@@ -273,7 +260,7 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
       const it = items.get(itemId);
       const bid = it?.branch_id ?? "__none__";
       const label = it?.branch_id
-        ? branches.get(it.branch_id)?.name_ar ?? it.branch_id
+        ? (branches.get(it.branch_id)?.name_ar ?? it.branch_id)
         : "بدون فرع";
       return { key: bid, label };
     };
@@ -346,7 +333,6 @@ export const getContentAnalytics = createServerFn({ method: "GET" })
       bySegment: bySegment.slice(0, 20),
       byType,
       window: { from, to },
-      sampled:
-        impressions.length >= ROW_CAP || clicks.length >= ROW_CAP,
+      sampled: impressions.length >= ROW_CAP || clicks.length >= ROW_CAP,
     };
   });

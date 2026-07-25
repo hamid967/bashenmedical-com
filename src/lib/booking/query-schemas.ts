@@ -46,11 +46,7 @@ function isRealCalendarDate(iso: string): boolean {
   const d = Number(m[3]);
   if (mo < 1 || mo > 12 || d < 1 || d > 31) return false;
   const dt = new Date(Date.UTC(y, mo - 1, d));
-  return (
-    dt.getUTCFullYear() === y &&
-    dt.getUTCMonth() === mo - 1 &&
-    dt.getUTCDate() === d
-  );
+  return dt.getUTCFullYear() === y && dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d;
 }
 
 function daysBetween(a: string, b: string): number {
@@ -119,12 +115,14 @@ export const SessionId = z
   .max(128, BookingErrorCode.invalid_session)
   .regex(/^[A-Za-z0-9_.:-]+$/, BookingErrorCode.invalid_session);
 
-export const YearField = z.coerce.number()
+export const YearField = z.coerce
+  .number()
   .int(BookingErrorCode.invalid_year)
   .min(2000, BookingErrorCode.invalid_year)
   .max(2100, BookingErrorCode.invalid_year);
 
-export const MonthField = z.coerce.number()
+export const MonthField = z.coerce
+  .number()
   .int(BookingErrorCode.invalid_month)
   .min(1, BookingErrorCode.invalid_month)
   .max(12, BookingErrorCode.invalid_month);

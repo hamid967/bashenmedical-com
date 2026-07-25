@@ -18,14 +18,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
-import { Inbox, AlertTriangle, RefreshCw, Flame, UserCheck, UserX, ArrowUpDown } from "lucide-react";
+  Inbox,
+  AlertTriangle,
+  RefreshCw,
+  Flame,
+  UserCheck,
+  UserX,
+  ArrowUpDown,
+} from "lucide-react";
 
 const SearchSchema = z.object({
   status: z.enum(INBOX_STATUSES).optional(),
@@ -38,7 +40,6 @@ const SearchSchema = z.object({
   sort: z.enum(["recent", "priority"]).optional(),
 });
 type SearchIn = z.infer<typeof SearchSchema>;
-
 
 export const STATUS_LABELS: Record<InboxStatus, string> = {
   new: "جديد",
@@ -119,10 +120,7 @@ export const Route = createFileRoute("/_authenticated/admin/inbox")({
   loaderDeps: ({ search }) => search,
   loader: () => null,
   head: () => ({
-    meta: [
-      { title: "الصندوق الموحّد | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "الصندوق الموحّد | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error }) => (
     <div className="container-app py-16 text-center">
@@ -184,14 +182,10 @@ export function UnifiedInboxPage() {
   useEffect(() => {
     const channel = supabase
       .channel("admin-inbox-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "inbox_items" },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ["admin-inbox"] });
-          queryClient.invalidateQueries({ queryKey: ["admin-inbox-counts"] });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "inbox_items" }, () => {
+        queryClient.invalidateQueries({ queryKey: ["admin-inbox"] });
+        queryClient.invalidateQueries({ queryKey: ["admin-inbox-counts"] });
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -211,9 +205,7 @@ export function UnifiedInboxPage() {
 
   const chipCls = (active: boolean) =>
     `inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition ${
-      active
-        ? "border-primary bg-primary/10 text-primary"
-        : "border-border hover:bg-muted"
+      active ? "border-primary bg-primary/10 text-primary" : "border-border hover:bg-muted"
     }`;
 
   return (
@@ -224,7 +216,8 @@ export function UnifiedInboxPage() {
             <Inbox className="h-6 w-6" /> الصندوق الموحّد
           </h1>
           <p className="text-sm text-[color:var(--ac-ink-3)] mt-1">
-            كل طلبات العمليات من الموقع، الحجز، بوابة المريض، واتساب، الاستقبال، الهاتف، الحملات والدعم — في مكان واحد.
+            كل طلبات العمليات من الموقع، الحجز، بوابة المريض، واتساب، الاستقبال، الهاتف، الحملات
+            والدعم — في مكان واحد.
           </p>
         </div>
         <button
@@ -241,11 +234,7 @@ export function UnifiedInboxPage() {
         <KpiTile label="الإجمالي (غير مؤرشف)" value={kpi.total} />
         <KpiTile label="غير مسند" value={kpi.unassigned} tone="amber" />
         <KpiTile label="مسند إليّ" value={kpi.mine} tone="indigo" />
-        <KpiTile
-          label="عاجل"
-          value={kpi.byPriority?.urgent ?? 0}
-          tone="red"
-        />
+        <KpiTile label="عاجل" value={kpi.byPriority?.urgent ?? 0} tone="red" />
       </div>
 
       {/* Quick chips */}
@@ -253,9 +242,7 @@ export function UnifiedInboxPage() {
         <button
           type="button"
           className={chipCls(activeChip === "all")}
-          onClick={() =>
-            patch({ mine: undefined, unassigned: undefined, priority: undefined })
-          }
+          onClick={() => patch({ mine: undefined, unassigned: undefined, priority: undefined })}
         >
           الكل
         </button>
@@ -276,18 +263,14 @@ export function UnifiedInboxPage() {
         <button
           type="button"
           className={chipCls(activeChip === "urgent")}
-          onClick={() =>
-            patch({ priority: "urgent", mine: undefined, unassigned: undefined })
-          }
+          onClick={() => patch({ priority: "urgent", mine: undefined, unassigned: undefined })}
         >
           <Flame className="h-3.5 w-3.5" /> عاجل ({kpi.byPriority?.urgent ?? 0})
         </button>
         <div className="ms-auto flex items-center gap-2 text-xs text-muted-foreground">
           <button
             type="button"
-            onClick={() =>
-              patch({ sort: search.sort === "priority" ? "recent" : "priority" })
-            }
+            onClick={() => patch({ sort: search.sort === "priority" ? "recent" : "priority" })}
             className="inline-flex items-center gap-1 rounded-md border px-2 py-1 hover:bg-muted"
             title="ترتيب حسب الأولوية"
           >
@@ -306,43 +289,49 @@ export function UnifiedInboxPage() {
         />
         <Select
           value={search.status ?? "all"}
-          onValueChange={(v) =>
-            patch({ status: v === "all" ? undefined : (v as InboxStatus) })
-          }
+          onValueChange={(v) => patch({ status: v === "all" ? undefined : (v as InboxStatus) })}
         >
-          <SelectTrigger><SelectValue placeholder="الحالة" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="الحالة" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل الحالات</SelectItem>
             {INBOX_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+              <SelectItem key={s} value={s}>
+                {STATUS_LABELS[s]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select
           value={search.channel ?? "all"}
-          onValueChange={(v) =>
-            patch({ channel: v === "all" ? undefined : (v as InboxChannel) })
-          }
+          onValueChange={(v) => patch({ channel: v === "all" ? undefined : (v as InboxChannel) })}
         >
-          <SelectTrigger><SelectValue placeholder="القناة" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="القناة" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل القنوات</SelectItem>
             {INBOX_CHANNELS.map((c) => (
-              <SelectItem key={c} value={c}>{CHANNEL_LABELS[c]}</SelectItem>
+              <SelectItem key={c} value={c}>
+                {CHANNEL_LABELS[c]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
         <Select
           value={search.priority ?? "all"}
-          onValueChange={(v) =>
-            patch({ priority: v === "all" ? undefined : (v as InboxPriority) })
-          }
+          onValueChange={(v) => patch({ priority: v === "all" ? undefined : (v as InboxPriority) })}
         >
-          <SelectTrigger><SelectValue placeholder="الأولوية" /></SelectTrigger>
+          <SelectTrigger>
+            <SelectValue placeholder="الأولوية" />
+          </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">كل الأولويات</SelectItem>
             {INBOX_PRIORITIES.map((p) => (
-              <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
+              <SelectItem key={p} value={p}>
+                {PRIORITY_LABELS[p]}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -355,7 +344,6 @@ export function UnifiedInboxPage() {
           إظهار المؤرشف
         </label>
       </div>
-
 
       {items.length === 0 ? (
         <Card className="p-10 text-center text-sm text-[color:var(--ac-ink-3)]">
@@ -401,7 +389,9 @@ export function UnifiedInboxPage() {
                     <Badge variant="outline">{CHANNEL_LABELS[it.channel]}</Badge>
                   </td>
                   <td className="p-2">
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${PRIORITY_TONE[it.priority]}`}>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-xs ${PRIORITY_TONE[it.priority]}`}
+                    >
                       {PRIORITY_LABELS[it.priority]}
                     </span>
                   </td>
@@ -410,9 +400,7 @@ export function UnifiedInboxPage() {
                       {STATUS_LABELS[it.status]}
                     </span>
                   </td>
-                  <td className="p-2 text-xs text-muted-foreground">
-                    {it.department ?? "—"}
-                  </td>
+                  <td className="p-2 text-xs text-muted-foreground">{it.department ?? "—"}</td>
                   <td className="p-2 font-mono text-[11px] text-muted-foreground">
                     {it.assigned_to ? it.assigned_to.slice(0, 8) : "غير مسند"}
                   </td>
@@ -422,9 +410,7 @@ export function UnifiedInboxPage() {
                   <td className="p-2 text-xs text-muted-foreground">
                     {fmtDateTime(it.last_action_at ?? it.updated_at)}
                   </td>
-                  <td className="p-2 text-xs">
-                    {it.required_action ?? "—"}
-                  </td>
+                  <td className="p-2 text-xs">{it.required_action ?? "—"}</td>
                 </tr>
               ))}
             </tbody>
@@ -459,4 +445,3 @@ function KpiTile({
     </Card>
   );
 }
-

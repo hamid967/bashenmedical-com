@@ -51,20 +51,18 @@ export const Route = createFileRoute("/api/public/native/register-device")({
 
         // Upsert by (user_id, platform, native_token) — the unique index we
         // added in the F2 migration. Refresh last_seen_at so token GC works.
-        const { error: upErr } = await supabaseAdmin
-          .from("push_subscriptions")
-          .upsert(
-            {
-              user_id: userId,
-              platform: payload.platform,
-              native_token: payload.token,
-              app_version: payload.appVersion ?? null,
-              device_model: payload.deviceModel ?? null,
-              last_seen_at: new Date().toISOString(),
-              failure_count: 0,
-            },
-            { onConflict: "user_id,platform,native_token", ignoreDuplicates: false },
-          );
+        const { error: upErr } = await supabaseAdmin.from("push_subscriptions").upsert(
+          {
+            user_id: userId,
+            platform: payload.platform,
+            native_token: payload.token,
+            app_version: payload.appVersion ?? null,
+            device_model: payload.deviceModel ?? null,
+            last_seen_at: new Date().toISOString(),
+            failure_count: 0,
+          },
+          { onConflict: "user_id,platform,native_token", ignoreDuplicates: false },
+        );
         if (upErr) return json({ error: "db upsert failed", detail: upErr.message }, 500);
 
         return json({ ok: true });

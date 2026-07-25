@@ -63,9 +63,7 @@ function ContentCard({ item, surface }: { item: ContentFeedItem; surface: string
       (entries) => {
         for (const e of entries) {
           if (e.isIntersecting && markSeen(item.id)) {
-            void logContentImpression({ data: { itemId: item.id, surface } }).catch(
-              () => {},
-            );
+            void logContentImpression({ data: { itemId: item.id, surface } }).catch(() => {});
             obs.disconnect();
           }
         }
@@ -103,12 +101,7 @@ function ContentCard({ item, surface }: { item: ContentFeedItem; surface: string
     <Card ref={ref} className="overflow-hidden transition-shadow hover:shadow-md">
       {item.image_url && (
         <div className="aspect-video overflow-hidden bg-muted">
-          <img
-            src={item.image_url}
-            alt=""
-            loading="lazy"
-            className="h-full w-full object-cover"
-          />
+          <img src={item.image_url} alt="" loading="lazy" className="h-full w-full object-cover" />
         </div>
       )}
       <CardContent className="p-4">
@@ -122,9 +115,7 @@ function ContentCard({ item, surface }: { item: ContentFeedItem; surface: string
         </div>
         <div className="font-medium leading-tight">{item.title}</div>
         {item.excerpt && (
-          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-            {item.excerpt}
-          </p>
+          <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.excerpt}</p>
         )}
         {cta && <div className="mt-3">{cta}</div>}
       </CardContent>

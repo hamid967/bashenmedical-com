@@ -96,15 +96,12 @@ export function AppointmentQrDialog({
           <div className="rounded-xl border p-3 bg-white">
             <canvas ref={canvasRef} className="block" />
           </div>
-          <div
-            className="font-mono text-sm font-bold tracking-wider text-center"
-            dir="ltr"
-          >
+          <div className="font-mono text-sm font-bold tracking-wider text-center" dir="ltr">
             {reference}
           </div>
           <p className="text-[11px] text-muted-foreground text-center px-2">
-            يفتح الرمز صفحة تحقق تطلب آخر 4 أرقام من رقم جوّال المريض قبل عرض
-            التفاصيل. لا يُكشف أي معرّف داخلي.
+            يفتح الرمز صفحة تحقق تطلب آخر 4 أرقام من رقم جوّال المريض قبل عرض التفاصيل. لا يُكشف أي
+            معرّف داخلي.
           </p>
         </div>
 

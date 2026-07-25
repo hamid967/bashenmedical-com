@@ -25,9 +25,7 @@ function uaFamily(ua: string | null): string {
 
 export const recordDeviceSession = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((input: unknown) =>
-    z.object({ fingerprint: z.string().min(8).max(128) }).parse(input),
-  )
+  .validator((input: unknown) => z.object({ fingerprint: z.string().min(8).max(128) }).parse(input))
   .handler(async ({ data, context }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { hashIp } = await import("@/lib/auth/otp.server");

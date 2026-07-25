@@ -38,7 +38,6 @@ export function StepReview({
   onEditPatient: () => void;
   onVerified: (challengeId: string, phone: string) => void;
 }) {
-
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
   const spec = specialties.find((s) => s.id === state.specialtyId);
@@ -140,8 +139,7 @@ export function StepReview({
 
         {(() => {
           const phoneVerified =
-            !!state.verificationChallengeId &&
-            state.verifiedPhone === state.patient.phone.trim();
+            !!state.verificationChallengeId && state.verifiedPhone === state.patient.phone.trim();
           return (
             <Button
               onClick={onSubmit}
@@ -164,7 +162,6 @@ export function StepReview({
         <p className="mt-1 text-center text-[11px] text-muted-foreground/80">
           {t("review.referenceFormatHint")}
         </p>
-
       </div>
     </StepShell>
   );

@@ -102,7 +102,9 @@ function directionsHref(apt: AppointmentActionsRow): string | null {
     return `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`;
   }
   const query = b?.address_ar ?? b?.name_ar ?? b?.name_en;
-  return query ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}` : null;
+  return query
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`
+    : null;
 }
 
 function buildIcs(apt: AppointmentActionsRow): string {
@@ -110,7 +112,10 @@ function buildIcs(apt: AppointmentActionsRow): string {
   if (!start) return "";
   const end = new Date(start.getTime() + 30 * MINUTE);
   const fmt = (d: Date) =>
-    d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+    d
+      .toISOString()
+      .replace(/[-:]/g, "")
+      .replace(/\.\d{3}/, "");
   const title = `موعد مع ${apt.doctor?.name_ar ?? "الطبيب"}`;
   const location = apt.branch?.name_ar ?? apt.branch?.name_en ?? "";
   const description = apt.reason ?? "";
@@ -153,8 +158,7 @@ function downloadIcs(apt: AppointmentActionsRow) {
 
 export function AppointmentActions({ apt }: { apt: AppointmentActionsRow }) {
   const queryClient = useQueryClient();
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["patient", "appointments"] });
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["patient", "appointments"] });
 
   const confirmFn = useServerFn(confirmMyAttendance);
   const cancelFn = useServerFn(cancelMyAppointment);
@@ -191,8 +195,7 @@ export function AppointmentActions({ apt }: { apt: AppointmentActionsRow }) {
       );
       invalidate();
     },
-    onError: (e: unknown) =>
-      toast.error((e as Error).message || "تعذر تسجيل الوصول الآن."),
+    onError: (e: unknown) => toast.error((e as Error).message || "تعذر تسجيل الوصول الآن."),
   });
 
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
@@ -200,15 +203,13 @@ export function AppointmentActions({ apt }: { apt: AppointmentActionsRow }) {
   const [rTime, setRTime] = useState((apt.appointment_time ?? "09:00").slice(0, 5));
 
   const reschedule = useMutation({
-    mutationFn: () =>
-      rescheduleFn({ data: { id: apt.id, date: rDate, time: rTime } }),
+    mutationFn: () => rescheduleFn({ data: { id: apt.id, date: rDate, time: rTime } }),
     onSuccess: () => {
       toast.success("تم تعديل الموعد.");
       setRescheduleOpen(false);
       invalidate();
     },
-    onError: (e: unknown) =>
-      toast.error((e as Error).message || "تعذر تعديل الموعد."),
+    onError: (e: unknown) => toast.error((e as Error).message || "تعذر تعديل الموعد."),
   });
 
   const [followUpOpen, setFollowUpOpen] = useState(false);
@@ -235,8 +236,7 @@ export function AppointmentActions({ apt }: { apt: AppointmentActionsRow }) {
       setFollowUpOpen(false);
       invalidate();
     },
-    onError: (e: unknown) =>
-      toast.error((e as Error).message || "تعذر إرسال الطلب."),
+    onError: (e: unknown) => toast.error((e as Error).message || "تعذر إرسال الطلب."),
   });
 
   const directions = directionsHref(apt);
@@ -416,10 +416,7 @@ export function AppointmentActions({ apt }: { apt: AppointmentActionsRow }) {
               </div>
             </div>
             <DialogFooter>
-              <Button
-                onClick={() => followUp.mutate()}
-                disabled={followUp.isPending || !fDate}
-              >
+              <Button onClick={() => followUp.mutate()} disabled={followUp.isPending || !fDate}>
                 إرسال الطلب
               </Button>
             </DialogFooter>

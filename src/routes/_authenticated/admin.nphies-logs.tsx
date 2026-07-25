@@ -87,9 +87,7 @@ function NphiesLogsPage() {
 
       <section
         className={`rounded-xl border p-4 ${
-          cfg.ready
-            ? "border-border bg-background"
-            : "border-amber-300 bg-amber-50 text-amber-900"
+          cfg.ready ? "border-border bg-background" : "border-amber-300 bg-amber-50 text-amber-900"
         }`}
       >
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -285,9 +283,7 @@ function ConfigBadge({ ok, label }: { ok: boolean; label: string }) {
   return (
     <span
       className={`px-1.5 py-0.5 rounded font-mono ${
-        ok
-          ? "bg-emerald-100 text-emerald-900"
-          : "bg-muted text-muted-foreground line-through"
+        ok ? "bg-emerald-100 text-emerald-900" : "bg-muted text-muted-foreground line-through"
       }`}
     >
       {label}
@@ -296,9 +292,12 @@ function ConfigBadge({ ok, label }: { ok: boolean; label: string }) {
 }
 
 function PingButton() {
-  const [state, setState] = useState<
-    { ok: boolean; message: string; latency_ms: number; mode: string } | null
-  >(null);
+  const [state, setState] = useState<{
+    ok: boolean;
+    message: string;
+    latency_ms: number;
+    mode: string;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   async function run() {
     setBusy(true);
@@ -326,11 +325,7 @@ function PingButton() {
         {busy ? "جارٍ الاختبار…" : "اختبار الاتصال بـ NPHIES"}
       </button>
       {state && (
-        <span
-          className={`text-xs font-mono ${
-            state.ok ? "text-emerald-700" : "text-destructive"
-          }`}
-        >
+        <span className={`text-xs font-mono ${state.ok ? "text-emerald-700" : "text-destructive"}`}>
           {state.ok ? "✓" : "✗"} [{state.mode}] {state.message} · {state.latency_ms}ms
         </span>
       )}

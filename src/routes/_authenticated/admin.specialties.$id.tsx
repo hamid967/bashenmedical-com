@@ -15,10 +15,7 @@ import { getAdminSpecialty } from "@/lib/admin/specialties.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/specialties/$id")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل التخصص | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل التخصص | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error, reset }) => (
     <div className="container-app py-16 text-center">
@@ -93,7 +90,10 @@ function SpecialtyDetail() {
   return (
     <div className="container-app py-6 space-y-6">
       <nav className="text-xs text-muted-foreground">
-        <Link to="/admin/specialties" className="hover:text-foreground inline-flex items-center gap-1">
+        <Link
+          to="/admin/specialties"
+          className="hover:text-foreground inline-flex items-center gap-1"
+        >
           <ArrowRight className="h-3 w-3" /> التخصصات
         </Link>
       </nav>
@@ -122,7 +122,12 @@ function SpecialtyDetail() {
 
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3" aria-label="مؤشرات التخصص">
         <MiniKpi label="الأطباء" value={doctors.length} icon={Users} />
-        <MiniKpi label="أطباء نشِطون" value={doctors.filter((d) => d.is_active).length} icon={CheckCircle2} tone="success" />
+        <MiniKpi
+          label="أطباء نشِطون"
+          value={doctors.filter((d) => d.is_active).length}
+          icon={CheckCircle2}
+          tone="success"
+        />
         <MiniKpi label="مواعيد اليوم" value={today_appts} icon={CalendarDays} />
         <MiniKpi label="قادمة" value={upcoming_appts.length} icon={CalendarDays} />
       </section>
@@ -169,9 +174,7 @@ function SpecialtyDetail() {
           <h2 className="text-sm font-medium">أقرب المواعيد ({upcoming_appts.length})</h2>
         </header>
         {upcoming_appts.length === 0 ? (
-          <div className="p-6 text-sm text-muted-foreground text-center">
-            لا توجد مواعيد قادمة.
-          </div>
+          <div className="p-6 text-sm text-muted-foreground text-center">لا توجد مواعيد قادمة.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -212,8 +215,7 @@ function MiniKpi({
   icon: React.ElementType;
   tone?: "success";
 }) {
-  const toneCls =
-    tone === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-primary";
+  const toneCls = tone === "success" ? "text-emerald-600 dark:text-emerald-400" : "text-primary";
   return (
     <div className="rounded-lg border bg-card p-3">
       <div className="flex items-center justify-between">

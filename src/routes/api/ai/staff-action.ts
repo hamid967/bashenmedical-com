@@ -115,21 +115,14 @@ export const Route = createFileRoute("/api/ai/staff-action")({
 
         const paramsCheck = schema.safeParse(parsedBody.params);
         if (!paramsCheck.success) {
-          return json(
-            { error: "invalid_params", details: paramsCheck.error.flatten() },
-            400,
-          );
+          return json({ error: "invalid_params", details: paramsCheck.error.flatten() }, 400);
         }
         const params = paramsCheck.data;
 
-        const sb = createClient(
-          process.env.SUPABASE_URL!,
-          process.env.SUPABASE_PUBLISHABLE_KEY!,
-          {
-            auth: { persistSession: false, autoRefreshToken: false },
-            global: { headers: { Authorization: `Bearer ${auth.token}` } },
-          },
-        );
+        const sb = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_PUBLISHABLE_KEY!, {
+          auth: { persistSession: false, autoRefreshToken: false },
+          global: { headers: { Authorization: `Bearer ${auth.token}` } },
+        });
 
         // ---------- PREPARE ----------
         if (parsedBody.phase === "prepare") {

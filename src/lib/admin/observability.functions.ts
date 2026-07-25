@@ -16,7 +16,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { assertConsoleAccess } from "./_guard";
 
 const WindowInput = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24),
 });
 
 export type SloSignal = {
@@ -46,17 +51,15 @@ export const getSloSummary = createServerFn({ method: "GET" })
     const signals: SloSignal[] = [];
 
     // 1) Latency budget burn (perf_budget_alerts fired within window)
-    const { data: budgets } = await supabase
-      .from("perf_budgets")
-      .select("id")
-      .eq("enabled", true);
+    const { data: budgets } = await supabase.from("perf_budgets").select("id").eq("enabled", true);
     const totalBudgets = budgets?.length ?? 0;
     const { data: breaches } = await supabase
       .from("perf_budget_alerts")
       .select("id, path, metric, p75_value, threshold, bucket_at")
       .gte("bucket_at", since);
     const breachCount = breaches?.length ?? 0;
-    const burnPct = totalBudgets > 0 ? Math.round((breachCount / (totalBudgets * data.windowHours)) * 100) : 0;
+    const burnPct =
+      totalBudgets > 0 ? Math.round((breachCount / (totalBudgets * data.windowHours)) * 100) : 0;
     signals.push({
       key: "latency",
       label: "Latency Budget Burn",
@@ -135,11 +138,14 @@ export const getSloSummary = createServerFn({ method: "GET" })
   });
 
 const ListErrorsInput = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24),
   route: z.string().max(512).optional(),
-  mechanism: z
-    .enum(["onerror", "unhandledrejection", "react_error_boundary", "manual"])
-    .optional(),
+  mechanism: z.enum(["onerror", "unhandledrejection", "react_error_boundary", "manual"]).optional(),
   limit: z.number().int().min(1).max(500).default(100),
 });
 

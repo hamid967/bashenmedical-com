@@ -20,14 +20,21 @@ export interface IconProps extends Omit<React.SVGProps<SVGSVGElement>, "color"> 
   title?: string;
 }
 
-type IconRenderer = (p: {
-  strokeWidth: number;
-}) => React.ReactNode;
+type IconRenderer = (p: { strokeWidth: number }) => React.ReactNode;
 
 function makeIcon(displayName: string, render: IconRenderer) {
   const Comp = React.forwardRef<SVGSVGElement, IconProps>(
     (
-      { size = 24, color, strokeWidth = 2, title, className, style, "aria-hidden": ariaHidden, ...rest },
+      {
+        size = 24,
+        color,
+        strokeWidth = 2,
+        title,
+        className,
+        style,
+        "aria-hidden": ariaHidden,
+        ...rest
+      },
       ref,
     ) => {
       const decorative = title === undefined;
@@ -249,16 +256,14 @@ export interface UnifiedIconProps extends IconProps {
  * <Icon name="jazan-mark" size={32} className="text-primary" />
  * <Icon name="prescription" title="وصفة طبية" /> // accessible label
  */
-export const Icon = React.forwardRef<SVGSVGElement, UnifiedIconProps>(
-  ({ name, ...rest }, ref) => {
-    const Cmp = iconRegistry[name];
-    if (!Cmp) {
-      if (typeof console !== "undefined") {
-        console.warn(`[ui-v3/Icon] unknown icon name: ${name}`);
-      }
-      return null;
+export const Icon = React.forwardRef<SVGSVGElement, UnifiedIconProps>(({ name, ...rest }, ref) => {
+  const Cmp = iconRegistry[name];
+  if (!Cmp) {
+    if (typeof console !== "undefined") {
+      console.warn(`[ui-v3/Icon] unknown icon name: ${name}`);
     }
-    return <Cmp ref={ref} {...rest} />;
-  },
-);
+    return null;
+  }
+  return <Cmp ref={ref} {...rest} />;
+});
 Icon.displayName = "Icon";

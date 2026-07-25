@@ -41,7 +41,8 @@ export const Route = createFileRoute("/api/public/book/cancel")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "booking" });
+        if (_rl) return _rl;
         let body: unknown;
         try {
           body = await request.json();

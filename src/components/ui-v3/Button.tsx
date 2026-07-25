@@ -59,11 +59,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(className)}
         {...rest}
       >
-        {loading ? (
-          <LoadingSpinner label={loadingLabel ?? V3_LABELS.loading} />
-        ) : (
-          start
-        )}
+        {loading ? <LoadingSpinner label={loadingLabel ?? V3_LABELS.loading} /> : start}
         {children}
         {!loading ? end : null}
       </BaseButton>

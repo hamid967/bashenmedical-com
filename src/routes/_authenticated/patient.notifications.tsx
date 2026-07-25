@@ -18,10 +18,7 @@ const notifsQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/patient/notifications")({
   loader: ({ context }) => context.queryClient.ensureQueryData(notifsQuery),
   head: () => ({
-    meta: [
-      { title: "الإشعارات | بوابة المريض" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "الإشعارات | بوابة المريض" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: NotifsPage,
   ...patientRouteStates({ skeleton: "list", rows: 5 }),

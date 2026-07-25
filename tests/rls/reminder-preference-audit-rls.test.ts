@@ -51,7 +51,9 @@ async function main() {
   async function createUser(email: string, role?: "admin" | "reception" | "pharmacy") {
     const password = "Test!" + Math.random().toString(36).slice(2, 10) + "Aa1";
     const { data, error } = await admin.auth.admin.createUser({
-      email, password, email_confirm: true,
+      email,
+      password,
+      email_confirm: true,
     });
     if (error) throw error;
     if (role) {
@@ -77,7 +79,8 @@ async function main() {
         reminder_24h: true,
         reminder_2h: true,
       })
-      .select("id").single();
+      .select("id")
+      .single();
     if (error) throw error;
     const id = data.id as string;
     createdAppts.push(id);
@@ -86,10 +89,10 @@ async function main() {
     return id;
   }
 
-  const staffU  = await createUser(`rpa-staff-${stamp}@test.local`,  "reception");
-  const adminU  = await createUser(`rpa-admin-${stamp}@test.local`,  "admin");
-  const plainU  = await createUser(`rpa-plain-${stamp}@test.local`);   // no role
-  const pharmU  = await createUser(`rpa-pharm-${stamp}@test.local`, "pharmacy");
+  const staffU = await createUser(`rpa-staff-${stamp}@test.local`, "reception");
+  const adminU = await createUser(`rpa-admin-${stamp}@test.local`, "admin");
+  const plainU = await createUser(`rpa-plain-${stamp}@test.local`); // no role
+  const pharmU = await createUser(`rpa-pharm-${stamp}@test.local`, "pharmacy");
   createdUsers.push(staffU.userId, adminU.userId, plainU.userId, pharmU.userId);
 
   const staffC = await signInAs(staffU.email, staffU.password);
@@ -103,40 +106,53 @@ async function main() {
     // Seed one appointment with one audit row so SELECT tests have data.
     const apptId = await newApptWithAuditRow();
     const seedRow = await admin
-      .from("reminder_preference_audit").select("id").eq("appointment_id", apptId).single();
+      .from("reminder_preference_audit")
+      .select("id")
+      .eq("appointment_id", apptId)
+      .single();
     assert(!seedRow.error && seedRow.data, "seed audit row missing");
     const auditId = seedRow.data.id as string;
 
     // ── READ (SELECT) ───────────────────────────────────────────────
     await test("anon cannot SELECT (returns 0 rows)", async () => {
       const { data, error } = await anon
-        .from("reminder_preference_audit").select("*").eq("appointment_id", apptId);
+        .from("reminder_preference_audit")
+        .select("*")
+        .eq("appointment_id", apptId);
       assert(!error, `unexpected err: ${error?.message}`);
       assert((data ?? []).length === 0, `anon leaked ${data?.length} rows`);
     });
 
     await test("authenticated with no role cannot SELECT", async () => {
       const { data } = await plainC
-        .from("reminder_preference_audit").select("*").eq("appointment_id", apptId);
+        .from("reminder_preference_audit")
+        .select("*")
+        .eq("appointment_id", apptId);
       assert((data ?? []).length === 0, `no-role user leaked ${data?.length} rows`);
     });
 
     await test("authenticated with role='pharmacy' cannot SELECT", async () => {
       const { data } = await pharmC
-        .from("reminder_preference_audit").select("*").eq("appointment_id", apptId);
+        .from("reminder_preference_audit")
+        .select("*")
+        .eq("appointment_id", apptId);
       assert((data ?? []).length === 0, `pharmacy leaked ${data?.length} rows`);
     });
 
     await test("authenticated with role='reception' CAN SELECT", async () => {
       const { data, error } = await staffC
-        .from("reminder_preference_audit").select("*").eq("appointment_id", apptId);
+        .from("reminder_preference_audit")
+        .select("*")
+        .eq("appointment_id", apptId);
       assert(!error, `err: ${error?.message}`);
       assert((data ?? []).length >= 1, `reception should see rows, got ${data?.length}`);
     });
 
     await test("authenticated with role='admin' CAN SELECT", async () => {
       const { data, error } = await adminC
-        .from("reminder_preference_audit").select("*").eq("appointment_id", apptId);
+        .from("reminder_preference_audit")
+        .select("*")
+        .eq("appointment_id", apptId);
       assert(!error, `err: ${error?.message}`);
       assert((data ?? []).length >= 1, `admin should see rows, got ${data?.length}`);
     });
@@ -171,27 +187,39 @@ async function main() {
     await test("anon cannot UPDATE", async () => {
       const { error, data } = await anon
         .from("reminder_preference_audit")
-        .update({ reason: "hacked" }).eq("id", auditId).select();
+        .update({ reason: "hacked" })
+        .eq("id", auditId)
+        .select();
       // RLS may return no error + 0 rows, or an error. Either way, no mutation.
       assert(!data || data.length === 0, `anon updated ${data?.length} rows`);
       const { data: fresh } = await admin
-        .from("reminder_preference_audit").select("reason").eq("id", auditId).single();
+        .from("reminder_preference_audit")
+        .select("reason")
+        .eq("id", auditId)
+        .single();
       assert(fresh?.reason !== "hacked", "anon UPDATE leaked through");
       void error;
     });
     await test("authenticated admin cannot UPDATE", async () => {
       const { data } = await adminC
         .from("reminder_preference_audit")
-        .update({ reason: "admin-hack" }).eq("id", auditId).select();
+        .update({ reason: "admin-hack" })
+        .eq("id", auditId)
+        .select();
       assert(!data || data.length === 0, `admin updated ${data?.length} rows`);
       const { data: fresh } = await admin
-        .from("reminder_preference_audit").select("reason").eq("id", auditId).single();
+        .from("reminder_preference_audit")
+        .select("reason")
+        .eq("id", auditId)
+        .single();
       assert(fresh?.reason !== "admin-hack", "admin UPDATE leaked through");
     });
     await test("authenticated reception cannot UPDATE", async () => {
       const { data } = await staffC
         .from("reminder_preference_audit")
-        .update({ reason: "reception-hack" }).eq("id", auditId).select();
+        .update({ reason: "reception-hack" })
+        .eq("id", auditId)
+        .select();
       assert(!data || data.length === 0, `reception updated ${data?.length} rows`);
     });
 
@@ -199,19 +227,28 @@ async function main() {
     await test("anon cannot DELETE", async () => {
       await anon.from("reminder_preference_audit").delete().eq("id", auditId);
       const { data } = await admin
-        .from("reminder_preference_audit").select("id").eq("id", auditId).maybeSingle();
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("id", auditId)
+        .maybeSingle();
       assert(data?.id === auditId, "anon DELETE removed the row");
     });
     await test("authenticated admin cannot DELETE", async () => {
       await adminC.from("reminder_preference_audit").delete().eq("id", auditId);
       const { data } = await admin
-        .from("reminder_preference_audit").select("id").eq("id", auditId).maybeSingle();
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("id", auditId)
+        .maybeSingle();
       assert(data?.id === auditId, "admin DELETE removed the row");
     });
     await test("authenticated reception cannot DELETE", async () => {
       await staffC.from("reminder_preference_audit").delete().eq("id", auditId);
       const { data } = await admin
-        .from("reminder_preference_audit").select("id").eq("id", auditId).maybeSingle();
+        .from("reminder_preference_audit")
+        .select("id")
+        .eq("id", auditId)
+        .maybeSingle();
       assert(data?.id === auditId, "reception DELETE removed the row");
     });
 
@@ -219,18 +256,23 @@ async function main() {
     await test("staff-driven appointment update still produces an audit row via trigger", async () => {
       // Reception updates appointments table directly — trigger should log it.
       const { error } = await staffC
-        .from("appointments").update({ reminder_2h: false }).eq("id", apptId);
+        .from("appointments")
+        .update({ reminder_2h: false })
+        .eq("id", apptId);
       assert(!error, `staff update err: ${error?.message}`);
       const { data } = await staffC
         .from("reminder_preference_audit")
-        .select("*").eq("appointment_id", apptId).eq("reminder_kind", "reminder_2h");
+        .select("*")
+        .eq("appointment_id", apptId)
+        .eq("reminder_kind", "reminder_2h");
       assert((data ?? []).length >= 1, "trigger row for reminder_2h missing");
       const row = (data ?? []).at(-1) as any;
       assert(row.source === "staff", `expected source=staff, got ${row.source}`);
-      assert(row.changed_by === staffU.userId,
-        `changed_by should be staff user, got ${row.changed_by}`);
+      assert(
+        row.changed_by === staffU.userId,
+        `changed_by should be staff user, got ${row.changed_by}`,
+      );
     });
-
   } finally {
     if (createdAppts.length) {
       await admin.from("appointments").delete().in("id", createdAppts);
@@ -244,4 +286,7 @@ async function main() {
   if (failed > 0) process.exit(1);
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

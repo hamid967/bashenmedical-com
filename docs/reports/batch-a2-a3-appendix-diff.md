@@ -7,16 +7,16 @@
 
 ## 1. Executive diff
 
-| Dimension | Batch A2 | Batch A3 |
-|---|---|---|
-| Goal | Bulk removal of `EXECUTE` from `PUBLIC` / `anon` on obvious leaks | Cleanup pass on residuals + tighten remaining anon-accessible fns |
-| Fns touched | **~53** | **7** |
-| Fns fully sealed (owner/service_role only) | 30+ (G4 internal) | 3 (residual internals) |
-| Fns re-scoped to `authenticated` only | 23 (G2 + G3) | 0 |
-| Fns re-granted explicitly to `anon+authenticated` (not via `PUBLIC` role) | 0 | 4 |
-| Fns added to public-read allowlist with justification | 0 | 1 (`record_permission_error`) |
-| Linter warnings after run | 111 (from 191) | **106** |
-| Anon-reachable SECDEF fns after run | 36 | **32** |
+| Dimension                                                                 | Batch A2                                                          | Batch A3                                                          |
+| ------------------------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Goal                                                                      | Bulk removal of `EXECUTE` from `PUBLIC` / `anon` on obvious leaks | Cleanup pass on residuals + tighten remaining anon-accessible fns |
+| Fns touched                                                               | **~53**                                                           | **7**                                                             |
+| Fns fully sealed (owner/service_role only)                                | 30+ (G4 internal)                                                 | 3 (residual internals)                                            |
+| Fns re-scoped to `authenticated` only                                     | 23 (G2 + G3)                                                      | 0                                                                 |
+| Fns re-granted explicitly to `anon+authenticated` (not via `PUBLIC` role) | 0                                                                 | 4                                                                 |
+| Fns added to public-read allowlist with justification                     | 0                                                                 | 1 (`record_permission_error`)                                     |
+| Linter warnings after run                                                 | 111 (from 191)                                                    | **106**                                                           |
+| Anon-reachable SECDEF fns after run                                       | 36                                                                | **32**                                                            |
 
 ---
 
@@ -24,9 +24,9 @@
 
 ### 2.1 Group G2 — Auth helpers → `authenticated` only
 
-| Function | Before | After |
-|---|---|---|
-| `public.can_edit_page` | `PUBLIC` EXECUTE | `authenticated` only |
+| Function                  | Before           | After                |
+| ------------------------- | ---------------- | -------------------- |
+| `public.can_edit_page`    | `PUBLIC` EXECUTE | `authenticated` only |
 | `public.can_edit_service` | `PUBLIC` EXECUTE | `authenticated` only |
 
 ### 2.2 Group G3 — Staff RPCs → `authenticated` + in-body role check (21 fns)
@@ -61,11 +61,11 @@ These slipped through A2 because they were referenced by cron/watchdog and
 were mistakenly assumed to need broader access. A3 confirmed they are only
 called from server-only code paths.
 
-| Function | Before A3 | After A3 | Why |
-|---|---|---|---|
-| `public._purge_old_permission_errors` | `authenticated` | owner only | called only by nightly `pg_cron` under `service_role` |
+| Function                                 | Before A3       | After A3   | Why                                                                         |
+| ---------------------------------------- | --------------- | ---------- | --------------------------------------------------------------------------- |
+| `public._purge_old_permission_errors`    | `authenticated` | owner only | called only by nightly `pg_cron` under `service_role`                       |
 | `public.evaluate_permission_error_spike` | `authenticated` | owner only | called only by `/api/public/hooks/permission-watchdog` under `service_role` |
-| `public.has_resource_permission` | `authenticated` | owner only | wrapped by RLS policies via `SECURITY INVOKER` callers; no direct RPC use |
+| `public.has_resource_permission`         | `authenticated` | owner only | wrapped by RLS policies via `SECURITY INVOKER` callers; no direct RPC use   |
 
 ### 3.2 Category Y — Explicit `anon+authenticated` grants (never `PUBLIC` role)
 
@@ -73,12 +73,12 @@ Previously granted via the `PUBLIC` pseudo-role, which means "every current
 and future role, including any custom role added later". A3 pinned them to
 the exact two roles they need, closing future-role leaks.
 
-| Function | Before A3 | After A3 |
-|---|---|---|
-| `public.book_appointment_atomic` | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
-| `public.confirm_waitlist_offer` | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
+| Function                           | Before A3                 | After A3                               |
+| ---------------------------------- | ------------------------- | -------------------------------------- |
+| `public.book_appointment_atomic`   | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
+| `public.confirm_waitlist_offer`    | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
 | `public.estimate_appointment_cost` | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
-| `public.track_orders_by_phone` | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
+| `public.track_orders_by_phone`     | `GRANT EXECUTE TO PUBLIC` | `GRANT EXECUTE TO anon, authenticated` |
 
 Behavior is functionally identical for today's role set, but any newly
 added role (e.g. a future `partner_api` role) will not inherit access
@@ -86,8 +86,8 @@ unless granted explicitly.
 
 ### 3.3 Category Z — Added to public-read allowlist
 
-| Function | Reason | Docs |
-|---|---|---|
+| Function                         | Reason                                                                                                                                                                                              | Docs                                                               |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | `public.record_permission_error` | Telemetry writer used by `installPermissionErrorReporter()` in the browser bundle; must be reachable by `anon` on the guest paths where errors originate. Bounded (rate-limited, sanitized inputs). | [`public_read_allowlist.md`](../security/public_read_allowlist.md) |
 
 ---
@@ -106,14 +106,14 @@ unless granted explicitly.
 
 ## 5. Guard coverage per category
 
-| Category | Blocking pre-merge | Post-merge pinned | Runtime watchdog |
-|---|:---:|:---:|:---:|
-| A2 G2 auth helpers | ✅ SECDEF guard | ✅ pinned | ✅ |
-| A2 G3 staff RPCs | ✅ SECDEF guard | ✅ pinned | ✅ |
-| A2 G4 internals | ✅ SECDEF guard | ✅ pinned | ✅ |
-| A3 X sealed | ✅ SECDEF guard | ✅ pinned | ✅ |
-| A3 Y anon-explicit | ✅ role matrix | ✅ pinned (PUBLIC-only check) | ✅ |
-| A3 Z allowlist | ✅ role matrix | — (intentionally reachable) | ✅ |
+| Category           | Blocking pre-merge |       Post-merge pinned       | Runtime watchdog |
+| ------------------ | :----------------: | :---------------------------: | :--------------: |
+| A2 G2 auth helpers |  ✅ SECDEF guard   |           ✅ pinned           |        ✅        |
+| A2 G3 staff RPCs   |  ✅ SECDEF guard   |           ✅ pinned           |        ✅        |
+| A2 G4 internals    |  ✅ SECDEF guard   |           ✅ pinned           |        ✅        |
+| A3 X sealed        |  ✅ SECDEF guard   |           ✅ pinned           |        ✅        |
+| A3 Y anon-explicit |   ✅ role matrix   | ✅ pinned (PUBLIC-only check) |        ✅        |
+| A3 Z allowlist     |   ✅ role matrix   |  — (intentionally reachable)  |        ✅        |
 
 All three guard layers (see §3 of the parent report) run against every
 push to `main`; the pinned check in `tests/security/test_a2_a3_grants_pinned.py`

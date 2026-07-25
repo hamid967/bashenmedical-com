@@ -2,12 +2,7 @@
  * Phase 5 — /patient/family — in-portal dependents CRUD + booking gate.
  */
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  queryOptions,
-  useSuspenseQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { queryOptions, useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -27,13 +22,7 @@ import { Badge } from "@/components/ui-v3";
 import { Button } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
 import { Label } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import {
   Dialog,
   DialogContent,
@@ -166,7 +155,6 @@ function FamilyPage() {
     onError: (e: any) => toast.error(e?.message ?? "تعذر الحذف"),
   });
 
-
   const openCreate = () => {
     setEditing(null);
     setForm(emptyForm);
@@ -216,7 +204,6 @@ function FamilyPage() {
           onRetry={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
         />
       ) : null}
-
 
       {items.length === 0 ? (
         <EmptyState
@@ -270,14 +257,8 @@ function FamilyPage() {
                         احجز لهذا التابع
                       </Button>
                     ) : !verified ? (
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        onClick={() => setVerifyFor(d)}
-                      >
-                        {d.verification_status === "pending"
-                          ? "متابعة طلب التوثيق"
-                          : "طلب توثيق"}
+                      <Button size="sm" variant="secondary" onClick={() => setVerifyFor(d)}>
+                        {d.verification_status === "pending" ? "متابعة طلب التوثيق" : "طلب توثيق"}
                       </Button>
                     ) : null}
 
@@ -312,7 +293,9 @@ function FamilyPage() {
       >
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>{dialogMode === "edit" ? "تعديل بيانات التابع" : "إضافة تابع"}</DialogTitle>
+            <DialogTitle>
+              {dialogMode === "edit" ? "تعديل بيانات التابع" : "إضافة تابع"}
+            </DialogTitle>
             <DialogDescription>
               أدخل بيانات فرد الأسرة. التحقق من صلة القرابة يتم عبر الاستقبال قبل تفعيل الحجز.
             </DialogDescription>
@@ -418,16 +401,13 @@ function FamilyPage() {
         </DialogContent>
       </Dialog>
 
-
-      <AlertDialog
-        open={!!confirmDelete}
-        onOpenChange={(o) => !o && setConfirmDelete(null)}
-      >
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>حذف التابع؟</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم إزالة {confirmDelete?.full_name} من قائمة أفراد أسرتك. لا يمكن التراجع عن هذه العملية.
+              سيتم إزالة {confirmDelete?.full_name} من قائمة أفراد أسرتك. لا يمكن التراجع عن هذه
+              العملية.
             </AlertDialogDescription>
           </AlertDialogHeader>
           {deleteMut.error ? (
@@ -436,11 +416,8 @@ function FamilyPage() {
               onRetry={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}
             />
           ) : null}
-          {deleteMut.isPending ? (
-            <LoadingState label="جارٍ الحذف…" className="py-1" />
-          ) : null}
+          {deleteMut.isPending ? <LoadingState label="جارٍ الحذف…" className="py-1" /> : null}
           <AlertDialogFooter>
-
             <AlertDialogCancel disabled={deleteMut.isPending}>إلغاء</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => confirmDelete && deleteMut.mutate(confirmDelete.id)}

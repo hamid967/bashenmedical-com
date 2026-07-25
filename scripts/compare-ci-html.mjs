@@ -16,7 +16,14 @@ const esc = (s) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
-const { meta = {}, local_run = {}, ci_run = {}, summary = {}, errors = {}, differences = [] } = data;
+const {
+  meta = {},
+  local_run = {},
+  ci_run = {},
+  summary = {},
+  errors = {},
+  differences = [],
+} = data;
 
 const statusColor = summary.match ? "#16a34a" : "#dc2626";
 const statusLabel = summary.match ? "مطابق ✓" : "اختلافات موجودة ✗";

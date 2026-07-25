@@ -6,10 +6,7 @@
  */
 export type CmsGuardCtx = { supabase: any; userId: string };
 
-async function hasAny(
-  ctx: CmsGuardCtx,
-  roles: readonly string[],
-): Promise<boolean> {
+async function hasAny(ctx: CmsGuardCtx, roles: readonly string[]): Promise<boolean> {
   const checks = await Promise.all(
     roles.map((r) => ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: r })),
   );

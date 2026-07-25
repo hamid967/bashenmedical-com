@@ -75,8 +75,11 @@ function globToRegExp(g) {
   for (let i = 0; i < g.length; i++) {
     const c = g[i];
     if (c === "*") {
-      if (g[i + 1] === "*") { re += ".*"; i++; if (g[i + 1] === "/") i++; }
-      else re += "[^/]*";
+      if (g[i + 1] === "*") {
+        re += ".*";
+        i++;
+        if (g[i + 1] === "/") i++;
+      } else re += "[^/]*";
     } else if (c === "?") re += "[^/]";
     else if (".+^$(){}|[]\\".includes(c)) re += "\\" + c;
     else re += c;
@@ -163,7 +166,17 @@ const PROP_TO_CSS = {
 };
 
 // props التي نتعامل معها بأمان (نتجنّب gradients لأنها تحتاج tokens مختلفة)
-const SAFE_PROPS = new Set(["bg", "text", "border", "ring", "fill", "stroke", "outline", "placeholder", "divide"]);
+const SAFE_PROPS = new Set([
+  "bg",
+  "text",
+  "border",
+  "ring",
+  "fill",
+  "stroke",
+  "outline",
+  "placeholder",
+  "divide",
+]);
 
 // بناء اسم utility المستهدف: مثال bg-[color:var(--portal-error-50)]
 function tokenUtility(prop, tokenSuffix) {
@@ -219,7 +232,9 @@ if (LIST_RULES) {
   for (const [k, v] of DIRECT) console.log(`  ${k.padEnd(28)} → ${v}`);
   console.log("\nSemantic families → portal-*:");
   for (const [sem, fams] of Object.entries(SEMANTIC_FAMILIES))
-    console.log(`  ${sem.padEnd(8)} ← ${fams.join(", ")}  (shades 50/100/200 → -50, 300–950 → base)`);
+    console.log(
+      `  ${sem.padEnd(8)} ← ${fams.join(", ")}  (shades 50/100/200 → -50, 300–950 → base)`,
+    );
   console.log("\nInk families → portal-{surface-1|surface-2|surface-3|ink-3|ink-2|ink}:");
   for (const f of INK_FAMILIES) console.log(`  ${f}`);
   console.log("\nصيغة الإخراج: <prop>-[color:var(--portal-<token>)]  (fill/stroke بدون color:)");
@@ -231,7 +246,11 @@ if (LIST_RULES) {
 // ─────────────────────────────────────────────────────────────────────
 function walk(dir, out = []) {
   let entries;
-  try { entries = readdirSync(dir); } catch { return out; }
+  try {
+    entries = readdirSync(dir);
+  } catch {
+    return out;
+  }
   for (const name of entries) {
     const p = join(dir, name);
     const s = statSync(p);
@@ -258,9 +277,17 @@ function transformClassLiteral(literal, ctx) {
     const prefix = idx >= 0 ? tok.slice(0, idx + 1) : "";
     const bare = idx >= 0 ? tok.slice(idx + 1) : tok;
     const mapped = mapUtility(bare);
-    if (mapped) { touched++; return prefix + mapped; }
+    if (mapped) {
+      touched++;
+      return prefix + mapped;
+    }
     // تسجيل الحالات القريبة (bg-red-… إلخ) التي لم تُطبَّق
-    if (VERBOSE && /^(bg|text|border|ring|fill|stroke|divide|placeholder|outline)-[a-z]+-\d{2,3}(\/\d+)?$/.test(bare)) {
+    if (
+      VERBOSE &&
+      /^(bg|text|border|ring|fill|stroke|divide|placeholder|outline)-[a-z]+-\d{2,3}(\/\d+)?$/.test(
+        bare,
+      )
+    ) {
       skipped.push(tok);
     }
     return tok;
@@ -274,7 +301,8 @@ function transformClassLiteral(literal, ctx) {
 // - className={'…'} / className={"…"}
 // - className={`…`}
 // - clsx( … "…" … )   (فقط الحرفيات المزدوجة/المفردة/backtick داخل الاستدعاء)
-const CLASSNAME_ATTR = /className=(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\}|\{"([^"]*)"\}|\{'([^']*)'\})/g;
+const CLASSNAME_ATTR =
+  /className=(?:"([^"]*)"|'([^']*)'|\{`([^`]*)`\}|\{"([^"]*)"\}|\{'([^']*)'\})/g;
 const CLSX_CALL = /(?:clsx|cn|twMerge)\s*\(([\s\S]*?)\)/g;
 const STRING_IN_CALL = /(["'`])((?:\\.|(?!\1).)*)\1/g;
 
@@ -321,105 +349,123 @@ function transformSource(src, ctx) {
 // ─────────────────────────────────────────────────────────────────────
 if (IS_MAIN) runCli();
 function runCli() {
-const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d)))
-  .filter((p) => {
+  const files = TARGET_DIRS.flatMap((d) => walk(join(ROOT, d))).filter((p) => {
     const rel = relative(ROOT, p).replaceAll("\\", "/");
     if (FILE_EXCEPTIONS.has(rel)) return false;
-    if (!(rel.startsWith("src/components/portal/") || rel.startsWith("src/routes/_authenticated/portal"))) return false;
+    if (!(
+      rel.startsWith("src/components/portal/") || rel.startsWith("src/routes/_authenticated/portal")
+    ))
+      return false;
     if (FILE_FILTER && !rel.includes(FILE_FILTER)) return false;
     if (GLOB_RES.length && !GLOB_RES.some((re) => re.test(rel))) return false;
     return true;
   });
 
-if (VERBOSE) {
-  console.log(`نطاق المطابقة: ${files.length} ملف بعد التصفية` +
-    (GLOB_PATTERNS.length ? ` (globs: ${GLOB_PATTERNS.length})` : "") +
-    (FILE_FILTER ? ` (--file="${FILE_FILTER}")` : ""));
-}
+  if (VERBOSE) {
+    console.log(
+      `نطاق المطابقة: ${files.length} ملف بعد التصفية` +
+        (GLOB_PATTERNS.length ? ` (globs: ${GLOB_PATTERNS.length})` : "") +
+        (FILE_FILTER ? ` (--file="${FILE_FILTER}")` : ""),
+    );
+  }
 
-let totalFiles = 0;
-let totalReplacements = 0;
-const perFile = [];
-const skippedAll = [];
+  let totalFiles = 0;
+  let totalReplacements = 0;
+  const perFile = [];
+  const skippedAll = [];
 
-for (const f of files) {
-  if (totalFiles >= LIMIT) break;
-  const rel = relative(ROOT, f).replaceAll("\\", "/");
-  const original = readFileSync(f, "utf8");
-  const ctx = { skipped: [] };
-  const { src, changed } = transformSource(original, ctx);
-  if (changed > 0) {
-    totalFiles++;
-    totalReplacements += changed;
-    perFile.push({ rel, changed });
-    if (WRITE) {
-      writeFileSync(f + ".bak", original);
-      writeFileSync(f, src);
+  for (const f of files) {
+    if (totalFiles >= LIMIT) break;
+    const rel = relative(ROOT, f).replaceAll("\\", "/");
+    const original = readFileSync(f, "utf8");
+    const ctx = { skipped: [] };
+    const { src, changed } = transformSource(original, ctx);
+    if (changed > 0) {
+      totalFiles++;
+      totalReplacements += changed;
+      perFile.push({ rel, changed });
+      if (WRITE) {
+        writeFileSync(f + ".bak", original);
+        writeFileSync(f, src);
+      }
     }
-  }
-  if (ctx.skipped.length) skippedAll.push({ rel, tokens: ctx.skipped });
-}
-
-// إخراج
-const mode = WRITE ? "WRITE" : (DRY_RUN_FLAG ? "dry-run (تقدير)" : "dry-run");
-console.log(`portal-tokens codemod — ${mode}`);
-console.log(`نطاق: ${files.length} ملف مُرشَّح  ·  مُتأثِّر: ${totalFiles}  ·  استبدالات: ${totalReplacements}`);
-
-// تفصيل حسب المجلد (يُعرض دائمًا حتى في dry-run)
-if (perFile.length) {
-  const byDir = new Map();
-  for (const p of perFile) {
-    const dir = dirname(p.rel);
-    const agg = byDir.get(dir) ?? { files: 0, changed: 0 };
-    agg.files++;
-    agg.changed += p.changed;
-    byDir.set(dir, agg);
-  }
-  const rows = [...byDir.entries()].sort((a, b) => b[1].changed - a[1].changed);
-  console.log(`\nتفصيل حسب المجلد:`);
-  const dirW = Math.min(60, Math.max(...rows.map(([d]) => d.length)));
-  for (const [dir, agg] of rows) {
-    console.log(`  ${dir.padEnd(dirW)}  ${String(agg.files).padStart(3)} ملف · ${String(agg.changed).padStart(4)} استبدال`);
+    if (ctx.skipped.length) skippedAll.push({ rel, tokens: ctx.skipped });
   }
 
-  const topN = VERBOSE ? perFile.length : Math.min(30, perFile.length);
-  console.log(`\nأعلى الملفات (${topN}${topN < perFile.length ? `/${perFile.length}` : ""}):`);
-  for (const p of perFile.sort((a, b) => b.changed - a.changed).slice(0, topN)) {
-    console.log(`  • ${p.rel}  (${p.changed})`);
-  }
-  if (!VERBOSE && perFile.length > 30) console.log(`  … +${perFile.length - 30} ملف آخر (شغّل بـ --verbose للقائمة الكاملة)`);
-}
+  // إخراج
+  const mode = WRITE ? "WRITE" : DRY_RUN_FLAG ? "dry-run (تقدير)" : "dry-run";
+  console.log(`portal-tokens codemod — ${mode}`);
+  console.log(
+    `نطاق: ${files.length} ملف مُرشَّح  ·  مُتأثِّر: ${totalFiles}  ·  استبدالات: ${totalReplacements}`,
+  );
 
-if (VERBOSE && skippedAll.length) {
-  console.log(`\nتنبيه — utilities قريبة لم تُحوَّل (تحتاج قرار يدوي):`);
-  const flat = skippedAll.flatMap((s) => s.tokens.map((t) => `${s.rel}: ${t}`));
-  const uniq = [...new Set(flat)].slice(0, 40);
-  for (const line of uniq) console.log(`  ~ ${line}`);
-  if (flat.length > 40) console.log(`  … +${flat.length - 40}`);
-}
+  // تفصيل حسب المجلد (يُعرض دائمًا حتى في dry-run)
+  if (perFile.length) {
+    const byDir = new Map();
+    for (const p of perFile) {
+      const dir = dirname(p.rel);
+      const agg = byDir.get(dir) ?? { files: 0, changed: 0 };
+      agg.files++;
+      agg.changed += p.changed;
+      byDir.set(dir, agg);
+    }
+    const rows = [...byDir.entries()].sort((a, b) => b[1].changed - a[1].changed);
+    console.log(`\nتفصيل حسب المجلد:`);
+    const dirW = Math.min(60, Math.max(...rows.map(([d]) => d.length)));
+    for (const [dir, agg] of rows) {
+      console.log(
+        `  ${dir.padEnd(dirW)}  ${String(agg.files).padStart(3)} ملف · ${String(agg.changed).padStart(4)} استبدال`,
+      );
+    }
 
-if (!WRITE && !CHECK) {
-  console.log(`\nلتطبيق التغييرات:  bun run codemod:portal-tokens -- --write`);
-  console.log(`تقييد بـ glob:      bun run codemod:portal-tokens -- --glob "src/routes/_authenticated/portal.prescriptions*.tsx"`);
-  console.log(`تقييد بقائمة:       bun run codemod:portal-tokens -- --paths .codemod-scope.txt`);
-  console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
-  console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
-}
+    const topN = VERBOSE ? perFile.length : Math.min(30, perFile.length);
+    console.log(`\nأعلى الملفات (${topN}${topN < perFile.length ? `/${perFile.length}` : ""}):`);
+    for (const p of perFile.sort((a, b) => b.changed - a.changed).slice(0, topN)) {
+      console.log(`  • ${p.rel}  (${p.changed})`);
+    }
+    if (!VERBOSE && perFile.length > 30)
+      console.log(`  … +${perFile.length - 30} ملف آخر (شغّل بـ --verbose للقائمة الكاملة)`);
+  }
 
-if (CHECK) {
-  if (WRITE) {
-    console.error(`\n✗ لا يمكن الجمع بين --check و --write.`);
-    process.exit(2);
+  if (VERBOSE && skippedAll.length) {
+    console.log(`\nتنبيه — utilities قريبة لم تُحوَّل (تحتاج قرار يدوي):`);
+    const flat = skippedAll.flatMap((s) => s.tokens.map((t) => `${s.rel}: ${t}`));
+    const uniq = [...new Set(flat)].slice(0, 40);
+    for (const line of uniq) console.log(`  ~ ${line}`);
+    if (flat.length > 40) console.log(`  … +${flat.length - 40}`);
   }
-  if (totalFiles > 0) {
-    console.error(`\n✗ فحص codemod فشل: ${totalFiles} ملف داخل portal لا يزال يحوي utilities قابلة للتحويل (${totalReplacements} استبدال).`);
-    console.error(`  شغّل:  bun run codemod:portal-tokens -- --write   ثم راجع الـ diff.`);
-    process.exit(1);
+
+  if (!WRITE && !CHECK) {
+    console.log(`\nلتطبيق التغييرات:  bun run codemod:portal-tokens -- --write`);
+    console.log(
+      `تقييد بـ glob:      bun run codemod:portal-tokens -- --glob "src/routes/_authenticated/portal.prescriptions*.tsx"`,
+    );
+    console.log(`تقييد بقائمة:       bun run codemod:portal-tokens -- --paths .codemod-scope.txt`);
+    console.log(`عرض القواعد:        bun run codemod:portal-tokens -- --list-rules`);
+    console.log(`للتحقق بعد التطبيق: bun run lint:portal-tokens  ثم استعرِض  /design/storybook`);
   }
-  console.log(`\n✓ فحص codemod نجح: لا utilities قابلة للتحويل داخل portal.`);
-}
+
+  if (CHECK) {
+    if (WRITE) {
+      console.error(`\n✗ لا يمكن الجمع بين --check و --write.`);
+      process.exit(2);
+    }
+    if (totalFiles > 0) {
+      console.error(
+        `\n✗ فحص codemod فشل: ${totalFiles} ملف داخل portal لا يزال يحوي utilities قابلة للتحويل (${totalReplacements} استبدال).`,
+      );
+      console.error(`  شغّل:  bun run codemod:portal-tokens -- --write   ثم راجع الـ diff.`);
+      process.exit(1);
+    }
+    console.log(`\n✓ فحص codemod نجح: لا utilities قابلة للتحويل داخل portal.`);
+  }
 } // /runCli
 
-export { transformSource, transformClassLiteral, mapUtility, DIRECT, SEMANTIC_FAMILIES, INK_FAMILIES };
-
-
+export {
+  transformSource,
+  transformClassLiteral,
+  mapUtility,
+  DIRECT,
+  SEMANTIC_FAMILIES,
+  INK_FAMILIES,
+};
