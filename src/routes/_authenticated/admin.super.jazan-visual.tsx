@@ -293,7 +293,6 @@ function JazanVisualAdmin() {
               اتركه فارغًا لاستخدام شعار المجمع الافتراضي. استخدم فقط شعارًا لديك حق استعماله.
             </p>
             {s.intro.logoUrl?.trim() && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={s.intro.logoUrl}
                 alt=""
