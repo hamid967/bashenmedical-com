@@ -52,20 +52,46 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const nextParam = sanitizeNext(search.next);
 
-  // If already signed in, bounce out immediately.
+  // If already signed in, bounce out immediately. Honor a stashed post-SSO next.
   useEffect(() => {
     let active = true;
     supabase.auth.getUser().then(({ data }) => {
       if (!active || !data.user) return;
+      const stashed =
+        typeof window !== "undefined" ? sessionStorage.getItem("auth:next") : null;
+      if (stashed && typeof window !== "undefined") sessionStorage.removeItem("auth:next");
+      const dest = nextParam ?? sanitizeNext(stashed ?? undefined);
       resolveHome({}).then((r) => {
         if (!active) return;
-        navigate({ to: nextParam ?? r.home, replace: true });
+        navigate({ to: dest ?? r.home, replace: true });
       });
     });
     return () => {
       active = false;
     };
   }, [navigate, nextParam, resolveHome]);
+
+  async function handleSSO(provider: "google" | "apple") {
+    setError(null);
+    setBusy(true);
+    // Stash intended destination — the OAuth round-trip drops URL search params.
+    if (typeof window !== "undefined" && nextParam) {
+      sessionStorage.setItem("auth:next", nextParam);
+    }
+    const res = await lovable.auth.signInWithOAuth(provider, {
+      redirect_uri: window.location.origin,
+    });
+    if (res.redirected) return; // browser navigating to provider
+    if (res.error) {
+      setBusy(false);
+      setError(res.error.message || "تعذّر تسجيل الدخول عبر مزوّد الهوية.");
+      return;
+    }
+    // Popup/web_message flow: session already set — resolve home.
+    const r = await resolveHome({});
+    setBusy(false);
+    navigate({ to: nextParam ?? r.home, replace: true });
+  }
 
   async function handleMobileSubmit(e: React.FormEvent) {
     e.preventDefault();
