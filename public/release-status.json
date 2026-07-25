@@ -48,12 +48,13 @@
         "id": "unit_tests",
         "label": "Unit test suite green",
         "severity": "blocking",
-        "status": "unknown",
-        "measuredAt": "2026-07-24T10:13:56.625Z",
+        "status": "pass",
+        "detail": "14 files, 223 tests, 0 failures (bun test tests/unit/*.test.ts)",
+        "measuredAt": "2026-07-25T19:49:25.376Z",
         "maxAgeSeconds": 86400,
         "ageSeconds": 0,
         "stale": false,
-        "effectiveStatus": "unknown"
+        "effectiveStatus": "pass"
       },
       {
         "id": "eslint",
