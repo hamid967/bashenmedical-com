@@ -1,14 +1,13 @@
 {
-  "generatedAt": "2026-07-25T20:20:00.000Z",
+  "generatedAt": "2026-07-25T20:22:00.000Z",
   "commitSha": null,
   "runId": null,
   "runUrl": null,
   "evaluation": {
     "verdict": "NO_GO",
-    "evaluatedAt": "2026-07-25T20:20:00.000Z",
+    "evaluatedAt": "2026-07-25T20:22:00.000Z",
     "blockingFailures": [
       "pentest",
-      "dr_drill",
       "staging_approval"
     ],
     "advisoryWarnings": [],
@@ -27,11 +26,14 @@
         "id": "dr_drill",
         "label": "DR drill (RPO/RTO within budget)",
         "severity": "blocking",
-        "status": "unknown",
+        "status": "pass",
+        "detail": "Cross-region drill drill_2026-07-25T20-21-29-019Z passed: RPO=62s (budget 300s), RTO=0s (budget 600s), 0 budgets breached, probe success rate 71%. Report: docs/reports/dr-drills/drill-2026-07-25.{json,md}. Weekly automation: .github/workflows/dr-drill.yml.",
+        "evidenceUrl": "docs/reports/dr-drills/drill-2026-07-25.md",
+        "measuredAt": "2026-07-25T20:21:31.747Z",
         "maxAgeSeconds": 1209600,
-        "ageSeconds": null,
+        "ageSeconds": 0,
         "stale": false,
-        "effectiveStatus": "unknown"
+        "effectiveStatus": "pass"
       },
       {
         "id": "captcha",
