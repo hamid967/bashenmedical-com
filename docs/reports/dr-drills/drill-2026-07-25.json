@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "drill_id": "drill_2026-07-25T20-21-29-019Z",
+  "scenario": "primary_region_outage",
+  "status": "passed",
+  "operator": "release-captain",
+  "git_sha": "local-1785010888",
+  "primary_region": "production",
+  "secondary_region": "preview-standby",
+  "measurements": {
+    "rpo_seconds": 62,
+    "rto_seconds": 0,
+    "primary_p95_ms": 1032,
+    "secondary_p95_ms": 21,
+    "probe_success_rate": 0.7142857142857143
+  },
+  "budgets_breached": [],
+  "timeline": {
+    "drill_started_at_ms": 1785010889020,
+    "last_successful_backup_at_ms": 1785010829019,
+    "primary_failure_detected_at_ms": 1785010891465,
+    "failover_initiated_at_ms": 1785010891465,
+    "secondary_healthy_at_ms": 1785010891737,
+    "drill_completed_at_ms": 1785010891745
+  },
+  "probe_counts": {
+    "total": 7,
+    "ok": 5,
+    "degraded": 0,
+    "down": 2,
+    "per_region": {
+      "production": {
+        "ok": 3,
+        "degraded": 0,
+        "down": 2
+      },
+      "preview-standby": {
+        "ok": 2,
+        "degraded": 0,
+        "down": 0
+      }
+    }
+  },
+  "generated_at_iso": "2026-07-25T20:21:31.747Z"
+}
