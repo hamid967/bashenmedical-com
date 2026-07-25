@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   RefreshCw,
   AlertTriangle,
@@ -12,10 +14,17 @@ import {
   ShieldAlert,
   CheckCircle2,
   ExternalLink,
+  Pencil,
+  History,
+  X,
 } from "lucide-react";
 import {
   getReconciliationDetail,
+  applyReconciliationAdjustment,
+  revokeReconciliationAdjustment,
   type ReconciliationFieldDiff,
+  type ReconciliationAdjustmentRow,
+  type ReconciliationNphiesCandidate,
 } from "@/lib/admin/reconciliation.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/reconciliation/$invoiceId")({
