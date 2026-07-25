@@ -117,7 +117,7 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
     if (invoiceIds.length > 0) {
       const { data: pays, error: payErr } = await context.supabase
         .from("payments")
-        .select("invoice_id, amount, status")
+        .select("id, invoice_id, amount, status")
         .in("invoice_id", invoiceIds);
       if (payErr) throw new Error(payErr.message);
       for (const p of pays ?? []) {
