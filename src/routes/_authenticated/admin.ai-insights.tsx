@@ -8,7 +8,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Brain, AlertTriangle, Lightbulb, MessageSquareWarning, Check, X, Link2 } from "lucide-react";
+import { Brain, AlertTriangle, Lightbulb, MessageSquareWarning, Check, X, Link2, ShieldAlert } from "lucide-react";
 import { getMyRoles } from "@/lib/admin.functions";
 import {
   listNoShowPredictions,
@@ -44,22 +44,45 @@ const TABS: Tab[] = ["no-show", "recs", "complaints"];
 function AiInsightsPage() {
   const search = Route.useSearch();
   const navigate = useNavigate({ from: "/admin/ai-insights" });
-  const { tenantId: storedTenantId, setTenantId, activeOrganization, organizations } = useActiveTenant();
+  const {
+    tenantId: storedTenantId,
+    setTenantId,
+    activeOrganization,
+    organizations,
+    isLoading: orgsLoading,
+  } = useActiveTenant();
 
   const urlOrgId = search.organizationId || null;
   const tab: Tab = (TABS as string[]).includes(search.tab) ? (search.tab as Tab) : "no-show";
-  // URL wins over stored preference — enables shareable views.
-  const effectiveTenantId = urlOrgId ?? storedTenantId;
-  const effectiveOrg =
-    (urlOrgId && organizations.find((o) => o.id === urlOrgId)) || activeOrganization;
 
-  // Sync URL → stored tenant so the switcher reflects the shared link.
+  // Membership check runs only after orgs are loaded — otherwise we'd
+  // flash a false "denied" state during initial hydration.
+  const isMember = (id: string | null) =>
+    !id || organizations.some((o) => o.id === id);
+  const urlOrgAllowed = !urlOrgId || (!orgsLoading && isMember(urlOrgId));
+  const denied = !!urlOrgId && !orgsLoading && !urlOrgAllowed;
+
+  // Drop a disallowed organizationId from the URL rather than sending a
+  // query the server would strip via RLS (returning empty rows with no
+  // explanation). Prefer the stored tenant, else "all".
+  const effectiveTenantId = urlOrgAllowed ? (urlOrgId ?? storedTenantId) : storedTenantId;
+  const effectiveOrg =
+    (urlOrgAllowed && urlOrgId && organizations.find((o) => o.id === urlOrgId)) ||
+    activeOrganization;
+
+  // Sync URL → stored tenant only if the caller is actually a member.
   useEffect(() => {
-    if (urlOrgId && urlOrgId !== storedTenantId) setTenantId(urlOrgId);
-  }, [urlOrgId, storedTenantId, setTenantId]);
+    if (urlOrgAllowed && urlOrgId && urlOrgId !== storedTenantId) setTenantId(urlOrgId);
+  }, [urlOrgAllowed, urlOrgId, storedTenantId, setTenantId]);
 
   const setTab = (t: Tab) =>
     navigate({ search: { ...search, tab: t }, replace: true });
+
+  const clearUrlOrg = () =>
+    navigate({ search: { ...search, organizationId: "" }, replace: true });
+
+  const switchToOrg = (id: string) =>
+    navigate({ search: { ...search, organizationId: id }, replace: true });
 
   const copyShareLink = async () => {
     const url = new URL(window.location.href);
@@ -92,6 +115,44 @@ function AiInsightsPage() {
           نسخ رابط المشاركة
         </button>
       </header>
+
+      {denied && (
+        <div
+          role="alert"
+          className="rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 p-4 space-y-3"
+        >
+          <div className="flex items-start gap-2">
+            <ShieldAlert className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <div className="font-semibold text-red-800 dark:text-red-200">
+                لا تملك صلاحية الوصول إلى هذه المؤسسة
+              </div>
+              <div className="text-sm text-red-700/90 dark:text-red-300/90 mt-0.5">
+                الرابط يشير إلى مؤسسة (<code className="font-mono text-xs">{urlOrgId}</code>) لست عضواً فيها.
+                نعرض حالياً بيانات مؤسستك الافتراضية.
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={clearUrlOrg}
+              className="text-xs px-3 py-1.5 rounded border bg-white dark:bg-transparent hover:bg-muted"
+            >
+              إزالة الفلتر ومتابعة
+            </button>
+            {organizations.map((o) => (
+              <button
+                key={o.id}
+                onClick={() => switchToOrg(o.id)}
+                className="text-xs px-3 py-1.5 rounded border bg-white dark:bg-transparent hover:bg-muted inline-flex items-center gap-1.5"
+              >
+                <Check className="w-3.5 h-3.5" /> التحويل إلى: {o.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <nav className="flex gap-2 border-b">
         <TabBtn active={tab === "no-show"} onClick={() => setTab("no-show")} icon={<AlertTriangle className="w-4 h-4" />}>
           خطر عدم الحضور
