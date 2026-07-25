@@ -274,7 +274,7 @@ async function sendPushRun(admin: any): Promise<{
 
     const { data: subs, error: subsErr } = await admin
       .from("push_subscriptions")
-      .select("id, endpoint, p256dh, auth, user_id, failure_count")
+      .select("id, endpoint, p256dh, auth, user_id, failure_count, platform, native_token")
       .in("user_id", targetUserIds);
     if (subsErr) {
       await admin
@@ -286,7 +286,16 @@ async function sendPushRun(admin: any): Promise<{
     }
 
     const subList = (subs ?? []) as Sub[];
-    if (subList.length === 0) {
+    const webSubs = subList.filter(
+      (s): s is Sub & { endpoint: string; p256dh: string; auth: string } =>
+        !!s.endpoint && !!s.p256dh && !!s.auth && (s.platform === null || s.platform === "web"),
+    );
+    const nativeSubs = subList.filter(
+      (s): s is Sub & { native_token: string; platform: "ios" | "android" } =>
+        !!s.native_token && (s.platform === "ios" || s.platform === "android"),
+    );
+
+    if (webSubs.length === 0 && nativeSubs.length === 0) {
       await admin
         .from("notifications")
         .update({ send_status: "skipped", last_error: "no push subscription" })
@@ -295,17 +304,31 @@ async function sendPushRun(admin: any): Promise<{
       continue;
     }
 
+    // Per-user unread count → APNs badge (skip for multi-target staff broadcasts).
+    const badgeByUser = new Map<string, number>();
+    if (row.audience !== "staff" && nativeSubs.length > 0 && row.user_id) {
+      const { count } = await admin
+        .from("notifications")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", row.user_id)
+        .eq("channel", "in_app")
+        .is("read_at", null);
+      badgeByUser.set(row.user_id, count ?? 0);
+    }
+
+    const deepLink = deriveDeepLink(row.kind, row.appointment_id, row.metadata);
     const payload = JSON.stringify({
       title: row.title,
       body: row.body ?? "",
       kind: row.kind,
       metadata: row.metadata ?? {},
+      deepLink,
     });
 
     let anySent = false;
     let lastError: string | null = null;
 
-    for (const s of subList) {
+    for (const s of webSubs) {
       try {
         await webpush.sendNotification(
           {
@@ -336,6 +359,39 @@ async function sendPushRun(admin: any): Promise<{
       }
     }
 
+    if (nativeSubs.length > 0 && fcmConfigured()) {
+      for (const s of nativeSubs) {
+        const badge = badgeByUser.get(s.user_id);
+        const result = await sendFcm({
+          token: s.native_token,
+          platform: s.platform,
+          title: row.title,
+          body: row.body ?? "",
+          data: { kind: row.kind, notificationId: row.id },
+          badge,
+          deepLink,
+        });
+        if (result.ok) {
+          anySent = true;
+          await admin
+            .from("push_subscriptions")
+            .update({ last_seen_at: new Date().toISOString(), failure_count: 0 })
+            .eq("id", s.id);
+        } else {
+          lastError = result.error;
+          if (result.unregistered) {
+            await admin.from("push_subscriptions").delete().eq("id", s.id);
+            expired++;
+          } else if (!result.skipped) {
+            await admin
+              .from("push_subscriptions")
+              .update({ failure_count: (s.failure_count ?? 0) + 1 })
+              .eq("id", s.id);
+          }
+        }
+      }
+    }
+
     await admin
       .from("notifications")
       .update(
@@ -347,6 +403,7 @@ async function sendPushRun(admin: any): Promise<{
     if (anySent) sent++;
     else failed++;
   }
+
 
   return { enqueue: enqueueResult ?? null, sent, failed, expired, no_subscription: noSub };
 }
