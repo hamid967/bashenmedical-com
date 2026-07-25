@@ -641,7 +641,7 @@ function AdjustmentPanel({
       toast.error("سبب التعديل مطلوب (٣ أحرف على الأقل)");
       return;
     }
-    const payload: Parameters<typeof applyFn>[0]["data"] = {
+    const payload: ApplyPayload = {
       invoice_id: invoiceId,
       reason: reason.trim(),
       unlink_nphies: linkMode === "unlink",
