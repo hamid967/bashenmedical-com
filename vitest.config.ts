@@ -15,7 +15,13 @@ export default defineConfig({
   test: {
     include: ["tests/unit/**/*.test.ts"],
     exclude: [
-      "tests/unit/book-docs-keys.test.ts", // runner script, not a spec file
+      // Standalone runner scripts (call process.exit / have no describe block) —
+      // executed directly by `bun <file>` in a separate CI step, not by vitest.
+      "tests/unit/book-docs-keys.test.ts",
+      "tests/unit/booking-share-timezone.test.ts",
+      "tests/unit/download-error.test.ts",
+      "tests/unit/reason.test.ts",
+      "tests/unit/release-gate.test.ts",
       "**/node_modules/**",
     ],
     environment: "node",
