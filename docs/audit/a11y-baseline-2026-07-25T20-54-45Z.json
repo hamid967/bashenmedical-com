@@ -1,0 +1,194 @@
+[
+  {
+    "route": "/",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/about",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/doctors",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/branches",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/excellence",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/health",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/faq",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/contact",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/accreditations",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/book",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/emergency",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/auth",
+    "lang": "ar",
+    "dir": "rtl",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/about",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/doctors",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/branches",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/excellence",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/health",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/faq",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/contact",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/accreditations",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/book",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/emergency",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  },
+  {
+    "route": "/auth",
+    "lang": "en",
+    "dir": "ltr",
+    "violations": [],
+    "ok": false,
+    "error": "Page.add_script_tag: Refused to load the script 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js' because it violates the following Content Security Policy directive: \"script-src 'self' 'unsafe-inline' 'unsafe-eval' https://accounts.google.com https://www.googletagmanager.com https://www.google-analytics.com https://hcaptcha.com https://*.hcaptcha.com\". Note that 'script-src-elem' was not explicitly set, so 'script-src' is used as a fallback.\n"
+  }
+]

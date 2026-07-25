@@ -42,6 +42,7 @@ LANGS = [
 ]
 
 AXE_CDN = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js"
+AXE_LOCAL = Path("/tmp/axe/axe.min.js")
 
 OUT_DIR = Path(__file__).resolve().parents[2] / "docs" / "audit"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -67,7 +68,7 @@ async def run() -> None:
                             {"name": "i18nextLng", "value": lang, "url": "http://localhost:8080"},
                         ])
                         await page.reload(wait_until="networkidle", timeout=25000)
-                        await page.add_script_tag(url=AXE_CDN)
+                        await page.add_script_tag(content=AXE_LOCAL.read_text(encoding="utf-8"))
                         axe = await page.evaluate(
                             """async () => {
                                 const r = await window.axe.run(document, {
