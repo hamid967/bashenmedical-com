@@ -94,11 +94,11 @@ export const upsertRadiologyReport = createServerFn({ method: "POST" })
       ordered_by: context.userId,
     };
     if (data.id) {
-      const { error } = await context.supabase.from("radiology_reports").update(payload).eq("id", data.id);
+      const { error } = await (context.supabase as any).from("radiology_reports").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { ok: true, id: data.id };
     }
-    const { data: row, error } = await context.supabase
+    const { data: row, error } = await (context.supabase as any)
       .from("radiology_reports")
       .insert(payload)
       .select("id")

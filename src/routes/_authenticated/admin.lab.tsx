@@ -26,7 +26,7 @@ export const Route = createFileRoute("/_authenticated/admin/lab")({
     ],
   }),
   component: () => (
-    <RequirePermission role="admin" fallbackRole="doctor">
+    <RequirePermission anyOf={["admin", "doctor"]}>
       <LabAdminPage />
     </RequirePermission>
   ),

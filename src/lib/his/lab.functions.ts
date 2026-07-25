@@ -95,11 +95,11 @@ export const upsertLabReport = createServerFn({ method: "POST" })
       ordered_by: context.userId,
     };
     if (data.id) {
-      const { error } = await context.supabase.from("lab_reports").update(payload).eq("id", data.id);
+      const { error } = await (context.supabase as any).from("lab_reports").update(payload).eq("id", data.id);
       if (error) throw new Error(error.message);
       return { ok: true, id: data.id };
     }
-    const { data: row, error } = await context.supabase
+    const { data: row, error } = await (context.supabase as any)
       .from("lab_reports")
       .insert(payload)
       .select("id")
