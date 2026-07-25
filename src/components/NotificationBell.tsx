@@ -11,6 +11,8 @@ import {
   countUnreadNotifications,
 } from "@/lib/notifications.functions";
 import { usePushNotifications } from "@/hooks/usePushNotifications";
+import { setNativeBadge } from "@/lib/native/badge";
+import { initNativePushHandlers } from "@/lib/native/push-native";
 
 type NotificationRow = {
   id: string;
