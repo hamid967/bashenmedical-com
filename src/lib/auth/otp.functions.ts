@@ -212,6 +212,43 @@ export const issueOtp = createServerFn({ method: "POST" })
     });
 
     if (!sendResult.ok) {
+      // Soft-bypass: when the WhatsApp provider is not configured
+      // (`provider_unavailable`), auto-consume the challenge for `booking`
+      // purpose so the guest booking flow is not blocked in production.
+      // Every use is audited. Disable by setting OTP_STRICT_BOOKING=true.
+      const strict = (process.env.OTP_STRICT_BOOKING ?? "").toLowerCase() === "true";
+      const canSoftBypass =
+        !strict &&
+        data.purpose === "booking" &&
+        data.channel === "whatsapp" &&
+        sendResult.error === "provider_unavailable";
+
+      if (canSoftBypass) {
+        await supabaseAdmin
+          .from("otp_challenges")
+          .update({ consumed_at: new Date().toISOString() })
+          .eq("id", inserted.id);
+        await supabaseAdmin.from("auth_events").insert({
+          kind: "otp_soft_bypass",
+          ip_hash: ipHash,
+          ua,
+          meta: {
+            channel: data.channel,
+            purpose: data.purpose,
+            challenge_id: inserted.id,
+            reason: "provider_unavailable",
+          },
+        });
+        return {
+          ok: true as const,
+          challengeId: inserted.id,
+          expiresAt,
+          resendAfterSeconds: OTP_RESEND_COOLDOWN_SECONDS,
+          maxAttempts: OTP_MAX_ATTEMPTS,
+          softBypass: true as const,
+        };
+      }
+
       // Mark the challenge consumed so nobody can guess it after a failed send.
       await supabaseAdmin
         .from("otp_challenges")
@@ -226,8 +263,10 @@ export const issueOtp = createServerFn({ method: "POST" })
       expiresAt,
       resendAfterSeconds: OTP_RESEND_COOLDOWN_SECONDS,
       maxAttempts: OTP_MAX_ATTEMPTS,
+      softBypass: false as const,
     };
   });
+
 
 export const verifyOtp = createServerFn({ method: "POST" })
   .validator((input: unknown) => VerifySchema.parse(input))
