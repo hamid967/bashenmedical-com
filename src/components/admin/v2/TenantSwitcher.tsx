@@ -73,7 +73,13 @@ export function TenantSwitcher() {
       <DropdownMenuContent align="end" className="w-64">
         <DropdownMenuLabel>اختر المؤسسة</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => setTenantId(null)} className="gap-2">
+        <DropdownMenuItem
+          onSelect={() => {
+            auditSwitch(tenantId, null, null);
+            setTenantId(null);
+          }}
+          className="gap-2"
+        >
           <Layers className="h-4 w-4 opacity-80" />
           <span className="flex-1">كل المؤسسات</span>
           {!tenantId && <Check className="h-4 w-4 opacity-80" />}
