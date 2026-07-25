@@ -42,6 +42,7 @@ LANGS = [
 ]
 
 AXE_CDN = "https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.10.0/axe.min.js"
+AXE_LOCAL = Path("/tmp/axe/axe.min.js")
 
 OUT_DIR = Path(__file__).resolve().parents[2] / "docs" / "audit"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
