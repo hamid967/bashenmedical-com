@@ -1,0 +1,37 @@
+/**
+ * Hook — G3 complaint classification. Called from a DB trigger via pg_net
+ * (or manually) with { complaint_id } and authenticated by apikey header.
+ */
+import { createFileRoute } from "@tanstack/react-router";
+
+export const Route = createFileRoute("/api/public/hooks/classify-complaint")({
+  server: {
+    handlers: {
+      POST: async ({ request }) => {
+        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
+        const provided = request.headers.get("apikey");
+        if (!expected || provided !== expected) {
+          return new Response("Unauthorized", { status: 401 });
+        }
+        let body: { complaint_id?: string } = {};
+        try {
+          body = await request.json();
+        } catch {
+          return new Response("Bad request", { status: 400 });
+        }
+        if (!body.complaint_id) return new Response("Missing complaint_id", { status: 400 });
+        const { classifyComplaint } = await import("@/lib/ai/classify-complaint.server");
+        try {
+          const result = await classifyComplaint(body.complaint_id);
+          return Response.json({ ok: true, result });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "error";
+          return new Response(JSON.stringify({ ok: false, error: msg }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
+        }
+      },
+    },
+  },
+});
