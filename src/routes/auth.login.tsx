@@ -20,10 +20,11 @@ import { Label } from "@/components/ui-v3";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, Apple } from "lucide-react";
 import { issueOtp } from "@/lib/auth/otp.functions";
 import { getMyRolesAndHome } from "@/lib/auth/resolve-home.functions";
 import { sanitizeNext } from "@/lib/auth/redirect";
+import { lovable } from "@/integrations/lovable";
 
 const Search = z.object({ next: z.string().optional() });
 
