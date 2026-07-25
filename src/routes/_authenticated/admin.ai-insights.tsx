@@ -14,6 +14,7 @@ import {
   decideAiRecommendation,
   listClassifiedComplaints,
 } from "@/lib/admin/ai-insights.functions";
+import { useActiveTenant } from "@/lib/active-tenant";
 
 export const Route = createFileRoute("/_authenticated/admin/ai-insights")({
   beforeLoad: async () => {
@@ -33,11 +34,17 @@ type Tab = "no-show" | "recs" | "complaints";
 
 function AiInsightsPage() {
   const [tab, setTab] = useState<Tab>("no-show");
+  const { tenantId, activeOrganization } = useActiveTenant();
   return (
     <div className="p-6 space-y-4" dir="rtl">
       <header className="flex items-center gap-3">
         <Brain className="w-6 h-6 text-primary" />
         <h1 className="text-2xl font-bold">تحليلات الذكاء الاصطناعي</h1>
+        {activeOrganization && (
+          <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
+            المؤسسة: {activeOrganization.name}
+          </span>
+        )}
       </header>
       <nav className="flex gap-2 border-b">
         <TabBtn active={tab === "no-show"} onClick={() => setTab("no-show")} icon={<AlertTriangle className="w-4 h-4" />}>
@@ -50,9 +57,9 @@ function AiInsightsPage() {
           تصنيف الشكاوى
         </TabBtn>
       </nav>
-      {tab === "no-show" && <NoShowTab />}
-      {tab === "recs" && <RecsTab />}
-      {tab === "complaints" && <ComplaintsTab />}
+      {tab === "no-show" && <NoShowTab tenantId={tenantId} />}
+      {tab === "recs" && <RecsTab tenantId={tenantId} />}
+      {tab === "complaints" && <ComplaintsTab tenantId={tenantId} />}
     </div>
   );
 }
@@ -81,11 +88,11 @@ function TabBtn({
   );
 }
 
-function NoShowTab() {
+function NoShowTab({ tenantId }: { tenantId: string | null }) {
   const fetch = useServerFn(listNoShowPredictions);
   const { data } = useSuspenseQuery({
-    queryKey: ["ai-insights", "no-show"],
-    queryFn: () => fetch({ data: { minRisk: 0.5, limit: 100 } }),
+    queryKey: ["ai-insights", "no-show", tenantId],
+    queryFn: () => fetch({ data: { minRisk: 0.5, limit: 100, organizationId: tenantId } }),
   });
   if (!data.length) return <Empty text="لا توجد مواعيد عالية الخطر حالياً." />;
   return (
@@ -128,13 +135,13 @@ function NoShowTab() {
   );
 }
 
-function RecsTab() {
+function RecsTab({ tenantId }: { tenantId: string | null }) {
   const qc = useQueryClient();
   const fetch = useServerFn(listAiRecommendations);
   const decide = useServerFn(decideAiRecommendation);
   const { data } = useSuspenseQuery({
-    queryKey: ["ai-insights", "recs"],
-    queryFn: () => fetch({ data: { status: "open", limit: 50 } }),
+    queryKey: ["ai-insights", "recs", tenantId],
+    queryFn: () => fetch({ data: { status: "open", limit: 50, organizationId: tenantId } }),
   });
   if (!data.length) return <Empty text="لا توجد توصيات مفتوحة." />;
   const act = async (id: string, decision: "accepted" | "dismissed") => {
@@ -175,11 +182,11 @@ function RecsTab() {
   );
 }
 
-function ComplaintsTab() {
+function ComplaintsTab({ tenantId }: { tenantId: string | null }) {
   const fetch = useServerFn(listClassifiedComplaints);
   const { data } = useSuspenseQuery({
-    queryKey: ["ai-insights", "complaints"],
-    queryFn: () => fetch({ data: { limit: 100 } }),
+    queryKey: ["ai-insights", "complaints", tenantId],
+    queryFn: () => fetch({ data: { limit: 100, organizationId: tenantId } }),
   });
   if (!data.length) return <Empty text="لا توجد شكاوى مصنّفة بعد." />;
   return (
