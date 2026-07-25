@@ -96,7 +96,17 @@ function ReconciliationDetailPage() {
     );
   }
 
-  const { row, invoice, payments, refunds, nphies, fieldDiffs, flagsExplained } = q.data;
+  const {
+    row,
+    invoice,
+    payments,
+    refunds,
+    nphies,
+    fieldDiffs,
+    flagsExplained,
+    activeAdjustment,
+    adjustmentHistory,
+  } = q.data;
   const ccy = invoice.currency;
 
   return (
