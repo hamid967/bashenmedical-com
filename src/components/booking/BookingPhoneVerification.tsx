@@ -121,10 +121,18 @@ export function BookingPhoneVerification({
     return (
       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-        <span>{t("verification.verified")}</span>
+        <span>
+          {softBypass
+            ? t("verification.softBypass", {
+                defaultValue:
+                  "خدمة الرسائل غير متاحة حاليًا — تم قبول رقم الجوال وسيتواصل معك فريقنا للتأكيد.",
+              })
+            : t("verification.verified")}
+        </span>
       </div>
     );
   }
+
 
   return (
     <div className="mt-4 rounded-xl border border-border bg-muted/30 p-4 text-sm">
