@@ -319,14 +319,22 @@ export async function checkEligibility(
   const { mode, report } = resolveMode();
   const started = Date.now();
   try {
-    const result =
-      mode === "mock" ? await mockDriver(input) : await httpDriver(input, mode);
+    let result: EligibilityResult;
+    let issues: FhirIssue[] = [];
+    if (mode === "mock") {
+      result = await mockDriver(input);
+    } else {
+      const out = await httpDriver(input, mode);
+      result = out.result;
+      issues = out.issues;
+    }
     await logRequest({
       mode,
       input,
       result,
       latency_ms: Date.now() - started,
       http_status: 200,
+      error_message: issues.length ? summarizeIssues(issues) : null,
     });
     return { mode, result, config: report };
   } catch (err) {
