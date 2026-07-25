@@ -49,14 +49,8 @@ test("ملف .ics يحتوي VTIMEZONE:Asia/Riyadh مع TZOFFSETTO:+0300", () =>
 
 test("DTSTART/DTEND يستخدمان TZID=Asia/Riyadh مع وقت محلي (بدون Z)", () => {
   const ics = buildIcs(base({ appointment_date: "2026-07-15", appointment_time: "10:00" }));
-  assert(
-    ics.includes("DTSTART;TZID=Asia/Riyadh:20260715T100000"),
-    `DTSTART شكل خاطئ:\n${ics}`,
-  );
-  assert(
-    ics.includes("DTEND;TZID=Asia/Riyadh:20260715T103000"),
-    `DTEND شكل خاطئ (30د افتراضياً)`,
-  );
+  assert(ics.includes("DTSTART;TZID=Asia/Riyadh:20260715T100000"), `DTSTART شكل خاطئ:\n${ics}`);
+  assert(ics.includes("DTEND;TZID=Asia/Riyadh:20260715T103000"), `DTEND شكل خاطئ (30د افتراضياً)`);
   assert(!/DTSTART[^\r\n]*Z(\r|\n)/.test(ics), "DTSTART يجب ألا يحتوي Z — تعني UTC");
 });
 
@@ -69,20 +63,14 @@ test("الصيف والشتاء يعطيان نفس الوقت المحلي (ل�
 
 test("منتصف الليل الرياضي يبقى 00:30 محلياً (بدون إزاحة يوم)", () => {
   const ics = buildIcs(base({ appointment_date: "2026-03-01", appointment_time: "00:30" }));
-  assert(
-    ics.includes("DTSTART;TZID=Asia/Riyadh:20260301T003000"),
-    `الوقت المحلي خطأ:\n${ics}`,
-  );
+  assert(ics.includes("DTSTART;TZID=Asia/Riyadh:20260301T003000"), `الوقت المحلي خطأ:\n${ics}`);
 });
 
 test("مدة مخصّصة (45د) تُحسب على الوقت المحلي دون تحويل UTC", () => {
   // نستدعي مباشرة عبر buildIcs الافتراضية (30د)، ثم نتحقق من الحد الأدنى
   const ics = buildIcs(base({ appointment_date: "2026-07-15", appointment_time: "23:45" }));
   // 23:45 + 30د = 00:15 من اليوم التالي — يجب أن ينعكس محلياً
-  assert(
-    ics.includes("DTSTART;TZID=Asia/Riyadh:20260715T234500"),
-    "DTSTART خطأ",
-  );
+  assert(ics.includes("DTSTART;TZID=Asia/Riyadh:20260715T234500"), "DTSTART خطأ");
   assert(
     ics.includes("DTEND;TZID=Asia/Riyadh:20260716T001500"),
     `DTEND عبور اليوم محلياً خطأ:\n${ics}`,
@@ -130,15 +118,15 @@ test("TRIGGER أبداً لا يكون DATE-TIME مطلقاً (سيكسر مع D
 // ── ثبات المخرج عبر TZ الجهاز/الخادم المختلفة ──
 const HOST_TZS = [
   "UTC",
-  "America/New_York",   // UTC-5/-4 (DST)
-  "America/Los_Angeles",// UTC-8/-7 (DST)
-  "Europe/London",      // UTC+0/+1 (DST)
-  "Europe/Berlin",      // UTC+1/+2 (DST)
-  "Asia/Kolkata",       // UTC+5:30 (لا DST)
-  "Asia/Tokyo",         // UTC+9 (لا DST)
-  "Australia/Sydney",   // UTC+10/+11 (DST جنوبي معكوس)
+  "America/New_York", // UTC-5/-4 (DST)
+  "America/Los_Angeles", // UTC-8/-7 (DST)
+  "Europe/London", // UTC+0/+1 (DST)
+  "Europe/Berlin", // UTC+1/+2 (DST)
+  "Asia/Kolkata", // UTC+5:30 (لا DST)
+  "Asia/Tokyo", // UTC+9 (لا DST)
+  "Australia/Sydney", // UTC+10/+11 (DST جنوبي معكوس)
   "Pacific/Kiritimati", // UTC+14 (الأقصى شرقاً)
-  "Pacific/Pago_Pago",  // UTC-11 (الأقصى غرباً)
+  "Pacific/Pago_Pago", // UTC-11 (الأقصى غرباً)
 ];
 
 const stripStamp = (s: string) => s.replace(/DTSTAMP:[^\r\n]+/g, "DTSTAMP:X");
@@ -174,7 +162,9 @@ test("googleCalendarUrl متطابق عبر كل مناطق الجهاز", () =>
 });
 
 test("googleCalendarUrl يثبّت ctz=Asia/Riyadh مع وقت محلي (بدون Z)", () => {
-  const url = googleCalendarUrl(base({ appointment_date: "2026-07-15", appointment_time: "10:00" }));
+  const url = googleCalendarUrl(
+    base({ appointment_date: "2026-07-15", appointment_time: "10:00" }),
+  );
   assert(url.includes("ctz=Asia%2FRiyadh"), `ctz مفقودة: ${url}`);
   assert(
     url.includes("dates=20260715T100000%2F20260715T103000"),
@@ -195,10 +185,7 @@ test("تبديل TZ الجهاز بين استدعاءين لا يؤثر على 
   process.env.TZ = orig;
 
   assert(a === c, "التبديل بين UTC-11 و UTC+14 غيّر الناتج");
-  assert(
-    a.includes("DTSTART;TZID=Asia/Riyadh:20261231T233000"),
-    "الوقت المحلي المتوقع مفقود",
-  );
+  assert(a.includes("DTSTART;TZID=Asia/Riyadh:20261231T233000"), "الوقت المحلي المتوقع مفقود");
 });
 
 console.log(`\n${passed} passed, ${failed} failed`);

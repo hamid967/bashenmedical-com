@@ -65,18 +65,48 @@ function ArticlesList() {
         <Newspaper className="h-6 w-6 text-primary" aria-hidden="true" />
         <div>
           <h1 className="text-xl font-semibold">المقالات الصحية</h1>
-          <p className="text-sm text-muted-foreground">
-            إدارة مقالات المحتوى، النشر، والتصنيفات
-          </p>
+          <p className="text-sm text-muted-foreground">إدارة مقالات المحتوى، النشر، والتصنيفات</p>
         </div>
       </header>
 
       <section aria-label="مؤشرات المقالات" className="grid grid-cols-2 md:grid-cols-5 gap-3">
-        <KpiCard label="إجمالي المقالات" value={query.data?.kpis.total} icon={FileText} loading={query.isLoading} error={query.isError} />
-        <KpiCard label="منشورة" value={query.data?.kpis.published} icon={CheckCircle2} loading={query.isLoading} error={query.isError} tone="success" />
-        <KpiCard label="مسودّات" value={query.data?.kpis.draft} icon={FileText} loading={query.isLoading} error={query.isError} tone="muted" />
-        <KpiCard label="تصنيفات مستخدمة" value={query.data?.kpis.categories_used} icon={FolderTree} loading={query.isLoading} error={query.isError} />
-        <KpiCard label="متوسط دقائق القراءة" value={query.data?.kpis.avg_reading_minutes} icon={Timer} loading={query.isLoading} error={query.isError} />
+        <KpiCard
+          label="إجمالي المقالات"
+          value={query.data?.kpis.total}
+          icon={FileText}
+          loading={query.isLoading}
+          error={query.isError}
+        />
+        <KpiCard
+          label="منشورة"
+          value={query.data?.kpis.published}
+          icon={CheckCircle2}
+          loading={query.isLoading}
+          error={query.isError}
+          tone="success"
+        />
+        <KpiCard
+          label="مسودّات"
+          value={query.data?.kpis.draft}
+          icon={FileText}
+          loading={query.isLoading}
+          error={query.isError}
+          tone="muted"
+        />
+        <KpiCard
+          label="تصنيفات مستخدمة"
+          value={query.data?.kpis.categories_used}
+          icon={FolderTree}
+          loading={query.isLoading}
+          error={query.isError}
+        />
+        <KpiCard
+          label="متوسط دقائق القراءة"
+          value={query.data?.kpis.avg_reading_minutes}
+          icon={Timer}
+          loading={query.isLoading}
+          error={query.isError}
+        />
       </section>
 
       <section className="flex flex-wrap items-center gap-2">
@@ -109,7 +139,9 @@ function ArticlesList() {
         >
           <option value="">كل التصنيفات</option>
           {(query.data?.categories ?? []).map((c) => (
-            <option key={c.id} value={c.id}>{c.name_ar}</option>
+            <option key={c.id} value={c.id}>
+              {c.name_ar}
+            </option>
           ))}
         </select>
         <button
@@ -175,13 +207,9 @@ function ArticlesList() {
                       >
                         {a.title_ar}
                       </Link>
-                      <div className="text-xs text-muted-foreground font-mono">
-                        {a.slug}
-                      </div>
+                      <div className="text-xs text-muted-foreground font-mono">{a.slug}</div>
                     </td>
-                    <td className="px-3 py-2 text-muted-foreground">
-                      {a.category_name_ar ?? "—"}
-                    </td>
+                    <td className="px-3 py-2 text-muted-foreground">{a.category_name_ar ?? "—"}</td>
                     <td className="px-3 py-2">
                       {a.is_published ? (
                         <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs text-emerald-700 dark:text-emerald-300">

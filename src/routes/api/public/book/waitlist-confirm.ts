@@ -35,7 +35,8 @@ export const Route = createFileRoute("/api/public/book/waitlist-confirm")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "booking" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "booking" });
+        if (_rl) return _rl;
         let raw: unknown;
         try {
           raw = await request.json();

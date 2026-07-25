@@ -83,16 +83,12 @@ export const listAdminBranches = createServerFn({ method: "GET" })
             .eq("appointment_date", today)
         : Promise.resolve({ data: [], error: null }),
       ids.length
-        ? sb
-            .from("branch_excellence_centers")
-            .select("branch_id")
-            .in("branch_id", ids)
+        ? sb.from("branch_excellence_centers").select("branch_id").in("branch_id", ids)
         : Promise.resolve({ data: [], error: null }),
       sb.from("branches").select("id, is_active"),
     ]);
 
-    const err =
-      doctorsRes.error || apptsRes.error || ecRes.error || kpisTotalsRes.error;
+    const err = doctorsRes.error || apptsRes.error || ecRes.error || kpisTotalsRes.error;
     if (err) throw new Error(err.message);
 
     const tally = (arr: Array<{ branch_id: string | null }> | null) => {
@@ -149,38 +145,33 @@ export const getAdminBranch = createServerFn({ method: "GET" })
     if (!branch) throw new Error("الفرع غير موجود");
 
     const today = new Date().toISOString().slice(0, 10);
-    const [doctorsRes, ecRes, todayApptsRes, upcomingApptsRes] =
-      await Promise.all([
-        sb
-          .from("doctors")
-          .select("id, full_name_ar, full_name_en, specialty, is_active")
-          .eq("branch_id", data.id)
-          .order("full_name_ar", { ascending: true })
-          .limit(50),
-        sb
-          .from("branch_excellence_centers")
-          .select("excellence_center_id, excellence_centers(id, name_ar, name_en, slug)")
-          .eq("branch_id", data.id),
-        sb
-          .from("appointments")
-          .select("id", { count: "exact", head: true })
-          .eq("branch_id", data.id)
-          .eq("appointment_date", today),
-        sb
-          .from("appointments")
-          .select("id, appointment_date, appointment_time, status, patient_name")
-          .eq("branch_id", data.id)
-          .gte("appointment_date", today)
-          .order("appointment_date", { ascending: true })
-          .order("appointment_time", { ascending: true })
-          .limit(20),
-      ]);
+    const [doctorsRes, ecRes, todayApptsRes, upcomingApptsRes] = await Promise.all([
+      sb
+        .from("doctors")
+        .select("id, full_name_ar, full_name_en, specialty, is_active")
+        .eq("branch_id", data.id)
+        .order("full_name_ar", { ascending: true })
+        .limit(50),
+      sb
+        .from("branch_excellence_centers")
+        .select("excellence_center_id, excellence_centers(id, name_ar, name_en, slug)")
+        .eq("branch_id", data.id),
+      sb
+        .from("appointments")
+        .select("id", { count: "exact", head: true })
+        .eq("branch_id", data.id)
+        .eq("appointment_date", today),
+      sb
+        .from("appointments")
+        .select("id, appointment_date, appointment_time, status, patient_name")
+        .eq("branch_id", data.id)
+        .gte("appointment_date", today)
+        .order("appointment_date", { ascending: true })
+        .order("appointment_time", { ascending: true })
+        .limit(20),
+    ]);
 
-    const err =
-      doctorsRes.error ||
-      ecRes.error ||
-      todayApptsRes.error ||
-      upcomingApptsRes.error;
+    const err = doctorsRes.error || ecRes.error || todayApptsRes.error || upcomingApptsRes.error;
     if (err) throw new Error(err.message);
 
     return {

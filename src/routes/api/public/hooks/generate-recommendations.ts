@@ -12,9 +12,8 @@ export const Route = createFileRoute("/api/public/hooks/generate-recommendations
         if (!expected || provided !== expected) {
           return new Response("Unauthorized", { status: 401 });
         }
-        const { runGenerateRecommendations } = await import(
-          "@/lib/ai/generate-recommendations.server"
-        );
+        const { runGenerateRecommendations } =
+          await import("@/lib/ai/generate-recommendations.server");
         try {
           const result = await runGenerateRecommendations();
           return Response.json({ ok: true, ...result });

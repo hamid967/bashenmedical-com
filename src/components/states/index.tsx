@@ -170,9 +170,7 @@ export function OfflineState({ onRetry, className }: { onRetry?: () => void; cla
       icon={<WifiOff className="h-6 w-6" aria-hidden />}
       title={lang === "ar" ? "لا يوجد اتصال بالإنترنت" : "You're offline"}
       description={
-        lang === "ar"
-          ? "تحقّق من اتصالك ثم أعِد المحاولة."
-          : "Check your connection and try again."
+        lang === "ar" ? "تحقّق من اتصالك ثم أعِد المحاولة." : "Check your connection and try again."
       }
       action={
         onRetry ? (
@@ -224,8 +222,7 @@ export function SessionExpiredState({
     if (next && next.startsWith("/") && !next.startsWith("//")) return next;
     if (typeof window === "undefined") return undefined;
     // Preserve pathname + query + hash for an exact return-to-screen after re-auth.
-    const path =
-      window.location.pathname + window.location.search + window.location.hash;
+    const path = window.location.pathname + window.location.search + window.location.hash;
     if (!path.startsWith("/patient") || path.startsWith("//")) return undefined;
     if (path.length > 2048) return undefined;
     return path;
@@ -257,4 +254,3 @@ export function SessionExpiredState({
     />
   );
 }
-

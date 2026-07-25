@@ -167,7 +167,6 @@ function AdminDashboard() {
     staleTime: 5 * 60_000,
   });
 
-
   return (
     <div
       dir="rtl"
@@ -244,7 +243,12 @@ function AdminDashboard() {
               type="button"
               onClick={() =>
                 navigate({
-                  search: (prev: Record<string, string>) => ({ ...prev, range: r.id, from: "", to: "" }),
+                  search: (prev: Record<string, string>) => ({
+                    ...prev,
+                    range: r.id,
+                    from: "",
+                    to: "",
+                  }),
                   replace: true,
                 })
               }
@@ -299,10 +303,8 @@ function AdminDashboard() {
       {/* Phase 7 — Enterprise Command Center KPIs (real data, 14 tiles) */}
       <CommandCenterKpiGridV2 filters={{ from: fromDate, to: toDate, branchId }} />
 
-
       {/* Legacy KPI strip (role-scoped period-over-period + sparklines) */}
       <KpiGrid />
-
 
       {/* Trends section — daily/weekly stats for developers */}
       <TrendsSection />

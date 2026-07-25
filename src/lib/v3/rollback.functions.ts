@@ -87,8 +87,14 @@ async function computeRouteHealth(
     rpc: (fn: string, args?: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
     from: (table: string) => {
       select: (cols: string) => {
-        gte: (col: string, v: string) => {
-          lt: (col: string, v: string) => {
+        gte: (
+          col: string,
+          v: string,
+        ) => {
+          lt: (
+            col: string,
+            v: string,
+          ) => {
             in: (col: string, vals: number[]) => Promise<{ data: unknown; error: unknown }>;
           };
         };
@@ -101,9 +107,7 @@ async function computeRouteHealth(
   // built to match the route LIKE patterns. Keep it simple: run two counts.
   const now = Date.now();
   const recentStart = new Date(now - ROLLBACK_THRESHOLDS.windowMinutes * 60_000).toISOString();
-  const baselineStart = new Date(
-    now - ROLLBACK_THRESHOLDS.baselineHours * 3_600_000,
-  ).toISOString();
+  const baselineStart = new Date(now - ROLLBACK_THRESHOLDS.baselineHours * 3_600_000).toISOString();
   const recentEnd = new Date(now).toISOString();
 
   const [recent, baseline] = await Promise.all([
@@ -142,8 +146,14 @@ async function countErrorsInWindow(
         c: string,
         o: { count: "exact"; head: true },
       ) => {
-        gte: (col: string, v: string) => {
-          lt: (col: string, v: string) => {
+        gte: (
+          col: string,
+          v: string,
+        ) => {
+          lt: (
+            col: string,
+            v: string,
+          ) => {
             or: (expr: string) => Promise<{ count: number | null; error: unknown }>;
           };
         };
@@ -163,14 +173,22 @@ async function computeAiHealth(
   supabase: {
     from: (table: string) => {
       select: (cols: string) => {
-        gte: (col: string, v: string) => {
+        gte: (
+          col: string,
+          v: string,
+        ) => {
           in: (col: string, vals: string[]) => Promise<{ data: unknown; error: unknown }>;
         };
       };
     };
   },
   surfaces: Array<"public" | "portal" | "admin">,
-): Promise<{ observed_per_hour: number; baseline_per_hour: number; sample: number; failRate: number }> {
+): Promise<{
+  observed_per_hour: number;
+  baseline_per_hour: number;
+  sample: number;
+  failRate: number;
+}> {
   const now = Date.now();
   const recentStart = new Date(now - ROLLBACK_THRESHOLDS.windowMinutes * 60_000).toISOString();
 
@@ -206,7 +224,8 @@ function classifyRoute(
   if (observed_per_hour < ROLLBACK_THRESHOLDS.minObservedPerHour) {
     return {
       severity: "ok",
-      ratio: baseline_per_hour > 0 ? Number((observed_per_hour / baseline_per_hour).toFixed(2)) : null,
+      ratio:
+        baseline_per_hour > 0 ? Number((observed_per_hour / baseline_per_hour).toFixed(2)) : null,
       reason: "المعدل ضمن الطبيعي.",
     };
   }
@@ -283,11 +302,7 @@ export async function computeV3Health(
       results.push({
         ...base,
         severity: enabled ? "unknown" : "ok",
-        reason: enabled
-          ? signal.kind === "skip"
-            ? signal.reason
-            : "غير مفعّل"
-          : "معطّل",
+        reason: enabled ? (signal.kind === "skip" ? signal.reason : "غير مفعّل") : "معطّل",
       });
       continue;
     }

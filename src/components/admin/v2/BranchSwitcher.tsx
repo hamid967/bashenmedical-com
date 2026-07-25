@@ -70,9 +70,7 @@ export function BranchSwitcher() {
               <Building2 className="h-4 w-4 opacity-80" />
               <div className="flex-1 min-w-0">
                 <div className="truncate text-sm">{b.name_ar}</div>
-                {b.city_ar && (
-                  <div className="truncate text-[11px] opacity-60">{b.city_ar}</div>
-                )}
+                {b.city_ar && <div className="truncate text-[11px] opacity-60">{b.city_ar}</div>}
               </div>
               {active && <Check className="h-4 w-4 opacity-80" />}
             </DropdownMenuItem>

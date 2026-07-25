@@ -76,7 +76,6 @@ export const Route = createFileRoute("/api/public/reservations/otp/send")({
         const captcha = await verifyHCaptcha(parsed.data.captcha_token, ip);
         if (!captcha.ok) return captchaFailureResponse(captcha);
 
-
         const code = generateOtp();
         const code_hash = await hashCode(phone, code);
         const code_expires_at = new Date(Date.now() + OTP_TTL_MS).toISOString();

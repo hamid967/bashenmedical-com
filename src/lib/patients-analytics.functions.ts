@@ -10,7 +10,6 @@ type Role = "admin" | "reception" | "pharmacy" | "super_admin" | "doctor";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getRoles(sb: any, userId: string): Promise<Role[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await sb.from("user_roles").select("role").eq("user_id", userId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data ?? []).map((r: any) => r.role as Role);
@@ -290,7 +289,7 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
         .select("patient_id")
         .eq("doctor_id", data.doctorId)
         .limit(20000);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const withDoctor = new Set<string>(
         ((vRows ?? []) as any[]).map((r) => r.patient_id as string),
       );
@@ -566,7 +565,7 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const p of (profs ?? []) as any[]) nameMap.set(p.id, p.full_name ?? "");
       // We stored actor id in a local; re-loop using rows
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const rowMap = new Map<string, string | null>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const row of (rows ?? []) as any[]) rowMap.set(row.id, row.actor ?? null);
@@ -809,7 +808,7 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
       const nameMap = new Map<string, string>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const p of (profs ?? []) as any[]) nameMap.set(p.id, p.full_name ?? "");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
       const actorByAudit = new Map<string, string | null>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       for (const ev of (audit ?? []) as any[]) actorByAudit.set(ev.id, ev.actor ?? null);
@@ -920,7 +919,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     let pq = sb.from("patients").select("id, branch_id");
     if (data.branchId) pq = pq.eq("branch_id", data.branchId);
     const { data: pRows } = await pq.limit(20000);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     const patientToBranch = new Map<string, string | null>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     for (const p of (pRows ?? []) as any[]) patientToBranch.set(p.id, p.branch_id ?? null);

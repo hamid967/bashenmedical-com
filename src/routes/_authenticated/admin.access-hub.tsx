@@ -28,8 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/access-hub")({
       { title: "مركز الوصول — لوحة الإدارة الموحدة" },
       {
         name: "description",
-        content:
-          "إدارة المستخدمين، الأدوار، ومصفوفة الصلاحيات في واجهة واحدة داخل لوحة الإدارة.",
+        content: "إدارة المستخدمين، الأدوار، ومصفوفة الصلاحيات في واجهة واحدة داخل لوحة الإدارة.",
       },
       { name: "robots", content: "noindex,nofollow" },
     ],

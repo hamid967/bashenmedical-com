@@ -9,10 +9,7 @@ import arCommon from "@/locales/ar/common.json";
 import enCommon from "@/locales/en/common.json";
 import urCommon from "@/locales/ur/common.json";
 
-const INTERPOLATED_KEYS = [
-  "manage.undo.button_active",
-  "manage.undo.aria_active",
-] as const;
+const INTERPOLATED_KEYS = ["manage.undo.button_active", "manage.undo.aria_active"] as const;
 
 const STATIC_KEYS = [
   "manage.undo.restored_title",
@@ -35,9 +32,15 @@ describe("manage.undo.* i18n", () => {
   });
 
   it("has parity — every AR key exists in EN and UR (and vice versa)", () => {
-    const arKeys = Object.keys(arCommon).filter((k) => k.startsWith("manage.undo.")).sort();
-    const enKeys = Object.keys(enCommon).filter((k) => k.startsWith("manage.undo.")).sort();
-    const urKeys = Object.keys(urCommon).filter((k) => k.startsWith("manage.undo.")).sort();
+    const arKeys = Object.keys(arCommon)
+      .filter((k) => k.startsWith("manage.undo."))
+      .sort();
+    const enKeys = Object.keys(enCommon)
+      .filter((k) => k.startsWith("manage.undo."))
+      .sort();
+    const urKeys = Object.keys(urCommon)
+      .filter((k) => k.startsWith("manage.undo."))
+      .sort();
     expect(enKeys).toEqual(arKeys);
     expect(urKeys).toEqual(arKeys);
   });

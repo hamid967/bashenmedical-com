@@ -117,8 +117,7 @@ function FileDetail() {
   }
 
   const { file, uploader } = query.data;
-  const fullUrl =
-    typeof window !== "undefined" ? `${window.location.origin}${file.url}` : file.url;
+  const fullUrl = typeof window !== "undefined" ? `${window.location.origin}${file.url}` : file.url;
 
   const copyUrl = async () => {
     try {
@@ -132,8 +131,13 @@ function FileDetail() {
 
   return (
     <div className="container-app py-6 space-y-4">
-      <nav aria-label="breadcrumb" className="flex items-center gap-1 text-xs text-muted-foreground">
-        <Link to="/admin/files" className="hover:text-primary">الملفات</Link>
+      <nav
+        aria-label="breadcrumb"
+        className="flex items-center gap-1 text-xs text-muted-foreground"
+      >
+        <Link to="/admin/files" className="hover:text-primary">
+          الملفات
+        </Link>
         <ChevronRight className="h-3 w-3" />
         <span className="truncate max-w-[240px]">{file.file_name}</span>
       </nav>
@@ -175,7 +179,10 @@ function FileDetail() {
       </header>
 
       {remove.isError && (
-        <div role="alert" className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+        <div
+          role="alert"
+          className="rounded-md border border-destructive/40 bg-destructive/10 px-3 py-2 text-sm text-destructive"
+        >
           {(remove.error as Error).message}
         </div>
       )}
@@ -200,7 +207,11 @@ function FileDetail() {
 
         <div className="space-y-3">
           <InfoRow icon={FileType2} label="النوع" value={file.mime_type} />
-          <InfoRow icon={HardDrive} label="الحجم" value={formatBytes(Number(file.size_bytes ?? 0))} />
+          <InfoRow
+            icon={HardDrive}
+            label="الحجم"
+            value={formatBytes(Number(file.size_bytes ?? 0))}
+          />
           {file.is_image && (file.width || file.height) && (
             <InfoRow
               icon={Ruler}

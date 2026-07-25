@@ -115,7 +115,8 @@ export async function sendOtpMessage(
     // 401/403 from the gateway means credentials aren't usable — treat as
     // provider_unavailable so the UI tells the user to try another channel
     // instead of "message rejected".
-    const unavailable = response.status === 401 || response.status === 403 || response.status >= 500;
+    const unavailable =
+      response.status === 401 || response.status === 403 || response.status >= 500;
     console.error(
       `[otp] Twilio send failed status=${response.status} code=${payload.error_code ?? "?"} msg=${payload.message ?? "?"}`,
     );

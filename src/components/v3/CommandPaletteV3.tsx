@@ -47,20 +47,86 @@ const ITEMS: Item[] = [
   { to: "/reservations/manage", label: "إدارة حجزك (ضيف)", icon: Calendar, group: "الموقع" },
 
   { to: "/portal", label: "بوابة المريض", icon: User, group: "حسابي", roles: ["authenticated"] },
-  { to: "/portal/appointments", label: "مواعيدي", icon: Calendar, group: "حسابي", roles: ["authenticated"] },
+  {
+    to: "/portal/appointments",
+    label: "مواعيدي",
+    icon: Calendar,
+    group: "حسابي",
+    roles: ["authenticated"],
+  },
   { to: "/portal/family", label: "أسرتي", icon: User, group: "حسابي", roles: ["authenticated"] },
   { to: "/my-orders", label: "طلباتي", icon: Package, group: "حسابي", roles: ["authenticated"] },
 
-  { to: "/admin", label: "لوحة القيادة", icon: LayoutDashboard, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/inbox", label: "الصندوق الموحد", icon: Inbox, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/service-inquiries", label: "طلبات واتساب", icon: MessageSquare, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/booking-funnel", label: "قمع الحجوزات", icon: FileBarChart, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/realtime-monitor", label: "مراقبة Realtime", icon: Gauge, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/web-vitals", label: "Web Vitals", icon: FileBarChart, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/ai-streaming", label: "مراقبة AI Streaming", icon: Sparkles, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/ai-insights", label: "تحليلات AI (No-show/توصيات/شكاوى)", icon: Sparkles, group: "الإدارة", roles: ["admin", "super_admin"] },
-  { to: "/admin/v3", label: "ترقية V3", icon: Sparkles, group: "الإدارة", roles: ["admin", "super_admin"] },
+  {
+    to: "/admin",
+    label: "لوحة القيادة",
+    icon: LayoutDashboard,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/inbox",
+    label: "الصندوق الموحد",
+    icon: Inbox,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/service-inquiries",
+    label: "طلبات واتساب",
+    icon: MessageSquare,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/booking-funnel",
+    label: "قمع الحجوزات",
+    icon: FileBarChart,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/realtime-monitor",
+    label: "مراقبة Realtime",
+    icon: Gauge,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/audit-logs",
+    label: "سجل التدقيق",
+    icon: ShieldCheck,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/web-vitals",
+    label: "Web Vitals",
+    icon: FileBarChart,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/ai-streaming",
+    label: "مراقبة AI Streaming",
+    icon: Sparkles,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/ai-insights",
+    label: "تحليلات AI (No-show/توصيات/شكاوى)",
+    icon: Sparkles,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
+  {
+    to: "/admin/v3",
+    label: "ترقية V3",
+    icon: Sparkles,
+    group: "الإدارة",
+    roles: ["admin", "super_admin"],
+  },
 ];
 
 function matchesRole(item: Item, roles: Set<Role>): boolean {
@@ -70,7 +136,6 @@ function matchesRole(item: Item, roles: Set<Role>): boolean {
   if (!item.roles || item.roles.length === 0) return true;
   return item.roles.some((r) => roles.has(r));
 }
-
 
 export function CommandPaletteV3({
   open,

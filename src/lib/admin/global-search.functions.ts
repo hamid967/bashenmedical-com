@@ -58,9 +58,7 @@ export const globalSearch = createServerFn({ method: "POST" })
       sb
         .from("appointments")
         .select("id, reference_number, appointment_date, status, patients!inner(full_name)")
-        .or(
-          `reference_number.ilike.%${q}%,patients.full_name.ilike.%${q}%`,
-        )
+        .or(`reference_number.ilike.%${q}%,patients.full_name.ilike.%${q}%`)
         .order("appointment_date", { ascending: false })
         .limit(6),
       sb

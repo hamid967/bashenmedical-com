@@ -99,7 +99,6 @@ export const TOOL_REGISTRY: Record<string, ToolDef> = {
   },
 } as const;
 
-
 /** Tools currently allowed to appear in an ```action fence for a scope. */
 export function allowedActionTools(scope: AssistantScope): ToolDef[] {
   return Object.values(TOOL_REGISTRY).filter(

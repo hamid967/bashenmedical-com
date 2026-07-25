@@ -11,10 +11,27 @@
  * single schema-driven renderer covers every surface.
  */
 export type CmsKind =
-  | "home" | "nav" | "footer" | "hero" | "service" | "specialty"
-  | "doctor" | "branch" | "offer" | "announcement" | "article" | "faq"
-  | "insurance" | "contact" | "hours" | "banner" | "intro" | "whatsapp"
-  | "policy" | "page" | "seo_defaults";
+  | "home"
+  | "nav"
+  | "footer"
+  | "hero"
+  | "service"
+  | "specialty"
+  | "doctor"
+  | "branch"
+  | "offer"
+  | "announcement"
+  | "article"
+  | "faq"
+  | "insurance"
+  | "contact"
+  | "hours"
+  | "banner"
+  | "intro"
+  | "whatsapp"
+  | "policy"
+  | "page"
+  | "seo_defaults";
 
 export type FieldType = "text" | "textarea" | "rich" | "url" | "image" | "list" | "boolean";
 
@@ -36,7 +53,6 @@ export type KindDef = {
   fields: FieldDef[];
 };
 
-
 const seoFields: FieldDef[] = [
   { name: "title", label: "العنوان (SEO)", type: "text" },
   { name: "description", label: "الوصف (SEO)", type: "textarea" },
@@ -44,7 +60,10 @@ const seoFields: FieldDef[] = [
 
 export const CMS_KINDS: Record<CmsKind, KindDef> = {
   home: {
-    key: "home", label: "الصفحة الرئيسية", singleton: true, bilingual: true,
+    key: "home",
+    label: "الصفحة الرئيسية",
+    singleton: true,
+    bilingual: true,
     fields: [
       { name: "headline", label: "العنوان الرئيسي", type: "text", required: true },
       { name: "subheadline", label: "العنوان الفرعي", type: "textarea" },
@@ -54,29 +73,46 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   nav: {
-    key: "nav", label: "شريط التنقل", singleton: true, bilingual: true,
+    key: "nav",
+    label: "شريط التنقل",
+    singleton: true,
+    bilingual: true,
     fields: [
-      { name: "items", label: "عناصر القائمة", type: "list",
+      {
+        name: "items",
+        label: "عناصر القائمة",
+        type: "list",
         itemFields: [
           { name: "label", label: "النص", type: "text" },
           { name: "href", label: "الرابط", type: "url" },
-        ]},
+        ],
+      },
     ],
   },
   footer: {
-    key: "footer", label: "التذييل", singleton: true, bilingual: true,
+    key: "footer",
+    label: "التذييل",
+    singleton: true,
+    bilingual: true,
     fields: [
       { name: "tagline", label: "الشعار النصي", type: "textarea" },
-      { name: "columns", label: "الأعمدة",  type: "list",
+      {
+        name: "columns",
+        label: "الأعمدة",
+        type: "list",
         itemFields: [
           { name: "title", label: "عنوان العمود", type: "text" },
           { name: "links", label: "روابط (سطر لكل رابط)", type: "textarea" },
-        ]},
+        ],
+      },
       { name: "copyright", label: "نص حقوق النشر", type: "text" },
     ],
   },
   hero: {
-    key: "hero", label: "قسم البطل", singleton: true, bilingual: true,
+    key: "hero",
+    label: "قسم البطل",
+    singleton: true,
+    bilingual: true,
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       { name: "body", label: "النص", type: "rich" },
@@ -86,7 +122,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   service: {
-    key: "service", label: "خدمة", singleton: false, bilingual: true,
+    key: "service",
+    label: "خدمة",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "name", label: "الاسم", type: "text", required: true },
       { name: "summary", label: "ملخّص", type: "textarea" },
@@ -96,7 +135,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   specialty: {
-    key: "specialty", label: "تخصص", singleton: false, bilingual: true,
+    key: "specialty",
+    label: "تخصص",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "name", label: "الاسم", type: "text", required: true },
       { name: "description", label: "الوصف", type: "textarea" },
@@ -105,7 +147,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   doctor: {
-    key: "doctor", label: "طبيب", singleton: false, bilingual: true,
+    key: "doctor",
+    label: "طبيب",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "name", label: "الاسم", type: "text", required: true },
       { name: "title", label: "المسمى", type: "text" },
@@ -115,7 +160,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   branch: {
-    key: "branch", label: "فرع", singleton: false, bilingual: true,
+    key: "branch",
+    label: "فرع",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "name", label: "الاسم", type: "text", required: true },
       { name: "address", label: "العنوان", type: "textarea" },
@@ -126,7 +174,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   offer: {
-    key: "offer", label: "عرض", singleton: false, bilingual: true,
+    key: "offer",
+    label: "عرض",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       { name: "body", label: "التفاصيل", type: "rich" },
@@ -135,7 +186,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   announcement: {
-    key: "announcement", label: "إعلان", singleton: false, bilingual: true,
+    key: "announcement",
+    label: "إعلان",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "message", label: "الرسالة", type: "textarea", required: true },
       { name: "level", label: "المستوى (info/warning)", type: "text" },
@@ -143,7 +197,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   article: {
-    key: "article", label: "مقالة", singleton: false, bilingual: true,
+    key: "article",
+    label: "مقالة",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       { name: "excerpt", label: "المقتطف", type: "textarea" },
@@ -153,14 +210,19 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   faq: {
-    key: "faq", label: "سؤال شائع", singleton: false, bilingual: true,
+    key: "faq",
+    label: "سؤال شائع",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "question", label: "السؤال", type: "text", required: true },
       { name: "answer", label: "الإجابة", type: "rich", required: true },
     ],
   },
   insurance: {
-    key: "insurance", label: "شركة تأمين", singleton: false,
+    key: "insurance",
+    label: "شركة تأمين",
+    singleton: false,
     fields: [
       { name: "name", label: "الاسم", type: "text", required: true },
       { name: "logo", label: "الشعار", type: "image" },
@@ -168,7 +230,9 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   contact: {
-    key: "contact", label: "بيانات التواصل", singleton: true,
+    key: "contact",
+    label: "بيانات التواصل",
+    singleton: true,
     fields: [
       { name: "phone", label: "الهاتف", type: "text" },
       { name: "whatsapp", label: "واتساب", type: "text" },
@@ -177,7 +241,9 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   hours: {
-    key: "hours", label: "ساعات العمل", singleton: true,
+    key: "hours",
+    label: "ساعات العمل",
+    singleton: true,
     fields: [
       { name: "weekday_hours", label: "أيام العمل", type: "text" },
       { name: "weekend_hours", label: "نهاية الأسبوع", type: "text" },
@@ -185,7 +251,9 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   banner: {
-    key: "banner", label: "بانر", singleton: false,
+    key: "banner",
+    label: "بانر",
+    singleton: false,
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       { name: "image", label: "الصورة", type: "image" },
@@ -193,7 +261,9 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   intro: {
-    key: "intro", label: "شاشة الترحيب", singleton: true,
+    key: "intro",
+    label: "شاشة الترحيب",
+    singleton: true,
     fields: [
       { name: "headline", label: "العنوان", type: "text" },
       { name: "body", label: "النص", type: "textarea" },
@@ -202,7 +272,9 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   whatsapp: {
-    key: "whatsapp", label: "زر واتساب", singleton: true,
+    key: "whatsapp",
+    label: "زر واتساب",
+    singleton: true,
     fields: [
       { name: "phone", label: "رقم واتساب", type: "text", required: true },
       { name: "tooltip", label: "التلميح", type: "text" },
@@ -210,14 +282,20 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   policy: {
-    key: "policy", label: "سياسة", singleton: false, bilingual: true,
+    key: "policy",
+    label: "سياسة",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "title", label: "العنوان", type: "text", required: true },
       { name: "body", label: "النص", type: "rich", required: true },
     ],
   },
   page: {
-    key: "page", label: "صفحة مخصصة", singleton: false, bilingual: true,
+    key: "page",
+    label: "صفحة مخصصة",
+    singleton: false,
+    bilingual: true,
     fields: [
       { name: "slug", label: "المسار (slug)", type: "text", required: true },
       { name: "title", label: "العنوان", type: "text", required: true },
@@ -226,7 +304,10 @@ export const CMS_KINDS: Record<CmsKind, KindDef> = {
     ],
   },
   seo_defaults: {
-    key: "seo_defaults", label: "الإعدادات الافتراضية للـ SEO", singleton: true, bilingual: true,
+    key: "seo_defaults",
+    label: "الإعدادات الافتراضية للـ SEO",
+    singleton: true,
+    bilingual: true,
     fields: [
       { name: "site_title", label: "اسم الموقع", type: "text" },
       { name: "site_description", label: "الوصف الافتراضي", type: "textarea" },
@@ -254,7 +335,10 @@ export function computeCompleteness(
     if (v == null) continue;
     if (typeof v === "string" && v.trim() === "") continue;
     if (Array.isArray(v) && v.length === 0) continue;
-    if (typeof v === "boolean") { filled++; continue; }
+    if (typeof v === "boolean") {
+      filled++;
+      continue;
+    }
     filled++;
   }
   return Math.round((filled / targets.length) * 100);

@@ -210,8 +210,7 @@ function MessageTemplatesPage() {
   );
   const knownVars = useMemo(() => new Set(TEMPLATE_VARIABLES.map((v) => v.key)), []);
   const unknownVars = useMemo(
-    () =>
-      extractTemplateVariables(form.body, form.title).filter((k) => !knownVars.has(k)),
+    () => extractTemplateVariables(form.body, form.title).filter((k) => !knownVars.has(k)),
     [form.body, form.title, knownVars],
   );
 

@@ -43,11 +43,11 @@ bun run check:rls    # اختبارات RLS الكاملة (تحتاج أسرا�
 
 ### الفروع
 
-| الفرع        | الغرض                                                                 |
-| ------------ | --------------------------------------------------------------------- |
-| `main`       | الفرع الافتراضي — يعكس الحالة الحيّة في Lovable ويُنشر إلى الإنتاج.    |
-| `feature/*`  | فروع للميزات الجديدة أو الإصلاحات — تُفتح عبر Pull Request إلى `main`. |
-| `fix/*`      | فروع لإصلاحات عاجلة — نفس تدفّق الـ PR.                                |
+| الفرع       | الغرض                                                                  |
+| ----------- | ---------------------------------------------------------------------- |
+| `main`      | الفرع الافتراضي — يعكس الحالة الحيّة في Lovable ويُنشر إلى الإنتاج.    |
+| `feature/*` | فروع للميزات الجديدة أو الإصلاحات — تُفتح عبر Pull Request إلى `main`. |
+| `fix/*`     | فروع لإصلاحات عاجلة — نفس تدفّق الـ PR.                                |
 
 ### تدفّق العمل المُوصى به
 
@@ -76,7 +76,6 @@ bun run check:rls    # اختبارات RLS الكاملة (تحتاج أسرا�
 ### إعادة الربط أو تغيير المستودع
 
 من داخل Lovable: **+** أسفل يسار الدردشة → **GitHub** → **Disconnect** ثم **Connect project** واختر المستودع الجديد. يُدفع كامل المشروع تلقائيًا بعد الربط.
-
 
 ## الفحوصات
 
@@ -179,11 +178,11 @@ done
 
 تتطلّب اختبارات RLS مشروع Supabase حقيقيًا. يجب توفّر الأسرار التالية بأسمائها المحدّدة في GitHub Actions (Repository secrets) أو في بيئة التشغيل المحلّية:
 
-| المتغير                     | الغرض                      | مطلوب على `main` | التوقّعات والتحقق                                |
-| --------------------------- | -------------------------- | ---------------- | ------------------------------------------------ |
+| المتغير                     | الغرض                      | مطلوب على `main` | التوقّعات والتحقق                                                                                       |
+| --------------------------- | -------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
 | `SUPABASE_URL`              | عنوان مشروع Supabase       | نعم              | يبدأ بـ `https://` وينتهي بـ `.supabase.co`. يُقرأ من `secrets.SUPABASE_URL` ويُتحقق من أنه ليس فارغًا. |
-| `SUPABASE_PUBLISHABLE_KEY`  | مفتاح العميل (anon/public) | نعم              | يُستخدم لمحاكاة المستخدمين المجهولين/المسجّلين. يُقرأ من `secrets.SUPABASE_PUBLISHABLE_KEY`. |
-| `SUPABASE_SERVICE_ROLE_KEY` | مفتاح الخدمة               | **نعم**          | يُستخدم لتهيئة البيانات وتنظيفها بعد الاختبارات. يُقرأ من `secrets.SUPABASE_SERVICE_ROLE_KEY`. |
+| `SUPABASE_PUBLISHABLE_KEY`  | مفتاح العميل (anon/public) | نعم              | يُستخدم لمحاكاة المستخدمين المجهولين/المسجّلين. يُقرأ من `secrets.SUPABASE_PUBLISHABLE_KEY`.            |
+| `SUPABASE_SERVICE_ROLE_KEY` | مفتاح الخدمة               | **نعم**          | يُستخدم لتهيئة البيانات وتنظيفها بعد الاختبارات. يُقرأ من `secrets.SUPABASE_SERVICE_ROLE_KEY`.          |
 
 ### التحقق المبكّر قبل `checkout` و `install`
 
@@ -211,10 +210,10 @@ missing=()
 
 تستخدم الـ CI وظيفتين منفصلتين لاختبارات RLS، وكلتاهما تبدأ بفحص مبكّر للأسرار **قبل** `checkout` و `install` لتجنّب العمل المهدور:
 
-| الوظيفة                | الفرع/الحدث                      | السلوك عند غياب الأسرار        |
-| ---------------------- | -------------------------------- | ------------------------------ |
-| `rls-tests-main`       | `push` إلى `main` فقط            | فشل فوري (`exit 1`)            |
-| `rls-tests-pr`         | PRs من نفس المستودع فقط (لا الـ forks) | تخطٍّ آمن (`skip`) لا يفشل الـ PR |
+| الوظيفة          | الفرع/الحدث                            | السلوك عند غياب الأسرار           |
+| ---------------- | -------------------------------------- | --------------------------------- |
+| `rls-tests-main` | `push` إلى `main` فقط                  | فشل فوري (`exit 1`)               |
+| `rls-tests-pr`   | PRs من نفس المستودع فقط (لا الـ forks) | تخطٍّ آمن (`skip`) لا يفشل الـ PR |
 
 الوظيفتان تتحققان من وجود الأسرار التالية قبل تشغيل أي خطوة أخرى:
 
@@ -277,6 +276,7 @@ missing=()
 This early check runs **before** checkout/install to fail fast on `main`.
 
 The following secrets are **required** but missing:
+
 - `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
@@ -299,6 +299,7 @@ Note: `SUPABASE_SERVICE_ROLE_KEY` is not available on Lovable Cloud. For full RL
 This early check runs **before** checkout/install so we skip fast on PRs without wasted work.
 
 The following secrets are missing:
+
 - `SUPABASE_URL`
 - `SUPABASE_PUBLISHABLE_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
@@ -393,6 +394,7 @@ bun tests/rls/appt-reason-too-long.test.ts
 ```
 
 > **ملاحظة:** إذا لم تستخدم `export` أو `.env.local`، اكتب الأسرار قبل كل أمر:
+>
 > ```bash
 > SUPABASE_URL=... SUPABASE_PUBLISHABLE_KEY=... SUPABASE_SERVICE_ROLE_KEY=... \
 >   bun tests/rls/appointments.rls.test.ts
@@ -422,12 +424,12 @@ bun run check:rls
 
 ### 6. أمثلة على أخطاء محليّة شائعة
 
-| الخطأ المحلي | السبب | الحل |
-| ------------ | ----- | ---- |
-| `Missing: SUPABASE_SERVICE_ROLE_KEY` | لم يُضبط السرّ في البيئة | صدّر الأسرار أو حمّل `.env.local`. |
-| `fetch failed` / `401 Unauthorized` | `SUPABASE_URL` أو مفتاح خاطئ | تأكّد من تطابق المفاتيح مع المشروع. |
-| `permission denied for table` | `SUPABASE_SERVICE_ROLE_KEY` غير صحيح أو RLS مفقود | تأكّد من المفتاح، ومن أن الجداول تملك GRANTs و RLS policies. |
-| فشل فقط في بعض ملفّات الـ RLS | تغييرات في السكيما لم تُنفّذ | شغّل آخر migration على قاعدة البيانات المحليّة/الحية. |
+| الخطأ المحلي                         | السبب                                             | الحل                                                         |
+| ------------------------------------ | ------------------------------------------------- | ------------------------------------------------------------ |
+| `Missing: SUPABASE_SERVICE_ROLE_KEY` | لم يُضبط السرّ في البيئة                          | صدّر الأسرار أو حمّل `.env.local`.                           |
+| `fetch failed` / `401 Unauthorized`  | `SUPABASE_URL` أو مفتاح خاطئ                      | تأكّد من تطابق المفاتيح مع المشروع.                          |
+| `permission denied for table`        | `SUPABASE_SERVICE_ROLE_KEY` غير صحيح أو RLS مفقود | تأكّد من المفتاح، ومن أن الجداول تملك GRANTs و RLS policies. |
+| فشل فقط في بعض ملفّات الـ RLS        | تغييرات في السكيما لم تُنفّذ                      | شغّل آخر migration على قاعدة البيانات المحليّة/الحية.        |
 
 ### 7. استخدم سكربت `check:rls` كحاجز قبل الـ push
 
@@ -462,14 +464,14 @@ git push --no-verify
 
 ## استكشاف أخطاء CI المتعلقة بالأسرار
 
-| العَرَض | السبب المحتمل | الحل |
-| -------- | -------------- | ---- |
-| `## ❌ RLS tests failed on main — missing Supabase secrets` في `GITHUB_STEP_SUMMARY` | واحد أو أكثر من أسرار Supabase غير مضبوط في Repository secrets | أضِف الأسرار الناقصة في **Settings → Secrets and variables → Actions** بأسمائها بالضبط: `SUPABASE_URL`، `SUPABASE_PUBLISHABLE_KEY`، `SUPABASE_SERVICE_ROLE_KEY`. |
-| `## ⚠️ RLS tests skipped on PR — missing Supabase secrets` | نفس الأسباب السابقة لكن على PR | اختياري على PR؛ إذا أردت تشغيل الاختبارات على PR أضِف الأسرار. إذا كنت تستخدم Lovable Cloud، فالتخطّي المتكرّر متوقّع. |
-| لا يظهر وظيفة `rls-tests-pr` في CI لـ PR | الـ PR قادم من `fork` | الوظيفة تُستثني الـ forks لأن GitHub لا يكشف أسرار المستودع الأصلي للـ forks. ادمج الفرع في المستودع الأصلي أولًا. |
-| الاختبارات تفشل بعد الفحص المبكّر مع خطأ `401 Unauthorized` أو `403 Forbidden` | مفتاح خاطئ أو عنوان مشروع غير صحيح | تأكّد من أن `SUPABASE_URL` يبدأ بـ `https://` وينتهي بـ `.supabase.co`، وأن المفتاح المستخدَم يتطابق مع المشروع (لا تخلط بين مفتاحي `PUBLISHABLE` و `SERVICE_ROLE`). |
-| لا أستطيع الحصول على `SUPABASE_SERVICE_ROLE_KEY` | Lovable Cloud لا يوفّر مفتاح الخدمة | أنشئ مشروع Supabase منفصلًا خاصًا بالاختبارات واستخدم `SUPABASE_SERVICE_ROLE_KEY` الخاص به. |
-| تكرار رسالة التخطّي على كل PR | الأسرار مضبوطة لكن الوظيفة ما زالت تتخطّى | تأكّد أن الأسرار مضبوطة في **Repository secrets** (وليس Environment secrets فقط)، وأن أسماؤها متطابقة تمامًا (حسّاسة لحالة الأحرف). |
+| العَرَض                                                                              | السبب المحتمل                                                  | الحل                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `## ❌ RLS tests failed on main — missing Supabase secrets` في `GITHUB_STEP_SUMMARY` | واحد أو أكثر من أسرار Supabase غير مضبوط في Repository secrets | أضِف الأسرار الناقصة في **Settings → Secrets and variables → Actions** بأسمائها بالضبط: `SUPABASE_URL`، `SUPABASE_PUBLISHABLE_KEY`، `SUPABASE_SERVICE_ROLE_KEY`.     |
+| `## ⚠️ RLS tests skipped on PR — missing Supabase secrets`                           | نفس الأسباب السابقة لكن على PR                                 | اختياري على PR؛ إذا أردت تشغيل الاختبارات على PR أضِف الأسرار. إذا كنت تستخدم Lovable Cloud، فالتخطّي المتكرّر متوقّع.                                               |
+| لا يظهر وظيفة `rls-tests-pr` في CI لـ PR                                             | الـ PR قادم من `fork`                                          | الوظيفة تُستثني الـ forks لأن GitHub لا يكشف أسرار المستودع الأصلي للـ forks. ادمج الفرع في المستودع الأصلي أولًا.                                                   |
+| الاختبارات تفشل بعد الفحص المبكّر مع خطأ `401 Unauthorized` أو `403 Forbidden`       | مفتاح خاطئ أو عنوان مشروع غير صحيح                             | تأكّد من أن `SUPABASE_URL` يبدأ بـ `https://` وينتهي بـ `.supabase.co`، وأن المفتاح المستخدَم يتطابق مع المشروع (لا تخلط بين مفتاحي `PUBLISHABLE` و `SERVICE_ROLE`). |
+| لا أستطيع الحصول على `SUPABASE_SERVICE_ROLE_KEY`                                     | Lovable Cloud لا يوفّر مفتاح الخدمة                            | أنشئ مشروع Supabase منفصلًا خاصًا بالاختبارات واستخدم `SUPABASE_SERVICE_ROLE_KEY` الخاص به.                                                                          |
+| تكرار رسالة التخطّي على كل PR                                                        | الأسرار مضبوطة لكن الوظيفة ما زالت تتخطّى                      | تأكّد أن الأسرار مضبوطة في **Repository secrets** (وليس Environment secrets فقط)، وأن أسماؤها متطابقة تمامًا (حسّاسة لحالة الأحرف).                                  |
 
 ### قائمة مرجعية سريعة
 
@@ -512,27 +514,27 @@ bun run test:all -- --watch --no-rls --watch-path=src  # مراقبة مجلد �
 
 الأوامر التي ينفّذها `scripts/run-tests.sh` و`Dockerfile.test` مأخوذة حرفيًا من `.github/workflows/ci.yml` بنفس الترتيب. الجدول أدناه هو مصدر الحقيقة لهذه المطابقة — إذا تغيّر أحد الطرفين وجب تحديث الآخر.
 
-| # | خطوة CI (workflow / step) | الأمر في CI | الأمر داخل `Dockerfile.test` / `run-tests.sh` |
-| - | ------------------------- | ----------- | -------------------------------------------- |
-| 1 | `lint-and-typecheck` → Install | `bun install --frozen-lockfile` | `bun install --frozen-lockfile` |
-| 2 | `lint-and-typecheck` → Prettier | `bun run format:check` | `bun run format:check` |
-| 3 | `lint-and-typecheck` → Lint inserts | `bun run lint:inserts` | `bun run lint:inserts` |
-| 4 | `lint-and-typecheck` → Docs examples | `bash tests/lint/book-docs-examples.sh` | `bash tests/lint/book-docs-examples.sh` |
-| 5 | `lint-and-typecheck` → Docs keys | `bun tests/unit/book-docs-keys.test.ts` | `bun tests/unit/book-docs-keys.test.ts` |
-| 6 | `lint-and-typecheck` → Unit tests | `for f in tests/unit/*.test.ts; do bun "$f"; done` | نفس الحلقة حرفيًا |
-| 7 | `lint-and-typecheck` → TypeScript | `bun run typecheck` | `bun run typecheck` |
-| 8 | `rls-tests-*` → Verify secrets | فحص وجود `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | نفس الفحص داخل `scripts/pre-push-rls-checks.sh` (يُستدعى عبر `bun run check:rls`) |
-| 9 | `rls-tests-*` → RLS suite | `for f in tests/rls/*.test.ts; do bun "$f"; done` | نفس الحلقة داخل `check:rls` |
+| #   | خطوة CI (workflow / step)            | الأمر في CI                                                                      | الأمر داخل `Dockerfile.test` / `run-tests.sh`                                     |
+| --- | ------------------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| 1   | `lint-and-typecheck` → Install       | `bun install --frozen-lockfile`                                                  | `bun install --frozen-lockfile`                                                   |
+| 2   | `lint-and-typecheck` → Prettier      | `bun run format:check`                                                           | `bun run format:check`                                                            |
+| 3   | `lint-and-typecheck` → Lint inserts  | `bun run lint:inserts`                                                           | `bun run lint:inserts`                                                            |
+| 4   | `lint-and-typecheck` → Docs examples | `bash tests/lint/book-docs-examples.sh`                                          | `bash tests/lint/book-docs-examples.sh`                                           |
+| 5   | `lint-and-typecheck` → Docs keys     | `bun tests/unit/book-docs-keys.test.ts`                                          | `bun tests/unit/book-docs-keys.test.ts`                                           |
+| 6   | `lint-and-typecheck` → Unit tests    | `for f in tests/unit/*.test.ts; do bun "$f"; done`                               | نفس الحلقة حرفيًا                                                                 |
+| 7   | `lint-and-typecheck` → TypeScript    | `bun run typecheck`                                                              | `bun run typecheck`                                                               |
+| 8   | `rls-tests-*` → Verify secrets       | فحص وجود `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | نفس الفحص داخل `scripts/pre-push-rls-checks.sh` (يُستدعى عبر `bun run check:rls`) |
+| 9   | `rls-tests-*` → RLS suite            | `for f in tests/rls/*.test.ts; do bun "$f"; done`                                | نفس الحلقة داخل `check:rls`                                                       |
 
 **تكافؤ البيئة:**
 
-| المكوّن | CI (`ubuntu-latest`) | الحاوية المحلية |
-| ------- | -------------------- | ---------------- |
-| نظام التشغيل | Ubuntu (Linux x64/arm64) | Debian slim (`oven/bun:1-debian`) |
-| Bun | `oven-sh/setup-bun@v2` بإصدار `latest` | `oven/bun:1-debian` (نفس القناة) |
-| متغيّر `CI` | `true` | `true` (مضبوط في `Dockerfile.test` و `docker-compose.test.yml`) |
-| الأسرار | `secrets.SUPABASE_*` من Repository secrets | `.env.local` عبر `--env-file` / `env_file` |
-| التبعيات | `bun install --frozen-lockfile` | `bun install --frozen-lockfile` (fallback إلى `bun install` عند اختلاف lockfile) |
+| المكوّن      | CI (`ubuntu-latest`)                       | الحاوية المحلية                                                                  |
+| ------------ | ------------------------------------------ | -------------------------------------------------------------------------------- |
+| نظام التشغيل | Ubuntu (Linux x64/arm64)                   | Debian slim (`oven/bun:1-debian`)                                                |
+| Bun          | `oven-sh/setup-bun@v2` بإصدار `latest`     | `oven/bun:1-debian` (نفس القناة)                                                 |
+| متغيّر `CI`  | `true`                                     | `true` (مضبوط في `Dockerfile.test` و `docker-compose.test.yml`)                  |
+| الأسرار      | `secrets.SUPABASE_*` من Repository secrets | `.env.local` عبر `--env-file` / `env_file`                                       |
+| التبعيات     | `bun install --frozen-lockfile`            | `bun install --frozen-lockfile` (fallback إلى `bun install` عند اختلاف lockfile) |
 
 **فروق مقصودة:**
 
@@ -550,13 +552,12 @@ docker compose -f docker-compose.test.yml run --rm tests bash -lc 'echo "$0"; de
 grep -E "^\s+run:|bun |bash tests/" .github/workflows/ci.yml
 ```
 
-
-
 ### محاكاة GitHub Actions محليًا عبر `act`
 
 للحصول على مقارنة **أدقّ** بين المحلي و CI، شغّل نفس ملف الـ workflow (`.github/workflows/ci.yml`) داخل حاوية Docker مطابقة لـ `ubuntu-latest` باستخدام [`act`](https://nektosact.com). هذا يضمن نفس الأوامر، الترتيب، ومتغيّرات البيئة التي يستخدمها GitHub.
 
 **المتطلبات:**
+
 - Docker يعمل في الخلفية.
 - `act`: `brew install act` (macOS) أو `curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash`.
 - ملف `.env.local` بالأسرار الثلاثة (يُستخدَم تلقائيًا كملف أسرار لـ `act`).
@@ -600,6 +601,7 @@ open ci-compare.html                                       # macOS (أو xdg-ope
 ```
 
 يعرض التقرير:
+
 - **شارة حالة** خضراء (مطابق) أو حمراء (اختلافات).
 - **بطاقات** لأسطر المخرجات، رمز الخروج، وعدد الأخطاء ومقاطع الفروق.
 - **جدول الأخطاء** مع مصدرها (CI/محلي) ورقم السطر.
@@ -611,11 +613,16 @@ open ci-compare.html                                       # macOS (أو xdg-ope
 
 ```json
 {
-  "meta": { "generated_at": "...", "method": "compose", "ci_source": "gh:12345", "normalization": "..." },
+  "meta": {
+    "generated_at": "...",
+    "method": "compose",
+    "ci_source": "gh:12345",
+    "normalization": "..."
+  },
   "local_run": { "exit_code": 0, "line_count": 342, "normalized_log": "/tmp/.../local.norm" },
-  "ci_run":    { "line_count": 340, "source": "gh:12345", "normalized_log": "/tmp/.../ci.norm" },
-  "summary":   { "local_error_count": 0, "ci_error_count": 0, "diff_hunks": 0, "match": true },
-  "errors":    { "local": [{ "line": 87, "text": "..." }], "ci": [] },
+  "ci_run": { "line_count": 340, "source": "gh:12345", "normalized_log": "/tmp/.../ci.norm" },
+  "summary": { "local_error_count": 0, "ci_error_count": 0, "diff_hunks": 0, "match": true },
+  "errors": { "local": [{ "line": 87, "text": "..." }], "ci": [] },
   "differences": [
     { "hunk": "@@ -120,3 +120,4 @@", "ci_only": ["..."], "local_only": ["...", "..."] }
   ]
@@ -718,12 +725,15 @@ docker run --rm --env-file .env.local -v "$PWD":/app -w /app app-tests
 ### 1. أسرار غير مضبوطة أو غير محمّلة
 
 **العَرَض:**
+
 ```
 ❌ Missing: SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY
 ```
+
 أو `TypeError: Cannot read properties of undefined` عند إنشاء عميل Supabase.
 
 **التشخيص:**
+
 ```bash
 bash -c 'for k in SUPABASE_URL SUPABASE_PUBLISHABLE_KEY SUPABASE_SERVICE_ROLE_KEY; do
   [ -z "${!k}" ] && echo "❌ $k فارغ" || echo "✅ $k مضبوط (${#!k} حرفًا)"
@@ -731,10 +741,12 @@ done'
 ```
 
 **الحل:**
+
 ```bash
 set -a; source .env.local; set +a
 bun run check:rls
 ```
+
 إذا كنت في shell جديد، الأسرار المُصدَّرة سابقًا لا تنتقل — أعد التحميل.
 
 ### 2. مفاتيح خاطئة أو من مشروع مختلف (`401` / `Invalid API key`)
@@ -742,11 +754,13 @@ bun run check:rls
 **العَرَض:** `401 Unauthorized`, `Invalid API key`, أو `JWT malformed`.
 
 **التشخيص:**
+
 ```bash
 curl -sS -o /dev/null -w "%{http_code}\n" \
   -H "apikey: $SUPABASE_PUBLISHABLE_KEY" \
   "$SUPABASE_URL/rest/v1/"
 ```
+
 - `200` ⇒ المفتاح والعنوان صحيحان.
 - `401` ⇒ المفتاح لا يطابق `SUPABASE_URL`.
 - `000` أو timeout ⇒ عنوان خاطئ أو مشكلة شبكة.
@@ -766,6 +780,7 @@ curl -sS -o /dev/null -w "%{http_code}\n" \
 **العَرَض:** الاختبار يفشل حتى مع `SUPABASE_SERVICE_ROLE_KEY` صحيح.
 
 **التشخيص:**
+
 ```bash
 # تحقّق من وجود الجدول والسياسات
 curl -sS \
@@ -773,11 +788,13 @@ curl -sS \
   -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" \
   "$SUPABASE_URL/rest/v1/appointments?select=id&limit=1"
 ```
+
 - `permission denied` ⇒ ينقص `GRANT` على الجدول.
 - `relation ... does not exist` ⇒ ينقص migration لم يُطبَّق.
 - `[]` ⇒ الجدول موجود وسليم؛ الفشل في منطق الاختبار نفسه.
 
 **الحل:**
+
 - تأكّد أن آخر migration مطبَّق على نفس المشروع.
 - تأكّد من وجود `GRANT SELECT, INSERT, UPDATE, DELETE ON public.<table> TO authenticated;` و `GRANT ALL ... TO service_role;` في migration الجدول.
 
@@ -800,10 +817,12 @@ curl -sS \
 **السبب:** الاختبار مبني على شكل جدول أو enum قديم لم يواكب آخر migration.
 
 **التشخيص:**
+
 ```bash
 # قارن الأعمدة الفعلية بما يتوقّعه الاختبار
 grep -nE "\.select\(|\.insert\(|\.update\(" tests/rls/<الملف>.test.ts
 ```
+
 ثم تحقّق من الأعمدة الفعلية عبر Supabase (Table Editor أو `information_schema`).
 
 **الحل:** حدّث الاختبار ليطابق السكيما، أو أعِد تطبيق آخر migration إن كان مفقودًا.
@@ -813,9 +832,11 @@ grep -nE "\.select\(|\.insert\(|\.update\(" tests/rls/<الملف>.test.ts
 **العَرَض:** `TypeError: fetch failed`, `ECONNREFUSED`, `ETIMEDOUT`.
 
 **التشخيص:**
+
 ```bash
 curl -sSI "$SUPABASE_URL/rest/v1/" | head -1
 ```
+
 - سطر `HTTP/2 200` ⇒ الشبكة سليمة؛ راجع الأسباب الأخرى.
 - لا مخرجات ⇒ مشكلة شبكة/جدار حماية/VPN أو `SUPABASE_URL` مكتوب خطأ (مثلاً بدون `https://`).
 
@@ -824,16 +845,19 @@ curl -sSI "$SUPABASE_URL/rest/v1/" | head -1
 ### 9. اختبار ينجح مرة ويفشل أخرى (flaky)
 
 **الأسباب الشائعة:**
+
 - بيانات متبقّية من تشغيل سابق (اختبار لا يُنظّف).
 - تشغيل موازٍ لاختبارات تتشارك نفس السجلات.
 
 **الحل:**
+
 - شغّل الملفات بالتسلسل (`for f in tests/rls/*.test.ts; do bun "$f"; done`) بدل أي أداة موازية.
 - تحقّق أن كل اختبار يُنشئ ثم يحذف بياناته (transaction/`afterAll`).
 
 ### 10. اختلاف السلوك بين محلي و Docker/CI
 
 إذا نجح الاختبار في shell محلي وفشل داخل `docker compose run --rm tests`:
+
 - تأكّد أن `.env.local` يحتوي القيم الصحيحة (Compose يقرأه عبر `env_file`).
 - تحقّق من إصدار Bun داخل الحاوية: `docker compose -f docker-compose.test.yml run --rm tests bun --version` — يجب أن يطابق إصدار CI.
 - امسح الطبقات القديمة: `docker compose -f docker-compose.test.yml build --no-cache`.

@@ -6,10 +6,7 @@ import { getAdminWhatsappRequest } from "@/lib/admin/whatsapp.functions";
 
 export const Route = createFileRoute("/_authenticated/admin/whatsapp/$inquiryId")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل طلب واتساب | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل طلب واتساب | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error, reset }) => (
     <div className="container-app py-16 text-center">
@@ -26,9 +23,7 @@ export const Route = createFileRoute("/_authenticated/admin/whatsapp/$inquiryId"
     </div>
   ),
   notFoundComponent: () => (
-    <div className="container-app py-16 text-center text-muted-foreground">
-      الطلب غير موجود.
-    </div>
+    <div className="container-app py-16 text-center text-muted-foreground">الطلب غير موجود.</div>
   ),
   component: WhatsappDetailPage,
 });
@@ -111,14 +106,20 @@ function WhatsappDetailPage() {
         </div>
       </header>
 
-      <section aria-label="بيانات المُستفسر" className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <section
+        aria-label="بيانات المُستفسر"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <Field label="الاسم" value={row.full_name} />
         <Field label="الجوال" value={row.mobile_e164 || row.mobile_number} />
         <Field label="البريد" value={row.email} />
         <Field label="الهوية الوطنية" value={row.national_id} />
         <Field label="الخدمة" value={row.service_label} />
         <Field label="التخصص" value={row.specialty?.name_ar || row.specialty?.name_en} />
-        <Field label="الطبيب المطلوب" value={row.doctor?.full_name_ar || row.doctor?.full_name_en} />
+        <Field
+          label="الطبيب المطلوب"
+          value={row.doctor?.full_name_ar || row.doctor?.full_name_en}
+        />
         <Field label="التأمين" value={row.insurance?.name_ar || row.insurance?.name_en} />
         <Field label="الفرع" value={branch?.name_ar || branch?.name_en} />
         <Field label="التاريخ المفضل" value={row.preferred_date} />
@@ -209,9 +210,7 @@ function WhatsappDetailPage() {
                   <td className="px-3 py-2">{d.provider ?? "—"}</td>
                   <td className="px-3 py-2">{d.status ?? "—"}</td>
                   <td className="px-3 py-2">{d.attempt ?? "—"}</td>
-                  <td className="px-3 py-2 text-xs text-destructive">
-                    {d.error_message ?? ""}
-                  </td>
+                  <td className="px-3 py-2 text-xs text-destructive">{d.error_message ?? ""}</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">
                     {fmtDate(d.created_at)}
                   </td>

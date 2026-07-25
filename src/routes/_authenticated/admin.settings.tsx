@@ -120,7 +120,10 @@ function AdminSettingsRoute() {
         role="search"
       >
         <div className="relative flex-1 min-w-[220px]">
-          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <Search
+            className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"
+            aria-hidden="true"
+          />
           <input
             type="search"
             value={qInput}
@@ -176,9 +179,7 @@ function AdminSettingsRoute() {
       ) : rows.length === 0 ? (
         <div className="rounded-lg border bg-card p-12 text-center text-muted-foreground">
           <Inbox className="mx-auto h-10 w-10 mb-3" aria-hidden="true" />
-          <p className="text-sm">
-            {hasFilters ? "لا نتائج مطابقة." : "لا توجد إعدادات بعد."}
-          </p>
+          <p className="text-sm">{hasFilters ? "لا نتائج مطابقة." : "لا توجد إعدادات بعد."}</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -239,10 +240,16 @@ function CategoryGroup({
               {items.map((r) => (
                 <tr key={r.key} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono text-xs">{r.key}</td>
-                  <td className="p-3 font-mono text-xs max-w-[240px] truncate" title={preview(r.value)}>
+                  <td
+                    className="p-3 font-mono text-xs max-w-[240px] truncate"
+                    title={preview(r.value)}
+                  >
                     {preview(r.value)}
                   </td>
-                  <td className="p-3 text-xs text-muted-foreground max-w-[280px] truncate" title={r.description ?? ""}>
+                  <td
+                    className="p-3 text-xs text-muted-foreground max-w-[280px] truncate"
+                    title={r.description ?? ""}
+                  >
                     {r.description ?? "—"}
                   </td>
                   <td className="p-3 text-xs text-muted-foreground whitespace-nowrap">

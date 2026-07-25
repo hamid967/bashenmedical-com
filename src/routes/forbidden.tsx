@@ -41,9 +41,7 @@ function ForbiddenPage() {
             <ShieldAlert className="h-5 w-5 text-destructive" aria-hidden />
           </div>
           <CardTitle id="forbidden-title">غير مصرح بالوصول</CardTitle>
-          <CardDescription>
-            حسابك لا يملك الصلاحية اللازمة لعرض هذه الصفحة.
-          </CardDescription>
+          <CardDescription>حسابك لا يملك الصلاحية اللازمة لعرض هذه الصفحة.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button asChild className="w-full">

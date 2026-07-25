@@ -151,7 +151,6 @@ export const Route = createFileRoute("/api/public/inquiries/create")({
 
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-
         // Soft rate limit: max 3 inquiries per mobile per hour.
         try {
           const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();

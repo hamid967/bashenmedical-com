@@ -19,12 +19,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export type PatientService =
-  | "appointments"
-  | "reports"
-  | "prescriptions"
-  | "notifications"
-  | "profile"
-  | "dashboard";
+  "appointments" | "reports" | "prescriptions" | "notifications" | "profile" | "dashboard";
 
 const PRIVILEGED_ROLES = new Set([
   "admin",
@@ -70,18 +65,12 @@ export async function assertPatientAccess(
   const roles = ((rolesRes.data as { role: string }[] | null) ?? []).map((r) => r.role);
   const hasPrivileged = roles.some((r) => PRIVILEGED_ROLES.has(r));
   if (hasPrivileged) {
-    throw new PatientAccessDeniedError(
-      service,
-      "staff accounts must use the admin portal",
-    );
+    throw new PatientAccessDeniedError(service, "staff accounts must use the admin portal");
   }
 
   const hasPatientRow = Boolean(patientRes.data?.id);
   const hasPatientProfile = Boolean(profileRes.data?.user_id);
   if (!hasPatientRow && !hasPatientProfile) {
-    throw new PatientAccessDeniedError(
-      service,
-      "no patient record linked to this account",
-    );
+    throw new PatientAccessDeniedError(service, "no patient record linked to this account");
   }
 }

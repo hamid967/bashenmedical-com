@@ -38,7 +38,9 @@ export const listAdminAppointments = createServerFn({ method: "GET" })
     if (data.to) q = q.lte("appointment_date", data.to);
     if (data.q) {
       const like = `%${data.q.replace(/[%_]/g, "\\$&")}%`;
-      q = q.or(`patient_name.ilike.${like},patient_phone.ilike.${like},reference_number.ilike.${like}`);
+      q = q.or(
+        `patient_name.ilike.${like},patient_phone.ilike.${like},reference_number.ilike.${like}`,
+      );
     }
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
@@ -54,7 +56,10 @@ export const getAdminAppointment = createServerFn({ method: "GET" })
     await assertHasRole(context.supabase, context.userId, "admin");
     const { data: row, error } = await context.supabase
       .from("appointments")
-      .select(COLS + ", reason, notes, patient_email, national_id, gender, estimated_cost_sar, patient_share_sar, insurance_status")
+      .select(
+        COLS +
+          ", reason, notes, patient_email, national_id, gender, estimated_cost_sar, patient_share_sar, insurance_status",
+      )
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);

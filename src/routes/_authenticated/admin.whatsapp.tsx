@@ -153,7 +153,15 @@ function WhatsappPage() {
       limit: PAGE_SIZE,
       offset: (search.page ?? 0) * PAGE_SIZE,
     }),
-    [branchId, search.internal_status, search.handoff_status, search.q, search.from, search.to, search.page],
+    [
+      branchId,
+      search.internal_status,
+      search.handoff_status,
+      search.q,
+      search.from,
+      search.to,
+      search.page,
+    ],
   );
 
   const list = useQuery({
@@ -405,10 +413,7 @@ function WhatsappPage() {
         </table>
       </section>
 
-      <nav
-        className="mt-4 flex items-center justify-between text-sm"
-        aria-label="ترقيم الصفحات"
-      >
+      <nav className="mt-4 flex items-center justify-between text-sm" aria-label="ترقيم الصفحات">
         <div className="text-muted-foreground">
           صفحة {page + 1} من {totalPages}
         </div>

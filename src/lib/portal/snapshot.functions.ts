@@ -292,7 +292,9 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
 
     // Insurance approvals — group
     const insRows = (insuranceRes.data ?? []) as any[];
-    const insPending = insRows.filter((r) => r.status === "pending" || r.status === "submitted").length;
+    const insPending = insRows.filter(
+      (r) => r.status === "pending" || r.status === "submitted",
+    ).length;
     const insApproved = insRows.filter((r) => r.status === "approved").length;
     const insNeedsInfo = insRows.filter((r) => r.status === "additional_info_required").length;
 

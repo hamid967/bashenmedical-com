@@ -59,8 +59,6 @@ export const listMyInquiries = createServerFn({ method: "GET" })
       created_at: r.created_at,
       linked_at: r.linked_at,
     }));
-
-
   });
 
 const claimSchema = z.object({

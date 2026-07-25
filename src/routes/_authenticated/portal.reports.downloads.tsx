@@ -19,13 +19,7 @@ import { listMyReportDownloads, type MyReportDownloadEntry } from "@/lib/portal/
 import { Button } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 
 export const Route = createFileRoute("/_authenticated/portal/reports/downloads")({
   head: () => ({

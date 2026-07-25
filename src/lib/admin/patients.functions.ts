@@ -30,7 +30,9 @@ export const listAdminPatients = createServerFn({ method: "GET" })
     if (data.branch_id) q = q.eq("branch_id", data.branch_id);
     if (data.q) {
       const like = `%${data.q.replace(/[%_]/g, "\\$&")}%`;
-      q = q.or(`full_name_ar.ilike.${like},full_name_en.ilike.${like},mrn.ilike.${like},phone.ilike.${like}`);
+      q = q.or(
+        `full_name_ar.ilike.${like},full_name_en.ilike.${like},mrn.ilike.${like},phone.ilike.${like}`,
+      );
     }
     const { data: rows, error, count } = await q;
     if (error) throw new Error(error.message);
@@ -46,7 +48,10 @@ export const getAdminPatient = createServerFn({ method: "GET" })
     await assertHasRole(context.supabase, context.userId, "admin");
     const { data: patient, error } = await context.supabase
       .from("patients")
-      .select(COLS + ", national_id, email, blood_type, marital_status, nationality, address, emergency_contact_name, emergency_contact_phone, notes, tags, status")
+      .select(
+        COLS +
+          ", national_id, email, blood_type, marital_status, nationality, address, emergency_contact_name, emergency_contact_phone, notes, tags, status",
+      )
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);

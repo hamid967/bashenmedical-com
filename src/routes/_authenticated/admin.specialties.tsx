@@ -62,15 +62,44 @@ function SpecialtiesList() {
         </div>
       </header>
 
-      <section
-        aria-label="مؤشرات التخصصات"
-        className="grid grid-cols-2 md:grid-cols-5 gap-3"
-      >
-        <KpiCard label="إجمالي التخصصات" value={query.data?.kpis.total} icon={Stethoscope} loading={query.isLoading} error={query.isError} />
-        <KpiCard label="نشِط" value={query.data?.kpis.active} icon={CheckCircle2} loading={query.isLoading} error={query.isError} tone="success" />
-        <KpiCard label="غير نشِط" value={query.data?.kpis.inactive} icon={XCircle} loading={query.isLoading} error={query.isError} tone="muted" />
-        <KpiCard label="أطباء مرتبطون" value={query.data?.kpis.doctors_linked} icon={Users} loading={query.isLoading} error={query.isError} />
-        <KpiCard label="مواعيد اليوم" value={query.data?.kpis.today_appts} icon={CalendarDays} loading={query.isLoading} error={query.isError} />
+      <section aria-label="مؤشرات التخصصات" className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <KpiCard
+          label="إجمالي التخصصات"
+          value={query.data?.kpis.total}
+          icon={Stethoscope}
+          loading={query.isLoading}
+          error={query.isError}
+        />
+        <KpiCard
+          label="نشِط"
+          value={query.data?.kpis.active}
+          icon={CheckCircle2}
+          loading={query.isLoading}
+          error={query.isError}
+          tone="success"
+        />
+        <KpiCard
+          label="غير نشِط"
+          value={query.data?.kpis.inactive}
+          icon={XCircle}
+          loading={query.isLoading}
+          error={query.isError}
+          tone="muted"
+        />
+        <KpiCard
+          label="أطباء مرتبطون"
+          value={query.data?.kpis.doctors_linked}
+          icon={Users}
+          loading={query.isLoading}
+          error={query.isError}
+        />
+        <KpiCard
+          label="مواعيد اليوم"
+          value={query.data?.kpis.today_appts}
+          icon={CalendarDays}
+          loading={query.isLoading}
+          error={query.isError}
+        />
       </section>
 
       <section className="flex flex-wrap items-center gap-2">
@@ -158,9 +187,7 @@ function SpecialtiesList() {
                       >
                         {s.name_ar}
                       </Link>
-                      <div className="text-xs text-muted-foreground font-mono">
-                        {s.slug}
-                      </div>
+                      <div className="text-xs text-muted-foreground font-mono">{s.slug}</div>
                     </td>
                     <td className="px-3 py-2">
                       {s.is_active ? (

@@ -7,7 +7,9 @@ export const A = ({ on, tone }: { on: boolean; tone: "ok" | "err" }) => (
       "bg-[color:var(--portal-surface-1)] text-[color:var(--portal-ink)]",
       ["border border-[color:var(--portal-surface-3)]", "hover:bg-[color:var(--portal-surface-1)]"],
       on ? "text-[color:var(--portal-success)]" : "text-[color:var(--portal-error)]",
-      tone === "ok" ? ["bg-[color:var(--portal-success-50)]", "border-[color:var(--portal-success-50)]"] : ["bg-[color:var(--portal-error-50)]", "border-[color:var(--portal-error-50)]"],
+      tone === "ok"
+        ? ["bg-[color:var(--portal-success-50)]", "border-[color:var(--portal-success-50)]"]
+        : ["bg-[color:var(--portal-error-50)]", "border-[color:var(--portal-error-50)]"],
     ])}
   >
     A
@@ -31,8 +33,13 @@ export const C = ({ state }: { state: "idle" | "loading" | "error" }) => (
     className={clsx(
       "bg-[color:var(--portal-surface-1)] text-[color:var(--portal-ink)]",
       state === "idle" && "border-[color:var(--portal-surface-3)]",
-      state === "loading" && ["bg-[color:var(--portal-primary-50)]", "text-[color:var(--portal-primary)]"],
-      state === "error" ? "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)]" : "hover:bg-[color:var(--portal-surface-1)]",
+      state === "loading" && [
+        "bg-[color:var(--portal-primary-50)]",
+        "text-[color:var(--portal-primary)]",
+      ],
+      state === "error"
+        ? "bg-[color:var(--portal-error-50)] text-[color:var(--portal-error)]"
+        : "hover:bg-[color:var(--portal-surface-1)]",
     )}
   >
     C

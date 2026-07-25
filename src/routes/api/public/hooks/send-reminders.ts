@@ -404,7 +404,6 @@ async function sendPushRun(admin: any): Promise<{
     else failed++;
   }
 
-
   return { enqueue: enqueueResult ?? null, sent, failed, expired, no_subscription: noSub };
 }
 

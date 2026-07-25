@@ -107,8 +107,7 @@ function estimateFcpMs({ introGzBytes, logoRawBytes }) {
   // Rough transfer-time proxy over BUDGETS.networkKbps + fixed
   // parse/render overhead (~250 ms). The logo is preloaded in
   // parallel, so only the larger of the two dominates FCP.
-  const bytesToMs = (b) =>
-    (b * 8) / (BUDGETS.networkKbps * 1000) * 1000;
+  const bytesToMs = (b) => ((b * 8) / (BUDGETS.networkKbps * 1000)) * 1000;
   const criticalBytes = Math.max(introGzBytes, logoRawBytes);
   return Math.round(bytesToMs(criticalBytes) + 250);
 }
@@ -118,11 +117,7 @@ async function main() {
 
   const clientDir = await findClientDir();
   if (!clientDir) {
-    console.log(
-      color.yellow(
-        "  ⚠ No client build directory found. Run `bun run build` first.",
-      ),
-    );
+    console.log(color.yellow("  ⚠ No client build directory found. Run `bun run build` first."));
     // Non-fatal when the build hasn't happened yet — CI runs build first.
     process.exit(0);
   }
@@ -145,11 +140,7 @@ async function main() {
     console.log(color.gray("    (none matched — component may be inlined)"));
   } else {
     for (const c of chunks) {
-      console.log(
-        color.gray(
-          `    · ${c.file}  raw=${fmtKB(c.raw)}  gz=${fmtKB(c.gz)}`,
-        ),
-      );
+      console.log(color.gray(`    · ${c.file}  raw=${fmtKB(c.raw)}  gz=${fmtKB(c.gz)}`));
     }
   }
 
@@ -206,11 +197,7 @@ async function main() {
   if (problems.length) {
     console.log("\n" + color.red(color.bold("  ✖ Performance budget FAILED")));
     for (const p of problems) console.log(color.red(`    - ${p}`));
-    console.log(
-      color.gray(
-        "\n  Edit BUDGETS in scripts/perf-budget.mjs to change thresholds.\n",
-      ),
-    );
+    console.log(color.gray("\n  Edit BUDGETS in scripts/perf-budget.mjs to change thresholds.\n"));
     process.exit(1);
   }
 

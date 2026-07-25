@@ -42,7 +42,7 @@ export async function runGenerateRecommendations(): Promise<RecoBatchResult> {
       {
         role: "system",
         content:
-          'أنت محلل عمليات لمركز طبي. اقرأ KPIs المجمّعة (بدون PII) وأعد JSON: {recommendations: AiRec[]} — بحد أقصى 10 عناصر. كل عنصر: {scope, scope_id?, kind, title (عربي <=90 حرف), priority (low|medium|high), payload?}. ركّز على: تقليل No-show، تحسين استخدام السعة، رضا المريض.',
+          "أنت محلل عمليات لمركز طبي. اقرأ KPIs المجمّعة (بدون PII) وأعد JSON: {recommendations: AiRec[]} — بحد أقصى 10 عناصر. كل عنصر: {scope, scope_id?, kind, title (عربي <=90 حرف), priority (low|medium|high), payload?}. ركّز على: تقليل No-show، تحسين استخدام السعة، رضا المريض.",
       },
       { role: "user", content: JSON.stringify({ kpis_last30: kpis }) },
     ],

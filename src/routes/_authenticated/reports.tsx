@@ -442,7 +442,7 @@ function ReportsPage() {
               {query.data && query.data.rows.length > 0 ? (
                 (query.data.rows as unknown[]).slice(0, 100).map((r, i) => (
                   <tr key={i} className="border-t">
-                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    {}
                     {colsFor(query.data!.kind).map((c) => (
                       <td key={c.header} className="px-3 py-1.5">
                         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}

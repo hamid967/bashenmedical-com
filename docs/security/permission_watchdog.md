@@ -4,16 +4,16 @@
 
 ## المكوّنات
 
-| المكوّن | الوصف |
-|---|---|
-| `public.deployment_markers` | سجل كل migration مُدمج + خط الأساس (أخطاء/ساعة خلال 7 أيام سابقة). |
-| `public.api_permission_errors` | append-only، احتفاظ 14 يوم، يستقبل من الفرونت عبر `record_permission_error`. |
-| `public.rollback_recommendations` | يخزّن توصيات watchdog مع النسبة والمسارات الأعلى. |
-| `record_permission_error` (RPC) | يستدعى تلقائياً من الفرونت لكل استجابة 401/403. |
-| `evaluate_permission_error_spike` (RPC) | ينفّذه watchdog كل 15 دقيقة، يقارن بالـbaseline. |
-| `POST /api/public/hooks/record-deployment` | يستدعيه CI بعد كل دمج migration لتسجيل نقطة انطلاق. |
-| `POST /api/public/hooks/permission-watchdog` | يستدعيه pg_cron كل 15 دقيقة. |
-| `src/lib/telemetry/permission-errors.ts` | wrapper على `window.fetch` + `reportRpcPermissionError` للـcatch. |
+| المكوّن                                      | الوصف                                                                        |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| `public.deployment_markers`                  | سجل كل migration مُدمج + خط الأساس (أخطاء/ساعة خلال 7 أيام سابقة).           |
+| `public.api_permission_errors`               | append-only، احتفاظ 14 يوم، يستقبل من الفرونت عبر `record_permission_error`. |
+| `public.rollback_recommendations`            | يخزّن توصيات watchdog مع النسبة والمسارات الأعلى.                            |
+| `record_permission_error` (RPC)              | يستدعى تلقائياً من الفرونت لكل استجابة 401/403.                              |
+| `evaluate_permission_error_spike` (RPC)      | ينفّذه watchdog كل 15 دقيقة، يقارن بالـbaseline.                             |
+| `POST /api/public/hooks/record-deployment`   | يستدعيه CI بعد كل دمج migration لتسجيل نقطة انطلاق.                          |
+| `POST /api/public/hooks/permission-watchdog` | يستدعيه pg_cron كل 15 دقيقة.                                                 |
+| `src/lib/telemetry/permission-errors.ts`     | wrapper على `window.fetch` + `reportRpcPermissionError` للـcatch.            |
 
 ## العتبات
 
@@ -25,14 +25,18 @@
 ## التثبيت (خطوات لمرة واحدة)
 
 ### 1) Front-end bootstrap
+
 في `src/start.tsx` (client entry) أضِف:
+
 ```ts
 import { installPermissionErrorReporter } from "@/lib/telemetry/permission-errors";
 installPermissionErrorReporter();
 ```
 
 ### 2) جدولة pg_cron (كل 15 دقيقة)
+
 شغّل عبر أداة الإدراج (SQL) — **ليس migration** لأنه يحتوي مفاتيح المشروع:
+
 ```sql
 select cron.schedule(
   'permission-watchdog-15m',
@@ -55,16 +59,19 @@ select cron.schedule(
 ```
 
 ### 3) خطوة CI بعد الدمج
+
 تُضاف تلقائياً في `.github/workflows/ci.yml` (job `record-deployment-marker`).
 تُشغَّل فقط على `push` إلى `main` عند تعديل `supabase/migrations/*`.
 
 ### 4) تنبيه Slack (اختياري)
+
 أضف secret اسمه `SLACK_ALERT_WEBHOOK` قيمته Incoming Webhook من قناتك.
 بدونه، التوصيات تُخزَّن في `rollback_recommendations` فقط.
 
 ## الـRollback الآلي — القاعدة
 
 **لا نطبّق Rollback على DB تلقائياً** لأنه غير آمن. عند `severity='rollback'`:
+
 1. تُنشأ توصية في `rollback_recommendations` (لوحة `/admin`).
 2. يُرسل تنبيه Slack عاجل.
 3. الخطوة اليدوية:

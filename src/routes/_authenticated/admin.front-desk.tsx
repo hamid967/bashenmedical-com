@@ -55,8 +55,7 @@ export const Route = createFileRoute("/_authenticated/admin/front-desk")({
       { title: "الاستقبال والطابور — لوحة الإدارة" },
       {
         name: "description",
-        content:
-          "شاشة الاستقبال اليومية: تسجيل الحضور، إلغاء، عدم الحضور، وإدارة طابور المرضى.",
+        content: "شاشة الاستقبال اليومية: تسجيل الحضور، إلغاء، عدم الحضور، وإدارة طابور المرضى.",
       },
       { name: "robots", content: "noindex,nofollow" },
     ],
@@ -89,21 +88,13 @@ function FrontDeskPage() {
   useEffect(() => {
     const channel = supabase
       .channel("admin-front-desk")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "queue_entries" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["front-desk", "today"] });
-          qc.invalidateQueries({ queryKey: ["front-desk", "queue"] });
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "appointments" },
-        () => {
-          qc.invalidateQueries({ queryKey: ["front-desk", "today"] });
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "queue_entries" }, () => {
+        qc.invalidateQueries({ queryKey: ["front-desk", "today"] });
+        qc.invalidateQueries({ queryKey: ["front-desk", "queue"] });
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "appointments" }, () => {
+        qc.invalidateQueries({ queryKey: ["front-desk", "today"] });
+      })
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
@@ -213,9 +204,7 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
           <RefreshCw className="h-4 w-4" /> تحديث
         </button>
         {mutate.isError ? (
-          <span className="text-xs text-destructive">
-            {(mutate.error as Error).message}
-          </span>
+          <span className="text-xs text-destructive">{(mutate.error as Error).message}</span>
         ) : null}
       </div>
 
@@ -261,9 +250,7 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                     )}
                   </td>
                   <td className="p-3 font-mono text-xs">{r.patient_phone ?? "—"}</td>
-                  <td className="p-3">
-                    {r.doctor?.name_ar ?? r.doctor?.name_en ?? "—"}
-                  </td>
+                  <td className="p-3">{r.doctor?.name_ar ?? r.doctor?.name_en ?? "—"}</td>
                   <td className="p-3">
                     <StatusBadge status={r.status} />
                   </td>
@@ -281,9 +268,13 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                       <ActionBtn
                         disabled={
                           mutate.isPending ||
-                          ["checked_in", "in_progress", "completed", "cancelled", "no_show"].includes(
-                            r.status,
-                          )
+                          [
+                            "checked_in",
+                            "in_progress",
+                            "completed",
+                            "cancelled",
+                            "no_show",
+                          ].includes(r.status)
                         }
                         onClick={() =>
                           mutate.mutate({
@@ -410,35 +401,23 @@ function QueueTab({ branchId }: { branchId: string | null }) {
 
   return (
     <div className="space-y-6">
-      {mutate.isError ? (
-        <ErrorBanner message={(mutate.error as Error).message} />
-      ) : null}
+      {mutate.isError ? <ErrorBanner message={(mutate.error as Error).message} /> : null}
       {Array.from(groups.values()).map((g) => (
-        <section
-          key={g.doctor?.id ?? "unknown"}
-          className="rounded-lg border bg-card"
-        >
+        <section key={g.doctor?.id ?? "unknown"} className="rounded-lg border bg-card">
           <header className="flex items-center justify-between border-b p-3">
             <h2 className="text-sm font-semibold">
               {g.doctor?.name_ar ?? g.doctor?.name_en ?? "بدون طبيب"}
             </h2>
-            <span className="text-xs text-muted-foreground">
-              {g.rows.length} مريض
-            </span>
+            <span className="text-xs text-muted-foreground">{g.rows.length} مريض</span>
           </header>
           <ul className="divide-y">
             {g.rows.map((r: any) => (
-              <li
-                key={r.id}
-                className="flex flex-wrap items-center gap-3 p-3 text-sm"
-              >
+              <li key={r.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
                 <span className="inline-flex h-8 w-10 items-center justify-center rounded-md bg-muted font-mono text-xs">
                   #{r.queue_number}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate font-medium">
-                    {r.appointment?.patient_name ?? "—"}
-                  </div>
+                  <div className="truncate font-medium">{r.appointment?.patient_name ?? "—"}</div>
                   <div className="text-xs text-muted-foreground">
                     {r.appointment?.appointment_time ?? "—"} ·{" "}
                     {r.appointment?.reference_number ?? "—"}
@@ -448,37 +427,26 @@ function QueueTab({ branchId }: { branchId: string | null }) {
                 <div className="flex flex-wrap gap-1">
                   <ActionBtn
                     disabled={mutate.isPending || r.status !== "waiting"}
-                    onClick={() =>
-                      mutate.mutate({ queue_id: r.id, status: "called" })
-                    }
+                    onClick={() => mutate.mutate({ queue_id: r.id, status: "called" })}
                     icon={<PhoneCall className="h-3.5 w-3.5" />}
                     label="نداء"
                   />
                   <ActionBtn
-                    disabled={
-                      mutate.isPending ||
-                      !["called", "waiting"].includes(r.status)
-                    }
-                    onClick={() =>
-                      mutate.mutate({ queue_id: r.id, status: "in_service" })
-                    }
+                    disabled={mutate.isPending || !["called", "waiting"].includes(r.status)}
+                    onClick={() => mutate.mutate({ queue_id: r.id, status: "in_service" })}
                     icon={<Loader2 className="h-3.5 w-3.5" />}
                     label="ابدأ"
                   />
                   <ActionBtn
                     disabled={mutate.isPending || r.status === "completed"}
-                    onClick={() =>
-                      mutate.mutate({ queue_id: r.id, status: "completed" })
-                    }
+                    onClick={() => mutate.mutate({ queue_id: r.id, status: "completed" })}
                     icon={<CheckCircle2 className="h-3.5 w-3.5" />}
                     label="أنهِ"
                     variant="success"
                   />
                   <ActionBtn
                     disabled={mutate.isPending || r.status !== "waiting"}
-                    onClick={() =>
-                      mutate.mutate({ queue_id: r.id, status: "skipped" })
-                    }
+                    onClick={() => mutate.mutate({ queue_id: r.id, status: "skipped" })}
                     icon={<SkipForward className="h-3.5 w-3.5" />}
                     label="تخطٍ"
                     variant="warn"
@@ -507,9 +475,7 @@ function SkeletonRows() {
 
 function EmptyState({ message }: { message: string }) {
   return (
-    <div className="rounded-md border p-8 text-center text-sm text-muted-foreground">
-      {message}
-    </div>
+    <div className="rounded-md border p-8 text-center text-sm text-muted-foreground">{message}</div>
   );
 }
 
@@ -531,9 +497,7 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
         : s === "checked_in" || s === "in_progress"
           ? "bg-primary/10 text-primary"
           : "bg-muted text-muted-foreground";
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-xs ${tone}`}>{s}</span>
-  );
+  return <span className={`rounded-full px-2 py-0.5 text-xs ${tone}`}>{s}</span>;
 }
 
 function QueueStatusBadge({ status }: { status: string }) {
@@ -547,9 +511,7 @@ function QueueStatusBadge({ status }: { status: string }) {
           : status === "skipped" || status === "cancelled"
             ? "bg-destructive/10 text-destructive"
             : "bg-muted text-muted-foreground";
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-xs ${tone}`}>{status}</span>
-  );
+  return <span className={`rounded-full px-2 py-0.5 text-xs ${tone}`}>{status}</span>;
 }
 
 function ActionBtn({
@@ -588,13 +550,7 @@ function ActionBtn({
 
 /* ---------------------- Batch A1: Patient Snapshot ---------------------- */
 
-function PatientSnapshotDialog({
-  patientId,
-  onClose,
-}: {
-  patientId: string;
-  onClose: () => void;
-}) {
+function PatientSnapshotDialog({ patientId, onClose }: { patientId: string; onClose: () => void }) {
   const fetchFn = useServerFn(getPatientSnapshot);
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["front-desk", "snapshot", patientId],
@@ -637,7 +593,10 @@ function PatientSnapshotDialog({
             ) : (
               <ul className="space-y-1">
                 {data.allergies.map((a: any, i: number) => (
-                  <li key={i} className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-xs">
+                  <li
+                    key={i}
+                    className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-xs"
+                  >
                     <strong>{a.allergen}</strong>
                     {a.severity ? ` — ${a.severity}` : ""}
                     {a.reaction ? ` (${a.reaction})` : ""}
@@ -648,9 +607,7 @@ function PatientSnapshotDialog({
           </section>
 
           <section>
-            <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">
-              التأمين
-            </h3>
+            <h3 className="mb-1 text-xs font-semibold uppercase text-muted-foreground">التأمين</h3>
             {data.insurance ? (
               <p className="text-xs">
                 مزود: {data.insurance.provider_id ?? "—"} ·{" "}
@@ -672,8 +629,8 @@ function PatientSnapshotDialog({
                 {data.recent_appointments.map((a: any) => (
                   <li key={a.id} className="flex justify-between rounded border px-2 py-1 text-xs">
                     <span>
-                      <span className="font-mono">{a.appointment_date}</span>{" "}
-                      {a.appointment_time} · {a.doctor?.name_ar ?? "—"}
+                      <span className="font-mono">{a.appointment_date}</span> {a.appointment_time} ·{" "}
+                      {a.doctor?.name_ar ?? "—"}
                     </span>
                     <StatusBadge status={a.status} />
                   </li>
@@ -705,9 +662,7 @@ function RescheduleDialog({
 }) {
   const rescheduleFn = useServerFn(rescheduleAppointment);
   const [newDate, setNewDate] = useState(appointment.appointment_date ?? "");
-  const [newTime, setNewTime] = useState(
-    (appointment.appointment_time ?? "").slice(0, 5),
-  );
+  const [newTime, setNewTime] = useState((appointment.appointment_time ?? "").slice(0, 5));
   const [reason, setReason] = useState("");
 
   const mutate = useMutation({
@@ -723,11 +678,7 @@ function RescheduleDialog({
     onSuccess,
   });
 
-  const disabled =
-    !newDate ||
-    !newTime ||
-    reason.trim().length < 3 ||
-    mutate.isPending;
+  const disabled = !newDate || !newTime || reason.trim().length < 3 || mutate.isPending;
 
   return (
     <DialogShell title="إعادة جدولة الحجز" onClose={onClose}>
@@ -769,9 +720,7 @@ function RescheduleDialog({
             placeholder="مثال: تعارض مع جدول الطبيب."
           />
         </label>
-        {mutate.isError ? (
-          <ErrorBanner message={(mutate.error as Error).message} />
-        ) : null}
+        {mutate.isError ? <ErrorBanner message={(mutate.error as Error).message} /> : null}
         <div className="flex justify-end gap-2 pt-2">
           <button
             type="button"

@@ -21,8 +21,8 @@ CAPTCHA on OTP/inquiries, cross-region DR drill, 3 stale unit-test mirrors).
 
 ## 2. Files Changed (this phase only)
 
-| File | Purpose |
-| --- | --- |
+| File                                   | Purpose      |
+| -------------------------------------- | ------------ |
 | `docs/reports/phase13-verification.md` | This report. |
 
 No source or migration edits in Phase 13 — this is a verification pass over
@@ -40,21 +40,21 @@ canonical admin surface.
 - Total migrations on disk: **210**.
 - Delta this phase: **0**.
 - Baseline: latest applied migration matches HEAD (`9b6420e3 Finished
-  security hardening`).
+security hardening`).
 
 ## 5. Permission Matrix (spot summary)
 
 Full matrix lives at `/admin/access-hub` (Role Permissions tab) and is exercised
 by `tests/security/test_role_access_matrix.py`. Highlights:
 
-| Role          | Public site | Patient Portal | Admin hubs | Owner/Super | AI staff tools |
-| ------------- | :---------: | :------------: | :--------: | :---------: | :------------: |
-| anon          | R           | —              | —          | —           | —              |
-| patient       | R           | RW (own)       | —          | —           | —              |
-| doctor        | R           | RW (own)       | R (scoped) | —           | R              |
-| reception     | R           | —              | RW (branch)| —           | R              |
-| admin         | R           | —              | RW         | —           | RW             |
-| super_admin   | R           | —              | RW         | RW          | RW             |
+| Role        | Public site | Patient Portal | Admin hubs  | Owner/Super | AI staff tools |
+| ----------- | :---------: | :------------: | :---------: | :---------: | :------------: |
+| anon        |      R      |       —        |      —      |      —      |       —        |
+| patient     |      R      |    RW (own)    |      —      |      —      |       —        |
+| doctor      |      R      |    RW (own)    | R (scoped)  |      —      |       R        |
+| reception   |      R      |       —        | RW (branch) |      —      |       R        |
+| admin       |      R      |       —        |     RW      |      —      |       RW       |
+| super_admin |      R      |       —        |     RW      |     RW      |       RW       |
 
 Every admin server fn calls `assertHasRole` from `src/lib/admin/_guard.ts`
 (unified in Phase 11). RLS policies enforce ownership/branch scope
@@ -62,14 +62,14 @@ independently of client checks.
 
 ## 6. Security Results
 
-| Scanner              | Findings | Notes |
-| -------------------- | :------: | ----- |
+| Scanner              | Findings | Notes                                                                                                        |
+| -------------------- | :------: | ------------------------------------------------------------------------------------------------------------ |
 | `supabase`           | 1 warn.  | `SUPA_function_search_path_mutable` only in `extensions` schema — Supabase-managed, accepted residual (§11). |
-| `supabase_lov`       | 0        | |
-| `supply_chain`       | 0        | `code--dependency_scan` clean (2026-07-24). |
-| `agent_security`     | 0        | |
-| `app_mcp`            | 0        | |
-| `connector_security` | 0        | |
+| `supabase_lov`       |    0     |                                                                                                              |
+| `supply_chain`       |    0     | `code--dependency_scan` clean (2026-07-24).                                                                  |
+| `agent_security`     |    0     |                                                                                                              |
+| `app_mcp`            |    0     |                                                                                                              |
+| `connector_security` |    0     |                                                                                                              |
 
 App-level SECDEF exposure: **0 exposed functions** (see
 `docs/reports/secdef-final-2026-07-24.md`). All application `SECURITY DEFINER`
@@ -101,32 +101,32 @@ functions in `public.*` have `search_path` pinned.
 
 Verified in this turn:
 
-| Check | Command | Result |
-| --- | --- | --- |
-| TypeScript | `bunx tsgo --noEmit` | ✅ **pass** — 0 type errors. |
-| Dependencies | `code--dependency_scan` | ✅ **pass** — 0 high/critical. |
-| Unit (bun runner) | `bun test tests/unit` | ⚠️ **52 pass / 3 fail** — the 3 failures are stale text-snapshot assertions in `admin-service-inquiries-role-guard.test.ts` mirroring source code that legitimately moved from `assertHasRole` to `assertPermission` after Phase 3. Not a runtime regression; scheduled for §11 follow-up. |
-| ESLint | `bunx eslint . --ext .ts,.tsx` | ⚠️ ~11k `prettier/prettier` formatting complaints, **0 semantic errors**. Run `bunx eslint . --fix` before release; safe (formatting-only). |
-| Production build | Managed by the platform build pipeline | ✅ green on last publish (`9b6420e3`). |
+| Check             | Command                                | Result                                                                                                                                                                                                                                                                                     |
+| ----------------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| TypeScript        | `bunx tsgo --noEmit`                   | ✅ **pass** — 0 type errors.                                                                                                                                                                                                                                                               |
+| Dependencies      | `code--dependency_scan`                | ✅ **pass** — 0 high/critical.                                                                                                                                                                                                                                                             |
+| Unit (bun runner) | `bun test tests/unit`                  | ⚠️ **52 pass / 3 fail** — the 3 failures are stale text-snapshot assertions in `admin-service-inquiries-role-guard.test.ts` mirroring source code that legitimately moved from `assertHasRole` to `assertPermission` after Phase 3. Not a runtime regression; scheduled for §11 follow-up. |
+| ESLint            | `bunx eslint . --ext .ts,.tsx`         | ⚠️ ~11k `prettier/prettier` formatting complaints, **0 semantic errors**. Run `bunx eslint . --fix` before release; safe (formatting-only).                                                                                                                                                |
+| Production build  | Managed by the platform build pipeline | ✅ green on last publish (`9b6420e3`).                                                                                                                                                                                                                                                     |
 
 Wired but require live-service orchestration (CI matrix, not this sandbox):
 
-| Suite | Location | Status |
-| --- | --- | --- |
-| RLS / RBAC | `tests/rls/` (32 files), `tests/security/test_role_access_matrix.py` | ✅ wired |
-| Cross-patient IDOR | `tests/security/test_cross_patient_idor.py` | ✅ wired (Phase 12) |
-| Auth / redirect | `tests/e2e/admin_redirect_when_not_admin.py`, `admin_opens_for_admin_user.py` | ✅ wired |
-| Booking race + Idempotency | `tests/e2e/booking_concurrent_hold_409.py`, `booking_rate_limit.py` | ✅ wired |
-| File security | `tests/unit/signed-url.test.ts` | ✅ wired |
-| AI safety / prompt-injection | `tests/security/test_prompt_injection.md` (manual matrix) | ✅ wired — automation pending |
-| Accessibility | `tests/a11y/` (1 file), `scripts/design/contrast-audit.mjs` | ✅ wired |
-| Visual regression | `tests/visual/` (1 file), `scripts/design/visual-regression.py` | ✅ wired |
-| Cross-browser | Playwright matrix (Chromium / Firefox / WebKit) | ✅ wired — engine matrix runs in CI, not sandbox |
-| Locale × Viewport (AR-RTL / EN-LTR × Mobile / Tablet / Desktop) | `tests/e2e/` helpers + `_helpers.py` retry/HAR | ✅ wired |
-| Slow-network / Offline | Playwright network throttling used by `_helpers.py` | ✅ wired |
-| Session expiration | Covered by sign-out hygiene tests + `onAuthStateChange` root listener | ✅ wired |
-| Payment / Notification / Integration failure | Retry + degradation paths in booking, notifications, and inbox | ✅ implemented — end-to-end failure-injection scripts pending |
-| Backup / rollback | `docs/runbooks/backup-recovery.md` (quarterly drills; cross-region **pending**) | ⚠️ partially rehearsed |
+| Suite                                                           | Location                                                                        | Status                                                        |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| RLS / RBAC                                                      | `tests/rls/` (32 files), `tests/security/test_role_access_matrix.py`            | ✅ wired                                                      |
+| Cross-patient IDOR                                              | `tests/security/test_cross_patient_idor.py`                                     | ✅ wired (Phase 12)                                           |
+| Auth / redirect                                                 | `tests/e2e/admin_redirect_when_not_admin.py`, `admin_opens_for_admin_user.py`   | ✅ wired                                                      |
+| Booking race + Idempotency                                      | `tests/e2e/booking_concurrent_hold_409.py`, `booking_rate_limit.py`             | ✅ wired                                                      |
+| File security                                                   | `tests/unit/signed-url.test.ts`                                                 | ✅ wired                                                      |
+| AI safety / prompt-injection                                    | `tests/security/test_prompt_injection.md` (manual matrix)                       | ✅ wired — automation pending                                 |
+| Accessibility                                                   | `tests/a11y/` (1 file), `scripts/design/contrast-audit.mjs`                     | ✅ wired                                                      |
+| Visual regression                                               | `tests/visual/` (1 file), `scripts/design/visual-regression.py`                 | ✅ wired                                                      |
+| Cross-browser                                                   | Playwright matrix (Chromium / Firefox / WebKit)                                 | ✅ wired — engine matrix runs in CI, not sandbox              |
+| Locale × Viewport (AR-RTL / EN-LTR × Mobile / Tablet / Desktop) | `tests/e2e/` helpers + `_helpers.py` retry/HAR                                  | ✅ wired                                                      |
+| Slow-network / Offline                                          | Playwright network throttling used by `_helpers.py`                             | ✅ wired                                                      |
+| Session expiration                                              | Covered by sign-out hygiene tests + `onAuthStateChange` root listener           | ✅ wired                                                      |
+| Payment / Notification / Integration failure                    | Retry + degradation paths in booking, notifications, and inbox                  | ✅ implemented — end-to-end failure-injection scripts pending |
+| Backup / rollback                                               | `docs/runbooks/backup-recovery.md` (quarterly drills; cross-region **pending**) | ⚠️ partially rehearsed                                        |
 
 Test inventory: **73 e2e · 32 rls · 10 security · 11 unit · 1 a11y · 1 visual**.
 
@@ -156,6 +156,7 @@ All above are provisioned by ops/business — none require code changes here.
 ## 12. Rollback Instructions
 
 Application:
+
 1. Identify the last known-good deploy from the Lovable publish history (each publish creates a build marker; see `deployment_markers` table).
 2. In the publish dialog, revert to that version. Frontend/route rollbacks take effect after the next publish; server-fn code redeploys automatically.
 3. Any feature that must be disabled independently: flip the corresponding
@@ -163,6 +164,7 @@ Application:
    controls) — no code deploy required.
 
 Database:
+
 1. For a targeted row-level rollback, use the table-level PITR procedure in
    `docs/runbooks/backup-recovery.md` §3.1 (restore to staging, diff, apply
    corrective migration).
@@ -172,6 +174,7 @@ Database:
    delete existing migration files).
 
 Kill switch:
+
 - `MAINTENANCE_MODE=true` short-circuits public routes and shows a banner in
   admin. Toggle via `secrets--update_secret`.
 

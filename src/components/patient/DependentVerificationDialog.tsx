@@ -34,13 +34,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import {
   BadgeCheck,
   Loader2,
@@ -56,7 +50,6 @@ import {
 } from "lucide-react";
 import { InlineStateBanner } from "@/components/states/InlineStateBanner";
 import { LoadingState, EmptyState } from "@/components/states";
-
 
 const RELATION_LABEL: Record<string, string> = {
   child: "ابن/ابنة",
@@ -87,8 +80,7 @@ function StatusBadge({ status }: { status: VerificationStatus }) {
         <ShieldAlert className="h-3 w-3" aria-hidden /> {STATUS_LABEL[status]}
       </Badge>
     );
-  if (status === "cancelled")
-    return <Badge variant="outline">{STATUS_LABEL[status]}</Badge>;
+  if (status === "cancelled") return <Badge variant="outline">{STATUS_LABEL[status]}</Badge>;
   return (
     <Badge variant="secondary" className="gap-1">
       <Clock className="h-3 w-3" aria-hidden /> {STATUS_LABEL[status]}
@@ -98,8 +90,7 @@ function StatusBadge({ status }: { status: VerificationStatus }) {
 
 function StatusTimeline({ status }: { status: VerificationStatus }) {
   const steps: VerificationStatus[] = ["submitted", "under_review", "approved"];
-  const activeIndex =
-    status === "approved" ? 2 : status === "under_review" ? 1 : 0;
+  const activeIndex = status === "approved" ? 2 : status === "under_review" ? 1 : 0;
   const rejected = status === "rejected";
   return (
     <ol className="flex items-center gap-2">
@@ -116,14 +107,10 @@ function StatusTimeline({ status }: { status: VerificationStatus }) {
                     : "bg-muted"
               }`}
             />
-            <span
-              className={`text-xs ${active ? "text-foreground" : "text-muted-foreground"}`}
-            >
+            <span className={`text-xs ${active ? "text-foreground" : "text-muted-foreground"}`}>
               {STATUS_LABEL[s]}
             </span>
-            {i < steps.length - 1 ? (
-              <span className="mx-1 h-px flex-1 bg-border" />
-            ) : null}
+            {i < steps.length - 1 ? <span className="mx-1 h-px flex-1 bg-border" /> : null}
           </li>
         );
       })}
@@ -151,37 +138,28 @@ export function DependentVerificationDialog({
 
   const requestsQ = useQuery({
     queryKey,
-    queryFn: () =>
-      listDependentVerificationRequests({ data: { dependent_id: dependent.id } }),
+    queryFn: () => listDependentVerificationRequests({ data: { dependent_id: dependent.id } }),
     enabled: open,
     staleTime: 15_000,
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey });
-  const invalidateFamily = () =>
-    qc.invalidateQueries({ queryKey: ["patient", "family"] });
+  const invalidateFamily = () => qc.invalidateQueries({ queryKey: ["patient", "family"] });
 
   const activeReq: VerificationRequest | undefined = useMemo(
     () =>
-      (requestsQ.data ?? []).find(
-        (r) => r.status === "submitted" || r.status === "under_review",
-      ),
+      (requestsQ.data ?? []).find((r) => r.status === "submitted" || r.status === "under_review"),
     [requestsQ.data],
   );
   const history = useMemo(
-    () =>
-      (requestsQ.data ?? []).filter(
-        (r) => r.id !== activeReq?.id && r.status !== "cancelled",
-      ),
+    () => (requestsQ.data ?? []).filter((r) => r.id !== activeReq?.id && r.status !== "cancelled"),
     [requestsQ.data, activeReq],
   );
 
   const [relationship, setRelationship] = useState<Dependent["relationship"]>(
     dependent.relationship,
   );
-  const [idLast4, setIdLast4] = useState(
-    (dependent.national_id ?? "").slice(-4),
-  );
+  const [idLast4, setIdLast4] = useState((dependent.national_id ?? "").slice(-4));
   const [notes, setNotes] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadingName, setUploadingName] = useState<string | null>(null);
@@ -231,9 +209,7 @@ export function DependentVerificationDialog({
         toast.error(`${f.name}: الحجم يتجاوز 10 ميغابايت`);
         continue;
       }
-      if (
-        !VERIFICATION_LIMITS.allowedContentTypes.includes(f.type.toLowerCase())
-      ) {
+      if (!VERIFICATION_LIMITS.allowedContentTypes.includes(f.type.toLowerCase())) {
         toast.error(`${f.name}: نوع الملف غير مسموح`);
         continue;
       }
@@ -278,17 +254,15 @@ export function DependentVerificationDialog({
         <DialogHeader>
           <DialogTitle>توثيق صلة القرابة — {dependent.full_name}</DialogTitle>
           <DialogDescription>
-            أرسل نسخة من وثيقة تُثبت الصلة (بطاقة عائلة، شهادة ميلاد، إلخ). يراجع فريق الاستقبال الطلب خلال 24 ساعة.
+            أرسل نسخة من وثيقة تُثبت الصلة (بطاقة عائلة، شهادة ميلاد، إلخ). يراجع فريق الاستقبال
+            الطلب خلال 24 ساعة.
           </DialogDescription>
         </DialogHeader>
 
         {requestsQ.isLoading ? (
           <LoadingState label="جارٍ تحميل حالة الطلب…" className="py-6" />
         ) : requestsQ.isError ? (
-          <InlineStateBanner
-            error={requestsQ.error}
-            onRetry={() => requestsQ.refetch()}
-          />
+          <InlineStateBanner error={requestsQ.error} onRetry={() => requestsQ.refetch()} />
         ) : activeReq ? (
           <ActiveRequestView
             req={activeReq}
@@ -335,9 +309,7 @@ export function DependentVerificationDialog({
                     </span>
                   </div>
                   {h.decision_notes ? (
-                    <p className="mt-1 text-muted-foreground">
-                      ملاحظة المراجع: {h.decision_notes}
-                    </p>
+                    <p className="mt-1 text-muted-foreground">ملاحظة المراجع: {h.decision_notes}</p>
                   ) : null}
                 </li>
               ))}
@@ -377,7 +349,6 @@ export function DependentVerificationDialog({
             </>
           )}
         </DialogFooter>
-
       </DialogContent>
     </Dialog>
   );
@@ -474,9 +445,7 @@ function ActiveRequestView({
         </div>
         <div>
           <div className="text-muted-foreground">تاريخ الإرسال</div>
-          <div className="font-medium">
-            {new Date(req.created_at).toLocaleString("ar-SA")}
-          </div>
+          <div className="font-medium">{new Date(req.created_at).toLocaleString("ar-SA")}</div>
         </div>
         {req.national_id_last4 ? (
           <div>
@@ -504,10 +473,7 @@ function ActiveRequestView({
             size="sm"
             variant="outline"
             onClick={() => fileRef.current?.click()}
-            disabled={
-              !!uploadingName ||
-              req.documents.length >= VERIFICATION_LIMITS.maxDocs
-            }
+            disabled={!!uploadingName || req.documents.length >= VERIFICATION_LIMITS.maxDocs}
           >
             {uploadingName ? (
               <Loader2 className="me-1 h-3 w-3 animate-spin" aria-hidden />
@@ -540,9 +506,7 @@ function ActiveRequestView({
                 <div className="flex min-w-0 items-center gap-2">
                   <FileText className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   <span className="truncate">{d.file_name}</span>
-                  <span className="text-muted-foreground">
-                    ({formatBytes(d.size_bytes)})
-                  </span>
+                  <span className="text-muted-foreground">({formatBytes(d.size_bytes)})</span>
                 </div>
                 <div className="flex items-center gap-1">
                   {d.download_url ? (

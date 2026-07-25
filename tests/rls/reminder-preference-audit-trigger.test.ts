@@ -20,7 +20,6 @@
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-
 let passed = 0;
 let failed = 0;
 async function test(name: string, fn: () => Promise<void>) {
@@ -45,7 +44,6 @@ async function main() {
     console.log("(skipping — missing Supabase env vars)");
     return;
   }
-  
 
   const admin = createClient(URL, SERVICE, { auth: { persistSession: false } });
   const anon = createClient(URL, ANON, { auth: { persistSession: false } });
@@ -60,7 +58,9 @@ async function main() {
   async function createUser(email: string, role?: "admin" | "reception") {
     const password = "Test!" + Math.random().toString(36).slice(2, 10) + "Aa1";
     const { data, error } = await admin.auth.admin.createUser({
-      email, password, email_confirm: true,
+      email,
+      password,
+      email_confirm: true,
     });
     if (error) throw error;
     if (role) {
@@ -86,7 +86,8 @@ async function main() {
         reminder_24h: true,
         reminder_2h: true,
       })
-      .select("id").single();
+      .select("id")
+      .single();
     if (error) throw error;
     const id = data.id as string;
     createdAppts.push(id);
@@ -106,11 +107,11 @@ async function main() {
   }
 
   const receptionU = await createUser(`rpt-recep-${stamp}@test.local`, "reception");
-  const adminU     = await createUser(`rpt-admin-${stamp}@test.local`, "admin");
+  const adminU = await createUser(`rpt-admin-${stamp}@test.local`, "admin");
   createdUsers.push(receptionU.userId, adminU.userId);
 
   const receptionC = await signInAs(receptionU.email, receptionU.password);
-  const adminC     = await signInAs(adminU.email,     adminU.password);
+  const adminC = await signInAs(adminU.email, adminU.password);
 
   console.log("\n── reminder_preference_audit trigger ──");
 
@@ -129,47 +130,59 @@ async function main() {
       assert(ok === true, `rpc returned ${ok}`);
       const row = await latestAuditRow(apptId, "reminder_24h");
       assert(row, "no audit row created");
-      assert(row.source === "self_service",
-        `expected source=self_service, got ${row.source}`);
-      assert(row.changed_by === null,
-        `expected changed_by NULL, got ${row.changed_by}`);
-      assert(row.old_value === true && row.new_value === false,
-        `expected true→false, got ${row.old_value}→${row.new_value}`);
-      assert(row.reason === null,
-        `expected reason NULL (RPC doesn't set GUC), got ${JSON.stringify(row.reason)}`);
+      assert(row.source === "self_service", `expected source=self_service, got ${row.source}`);
+      assert(row.changed_by === null, `expected changed_by NULL, got ${row.changed_by}`);
+      assert(
+        row.old_value === true && row.new_value === false,
+        `expected true→false, got ${row.old_value}→${row.new_value}`,
+      );
+      assert(
+        row.reason === null,
+        `expected reason NULL (RPC doesn't set GUC), got ${JSON.stringify(row.reason)}`,
+      );
     });
 
     // ── 2) staff (reception) direct UPDATE ──────────────────────────
     await test("staff (reception) UPDATE: source='staff', changed_by=<receptionUid>", async () => {
       const apptId = await newAppt();
       const { error } = await receptionC
-        .from("appointments").update({ reminder_2h: false }).eq("id", apptId);
+        .from("appointments")
+        .update({ reminder_2h: false })
+        .eq("id", apptId);
       assert(!error, `update err: ${error?.message}`);
       const row = await latestAuditRow(apptId, "reminder_2h");
       assert(row, "no audit row created");
-      assert(row.source === "staff",
-        `expected source=staff, got ${row.source}`);
-      assert(row.changed_by === receptionU.userId,
-        `expected changed_by=${receptionU.userId}, got ${row.changed_by}`);
+      assert(row.source === "staff", `expected source=staff, got ${row.source}`);
+      assert(
+        row.changed_by === receptionU.userId,
+        `expected changed_by=${receptionU.userId}, got ${row.changed_by}`,
+      );
       assert(row.new_value === false, `expected new_value=false, got ${row.new_value}`);
-      assert(row.reason === null,
-        `expected reason NULL (no GUC set), got ${JSON.stringify(row.reason)}`);
+      assert(
+        row.reason === null,
+        `expected reason NULL (no GUC set), got ${JSON.stringify(row.reason)}`,
+      );
     });
 
     // ── 3) staff (admin) direct UPDATE ──────────────────────────────
     await test("staff (admin) UPDATE: source='staff', changed_by=<adminUid>", async () => {
       const apptId = await newAppt();
       const { error } = await adminC
-        .from("appointments").update({ reminder_24h: false }).eq("id", apptId);
+        .from("appointments")
+        .update({ reminder_24h: false })
+        .eq("id", apptId);
       assert(!error, `update err: ${error?.message}`);
       const row = await latestAuditRow(apptId, "reminder_24h");
       assert(row, "no audit row created");
-      assert(row.source === "staff",
-        `expected source=staff, got ${row.source}`);
-      assert(row.changed_by === adminU.userId,
-        `expected changed_by=${adminU.userId}, got ${row.changed_by}`);
-      assert(row.reason === null,
-        `expected reason NULL (no GUC set), got ${JSON.stringify(row.reason)}`);
+      assert(row.source === "staff", `expected source=staff, got ${row.source}`);
+      assert(
+        row.changed_by === adminU.userId,
+        `expected changed_by=${adminU.userId}, got ${row.changed_by}`,
+      );
+      assert(
+        row.reason === null,
+        `expected reason NULL (no GUC set), got ${JSON.stringify(row.reason)}`,
+      );
     });
 
     // ── 4) self_service via anon RPC WITH reason ────────────────────
@@ -188,12 +201,12 @@ async function main() {
       assert(ok === true, `rpc returned ${ok}`);
       const row = await latestAuditRow(apptId, "reminder_24h");
       assert(row, "no audit row created");
-      assert(row.reason === reasonText,
-        `expected reason=${JSON.stringify(reasonText)}, got ${JSON.stringify(row.reason)}`);
-      assert(row.source === "self_service",
-        `expected source=self_service, got ${row.source}`);
-      assert(row.changed_by === null,
-        `expected changed_by NULL, got ${row.changed_by}`);
+      assert(
+        row.reason === reasonText,
+        `expected reason=${JSON.stringify(reasonText)}, got ${JSON.stringify(row.reason)}`,
+      );
+      assert(row.source === "self_service", `expected source=self_service, got ${row.source}`);
+      assert(row.changed_by === null, `expected changed_by NULL, got ${row.changed_by}`);
     });
 
     // ── 5) self_service RPC with whitespace-only reason → NULL ─────
@@ -211,8 +224,10 @@ async function main() {
       assert(ok === true, `rpc returned ${ok}`);
       const row = await latestAuditRow(apptId, "reminder_24h");
       assert(row, "no audit row created");
-      assert(row.reason === null,
-        `expected reason NULL after normalize, got ${JSON.stringify(row.reason)}`);
+      assert(
+        row.reason === null,
+        `expected reason NULL after normalize, got ${JSON.stringify(row.reason)}`,
+      );
     });
   } finally {
     if (createdAppts.length) {
@@ -227,5 +242,7 @@ async function main() {
   if (failed > 0) process.exit(1);
 }
 
-
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});

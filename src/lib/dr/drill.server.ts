@@ -72,7 +72,8 @@ export async function runDrill(plan: DrillPlan, hooks: DrillHooks): Promise<Dril
     if (primaryDownAt === null) await sleep(plan.probe_interval_ms);
   }
 
-  if (primaryDownAt === null) return abortReport(plan, samples, started, now, backupAt, "primary_never_failed");
+  if (primaryDownAt === null)
+    return abortReport(plan, samples, started, now, backupAt, "primary_never_failed");
 
   // Phase 2: initiate cutover, probe secondary until healthy.
   const failoverInitiatedAt = now();

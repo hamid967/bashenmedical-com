@@ -35,10 +35,7 @@ import {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FN_SRC = resolve(__dirname, "../../src/lib/admin/inbox.functions.ts");
-const UI_SRC = resolve(
-  __dirname,
-  "../../src/routes/_authenticated/admin.inbox.$id.tsx",
-);
+const UI_SRC = resolve(__dirname, "../../src/routes/_authenticated/admin.inbox.$id.tsx");
 const fnSource = readFileSync(FN_SRC, "utf8");
 const uiSource = readFileSync(UI_SRC, "utf8");
 
@@ -85,9 +82,7 @@ describe("isActionAllowedForRoles — مصفوفة الأذونات", () => {
   });
 
   test("ADMIN_ONLY_ACTIONS مطابق للمواصفات (merge/archive/reopen)", () => {
-    expect([...ADMIN_ONLY_ACTIONS].sort()).toEqual(
-      ["archive", "merge_duplicate", "reopen"].sort(),
-    );
+    expect([...ADMIN_ONLY_ACTIONS].sort()).toEqual(["archive", "merge_duplicate", "reopen"].sort());
   });
 });
 
@@ -96,14 +91,10 @@ describe("isActionAllowedForRoles — مصفوفة الأذونات", () => {
 describe("assertAllowed — يرفض على الخادم كل إجراء مقيّد بلا دور admin", () => {
   for (const action of RESTRICTED_ACTIONS) {
     test(`reception يحاول ${action} → رفض`, () => {
-      expect(() => assertAllowed(["reception"], action)).toThrow(
-        /صلاحية مسؤول/,
-      );
+      expect(() => assertAllowed(["reception"], action)).toThrow(/صلاحية مسؤول/);
     });
     test(`support_agent يحاول ${action} → رفض`, () => {
-      expect(() => assertAllowed(["support_agent"], action)).toThrow(
-        /صلاحية مسؤول/,
-      );
+      expect(() => assertAllowed(["support_agent"], action)).toThrow(/صلاحية مسؤول/);
     });
     test(`بلا أي دور يحاول ${action} → رفض`, () => {
       expect(() => assertAllowed([], action)).toThrow(/صلاحية مسؤول/);
@@ -143,9 +134,7 @@ describe("كل serverFn لإجراء مقيّد يستدعي assertAllowed(...) 
       const m = fnSource.match(re);
       expect(m, `did not find handler body for ${fnName}`).toBeTruthy();
       const body = m![0];
-      expect(body).toMatch(
-        new RegExp(`assertAllowed\\([^)]*["']${action}["']\\s*\\)`),
-      );
+      expect(body).toMatch(new RegExp(`assertAllowed\\([^)]*["']${action}["']\\s*\\)`));
       // يظهر قبل أي استدعاء لـ logEvent أو .update/.insert/.delete
       const guardIdx = body.search(/assertAllowed\s*\(/);
       const writeIdx = body.search(/logEvent\s*\(|\.update\s*\(|\.delete\s*\(/);
@@ -159,10 +148,7 @@ describe("كل serverFn لإجراء مقيّد يستدعي assertAllowed(...) 
 describe("لوحة التفاصيل تُخفي الإجراءات المقيّدة عن الأدوار غير المسؤولة", () => {
   // الشرط: كل Panel للإجراءات المقيّدة يجب أن يكون داخل تعبير يحوي
   // إما `isActionAllowedForRoles(` أو `<Can ` أو `canAdminAction` أو ما شابه.
-  const RESTRICTED_PANEL_MARKERS = [
-    'title="دمج مكرر"',
-    'title="أرشفة / إعادة فتح"',
-  ];
+  const RESTRICTED_PANEL_MARKERS = ['title="دمج مكرر"', 'title="أرشفة / إعادة فتح"'];
 
   test("مؤشرات لوحات الإجراءات المقيّدة موجودة في المصدر", () => {
     for (const marker of RESTRICTED_PANEL_MARKERS) {

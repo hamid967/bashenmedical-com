@@ -327,13 +327,15 @@ function BillingPage() {
                 const patient = r.patient;
                 return (
                   <tr key={r.id} className="border-t hover:bg-muted/40">
-                    <td className="px-3 py-2 font-mono text-xs">{r.invoice_number ?? r.id.slice(0, 8)}</td>
+                    <td className="px-3 py-2 font-mono text-xs">
+                      {r.invoice_number ?? r.id.slice(0, 8)}
+                    </td>
                     <td className="px-3 py-2">
                       <div className="font-medium">
                         {patient?.full_name_ar || patient?.full_name_en || "—"}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {patient?.mrn ? `MRN ${patient.mrn}` : patient?.phone ?? ""}
+                        {patient?.mrn ? `MRN ${patient.mrn}` : (patient?.phone ?? "")}
                       </div>
                     </td>
                     <td className="px-3 py-2">
@@ -366,10 +368,7 @@ function BillingPage() {
         </table>
       </section>
 
-      <nav
-        className="mt-4 flex items-center justify-between text-sm"
-        aria-label="ترقيم الصفحات"
-      >
+      <nav className="mt-4 flex items-center justify-between text-sm" aria-label="ترقيم الصفحات">
         <div className="text-muted-foreground">
           صفحة {page + 1} من {totalPages}
         </div>

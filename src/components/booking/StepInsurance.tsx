@@ -32,10 +32,7 @@ export function StepInsurance({
   onChange: (p: Partial<State["patient"]>) => void;
 }) {
   const { t } = useTranslation("booking");
-  const errorEntries = Object.entries(errors) as [
-    keyof InsuranceErrors,
-    string,
-  ][];
+  const errorEntries = Object.entries(errors) as [keyof InsuranceErrors, string][];
   const hasErrors = errorEntries.length > 0;
 
   return (
@@ -46,12 +43,7 @@ export function StepInsurance({
           <span>{t("insurance.stepHint")}</span>
         </p>
 
-        <InsuranceSection
-          lang={lang}
-          doctorId={doctorId}
-          value={value}
-          onChange={onChange}
-        />
+        <InsuranceSection lang={lang} doctorId={doctorId} value={value} onChange={onChange} />
 
         {value.payerType === "self" && (
           <div

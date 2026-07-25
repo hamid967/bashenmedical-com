@@ -73,8 +73,6 @@ export function StepPatient({
           </span>
         </label>
 
-
-
         <Field label={t("patient.fullName")} required error={show("name")}>
           <input
             value={value.name}
@@ -203,7 +201,6 @@ export function StepPatient({
             })}
           </div>
         </div>
-        
 
         <div className="sm:col-span-2 rounded-xl bg-muted/50 p-4 space-y-2">
           <div className="font-semibold text-sm">{t("patient.reminders")}</div>

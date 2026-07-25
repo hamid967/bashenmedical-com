@@ -78,7 +78,13 @@ describe("RPO/RTO math", () => {
 describe("budget evaluation", () => {
   test("no breaches when within budget", () => {
     const breaches = evaluateBudgets(
-      { rpo_seconds: 30, rto_seconds: 50, primary_p95_ms: 100, secondary_p95_ms: 150, probe_success_rate: 1 },
+      {
+        rpo_seconds: 30,
+        rto_seconds: 50,
+        primary_p95_ms: 100,
+        secondary_p95_ms: 150,
+        probe_success_rate: 1,
+      },
       BUDGETS,
     );
     expect(breaches).toEqual([]);
@@ -86,7 +92,13 @@ describe("budget evaluation", () => {
 
   test("flags RPO, RTO, and latency independently", () => {
     const breaches = evaluateBudgets(
-      { rpo_seconds: 999, rto_seconds: 999, primary_p95_ms: 100, secondary_p95_ms: 5000, probe_success_rate: 0.5 },
+      {
+        rpo_seconds: 999,
+        rto_seconds: 999,
+        primary_p95_ms: 100,
+        secondary_p95_ms: 5000,
+        probe_success_rate: 0.5,
+      },
       BUDGETS,
     );
     expect(breaches.map((b) => b.kind).sort()).toEqual(["latency", "rpo", "rto"]);
@@ -133,11 +145,18 @@ function virtualClock(start = 1_700_000_000_000) {
     t += ms;
   };
   // Replace setTimeout with an immediate-resolve that also advances the clock.
-  (globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout = ((cb: () => void, ms?: number) => {
+  (globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout = ((
+    cb: () => void,
+    ms?: number,
+  ) => {
     advance(ms ?? 0);
     return orig(cb, 0);
   }) as unknown as typeof setTimeout;
-  return { now, advance, restore: () => ((globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout = orig) };
+  return {
+    now,
+    advance,
+    restore: () => ((globalThis as unknown as { setTimeout: typeof setTimeout }).setTimeout = orig),
+  };
 }
 
 describe("runDrill orchestrator", () => {

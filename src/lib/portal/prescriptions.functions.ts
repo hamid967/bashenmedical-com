@@ -378,9 +378,7 @@ export const generateMedicationReminders = createServerFn({ method: "POST" })
     if (plan.slots.length > 0) {
       try {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        const { filterRowsForUser } = await import(
-          "@/lib/notifications/apply-preferences.server"
-        );
+        const { filterRowsForUser } = await import("@/lib/notifications/apply-preferences.server");
         const rows = plan.slots.slice(0, 40).map((s) => ({
           audience: "user" as const,
           user_id: userId,

@@ -25,13 +25,7 @@ import {
 } from "lucide-react";
 import { format, parseISO } from "date-fns";
 import { ar as arLocale } from "date-fns/locale";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui-v3";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui-v3";
 import { Badge } from "@/components/ui-v3";
 import {
   LineChart,

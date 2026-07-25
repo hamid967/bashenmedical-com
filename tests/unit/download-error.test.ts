@@ -116,8 +116,7 @@ test("invoice-pdfs bucket is a valid DownloadBucket", () => {
  * in the shared code path is caught for all three at once.
  */
 console.log("Simulated DownloadFileButton flow per tab");
-type SignResult =
-  | { data: { signedUrl: string } | null; error: { message: string } | null };
+type SignResult = { data: { signedUrl: string } | null; error: { message: string } | null };
 
 async function simulateFlow(
   bucket: DownloadBucket,
@@ -217,10 +216,7 @@ test("far above threshold → HEAD skipped", () => {
 });
 test("recent failure within cool-down → HEAD required even with many successes", () => {
   const now = 1_000_000;
-  const d = shouldPerformHeadCheck(
-    { consecutiveSuccesses: 99, lastFailureAt: now - 1_000 },
-    now,
-  );
+  const d = shouldPerformHeadCheck({ consecutiveSuccesses: 99, lastFailureAt: now - 1_000 }, now);
   eq(d.shouldCheck, true);
   eq(d.reason, "recent-failure");
 });
@@ -237,21 +233,17 @@ test("failure older than cool-down + enough successes → HEAD skipped", () => {
   eq(d.reason, "trusted-bucket");
 });
 test("custom successThreshold override respected", () => {
-  const d = shouldPerformHeadCheck(
-    { consecutiveSuccesses: 1, lastFailureAt: null },
-    1_000_000,
-    { successThreshold: 1 },
-  );
+  const d = shouldPerformHeadCheck({ consecutiveSuccesses: 1, lastFailureAt: null }, 1_000_000, {
+    successThreshold: 1,
+  });
   eq(d.shouldCheck, false);
   eq(d.reason, "trusted-bucket");
 });
 test("custom failureCoolDownMs override respected", () => {
   const now = 1_000_000;
-  const d = shouldPerformHeadCheck(
-    { consecutiveSuccesses: 10, lastFailureAt: now - 100 },
-    now,
-    { failureCoolDownMs: 50 },
-  );
+  const d = shouldPerformHeadCheck({ consecutiveSuccesses: 10, lastFailureAt: now - 100 }, now, {
+    failureCoolDownMs: 50,
+  });
   eq(d.shouldCheck, false, "cool-down passed under tight override");
   eq(d.reason, "trusted-bucket");
 });
@@ -284,7 +276,10 @@ for (const bucket of ["lab-reports", "radiology-reports", "invoice-pdfs"] as Dow
     // First 3 clicks HEAD; subsequent 3 skip once bucket is trusted.
     eq(headCalls.length, HEAD_CHECK_DEFAULTS.successThreshold, "head-call count");
     eq(headCalls[0], 0);
-    eq(headCalls[HEAD_CHECK_DEFAULTS.successThreshold - 1], HEAD_CHECK_DEFAULTS.successThreshold - 1);
+    eq(
+      headCalls[HEAD_CHECK_DEFAULTS.successThreshold - 1],
+      HEAD_CHECK_DEFAULTS.successThreshold - 1,
+    );
   });
 
   test(`[${bucket}] failure re-enables HEAD checks on the next click`, () => {
@@ -329,7 +324,6 @@ test("negative TTL yields empty string", () => {
 test("NaN TTL yields empty string", () => {
   eq(formatSignedUrlValidity(Number.NaN), "");
 });
-
 
 console.log("formatCountdown — live signed-URL countdown");
 test("300s → '05:00' (full TTL)", () => {

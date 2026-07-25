@@ -41,10 +41,7 @@ function RequestsPage() {
         </Button>
       </header>
       {items.length === 0 ? (
-        <EmptyState
-          title="لا توجد طلبات"
-          description="لم تسجل أي طلبات أو استفسارات بعد."
-        />
+        <EmptyState title="لا توجد طلبات" description="لم تسجل أي طلبات أو استفسارات بعد." />
       ) : (
         items.map((it) => (
           <Card key={it.id}>
@@ -55,9 +52,7 @@ function RequestsPage() {
                 </div>
                 <div>
                   <div className="font-semibold">{it.service_label ?? "طلب"}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {it.request_number}
-                  </div>
+                  <div className="text-xs text-muted-foreground">{it.request_number}</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">

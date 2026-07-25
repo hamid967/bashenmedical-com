@@ -49,16 +49,17 @@ exits non-zero. Missing baselines print `no_baseline` but do not fail
 (bootstrap-friendly).
 
 ### Routes covered
+
 `/`, `/doctors`, `/book`, `/auth/login`, `/faq`, `/insurance/verify`.
 Add more by editing the `ROUTES` list in `scripts/design/visual-regression.py`.
 
 ## When to run
 
-| Change                             | Contrast | Visual  |
-| ---------------------------------- | :------: | :-----: |
-| Editing tokens in `src/styles.css` |    ✔     |   ✔     |
-| Redesigning a public route         |          |   ✔     |
-| Adjusting ui-v3 primitives         |    ✔     |   ✔     |
+| Change                             | Contrast | Visual |
+| ---------------------------------- | :------: | :----: |
+| Editing tokens in `src/styles.css` |    ✔     |   ✔    |
+| Redesigning a public route         |          |   ✔    |
+| Adjusting ui-v3 primitives         |    ✔     |   ✔    |
 
 The contrast audit is cheap enough to wire into `bun run build` if the team
 wants a hard gate — right now it stays a targeted check to keep local

@@ -9,10 +9,7 @@ import { Shield, Smartphone, Key, ArrowLeft } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/patient/security")({
   head: () => ({
-    meta: [
-      { title: "الأمان | بوابة المريض" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "الأمان | بوابة المريض" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: SecurityPage,
   ...patientRouteStates({ skeleton: "list", rows: 3 }),

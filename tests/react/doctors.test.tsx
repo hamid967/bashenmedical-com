@@ -55,10 +55,50 @@ const mkDoc = (over: Partial<DoctorRow> = {}): DoctorRow => ({
 });
 
 const DOCS: DoctorRow[] = [
-  mkDoc({ id: "1", name_ar: "أحمد", name_en: "Ahmed", gender: "male", languages: ["ar"], avg_rating: 5, years_experience: 20, specialty_id: "s1", branch_ids: ["b1"] }),
-  mkDoc({ id: "2", name_ar: "سارة", name_en: "Sara", gender: "female", languages: ["ar", "en"], avg_rating: 4.5, years_experience: 10, specialty_id: "s2", branch_ids: ["b1", "b2"] }),
-  mkDoc({ id: "3", name_ar: "خالد", name_en: "Khalid", gender: "male", languages: ["en"], avg_rating: 3, years_experience: 15, specialty_id: "s1", branch_ids: ["b2"] }),
-  mkDoc({ id: "4", name_ar: "ليلى", name_en: "Layla", gender: "female", languages: ["ar", "en", "fr"], avg_rating: 4.8, years_experience: 8, specialty_id: "s2", branch_ids: ["b2"] }),
+  mkDoc({
+    id: "1",
+    name_ar: "أحمد",
+    name_en: "Ahmed",
+    gender: "male",
+    languages: ["ar"],
+    avg_rating: 5,
+    years_experience: 20,
+    specialty_id: "s1",
+    branch_ids: ["b1"],
+  }),
+  mkDoc({
+    id: "2",
+    name_ar: "سارة",
+    name_en: "Sara",
+    gender: "female",
+    languages: ["ar", "en"],
+    avg_rating: 4.5,
+    years_experience: 10,
+    specialty_id: "s2",
+    branch_ids: ["b1", "b2"],
+  }),
+  mkDoc({
+    id: "3",
+    name_ar: "خالد",
+    name_en: "Khalid",
+    gender: "male",
+    languages: ["en"],
+    avg_rating: 3,
+    years_experience: 15,
+    specialty_id: "s1",
+    branch_ids: ["b2"],
+  }),
+  mkDoc({
+    id: "4",
+    name_ar: "ليلى",
+    name_en: "Layla",
+    gender: "female",
+    languages: ["ar", "en", "fr"],
+    avg_rating: 4.8,
+    years_experience: 8,
+    specialty_id: "s2",
+    branch_ids: ["b2"],
+  }),
 ];
 
 const wrapLocal =

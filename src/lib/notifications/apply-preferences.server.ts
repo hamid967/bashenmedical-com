@@ -109,10 +109,7 @@ function channelAllowed(prefs: Prefs, ch: NotificationChannel): boolean {
  * When no row exists we fall back to the same defaults as the Preferences
  * Center — in_app + push on, external channels off, quiet hours 07:00–23:00.
  */
-export async function loadPrefs(
-  client: SupabaseClient<Database>,
-  userId: string,
-): Promise<Prefs> {
+export async function loadPrefs(client: SupabaseClient<Database>, userId: string): Promise<Prefs> {
   const { data } = await client
     .from("reminder_preferences")
     .select(

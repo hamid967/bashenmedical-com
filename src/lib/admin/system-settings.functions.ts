@@ -14,13 +14,7 @@ const listSchema = z.object({
   category: z.string().trim().max(60).optional(),
 });
 
-type JsonValue =
-  | string
-  | number
-  | boolean
-  | null
-  | { [k: string]: JsonValue }
-  | JsonValue[];
+type JsonValue = string | number | boolean | null | { [k: string]: JsonValue } | JsonValue[];
 
 export type SystemSettingRow = {
   key: string;
@@ -69,9 +63,7 @@ export const listSystemSettings = createServerFn({ method: "GET" })
       ? enriched.filter((r) => r.category === data.category)
       : enriched;
 
-    const categories = Array.from(
-      new Set(enriched.map((r) => r.category)),
-    ).sort();
+    const categories = Array.from(new Set(enriched.map((r) => r.category))).sort();
 
     return { rows: filtered, categories, total: filtered.length };
   });

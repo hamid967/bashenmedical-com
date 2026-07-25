@@ -6,23 +6,33 @@ the shadcn primitives in `@/components/ui/*` rather than duplicating them.
 
 ```tsx
 import {
-  Button, Field, FieldGrid, SectionCard,
-  DataTable, ConfirmDialog, FormDialog,
-  Input, Select, SelectItem, SelectTrigger, SelectValue, SelectContent,
+  Button,
+  Field,
+  FieldGrid,
+  SectionCard,
+  DataTable,
+  ConfirmDialog,
+  FormDialog,
+  Input,
+  Select,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
 } from "@/components/ui-v3";
 ```
 
 ## Added value per wrapper
 
-| Wrapper        | Adds                                                                 |
-| -------------- | -------------------------------------------------------------------- |
-| `Button`       | `loading` spinner + `aria-busy`, `leftIcon`/`rightIcon` slots.       |
-| `Field`        | Label + required marker + help + error, ARIA wiring, inline layout.  |
-| `FieldGrid`    | Responsive 1/2/3 column form grid.                                   |
-| `SectionCard`  | Card with title/description/actions/footer and `flush` for tables.   |
-| `ConfirmDialog`| Async `onConfirm` with loading + toast on error, destructive style.  |
-| `FormDialog`   | Form scaffold with submit/cancel, loading, toast, invalid-disable.   |
-| `DataTable`    | Canonical re-export of `DataTableV2` — never fork a second table.    |
+| Wrapper         | Adds                                                                |
+| --------------- | ------------------------------------------------------------------- |
+| `Button`        | `loading` spinner + `aria-busy`, `leftIcon`/`rightIcon` slots.      |
+| `Field`         | Label + required marker + help + error, ARIA wiring, inline layout. |
+| `FieldGrid`     | Responsive 1/2/3 column form grid.                                  |
+| `SectionCard`   | Card with title/description/actions/footer and `flush` for tables.  |
+| `ConfirmDialog` | Async `onConfirm` with loading + toast on error, destructive style. |
+| `FormDialog`    | Form scaffold with submit/cancel, loading, toast, invalid-disable.  |
+| `DataTable`     | Canonical re-export of `DataTableV2` — never fork a second table.   |
 
 ## Rules
 
@@ -120,11 +130,7 @@ export function FormExample() {
           <Input value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
         <Field label="البريد الإلكتروني" required error={emailError}>
-          <Input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
         </Field>
         <Field label="رقم الملف" disabled>
           <Input value="MRN-2026-0421" readOnly />
@@ -195,7 +201,7 @@ export function ConfirmExample() {
         errorMode="inline"
         onConfirm={async () => {
           await new Promise((_, rej) =>
-            setTimeout(() => rej(new Error("تعذّر الاتصال بالخادم")), 1200)
+            setTimeout(() => rej(new Error("تعذّر الاتصال بالخادم")), 1200),
           );
         }}
       />
@@ -303,11 +309,19 @@ export default function Preview() {
         <h3 className="mb-3 font-semibold">RTL · Light</h3>
         <ButtonsExample />
       </section>
-      <section dir="ltr" lang="en" className="dark rounded-lg border p-4 bg-background text-foreground">
+      <section
+        dir="ltr"
+        lang="en"
+        className="dark rounded-lg border p-4 bg-background text-foreground"
+      >
         <h3 className="mb-3 font-semibold">LTR · Dark</h3>
         <ButtonsExample />
       </section>
-      <section dir="rtl" lang="ar" className="dark rounded-lg border p-4 bg-background text-foreground">
+      <section
+        dir="rtl"
+        lang="ar"
+        className="dark rounded-lg border p-4 bg-background text-foreground"
+      >
         <h3 className="mb-3 font-semibold">RTL · Dark</h3>
         <ButtonsExample />
       </section>

@@ -25,7 +25,10 @@ export const V3_LABELS = {
  * Error extraction — one canonical helper. Accepts Error,
  * PostgrestError-shaped objects, strings, or unknowns.
  * ──────────────────────────────────────────────────────────── */
-export function extractErrorMessage(err: unknown, fallback: string = V3_LABELS.genericError): string {
+export function extractErrorMessage(
+  err: unknown,
+  fallback: string = V3_LABELS.genericError,
+): string {
   if (!err) return fallback;
   if (typeof err === "string") return err;
   if (err instanceof Error && err.message) return err.message;

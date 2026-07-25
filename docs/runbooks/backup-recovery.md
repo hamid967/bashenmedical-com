@@ -5,23 +5,23 @@ _Last updated: 2026-07-24._
 
 ## 1. What is backed up
 
-| Asset                              | Mechanism                                          | Frequency          | Retention        |
-| ---------------------------------- | -------------------------------------------------- | ------------------ | ---------------- |
-| Supabase Postgres (all schemas)    | Managed PITR (point-in-time recovery)              | Continuous WAL     | 7 days rolling   |
-| Supabase Postgres — daily snapshot | Managed snapshot                                   | Daily 02:00 UTC    | 30 days          |
-| Supabase Storage (private buckets) | Managed replication (S3-compatible)                | Real-time replica  | Aligned with obj |
-| Repository (code + migrations)     | Git + Lovable managed history                      | Every commit       | Indefinite       |
-| Secrets (Lovable Cloud)            | Managed vault — **not backed up in-repo**          | N/A                | Vault lifecycle  |
-| Immutable audit tables             | Same as DB (PITR + snapshot)                       | —                  | ≥ 7 years (see retention) |
+| Asset                              | Mechanism                                 | Frequency         | Retention                 |
+| ---------------------------------- | ----------------------------------------- | ----------------- | ------------------------- |
+| Supabase Postgres (all schemas)    | Managed PITR (point-in-time recovery)     | Continuous WAL    | 7 days rolling            |
+| Supabase Postgres — daily snapshot | Managed snapshot                          | Daily 02:00 UTC   | 30 days                   |
+| Supabase Storage (private buckets) | Managed replication (S3-compatible)       | Real-time replica | Aligned with obj          |
+| Repository (code + migrations)     | Git + Lovable managed history             | Every commit      | Indefinite                |
+| Secrets (Lovable Cloud)            | Managed vault — **not backed up in-repo** | N/A               | Vault lifecycle           |
+| Immutable audit tables             | Same as DB (PITR + snapshot)              | —                 | ≥ 7 years (see retention) |
 
 ## 2. Recovery objectives
 
-| Class                         | RPO      | RTO   |
-| ----------------------------- | -------- | ----- |
-| Application code              | 0        | < 15m |
-| Database (single-tenant loss) | ≤ 5 min  | < 1 h |
-| Database (full disaster)      | ≤ 5 min  | < 4 h |
-| Storage object                | ≤ 5 min  | < 1 h |
+| Class                         | RPO     | RTO   |
+| ----------------------------- | ------- | ----- |
+| Application code              | 0       | < 15m |
+| Database (single-tenant loss) | ≤ 5 min | < 1 h |
+| Database (full disaster)      | ≤ 5 min | < 4 h |
+| Storage object                | ≤ 5 min | < 1 h |
 
 ## 3. Restore procedures
 
@@ -49,12 +49,12 @@ _Last updated: 2026-07-24._
 
 ## 4. Rehearsal cadence
 
-| Drill                              | Frequency | Owner              |
-| ---------------------------------- | --------- | ------------------ |
-| Table-level rollback drill         | Quarterly | Backend on-call    |
-| Full DB restore to staging         | Bi-annual | Backend + IC       |
-| Cross-region DR (**pending**)      | Annual    | Platform lead      |
-| Storage object restore drill       | Quarterly | Ops                |
+| Drill                         | Frequency | Owner           |
+| ----------------------------- | --------- | --------------- |
+| Table-level rollback drill    | Quarterly | Backend on-call |
+| Full DB restore to staging    | Bi-annual | Backend + IC    |
+| Cross-region DR (**pending**) | Annual    | Platform lead   |
+| Storage object restore drill  | Quarterly | Ops             |
 
 Each drill must produce a report under `docs/reports/drills/`. The **cross-region DR drill has not run yet** and is listed as a residual risk in the Phase 12 threat model.
 

@@ -27,8 +27,7 @@ export const Route = createFileRoute("/_authenticated/admin/content-hub")({
       { title: "مركز المحتوى — لوحة الإدارة الموحدة" },
       {
         name: "description",
-        content:
-          "إدارة المحتوى، مكتبة الوسائط، والصفحات في واجهة واحدة داخل لوحة الإدارة.",
+        content: "إدارة المحتوى، مكتبة الوسائط، والصفحات في واجهة واحدة داخل لوحة الإدارة.",
       },
       { name: "robots", content: "noindex,nofollow" },
     ],

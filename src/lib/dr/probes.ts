@@ -76,7 +76,10 @@ export interface DrillOutcome {
  * `>= 0` — negative durations indicate a clock-skew bug in the caller, not
  * a legitimate metric, and we surface that by asserting via `assertTimeline`.
  */
-export function computeRpoRto(timeline: DrillTimeline): { rpo_seconds: number; rto_seconds: number } {
+export function computeRpoRto(timeline: DrillTimeline): {
+  rpo_seconds: number;
+  rto_seconds: number;
+} {
   assertTimeline(timeline);
   const rpoMs = timeline.failover_initiated_at_ms - timeline.last_successful_backup_at_ms;
   const rtoMs = timeline.secondary_healthy_at_ms - timeline.failover_initiated_at_ms;
@@ -94,7 +97,9 @@ export function percentile(values: number[], p: number): number | null {
 }
 
 export function summarizeProbes(samples: ProbeSample[], region: string): number | null {
-  const latencies = samples.filter((s) => s.region === region && s.status !== "down").map((s) => s.latency_ms);
+  const latencies = samples
+    .filter((s) => s.region === region && s.status !== "down")
+    .map((s) => s.latency_ms);
   return percentile(latencies, 95);
 }
 

@@ -120,10 +120,7 @@ function KpiTile({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <div
-            className="text-[11px] sm:text-xs font-bold truncate"
-            style={{ color: OCEAN.glow }}
-          >
+          <div className="text-[11px] sm:text-xs font-bold truncate" style={{ color: OCEAN.glow }}>
             {k.label}
           </div>
           {k.hint && (
@@ -283,9 +280,7 @@ export function CommandCenterKpiGridV2({ filters }: { filters?: KpiGridFilters }
         <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3 sm:gap-4">
           {isLoading
             ? Array.from({ length: 14 }).map((_, i) => <KpiSkeleton key={i} />)
-            : (data?.kpis ?? []).map((k) => (
-                <KpiTile key={k.key} k={k} filters={effective} />
-              ))}
+            : (data?.kpis ?? []).map((k) => <KpiTile key={k.key} k={k} filters={effective} />)}
         </div>
       )}
     </section>

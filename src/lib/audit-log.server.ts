@@ -24,7 +24,6 @@ function getClientMeta() {
   return { ip, ua };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function logAppEvent(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   supabase: any,

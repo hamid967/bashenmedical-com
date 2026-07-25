@@ -1,10 +1,6 @@
 import { AlertCircle, RefreshCw, WifiOff, Clock, ServerCrash, ShieldAlert } from "lucide-react";
 import type { BookingSubmitKind } from "@/lib/booking-submit";
-import {
-  describeBookingError,
-  kindToCode,
-  formatCorrelationId,
-} from "@/lib/booking/errors";
+import { describeBookingError, kindToCode, formatCorrelationId } from "@/lib/booking/errors";
 
 /**
  * Inline error banner rendered above a form when the last submission failed.
@@ -20,13 +16,41 @@ const FALLBACK_META: Record<
   Exclude<BookingSubmitKind, "success">,
   { titleAr: string; titleEn: string; icon: React.ReactNode }
 > = {
-  validation: { titleAr: "بيانات غير مقبولة", titleEn: "Invalid data", icon: <ShieldAlert className="h-5 w-5" /> },
-  db: { titleAr: "تعذّر حفظ الطلب", titleEn: "Couldn't save request", icon: <ServerCrash className="h-5 w-5" /> },
-  conflict: { titleAr: "الوقت لم يعد متاحًا", titleEn: "Slot unavailable", icon: <Clock className="h-5 w-5" /> },
-  network: { titleAr: "لا يوجد اتصال", titleEn: "No connection", icon: <WifiOff className="h-5 w-5" /> },
-  timeout: { titleAr: "انتهت مهلة الاتصال", titleEn: "Request timed out", icon: <Clock className="h-5 w-5" /> },
-  server: { titleAr: "خطأ في الخادم", titleEn: "Server error", icon: <ServerCrash className="h-5 w-5" /> },
-  unknown: { titleAr: "حدث خطأ غير متوقع", titleEn: "Unexpected error", icon: <AlertCircle className="h-5 w-5" /> },
+  validation: {
+    titleAr: "بيانات غير مقبولة",
+    titleEn: "Invalid data",
+    icon: <ShieldAlert className="h-5 w-5" />,
+  },
+  db: {
+    titleAr: "تعذّر حفظ الطلب",
+    titleEn: "Couldn't save request",
+    icon: <ServerCrash className="h-5 w-5" />,
+  },
+  conflict: {
+    titleAr: "الوقت لم يعد متاحًا",
+    titleEn: "Slot unavailable",
+    icon: <Clock className="h-5 w-5" />,
+  },
+  network: {
+    titleAr: "لا يوجد اتصال",
+    titleEn: "No connection",
+    icon: <WifiOff className="h-5 w-5" />,
+  },
+  timeout: {
+    titleAr: "انتهت مهلة الاتصال",
+    titleEn: "Request timed out",
+    icon: <Clock className="h-5 w-5" />,
+  },
+  server: {
+    titleAr: "خطأ في الخادم",
+    titleEn: "Server error",
+    icon: <ServerCrash className="h-5 w-5" />,
+  },
+  unknown: {
+    titleAr: "حدث خطأ غير متوقع",
+    titleEn: "Unexpected error",
+    icon: <AlertCircle className="h-5 w-5" />,
+  },
 };
 
 function iconForKind(kind: Exclude<BookingSubmitKind, "success">) {
@@ -59,9 +83,7 @@ export function SubmitErrorBanner({
       ? descriptor.title[lang]
       : (FALLBACK_META[kind] ?? FALLBACK_META.unknown)[lang === "ar" ? "titleAr" : "titleEn"];
   const bodyMessage =
-    descriptor && descriptor.code !== "UNKNOWN" && !message
-      ? descriptor.message[lang]
-      : message;
+    descriptor && descriptor.code !== "UNKNOWN" && !message ? descriptor.message[lang] : message;
 
   const showRetry =
     kind !== "validation" &&

@@ -169,7 +169,11 @@ function ReleaseGatePage() {
   }, []);
 
   const evaluation =
-    state.kind === "ready" ? state.data.evaluation : state.kind === "empty" ? state.evaluation : null;
+    state.kind === "ready"
+      ? state.data.evaluation
+      : state.kind === "empty"
+        ? state.evaluation
+        : null;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8" dir="rtl">
@@ -177,7 +181,8 @@ function ReleaseGatePage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">بوابة الإصدار (Release Gate)</h1>
           <p className="text-sm text-slate-600">
-            شروط NO-GO لأي نشر إلى الإنتاج. أي شرط blocking غير <code>pass</code> يوقف الـDeploy تلقائيًا.
+            شروط NO-GO لأي نشر إلى الإنتاج. أي شرط blocking غير <code>pass</code> يوقف الـDeploy
+            تلقائيًا.
           </p>
         </div>
         <button
@@ -203,7 +208,8 @@ function ReleaseGatePage() {
 
           {state.kind === "empty" ? (
             <p className="mt-3 text-sm text-slate-600">
-              لم تُنتَج <code>public/release-status.json</code> بعد. شغّل الـCI أو ارفع الشروط يدويًا عبر
+              لم تُنتَج <code>public/release-status.json</code> بعد. شغّل الـCI أو ارفع الشروط
+              يدويًا عبر
               <code> workflow_dispatch</code>.
             </p>
           ) : null}
@@ -258,7 +264,12 @@ function ReleaseGatePage() {
           {state.kind === "ready" && state.data.runUrl ? (
             <p className="mt-4 text-xs text-slate-600">
               تم الإنشاء من CI:{" "}
-              <a href={state.data.runUrl} className="text-sky-700 hover:underline" target="_blank" rel="noreferrer">
+              <a
+                href={state.data.runUrl}
+                className="text-sky-700 hover:underline"
+                target="_blank"
+                rel="noreferrer"
+              >
                 {state.data.commitSha?.slice(0, 7) ?? "run"} ↗
               </a>{" "}
               في {new Date(state.data.generatedAt).toLocaleString("en-GB")}

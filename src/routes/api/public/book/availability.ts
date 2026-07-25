@@ -102,7 +102,6 @@ function memoSet(key: string, body: Record<string, unknown>) {
   memo.set(key, { at: Date.now(), body });
 }
 
-
 function pad2(n: number) {
   return String(n).padStart(2, "0");
 }
@@ -129,7 +128,8 @@ export const Route = createFileRoute("/api/public/book/availability")({
   server: {
     handlers: {
       GET: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "reads" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "reads" });
+        if (_rl) return _rl;
         const url = new URL(request.url);
         const parsed = QuerySchema.safeParse({
           date: url.searchParams.get("date"),

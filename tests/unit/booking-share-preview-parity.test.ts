@@ -82,8 +82,14 @@ for (const c of cases) {
 
 // ── parity تحت جميع مناطق الجهاز الزمنية ──
 const HOST_TZS = [
-  "UTC", "America/New_York", "America/Los_Angeles", "Europe/London",
-  "Asia/Tokyo", "Australia/Sydney", "Pacific/Kiritimati", "Pacific/Pago_Pago",
+  "UTC",
+  "America/New_York",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+  "Pacific/Kiritimati",
+  "Pacific/Pago_Pago",
 ];
 
 test("parity يبقى صحيحاً مهما تغيّرت TZ الجهاز", () => {
@@ -98,10 +104,14 @@ test("parity يبقى صحيحاً مهما تغيّرت TZ الجهاز", () =>
     process.env.TZ = tz;
     const ics = extractIcsLocal(buildIcs(share));
     const g = extractGoogleLocal(googleCalendarUrl(share));
-    assert(ics.date === share.appointment_date && ics.time === share.appointment_time,
-      `.ics انحرف تحت TZ=${tz}: ${ics.date} ${ics.time}`);
-    assert(g.date === share.appointment_date && g.time === share.appointment_time,
-      `Google انحرف تحت TZ=${tz}: ${g.date} ${g.time}`);
+    assert(
+      ics.date === share.appointment_date && ics.time === share.appointment_time,
+      `.ics انحرف تحت TZ=${tz}: ${ics.date} ${ics.time}`,
+    );
+    assert(
+      g.date === share.appointment_date && g.time === share.appointment_time,
+      `Google انحرف تحت TZ=${tz}: ${g.date} ${g.time}`,
+    );
   }
   process.env.TZ = orig;
 });

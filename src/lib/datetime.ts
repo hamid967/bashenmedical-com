@@ -37,9 +37,15 @@ export function getAppToday(): Date {
 export function formatDateInTZ(
   input: Date | string,
   lang: "ar" | "en",
-  opts: Intl.DateTimeFormatOptions = { weekday: "long", year: "numeric", month: "long", day: "numeric" },
+  opts: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  },
 ): string {
-  const d = typeof input === "string" ? new Date(input.length === 10 ? input + "T00:00:00" : input) : input;
+  const d =
+    typeof input === "string" ? new Date(input.length === 10 ? input + "T00:00:00" : input) : input;
   const locale = lang === "ar" ? "ar-SA-u-ca-gregory" : "en-US";
   return new Intl.DateTimeFormat(locale, { timeZone: APP_TZ, ...opts }).format(d);
 }

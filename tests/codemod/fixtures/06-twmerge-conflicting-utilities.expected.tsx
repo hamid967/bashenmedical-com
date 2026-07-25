@@ -10,7 +10,8 @@ export const A = ({ selected }: { selected: boolean }) => (
     className={twMerge(
       "bg-[color:var(--portal-surface-1)] text-[color:var(--portal-ink)] border border-[color:var(--portal-surface-3)]",
       "bg-[color:var(--portal-surface-1)]",
-      selected && "bg-[color:var(--portal-primary)] text-[color:var(--portal-on-primary)] border-[color:var(--portal-primary)]",
+      selected &&
+        "bg-[color:var(--portal-primary)] text-[color:var(--portal-on-primary)] border-[color:var(--portal-primary)]",
       "hover:bg-[color:var(--portal-surface-2)]",
     )}
   >

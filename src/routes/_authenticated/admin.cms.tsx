@@ -52,9 +52,7 @@ export function CmsDashboard() {
               <Icon className="w-4 h-4" />
               <span>{label}</span>
             </div>
-            <div className="text-2xl font-bold mt-1">
-              {(data.totals as any)[key] ?? 0}
-            </div>
+            <div className="text-2xl font-bold mt-1">{(data.totals as any)[key] ?? 0}</div>
           </Card>
         ))}
       </div>
@@ -96,7 +94,10 @@ export function CmsDashboard() {
         ) : (
           <ul className="space-y-2">
             {data.recent.map((r: any) => (
-              <li key={r.id} className="flex items-center justify-between text-sm border-b py-2 last:border-0">
+              <li
+                key={r.id}
+                className="flex items-center justify-between text-sm border-b py-2 last:border-0"
+              >
                 <Link
                   to="/admin/cms/$kind/$id"
                   params={{ kind: r.kind, id: r.id }}

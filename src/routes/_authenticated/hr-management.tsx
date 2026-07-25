@@ -41,13 +41,7 @@ import {
 } from "@/lib/hr.functions";
 import { listBranches } from "@/lib/dashboard.functions";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui-v3";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui-v3";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui-v3";
 import { RequirePermission } from "@/components/rbac/RequirePermission";
 
 export const Route = createFileRoute("/_authenticated/hr-management")({

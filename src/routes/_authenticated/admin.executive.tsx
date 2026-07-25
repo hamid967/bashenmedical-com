@@ -30,10 +30,7 @@ const summaryQuery = (windowDays: number) =>
 
 export const Route = createFileRoute("/_authenticated/admin/executive")({
   head: () => ({
-    meta: [
-      { title: "الملخص التنفيذي | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "الملخص التنفيذي | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   beforeLoad: async () => {
     try {
@@ -81,9 +78,7 @@ function KpiCard({ kpi }: { kpi: ExecutiveKpi }) {
   return (
     <div className="rounded-2xl border border-[color:var(--ac-border)] bg-[color:var(--ac-bg-2)] p-4">
       <div className="text-xs text-[color:var(--ac-ink-3)]">{kpi.label}</div>
-      <div className="mt-1 text-2xl font-bold tracking-tight">
-        {fmtNumber(kpi.value, kpi.unit)}
-      </div>
+      <div className="mt-1 text-2xl font-bold tracking-tight">{fmtNumber(kpi.value, kpi.unit)}</div>
       <div className="mt-2 flex items-center justify-between">
         <DeltaBadge delta={kpi.delta_pct} />
         <span className="text-[10px] text-[color:var(--ac-ink-3)]">
@@ -120,7 +115,9 @@ function TrendTable({ summary }: { summary: ExecutiveSummary }) {
             return (
               <tr key={metric} className="border-t border-[color:var(--ac-border)]">
                 <td className="p-3 font-medium">{metric}</td>
-                <td className="p-3">{total.toLocaleString("en-US", { maximumFractionDigits: 2 })}</td>
+                <td className="p-3">
+                  {total.toLocaleString("en-US", { maximumFractionDigits: 2 })}
+                </td>
                 <td className="p-3">{points.length}</td>
                 <td className="p-3 text-[color:var(--ac-ink-3)]">
                   {last ? `${last.day} · ${last.value.toLocaleString("en-US")}` : "—"}
@@ -218,7 +215,8 @@ function ExecutivePage() {
         </section>
 
         <footer className="text-[11px] text-[color:var(--ac-ink-3)]">
-          آخر تحديث: {new Date(data.generated_at).toLocaleString("ar-SA")} · نافذة {data.window_days} يوم
+          آخر تحديث: {new Date(data.generated_at).toLocaleString("ar-SA")} · نافذة{" "}
+          {data.window_days} يوم
         </footer>
       </div>
     </div>

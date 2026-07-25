@@ -44,9 +44,7 @@ export const listBookingTraceEvents = createServerFn({ method: "POST" })
   .validator((input: unknown) => listFilters.parse(input))
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     // If filtering by patient name, first look up matching appointment_ids
     // and constrain the trace query to those. Empty match → no results.
@@ -85,31 +83,22 @@ export const listBookingTraceEvents = createServerFn({ method: "POST" })
     }));
     if (data.error_code) {
       const needle = data.error_code.toUpperCase();
-      enriched = enriched.filter((r) =>
-        (r.error_code ?? "").toUpperCase().includes(needle),
-      );
+      enriched = enriched.filter((r) => (r.error_code ?? "").toUpperCase().includes(needle));
     }
     return { rows: enriched };
   });
 
-
 export const listRecentBookingCorrelations = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .validator((input: unknown) =>
-    z
-      .object({ limit: z.number().int().min(1).max(200).default(50) })
-      .parse(input ?? {}),
+    z.object({ limit: z.number().int().min(1).max(200).default(50) }).parse(input ?? {}),
   )
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("booking_trace_events")
-      .select(
-        "correlation_id, event, reference_number, created_at, pg_code, duration_ms, extra",
-      )
+      .select("correlation_id, event, reference_number, created_at, pg_code, duration_ms, extra")
       .order("created_at", { ascending: false })
       .limit(data.limit * 6);
     if (error) throw new Error(error.message);
@@ -156,8 +145,7 @@ export const listRecentBookingCorrelations = createServerFn({ method: "POST" })
         if (!prev.reference_number && r.reference_number)
           prev.reference_number = r.reference_number;
         // Keep the newest error code we've seen (rows arrive newest→oldest).
-        if (!prev.last_error_code && (isErr || isConf) && code)
-          prev.last_error_code = code;
+        if (!prev.last_error_code && (isErr || isConf) && code) prev.last_error_code = code;
       }
     }
     const list = Array.from(byCorr.values())
@@ -185,11 +173,11 @@ export const listAppointmentTraces = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertHasRole(context.supabase, context.userId, "admin");
     if (data.appointment_ids.length === 0) {
-      return { traces: {} as Record<string, { correlation_id: string; error_code: string | null }> };
+      return {
+        traces: {} as Record<string, { correlation_id: string; error_code: string | null }>,
+      };
     }
-    const { supabaseAdmin } = await import(
-      "@/integrations/supabase/client.server"
-    );
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Newest first — first row per appointment wins for correlation_id.
     // Then we scan any correlation's other events to surface an error code
     // even when the appointment eventually succeeded (retries after a

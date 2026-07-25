@@ -2,7 +2,14 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { ArrowRight, RefreshCw, AlertTriangle, ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
+import {
+  ArrowRight,
+  RefreshCw,
+  AlertTriangle,
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   decideInsuranceApproval,
@@ -11,10 +18,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/admin/insurance/$approvalId")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل طلب التأمين | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل طلب التأمين | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error, reset }) => (
     <div className="container-app py-16 text-center">
@@ -76,9 +80,7 @@ function InsuranceDetailPage() {
       setNote("");
       setConfirmOpen(null);
       queryClient.invalidateQueries({ queryKey: ["admin-insurance"] });
-      toast.success(
-        decision === "approved" ? "تم اعتماد طلب التأمين بنجاح" : "تم رفض طلب التأمين",
-      );
+      toast.success(decision === "approved" ? "تم اعتماد طلب التأمين بنجاح" : "تم رفض طلب التأمين");
     },
     onError: (err) => {
       toast.error(err instanceof Error ? err.message : "تعذّر تنفيذ الإجراء");
@@ -137,10 +139,7 @@ function InsuranceDetailPage() {
         </div>
       </header>
 
-      <section
-        className="mt-6 rounded-lg border p-4"
-        aria-label="إجراءات القرار"
-      >
+      <section className="mt-6 rounded-lg border p-4" aria-label="إجراءات القرار">
         <h2 className="text-sm font-semibold text-muted-foreground">إجراء على الطلب</h2>
         <p className="mt-1 text-xs text-muted-foreground">
           سيتم تحديث حالة الطلب وتسجيل ملاحظة في السجل الزمني للطلب مع تدوين حدث في سجل التدقيق.
@@ -246,7 +245,6 @@ function InsuranceDetailPage() {
         </div>
       ) : null}
 
-
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <section className="rounded-lg border p-4">
           <h2 className="text-sm font-semibold text-muted-foreground">المريض</h2>
@@ -273,9 +271,7 @@ function InsuranceDetailPage() {
           <dl className="mt-3 space-y-2 text-sm">
             <div className="flex justify-between gap-4">
               <dt className="text-muted-foreground">الشركة</dt>
-              <dd className="font-medium">
-                {provider?.name_ar || provider?.name_en || "—"}
-              </dd>
+              <dd className="font-medium">{provider?.name_ar || provider?.name_en || "—"}</dd>
             </div>
           </dl>
         </section>

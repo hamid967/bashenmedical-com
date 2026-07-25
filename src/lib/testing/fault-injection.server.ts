@@ -29,11 +29,7 @@
  */
 
 export type FaultScope =
-  | "payment"
-  | "payment.settle"
-  | "notification"
-  | "notification.deliver"
-  | "notification.enqueue";
+  "payment" | "payment.settle" | "notification" | "notification.deliver" | "notification.enqueue";
 
 export interface FaultConfig {
   /** Which scope to fail. */

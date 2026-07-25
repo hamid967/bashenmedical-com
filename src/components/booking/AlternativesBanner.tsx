@@ -67,10 +67,7 @@ export function AlternativesBanner({
               {t("page.holdExpiredTitle", "انتهت مهلة الحجز المؤقت")}
             </div>
             <p className="mt-0.5 text-xs text-muted-foreground leading-5">
-              {t(
-                "page.holdExpiredHint",
-                "اختر وقتًا آخر أو طبيبًا آخر — بقية بياناتك محفوظة.",
-              )}
+              {t("page.holdExpiredHint", "اختر وقتًا آخر أو طبيبًا آخر — بقية بياناتك محفوظة.")}
             </p>
           </div>
         </div>

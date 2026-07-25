@@ -70,7 +70,8 @@ export function buildReport(input: DrillReportInput): DrillReport {
 }
 
 export function renderReportMarkdown(r: DrillReport): string {
-  const statusBadge = r.status === "passed" ? "✅ PASSED" : r.status === "breached" ? "❌ BREACHED" : "⚠️ ABORTED";
+  const statusBadge =
+    r.status === "passed" ? "✅ PASSED" : r.status === "breached" ? "❌ BREACHED" : "⚠️ ABORTED";
   const breaches = r.budgets_breached.length
     ? r.budgets_breached
         .map((b) => `- **${b.kind.toUpperCase()}**: actual \`${b.actual}\`, budget \`${b.budget}\``)

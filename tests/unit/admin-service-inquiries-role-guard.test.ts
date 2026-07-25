@@ -20,10 +20,7 @@ import { fileURLToPath } from "node:url";
 import { assertHasRole } from "../../src/lib/admin/service-inquiries.functions";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const SRC = resolve(
-  __dirname,
-  "../../src/lib/admin/service-inquiries.functions.ts",
-);
+const SRC = resolve(__dirname, "../../src/lib/admin/service-inquiries.functions.ts");
 const source = readFileSync(SRC, "utf8");
 
 // ---------- 1) assertHasRole runtime behaviour ---------------------------
@@ -42,9 +39,7 @@ function makeSupabase(response: { data: unknown; error: unknown }) {
 describe("assertHasRole", () => {
   test("يرفض عندما لا يملك المستخدم دور admin ولا super_admin", async () => {
     const sb = makeSupabase({ data: false, error: null });
-    await expect(assertHasRole(sb as any, "user-1", "admin")).rejects.toThrow(
-      /ليست لديك الصلاحية/,
-    );
+    await expect(assertHasRole(sb as any, "user-1", "admin")).rejects.toThrow(/ليست لديك الصلاحية/);
     // `admin` implicitly checks `super_admin` too (unified guard in _guard.ts),
     // so both RPC probes must run — order isn't guaranteed (Promise.all).
     const roles = sb.calls
@@ -69,9 +64,7 @@ describe("assertHasRole", () => {
 
   test("يقبل عندما يعيد RPC true للدور admin", async () => {
     const sb = makeSupabase({ data: true, error: null });
-    await expect(
-      assertHasRole(sb as any, "user-1", "admin"),
-    ).resolves.toBe(true);
+    await expect(assertHasRole(sb as any, "user-1", "admin")).resolves.toBe(true);
   });
 
   test("الافتراضي هو admin حتى لو لم يُمرَّر الدور صراحة", async () => {

@@ -57,15 +57,16 @@ export const listAdminArticles = createServerFn({ method: "GET" })
     if (data.categoryId) q = q.eq("category_id", data.categoryId);
     if (data.q) {
       const like = `%${data.q.replace(/[%_]/g, "\\$&")}%`;
-      q = q.or(
-        `title_ar.ilike.${like},title_en.ilike.${like},slug.ilike.${like}`,
-      );
+      q = q.or(`title_ar.ilike.${like},title_en.ilike.${like},slug.ilike.${like}`);
     }
 
     const [{ data: rows, error }, kpisRes, catsRes] = await Promise.all([
       q.limit(200),
       sb.from("health_articles").select("id, is_published, reading_minutes, category_id"),
-      sb.from("health_categories").select("id, name_ar, is_active").order("sort_order", { ascending: true }),
+      sb
+        .from("health_categories")
+        .select("id, name_ar, is_active")
+        .order("sort_order", { ascending: true }),
     ]);
 
     if (error) throw new Error(error.message);
@@ -122,9 +123,7 @@ export const getAdminArticle = createServerFn({ method: "GET" })
 
     const { data: article, error } = await sb
       .from("health_articles")
-      .select(
-        "*, health_categories(id, name_ar, name_en, slug)",
-      )
+      .select("*, health_categories(id, name_ar, name_en, slug)")
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
@@ -193,10 +192,7 @@ export const updateAdminArticle = createServerFn({ method: "POST" })
       patch.published_at = new Date().toISOString();
     }
 
-    const { error } = await sb
-      .from("health_articles")
-      .update(patch)
-      .eq("id", data.id);
+    const { error } = await sb.from("health_articles").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
   });

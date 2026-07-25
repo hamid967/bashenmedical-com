@@ -22,9 +22,7 @@ export const Route = createFileRoute("/.well-known/apple-app-site-association")(
         const body = {
           applinks: {
             apps: [],
-            details: appId
-              ? [{ appIDs: [appId], appID: appId, paths }]
-              : [],
+            details: appId ? [{ appIDs: [appId], appID: appId, paths }] : [],
           },
           webcredentials: appId ? { apps: [appId] } : { apps: [] },
         };

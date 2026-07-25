@@ -80,8 +80,6 @@ export const Route = createFileRoute("/api/public/reservations/otp/verify")({
         const captcha = await verifyHCaptcha(parsed.data.captcha_token, ip);
         if (!captcha.ok) return captchaFailureResponse(captcha);
 
-
-
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 

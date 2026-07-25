@@ -25,31 +25,17 @@ import {
   type InboxPriority,
   type InboxEvent,
 } from "@/lib/admin/inbox.functions";
-import {
-  STATUS_LABELS,
-  CHANNEL_LABELS,
-  PRIORITY_LABELS,
-  maskPhone,
-} from "./admin.inbox";
+import { STATUS_LABELS, CHANNEL_LABELS, PRIORITY_LABELS, maskPhone } from "./admin.inbox";
 import { Card } from "@/components/ui-v3";
 import { Button } from "@/components/ui-v3";
 import { Input } from "@/components/ui-v3";
 import { Textarea } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import { ArrowRight, AlertTriangle } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/inbox/$id")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل الطلب | الصندوق الموحّد" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل الطلب | الصندوق الموحّد" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error }) => (
     <div className="container-app py-16 text-center">
@@ -147,9 +133,9 @@ function InboxDetailPage() {
   >("reached");
   const [docs, setDocs] = useState("");
   const [apptId, setApptId] = useState(item.linked_appointment_id ?? "");
-  const [notifyChannel, setNotifyChannel] = useState<
-    "sms" | "whatsapp" | "email" | "push"
-  >("whatsapp");
+  const [notifyChannel, setNotifyChannel] = useState<"sms" | "whatsapp" | "email" | "push">(
+    "whatsapp",
+  );
   const [notifyTemplate, setNotifyTemplate] = useState("");
   const [mergeInto, setMergeInto] = useState("");
 
@@ -183,7 +169,10 @@ function InboxDetailPage() {
       {/* Snapshot */}
       <Card className="p-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
         <Field label="المريض" value={item.patient_name ?? "—"} />
-        <Field label="الجوال" value={<span className="font-mono">{maskPhone(item.patient_phone)}</span>} />
+        <Field
+          label="الجوال"
+          value={<span className="font-mono">{maskPhone(item.patient_phone)}</span>}
+        />
         <Field label="الخدمة" value={item.service_label ?? item.subject ?? "—"} />
         <Field label="الفرع" value={item.branch_id ?? "—"} />
         <Field label="القسم" value={item.department ?? "—"} />
@@ -272,14 +261,15 @@ function InboxDetailPage() {
         </Panel>
 
         <Panel title="الأولوية">
-          <Select
-            value={priority}
-            onValueChange={(v) => setPriority(v as InboxPriority)}
-          >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select value={priority} onValueChange={(v) => setPriority(v as InboxPriority)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {INBOX_PRIORITIES.map((p) => (
-                <SelectItem key={p} value={p}>{PRIORITY_LABELS[p]}</SelectItem>
+                <SelectItem key={p} value={p}>
+                  {PRIORITY_LABELS[p]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -299,14 +289,15 @@ function InboxDetailPage() {
         </Panel>
 
         <Panel title="الحالة">
-          <Select
-            value={status}
-            onValueChange={(v) => setStatus(v as InboxStatus)}
-          >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+          <Select value={status} onValueChange={(v) => setStatus(v as InboxStatus)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               {INBOX_STATUSES.filter((s) => s !== "archived").map((s) => (
-                <SelectItem key={s} value={s}>{STATUS_LABELS[s]}</SelectItem>
+                <SelectItem key={s} value={s}>
+                  {STATUS_LABELS[s]}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -330,7 +321,9 @@ function InboxDetailPage() {
             value={contactChannel}
             onValueChange={(v) => setContactChannel(v as typeof contactChannel)}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="phone">هاتف</SelectItem>
               <SelectItem value="whatsapp">واتساب</SelectItem>
@@ -343,7 +336,9 @@ function InboxDetailPage() {
             value={contactOutcome}
             onValueChange={(v) => setContactOutcome(v as typeof contactOutcome)}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="reached">تم التواصل</SelectItem>
               <SelectItem value="no_answer">لم يرد</SelectItem>
@@ -435,7 +430,9 @@ function InboxDetailPage() {
             value={notifyChannel}
             onValueChange={(v) => setNotifyChannel(v as typeof notifyChannel)}
           >
-            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="whatsapp">واتساب</SelectItem>
               <SelectItem value="sms">SMS</SelectItem>
@@ -469,63 +466,61 @@ function InboxDetailPage() {
         </Panel>
 
         {canMerge && (
-        <Panel title="دمج مكرر">
-          <Input
-            placeholder="UUID الطلب الأصلي (سيتم دمج هذا الطلب فيه)"
-            value={mergeInto}
-            onChange={(e) => setMergeInto(e.target.value)}
-          />
-          <ActionButton
-            busy={busy === "merge"}
-            disabled={isArchived || !mergeInto.trim()}
-            onClick={() =>
-              run("merge", () =>
-                doMerge({
-                  data: {
-                    id,
-                    into_id: mergeInto.trim(),
-                    note: note.trim() || undefined,
-                  },
-                }),
-              )
-            }
-          >
-            دمج
-          </ActionButton>
-        </Panel>
+          <Panel title="دمج مكرر">
+            <Input
+              placeholder="UUID الطلب الأصلي (سيتم دمج هذا الطلب فيه)"
+              value={mergeInto}
+              onChange={(e) => setMergeInto(e.target.value)}
+            />
+            <ActionButton
+              busy={busy === "merge"}
+              disabled={isArchived || !mergeInto.trim()}
+              onClick={() =>
+                run("merge", () =>
+                  doMerge({
+                    data: {
+                      id,
+                      into_id: mergeInto.trim(),
+                      note: note.trim() || undefined,
+                    },
+                  }),
+                )
+              }
+            >
+              دمج
+            </ActionButton>
+          </Panel>
         )}
 
         {(canArchive || canReopen) && (
-        <Panel title="أرشفة / إعادة فتح">
-          {isArchived ? (
-            canReopen && (
-            <ActionButton
-              busy={busy === "reopen"}
-              onClick={() =>
-                run("reopen", () =>
-                  doReopen({ data: { id, note: note.trim() || undefined } }),
+          <Panel title="أرشفة / إعادة فتح">
+            {isArchived
+              ? canReopen && (
+                  <ActionButton
+                    busy={busy === "reopen"}
+                    onClick={() =>
+                      run("reopen", () =>
+                        doReopen({ data: { id, note: note.trim() || undefined } }),
+                      )
+                    }
+                  >
+                    إعادة فتح الطلب
+                  </ActionButton>
                 )
-              }
-            >
-              إعادة فتح الطلب
-            </ActionButton>
-            )
-          ) : (
-            canArchive && (
-            <ActionButton
-              busy={busy === "archive"}
-              variant="destructive"
-              onClick={() =>
-                run("archive", () =>
-                  doArchive({ data: { id, note: note.trim() || undefined } }),
-                )
-              }
-            >
-              أرشفة (بدون حذف)
-            </ActionButton>
-            )
-          )}
-        </Panel>
+              : canArchive && (
+                  <ActionButton
+                    busy={busy === "archive"}
+                    variant="destructive"
+                    onClick={() =>
+                      run("archive", () =>
+                        doArchive({ data: { id, note: note.trim() || undefined } }),
+                      )
+                    }
+                  >
+                    أرشفة (بدون حذف)
+                  </ActionButton>
+                )}
+          </Panel>
         )}
       </div>
 
@@ -558,9 +553,7 @@ function InboxDetailPage() {
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">سجل الإجراءات (غير قابل للتعديل)</h2>
         {events.length === 0 ? (
-          <Card className="p-6 text-center text-sm text-muted-foreground">
-            لا توجد أحداث بعد.
-          </Card>
+          <Card className="p-6 text-center text-sm text-muted-foreground">لا توجد أحداث بعد.</Card>
         ) : (
           <ol className="space-y-2">
             {events.map((ev: InboxEvent) => (
@@ -568,13 +561,14 @@ function InboxDetailPage() {
                 <div className="flex flex-wrap justify-between gap-2">
                   <span className="font-semibold">{ev.action}</span>
                   <span className="text-xs text-muted-foreground">
-                    {fmt(ev.created_at)} · {ev.actor_user_id ? ev.actor_user_id.slice(0, 8) : "نظام"}
+                    {fmt(ev.created_at)} ·{" "}
+                    {ev.actor_user_id ? ev.actor_user_id.slice(0, 8) : "نظام"}
                   </span>
                 </div>
                 {ev.note && <p className="mt-1 text-muted-foreground">{ev.note}</p>}
                 {(ev.from_value || ev.to_value) && (
                   <pre className="mt-2 text-xs bg-muted/40 p-2 rounded overflow-x-auto">
-{JSON.stringify({ from: ev.from_value, to: ev.to_value }, null, 2)}
+                    {JSON.stringify({ from: ev.from_value, to: ev.to_value }, null, 2)}
                   </pre>
                 )}
               </li>

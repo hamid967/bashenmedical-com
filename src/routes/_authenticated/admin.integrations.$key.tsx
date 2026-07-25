@@ -120,7 +120,10 @@ function IntegrationDrillDown() {
   return (
     <div className="container-app py-6 space-y-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/admin/integrations" className="hover:text-foreground inline-flex items-center gap-1">
+        <Link
+          to="/admin/integrations"
+          className="hover:text-foreground inline-flex items-center gap-1"
+        >
           <ArrowRight className="h-4 w-4" /> التكاملات
         </Link>
         <span>/</span>
@@ -132,9 +135,7 @@ function IntegrationDrillDown() {
           <Plug className="h-6 w-6 text-primary" />
           <div>
             <h1 className="text-xl font-semibold font-mono">{key}</h1>
-            <p className="text-sm text-muted-foreground">
-              سجلات التنفيذ لآخر {window} ساعة
-            </p>
+            <p className="text-sm text-muted-foreground">سجلات التنفيذ لآخر {window} ساعة</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -268,7 +269,10 @@ function IntegrationDrillDown() {
                       {r.duration_ms != null ? `${r.duration_ms} ms` : "—"}
                     </td>
                     <td className="p-3 text-xs">{r.is_mock ? "نعم" : "—"}</td>
-                    <td className="p-3 text-xs max-w-[280px] truncate" title={r.error_message ?? ""}>
+                    <td
+                      className="p-3 text-xs max-w-[280px] truncate"
+                      title={r.error_message ?? ""}
+                    >
                       {r.error_message ?? "—"}
                     </td>
                     <td className="p-3 text-left">
@@ -296,9 +300,7 @@ function IntegrationDrillDown() {
           <div className="flex gap-2">
             <button
               type="button"
-              onClick={() =>
-                navigate({ search: { ...search, page: Math.max(1, page - 1) } })
-              }
+              onClick={() => navigate({ search: { ...search, page: Math.max(1, page - 1) } })}
               disabled={page <= 1}
               className="inline-flex items-center gap-1 rounded-md border px-3 py-1.5 disabled:opacity-50"
             >
@@ -386,10 +388,7 @@ function LogDetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 value={q.data.duration_ms != null ? `${q.data.duration_ms} ms` : "—"}
               />
               <Row label="Mock" value={q.data.is_mock ? "نعم" : "—"} />
-              <Row
-                label="التاريخ"
-                value={new Date(q.data.created_at).toLocaleString("ar-SA")}
-              />
+              <Row label="التاريخ" value={new Date(q.data.created_at).toLocaleString("ar-SA")} />
               {q.data.error_message && (
                 <div>
                   <div className="text-xs text-muted-foreground mb-1">رسالة الخطأ</div>

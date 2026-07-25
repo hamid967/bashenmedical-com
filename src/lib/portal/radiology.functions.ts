@@ -92,9 +92,7 @@ export const getRadiologyFileUrl = createServerFn({ method: "POST" })
       file_path: data.path,
       bucket: "radiology-reports",
     });
-    const { recordSensitiveAccess } = await import(
-      "@/lib/audit/sensitive-access.server"
-    );
+    const { recordSensitiveAccess } = await import("@/lib/audit/sensitive-access.server");
     await recordSensitiveAccess({
       supabase,
       actorId: userId,

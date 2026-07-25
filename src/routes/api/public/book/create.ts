@@ -74,14 +74,14 @@ const bookingCreateSchema = z.object({
   insurance_provider_id: z.string().uuid("جهة تأمين غير صالحة").optional().nullable(),
   insurance_policy_number: z.string().trim().max(64, "رقم البوليصة طويل").optional().nullable(),
   insurance_member_id: z.string().trim().max(64, "رقم العضو طويل").optional().nullable(),
-  verification_challenge_id: z
-    .string()
-    .uuid("رمز التحقق مفقود أو غير صالح")
-    .nullable()
-    .optional(),
+  verification_challenge_id: z.string().uuid("رمز التحقق مفقود أو غير صالح").nullable().optional(),
 });
 
-function json(status: number, body: Record<string, unknown>, extraHeaders?: Record<string, string>) {
+function json(
+  status: number,
+  body: Record<string, unknown>,
+  extraHeaders?: Record<string, string>,
+) {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
@@ -94,8 +94,7 @@ function json(status: number, body: Record<string, unknown>, extraHeaders?: Reco
 // Legacy tracking reference derived from a UUID. Kept for pre-BMC bookings
 // looked up by /booking-confirmation. New bookings return the BMC reference
 // generated inside confirm_appointment_booking.
-const refFromId = (id: string) =>
-  "BAA-" + String(id).replace(/-/g, "").slice(0, 8).toUpperCase();
+const refFromId = (id: string) => "BAA-" + String(id).replace(/-/g, "").slice(0, 8).toUpperCase();
 
 type InsuranceInput = {
   doctor_id?: string | null;
@@ -200,7 +199,6 @@ export const Route = createFileRoute("/api/public/book/create")({
         // INVALID_IDEMPOTENCY_KEY so the client can rotate the key and
         // retry, instead of silently dropping replay protection.
         const rawKey = request.headers.get("idempotency-key")?.trim() ?? "";
-
 
         if (rawKey && !/^[A-Za-z0-9_-]{8,128}$/.test(rawKey)) {
           return respond(400, {
@@ -312,9 +310,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           // block the booking response or fail the request on a trace write.
           void (async () => {
             try {
-              const { supabaseAdmin } = await import(
-                "@/integrations/supabase/client.server"
-              );
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
               const {
                 appointment_id = null,
                 reference_number = null,
@@ -326,15 +322,12 @@ export const Route = createFileRoute("/api/public/book/create")({
                 correlation_id: correlationId,
                 event,
                 idempotency_key_masked: maskKey(idempotencyKey),
-                reference_number:
-                  typeof reference_number === "string" ? reference_number : null,
-                appointment_id:
-                  typeof appointment_id === "string" ? appointment_id : null,
+                reference_number: typeof reference_number === "string" ? reference_number : null,
+                appointment_id: typeof appointment_id === "string" ? appointment_id : null,
                 doctor_id: parsed.data.doctor_id ?? null,
                 appointment_date: parsed.data.appointment_date,
                 appointment_time: parsed.data.appointment_time,
-                duration_ms:
-                  typeof duration_ms === "number" ? duration_ms : null,
+                duration_ms: typeof duration_ms === "number" ? duration_ms : null,
                 pg_code: typeof pg_code === "string" ? pg_code : null,
                 extra: rest as Record<string, unknown> as never,
               });
@@ -410,7 +403,6 @@ export const Route = createFileRoute("/api/public/book/create")({
           }
         }
 
-
         // Build the JSONB payload for the RPC. All non-provided fields are
         // omitted so the function's NULLIF/COALESCE branches apply.
         const cleanEmail = (parsed.data.patient_email ?? "").trim().toLowerCase() || null;
@@ -449,8 +441,7 @@ export const Route = createFileRoute("/api/public/book/create")({
 
         if (error) {
           const err = error as { message?: string; code?: string };
-          const isDup =
-            err.code === "23505" || (err.message ?? "").includes("duplicate key");
+          const isDup = err.code === "23505" || (err.message ?? "").includes("duplicate key");
           const dupOnIdemKey =
             isDup && !!idempotencyKey && (err.message ?? "").includes("idempotency_key");
 
@@ -461,7 +452,6 @@ export const Route = createFileRoute("/api/public/book/create")({
             dup_on_idempotency_key: dupOnIdemKey,
             error_code: isDup ? "SLOT_TAKEN" : `DB_ERROR${err.code ? `:${err.code}` : ""}`,
           });
-
 
           // Idempotency-key race: another concurrent request with the same
           // key already inserted — replay its reference.

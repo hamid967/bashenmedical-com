@@ -44,7 +44,7 @@ export function usePermissions(): PermissionCheck {
     return snapshot.grants.some((g) => {
       if (g.permission_key !== permission) return false;
       if (g.branch_id === null) return true; // global grant satisfies any scope
-      if (branchId == null) return true;      // any grant satisfies "any scope"
+      if (branchId == null) return true; // any grant satisfies "any scope"
       return g.branch_id === branchId;
     });
   };

@@ -49,8 +49,7 @@ export function BranchesList() {
 
   const query = useQuery({
     queryKey: ["admin-branches", q, status],
-    queryFn: () =>
-      fn({ data: { q: q.trim() || undefined, status } }),
+    queryFn: () => fn({ data: { q: q.trim() || undefined, status } }),
   });
 
   return (
@@ -59,17 +58,12 @@ export function BranchesList() {
         <Building2 className="h-6 w-6 text-primary" aria-hidden="true" />
         <div>
           <h1 className="text-xl font-semibold">الفروع</h1>
-          <p className="text-sm text-muted-foreground">
-            نظرة تشغيلية شاملة على فروع المجمّع
-          </p>
+          <p className="text-sm text-muted-foreground">نظرة تشغيلية شاملة على فروع المجمّع</p>
         </div>
       </header>
 
       {/* KPI strip */}
-      <section
-        aria-label="مؤشرات الفروع"
-        className="grid grid-cols-2 md:grid-cols-5 gap-3"
-      >
+      <section aria-label="مؤشرات الفروع" className="grid grid-cols-2 md:grid-cols-5 gap-3">
         <KpiCard
           label="إجمالي الفروع"
           value={query.data?.kpis.total}
@@ -197,9 +191,7 @@ export function BranchesList() {
                       >
                         {b.name_ar}
                       </Link>
-                      <div className="text-xs text-muted-foreground font-mono">
-                        {b.slug}
-                      </div>
+                      <div className="text-xs text-muted-foreground font-mono">{b.slug}</div>
                     </td>
                     <td className="px-3 py-2 text-muted-foreground">
                       {b.city_ar ? (
@@ -223,9 +215,7 @@ export function BranchesList() {
                     </td>
                     <td className="px-3 py-2 tabular-nums">{b.doctors_count}</td>
                     <td className="px-3 py-2 tabular-nums">{b.today_appts}</td>
-                    <td className="px-3 py-2 tabular-nums">
-                      {b.excellence_centers_count}
-                    </td>
+                    <td className="px-3 py-2 tabular-nums">{b.excellence_centers_count}</td>
                     <td className="px-3 py-2 text-left">
                       <Link
                         to="/admin/branches/$id"

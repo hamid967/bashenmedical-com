@@ -5,7 +5,10 @@
  */
 import { describe, it, expect, vi } from "vitest";
 import {
-  assertCmsEditor, assertCmsPublisher, assertCmsSuper, getCmsRole,
+  assertCmsEditor,
+  assertCmsPublisher,
+  assertCmsSuper,
+  getCmsRole,
 } from "@/lib/admin/cms/_guard";
 import { computeCompleteness, CMS_KINDS } from "@/lib/admin/cms/schemas";
 
@@ -29,9 +32,7 @@ describe("CMS role guards", () => {
     await expect(
       assertCmsEditor({ supabase: makeSupabase(["super_admin"]), userId: "u" }),
     ).resolves.toBeUndefined();
-    await expect(
-      assertCmsEditor({ supabase: makeSupabase([]), userId: "u" }),
-    ).rejects.toThrow();
+    await expect(assertCmsEditor({ supabase: makeSupabase([]), userId: "u" })).rejects.toThrow();
     await expect(
       assertCmsEditor({ supabase: makeSupabase(["reception"]), userId: "u" }),
     ).rejects.toThrow();
@@ -56,9 +57,12 @@ describe("CMS role guards", () => {
   });
 
   it("getCmsRole returns highest role", async () => {
-    expect(await getCmsRole({ supabase: makeSupabase(["super_admin", "admin", "editor"]), userId: "u" }))
-      .toBe("super_admin");
-    expect(await getCmsRole({ supabase: makeSupabase(["admin", "editor"]), userId: "u" })).toBe("admin");
+    expect(
+      await getCmsRole({ supabase: makeSupabase(["super_admin", "admin", "editor"]), userId: "u" }),
+    ).toBe("super_admin");
+    expect(await getCmsRole({ supabase: makeSupabase(["admin", "editor"]), userId: "u" })).toBe(
+      "admin",
+    );
     expect(await getCmsRole({ supabase: makeSupabase(["editor"]), userId: "u" })).toBe("editor");
     expect(await getCmsRole({ supabase: makeSupabase([]), userId: "u" })).toBe("none");
   });

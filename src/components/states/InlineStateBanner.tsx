@@ -7,13 +7,7 @@ import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  AlertTriangle,
-  Clock,
-  Lock,
-  RefreshCw,
-  WifiOff,
-} from "lucide-react";
+import { AlertTriangle, Clock, Lock, RefreshCw, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui-v3";
 import { classifyPatientError } from "@/components/states/patient-route-states";
@@ -83,11 +77,7 @@ export function InlineStateBanner({
     <div
       role="alert"
       aria-live="polite"
-      className={cn(
-        "flex items-start gap-2 rounded-lg border p-3 text-xs",
-        tone,
-        className,
-      )}
+      className={cn("flex items-start gap-2 rounded-lg border p-3 text-xs", tone, className)}
     >
       <Icon className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
       <div className="flex-1">

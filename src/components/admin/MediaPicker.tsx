@@ -14,10 +14,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ImagePlus, Upload, X, Search, Loader2, Crop, Check } from "lucide-react";
 import { toast } from "sonner";
-import {
-  listAdminFiles,
-  uploadAdminFile,
-} from "@/lib/admin/files.functions";
+import { listAdminFiles, uploadAdminFile } from "@/lib/admin/files.functions";
 import { Button } from "@/components/ui-v3";
 import {
   Dialog,
@@ -186,7 +183,6 @@ export function MediaPicker({
     if (file) handleFile(file);
   };
 
-
   const openEditorFromLibrary = (row: any) => {
     if (!row.is_image) {
       onSelect({
@@ -243,9 +239,7 @@ export function MediaPicker({
         onDrop={onDrop}
       >
         <DialogHeader>
-          <DialogTitle>
-            {editing ? "معاينة وقصّ الصورة" : "مكتبة الوسائط"}
-          </DialogTitle>
+          <DialogTitle>{editing ? "معاينة وقصّ الصورة" : "مكتبة الوسائط"}</DialogTitle>
         </DialogHeader>
 
         {upload.isPending && (
@@ -266,7 +260,6 @@ export function MediaPicker({
           </div>
         )}
 
-
         {editing ? (
           <ImageEditor
             source={editing}
@@ -279,9 +272,7 @@ export function MediaPicker({
                 setOpen(false);
               }
             }}
-            onSave={(blob, fileName, mime) =>
-              upload.mutate({ blob, fileName, mime })
-            }
+            onSave={(blob, fileName, mime) => upload.mutate({ blob, fileName, mime })}
           />
         ) : (
           <>
@@ -322,14 +313,10 @@ export function MediaPicker({
 
             <div className="max-h-[60vh] overflow-y-auto">
               {query.isLoading && (
-                <div className="p-6 text-center text-sm text-muted-foreground">
-                  جارِ التحميل…
-                </div>
+                <div className="p-6 text-center text-sm text-muted-foreground">جارِ التحميل…</div>
               )}
               {query.error && (
-                <div className="p-6 text-center text-sm text-destructive">
-                  تعذّر جلب المكتبة
-                </div>
+                <div className="p-6 text-center text-sm text-destructive">تعذّر جلب المكتبة</div>
               )}
               {query.data && query.data.rows.length === 0 && (
                 <div className="p-6 text-center text-sm text-muted-foreground">
@@ -359,9 +346,7 @@ export function MediaPicker({
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <span className="text-xs text-muted-foreground">
-                              {row.mime_type}
-                            </span>
+                            <span className="text-xs text-muted-foreground">{row.mime_type}</span>
                           )}
                         </div>
                         <div className="p-1.5 text-[11px] truncate" title={row.file_name}>
@@ -426,10 +411,7 @@ function ImageEditor({
     setRect((r) => enforceAspect(r, aspect, natural));
   }, [aspect, natural]);
 
-  const startDrag = (
-    e: React.PointerEvent,
-    mode: "move" | "resize",
-  ) => {
+  const startDrag = (e: React.PointerEvent, mode: "move" | "resize") => {
     e.preventDefault();
     const overlay = overlayRef.current;
     if (!overlay || !natural) return;
@@ -499,17 +481,7 @@ function ImageEditor({
       if (!ctx) throw new Error("canvas");
       // Re-load with crossOrigin to avoid taint when possible
       const img = await loadImageForCanvas(source.src);
-      ctx.drawImage(
-        img,
-        pxCrop.x,
-        pxCrop.y,
-        pxCrop.w,
-        pxCrop.h,
-        0,
-        0,
-        outSize.w,
-        outSize.h,
-      );
+      ctx.drawImage(img, pxCrop.x, pxCrop.y, pxCrop.w, pxCrop.h, 0, 0, outSize.w, outSize.h);
       const blob: Blob = await new Promise((resolve, reject) =>
         canvas.toBlob(
           (b) => (b ? resolve(b) : reject(new Error("toBlob failed"))),
@@ -517,8 +489,7 @@ function ImageEditor({
           format === "image/png" ? undefined : quality,
         ),
       );
-      const ext =
-        format === "image/png" ? "png" : format === "image/webp" ? "webp" : "jpg";
+      const ext = format === "image/png" ? "png" : format === "image/webp" ? "webp" : "jpg";
       const base = source.fileName.replace(/\.[^.]+$/, "");
       const fname = `${base}-edited-${outSize.w}x${outSize.h}.${ext}`;
       onSave(blob, fname, format);
@@ -550,8 +521,7 @@ function ImageEditor({
             <div
               className="absolute inset-0"
               style={{
-                background:
-                  "linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45))",
+                background: "linear-gradient(rgba(0,0,0,.45), rgba(0,0,0,.45))",
                 clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%, 0 0, ${rect.x}% ${rect.y}%, ${rect.x}% ${rect.y + rect.h}%, ${rect.x + rect.w}% ${rect.y + rect.h}%, ${rect.x + rect.w}% ${rect.y}%, ${rect.x}% ${rect.y}%)`,
               }}
             />
@@ -648,8 +618,8 @@ function ImageEditor({
       <div className="text-xs text-muted-foreground">
         {natural && pxCrop && outSize ? (
           <>
-            المصدر: {natural.w}×{natural.h} · القص:{" "}
-            {pxCrop.w}×{pxCrop.h} · الناتج: {outSize.w}×{outSize.h}
+            المصدر: {natural.w}×{natural.h} · القص: {pxCrop.w}×{pxCrop.h} · الناتج: {outSize.w}×
+            {outSize.h}
           </>
         ) : (
           "جارِ تحميل الصورة…"
@@ -661,12 +631,7 @@ function ImageEditor({
           إلغاء
         </Button>
         {source.originalItem && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onUseOriginal}
-            disabled={busy}
-          >
+          <Button type="button" variant="outline" onClick={onUseOriginal} disabled={busy}>
             استخدام الأصل بدون تعديل
           </Button>
         )}
@@ -743,9 +708,7 @@ async function loadImageForCanvas(src: string): Promise<HTMLImageElement> {
 
 // Helper: pointer coords stored under `_` suffix keys to avoid shadowing
 // the runtime `x`/`y` in the drag start snapshot.
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-}
+declare global {}
 
 export function MediaField({
   label,

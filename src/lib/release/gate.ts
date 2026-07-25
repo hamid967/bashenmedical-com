@@ -93,11 +93,17 @@ function ageSecondsFrom(iso: string | undefined, now: number): number | null {
  * Normalize a partial input into a full CheckResult. Applies defaults for
  * canonical check ids and computes staleness against maxAgeSeconds.
  */
-export function normalizeCheck(input: Partial<CheckInput> & { id: string }, now = Date.now()): CheckResult {
+export function normalizeCheck(
+  input: Partial<CheckInput> & { id: string },
+  now = Date.now(),
+): CheckResult {
   const id = input.id;
-  const canonical = (Object.values(RELEASE_CHECKS) as string[]).includes(id) ? (id as ReleaseCheckId) : null;
+  const canonical = (Object.values(RELEASE_CHECKS) as string[]).includes(id)
+    ? (id as ReleaseCheckId)
+    : null;
   const label = input.label ?? (canonical ? DEFAULT_LABELS[canonical] : id);
-  const severity: Severity = input.severity ?? (canonical ? DEFAULT_SEVERITY[canonical] : "advisory");
+  const severity: Severity =
+    input.severity ?? (canonical ? DEFAULT_SEVERITY[canonical] : "advisory");
   const maxAgeSeconds = input.maxAgeSeconds ?? (canonical ? DEFAULT_MAX_AGE[canonical] : undefined);
   const status: CheckStatus = input.status ?? "unknown";
   const ageSeconds = ageSecondsFrom(input.measuredAt, now);
@@ -146,6 +152,8 @@ export function evaluateGate(
 
 /** Human-readable single-line summary suitable for CI logs. */
 export function formatGateSummary(evaluation: GateEvaluation): string {
-  const parts = evaluation.checks.map((c) => `${c.id}=${c.effectiveStatus}${c.stale ? "(stale)" : ""}`);
+  const parts = evaluation.checks.map(
+    (c) => `${c.id}=${c.effectiveStatus}${c.stale ? "(stale)" : ""}`,
+  );
   return `${evaluation.verdict} :: ${parts.join(" ")}`;
 }

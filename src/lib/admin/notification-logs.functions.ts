@@ -206,9 +206,7 @@ export const getNotificationDeliveryLogDetail = createServerFn({ method: "GET" }
     if (log.notification_id) {
       const { data: n } = await context.supabase
         .from("notifications")
-        .select(
-          "id, kind, title, body, send_status, sent_at, audience, created_at, metadata",
-        )
+        .select("id, kind, title, body, send_status, sent_at, audience, created_at, metadata")
         .eq("id", log.notification_id)
         .maybeSingle();
       if (n) {
@@ -235,7 +233,7 @@ const StatsInput = z.object({
     .min(1)
     .max(24 * 30)
     .default(24 * 7),
-  });
+});
 
 /* ------------------------------- retry ---------------------------------- */
 
@@ -388,7 +386,12 @@ export type NotificationDeliveryKpis = {
 };
 
 const KpisInput = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24),
 });
 
 export const getNotificationDeliveryKpis = createServerFn({ method: "GET" })
@@ -419,8 +422,7 @@ export const getNotificationDeliveryKpis = createServerFn({ method: "GET" })
       if (status === "sent" || status === "delivered") {
         successCount += 1;
         if (r.created_at && r.updated_at) {
-          const ms =
-            new Date(r.updated_at).getTime() - new Date(r.created_at).getTime();
+          const ms = new Date(r.updated_at).getTime() - new Date(r.created_at).getTime();
           if (Number.isFinite(ms) && ms >= 0 && ms < 24 * 3600_000) {
             const cur = durByChannel.get(channel) ?? { sum: 0, n: 0 };
             cur.sum += ms;

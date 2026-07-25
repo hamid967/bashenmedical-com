@@ -71,7 +71,12 @@ export const updatePerfBudget = createServerFn({ method: "POST" })
   });
 
 const ListAlertsInput = z.object({
-  windowHours: z.number().int().min(1).max(24 * 30).default(24 * 7),
+  windowHours: z
+    .number()
+    .int()
+    .min(1)
+    .max(24 * 30)
+    .default(24 * 7),
   limit: z.number().int().min(1).max(500).default(100),
 });
 

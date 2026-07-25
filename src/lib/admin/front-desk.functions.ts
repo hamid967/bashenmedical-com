@@ -131,13 +131,7 @@ export const listQueue = createServerFn({ method: "GET" })
 
 /* ---------------------- Appointment status ---------------------- */
 
-const APPT_STATUSES = [
-  "checked_in",
-  "in_progress",
-  "completed",
-  "cancelled",
-  "no_show",
-] as const;
+const APPT_STATUSES = ["checked_in", "in_progress", "completed", "cancelled", "no_show"] as const;
 
 const apptStatusSchema = z.object({
   appointment_id: z.string().uuid(),

@@ -159,7 +159,6 @@ function ReportsPage() {
     setTo(p.to);
     setAttachment(p.attachment);
     setDemo(p.demo);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Persist any change.

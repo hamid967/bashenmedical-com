@@ -78,14 +78,9 @@ export function StepDoctor({
                   <Users className="h-6 w-6" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="font-semibold">
-                    {t("doctor.anyAvailable", "أول طبيب متاح")}
-                  </div>
+                  <div className="font-semibold">{t("doctor.anyAvailable", "أول طبيب متاح")}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    {t(
-                      "doctor.anyAvailableHint",
-                      "نختار لك الطبيب المناسب حسب الوقت الذي تختاره",
-                    )}
+                    {t("doctor.anyAvailableHint", "نختار لك الطبيب المناسب حسب الوقت الذي تختاره")}
                   </div>
                 </div>
               </div>

@@ -60,9 +60,9 @@ export type CreatePatientSignedUrlInput = {
   /** Locale for the thrown error message. Defaults to Arabic. */
   lang?: DownloadLang;
   /** Optional post-issuance audit hook. Failures are swallowed. */
-  audit?: (result: { ok: true; expiresIn: number } | { ok: false; reason: string }) =>
-    | Promise<void>
-    | void;
+  audit?: (
+    result: { ok: true; expiresIn: number } | { ok: false; reason: string },
+  ) => Promise<void> | void;
 } & AuthProof;
 
 export interface PatientSignedUrl {

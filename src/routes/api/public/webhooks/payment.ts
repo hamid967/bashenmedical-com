@@ -15,17 +15,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createHmac, timingSafeEqual } from "crypto";
 
-async function record(
-  fields: {
-    provider: string;
-    event_id: string;
-    event_type: string | null;
-    signature_valid: boolean;
-    http_status: number;
-    raw: unknown;
-    error_message?: string | null;
-  },
-) {
+async function record(fields: {
+  provider: string;
+  event_id: string;
+  event_type: string | null;
+  signature_valid: boolean;
+  http_status: number;
+  raw: unknown;
+  error_message?: string | null;
+}) {
   try {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     await supabaseAdmin
@@ -52,8 +50,7 @@ export const Route = createFileRoute("/api/public/webhooks/payment")({
         const expected = createHmac("sha256", secret).update(body).digest("hex");
         const sigBuf = Buffer.from(signature);
         const expBuf = Buffer.from(expected);
-        const valid =
-          sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf);
+        const valid = sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf);
 
         let parsed: any = {};
         try {

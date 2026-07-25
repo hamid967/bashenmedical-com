@@ -3,9 +3,18 @@ import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-q
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import {
-  getCmsEntry, saveCmsVersion, submitCmsForReview, reviewCmsEntry,
-  publishCmsEntry, scheduleCmsEntry, archiveCmsEntry, rollbackCmsVersion,
-  createCmsPreviewToken, listCmsAudit, getCmsRoleInfo, getCmsVersion,
+  getCmsEntry,
+  saveCmsVersion,
+  submitCmsForReview,
+  reviewCmsEntry,
+  publishCmsEntry,
+  scheduleCmsEntry,
+  archiveCmsEntry,
+  rollbackCmsVersion,
+  createCmsPreviewToken,
+  listCmsAudit,
+  getCmsRoleInfo,
+  getCmsVersion,
 } from "@/lib/admin/cms/cms.functions";
 import { CMS_KINDS, type CmsKind, type FieldDef } from "@/lib/admin/cms/schemas";
 import { Card } from "@/components/ui-v3";
@@ -67,16 +76,17 @@ function CmsEditor() {
   }, [data.current?.id]);
 
   const save = useMutation({
-    mutationFn: () => saveFn({
-      data: {
-        entry_id: id,
-        payload_ar: ar,
-        payload_en: en,
-        seo,
-        og_image_url: ogImage || null,
-        note: note || undefined,
-      },
-    }),
+    mutationFn: () =>
+      saveFn({
+        data: {
+          entry_id: id,
+          payload_ar: ar,
+          payload_en: en,
+          seo,
+          og_image_url: ogImage || null,
+          note: note || undefined,
+        },
+      }),
     onSuccess: (r) => {
       toast.success(`تم الحفظ (v${r.version_no})`);
       setNote("");
@@ -87,7 +97,10 @@ function CmsEditor() {
 
   const runAction = (fn: () => Promise<any>, ok: string) =>
     fn()
-      .then(() => { toast.success(ok); qc.invalidateQueries({ queryKey: ["cms"] }); })
+      .then(() => {
+        toast.success(ok);
+        qc.invalidateQueries({ queryKey: ["cms"] });
+      })
       .catch((e: any) => toast.error(e?.message ?? "فشل"));
 
   const preview = useMutation({
@@ -112,48 +125,92 @@ function CmsEditor() {
         <h1 className="text-xl font-bold">{data.entry.title ?? "(بدون عنوان)"}</h1>
         <Badge variant="outline">{status}</Badge>
         <span className="text-[11px] text-muted-foreground">
-          AR {(data.entry.locale_completeness as any)?.ar ?? 0}% · EN {(data.entry.locale_completeness as any)?.en ?? 0}%
+          AR {(data.entry.locale_completeness as any)?.ar ?? 0}% · EN{" "}
+          {(data.entry.locale_completeness as any)?.en ?? 0}%
         </span>
         <div className="flex-1" />
-        <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>حفظ نسخة</Button>
-        <Button size="sm" variant="outline" onClick={() => preview.mutate()}>معاينة</Button>
-        <Button size="sm" variant="outline"
-          onClick={() => runAction(() => submitFn({ data: { entry_id: id } }), "تم التقديم للمراجعة")}
-          disabled={status !== "draft"}>
+        <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>
+          حفظ نسخة
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => preview.mutate()}>
+          معاينة
+        </Button>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() =>
+            runAction(() => submitFn({ data: { entry_id: id } }), "تم التقديم للمراجعة")
+          }
+          disabled={status !== "draft"}
+        >
           تقديم للمراجعة
         </Button>
         {canPublish && (
           <>
-            <Button size="sm"
-              onClick={() => runAction(() => reviewFn({ data: { entry_id: id, decision: "approved" } }), "تم الاعتماد")}
-              disabled={status !== "in_review"}>
+            <Button
+              size="sm"
+              onClick={() =>
+                runAction(
+                  () => reviewFn({ data: { entry_id: id, decision: "approved" } }),
+                  "تم الاعتماد",
+                )
+              }
+              disabled={status !== "in_review"}
+            >
               اعتماد
             </Button>
-            <Button size="sm" variant="outline"
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => {
                 const c = window.prompt("سبب الرفض (مطلوب):", "");
-                if (!c || c.trim().length < 3) { toast.error("يجب إدخال سبب الرفض"); return; }
-                runAction(() => reviewFn({ data: { entry_id: id, decision: "rejected", comment: c.trim() } }), "تم الرفض");
+                if (!c || c.trim().length < 3) {
+                  toast.error("يجب إدخال سبب الرفض");
+                  return;
+                }
+                runAction(
+                  () =>
+                    reviewFn({ data: { entry_id: id, decision: "rejected", comment: c.trim() } }),
+                  "تم الرفض",
+                );
               }}
-              disabled={status !== "in_review"}>
+              disabled={status !== "in_review"}
+            >
               رفض
             </Button>
-            <Button size="sm" variant="outline"
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => {
                 const c = window.prompt("طلب تعديلات — الملاحظات (مطلوب):", "");
-                if (!c || c.trim().length < 3) { toast.error("يجب إدخال ملاحظات التعديل"); return; }
-                runAction(() => reviewFn({ data: { entry_id: id, decision: "changes_requested", comment: c.trim() } }), "أُعيد إلى المسودة");
+                if (!c || c.trim().length < 3) {
+                  toast.error("يجب إدخال ملاحظات التعديل");
+                  return;
+                }
+                runAction(
+                  () =>
+                    reviewFn({
+                      data: { entry_id: id, decision: "changes_requested", comment: c.trim() },
+                    }),
+                  "أُعيد إلى المسودة",
+                );
               }}
-              disabled={status !== "in_review"}>
+              disabled={status !== "in_review"}
+            >
               طلب تعديلات
             </Button>
-            <Button size="sm"
+            <Button
+              size="sm"
               onClick={() => runAction(() => publishFn({ data: { entry_id: id } }), "تم النشر")}
-              disabled={!["approved", "scheduled", "draft"].includes(status)}>
+              disabled={!["approved", "scheduled", "draft"].includes(status)}
+            >
               نشر الآن
             </Button>
-            <Button size="sm" variant="outline"
-              onClick={() => runAction(() => archiveFn({ data: { entry_id: id } }), "تمت الأرشفة")}>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => runAction(() => archiveFn({ data: { entry_id: id } }), "تمت الأرشفة")}
+            >
               أرشفة
             </Button>
           </>
@@ -167,7 +224,15 @@ function CmsEditor() {
             onClick={() => setTab(t)}
             className={`px-3 py-2 text-sm ${tab === t ? "border-b-2 border-primary font-semibold" : "text-muted-foreground"}`}
           >
-            {t === "ar" ? "عربي" : t === "en" ? "English" : t === "seo" ? "SEO/OG" : t === "schedule" ? "جدولة" : "السجل"}
+            {t === "ar"
+              ? "عربي"
+              : t === "en"
+                ? "English"
+                : t === "seo"
+                  ? "SEO/OG"
+                  : t === "schedule"
+                    ? "جدولة"
+                    : "السجل"}
           </button>
         ))}
       </div>
@@ -177,31 +242,64 @@ function CmsEditor() {
 
       {tab === "seo" && (
         <Card className="p-4 space-y-3">
-          <TextInput label="Title (SEO)" value={seo.title ?? ""} onChange={(v) => setSeo({ ...seo, title: v })} />
-          <TextInput label="Description (SEO)" value={seo.description ?? ""} onChange={(v) => setSeo({ ...seo, description: v })} textarea />
-          <TextInput label="Canonical URL" value={seo.canonical ?? ""} onChange={(v) => setSeo({ ...seo, canonical: v })} />
-          <TextInput label="og:title" value={seo.og_title ?? ""} onChange={(v) => setSeo({ ...seo, og_title: v })} />
-          <TextInput label="og:description" value={seo.og_description ?? ""} onChange={(v) => setSeo({ ...seo, og_description: v })} textarea />
+          <TextInput
+            label="Title (SEO)"
+            value={seo.title ?? ""}
+            onChange={(v) => setSeo({ ...seo, title: v })}
+          />
+          <TextInput
+            label="Description (SEO)"
+            value={seo.description ?? ""}
+            onChange={(v) => setSeo({ ...seo, description: v })}
+            textarea
+          />
+          <TextInput
+            label="Canonical URL"
+            value={seo.canonical ?? ""}
+            onChange={(v) => setSeo({ ...seo, canonical: v })}
+          />
+          <TextInput
+            label="og:title"
+            value={seo.og_title ?? ""}
+            onChange={(v) => setSeo({ ...seo, og_title: v })}
+          />
+          <TextInput
+            label="og:description"
+            value={seo.og_description ?? ""}
+            onChange={(v) => setSeo({ ...seo, og_description: v })}
+            textarea
+          />
           <MediaField label="og:image" value={ogImage} onChange={setOgImage} />
         </Card>
       )}
 
       {tab === "schedule" && (
         <Card className="p-4 space-y-3">
-          <TextInput label="نشر تلقائي في (UTC)" value={publishAt} onChange={setPublishAt} placeholder="2026-08-01T09:00:00Z" />
+          <TextInput
+            label="نشر تلقائي في (UTC)"
+            value={publishAt}
+            onChange={setPublishAt}
+            placeholder="2026-08-01T09:00:00Z"
+          />
           <div className="flex gap-2">
-            <Button size="sm"
+            <Button
+              size="sm"
               disabled={!canPublish || !publishAt}
               onClick={() =>
                 runAction(
-                  () => scheduleFn({ data: { entry_id: id, publish_at: new Date(publishAt).toISOString() } }),
+                  () =>
+                    scheduleFn({
+                      data: { entry_id: id, publish_at: new Date(publishAt).toISOString() },
+                    }),
                   "تمت الجدولة",
                 )
               }
             >
               جدولة
             </Button>
-            {!canPublish && <span className="text-xs text-muted-foreground">تحتاج صلاحية مسؤول للجدولة.</span>}
+            {!canPublish && (
+              <span className="text-xs text-muted-foreground">تحتاج صلاحية مسؤول للجدولة.</span>
+            )}
           </div>
           {data.entry.scheduled_at && (
             <div className="text-xs text-muted-foreground">
@@ -241,10 +339,15 @@ function CmsEditor() {
 }
 
 function FieldsEditor({
-  fields, value, onChange, dir,
+  fields,
+  value,
+  onChange,
+  dir,
 }: {
-  fields: FieldDef[]; value: Record<string, any>;
-  onChange: (v: Record<string, any>) => void; dir: "rtl" | "ltr";
+  fields: FieldDef[];
+  value: Record<string, any>;
+  onChange: (v: Record<string, any>) => void;
+  dir: "rtl" | "ltr";
 }) {
   return (
     <Card className="p-4 space-y-3" dir={dir}>
@@ -263,7 +366,14 @@ function FieldsEditor({
           return <ListField key={f.name} f={f} value={Array.isArray(v) ? v : []} onChange={set} />;
         }
         if (f.type === "image") {
-          return <MediaField key={f.name} label={f.label + (f.required ? " *" : "")} value={v ?? ""} onChange={set} />;
+          return (
+            <MediaField
+              key={f.name}
+              label={f.label + (f.required ? " *" : "")}
+              value={v ?? ""}
+              onChange={set}
+            />
+          );
         }
         const textarea = f.type === "textarea" || f.type === "rich";
         return (
@@ -281,7 +391,15 @@ function FieldsEditor({
   );
 }
 
-function ListField({ f, value, onChange }: { f: FieldDef; value: any[]; onChange: (v: any[]) => void }) {
+function ListField({
+  f,
+  value,
+  onChange,
+}: {
+  f: FieldDef;
+  value: any[];
+  onChange: (v: any[]) => void;
+}) {
   const cols = f.itemFields ?? [];
   return (
     <div className="space-y-2">
@@ -310,11 +428,7 @@ function ListField({ f, value, onChange }: { f: FieldDef; value: any[]; onChange
           </button>
         </div>
       ))}
-      <button
-        type="button"
-        className="text-sm underline"
-        onClick={() => onChange([...value, {}])}
-      >
+      <button type="button" className="text-sm underline" onClick={() => onChange([...value, {}])}>
         + إضافة عنصر
       </button>
     </div>
@@ -322,10 +436,17 @@ function ListField({ f, value, onChange }: { f: FieldDef; value: any[]; onChange
 }
 
 function TextInput({
-  label, value, onChange, textarea, placeholder,
+  label,
+  value,
+  onChange,
+  textarea,
+  placeholder,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  textarea?: boolean; placeholder?: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  textarea?: boolean;
+  placeholder?: string;
 }) {
   return (
     <label className="text-sm block">
@@ -351,7 +472,12 @@ function TextInput({
 }
 
 function HistoryPanel({
-  versions, currentId, canPublish, onRollback, fetchAudit, fetchVersion,
+  versions,
+  currentId,
+  canPublish,
+  onRollback,
+  fetchAudit,
+  fetchVersion,
 }: {
   entryId: string;
   versions: any[];
@@ -370,7 +496,8 @@ function HistoryPanel({
     setDiffLoading(true);
     try {
       const [l, r] = await Promise.all([fetchVersion(leftId), fetchVersion(rightId)]);
-      setDiffLeft(l); setDiffRight(r);
+      setDiffLeft(l);
+      setDiffRight(r);
     } catch (e: any) {
       toast.error(e?.message ?? "فشل تحميل المقارنة");
     } finally {
@@ -384,12 +511,21 @@ function HistoryPanel({
         <h3 className="font-bold mb-2">النسخ</h3>
         <ul className="space-y-1 text-sm">
           {versions.map((v) => (
-            <li key={v.id} className="flex items-center justify-between border-b py-1 last:border-0">
+            <li
+              key={v.id}
+              className="flex items-center justify-between border-b py-1 last:border-0"
+            >
               <span>
                 <span className="font-mono">v{v.version_no}</span>
-                <span className="text-muted-foreground ms-2">{new Date(v.created_at).toLocaleString("ar")}</span>
+                <span className="text-muted-foreground ms-2">
+                  {new Date(v.created_at).toLocaleString("ar")}
+                </span>
                 {v.note && <span className="text-muted-foreground ms-2">— {v.note}</span>}
-                {v.id === currentId && <Badge className="ms-2" variant="secondary">الحالية</Badge>}
+                {v.id === currentId && (
+                  <Badge className="ms-2" variant="secondary">
+                    الحالية
+                  </Badge>
+                )}
               </span>
               <div className="flex items-center gap-2">
                 {currentId && v.id !== currentId && (
@@ -408,13 +544,20 @@ function HistoryPanel({
         </ul>
       </div>
 
-      {(diffLeft && diffRight) && (
+      {diffLeft && diffRight && (
         <div>
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-bold">
               مقارنة: v{diffLeft.version_no} ↔ v{diffRight.version_no}
             </h3>
-            <Button size="sm" variant="ghost" onClick={() => { setDiffLeft(null); setDiffRight(null); }}>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => {
+                setDiffLeft(null);
+                setDiffRight(null);
+              }}
+            >
               إغلاق
             </Button>
           </div>
@@ -434,7 +577,9 @@ function HistoryPanel({
           <ul className="space-y-1 text-xs font-mono">
             {audit.map((a: any) => (
               <li key={a.id} className="border-b py-1 last:border-0">
-                <span className="text-muted-foreground">{new Date(a.created_at).toLocaleString("ar")}</span>
+                <span className="text-muted-foreground">
+                  {new Date(a.created_at).toLocaleString("ar")}
+                </span>
                 {" · "}
                 <span>{a.action}</span>
               </li>
@@ -458,7 +603,10 @@ function flattenPayload(prefix: string, val: any, out: Record<string, string>) {
       return;
     }
     const keys = Object.keys(val);
-    if (keys.length === 0) { out[prefix] = "{}"; return; }
+    if (keys.length === 0) {
+      out[prefix] = "{}";
+      return;
+    }
     for (const k of keys) flattenPayload(prefix ? `${prefix}.${k}` : k, val[k], out);
     return;
   }
@@ -503,8 +651,12 @@ function DiffTable({ left, right }: { left: any; right: any }) {
           {rows.map(([k, a, b]) => (
             <tr key={k} className="border-t align-top">
               <td className="p-2 font-mono text-[11px] text-muted-foreground break-all">{k}</td>
-              <td className="p-2 bg-red-500/5 whitespace-pre-wrap break-all">{a || <span className="text-muted-foreground">—</span>}</td>
-              <td className="p-2 bg-emerald-500/5 whitespace-pre-wrap break-all">{b || <span className="text-muted-foreground">—</span>}</td>
+              <td className="p-2 bg-red-500/5 whitespace-pre-wrap break-all">
+                {a || <span className="text-muted-foreground">—</span>}
+              </td>
+              <td className="p-2 bg-emerald-500/5 whitespace-pre-wrap break-all">
+                {b || <span className="text-muted-foreground">—</span>}
+              </td>
             </tr>
           ))}
         </tbody>
@@ -512,4 +664,3 @@ function DiffTable({ left, right }: { left: any; right: any }) {
     </div>
   );
 }
-

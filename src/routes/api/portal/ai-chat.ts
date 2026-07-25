@@ -143,7 +143,8 @@ export const Route = createFileRoute("/api/portal/ai-chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const _rl = await applyRateLimit(request, { category: "ai_chat" }); if (_rl) return _rl;
+        const _rl = await applyRateLimit(request, { category: "ai_chat" });
+        if (_rl) return _rl;
         const auth = await readBearer(request);
         if (!auth) return new Response("Unauthorized", { status: 401 });
 

@@ -74,7 +74,10 @@ export const Route = createFileRoute("/_authenticated/my")({
   head: () => ({
     meta: [
       { title: "حسابي — مواعيدي وطلباتي | مجمع باعشن الطبي" },
-      { name: "description", content: "استعرض مواعيدك، وصفاتك، تقارير المختبر والأشعة وفواتيرك في مكان واحد." },
+      {
+        name: "description",
+        content: "استعرض مواعيدك، وصفاتك، تقارير المختبر والأشعة وفواتيرك في مكان واحد.",
+      },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "حسابي — مجمع باعشن الطبي" },
       { property: "og:description", content: "لوحة المريض الخاصة بمتابعة المواعيد والتقارير." },

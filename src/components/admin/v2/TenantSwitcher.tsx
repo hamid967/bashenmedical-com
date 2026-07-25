@@ -14,11 +14,7 @@ import { logTenantSwitch } from "@/lib/admin/tenant-audit.functions";
  * Fires an audit event for every explicit tenant switch. Failures are
  * swallowed so a flaky audit write can never block the UI change.
  */
-function auditSwitch(
-  fromId: string | null,
-  toId: string | null,
-  toName: string | null,
-) {
+function auditSwitch(fromId: string | null, toId: string | null, toName: string | null) {
   if (fromId === toId) return;
   void logTenantSwitch({
     data: {
@@ -39,8 +35,7 @@ function auditSwitch(
  * Hidden when the user only belongs to a single organization.
  */
 export function TenantSwitcher() {
-  const { tenantId, setTenantId, organizations, isLoading, activeOrganization } =
-    useActiveTenant();
+  const { tenantId, setTenantId, organizations, isLoading, activeOrganization } = useActiveTenant();
 
   // Do not render when there's nothing to switch between.
   if (!isLoading && organizations.length <= 1) return null;
@@ -109,9 +104,7 @@ export function TenantSwitcher() {
               <Building className="h-4 w-4 opacity-80" />
               <div className="flex-1 min-w-0">
                 <div className="truncate text-sm">{o.name}</div>
-                {o.slug && (
-                  <div className="truncate text-[11px] opacity-60">{o.slug}</div>
-                )}
+                {o.slug && <div className="truncate text-[11px] opacity-60">{o.slug}</div>}
               </div>
               {active && <Check className="h-4 w-4 opacity-80" />}
             </DropdownMenuItem>

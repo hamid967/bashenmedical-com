@@ -6,12 +6,12 @@
 
 ## 1. Summary
 
-| Metric | Baseline (pre-A2) | After A2 | After A3 | Δ Total |
-|---|---:|---:|---:|---:|
-| Linter warnings (total) | 191 | 111 | **106** | **−85 (−44%)** |
-| SECDEF fns callable by `anon` | ~70 | 36 | **32** | **−38** |
-| SECDEF fns callable by `PUBLIC` role | ~65 | 5 | **0** | **−65** |
-| Internal (`_`-prefixed) fns exposed to anon | 12 | 0 | **0** | **−12** |
+| Metric                                      | Baseline (pre-A2) | After A2 | After A3 |        Δ Total |
+| ------------------------------------------- | ----------------: | -------: | -------: | -------------: |
+| Linter warnings (total)                     |               191 |      111 |  **106** | **−85 (−44%)** |
+| SECDEF fns callable by `anon`               |               ~70 |       36 |   **32** |        **−38** |
+| SECDEF fns callable by `PUBLIC` role        |               ~65 |        5 |    **0** |        **−65** |
+| Internal (`_`-prefixed) fns exposed to anon |                12 |        0 |    **0** |        **−12** |
 
 ## 2. What A2 / A3 Did
 
@@ -39,13 +39,13 @@ client). Populated by the watchdog cron (`evaluate_permission_error_spike`).
 
 ### 4.1 Current snapshot (last 7 days)
 
-| Bucket | Requests | % of total |
-|---|---:|---:|
-| `/api/*` 403 | **0** | — |
-| `rpc/*` 403 | **0** | — |
-| `/api/*` 401 | **0** | — |
-| `rpc/*` 401 | **0** | — |
-| **Total 401/403** | **0** | 100% |
+| Bucket            | Requests | % of total |
+| ----------------- | -------: | ---------: |
+| `/api/*` 403      |    **0** |          — |
+| `rpc/*` 403       |    **0** |          — |
+| `/api/*` 401      |    **0** |          — |
+| `rpc/*` 401       |    **0** |          — |
+| **Total 401/403** |    **0** |       100% |
 
 > **Interpretation**: No permission errors recorded in the 7 days since A2/A3 landed.
 > This is the healthy state — the pinned guard + watchdog will flag any change.
@@ -80,11 +80,11 @@ Live view: `/admin/permission-errors` (Rate & Sources tab).
 
 ### 4.3 Spike detection thresholds
 
-| Severity | Rule | Watchdog action |
-|---|---|---|
-| `info` | any 401/403 recorded | write row only |
-| `warn` | current 15-min rate ≥ 3× 7-day baseline **and** > 10 hits | Slack notice, no rollback rec |
-| `rollback` | rate ≥ 6× baseline **and** > 20 hits | Slack alert + `rollback_recommendations` row for one-click revert |
+| Severity   | Rule                                                      | Watchdog action                                                   |
+| ---------- | --------------------------------------------------------- | ----------------------------------------------------------------- |
+| `info`     | any 401/403 recorded                                      | write row only                                                    |
+| `warn`     | current 15-min rate ≥ 3× 7-day baseline **and** > 10 hits | Slack notice, no rollback rec                                     |
+| `rollback` | rate ≥ 6× baseline **and** > 20 hits                      | Slack alert + `rollback_recommendations` row for one-click revert |
 
 Watchdog runs every 15 minutes for 24 h after each `deployment_markers`
 insert (registered automatically by the `record-deployment-marker` CI job).
@@ -95,14 +95,15 @@ If a future migration accidentally revokes a still-live function, the panel
 would render like this (this is a **worked example only** — current values in
 §4.1 are all zero):
 
-| source | route | status | hits | distinct_roles | first_seen |
-|---|---|---:|---:|---:|---|
-| RPC | `rpc/book_appointment_atomic` | 403 | 214 | 1 (`anon`) | 12:04 UTC |
-| RPC | `rpc/estimate_appointment_cost` | 403 | 118 | 1 (`anon`) | 12:04 UTC |
-| API | `/api/public/inquiries/create` | 403 | 42 | 2 | 12:07 UTC |
-| RPC | `rpc/lookup_appointment` | 403 | 19 | 1 (`anon`) | 12:11 UTC |
+| source | route                           | status | hits | distinct_roles | first_seen |
+| ------ | ------------------------------- | -----: | ---: | -------------: | ---------- |
+| RPC    | `rpc/book_appointment_atomic`   |    403 |  214 |     1 (`anon`) | 12:04 UTC  |
+| RPC    | `rpc/estimate_appointment_cost` |    403 |  118 |     1 (`anon`) | 12:04 UTC  |
+| API    | `/api/public/inquiries/create`  |    403 |   42 |              2 | 12:07 UTC  |
+| RPC    | `rpc/lookup_appointment`        |    403 |   19 |     1 (`anon`) | 12:11 UTC  |
 
 Attribution rules:
+
 - `role_hint = anon` on a guest-critical route → **priority-0**, trigger rollback rec immediately.
 - `role_hint = authenticated` on a staff route → **priority-1**, check role-grant matrix.
 - Spread across ≥ 5 routes within 5 min → likely ACL-wide regression (audit the last migration's `REVOKE`/`CREATE OR REPLACE` statements).
@@ -138,12 +139,12 @@ generation, Slack notification, and a one-click apply button.
 
 ### 6.2 Trigger conditions (all evaluated by `evaluate_permission_error_spike`)
 
-| Signal | Threshold | Window | Sources |
-|---|---|---|---|
-| **S1** — Rate ratio | current 15-min rate ≥ **6×** 7-day baseline | rolling 15 min | `api_permission_errors` |
-| **S2** — Absolute floor | > **20 hits** in the same 15 min | rolling 15 min | same |
-| **S3** — Guest impact | ≥ **1 hit** with `role_hint='anon'` on a route in the guest-critical set | rolling 15 min | same |
-| **S4** — Deployment proximity | most-recent `deployment_markers.created_at` within last **24 h** | on trigger | `deployment_markers` |
+| Signal                        | Threshold                                                                | Window         | Sources                 |
+| ----------------------------- | ------------------------------------------------------------------------ | -------------- | ----------------------- |
+| **S1** — Rate ratio           | current 15-min rate ≥ **6×** 7-day baseline                              | rolling 15 min | `api_permission_errors` |
+| **S2** — Absolute floor       | > **20 hits** in the same 15 min                                         | rolling 15 min | same                    |
+| **S3** — Guest impact         | ≥ **1 hit** with `role_hint='anon'` on a route in the guest-critical set | rolling 15 min | same                    |
+| **S4** — Deployment proximity | most-recent `deployment_markers.created_at` within last **24 h**         | on trigger     | `deployment_markers`    |
 
 **Rollback recommendation is emitted only when `S1 ∧ S2 ∧ S4` are all true.**
 `S3` upgrades severity from `warn` → `rollback` immediately, bypassing the
@@ -178,23 +179,24 @@ Route: `src/routes/_authenticated/admin.rollback-decisions.tsx`
 
 Each pending recommendation card shows:
 
-| Field | Purpose |
-|---|---|
-| `id`, `created_at` | audit reference |
-| `severity` (`warn` / `rollback`) | urgency badge |
-| `deployment_ref` | link to merged migration SHA + diff |
-| `signals_snapshot` (jsonb) | S1/S2/S3/S4 values at trigger time |
-| `top_affected_routes[]` | table from §4.2 for the 15-min window |
-| `sample_error_ids[]` | 5 representative `api_permission_errors.id` |
-| `proposed_reverse_migration` | pre-generated SQL from `pg_proc.proacl` snapshot |
-| **Keep button** | writes `status='kept'`, `decided_by=auth.uid()`, `decision_reason` (required text) |
-| **Rollback button** | writes `status='approved'`, triggers `bot-open-rollback-pr` webhook |
+| Field                            | Purpose                                                                            |
+| -------------------------------- | ---------------------------------------------------------------------------------- |
+| `id`, `created_at`               | audit reference                                                                    |
+| `severity` (`warn` / `rollback`) | urgency badge                                                                      |
+| `deployment_ref`                 | link to merged migration SHA + diff                                                |
+| `signals_snapshot` (jsonb)       | S1/S2/S3/S4 values at trigger time                                                 |
+| `top_affected_routes[]`          | table from §4.2 for the 15-min window                                              |
+| `sample_error_ids[]`             | 5 representative `api_permission_errors.id`                                        |
+| `proposed_reverse_migration`     | pre-generated SQL from `pg_proc.proacl` snapshot                                   |
+| **Keep button**                  | writes `status='kept'`, `decided_by=auth.uid()`, `decision_reason` (required text) |
+| **Rollback button**              | writes `status='approved'`, triggers `bot-open-rollback-pr` webhook                |
 
 Both buttons are idempotent and audit-logged to `security_audit_log`.
 
 ### 6.5 What "Keep" means
 
 Choosing **Keep** commits to:
+
 1. The 403 spike is **not** an ACL regression from this migration.
 2. Root cause must be filed within 24 h as an incident ticket (link stored in `rollback_recommendations.followup_url`).
 3. Watchdog remains armed; a second `rollback` recommendation within the same 24 h window auto-escalates to the tech-lead channel and disables the Keep button until the incident ticket resolves.
@@ -202,6 +204,7 @@ Choosing **Keep** commits to:
 ### 6.6 What "Rollback" means
 
 Choosing **Rollback** triggers:
+
 1. Bot generates a reverse migration named
    `<timestamp>_rollback_of_<original_ref>.sql` containing the `GRANT`s
    restored from the pre-A2 `pg_proc.proacl` snapshot stored in
@@ -238,6 +241,7 @@ recommendations from accumulating after resolved incidents.
 ## 7. Original rollback triggers (retained for reference)
 
 Rollback only if within 24 h of a subsequent deploy:
+
 - Watchdog emits `severity='rollback'` (formalized in §6.2 as S1 ∧ S2 ∧ S4), or
 - Live logs show `permission denied for function` on a guest-critical path (S3), or
 
@@ -250,24 +254,24 @@ Rollback only if within 24 h of a subsequent deploy:
 
 ### 8.1 التعريفات
 
-| مصطلح | تعريف |
-|---|---|
-| **Change window** | أول 24h بعد `record-deployment-marker` |
-| **Baseline** | `deployment_markers.baseline_errors_per_hour` من آخر marker مستقر |
-| **403 rate** | `api_permission_errors` where `status_code=403`, per hour |
-| **PGRST rate** | نفس المصدر where `error_code IN ('42501','PGRST301','PGRST302')` |
-| **Guest impact** | 403 على `/api/public/*` (booking, inquiries, invoices) |
+| مصطلح             | تعريف                                                             |
+| ----------------- | ----------------------------------------------------------------- |
+| **Change window** | أول 24h بعد `record-deployment-marker`                            |
+| **Baseline**      | `deployment_markers.baseline_errors_per_hour` من آخر marker مستقر |
+| **403 rate**      | `api_permission_errors` where `status_code=403`, per hour         |
+| **PGRST rate**    | نفس المصدر where `error_code IN ('42501','PGRST301','PGRST302')`  |
+| **Guest impact**  | 403 على `/api/public/*` (booking, inquiries, invoices)            |
 
 ### 8.2 الأهداف (SLOs)
 
-| # | Objective | Target | Budget (28-day) | Alert |
-|---|---|---:|---:|---|
-| SLO-1 | 403 rate ضمن change window | ≤ **1.5×** baseline | 6 spikes | `severity='warn'` |
-| SLO-2 | 403 rate ضمن change window | ≤ **3×** baseline | 2 spikes | `severity='rollback'` |
-| SLO-3 | Guest-path 403 (S3) | ≤ **0** hits خلال 24h | 0 | فوري + rollback recommendation |
-| SLO-4 | `permission_denied` مطلق | ≤ **20** hits خلال 24h | — | `warn` عند 10، `rollback` عند 20 |
-| SLO-5 | Time-to-detect (TTD) | ≤ **15 min** بعد أول spike | — | يقاس عبر `record_permission_error → evaluate_*` |
-| SLO-6 | Time-to-decide (TTM) | ≤ **60 min** بعد rollback recommendation | — | measured via `rollback_recommendations.acknowledged_at − created_at` |
+| #     | Objective                  |                                   Target | Budget (28-day) | Alert                                                                |
+| ----- | -------------------------- | ---------------------------------------: | --------------: | -------------------------------------------------------------------- |
+| SLO-1 | 403 rate ضمن change window |                      ≤ **1.5×** baseline |        6 spikes | `severity='warn'`                                                    |
+| SLO-2 | 403 rate ضمن change window |                        ≤ **3×** baseline |        2 spikes | `severity='rollback'`                                                |
+| SLO-3 | Guest-path 403 (S3)        |                    ≤ **0** hits خلال 24h |               0 | فوري + rollback recommendation                                       |
+| SLO-4 | `permission_denied` مطلق   |                   ≤ **20** hits خلال 24h |               — | `warn` عند 10، `rollback` عند 20                                     |
+| SLO-5 | Time-to-detect (TTD)       |               ≤ **15 min** بعد أول spike |               — | يقاس عبر `record_permission_error → evaluate_*`                      |
+| SLO-6 | Time-to-decide (TTM)       | ≤ **60 min** بعد rollback recommendation |               — | measured via `rollback_recommendations.acknowledged_at − created_at` |
 
 **العلاقة بالـthresholds الفعلية في `evaluate_permission_error_spike`:**
 `warn_ratio=1.5`, `rollback_ratio=3.0`, `min_hits=20` — مطابقة لـ SLO-1/2/4.
@@ -276,12 +280,12 @@ Rollback only if within 24 h of a subsequent deploy:
 
 **المصدر**: `api_permission_errors` + `deployment_markers` (منذ تفعيل الـwatchdog).
 
-| Window | 403 total | 403/h peak | PGRST42501 | Guest 403 | rollback recs | SLO status |
-|---|---:|---:|---:|---:|---:|---|
-| **Pre-A2** (baseline 14d، تقديري من logs) | ~14 | ~0.5 | 6 | 2 | 0 | — (no monitor) |
-| **A2 window** (24h post-merge) | 3 | 0.3 | 0 | 0 | 0 | ✅ SLO-1/2/3/4 |
-| **A3 window** (24h post-merge) | 1 | 0.1 | 0 | 0 | 0 | ✅ SLO-1/2/3/4 |
-| **Post-A3 steady state** (7d) | 0 | 0 | 0 | 0 | 0 | ✅ الكل |
+| Window                                    | 403 total | 403/h peak | PGRST42501 | Guest 403 | rollback recs | SLO status     |
+| ----------------------------------------- | --------: | ---------: | ---------: | --------: | ------------: | -------------- |
+| **Pre-A2** (baseline 14d، تقديري من logs) |       ~14 |       ~0.5 |          6 |         2 |             0 | — (no monitor) |
+| **A2 window** (24h post-merge)            |         3 |        0.3 |          0 |         0 |             0 | ✅ SLO-1/2/3/4 |
+| **A3 window** (24h post-merge)            |         1 |        0.1 |          0 |         0 |             0 | ✅ SLO-1/2/3/4 |
+| **Post-A3 steady state** (7d)             |         0 |          0 |          0 |         0 |             0 | ✅ الكل        |
 
 **ملاحظة**: أرقام Pre-A2 تقديرية — الـwatchdog والجدول لم يكونا موجودين
 قبل A2. تم إنشاؤهما ضمن A2 نفسها كشرط لقياس الأثر، لذلك القيم قبل-A2
@@ -316,5 +320,3 @@ GROUP BY 1 ORDER BY 1 DESC;
 خلال 7 أيام من دمج A3، جميع الـSLOs الستة **within budget** بهامش واسع
 (0 spikes، 0 guest impact، 0 rollback recommendations). هذا يدعم توصية
 **KEEP** في §1، ويحدّد threshold موضوعي لأي rollback مستقبلي.
-
-

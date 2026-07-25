@@ -57,14 +57,7 @@ export function classifyPatientError(
 
 const classify = classifyPatientError;
 
-
-export function PatientRouteError({
-  error,
-  reset,
-}: {
-  error: Error;
-  reset: () => void;
-}) {
+export function PatientRouteError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const kind = classify(error);

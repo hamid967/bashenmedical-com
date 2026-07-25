@@ -4,14 +4,14 @@
 
 ## المكوّنات
 
-| المستوى | الملف | الدور |
-|---|---|---|
-| UI مخصّص | `src/routes/insurance.verify.tsx` (`/insurance/verify`) | صفحة عامة قائمة بذاتها للمرضى للتحقق قبل الحجز. |
-| UI مدمج | `src/components/booking/InsuranceSection.tsx` | نفس التدفق داخل معالج `/book`. |
-| API عام | `src/routes/api/public/insurance/verify.ts` (`POST /api/public/insurance/verify`) | تحقق مدخل Zod + استدعاء المحوّل + تنسيق الرد. |
-| المحوّل | `src/lib/nphies/adapter.server.ts` | `checkEligibility()` + سائقو `mock`/`sandbox`/`live` + سجل تدقيق. |
-| السجل | جدول `public.nphies_requests` | كل استدعاء يُسجّل (Latency + status + raw). |
-| لوحة الأدمن | `src/routes/_authenticated/admin.nphies-logs.tsx` | عرض السجلات وتحليل الأداء. |
+| المستوى     | الملف                                                                             | الدور                                                             |
+| ----------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| UI مخصّص    | `src/routes/insurance.verify.tsx` (`/insurance/verify`)                           | صفحة عامة قائمة بذاتها للمرضى للتحقق قبل الحجز.                   |
+| UI مدمج     | `src/components/booking/InsuranceSection.tsx`                                     | نفس التدفق داخل معالج `/book`.                                    |
+| API عام     | `src/routes/api/public/insurance/verify.ts` (`POST /api/public/insurance/verify`) | تحقق مدخل Zod + استدعاء المحوّل + تنسيق الرد.                     |
+| المحوّل     | `src/lib/nphies/adapter.server.ts`                                                | `checkEligibility()` + سائقو `mock`/`sandbox`/`live` + سجل تدقيق. |
+| السجل       | جدول `public.nphies_requests`                                                     | كل استدعاء يُسجّل (Latency + status + raw).                       |
+| لوحة الأدمن | `src/routes/_authenticated/admin.nphies-logs.tsx`                                 | عرض السجلات وتحليل الأداء.                                        |
 
 ## تدفق البيانات
 
@@ -35,6 +35,7 @@ Response: { ok, eligible, reason, coverage_percent, consultation_fee,
 ## اختيار السائق
 
 يُقرَّر عبر `NPHIES_MODE` (server env):
+
 - `mock` (افتراضي) — تقدير داخلي عبر RPC.
 - `sandbox` — مطابق للـ mock حاليًا؛ محجوز لاختبارات NPHIES الرسمية.
 - `live` — يتطلب `NPHIES_BASE_URL` و `NPHIES_CLIENT_ID` و `NPHIES_CLIENT_SECRET`.

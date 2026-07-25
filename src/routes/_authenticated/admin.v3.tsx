@@ -47,10 +47,7 @@ const healthQuery = queryOptions({
 
 export const Route = createFileRoute("/_authenticated/admin/v3")({
   head: () => ({
-    meta: [
-      { title: "V3 Rollout | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "V3 Rollout | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(rolloutQuery),
   component: V3RolloutPage,
@@ -104,7 +101,6 @@ function V3RolloutPage() {
   }
 
   const overallPct = Math.round((data.totalEnabled / Math.max(1, data.total)) * 100);
-
 
   return (
     <div className="admin-console" dir="rtl">
@@ -184,10 +180,7 @@ function PhaseRow({ data }: { data: V3RolloutSummary }) {
               {c.enabled}/{c.total}
             </div>
             <div className="mt-2 h-1.5 rounded-full bg-slate-100 overflow-hidden">
-              <div
-                className="h-full bg-indigo-500"
-                style={{ width: `${pct}%` }}
-              />
+              <div className="h-full bg-indigo-500" style={{ width: `${pct}%` }} />
             </div>
             <div className="text-[11px] text-[color:var(--ac-ink-3)] mt-1">{pct}%</div>
           </div>
@@ -266,10 +259,26 @@ function PillarCard({
 }
 
 const SEV_TONE: Record<Severity, { chip: string; label: string; icon: string }> = {
-  ok: { chip: "bg-emerald-50 text-emerald-700 border-emerald-200", label: "طبيعي", icon: "text-emerald-500" },
-  warn: { chip: "bg-amber-50 text-amber-700 border-amber-200", label: "تحذير", icon: "text-amber-500" },
-  rollback: { chip: "bg-rose-50 text-rose-700 border-rose-200", label: "تراجع مقترح", icon: "text-rose-500" },
-  unknown: { chip: "bg-slate-50 text-slate-600 border-slate-200", label: "—", icon: "text-slate-400" },
+  ok: {
+    chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    label: "طبيعي",
+    icon: "text-emerald-500",
+  },
+  warn: {
+    chip: "bg-amber-50 text-amber-700 border-amber-200",
+    label: "تحذير",
+    icon: "text-amber-500",
+  },
+  rollback: {
+    chip: "bg-rose-50 text-rose-700 border-rose-200",
+    label: "تراجع مقترح",
+    icon: "text-rose-500",
+  },
+  unknown: {
+    chip: "bg-slate-50 text-slate-600 border-slate-200",
+    label: "—",
+    icon: "text-slate-400",
+  },
 };
 
 function HealthPanel({

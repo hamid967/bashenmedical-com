@@ -20,13 +20,7 @@ import { Label } from "@/components/ui-v3";
 import { Switch } from "@/components/ui-v3";
 import { Textarea } from "@/components/ui-v3";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-v3";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui-v3";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui-v3";
 import { Separator } from "@/components/ui-v3";
 import {
   DEFAULT_JAZAN_SETTINGS,
@@ -179,7 +173,8 @@ function JazanVisualAdmin() {
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground mt-1">
-              الافتراضي: مرة واحدة في الجلسة. لا يظهر أبدًا في مسارات الحجز/الدخول/لوحة المريض/الإدارة.
+              الافتراضي: مرة واحدة في الجلسة. لا يظهر أبدًا في مسارات الحجز/الدخول/لوحة
+              المريض/الإدارة.
             </p>
           </div>
           <div>
@@ -250,8 +245,10 @@ function JazanVisualAdmin() {
             />
             <p className="text-xs text-muted-foreground mt-1">
               اتركه فارغًا لاستخدام القائمة الافتراضية (
-              <code>/book, /auth, /patient, /admin, /owner, /verify, /reservations/manage, /api</code>).
-              المقدمة تُتخطى تلقائيًا أيضًا على شبكات Data Saver و 2G.
+              <code>
+                /book, /auth, /patient, /admin, /owner, /verify, /reservations/manage, /api
+              </code>
+              ). المقدمة تُتخطى تلقائيًا أيضًا على شبكات Data Saver و 2G.
             </p>
           </div>
           <div>
@@ -296,7 +293,6 @@ function JazanVisualAdmin() {
               اتركه فارغًا لاستخدام شعار المجمع الافتراضي. استخدم فقط شعارًا لديك حق استعماله.
             </p>
             {s.intro.logoUrl?.trim() && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={s.intro.logoUrl}
                 alt=""

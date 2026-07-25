@@ -28,8 +28,7 @@ export const Route = createFileRoute("/_authenticated/admin/clinic-hub")({
       { title: "المركز السريري — لوحة الإدارة الموحدة" },
       {
         name: "description",
-        content:
-          "استخدام الحجوزات، إدارة الأطباء، والفروع في واجهة واحدة داخل لوحة الإدارة.",
+        content: "استخدام الحجوزات، إدارة الأطباء، والفروع في واجهة واحدة داخل لوحة الإدارة.",
       },
       { name: "robots", content: "noindex,nofollow" },
     ],
@@ -49,9 +48,7 @@ function ClinicHub() {
     <div className="space-y-6 p-4 md:p-6">
       <header className="space-y-1">
         <h1 className="text-2xl font-bold tracking-tight">المركز السريري</h1>
-        <p className="text-sm text-muted-foreground">
-          الحجوزات، الأطباء، والفروع في مكان واحد.
-        </p>
+        <p className="text-sm text-muted-foreground">الحجوزات، الأطباء، والفروع في مكان واحد.</p>
       </header>
 
       <Tabs value={tab} onValueChange={(v) => setTab(v as ClinicTab)}>

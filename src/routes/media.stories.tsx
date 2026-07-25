@@ -30,9 +30,24 @@ export const Route = createFileRoute("/media/stories")({
           "@context": "https://schema.org",
           "@type": "BreadcrumbList",
           itemListElement: [
-            { "@type": "ListItem", position: 1, name: "الرئيسية", item: "https://bashenmedical.com/" },
-            { "@type": "ListItem", position: 2, name: "الوسائط", item: "https://bashenmedical.com/media/news" },
-            { "@type": "ListItem", position: 3, name: "قصص المرضى", item: "https://bashenmedical.com/media/stories" },
+            {
+              "@type": "ListItem",
+              position: 1,
+              name: "الرئيسية",
+              item: "https://bashenmedical.com/",
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              name: "الوسائط",
+              item: "https://bashenmedical.com/media/news",
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              name: "قصص المرضى",
+              item: "https://bashenmedical.com/media/stories",
+            },
           ],
         }),
       },

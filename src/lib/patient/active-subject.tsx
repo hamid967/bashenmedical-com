@@ -117,9 +117,7 @@ export function ActiveSubjectProvider({
     [subject, switchableDependents, dependentsQuery.isLoading, setSubject],
   );
 
-  return (
-    <ActiveSubjectContext.Provider value={value}>{children}</ActiveSubjectContext.Provider>
-  );
+  return <ActiveSubjectContext.Provider value={value}>{children}</ActiveSubjectContext.Provider>;
 }
 
 export function useActiveSubject(): Ctx {

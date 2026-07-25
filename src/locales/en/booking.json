@@ -78,15 +78,7 @@
     "noneThisMonth": "No available days this month — try another.",
     "unavailableAuto": "Unavailable days are disabled",
     "unavailableTip": "Doctor unavailable this day",
-    "weekdays": [
-      "Sun",
-      "Mon",
-      "Tue",
-      "Wed",
-      "Thu",
-      "Fri",
-      "Sat"
-    ]
+    "weekdays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
   },
   "time": {
     "title": "Choose time",

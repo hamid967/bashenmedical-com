@@ -12,7 +12,15 @@
  * interval and shows the current inbox status + last update time.
  */
 import { useMemo, useState } from "react";
-import { LifeBuoy, Loader2, CheckCircle2, XCircle, Clock, ExternalLink, ShieldAlert } from "lucide-react";
+import {
+  LifeBuoy,
+  Loader2,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  ExternalLink,
+  ShieldAlert,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -90,7 +98,8 @@ function bucketLabel(b: Bucket, isAr: boolean) {
 
 function bucketClass(b: Bucket) {
   if (b === "closed") return "border-muted bg-muted/50 text-muted-foreground";
-  if (b === "in_review") return "border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+  if (b === "in_review")
+    return "border-amber-300 bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
   return "border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
 }
 
@@ -370,9 +379,7 @@ export function EscalateToHumanButton({
                   maxLength={500}
                   disabled={state.kind === "submitting"}
                 />
-                <div className="text-[11px] text-muted-foreground">
-                  {reason.trim().length}/500
-                </div>
+                <div className="text-[11px] text-muted-foreground">{reason.trim().length}/500</div>
               </div>
 
               <div className="space-y-1.5">
@@ -780,11 +787,7 @@ function IncidentsList({
         </>
       )}
 
-      <IncidentDetailsDialog
-        incident={selected}
-        isAr={isAr}
-        onClose={() => setSelected(null)}
-      />
+      <IncidentDetailsDialog incident={selected} isAr={isAr} onClose={() => setSelected(null)} />
     </div>
   );
 }

@@ -52,8 +52,7 @@ export function PerfBudgetsPanel() {
   });
 
   const toggleMut = useMutation({
-    mutationFn: async (v: { id: string; enabled: boolean }) =>
-      updateFn({ data: v }),
+    mutationFn: async (v: { id: string; enabled: boolean }) => updateFn({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "perf-budgets"] }),
   });
 
@@ -76,9 +75,7 @@ export function PerfBudgetsPanel() {
           Performance Budget — تنبيهات LCP/INP لمسارات /book و/ و/doctors
         </div>
         <div className="flex items-center gap-2">
-          {sweepMsg && (
-            <span className="text-[11px] text-[color:var(--ac-ink-3)]">{sweepMsg}</span>
-          )}
+          {sweepMsg && <span className="text-[11px] text-[color:var(--ac-ink-3)]">{sweepMsg}</span>}
           <button
             type="button"
             onClick={() => sweepMut.mutate()}
@@ -113,15 +110,10 @@ export function PerfBudgetsPanel() {
               const key = `${b.path}:${b.metric}`;
               const breached = openAlertsByKey.has(key);
               return (
-                <tr
-                  key={b.id}
-                  className="border-b border-[color:var(--ac-line)] last:border-0"
-                >
+                <tr key={b.id} className="border-b border-[color:var(--ac-line)] last:border-0">
                   <td className="py-2 px-2 font-mono text-xs">{b.path}</td>
                   <td className="py-2 px-2">{b.metric}</td>
-                  <td className="py-2 px-2 tabular-nums">
-                    {formatValue(b.metric, b.threshold)}
-                  </td>
+                  <td className="py-2 px-2 tabular-nums">{formatValue(b.metric, b.threshold)}</td>
                   <td className="py-2 px-2 tabular-nums">{b.window_hours}h</td>
                   <td className="py-2 px-2 tabular-nums">{b.min_samples}</td>
                   <td className="py-2 px-2">
@@ -144,9 +136,7 @@ export function PerfBudgetsPanel() {
                       <input
                         type="checkbox"
                         checked={b.enabled}
-                        onChange={(e) =>
-                          toggleMut.mutate({ id: b.id, enabled: e.target.checked })
-                        }
+                        onChange={(e) => toggleMut.mutate({ id: b.id, enabled: e.target.checked })}
                         aria-label={`تفعيل ${b.path} ${b.metric}`}
                       />
                       {b.enabled ? "مفعّل" : "متوقّف"}
@@ -157,10 +147,7 @@ export function PerfBudgetsPanel() {
             })}
             {budgets.length === 0 && (
               <tr>
-                <td
-                  colSpan={7}
-                  className="py-4 text-center text-[color:var(--ac-ink-3)] text-sm"
-                >
+                <td colSpan={7} className="py-4 text-center text-[color:var(--ac-ink-3)] text-sm">
                   لا توجد سياسات ميزانية.
                 </td>
               </tr>
@@ -188,16 +175,15 @@ export function PerfBudgetsPanel() {
                   </span>
                   <span className="font-mono text-xs">{a.path}</span>
                   <span className="tabular-nums text-[color:var(--ac-ink-2)]">
-                    p75 {formatValue(a.metric, a.p75_value)} &gt; {formatValue(a.metric, a.threshold)}
+                    p75 {formatValue(a.metric, a.p75_value)} &gt;{" "}
+                    {formatValue(a.metric, a.threshold)}
                   </span>
                   <span className="text-[11px] text-[color:var(--ac-ink-3)]">
                     عيّنات: {a.sample_size}
                   </span>
                 </div>
                 <div className="text-[11px] text-[color:var(--ac-ink-3)] flex items-center gap-3">
-                  {a.webhook_status !== null && (
-                    <span>webhook: {a.webhook_status}</span>
-                  )}
+                  {a.webhook_status !== null && <span>webhook: {a.webhook_status}</span>}
                   {a.email_status && <span>email: {a.email_status}</span>}
                   <span>{new Date(a.created_at).toLocaleString("ar-SA")}</span>
                 </div>

@@ -282,7 +282,6 @@ function TrackPage() {
       setAutoSearching(false);
       if (!found) setAutoFailed(true);
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialRef, initialPhone4]);
 
   const status = appointment ? (STATUS[appointment.status] ?? STATUS.new) : null;

@@ -23,10 +23,7 @@ const ROLE_LABEL: Record<string, string> = {
 
 export const Route = createFileRoute("/_authenticated/admin/users/$id")({
   head: () => ({
-    meta: [
-      { title: "تفاصيل المستخدم | لوحة الإدارة" },
-      { name: "robots", content: "noindex" },
-    ],
+    meta: [{ title: "تفاصيل المستخدم | لوحة الإدارة" }, { name: "robots", content: "noindex" }],
   }),
   errorComponent: ({ error, reset }) => (
     <div className="container-app py-16 text-center">
@@ -132,10 +129,7 @@ function AdminUserDetail() {
           <Field label="تاريخ الميلاد" value={p.date_of_birth} />
           <Field label="الجنس" value={p.gender} />
           <Field label="اللغة" value={p.preferred_language} />
-          <Field
-            label="الفرع الافتراضي"
-            value={p.branch?.name_ar || p.branch?.name_en}
-          />
+          <Field label="الفرع الافتراضي" value={p.branch?.name_ar || p.branch?.name_en} />
           <Field label="جهة اتصال الطوارئ" value={p.emergency_contact_name} />
           <Field label="جوال الطوارئ" value={p.emergency_contact_phone} />
           <Field label="مزود التأمين" value={p.insurance_provider} />
@@ -147,7 +141,9 @@ function AdminUserDetail() {
           <Field
             label="التحقق من الجوال"
             value={
-              p.phone_verified_at ? new Date(p.phone_verified_at).toLocaleString("ar-SA") : undefined
+              p.phone_verified_at
+                ? new Date(p.phone_verified_at).toLocaleString("ar-SA")
+                : undefined
             }
           />
         </dl>
@@ -189,11 +185,7 @@ function AdminUserDetail() {
         ) : (
           <ul className="divide-y">
             {data.recent_appointments.map(
-              (a: {
-                id: string;
-                appointment_date: string | null;
-                status: string | null;
-              }) => (
+              (a: { id: string; appointment_date: string | null; status: string | null }) => (
                 <li key={a.id} className="flex items-center justify-between py-2 text-sm">
                   <Link
                     to="/admin/appointments/$id"

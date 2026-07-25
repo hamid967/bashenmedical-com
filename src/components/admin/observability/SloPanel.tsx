@@ -77,9 +77,7 @@ export function SloPanel() {
         </div>
       </div>
 
-      {q.isLoading && (
-        <div className="text-sm text-muted-foreground">جاري الاحتساب…</div>
-      )}
+      {q.isLoading && <div className="text-sm text-muted-foreground">جاري الاحتساب…</div>}
       {q.error && (
         <div className="text-sm text-red-600">
           {(q.error as Error).message || "تعذّر جلب البيانات"}
@@ -109,9 +107,7 @@ export function SloPanel() {
                 <div className="text-xs text-muted-foreground">
                   الهدف: ≤ {s.target.toLocaleString()} {s.unit}
                 </div>
-                <div className="text-xs text-muted-foreground line-clamp-2">
-                  {s.detail}
-                </div>
+                <div className="text-xs text-muted-foreground line-clamp-2">{s.detail}</div>
               </CardContent>
             </Card>
           );

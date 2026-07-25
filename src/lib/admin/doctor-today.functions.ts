@@ -121,7 +121,11 @@ const completeSchema = z.object({
   objective: z.string().trim().max(4000).optional().nullable(),
   assessment: z.string().trim().max(4000).optional().nullable(),
   plan: z.string().trim().max(4000).optional().nullable(),
-  follow_up_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional().nullable(),
+  follow_up_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
   finalize: z.boolean().default(false),
 });
 
@@ -196,20 +200,18 @@ export const holdFollowUp = createServerFn({ method: "POST" })
     }
 
     const reference = `FUP-${Date.now().toString(36).toUpperCase()}`;
-    const { error: iErr } = await context.supabase
-      .from("appointment_waitlist")
-      .insert({
-        branch_id: appt.branch_id,
-        doctor_id: doctorId,
-        specialty_id: appt.specialty_id ?? null,
-        patient_name: appt.patient_name ?? "متابعة",
-        patient_phone: appt.patient_phone ?? "",
-        preferred_from: data.preferred_from,
-        preferred_to: data.preferred_to,
-        reference,
-        status: "pending",
-        notes: data.notes ?? "متابعة بعد الكشف",
-      });
+    const { error: iErr } = await context.supabase.from("appointment_waitlist").insert({
+      branch_id: appt.branch_id,
+      doctor_id: doctorId,
+      specialty_id: appt.specialty_id ?? null,
+      patient_name: appt.patient_name ?? "متابعة",
+      patient_phone: appt.patient_phone ?? "",
+      preferred_from: data.preferred_from,
+      preferred_to: data.preferred_to,
+      reference,
+      status: "pending",
+      notes: data.notes ?? "متابعة بعد الكشف",
+    });
     if (iErr) throw new Error(iErr.message);
     return { ok: true, reference };
   });

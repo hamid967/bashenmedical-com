@@ -20,10 +20,7 @@ const insuranceQuery = queryOptions({
 export const Route = createFileRoute("/_authenticated/patient/insurance")({
   loader: ({ context }) => context.queryClient.ensureQueryData(insuranceQuery),
   head: () => ({
-    meta: [
-      { title: "التأمين | بوابة المريض" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "التأمين | بوابة المريض" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: InsurancePage,
   ...patientRouteStates({ skeleton: "list", rows: 3 }),
@@ -48,7 +45,10 @@ function InsurancePage() {
         </Button>
       </header>
       {items.length === 0 ? (
-        <EmptyState title="لا توجد تحققات تأمينية" description="ابدأ بتحقق تأميني جديد قبل موعدك." />
+        <EmptyState
+          title="لا توجد تحققات تأمينية"
+          description="ابدأ بتحقق تأميني جديد قبل موعدك."
+        />
       ) : (
         items.map((v) => (
           <Card key={v.id}>

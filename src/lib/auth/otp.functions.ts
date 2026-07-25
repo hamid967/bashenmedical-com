@@ -82,7 +82,6 @@ async function bumpRateLimit(
   return { ok: true, retryAfterSeconds: 0 };
 }
 
-
 export const issueOtp = createServerFn({ method: "POST" })
   .validator((input: unknown) => IssueSchema.parse(input))
   .handler(async ({ data }) => {
@@ -161,7 +160,6 @@ export const issueOtp = createServerFn({ method: "POST" })
       });
       return { ok: false as const, error: "rate_limited", retryAfterSeconds: retry };
     }
-
 
     // Mint & hash code.
     const code = mintCode();
@@ -267,7 +265,6 @@ export const issueOtp = createServerFn({ method: "POST" })
     };
   });
 
-
 export const verifyOtp = createServerFn({ method: "POST" })
   .validator((input: unknown) => VerifySchema.parse(input))
   .handler(async ({ data }) => {
@@ -280,7 +277,9 @@ export const verifyOtp = createServerFn({ method: "POST" })
 
     const { data: row, error } = await supabaseAdmin
       .from("otp_challenges")
-      .select("id, code_hash, salt, attempts, max_attempts, expires_at, consumed_at, destination, channel, purpose")
+      .select(
+        "id, code_hash, salt, attempts, max_attempts, expires_at, consumed_at, destination, channel, purpose",
+      )
       .eq("id", data.challengeId)
       .maybeSingle();
 

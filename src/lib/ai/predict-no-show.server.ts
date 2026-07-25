@@ -104,25 +104,22 @@ export async function runPredictNoShowBatch(windowHours = 48): Promise<PredictBa
 
     let recommendation: string | null = null;
     if (risk >= 0.6) {
-      recommendation =
-        factors.find((f) => f.key === "no_whatsapp")
-          ? "أضف تذكيرًا هاتفيًا مباشرًا قبل 24 ساعة."
-          : "أرسل تذكير واتساب مسبق + تأكيد قبل 12 ساعة.";
+      recommendation = factors.find((f) => f.key === "no_whatsapp")
+        ? "أضف تذكيرًا هاتفيًا مباشرًا قبل 24 ساعة."
+        : "أرسل تذكير واتساب مسبق + تأكيد قبل 12 ساعة.";
     }
 
-    const { error: upErr } = await supabaseAdmin
-      .from("no_show_predictions")
-      .upsert(
-        {
-          appointment_id: row.id,
-          risk,
-          top_factors: factors,
-          recommendation,
-          model: "heuristic-v1",
-          computed_at: now.toISOString(),
-        },
-        { onConflict: "appointment_id" },
-      );
+    const { error: upErr } = await supabaseAdmin.from("no_show_predictions").upsert(
+      {
+        appointment_id: row.id,
+        risk,
+        top_factors: factors,
+        recommendation,
+        model: "heuristic-v1",
+        computed_at: now.toISOString(),
+      },
+      { onConflict: "appointment_id" },
+    );
     if (upErr) errors++;
     else written++;
   }

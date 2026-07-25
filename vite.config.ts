@@ -106,7 +106,8 @@ export default defineConfig({
           },
           {
             urlPattern: ({ url, sameOrigin }) =>
-              sameOrigin && /\.(?:js|css|woff2|png|jpg|jpeg|webp|avif|svg|ico)$/i.test(url.pathname),
+              sameOrigin &&
+              /\.(?:js|css|woff2|png|jpg|jpeg|webp|avif|svg|ico)$/i.test(url.pathname),
             handler: "CacheFirst",
             options: {
               cacheName: "static-assets",

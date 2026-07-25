@@ -27,13 +27,7 @@ export type BookingErrorCode =
   | "UNKNOWN";
 
 export type BookingErrorRecovery =
-  | "retry"
-  | "refetch-slots"
-  | "resend-otp"
-  | "restart"
-  | "contact-support"
-  | "sign-in"
-  | "none";
+  "retry" | "refetch-slots" | "resend-otp" | "restart" | "contact-support" | "sign-in" | "none";
 
 export type LocalizedCopy = { ar: string; en: string };
 
@@ -218,10 +212,7 @@ export function kindToCode(
 }
 
 /** Localized single-line label. */
-export function localizedMessage(
-  descriptor: BookingErrorDescriptor,
-  lang: "ar" | "en",
-): string {
+export function localizedMessage(descriptor: BookingErrorDescriptor, lang: "ar" | "en"): string {
   return descriptor.message[lang];
 }
 

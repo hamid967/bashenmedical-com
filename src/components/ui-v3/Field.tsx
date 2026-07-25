@@ -54,13 +54,10 @@ export function Field({
         // read correctly without per-field overrides).
         const isTextInput =
           typeof (children as React.ReactElement).type === "string"
-            ? ((children as React.ReactElement).type === "input" ||
-                (children as React.ReactElement).type === "textarea")
+            ? (children as React.ReactElement).type === "input" ||
+              (children as React.ReactElement).type === "textarea"
             : true; // custom input components (e.g. shadcn Input) forward `dir`.
-        const shouldAuto =
-          isTextInput &&
-          !childProps.dir &&
-          shouldAutoDir(childProps.type);
+        const shouldAuto = isTextInput && !childProps.dir && shouldAutoDir(childProps.type);
         return React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
           id: childProps.id ?? htmlFor,
           "aria-invalid": error ? true : undefined,

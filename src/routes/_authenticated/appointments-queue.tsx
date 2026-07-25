@@ -24,7 +24,6 @@ import { listAppointments, updateAppointmentStatus } from "@/lib/admin.functions
 import { listAppointmentTraces } from "@/lib/admin/booking-trace.functions";
 import { AppointmentQrDialog } from "@/components/booking/AppointmentQrDialog";
 
-
 export const Route = createFileRoute("/_authenticated/appointments-queue")({
   head: () => ({
     meta: [
@@ -156,7 +155,10 @@ function AppointmentsQueuePage() {
       "admin",
       "appointments-queue",
       "traces",
-      rows.map((r) => r.id).sort().join(","),
+      rows
+        .map((r) => r.id)
+        .sort()
+        .join(","),
     ],
     queryFn: () =>
       tracesFn({
@@ -165,11 +167,8 @@ function AppointmentsQueuePage() {
     enabled: rows.length > 0,
     staleTime: 60_000,
   });
-  const traces: Record<
-    string,
-    { correlation_id: string; error_code: string | null }
-  > = traceQ.data?.traces ?? {};
-
+  const traces: Record<string, { correlation_id: string; error_code: string | null }> =
+    traceQ.data?.traces ?? {};
 
   // Rows filtered by the current scope only — used both for the visible list
   // (after status + query) and for the scope counters.
@@ -380,62 +379,61 @@ function AppointmentsQueuePage() {
                 {filtered.map((r) => {
                   const tr = traces[r.id];
                   return (
-                  <tr
-                    key={r.id}
-                    onClick={() => setSelected(r)}
-                    className="border-t border-border cursor-pointer hover:bg-muted/40 transition"
-                  >
-                    <td className="p-3 font-mono text-xs font-bold">{publicRef(r)}</td>
-                    <td className="p-3 font-semibold">{r.patient_name}</td>
-                    <td className="p-3 font-mono text-xs" dir="ltr">
-                      {r.patient_phone}
-                    </td>
-                    <td className="p-3 text-xs">
-                      <div>{formatDate(r.appointment_date)}</div>
-                      <div className="text-muted-foreground font-mono" dir="ltr">
-                        {r.appointment_time?.slice(0, 5)}
-                      </div>
-                    </td>
-                    <td className="p-3 text-xs">
-                      <div>{r.specialties?.name_ar ?? "—"}</div>
-                      <div className="text-muted-foreground">{r.doctors?.name_ar ?? "—"}</div>
-                    </td>
-                    <td className="p-3">
-                      <span
-                        className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_META[r.status].cls}`}
-                      >
-                        {STATUS_META[r.status].label}
-                      </span>
-                    </td>
-                    <td className="p-3 text-xs" onClick={(e) => e.stopPropagation()}>
-                      {tr ? (
-                        <div className="flex flex-col gap-1 items-start">
-                          <Link
-                            to="/admin/booking-trace"
-                            search={{ correlation_id: tr.correlation_id }}
-                            className="font-mono text-[11px] text-primary hover:underline"
-                            title={tr.correlation_id}
-                            dir="ltr"
-                          >
-                            {tr.correlation_id.slice(0, 8)}…
-                          </Link>
-                          {tr.error_code && (
-                            <span
-                              className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 border border-rose-500/20"
-                              title="آخر رمز خطأ لوحظ خلال هذه المحاولة"
-                            >
-                              {tr.error_code}
-                            </span>
-                          )}
+                    <tr
+                      key={r.id}
+                      onClick={() => setSelected(r)}
+                      className="border-t border-border cursor-pointer hover:bg-muted/40 transition"
+                    >
+                      <td className="p-3 font-mono text-xs font-bold">{publicRef(r)}</td>
+                      <td className="p-3 font-semibold">{r.patient_name}</td>
+                      <td className="p-3 font-mono text-xs" dir="ltr">
+                        {r.patient_phone}
+                      </td>
+                      <td className="p-3 text-xs">
+                        <div>{formatDate(r.appointment_date)}</div>
+                        <div className="text-muted-foreground font-mono" dir="ltr">
+                          {r.appointment_time?.slice(0, 5)}
                         </div>
-                      ) : (
-                        <span className="text-muted-foreground/60">—</span>
-                      )}
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="p-3 text-xs">
+                        <div>{r.specialties?.name_ar ?? "—"}</div>
+                        <div className="text-muted-foreground">{r.doctors?.name_ar ?? "—"}</div>
+                      </td>
+                      <td className="p-3">
+                        <span
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${STATUS_META[r.status].cls}`}
+                        >
+                          {STATUS_META[r.status].label}
+                        </span>
+                      </td>
+                      <td className="p-3 text-xs" onClick={(e) => e.stopPropagation()}>
+                        {tr ? (
+                          <div className="flex flex-col gap-1 items-start">
+                            <Link
+                              to="/admin/booking-trace"
+                              search={{ correlation_id: tr.correlation_id }}
+                              className="font-mono text-[11px] text-primary hover:underline"
+                              title={tr.correlation_id}
+                              dir="ltr"
+                            >
+                              {tr.correlation_id.slice(0, 8)}…
+                            </Link>
+                            {tr.error_code && (
+                              <span
+                                className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-700 border border-rose-500/20"
+                                title="آخر رمز خطأ لوحظ خلال هذه المحاولة"
+                              >
+                                {tr.error_code}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground/60">—</span>
+                        )}
+                      </td>
+                    </tr>
                   );
                 })}
-
               </tbody>
             </table>
           </div>
@@ -452,7 +450,6 @@ function AppointmentsQueuePage() {
           }}
         />
       )}
-
     </div>
   );
 }
@@ -698,7 +695,6 @@ function DetailDrawer({
               </Link>
             </div>
           )}
-
 
           {row.reason && (
             <div>

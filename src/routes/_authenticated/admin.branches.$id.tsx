@@ -40,9 +40,7 @@ export const Route = createFileRoute("/_authenticated/admin/branches/$id")({
     </div>
   ),
   notFoundComponent: () => (
-    <div className="container-app py-16 text-center text-muted-foreground">
-      الفرع غير موجود.
-    </div>
+    <div className="container-app py-16 text-center text-muted-foreground">الفرع غير موجود.</div>
   ),
   component: BranchDetail,
 });
@@ -58,16 +56,11 @@ function BranchDetail() {
   return (
     <div className="container-app py-6 space-y-4">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link
-          to="/admin/branches"
-          className="hover:text-foreground inline-flex items-center gap-1"
-        >
+        <Link to="/admin/branches" className="hover:text-foreground inline-flex items-center gap-1">
           <ArrowRight className="h-4 w-4" /> الفروع
         </Link>
         <span>/</span>
-        <span className="text-foreground">
-          {query.data?.branch.name_ar ?? "..."}
-        </span>
+        <span className="text-foreground">{query.data?.branch.name_ar ?? "..."}</span>
       </div>
 
       {query.isLoading ? (
@@ -90,12 +83,8 @@ function BranchDetail() {
             <div className="flex items-start gap-3">
               <Building2 className="h-7 w-7 text-primary mt-1" />
               <div>
-                <h1 className="text-xl font-semibold">
-                  {query.data.branch.name_ar}
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {query.data.branch.name_en}
-                </p>
+                <h1 className="text-xl font-semibold">{query.data.branch.name_ar}</h1>
+                <p className="text-sm text-muted-foreground">{query.data.branch.name_en}</p>
                 <p className="text-xs font-mono text-muted-foreground mt-1">
                   {query.data.branch.slug}
                 </p>
@@ -115,20 +104,9 @@ function BranchDetail() {
           </header>
 
           {/* KPIs */}
-          <section
-            aria-label="مؤشرات الفرع"
-            className="grid grid-cols-2 md:grid-cols-4 gap-3"
-          >
-            <MiniKpi
-              label="أطباء الفرع"
-              value={query.data.doctors.length}
-              icon={Users}
-            />
-            <MiniKpi
-              label="مواعيد اليوم"
-              value={query.data.today_appts}
-              icon={CalendarDays}
-            />
+          <section aria-label="مؤشرات الفرع" className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <MiniKpi label="أطباء الفرع" value={query.data.doctors.length} icon={Users} />
+            <MiniKpi label="مواعيد اليوم" value={query.data.today_appts} icon={CalendarDays} />
             <MiniKpi
               label="مواعيد قادمة"
               value={query.data.upcoming_appts.length}
@@ -147,30 +125,16 @@ function BranchDetail() {
             <MetaRow
               icon={MapPin}
               label="العنوان"
-              value={
-                query.data.branch.address_ar ||
-                query.data.branch.city_ar ||
-                "—"
-              }
+              value={query.data.branch.address_ar || query.data.branch.city_ar || "—"}
             />
-            <MetaRow
-              icon={Phone}
-              label="الهاتف"
-              value={query.data.branch.phone ?? "—"}
-              mono
-            />
+            <MetaRow icon={Phone} label="الهاتف" value={query.data.branch.phone ?? "—"} mono />
             <MetaRow
               icon={Phone}
               label="طوارئ"
               value={query.data.branch.emergency_phone ?? "—"}
               mono
             />
-            <MetaRow
-              icon={Mail}
-              label="البريد"
-              value={query.data.branch.email ?? "—"}
-              mono
-            />
+            <MetaRow icon={Mail} label="البريد" value={query.data.branch.email ?? "—"} mono />
           </section>
 
           {/* Doctors */}
@@ -178,9 +142,7 @@ function BranchDetail() {
             <div className="px-4 py-3 border-b flex items-center gap-2">
               <Users className="h-4 w-4 text-primary" />
               <h2 className="text-sm font-medium">أطباء الفرع</h2>
-              <span className="text-xs text-muted-foreground">
-                ({query.data.doctors.length})
-              </span>
+              <span className="text-xs text-muted-foreground">({query.data.doctors.length})</span>
             </div>
             {query.data.doctors.length === 0 ? (
               <div className="p-6 text-center text-sm text-muted-foreground">
@@ -189,20 +151,13 @@ function BranchDetail() {
             ) : (
               <ul className="divide-y">
                 {query.data.doctors.map((d: any) => (
-                  <li
-                    key={d.id}
-                    className="px-4 py-2 flex items-center justify-between text-sm"
-                  >
+                  <li key={d.id} className="px-4 py-2 flex items-center justify-between text-sm">
                     <div>
                       <div className="font-medium">{d.full_name_ar}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {d.specialty ?? "—"}
-                      </div>
+                      <div className="text-xs text-muted-foreground">{d.specialty ?? "—"}</div>
                     </div>
                     {!d.is_active && (
-                      <span className="text-xs text-muted-foreground">
-                        غير نشِط
-                      </span>
+                      <span className="text-xs text-muted-foreground">غير نشِط</span>
                     )}
                   </li>
                 ))}
@@ -234,9 +189,7 @@ function BranchDetail() {
                   <tbody>
                     {query.data.upcoming_appts.map((a: any) => (
                       <tr key={a.id} className="border-t">
-                        <td className="px-3 py-2 tabular-nums">
-                          {a.appointment_date}
-                        </td>
+                        <td className="px-3 py-2 tabular-nums">{a.appointment_date}</td>
                         <td className="px-3 py-2 tabular-nums font-mono text-xs">
                           {a.appointment_time}
                         </td>
@@ -259,10 +212,7 @@ function BranchDetail() {
               </div>
               <ul className="flex flex-wrap gap-2">
                 {query.data.excellence_centers.map((ec: any) => (
-                  <li
-                    key={ec.id}
-                    className="rounded-md border px-2 py-1 text-xs"
-                  >
+                  <li key={ec.id} className="rounded-md border px-2 py-1 text-xs">
                     {ec.name_ar}
                   </li>
                 ))}
@@ -313,9 +263,7 @@ function MetaRow({
       <span className="text-xs text-muted-foreground shrink-0 inline-flex items-center gap-1.5">
         <Icon className="h-3.5 w-3.5" /> {label}
       </span>
-      <span className={`text-sm text-right ${mono ? "font-mono text-xs" : ""}`}>
-        {value}
-      </span>
+      <span className={`text-sm text-right ${mono ? "font-mono text-xs" : ""}`}>{value}</span>
     </div>
   );
 }

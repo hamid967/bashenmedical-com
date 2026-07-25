@@ -45,8 +45,7 @@ function RadiologyAdminPage() {
 
   const { data, isLoading, refetch, isFetching } = useQuery({
     queryKey: ["his", "rad", status, modality, q],
-    queryFn: () =>
-      listFn({ data: { status, modality: modality || undefined, q: q || undefined } }),
+    queryFn: () => listFn({ data: { status, modality: modality || undefined, q: q || undefined } }),
     staleTime: 15_000,
   });
 
@@ -122,7 +121,9 @@ function RadiologyAdminPage() {
         >
           <option value="">كل الأنماط</option>
           {MODALITIES.map((m) => (
-            <option key={m} value={m}>{m}</option>
+            <option key={m} value={m}>
+              {m}
+            </option>
           ))}
         </select>
         <select
@@ -139,9 +140,13 @@ function RadiologyAdminPage() {
 
       <div className="glass-card rounded-xl overflow-hidden">
         {isLoading ? (
-          <div className="p-8 text-center"><Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" /></div>
+          <div className="p-8 text-center">
+            <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+          </div>
         ) : rows.length === 0 ? (
-          <div className="p-8 text-center text-muted-foreground text-sm">لا توجد تقارير مطابقة.</div>
+          <div className="p-8 text-center text-muted-foreground text-sm">
+            لا توجد تقارير مطابقة.
+          </div>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-muted/40 text-xs">
@@ -161,19 +166,30 @@ function RadiologyAdminPage() {
                   <td className="p-3">{r.body_part ?? "—"}</td>
                   <td className="p-3">
                     {r.patient?.full_name_ar ?? "—"}
-                    {r.patient?.mrn && <span className="text-xs text-muted-foreground"> · {r.patient.mrn}</span>}
+                    {r.patient?.mrn && (
+                      <span className="text-xs text-muted-foreground"> · {r.patient.mrn}</span>
+                    )}
                   </td>
                   <td className="p-3">{r.report_date ?? "—"}</td>
                   <td className="p-3">
                     {r.released_at ? (
-                      <span className="text-xs bg-emerald-500/10 text-emerald-700 px-2 py-1 rounded">مُطلق</span>
+                      <span className="text-xs bg-emerald-500/10 text-emerald-700 px-2 py-1 rounded">
+                        مُطلق
+                      </span>
                     ) : (
-                      <span className="text-xs bg-amber-500/10 text-amber-700 px-2 py-1 rounded">{r.status ?? "pending"}</span>
+                      <span className="text-xs bg-amber-500/10 text-amber-700 px-2 py-1 rounded">
+                        {r.status ?? "pending"}
+                      </span>
                     )}
                   </td>
                   <td className="p-3">
                     <div className="flex items-center gap-1">
-                      <button onClick={() => setEditing(r)} className="px-2 py-1 rounded border text-xs">تعديل</button>
+                      <button
+                        onClick={() => setEditing(r)}
+                        className="px-2 py-1 rounded border text-xs"
+                      >
+                        تعديل
+                      </button>
                       {r.released_at ? (
                         <button
                           onClick={() => unreleaseM.mutate(r.id)}
@@ -239,9 +255,11 @@ function RadEditor({
   const [bodyPart, setBodyPart] = useState(value?.body_part ?? "");
   const [findings, setFindings] = useState(value?.findings ?? "");
   const [status, setStatus] = useState<"pending" | "in_progress" | "released">(
-    ((value?.status as any) ?? "pending"),
+    (value?.status as any) ?? "pending",
   );
-  const [reportDate, setReportDate] = useState(value?.report_date ?? new Date().toISOString().slice(0, 10));
+  const [reportDate, setReportDate] = useState(
+    value?.report_date ?? new Date().toISOString().slice(0, 10),
+  );
   const [filePath, setFilePath] = useState(value?.file_path ?? "");
 
   const patientQ = useQuery({
@@ -279,7 +297,10 @@ function RadEditor({
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-background rounded-xl w-full max-w-2xl max-h-[90vh] overflow-auto" dir="rtl">
+      <div
+        className="bg-background rounded-xl w-full max-w-2xl max-h-[90vh] overflow-auto"
+        dir="rtl"
+      >
         <header className="flex items-center justify-between p-4 border-b">
           <h2 className="font-semibold">{value ? "تعديل تقرير أشعة" : "تقرير أشعة جديد"}</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-muted">
@@ -327,7 +348,10 @@ function RadEditor({
                           }}
                         >
                           {p.full_name_ar}
-                          <span className="text-xs text-muted-foreground"> · {p.mrn ?? "بدون MRN"}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {" "}
+                            · {p.mrn ?? "بدون MRN"}
+                          </span>
                         </button>
                       </li>
                     ))}
@@ -346,7 +370,9 @@ function RadEditor({
                 className="w-full px-3 py-2 rounded border bg-background text-sm"
               >
                 {MODALITIES.map((m) => (
-                  <option key={m} value={m}>{m}</option>
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
                 ))}
               </select>
             </div>
@@ -403,7 +429,9 @@ function RadEditor({
           </div>
         </div>
         <footer className="p-4 border-t flex items-center justify-end gap-2">
-          <button onClick={onClose} className="px-3 py-2 rounded border text-sm">إلغاء</button>
+          <button onClick={onClose} className="px-3 py-2 rounded border text-sm">
+            إلغاء
+          </button>
           <button
             onClick={() => saveM.mutate()}
             disabled={!canSave || saveM.isPending}

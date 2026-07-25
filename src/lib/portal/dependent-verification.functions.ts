@@ -30,11 +30,7 @@ const ALLOWED = new Map<string, string>([
 const RelationshipEnum = z.enum(["child", "spouse", "parent", "sibling", "other"]);
 
 export type VerificationStatus =
-  | "submitted"
-  | "under_review"
-  | "approved"
-  | "rejected"
-  | "cancelled";
+  "submitted" | "under_review" | "approved" | "rejected" | "cancelled";
 
 export type VerificationDocument = {
   id: string;
@@ -205,7 +201,10 @@ export const registerVerificationDocument = createServerFn({ method: "POST" })
       .select("id, created_at")
       .single();
     if (error) {
-      await supabase.storage.from(BUCKET).remove([data.storage_path]).catch(() => {});
+      await supabase.storage
+        .from(BUCKET)
+        .remove([data.storage_path])
+        .catch(() => {});
       throw new Error(error.message);
     }
     return { id: row.id as string, created_at: row.created_at as string };
@@ -240,7 +239,10 @@ export const deleteVerificationDocument = createServerFn({ method: "POST" })
       .delete()
       .eq("id", data.id);
     if (dErr) throw new Error(dErr.message);
-    await supabase.storage.from(BUCKET).remove([row.storage_path]).catch(() => {});
+    await supabase.storage
+      .from(BUCKET)
+      .remove([row.storage_path])
+      .catch(() => {});
     return { ok: true as const };
   });
 
@@ -327,6 +329,5 @@ export const VERIFICATION_LIMITS = {
   maxDocs: MAX_DOCS,
   maxBytes: MAX_BYTES,
   allowedContentTypes: Array.from(ALLOWED.keys()),
-  allowedAcceptAttr:
-    "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf",
+  allowedAcceptAttr: "image/jpeg,image/png,image/webp,image/heic,image/heif,application/pdf",
 } as const;

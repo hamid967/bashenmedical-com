@@ -104,14 +104,9 @@ export type InboxEvent = {
 export const STAFF_ROLES = ["admin", "super_admin", "reception", "support_agent"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
-async function assertInboxStaff(
-  supabase: any,
-  userId: string,
-): Promise<StaffRole[]> {
+async function assertInboxStaff(supabase: any, userId: string): Promise<StaffRole[]> {
   const checks = await Promise.all(
-    STAFF_ROLES.map((role) =>
-      supabase.rpc("has_role", { _user_id: userId, _role: role }),
-    ),
+    STAFF_ROLES.map((role) => supabase.rpc("has_role", { _user_id: userId, _role: role })),
   );
   const held = STAFF_ROLES.filter((_, i) => checks[i]?.data === true);
   if (!held.length) throw new Error("ليست لديك صلاحية الوصول للصندوق الموحّد.");
@@ -220,7 +215,7 @@ export const listInboxItems = createServerFn({ method: "GET" })
     if (data.sort === "priority") {
       items = [...items].sort((a, b) => {
         const w = PRIORITY_WEIGHT[b.priority] - PRIORITY_WEIGHT[a.priority];
-        return w !== 0 ? w : (a.created_at < b.created_at ? 1 : -1);
+        return w !== 0 ? w : a.created_at < b.created_at ? 1 : -1;
       });
     }
     return items;
@@ -229,35 +224,25 @@ export const listInboxItems = createServerFn({ method: "GET" })
 export const getInboxItem = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
-  .handler(
-    async ({
-      data,
-      context,
-    }): Promise<{ item: InboxItem; events: InboxEvent[] }> => {
-      await assertInboxStaff(context.supabase, context.userId);
-      const [{ data: item, error: e1 }, { data: events, error: e2 }] =
-        await Promise.all([
-          context.supabase
-            .from("inbox_items")
-            .select("*")
-            .eq("id", data.id)
-            .maybeSingle(),
-          context.supabase
-            .from("inbox_events")
-            .select("*")
-            .eq("item_id", data.id)
-            .order("created_at", { ascending: false })
-            .limit(500),
-        ]);
-      if (e1) throw new Error(e1.message);
-      if (!item) throw new Error("الطلب غير موجود.");
-      if (e2) throw new Error(e2.message);
-      return {
-        item: item as InboxItem,
-        events: (events ?? []) as InboxEvent[],
-      };
-    },
-  );
+  .handler(async ({ data, context }): Promise<{ item: InboxItem; events: InboxEvent[] }> => {
+    await assertInboxStaff(context.supabase, context.userId);
+    const [{ data: item, error: e1 }, { data: events, error: e2 }] = await Promise.all([
+      context.supabase.from("inbox_items").select("*").eq("id", data.id).maybeSingle(),
+      context.supabase
+        .from("inbox_events")
+        .select("*")
+        .eq("item_id", data.id)
+        .order("created_at", { ascending: false })
+        .limit(500),
+    ]);
+    if (e1) throw new Error(e1.message);
+    if (!item) throw new Error("الطلب غير موجود.");
+    if (e2) throw new Error(e2.message);
+    return {
+      item: item as InboxItem,
+      events: (events ?? []) as InboxEvent[],
+    };
+  });
 
 export const getInboxCounts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -292,16 +277,11 @@ export const getInboxCounts = createServerFn({ method: "GET" })
     };
   });
 
-
 // ---------------- Mutations (each = 1 audit event) ----------------
 const IdOnly = z.object({ id: z.string().uuid() });
 
 async function loadItem(supabase: any, id: string): Promise<InboxItem> {
-  const { data, error } = await supabase
-    .from("inbox_items")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
+  const { data, error } = await supabase.from("inbox_items").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("الطلب غير موجود.");
   return data as InboxItem;
@@ -438,20 +418,11 @@ export const changeInboxStatus = createServerFn({ method: "POST" })
 /** 5) Add an internal note (no field change; still audited). */
 export const addInboxNote = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
-    IdOnly.extend({ note: z.string().min(1).max(2000) }).parse(d),
-  )
+  .validator((d: unknown) => IdOnly.extend({ note: z.string().min(1).max(2000) }).parse(d))
   .handler(async ({ data, context }) => {
     await assertInboxStaff(context.supabase, context.userId);
     await loadItem(context.supabase, data.id); // existence check
-    await logEvent(
-      context.supabase,
-      data.id,
-      "add_note",
-      null,
-      null,
-      data.note,
-    );
+    await logEvent(context.supabase, data.id, "add_note", null, null, data.note);
     return { ok: true };
   });
 
@@ -475,10 +446,7 @@ export const contactPatientOnInbox = createServerFn({ method: "POST" })
       before.status !== "appointment_created" &&
       before.status !== "completed"
     ) {
-      await context.supabase
-        .from("inbox_items")
-        .update({ status: "contacted" })
-        .eq("id", data.id);
+      await context.supabase.from("inbox_items").update({ status: "contacted" }).eq("id", data.id);
     }
     await logEvent(
       context.supabase,
@@ -602,8 +570,7 @@ export const mergeInboxDuplicate = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roles = await assertInboxStaff(context.supabase, context.userId);
     assertAllowed(roles, "merge_duplicate");
-    if (data.id === data.into_id)
-      throw new Error("لا يمكن دمج طلب مع نفسه.");
+    if (data.id === data.into_id) throw new Error("لا يمكن دمج طلب مع نفسه.");
     const [dup, primary] = await Promise.all([
       loadItem(context.supabase, data.id),
       loadItem(context.supabase, data.into_id),
@@ -637,9 +604,7 @@ export const mergeInboxDuplicate = createServerFn({ method: "POST" })
 /** 11) Archive (soft) — never a hard delete. */
 export const archiveInboxItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
-    IdOnly.extend({ note: z.string().max(1000).optional() }).parse(d),
-  )
+  .validator((d: unknown) => IdOnly.extend({ note: z.string().max(1000).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await assertInboxStaff(context.supabase, context.userId);
     assertAllowed(roles, "archive");
@@ -664,9 +629,7 @@ export const archiveInboxItem = createServerFn({ method: "POST" })
 /** 12) Reopen from any non-active state back to `new`. */
 export const reopenInboxItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
-    IdOnly.extend({ note: z.string().max(1000).optional() }).parse(d),
-  )
+  .validator((d: unknown) => IdOnly.extend({ note: z.string().max(1000).optional() }).parse(d))
   .handler(async ({ data, context }) => {
     const roles = await assertInboxStaff(context.supabase, context.userId);
     assertAllowed(roles, "reopen");

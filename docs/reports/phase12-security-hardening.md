@@ -5,28 +5,28 @@ _Date: 2026-07-24._
 
 ## Scanner status
 
-| Scanner              | Findings           | Notes                                                                     |
-| -------------------- | ------------------ | ------------------------------------------------------------------------- |
-| `supabase`           | 1 warning          | `SUPA_function_search_path_mutable` — only in `extensions` schema (pgcrypto, uuid-ossp, pg_stat_statements). Supabase-managed; **accepted residual**. |
-| `supabase_lov`       | 0                  |                                                                           |
-| `supply_chain`       | 0 (0 high/critical)| Re-verified via `code--dependency_scan` on 2026-07-24.                    |
-| `agent_security`     | 0                  |                                                                           |
-| `app_mcp`            | 0                  |                                                                           |
-| `connector_security` | 0                  |                                                                           |
+| Scanner              | Findings            | Notes                                                                                                                                                 |
+| -------------------- | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `supabase`           | 1 warning           | `SUPA_function_search_path_mutable` — only in `extensions` schema (pgcrypto, uuid-ossp, pg_stat_statements). Supabase-managed; **accepted residual**. |
+| `supabase_lov`       | 0                   |                                                                                                                                                       |
+| `supply_chain`       | 0 (0 high/critical) | Re-verified via `code--dependency_scan` on 2026-07-24.                                                                                                |
+| `agent_security`     | 0                   |                                                                                                                                                       |
+| `app_mcp`            | 0                   |                                                                                                                                                       |
+| `connector_security` | 0                   |                                                                                                                                                       |
 
 App-level SECDEF exposure was closed in the previous batch (`docs/reports/secdef-final-2026-07-24.md` — 0 exposed SECDEF functions). No new fixes required in this phase; the extension-schema warning cannot be closed from application migrations.
 
 ## Deliverables
 
-| Artefact                                              | Purpose                                                                    |
-| ----------------------------------------------------- | -------------------------------------------------------------------------- |
-| `docs/security/threat-model-phase12.md`               | STRIDE model per surface + control matrix + residual risks.                |
-| `docs/security/data-retention.md`                     | Retention windows, erasure flow, cron sweep contract.                      |
-| `docs/runbooks/incident-response.md`                  | Severity ladder, first 30 min, comms, post-mortem template.                |
-| `docs/runbooks/backup-recovery.md`                    | PITR + snapshot policy, RPO/RTO, drill cadence.                            |
-| `tests/security/README.md`                            | Attack-class → test file matrix (single source of truth).                  |
-| `tests/security/test_cross_patient_idor.py`           | New RLS-level IDOR guard exercising cross-patient reads and update probes. |
-| `tests/security/test_prompt_injection.md`             | Adversarial prompt matrix for the AI Assistant.                            |
+| Artefact                                    | Purpose                                                                    |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `docs/security/threat-model-phase12.md`     | STRIDE model per surface + control matrix + residual risks.                |
+| `docs/security/data-retention.md`           | Retention windows, erasure flow, cron sweep contract.                      |
+| `docs/runbooks/incident-response.md`        | Severity ladder, first 30 min, comms, post-mortem template.                |
+| `docs/runbooks/backup-recovery.md`          | PITR + snapshot policy, RPO/RTO, drill cadence.                            |
+| `tests/security/README.md`                  | Attack-class → test file matrix (single source of truth).                  |
+| `tests/security/test_cross_patient_idor.py` | New RLS-level IDOR guard exercising cross-patient reads and update probes. |
+| `tests/security/test_prompt_injection.md`   | Adversarial prompt matrix for the AI Assistant.                            |
 
 ## Controls verified in place (from earlier phases)
 

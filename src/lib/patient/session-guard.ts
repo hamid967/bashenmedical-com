@@ -26,8 +26,7 @@ function currentNext(): string {
   if (typeof window === "undefined") return "/patient";
   // Preserve pathname + query + hash so the user returns to the exact screen
   // (including tab selection, filters, scroll anchors) after re-auth.
-  const path =
-    window.location.pathname + window.location.search + window.location.hash;
+  const path = window.location.pathname + window.location.search + window.location.hash;
   // Only preserve in-portal paths to avoid open-redirect surface, and reject
   // protocol-relative "//..." which would otherwise satisfy startsWith("/").
   if (!path.startsWith("/patient") || path.startsWith("//")) return "/patient";

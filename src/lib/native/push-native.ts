@@ -114,9 +114,7 @@ export async function registerNativePushForCurrentUser(
  * even before/without a fresh device registration this session.
  */
 let handlersInstalled = false;
-export async function initNativePushHandlers(options?: {
-  onReceived?: () => void;
-}): Promise<void> {
+export async function initNativePushHandlers(options?: { onReceived?: () => void }): Promise<void> {
   if (!isNative() || handlersInstalled) return;
   const Push = await loadPushPlugin();
   if (!Push) return;
@@ -125,7 +123,10 @@ export async function initNativePushHandlers(options?: {
   // Foreground push: bump the badge from the payload if present and let
   // the app refetch its notification list so the bell updates instantly.
   void Push.addListener("pushNotificationReceived", (payload) => {
-    const data = ((payload as { data?: Record<string, unknown> })?.data ?? {}) as Record<string, unknown>;
+    const data = ((payload as { data?: Record<string, unknown> })?.data ?? {}) as Record<
+      string,
+      unknown
+    >;
     const badgeRaw = data.badge;
     const n = typeof badgeRaw === "number" ? badgeRaw : Number(badgeRaw);
     if (Number.isFinite(n) && n >= 0) void setNativeBadge(n);
@@ -140,8 +141,7 @@ export async function initNativePushHandlers(options?: {
   // in-app deep link when the server sent one; fall back to the
   // notifications inbox.
   void Push.addListener("pushNotificationActionPerformed", (payload) => {
-    const notif = (payload as { notification?: { data?: Record<string, unknown> } })
-      ?.notification;
+    const notif = (payload as { notification?: { data?: Record<string, unknown> } })?.notification;
     const data = (notif?.data ?? {}) as Record<string, unknown>;
     const linkRaw = typeof data.deepLink === "string" ? data.deepLink : undefined;
     if (typeof window === "undefined") return;
@@ -161,4 +161,3 @@ export async function initNativePushHandlers(options?: {
     }
   });
 }
-

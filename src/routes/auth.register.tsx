@@ -24,10 +24,7 @@ const Search = z.object({
 export const Route = createFileRoute("/auth/register")({
   validateSearch: (s) => Search.parse(s),
   head: () => ({
-    meta: [
-      { title: "إنشاء حساب — باعشن الطبي" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
+    meta: [{ title: "إنشاء حساب — باعشن الطبي" }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: RegisterPage,
 });
@@ -69,9 +66,7 @@ function RegisterPage() {
       <Card>
         <CardHeader className="text-center">
           <CardTitle>تم التحقق من رقمك</CardTitle>
-          <CardDescription>
-            سنكمل بيانات حسابك قريبًا. يمكنك الآن تسجيل الدخول.
-          </CardDescription>
+          <CardDescription>سنكمل بيانات حسابك قريبًا. يمكنك الآن تسجيل الدخول.</CardDescription>
         </CardHeader>
         <CardContent>
           <Button asChild className="w-full">

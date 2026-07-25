@@ -36,18 +36,15 @@ export const escalateAiConversation = createServerFn({ method: "POST" })
     });
     if (limited) throw new Error("rate_limited");
 
-    const { data: rows, error } = await context.supabase.rpc(
-      "escalate_ai_to_inbox",
-      {
-        _conversation_id: data.conversationId,
-        _reason: data.reason,
-        _severity: data.severity,
-        _lang: data.lang ?? "ar",
-        _summary: data.summary ?? null,
-        _last_user_msg: data.lastUserMessage ?? null,
-        _last_ai_msg: data.lastAiMessage ?? null,
-      } as never,
-    );
+    const { data: rows, error } = await context.supabase.rpc("escalate_ai_to_inbox", {
+      _conversation_id: data.conversationId,
+      _reason: data.reason,
+      _severity: data.severity,
+      _lang: data.lang ?? "ar",
+      _summary: data.summary ?? null,
+      _last_user_msg: data.lastUserMessage ?? null,
+      _last_ai_msg: data.lastAiMessage ?? null,
+    } as never);
     if (error) {
       // Preserve semantic error codes to the caller without leaking SQL.
       const msg = error.message || "escalation_failed";
@@ -85,10 +82,9 @@ export const listAiSafetyIncidents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((raw) => ListInput.parse(raw))
   .handler(async ({ data, context }): Promise<SafetyIncident[]> => {
-    const { data: rows, error } = await context.supabase.rpc(
-      "list_ai_safety_incidents",
-      { _conversation_id: data.conversationId } as never,
-    );
+    const { data: rows, error } = await context.supabase.rpc("list_ai_safety_incidents", {
+      _conversation_id: data.conversationId,
+    } as never);
     if (error) {
       const msg = error.message || "";
       if (/not authorized|not authenticated/i.test(msg)) throw new Error("forbidden");
@@ -124,10 +120,9 @@ export const listAiIncidentEvents = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((raw) => EventsInput.parse(raw))
   .handler(async ({ data, context }): Promise<IncidentEvent[]> => {
-    const { data: rows, error } = await context.supabase.rpc(
-      "list_ai_incident_events",
-      { _incident_id: data.incidentId } as never,
-    );
+    const { data: rows, error } = await context.supabase.rpc("list_ai_incident_events", {
+      _incident_id: data.incidentId,
+    } as never);
     if (error) {
       const msg = error.message || "";
       if (/not authorized|not authenticated/i.test(msg)) throw new Error("forbidden");
@@ -166,10 +161,9 @@ export const getAiEscalationStatus = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((raw) => StatusInput.parse(raw))
   .handler(async ({ data, context }): Promise<EscalationStatus | null> => {
-    const { data: rows, error } = await context.supabase.rpc(
-      "get_ai_escalation_status",
-      { _conversation_id: data.conversationId } as never,
-    );
+    const { data: rows, error } = await context.supabase.rpc("get_ai_escalation_status", {
+      _conversation_id: data.conversationId,
+    } as never);
     if (error) {
       const msg = error.message || "";
       if (/authorized|authentication/i.test(msg)) throw new Error("forbidden");
