@@ -68,7 +68,7 @@ async def run() -> None:
                             {"name": "i18nextLng", "value": lang, "url": "http://localhost:8080"},
                         ])
                         await page.reload(wait_until="networkidle", timeout=25000)
-                        await page.add_script_tag(url=AXE_CDN)
+                        await page.add_script_tag(content=AXE_LOCAL.read_text(encoding="utf-8"))
                         axe = await page.evaluate(
                             """async () => {
                                 const r = await window.axe.run(document, {
