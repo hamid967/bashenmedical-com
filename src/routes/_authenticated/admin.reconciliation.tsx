@@ -367,6 +367,12 @@ function ReconciliationPage() {
                       <div className="flex flex-col gap-0.5">
                         <a
                           className="text-primary hover:underline"
+                          href={`/admin/reconciliation/${r.invoice_id}`}
+                        >
+                          تفاصيل التسوية
+                        </a>
+                        <a
+                          className="text-primary hover:underline"
                           href={`/admin/billing/${r.invoice_id}`}
                         >
                           فاتورة
