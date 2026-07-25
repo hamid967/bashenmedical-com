@@ -59,7 +59,7 @@ function AiInsightsPage() {
   }, [urlOrgId, storedTenantId, setTenantId]);
 
   const setTab = (t: Tab) =>
-    navigate({ search: (prev: z.infer<typeof searchSchema>) => ({ ...prev, tab: t }), replace: true });
+    navigate({ search: { ...search, tab: t }, replace: true });
 
   const copyShareLink = async () => {
     const url = new URL(window.location.href);
