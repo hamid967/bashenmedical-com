@@ -111,7 +111,6 @@ export function NotificationStatusChips({
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reference, phoneLast4]);
 
   if (!reference || phoneLast4.length !== 4) return null;

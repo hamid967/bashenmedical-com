@@ -708,9 +708,7 @@ async function loadImageForCanvas(src: string): Promise<HTMLImageElement> {
 
 // Helper: pointer coords stored under `_` suffix keys to avoid shadowing
 // the runtime `x`/`y` in the drag start snapshot.
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-}
+declare global {}
 
 export function MediaField({
   label,

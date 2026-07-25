@@ -41,7 +41,7 @@ export function DoctorResults({
     .map((d) => d.id)
     .sort()
     .join(",");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+
   useVisibleIdsEffect(visibleKey, onVisibleIdsChange);
 
   if (isLoading) {

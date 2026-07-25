@@ -10,7 +10,6 @@ type Role = "admin" | "reception" | "pharmacy" | "super_admin" | "doctor";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function getRoles(sb: any, userId: string): Promise<Role[]> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await sb.from("user_roles").select("role").eq("user_id", userId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (data ?? []).map((r: any) => r.role as Role);

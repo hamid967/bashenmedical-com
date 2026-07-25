@@ -523,7 +523,7 @@ function TabBtn({
 }
 
 type ApptRow = ReturnType<typeof mapItemType>;
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 function mapItemType() {
   return {} as {
     id: string;
