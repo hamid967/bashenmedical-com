@@ -50,17 +50,6 @@ function GoogleGlyph({ className }: { className?: string }) {
   );
 }
 
-// (removed duplicate route decl below)
-const _routeMarker = 1;
-  validateSearch: (s) => Search.parse(s),
-  head: () => ({
-    meta: [
-      { title: "تسجيل الدخول — باعشن الطبي" },
-      { name: "robots", content: "noindex, nofollow" },
-    ],
-  }),
-  component: LoginPage,
-});
 
 function LoginPage() {
   const search = Route.useSearch();
