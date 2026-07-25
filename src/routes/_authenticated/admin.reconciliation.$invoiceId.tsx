@@ -598,8 +598,24 @@ function AdjustmentPanel({
   const [resolved, setResolved] = useState<boolean>(!!activeAdjustment?.resolved);
   const [reason, setReason] = useState<string>("");
 
+  type ApplyPayload = {
+    invoice_id: string;
+    reason: string;
+    unlink_nphies?: boolean;
+    linked_nphies_request_id?: string | null;
+    override_expected_share?: number | null;
+    override_invoice_status?:
+      | "issued"
+      | "pending"
+      | "paid"
+      | "cancelled"
+      | "refunded"
+      | null;
+    resolved?: boolean;
+  };
+
   const apply = useMutation({
-    mutationFn: (data: Parameters<typeof applyFn>[0]["data"]) => applyFn({ data }),
+    mutationFn: (data: ApplyPayload) => applyFn({ data }),
     onSuccess: () => {
       toast.success("تم حفظ التعديل");
       setOpen(false);
