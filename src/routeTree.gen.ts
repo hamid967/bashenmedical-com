@@ -228,6 +228,7 @@ import { Route as ApiAiActionRouteImport } from './routes/api/ai/action'
 import { Route as ApiAiChatRouteImport } from './routes/api/ai/chat'
 import { Route as ApiAiStaffActionRouteImport } from './routes/api/ai/staff-action'
 import { Route as ApiPortalAiChatRouteImport } from './routes/api/portal/ai-chat'
+import { Route as ApiPublicHealthRouteImport } from './routes/api/public/health'
 import { Route as MediaStoriesSlugRouteImport } from './routes/media.stories.$slug'
 import { Route as AuthenticatedAdminAiOverviewRouteImport } from './routes/_authenticated/admin.ai.overview'
 import { Route as AuthenticatedAdminAiSafetyRouteImport } from './routes/_authenticated/admin.ai.safety'
@@ -1516,6 +1517,11 @@ const ApiPortalAiChatRoute = ApiPortalAiChatRouteImport.update({
   path: '/api/portal/ai-chat',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHealthRoute = ApiPublicHealthRouteImport.update({
+  id: '/api/public/health',
+  path: '/api/public/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MediaStoriesSlugRoute = MediaStoriesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -2144,6 +2150,7 @@ export interface FileRoutesByFullPath {
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/staff-action': typeof ApiAiStaffActionRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/owner/': typeof AuthenticatedOwnerIndexRoute
@@ -2430,6 +2437,7 @@ export interface FileRoutesByTo {
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/staff-action': typeof ApiAiStaffActionRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/owner': typeof AuthenticatedOwnerIndexRoute
@@ -2723,6 +2731,7 @@ export interface FileRoutesById {
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/staff-action': typeof ApiAiStaffActionRoute
   '/api/portal/ai-chat': typeof ApiPortalAiChatRoute
+  '/api/public/health': typeof ApiPublicHealthRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/owner/': typeof AuthenticatedOwnerIndexRoute
@@ -3016,6 +3025,7 @@ export interface FileRouteTypes {
     | '/api/ai/chat'
     | '/api/ai/staff-action'
     | '/api/portal/ai-chat'
+    | '/api/public/health'
     | '/media/stories/$slug'
     | '/admin/'
     | '/owner/'
@@ -3302,6 +3312,7 @@ export interface FileRouteTypes {
     | '/api/ai/chat'
     | '/api/ai/staff-action'
     | '/api/portal/ai-chat'
+    | '/api/public/health'
     | '/media/stories/$slug'
     | '/admin'
     | '/owner'
@@ -3594,6 +3605,7 @@ export interface FileRouteTypes {
     | '/api/ai/chat'
     | '/api/ai/staff-action'
     | '/api/portal/ai-chat'
+    | '/api/public/health'
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
     | '/_authenticated/owner/'
@@ -3734,6 +3746,7 @@ export interface RootRouteChildren {
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAiStaffActionRoute: typeof ApiAiStaffActionRoute
   ApiPortalAiChatRoute: typeof ApiPortalAiChatRoute
+  ApiPublicHealthRoute: typeof ApiPublicHealthRoute
   ApiPublicAiStreamMetricsRoute: typeof ApiPublicAiStreamMetricsRoute
   ApiPublicAppointmentsVerifyRoute: typeof ApiPublicAppointmentsVerifyRoute
   ApiPublicBookAvailabilityRoute: typeof ApiPublicBookAvailabilityRoute
@@ -5309,6 +5322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPortalAiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/health': {
+      id: '/api/public/health'
+      path: '/api/public/health'
+      fullPath: '/api/public/health'
+      preLoaderRoute: typeof ApiPublicHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/media/stories/$slug': {
       id: '/media/stories/$slug'
       path: '/$slug'
@@ -6643,6 +6663,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiChatRoute: ApiAiChatRoute,
   ApiAiStaffActionRoute: ApiAiStaffActionRoute,
   ApiPortalAiChatRoute: ApiPortalAiChatRoute,
+  ApiPublicHealthRoute: ApiPublicHealthRoute,
   ApiPublicAiStreamMetricsRoute: ApiPublicAiStreamMetricsRoute,
   ApiPublicAppointmentsVerifyRoute: ApiPublicAppointmentsVerifyRoute,
   ApiPublicBookAvailabilityRoute: ApiPublicBookAvailabilityRoute,
