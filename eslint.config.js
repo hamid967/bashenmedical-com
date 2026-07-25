@@ -95,4 +95,15 @@ export default tseslint.config(
     },
   },
   eslintPluginPrettier,
+  {
+    // Bracket-path routes (`[.mcp]`, `[.well-known]`) confuse eslint-plugin-prettier's
+    // config resolution — Prettier itself considers them formatted. Disable the
+    // in-editor check; the standalone `prettier --check` still guards these files.
+    files: [
+      "src/routes/mcp.ts",
+      "src/routes/[.mcp]/**/*.{ts,tsx}",
+      "src/routes/[.well-known]/**/*.{ts,tsx}",
+    ],
+    rules: { "prettier/prettier": "off" },
+  },
 );
