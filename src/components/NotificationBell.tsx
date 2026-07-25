@@ -86,6 +86,19 @@ export function NotificationBell() {
     };
   }, [signedIn, qc]);
 
+  // Sync the native app icon badge with the unread count, and install
+  // push handlers (deep-link taps + foreground badge bumps) once.
+  useEffect(() => {
+    if (!signedIn) return;
+    void initNativePushHandlers({
+      onReceived: () => qc.invalidateQueries({ queryKey: ["notifications"] }),
+    });
+  }, [signedIn, qc]);
+  useEffect(() => {
+    if (!signedIn) return;
+    void setNativeBadge(countQuery.data?.count ?? 0);
+  }, [signedIn, countQuery.data?.count]);
+
   // Close on outside click
   useEffect(() => {
     if (!open) return;
