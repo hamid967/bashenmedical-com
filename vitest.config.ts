@@ -19,6 +19,7 @@ export default defineConfig({
       // executed directly by `bun <file>` in a separate CI step, not by vitest.
       "tests/unit/book-docs-keys.test.ts",
       "tests/unit/booking-share-timezone.test.ts",
+      "tests/unit/booking-share-preview-parity.test.ts",
       "tests/unit/download-error.test.ts",
       "tests/unit/reason.test.ts",
       "tests/unit/release-gate.test.ts",
