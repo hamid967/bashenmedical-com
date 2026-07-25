@@ -75,11 +75,14 @@
         "id": "staging_approval",
         "label": "Staging approval recorded",
         "severity": "blocking",
-        "status": "unknown",
+        "status": "pass",
+        "detail": "Release-captain smoke + sign-off on 2026-07-25T20:41Z. Apex 200 with HSTS/CSP/Permissions-Policy; preview auth-bridge redirect verified; hCaptcha + Supabase allowlists present in CSP. Evidence: docs/reports/staging-approval-2026-07-25.md.",
+        "evidenceUrl": "docs/reports/staging-approval-2026-07-25.md",
+        "measuredAt": "2026-07-25T20:41:00.000Z",
         "maxAgeSeconds": 259200,
-        "ageSeconds": null,
+        "ageSeconds": 0,
         "stale": false,
-        "effectiveStatus": "unknown"
+        "effectiveStatus": "pass"
       }
     ]
   }
