@@ -1,74 +1,82 @@
-# F2 — Native App (Capacitor)
+# G3 — Analytics AI
 
-Goal: ship real iOS/Android apps for patients on the App Store and Google Play, reusing the existing TanStack Start site instead of rebuilding it in a native framework.
+ثلاث قدرات ذكية فوق بيانات BI الموجودة (bi_daily_kpis + appointments + complaints)، بدون أي بيانات مستخدم إضافية، وباستخدام Lovable AI Gateway (بدون مفتاح خارجي).
 
-## Strategy: Remote-URL Capacitor shell
+## القدرات
 
-The site runs on Cloudflare/Netlify with SSR — it is not a static SPA, so a "copy the `dist/` into the app" approach loses SSR, server functions, and auth cookies. The pragmatic path is a Capacitor shell that loads the published site (`https://bashenmedical.com`) inside a native WebView, and layers native-only capabilities on top:
+### 1) No-Show Prediction
+- ميزات مشتقة من `appointments`: تاريخ الحجز vs موعد الزيارة (lead time)، الفرع، التخصص، وقت اليوم، تاريخ العميل (نسبة الغياب السابقة)، نوع التأمين، عدد التأكيدات (SMS/WA).
+- محرك افتراضي: **Logistic scoring** خفيف داخل PL/pgSQL (بدون تدريب خارجي)، مع طبقة اختيارية تستدعي Gemini لتفسير عوامل الخطر لكل حالة.
+- ناتج: `no_show_predictions(appointment_id, risk 0-1, top_factors[], recommendation)` يتحدّث ساعياً عبر pg_cron.
 
-- Native push (APNs / FCM) alongside our existing Web Push
-- Biometric unlock (Face ID / Touch ID / fingerprint)
-- Universal / App Links so `bashenmedical.com/...` opens directly in the app
-- Native splash, status bar, safe-area handling, and app icons
-- Store-ready metadata
+### 2) Smart Recommendations
+- توصيات على مستوى الفرع/التخصص/اليوم: تعديل السعة، إضافة إشعار تذكير إضافي، عرض slots بديلة.
+- تُولَّد بواسطة server function تستدعي `google/gemini-3.6-flash` مع KPIs مجمّعة (بدون PII).
 
-App Store review requires the app to feel more than a wrapped site, so we also add: install-detected UI polish, native share integration, and a "Live from Baeshen" native badge count for unread notifications.
+### 3) Complaint Classification
+- تصنيف تلقائي لكل شكوى جديدة (fields من `complaints`): الفئة، الحدة، القسم المسؤول، توصية رد.
+- Trigger على `AFTER INSERT` → استدعاء server function `classifyComplaint` → تحديث الأعمدة `ai_category`, `ai_severity`, `ai_suggested_owner`.
 
-## Deliverables
+## المخطط الفني
 
+### قاعدة البيانات (migration واحدة)
 ```text
-capacitor/                        (new folder — native project lives outside src/)
-├── capacitor.config.ts           app id, server URL, plugins
-├── ios/                          Xcode project (generated)
-├── android/                      Gradle project (generated)
-├── resources/
-│   ├── icon.png                  1024×1024 master
-│   └── splash.png                2732×2732 master
-└── README.md                     build & release steps
+CREATE TABLE no_show_predictions (
+  appointment_id uuid PK REFERENCES appointments,
+  risk numeric(4,3),
+  top_factors jsonb,
+  recommendation text,
+  computed_at timestamptz
+);
 
-src/lib/native/
-├── bridge.ts                     detects Capacitor, exposes helpers
-├── push-native.ts                registers APNs/FCM, syncs to push_subscriptions
-└── biometric.ts                  Face ID unlock for /portal
+ALTER TABLE complaints
+  ADD COLUMN ai_category text,
+  ADD COLUMN ai_severity text,
+  ADD COLUMN ai_suggested_owner text,
+  ADD COLUMN ai_classified_at timestamptz;
 
-src/routes/api/public/native/
-└── register-device.ts            POST device token → stores native FCM/APNs subscription
-
-supabase migration
-└── adds device_platform + native_token columns to push_subscriptions
+CREATE TABLE ai_recommendations (
+  id uuid PK, scope text, scope_id text,
+  kind text, payload jsonb, generated_at timestamptz, dismissed_at timestamptz
+);
 ```
++ GRANTs + RLS: قراءة للأدوار admin/analyst فقط، service_role للكتابة.
 
-## Steps
+### Server Functions (TanStack، مسار `src/lib/ai/`)
+- `predictNoShow.functions.ts` — batch job، يقرأ المواعيد القادمة (48h) ويكتب `no_show_predictions`.
+- `generateRecommendations.functions.ts` — يقرأ `bi_daily_kpis` آخر 30 يوم ويولّد ≤10 توصيات.
+- `classifyComplaint.functions.ts` — استدعاء واحد لكل شكوى، محمي بـ `assertHasRole('admin'|'analyst')` أو DB trigger.
 
-1. Scaffold Capacitor in a `capacitor/` folder with `@capacitor/core`, `@capacitor/ios`, `@capacitor/android`, plus plugins: `@capacitor/push-notifications`, `@capacitor-community/biometric-auth`, `@capacitor/app`, `@capacitor/status-bar`, `@capacitor/splash-screen`, `@capacitor/share`, `@capacitor/badge`.
-2. Point `capacitor.config.ts` `server.url` at `https://bashenmedical.com` (production) with `androidScheme: "https"`; document a `.env.local` override for staging (`project--*-dev.lovable.app`).
-3. Add `src/lib/native/bridge.ts` that detects Capacitor via `window.Capacitor?.isNativePlatform()` and exposes typed accessors; gate all native code behind it so the web build ignores it.
-4. Native push: on portal login, `push-native.ts` requests permission, registers with APNs/FCM, and POSTs the token to `/api/public/native/register-device` (auth via Supabase bearer). Server stores it in `push_subscriptions` with `platform='ios'|'android'`. Fan-out logic in `notifications.functions.ts` sends via FCM/APNs for native rows and Web Push for browser rows.
-5. Biometric guard: after Supabase session load, if `Capacitor.isNativePlatform()` and user opted in via a new toggle on `/portal/settings`, prompt Face ID / fingerprint before revealing `/portal/*`.
-6. Deep links: register `bashenmedical.com` as an App Link (Android `assetlinks.json`) and Universal Link (iOS `apple-app-site-association`). Both files served from `/api/public/.well-known/*` routes.
-7. Icons & splash: run `@capacitor/assets` to generate every iOS/Android size from `icon.png` and `splash.png`. Icons match the existing brand teal `#0f766e`.
-8. In-app UX polish: hide the "Install app" card when running native (already installed), add native `Share` API to the report/appointment pages, and reflect unread notification count on the app badge.
-9. CI: add `.github/workflows/native-build.yml` (manual dispatch) that runs `pnpm cap sync` and builds unsigned iOS/Android artifacts for QA. Signing/store uploads stay manual for now — they need Apple/Google developer accounts you own.
-10. Docs: `capacitor/README.md` with exact commands to run/build/deploy, plus checklists for App Store and Play Store submission (screenshots, privacy nutrition labels, permission strings).
+### واجهة الإدارة
+- `/admin/ai-insights` — 3 تبويبات:
+  - **No-Show**: جدول المواعيد عالية الخطر + زر "إرسال تذكير الآن".
+  - **Recommendations**: بطاقات + accept/dismiss.
+  - **Complaints AI**: جدول تصنيفات + دقة يدوية (override).
 
-## Non-goals (this phase)
+### الجدولة
+- `pg_cron` كل ساعة: `predictNoShow` (48h window).
+- `pg_cron` يومياً 06:00: `generateRecommendations`.
+- شكاوى: real-time عبر trigger + net.http_post إلى `/api/public/hooks/classify-complaint`.
 
-- Rewriting screens as native components — the WebView is the UI.
-- Offline mode beyond what the PWA service worker already provides.
-- Automated store submission — needs your developer accounts and signing certs.
+### الأمان
+- كل الاستدعاءات لـ Lovable AI من الخادم فقط (`LOVABLE_API_KEY`).
+- PII masking قبل الإرسال: لا أسماء/أرقام هوية/جوال — فقط hashed ids + متغيرات رقمية.
+- تسجيل التوكنات في `ai_usage_costs` كما هو النمط الحالي.
+- RLS: قراءة للـ `admin` و`analyst` فقط عبر `has_role`.
 
-## Technical notes
+### الاختبارات
+- Unit: مصنّف الشكاوى (mock gateway) + PII masking.
+- Integration: RLS matrix للجداول الثلاثة.
+- E2E: `/admin/ai-insights` تفتح فقط لـ admin/analyst وتعرض بيانات.
 
-- Server-URL apps must whitelist the origin in `capacitor.config.ts` (`allowNavigation`) and set `App-Bound Domains` on iOS or the WebView blocks navigation to `bashenmedical.com`.
-- Push tokens are per-install and rotate; the register endpoint upserts by `(user_id, platform, token)` and prunes stale rows on server-side send failures (410/`NotRegistered`).
-- Universal Links require serving `apple-app-site-association` with `Content-Type: application/json` and no redirects — the TanStack public API route handles both.
-- `SUPABASE_URL` must be reachable from the WebView; nothing new to configure since the site already talks to it.
-- New secrets needed later (when we do real push): `FCM_SERVER_KEY`, `APNS_KEY_ID`, `APNS_TEAM_ID`, `APNS_PRIVATE_KEY`. I will request them via `add_secret` only when we reach step 4's server side.
+## Rollout
+1. Migration + GRANTs + RLS.
+2. Server functions + PII masker.
+3. UI `/admin/ai-insights`.
+4. Cron jobs + trigger.
+5. اختبارات + توثيق في `docs/ai-insights.md`.
 
-## What I need from you before step 4
-
-- Apple Developer Team ID and bundle identifier (e.g. `com.baeshenmedical.patient`).
-- Android package name.
-- Firebase project (for FCM) — or approval to create one under your Google account.
-
-Approving this plan starts with steps 1–3 and 7 (fully offline, no external accounts needed); we pause before step 4 to gather the credentials above.
+## خارج النطاق
+- تدريب نماذج ML مخصصة (ML pipelines).
+- بيانات ديموغرافية إضافية.
+- تنبؤات مالية / إيرادات — تُعالج في G3.2 لاحقاً.

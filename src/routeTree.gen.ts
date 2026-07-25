@@ -121,6 +121,7 @@ import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAccessHubRouteImport } from './routes/_authenticated/admin.access-hub'
+import { Route as AuthenticatedAdminAiInsightsRouteImport } from './routes/_authenticated/admin.ai-insights'
 import { Route as AuthenticatedAdminAiStreamingRouteImport } from './routes/_authenticated/admin.ai-streaming'
 import { Route as AuthenticatedAdminAiUsageRouteImport } from './routes/_authenticated/admin.ai-usage'
 import { Route as AuthenticatedAdminAppointmentsRouteImport } from './routes/_authenticated/admin.appointments'
@@ -271,8 +272,11 @@ import { Route as ApiPublicBookWaitlistConfirmRouteImport } from './routes/api/p
 import { Route as ApiPublicCronCmsPublishRouteImport } from './routes/api/public/cron/cms-publish'
 import { Route as ApiPublicCronPerfBudgetsRouteImport } from './routes/api/public/cron/perf-budgets'
 import { Route as ApiPublicCronSlaSweepRouteImport } from './routes/api/public/cron/sla-sweep'
+import { Route as ApiPublicHooksClassifyComplaintRouteImport } from './routes/api/public/hooks/classify-complaint'
 import { Route as ApiPublicHooksErrorsRouteImport } from './routes/api/public/hooks/errors'
+import { Route as ApiPublicHooksGenerateRecommendationsRouteImport } from './routes/api/public/hooks/generate-recommendations'
 import { Route as ApiPublicHooksPermissionWatchdogRouteImport } from './routes/api/public/hooks/permission-watchdog'
+import { Route as ApiPublicHooksPredictNoShowRouteImport } from './routes/api/public/hooks/predict-no-show'
 import { Route as ApiPublicHooksRecordDeploymentRouteImport } from './routes/api/public/hooks/record-deployment'
 import { Route as ApiPublicHooksSendRemindersRouteImport } from './routes/api/public/hooks/send-reminders'
 import { Route as ApiPublicHooksV3RollbackWatchdogRouteImport } from './routes/api/public/hooks/v3-rollback-watchdog'
@@ -883,6 +887,12 @@ const AuthenticatedAdminAccessHubRoute =
   AuthenticatedAdminAccessHubRouteImport.update({
     id: '/access-hub',
     path: '/access-hub',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminAiInsightsRoute =
+  AuthenticatedAdminAiInsightsRouteImport.update({
+    id: '/ai-insights',
+    path: '/ai-insights',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminAiStreamingRoute =
@@ -1762,15 +1772,33 @@ const ApiPublicCronSlaSweepRoute = ApiPublicCronSlaSweepRouteImport.update({
   path: '/api/public/cron/sla-sweep',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksClassifyComplaintRoute =
+  ApiPublicHooksClassifyComplaintRouteImport.update({
+    id: '/api/public/hooks/classify-complaint',
+    path: '/api/public/hooks/classify-complaint',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksErrorsRoute = ApiPublicHooksErrorsRouteImport.update({
   id: '/api/public/hooks/errors',
   path: '/api/public/hooks/errors',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicHooksGenerateRecommendationsRoute =
+  ApiPublicHooksGenerateRecommendationsRouteImport.update({
+    id: '/api/public/hooks/generate-recommendations',
+    path: '/api/public/hooks/generate-recommendations',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicHooksPermissionWatchdogRoute =
   ApiPublicHooksPermissionWatchdogRouteImport.update({
     id: '/api/public/hooks/permission-watchdog',
     path: '/api/public/hooks/permission-watchdog',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicHooksPredictNoShowRoute =
+  ApiPublicHooksPredictNoShowRouteImport.update({
+    id: '/api/public/hooks/predict-no-show',
+    path: '/api/public/hooks/predict-no-show',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiPublicHooksRecordDeploymentRoute =
@@ -2013,6 +2041,7 @@ export interface FileRoutesByFullPath {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/access-hub': typeof AuthenticatedAdminAccessHubRoute
+  '/admin/ai-insights': typeof AuthenticatedAdminAiInsightsRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -2162,8 +2191,11 @@ export interface FileRoutesByFullPath {
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
+  '/api/public/hooks/classify-complaint': typeof ApiPublicHooksClassifyComplaintRoute
   '/api/public/hooks/errors': typeof ApiPublicHooksErrorsRoute
+  '/api/public/hooks/generate-recommendations': typeof ApiPublicHooksGenerateRecommendationsRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
+  '/api/public/hooks/predict-no-show': typeof ApiPublicHooksPredictNoShowRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/hooks/v3-rollback-watchdog': typeof ApiPublicHooksV3RollbackWatchdogRoute
@@ -2295,6 +2327,7 @@ export interface FileRoutesByTo {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/admin/access-hub': typeof AuthenticatedAdminAccessHubRoute
+  '/admin/ai-insights': typeof AuthenticatedAdminAiInsightsRoute
   '/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -2444,8 +2477,11 @@ export interface FileRoutesByTo {
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
+  '/api/public/hooks/classify-complaint': typeof ApiPublicHooksClassifyComplaintRoute
   '/api/public/hooks/errors': typeof ApiPublicHooksErrorsRoute
+  '/api/public/hooks/generate-recommendations': typeof ApiPublicHooksGenerateRecommendationsRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
+  '/api/public/hooks/predict-no-show': typeof ApiPublicHooksPredictNoShowRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/hooks/v3-rollback-watchdog': typeof ApiPublicHooksV3RollbackWatchdogRoute
@@ -2584,6 +2620,7 @@ export interface FileRoutesById {
   '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/admin/access-hub': typeof AuthenticatedAdminAccessHubRoute
+  '/_authenticated/admin/ai-insights': typeof AuthenticatedAdminAiInsightsRoute
   '/_authenticated/admin/ai-streaming': typeof AuthenticatedAdminAiStreamingRoute
   '/_authenticated/admin/ai-usage': typeof AuthenticatedAdminAiUsageRoute
   '/_authenticated/admin/appointments': typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -2733,8 +2770,11 @@ export interface FileRoutesById {
   '/api/public/cron/cms-publish': typeof ApiPublicCronCmsPublishRoute
   '/api/public/cron/perf-budgets': typeof ApiPublicCronPerfBudgetsRoute
   '/api/public/cron/sla-sweep': typeof ApiPublicCronSlaSweepRoute
+  '/api/public/hooks/classify-complaint': typeof ApiPublicHooksClassifyComplaintRoute
   '/api/public/hooks/errors': typeof ApiPublicHooksErrorsRoute
+  '/api/public/hooks/generate-recommendations': typeof ApiPublicHooksGenerateRecommendationsRoute
   '/api/public/hooks/permission-watchdog': typeof ApiPublicHooksPermissionWatchdogRoute
+  '/api/public/hooks/predict-no-show': typeof ApiPublicHooksPredictNoShowRoute
   '/api/public/hooks/record-deployment': typeof ApiPublicHooksRecordDeploymentRoute
   '/api/public/hooks/send-reminders': typeof ApiPublicHooksSendRemindersRoute
   '/api/public/hooks/v3-rollback-watchdog': typeof ApiPublicHooksV3RollbackWatchdogRoute
@@ -2873,6 +2913,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/access-hub'
+    | '/admin/ai-insights'
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/appointments'
@@ -3022,8 +3063,11 @@ export interface FileRouteTypes {
     | '/api/public/cron/cms-publish'
     | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
+    | '/api/public/hooks/classify-complaint'
     | '/api/public/hooks/errors'
+    | '/api/public/hooks/generate-recommendations'
     | '/api/public/hooks/permission-watchdog'
+    | '/api/public/hooks/predict-no-show'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
     | '/api/public/hooks/v3-rollback-watchdog'
@@ -3155,6 +3199,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/admin/access-hub'
+    | '/admin/ai-insights'
     | '/admin/ai-streaming'
     | '/admin/ai-usage'
     | '/admin/appointments'
@@ -3304,8 +3349,11 @@ export interface FileRouteTypes {
     | '/api/public/cron/cms-publish'
     | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
+    | '/api/public/hooks/classify-complaint'
     | '/api/public/hooks/errors'
+    | '/api/public/hooks/generate-recommendations'
     | '/api/public/hooks/permission-watchdog'
+    | '/api/public/hooks/predict-no-show'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
     | '/api/public/hooks/v3-rollback-watchdog'
@@ -3443,6 +3491,7 @@ export interface FileRouteTypes {
     | '/.lovable/oauth/consent'
     | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/admin/access-hub'
+    | '/_authenticated/admin/ai-insights'
     | '/_authenticated/admin/ai-streaming'
     | '/_authenticated/admin/ai-usage'
     | '/_authenticated/admin/appointments'
@@ -3592,8 +3641,11 @@ export interface FileRouteTypes {
     | '/api/public/cron/cms-publish'
     | '/api/public/cron/perf-budgets'
     | '/api/public/cron/sla-sweep'
+    | '/api/public/hooks/classify-complaint'
     | '/api/public/hooks/errors'
+    | '/api/public/hooks/generate-recommendations'
     | '/api/public/hooks/permission-watchdog'
+    | '/api/public/hooks/predict-no-show'
     | '/api/public/hooks/record-deployment'
     | '/api/public/hooks/send-reminders'
     | '/api/public/hooks/v3-rollback-watchdog'
@@ -3697,8 +3749,11 @@ export interface RootRouteChildren {
   ApiPublicCronCmsPublishRoute: typeof ApiPublicCronCmsPublishRoute
   ApiPublicCronPerfBudgetsRoute: typeof ApiPublicCronPerfBudgetsRoute
   ApiPublicCronSlaSweepRoute: typeof ApiPublicCronSlaSweepRoute
+  ApiPublicHooksClassifyComplaintRoute: typeof ApiPublicHooksClassifyComplaintRoute
   ApiPublicHooksErrorsRoute: typeof ApiPublicHooksErrorsRoute
+  ApiPublicHooksGenerateRecommendationsRoute: typeof ApiPublicHooksGenerateRecommendationsRoute
   ApiPublicHooksPermissionWatchdogRoute: typeof ApiPublicHooksPermissionWatchdogRoute
+  ApiPublicHooksPredictNoShowRoute: typeof ApiPublicHooksPredictNoShowRoute
   ApiPublicHooksRecordDeploymentRoute: typeof ApiPublicHooksRecordDeploymentRoute
   ApiPublicHooksSendRemindersRoute: typeof ApiPublicHooksSendRemindersRoute
   ApiPublicHooksV3RollbackWatchdogRoute: typeof ApiPublicHooksV3RollbackWatchdogRoute
@@ -4503,6 +4558,13 @@ declare module '@tanstack/react-router' {
       path: '/access-hub'
       fullPath: '/admin/access-hub'
       preLoaderRoute: typeof AuthenticatedAdminAccessHubRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/ai-insights': {
+      id: '/_authenticated/admin/ai-insights'
+      path: '/ai-insights'
+      fullPath: '/admin/ai-insights'
+      preLoaderRoute: typeof AuthenticatedAdminAiInsightsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/ai-streaming': {
@@ -5555,6 +5617,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronSlaSweepRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/classify-complaint': {
+      id: '/api/public/hooks/classify-complaint'
+      path: '/api/public/hooks/classify-complaint'
+      fullPath: '/api/public/hooks/classify-complaint'
+      preLoaderRoute: typeof ApiPublicHooksClassifyComplaintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/errors': {
       id: '/api/public/hooks/errors'
       path: '/api/public/hooks/errors'
@@ -5562,11 +5631,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicHooksErrorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/hooks/generate-recommendations': {
+      id: '/api/public/hooks/generate-recommendations'
+      path: '/api/public/hooks/generate-recommendations'
+      fullPath: '/api/public/hooks/generate-recommendations'
+      preLoaderRoute: typeof ApiPublicHooksGenerateRecommendationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/hooks/permission-watchdog': {
       id: '/api/public/hooks/permission-watchdog'
       path: '/api/public/hooks/permission-watchdog'
       fullPath: '/api/public/hooks/permission-watchdog'
       preLoaderRoute: typeof ApiPublicHooksPermissionWatchdogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/predict-no-show': {
+      id: '/api/public/hooks/predict-no-show'
+      path: '/api/public/hooks/predict-no-show'
+      fullPath: '/api/public/hooks/predict-no-show'
+      preLoaderRoute: typeof ApiPublicHooksPredictNoShowRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/record-deployment': {
@@ -5963,6 +6046,7 @@ const AuthenticatedAdminSuperPermissionsRouteWithChildren =
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminAccessHubRoute: typeof AuthenticatedAdminAccessHubRoute
+  AuthenticatedAdminAiInsightsRoute: typeof AuthenticatedAdminAiInsightsRoute
   AuthenticatedAdminAiStreamingRoute: typeof AuthenticatedAdminAiStreamingRoute
   AuthenticatedAdminAiUsageRoute: typeof AuthenticatedAdminAiUsageRoute
   AuthenticatedAdminAppointmentsRoute: typeof AuthenticatedAdminAppointmentsRouteWithChildren
@@ -6026,6 +6110,7 @@ interface AuthenticatedAdminRouteChildren {
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminAccessHubRoute: AuthenticatedAdminAccessHubRoute,
+  AuthenticatedAdminAiInsightsRoute: AuthenticatedAdminAiInsightsRoute,
   AuthenticatedAdminAiStreamingRoute: AuthenticatedAdminAiStreamingRoute,
   AuthenticatedAdminAiUsageRoute: AuthenticatedAdminAiUsageRoute,
   AuthenticatedAdminAppointmentsRoute:
@@ -6573,8 +6658,12 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicCronCmsPublishRoute: ApiPublicCronCmsPublishRoute,
   ApiPublicCronPerfBudgetsRoute: ApiPublicCronPerfBudgetsRoute,
   ApiPublicCronSlaSweepRoute: ApiPublicCronSlaSweepRoute,
+  ApiPublicHooksClassifyComplaintRoute: ApiPublicHooksClassifyComplaintRoute,
   ApiPublicHooksErrorsRoute: ApiPublicHooksErrorsRoute,
+  ApiPublicHooksGenerateRecommendationsRoute:
+    ApiPublicHooksGenerateRecommendationsRoute,
   ApiPublicHooksPermissionWatchdogRoute: ApiPublicHooksPermissionWatchdogRoute,
+  ApiPublicHooksPredictNoShowRoute: ApiPublicHooksPredictNoShowRoute,
   ApiPublicHooksRecordDeploymentRoute: ApiPublicHooksRecordDeploymentRoute,
   ApiPublicHooksSendRemindersRoute: ApiPublicHooksSendRemindersRoute,
   ApiPublicHooksV3RollbackWatchdogRoute: ApiPublicHooksV3RollbackWatchdogRoute,

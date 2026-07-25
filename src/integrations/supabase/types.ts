@@ -268,6 +268,51 @@ export type Database = {
         }
         Relationships: []
       }
+      ai_recommendations: {
+        Row: {
+          decided_at: string | null
+          decided_by: string | null
+          generated_at: string
+          id: string
+          kind: string
+          model: string | null
+          payload: Json
+          priority: string
+          scope: string
+          scope_id: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          decided_at?: string | null
+          decided_by?: string | null
+          generated_at?: string
+          id?: string
+          kind: string
+          model?: string | null
+          payload?: Json
+          priority?: string
+          scope: string
+          scope_id?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          decided_at?: string | null
+          decided_by?: string | null
+          generated_at?: string
+          id?: string
+          kind?: string
+          model?: string | null
+          payload?: Json
+          priority?: string
+          scope?: string
+          scope_id?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       ai_safety_incidents: {
         Row: {
           action_taken: string | null
@@ -1798,6 +1843,11 @@ export type Database = {
       }
       complaints: {
         Row: {
+          ai_category: string | null
+          ai_classified_at: string | null
+          ai_model: string | null
+          ai_severity: string | null
+          ai_suggested_owner: string | null
           assigned_to: string | null
           attachments: Json
           created_at: string
@@ -1815,6 +1865,11 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          ai_category?: string | null
+          ai_classified_at?: string | null
+          ai_model?: string | null
+          ai_severity?: string | null
+          ai_suggested_owner?: string | null
           assigned_to?: string | null
           attachments?: Json
           created_at?: string
@@ -1832,6 +1887,11 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          ai_category?: string | null
+          ai_classified_at?: string | null
+          ai_model?: string | null
+          ai_severity?: string | null
+          ai_suggested_owner?: string | null
           assigned_to?: string | null
           attachments?: Json
           created_at?: string
@@ -4171,6 +4231,41 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      no_show_predictions: {
+        Row: {
+          appointment_id: string
+          computed_at: string
+          model: string | null
+          recommendation: string | null
+          risk: number
+          top_factors: Json
+        }
+        Insert: {
+          appointment_id: string
+          computed_at?: string
+          model?: string | null
+          recommendation?: string | null
+          risk: number
+          top_factors?: Json
+        }
+        Update: {
+          appointment_id?: string
+          computed_at?: string
+          model?: string | null
+          recommendation?: string | null
+          risk?: number
+          top_factors?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "no_show_predictions_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_delivery_logs: {
         Row: {

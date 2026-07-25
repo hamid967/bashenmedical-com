@@ -59,6 +59,7 @@ const ITEMS: Item[] = [
   { to: "/admin/audit-logs", label: "سجل التدقيق", icon: ShieldCheck, group: "الإدارة", roles: ["admin", "super_admin"] },
   { to: "/admin/web-vitals", label: "Web Vitals", icon: FileBarChart, group: "الإدارة", roles: ["admin", "super_admin"] },
   { to: "/admin/ai-streaming", label: "مراقبة AI Streaming", icon: Sparkles, group: "الإدارة", roles: ["admin", "super_admin"] },
+  { to: "/admin/ai-insights", label: "تحليلات AI (No-show/توصيات/شكاوى)", icon: Sparkles, group: "الإدارة", roles: ["admin", "super_admin"] },
   { to: "/admin/v3", label: "ترقية V3", icon: Sparkles, group: "الإدارة", roles: ["admin", "super_admin"] },
 ];
 
