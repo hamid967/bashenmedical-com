@@ -146,6 +146,41 @@ function LoginPage() {
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
+
+        {/* Single Sign-On */}
+        <div className="space-y-2 mb-4">
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            disabled={busy}
+            onClick={() => handleSSO("google")}
+            aria-label="تسجيل الدخول عبر Google"
+          >
+            <GoogleGlyph className="h-4 w-4" />
+            متابعة عبر Google
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="w-full gap-2"
+            disabled={busy}
+            onClick={() => handleSSO("apple")}
+            aria-label="تسجيل الدخول عبر Apple"
+          >
+            <Apple className="h-4 w-4" />
+            متابعة عبر Apple
+          </Button>
+        </div>
+        <div className="relative mb-4">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-card px-2 text-muted-foreground">أو</span>
+          </div>
+        </div>
+
         <Tabs defaultValue="mobile">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="mobile">جوال</TabsTrigger>
