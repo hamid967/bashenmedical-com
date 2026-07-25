@@ -29,9 +29,11 @@ function readInitial(): string | null {
  */
 export function useActiveTenant(): ActiveTenantState {
   const [tenantId, setTenantIdState] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     setTenantIdState(readInitial());
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
@@ -66,6 +68,25 @@ export function useActiveTenant(): ActiveTenantState {
     setTenantIdState(id);
     window.dispatchEvent(new CustomEvent(CHANGE_EVENT, { detail: id }));
   }, []);
+
+  // Safe default selection:
+  //  1. Wait for localStorage hydration + orgs fetch to complete.
+  //  2. If a stored tenant is no longer in the user's org list, clear it
+  //     (revoked membership must not leak a stale filter).
+  //  3. If nothing is selected and the user belongs to exactly one org,
+  //     auto-select it — "all orgs" is meaningless with a single org and
+  //     forces every query to re-derive the same filter.
+  //  4. Multiple orgs with no selection → keep null (user picks explicitly).
+  useEffect(() => {
+    if (!hydrated || isLoading) return;
+    if (tenantId && !organizations.some((o) => o.id === tenantId)) {
+      setTenantId(null);
+      return;
+    }
+    if (!tenantId && organizations.length === 1) {
+      setTenantId(organizations[0].id);
+    }
+  }, [hydrated, isLoading, tenantId, organizations, setTenantId]);
 
   const activeOrganization = tenantId
     ? (organizations.find((o) => o.id === tenantId) ?? null)
