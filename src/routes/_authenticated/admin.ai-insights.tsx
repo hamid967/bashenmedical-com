@@ -79,16 +79,10 @@ function AiInsightsPage() {
     navigate({ search: { ...search, tab: t }, replace: true });
 
   const clearUrlOrg = () =>
-    navigate({
-      search: (prev) => ({ ...(prev as typeof search), organizationId: "" }),
-      replace: true,
-    } as never);
+    navigate({ search: { ...search, organizationId: "" }, replace: true });
 
   const switchToOrg = (id: string) =>
-    navigate({
-      search: (prev) => ({ ...(prev as typeof search), organizationId: id }),
-      replace: true,
-    } as never);
+    navigate({ search: { ...search, organizationId: id }, replace: true });
 
   const copyShareLink = async () => {
     const url = new URL(window.location.href);
