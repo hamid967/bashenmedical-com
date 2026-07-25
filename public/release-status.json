@@ -1,15 +1,14 @@
 {
-  "generatedAt": "2026-07-25T19:49:25.376Z",
+  "generatedAt": "2026-07-25T20:20:00.000Z",
   "commitSha": null,
   "runId": null,
   "runUrl": null,
   "evaluation": {
     "verdict": "NO_GO",
-    "evaluatedAt": "2026-07-25T19:49:25.376Z",
+    "evaluatedAt": "2026-07-25T20:20:00.000Z",
     "blockingFailures": [
       "pentest",
       "dr_drill",
-      "captcha",
       "staging_approval"
     ],
     "advisoryWarnings": [],
@@ -38,11 +37,13 @@
         "id": "captcha",
         "label": "CAPTCHA fail-closed on OTP/inquiries",
         "severity": "blocking",
-        "status": "unknown",
+        "status": "pass",
+        "detail": "verifyHCaptcha fails closed in prod (503 without secret, 502 on upstream error, 400 on missing token, 403 on failed verify). Wired into /api/public/inquiries/create, /api/public/reservations/otp.send, /api/public/reservations/otp.verify. 8/8 contract tests pass (tests/unit/hcaptcha-fail-closed.test.ts).",
+        "measuredAt": "2026-07-25T20:20:00.000Z",
         "maxAgeSeconds": 604800,
-        "ageSeconds": null,
+        "ageSeconds": 0,
         "stale": false,
-        "effectiveStatus": "unknown"
+        "effectiveStatus": "pass"
       },
       {
         "id": "unit_tests",
