@@ -100,7 +100,10 @@ export function TenantSwitcher() {
           return (
             <DropdownMenuItem
               key={o.id}
-              onSelect={() => setTenantId(o.id)}
+              onSelect={() => {
+                auditSwitch(tenantId, o.id, o.name);
+                setTenantId(o.id);
+              }}
               className="gap-2"
             >
               <Building className="h-4 w-4 opacity-80" />
