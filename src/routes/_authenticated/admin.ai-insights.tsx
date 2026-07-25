@@ -2,11 +2,13 @@
  * /admin/ai-insights — G3 Analytics AI console.
  * Three tabs: No-Show predictions, Smart Recommendations, Complaint Classifications.
  */
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Brain, AlertTriangle, Lightbulb, MessageSquareWarning, Check, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import { Brain, AlertTriangle, Lightbulb, MessageSquareWarning, Check, X, Link2 } from "lucide-react";
 import { getMyRoles } from "@/lib/admin.functions";
 import {
   listNoShowPredictions,
@@ -16,7 +18,13 @@ import {
 } from "@/lib/admin/ai-insights.functions";
 import { useActiveTenant } from "@/lib/active-tenant";
 
+const searchSchema = z.object({
+  organizationId: fallback(z.string(), "").default(""),
+  tab: fallback(z.string(), "no-show").default("no-show"),
+});
+
 export const Route = createFileRoute("/_authenticated/admin/ai-insights")({
+  validateSearch: zodValidator(searchSchema),
   beforeLoad: async () => {
     const res = await getMyRoles();
     const roles = res.roles ?? [];
@@ -31,20 +39,58 @@ export const Route = createFileRoute("/_authenticated/admin/ai-insights")({
 });
 
 type Tab = "no-show" | "recs" | "complaints";
+const TABS: Tab[] = ["no-show", "recs", "complaints"];
 
 function AiInsightsPage() {
-  const [tab, setTab] = useState<Tab>("no-show");
-  const { tenantId, activeOrganization } = useActiveTenant();
+  const search = Route.useSearch();
+  const navigate = useNavigate({ from: "/admin/ai-insights" });
+  const { tenantId: storedTenantId, setTenantId, activeOrganization, organizations } = useActiveTenant();
+
+  const urlOrgId = search.organizationId || null;
+  const tab: Tab = (TABS as string[]).includes(search.tab) ? (search.tab as Tab) : "no-show";
+  // URL wins over stored preference — enables shareable views.
+  const effectiveTenantId = urlOrgId ?? storedTenantId;
+  const effectiveOrg =
+    (urlOrgId && organizations.find((o) => o.id === urlOrgId)) || activeOrganization;
+
+  // Sync URL → stored tenant so the switcher reflects the shared link.
+  useEffect(() => {
+    if (urlOrgId && urlOrgId !== storedTenantId) setTenantId(urlOrgId);
+  }, [urlOrgId, storedTenantId, setTenantId]);
+
+  const setTab = (t: Tab) =>
+    navigate({ search: { ...search, tab: t }, replace: true });
+
+  const copyShareLink = async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", tab);
+    if (effectiveTenantId) url.searchParams.set("organizationId", effectiveTenantId);
+    else url.searchParams.delete("organizationId");
+    try {
+      await navigator.clipboard.writeText(url.toString());
+    } catch {
+      /* ignore */
+    }
+  };
+
   return (
     <div className="p-6 space-y-4" dir="rtl">
-      <header className="flex items-center gap-3">
+      <header className="flex items-center gap-3 flex-wrap">
         <Brain className="w-6 h-6 text-primary" />
         <h1 className="text-2xl font-bold">تحليلات الذكاء الاصطناعي</h1>
-        {activeOrganization && (
+        {effectiveOrg && (
           <span className="text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
-            المؤسسة: {activeOrganization.name}
+            المؤسسة: {effectiveOrg.name}
           </span>
         )}
+        <button
+          onClick={copyShareLink}
+          className="mr-auto inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded border hover:bg-muted"
+          title="نسخ رابط المشاركة"
+        >
+          <Link2 className="w-3.5 h-3.5" />
+          نسخ رابط المشاركة
+        </button>
       </header>
       <nav className="flex gap-2 border-b">
         <TabBtn active={tab === "no-show"} onClick={() => setTab("no-show")} icon={<AlertTriangle className="w-4 h-4" />}>
@@ -57,9 +103,9 @@ function AiInsightsPage() {
           تصنيف الشكاوى
         </TabBtn>
       </nav>
-      {tab === "no-show" && <NoShowTab tenantId={tenantId} />}
-      {tab === "recs" && <RecsTab tenantId={tenantId} />}
-      {tab === "complaints" && <ComplaintsTab tenantId={tenantId} />}
+      {tab === "no-show" && <NoShowTab tenantId={effectiveTenantId} />}
+      {tab === "recs" && <RecsTab tenantId={effectiveTenantId} />}
+      {tab === "complaints" && <ComplaintsTab tenantId={effectiveTenantId} />}
     </div>
   );
 }
