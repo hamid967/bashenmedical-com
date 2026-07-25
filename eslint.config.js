@@ -44,7 +44,7 @@ export default tseslint.config(
       "no-case-declarations": "warn",
       "@typescript-eslint/no-unused-expressions": "warn",
       "@typescript-eslint/no-empty-interface": "warn",
-      "@next/next/no-img-element": "off",
+      "@typescript-eslint/no-unsafe-function-type": "warn",
     },
   },
   // Guardrails for book routes: friendlyInsertError / FRIENDLY_INSERT_MESSAGES
