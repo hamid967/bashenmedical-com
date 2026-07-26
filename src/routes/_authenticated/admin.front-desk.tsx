@@ -22,6 +22,7 @@ import {
   ClipboardList,
   Loader2,
   PhoneCall,
+  Printer,
   RefreshCw,
   Search,
   SkipForward,
