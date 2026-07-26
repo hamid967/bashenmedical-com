@@ -256,6 +256,13 @@ function DoctorRow({
               label="متابعة"
             />
           ) : null}
+          {row.patient_id ? (
+            <ActionBtn
+              onClick={onHistory}
+              icon={<History className="h-3 w-3" />}
+              label="السجل"
+            />
+          ) : null}
         </div>
         {start.isError ? (
           <p className="mt-1 text-xs text-destructive">{(start.error as Error).message}</p>
