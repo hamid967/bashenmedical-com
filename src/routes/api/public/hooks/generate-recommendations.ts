@@ -1,17 +1,16 @@
 /**
  * Cron hook — G3 daily AI recommendations.
+ * Auth: server-only INTERNAL_CRON_SECRET (constant-time compare).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyInternalCronSecret } from "@/lib/security/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/generate-recommendations")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const provided = request.headers.get("apikey");
-        if (!expected || provided !== expected) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        const denied = verifyInternalCronSecret(request);
+        if (denied) return denied;
         const { runGenerateRecommendations } =
           await import("@/lib/ai/generate-recommendations.server");
         try {
