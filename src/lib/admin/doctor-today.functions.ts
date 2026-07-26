@@ -376,3 +376,171 @@ export const cancelPrescription = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+/* --------------------------- Lab / Radiology orders --------------------- */
+
+const LAB_COLS =
+  "id, title, test_type, summary, status, report_date, released_at, ordered_by, created_at";
+const RAD_COLS =
+  "id, modality, body_part, findings, status, report_date, released_at, ordered_by, created_at";
+
+const orderListSchema = z.object({ appointment_id: z.string().uuid() });
+
+async function loadApptForOrder(sb: any, apptId: string, doctorId: string) {
+  const { data: appt, error } = await sb
+    .from("appointments")
+    .select("id, doctor_id, patient_id")
+    .eq("id", apptId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!appt || appt.doctor_id !== doctorId) throw new Error("الحجز غير موجود أو غير مسموح.");
+  return appt as { id: string; doctor_id: string; patient_id: string | null };
+}
+
+export const listVisitLabOrders = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => orderListSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const appt = await loadApptForOrder(context.supabase, data.appointment_id, doctorId);
+    if (!appt.patient_id) return { rows: [] };
+    const { data: rows, error } = await context.supabase
+      .from("lab_reports")
+      .select(LAB_COLS)
+      .eq("patient_id", appt.patient_id)
+      .eq("ordered_by", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const labAddSchema = z.object({
+  appointment_id: z.string().uuid(),
+  title: z.string().trim().min(1).max(200),
+  test_type: z.string().trim().max(120).optional().nullable(),
+  summary: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const addLabOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => labAddSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const appt = await loadApptForOrder(context.supabase, data.appointment_id, doctorId);
+    if (!appt.patient_id) throw new Error("لا يمكن طلب فحص قبل ربط المريض بالحجز.");
+    const { data: inserted, error } = await context.supabase
+      .from("lab_reports")
+      .insert({
+        patient_id: appt.patient_id,
+        title: data.title,
+        test_type: data.test_type ?? null,
+        summary: data.summary ?? null,
+        status: "pending",
+        ordered_by: context.userId,
+        report_date: new Date().toISOString().slice(0, 10),
+      })
+      .select(LAB_COLS)
+      .single();
+    if (error) throw new Error(error.message);
+    return { row: inserted };
+  });
+
+const orderIdSchema = z.object({ id: z.string().uuid() });
+
+export const cancelLabOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => orderIdSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const { data: row, error: fErr } = await context.supabase
+      .from("lab_reports")
+      .select("id, ordered_by, released_at, status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!row || row.ordered_by !== context.userId)
+      throw new Error("الطلب غير موجود أو غير مسموح.");
+    if (row.released_at) throw new Error("لا يمكن إلغاء طلب صادر بالنتيجة.");
+    const { error } = await context.supabase
+      .from("lab_reports")
+      .update({ status: "cancelled" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const listVisitRadOrders = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => orderListSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const appt = await loadApptForOrder(context.supabase, data.appointment_id, doctorId);
+    if (!appt.patient_id) return { rows: [] };
+    const { data: rows, error } = await context.supabase
+      .from("radiology_reports")
+      .select(RAD_COLS)
+      .eq("patient_id", appt.patient_id)
+      .eq("ordered_by", context.userId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const radAddSchema = z.object({
+  appointment_id: z.string().uuid(),
+  modality: z.string().trim().min(1).max(80),
+  body_part: z.string().trim().max(120).optional().nullable(),
+  findings: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const addRadOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => radAddSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const appt = await loadApptForOrder(context.supabase, data.appointment_id, doctorId);
+    if (!appt.patient_id) throw new Error("لا يمكن طلب أشعة قبل ربط المريض بالحجز.");
+    const { data: inserted, error } = await context.supabase
+      .from("radiology_reports")
+      .insert({
+        patient_id: appt.patient_id,
+        modality: data.modality,
+        body_part: data.body_part ?? null,
+        findings: data.findings ?? null,
+        status: "pending",
+        ordered_by: context.userId,
+        report_date: new Date().toISOString().slice(0, 10),
+      })
+      .select(RAD_COLS)
+      .single();
+    if (error) throw new Error(error.message);
+    return { row: inserted };
+  });
+
+export const cancelRadOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => orderIdSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const { data: row, error: fErr } = await context.supabase
+      .from("radiology_reports")
+      .select("id, ordered_by, released_at, status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!row || row.ordered_by !== context.userId)
+      throw new Error("الطلب غير موجود أو غير مسموح.");
+    if (row.released_at) throw new Error("لا يمكن إلغاء طلب صادر بالنتيجة.");
+    const { error } = await context.supabase
+      .from("radiology_reports")
+      .update({ status: "cancelled" })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
