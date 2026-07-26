@@ -269,12 +269,32 @@ function VisitDialog({
 }) {
   const saveFn = useServerFn(saveVisit);
   const qc = useQueryClient();
-  const [chief, setChief] = useState(appt.chief_complaint ?? "");
-  const [s, setS] = useState("");
-  const [o, setO] = useState("");
-  const [a, setA] = useState("");
-  const [p, setP] = useState("");
-  const [followUp, setFollowUp] = useState("");
+  const draftKey = `doctor:visit-draft:${visitId}`;
+
+  // Restore any locally-saved draft (from a prior session or a failed save)
+  // so a page reload / crash doesn't lose the doctor's typing.
+  const initial = (() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = window.localStorage.getItem(draftKey);
+      return raw ? (JSON.parse(raw) as Record<string, string>) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const [chief, setChief] = useState(initial?.chief ?? appt.chief_complaint ?? "");
+  const [s, setS] = useState(initial?.s ?? "");
+  const [o, setO] = useState(initial?.o ?? "");
+  const [a, setA] = useState(initial?.a ?? "");
+  const [p, setP] = useState(initial?.p ?? "");
+  const [followUp, setFollowUp] = useState(initial?.followUp ?? "");
+
+  const [autoState, setAutoState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [savedAt, setSavedAt] = useState<Date | null>(null);
+  const skipFirstRef = useRef(true);
+  const savingRef = useRef(false);
+  const pendingRef = useRef(false);
 
   const mutate = useMutation({
     mutationFn: (finalize: boolean) =>
@@ -293,13 +313,82 @@ function VisitDialog({
       }),
     onSuccess: (r: any) => {
       qc.invalidateQueries({ queryKey: ["doctor", "workspace", "today"] });
-      if (r.finalized) onClose();
+      if (r?.finalized) {
+        try {
+          window.localStorage.removeItem(draftKey);
+        } catch {
+          /* ignore */
+        }
+        onClose();
+      }
     },
   });
+
+  // Autosave (debounced) — writes silently to the server as finalize=false
+  // and mirrors the current draft to localStorage as an offline safety net.
+  useEffect(() => {
+    if (skipFirstRef.current) {
+      skipFirstRef.current = false;
+      return;
+    }
+    const snapshot = { chief, s, o, a, p, followUp };
+    try {
+      window.localStorage.setItem(draftKey, JSON.stringify(snapshot));
+    } catch {
+      /* ignore quota */
+    }
+    setAutoState("idle");
+    const t = window.setTimeout(async () => {
+      if (savingRef.current) {
+        pendingRef.current = true;
+        return;
+      }
+      const run = async () => {
+        savingRef.current = true;
+        setAutoState("saving");
+        try {
+          await saveFn({
+            data: {
+              visit_id: visitId,
+              appointment_id: appt.id,
+              chief_complaint: chief.trim() || null,
+              subjective: s.trim() || null,
+              objective: o.trim() || null,
+              assessment: a.trim() || null,
+              plan: p.trim() || null,
+              follow_up_date: followUp || null,
+              finalize: false,
+            },
+          });
+          setAutoState("saved");
+          setSavedAt(new Date());
+          try {
+            window.localStorage.removeItem(draftKey);
+          } catch {
+            /* ignore */
+          }
+        } catch {
+          setAutoState("error");
+        } finally {
+          savingRef.current = false;
+          if (pendingRef.current) {
+            pendingRef.current = false;
+            void run();
+          }
+        }
+      };
+      void run();
+    }, 1500);
+    return () => window.clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chief, s, o, a, p, followUp]);
 
   return (
     <DialogShell title={`زيارة — ${appt.patient_name ?? "المريض"}`} onClose={onClose}>
       <div className="space-y-3 text-sm">
+        <div className="flex items-center justify-end text-xs" aria-live="polite">
+          <AutosaveIndicator state={autoState} savedAt={savedAt} />
+        </div>
         <FieldArea label="الشكوى الرئيسية" value={chief} onChange={setChief} rows={2} max={500} />
         <FieldArea label="Subjective — الأعراض من المريض" value={s} onChange={setS} rows={3} max={4000} />
         <FieldArea label="Objective — الفحص السريري" value={o} onChange={setO} rows={3} max={4000} />
@@ -355,6 +444,33 @@ function VisitDialog({
       </div>
     </DialogShell>
   );
+}
+
+function AutosaveIndicator({
+  state,
+  savedAt,
+}: {
+  state: "idle" | "saving" | "saved" | "error";
+  savedAt: Date | null;
+}) {
+  if (state === "saving")
+    return (
+      <span className="inline-flex items-center gap-1 text-muted-foreground">
+        <Loader2 className="h-3 w-3 animate-spin" /> جارٍ الحفظ التلقائي…
+      </span>
+    );
+  if (state === "saved")
+    return (
+      <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+        <CheckCircle2 className="h-3 w-3" /> تم الحفظ
+        {savedAt ? ` ${savedAt.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}` : ""}
+      </span>
+    );
+  if (state === "error")
+    return (
+      <span className="text-destructive">تعذّر الحفظ التلقائي — سيُعاد المحاولة عند التعديل</span>
+    );
+  return <span className="text-muted-foreground">التغييرات تُحفظ تلقائيًا</span>;
 }
 
 /* -------------------------- Follow-up dialog -------------------------- */
