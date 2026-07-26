@@ -485,6 +485,9 @@ function VisitDialog({
         <FieldArea label="Objective — الفحص السريري" value={o} onChange={setO} rows={3} max={4000} />
         <FieldArea label="Assessment — التشخيص" value={a} onChange={setA} rows={3} max={4000} />
         <FieldArea label="Plan — الخطة العلاجية" value={p} onChange={setP} rows={3} max={4000} />
+
+        <RxSection appt={appt} />
+
         <label className="block space-y-1">
           <span className="text-xs">تاريخ المتابعة (اختياري)</span>
           <input
