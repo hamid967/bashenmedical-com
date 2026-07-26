@@ -17,12 +17,14 @@ import {
   Loader2,
   X,
   RefreshCw,
+  History,
 } from "lucide-react";
 import {
   listMyTodayAppointments,
   startVisit,
   saveVisit,
   holdFollowUp,
+  listPatientHistory,
 } from "@/lib/admin/doctor-today.functions";
 
 export const Route = createFileRoute("/_authenticated/doctor/workspace")({
