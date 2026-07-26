@@ -1328,8 +1328,9 @@ function printOrderTicket(
   <div class="grid">
     <div><strong>المريض</strong>${escapeHtml(appt.patient_name ?? "—")}</div>
     <div><strong>الجوال</strong>${escapeHtml(appt.patient_phone ?? "—")}</div>
-    <div><strong>الطبيب</strong>${escapeHtml(appt.doctor?.name_ar ?? appt.doctor?.name_en ?? "—")}</div>
     <div><strong>مرجع الزيارة</strong>${escapeHtml(appt.reference_number ?? "—")}</div>
+    <div><strong>الفرع</strong>${escapeHtml(branch || "—")}</div>
+
   </div>
   <div class="order">
     <span class="st">${escapeHtml(statusLabel)}</span>
