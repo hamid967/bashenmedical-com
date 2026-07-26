@@ -30,8 +30,19 @@ import {
   Calendar,
   QrCode,
   ScanLine,
+  FlaskConical,
+  Scan,
+  Clock,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { PatientQrDialog } from "@/components/PatientQrDialog";
+import {
+  listPatientLabOrders,
+  listPatientRadOrders,
+  updateLabOrderStatus,
+  updateRadOrderStatus,
+} from "@/lib/admin/patient-orders.functions";
 
 export const Route = createFileRoute("/_authenticated/patients/$patientId")({
   head: () => ({
@@ -219,7 +230,7 @@ function PatientDetail() {
       </div>
 
       <Tabs defaultValue="profile">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 sm:inline-flex h-auto">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-5 sm:inline-flex h-auto">
           <TabsTrigger value="profile">
             <User className="h-4 w-4 ml-1" /> بيانات
           </TabsTrigger>
@@ -228,6 +239,9 @@ function PatientDetail() {
           </TabsTrigger>
           <TabsTrigger value="visits">
             <History className="h-4 w-4 ml-1" /> الزيارات
+          </TabsTrigger>
+          <TabsTrigger value="orders">
+            <FlaskConical className="h-4 w-4 ml-1" /> المختبر/الأشعة
           </TabsTrigger>
           <TabsTrigger value="attachments">
             <Paperclip className="h-4 w-4 ml-1" /> المرفقات
@@ -271,6 +285,9 @@ function PatientDetail() {
 
         <TabsContent value="visits" className="mt-4">
           <VisitsSection patientId={patientId} />
+        </TabsContent>
+        <TabsContent value="orders" className="mt-4">
+          <OrdersHistorySection patientId={patientId} />
         </TabsContent>
         <TabsContent value="attachments" className="mt-4">
           <AttachmentsSection patientId={patientId} />
@@ -1391,6 +1408,163 @@ function SimpleFormDialog({
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+/* ----------------- Lab / Radiology Orders history ----------------- */
+type OrderStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  pending: "مجدول",
+  in_progress: "قيد التنفيذ",
+  completed: "مكتمل",
+  cancelled: "ملغى",
+};
+
+const ORDER_STATUS_STYLE: Record<OrderStatus, string> = {
+  pending: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+  in_progress: "bg-sky-500/10 text-sky-700 border-sky-500/30",
+  completed: "bg-teal-500/10 text-teal-700 border-teal-500/30",
+  cancelled: "bg-muted text-muted-foreground border-border",
+};
+
+function OrdersHistorySection({ patientId }: { patientId: string }) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <OrdersPanel
+        patientId={patientId}
+        kind="lab"
+        title="طلبات المختبر"
+        icon={<FlaskConical className="h-4 w-4 text-primary" />}
+      />
+      <OrdersPanel
+        patientId={patientId}
+        kind="rad"
+        title="طلبات الأشعة"
+        icon={<Scan className="h-4 w-4 text-primary" />}
+      />
+    </div>
+  );
+}
+
+type OrderRow = {
+  id: string;
+  status: OrderStatus;
+  report_date: string | null;
+  released_at: string | null;
+  created_at: string;
+  // lab
+  title?: string | null;
+  test_type?: string | null;
+  summary?: string | null;
+  // rad
+  modality?: string | null;
+  body_part?: string | null;
+  findings?: string | null;
+};
+
+function OrdersPanel({
+  patientId,
+  kind,
+  title,
+  icon,
+}: {
+  patientId: string;
+  kind: "lab" | "rad";
+  title: string;
+  icon: React.ReactNode;
+}) {
+  const qc = useQueryClient();
+  const listFn = useServerFn(
+    (kind === "lab" ? listPatientLabOrders : listPatientRadOrders) as typeof listPatientLabOrders,
+  );
+  const updateFn = useServerFn(
+    (kind === "lab" ? updateLabOrderStatus : updateRadOrderStatus) as typeof updateLabOrderStatus,
+  );
+  const queryKey = ["patient-orders", kind, patientId];
+
+  const q = useQuery({
+    queryKey,
+    queryFn: () => listFn({ data: { patient_id: patientId } }) as Promise<{ rows: OrderRow[] }>,
+  });
+
+  const rows: OrderRow[] = q.data?.rows ?? [];
+
+  async function setStatus(id: string, status: OrderStatus) {
+    try {
+      await updateFn({ data: { id, status } });
+      toast.success(`تم تحديث الحالة إلى: ${ORDER_STATUS_LABEL[status]}`);
+      qc.invalidateQueries({ queryKey });
+    } catch (e: any) {
+      toast.error(e?.message ?? "تعذّر تحديث الحالة");
+    }
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card overflow-hidden">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <h3 className="font-semibold inline-flex items-center gap-2">
+          {icon} {title}
+        </h3>
+        <span className="text-xs text-muted-foreground">{rows.length} طلب</span>
+      </div>
+      <div className="divide-y divide-border">
+        {q.isLoading ? (
+          <div className="p-6 text-center text-sm text-muted-foreground">
+            <Loader2 className="mx-auto h-4 w-4 animate-spin" />
+          </div>
+        ) : rows.length === 0 ? (
+          <div className="p-6 text-center text-sm text-muted-foreground">لا توجد طلبات.</div>
+        ) : (
+          rows.map((r) => {
+            const label = kind === "lab" ? (r.title ?? r.test_type ?? "—") : (r.modality ?? "—");
+            const sub =
+              kind === "lab"
+                ? (r.test_type && r.title && r.test_type !== r.title ? r.test_type : r.summary) ?? null
+                : [r.body_part, r.findings].filter(Boolean).join(" — ") || null;
+            return (
+              <div key={r.id} className="p-3 flex flex-wrap items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="font-medium text-sm">{label}</div>
+                  {sub && (
+                    <div className="text-xs text-muted-foreground line-clamp-2 mt-0.5">{sub}</div>
+                  )}
+                  <div className="mt-1 text-[11px] text-muted-foreground">
+                    أُنشئ: {formatFull(r.created_at)}
+                    {r.released_at && ` • صدر: ${formatFull(r.released_at)}`}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs ${ORDER_STATUS_STYLE[r.status]}`}
+                  >
+                    {r.status === "completed" ? (
+                      <CheckCircle2 className="h-3 w-3" />
+                    ) : r.status === "cancelled" ? (
+                      <XCircle className="h-3 w-3" />
+                    ) : (
+                      <Clock className="h-3 w-3" />
+                    )}
+                    {ORDER_STATUS_LABEL[r.status]}
+                  </span>
+                  <select
+                    aria-label="تحديث الحالة"
+                    className="h-7 rounded-md border border-input bg-background px-1.5 text-xs"
+                    value={r.status}
+                    onChange={(e) => setStatus(r.id, e.target.value as OrderStatus)}
+                  >
+                    <option value="pending">مجدول</option>
+                    <option value="in_progress">قيد التنفيذ</option>
+                    <option value="completed">مكتمل</option>
+                    <option value="cancelled">ملغى</option>
+                  </select>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
     </div>
   );
 }
