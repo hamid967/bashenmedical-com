@@ -22,6 +22,8 @@ import {
   Plus,
   Trash2,
   Printer,
+  FlaskConical,
+  Scan,
 } from "lucide-react";
 import {
   listMyTodayAppointments,
@@ -32,6 +34,12 @@ import {
   listVisitPrescriptions,
   addPrescription,
   cancelPrescription,
+  listVisitLabOrders,
+  addLabOrder,
+  cancelLabOrder,
+  listVisitRadOrders,
+  addRadOrder,
+  cancelRadOrder,
 } from "@/lib/admin/doctor-today.functions";
 import { SOAP_TEMPLATES, getTemplate } from "@/lib/clinical/soap-templates";
 
