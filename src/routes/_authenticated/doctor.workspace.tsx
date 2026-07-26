@@ -306,6 +306,8 @@ function VisitDialog({
   const [a, setA] = useState(initial?.a ?? "");
   const [p, setP] = useState(initial?.p ?? "");
   const [followUp, setFollowUp] = useState(initial?.followUp ?? "");
+  const [templateId, setTemplateId] = useState<string>(initial?.templateId ?? "");
+  const [templateNote, setTemplateNote] = useState<string>("");
 
   const [autoState, setAutoState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [savedAt, setSavedAt] = useState<Date | null>(null);
