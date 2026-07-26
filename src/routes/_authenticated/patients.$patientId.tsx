@@ -30,8 +30,19 @@ import {
   Calendar,
   QrCode,
   ScanLine,
+  FlaskConical,
+  Scan,
+  Clock,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { PatientQrDialog } from "@/components/PatientQrDialog";
+import {
+  listPatientLabOrders,
+  listPatientRadOrders,
+  updateLabOrderStatus,
+  updateRadOrderStatus,
+} from "@/lib/admin/patient-orders.functions";
 
 export const Route = createFileRoute("/_authenticated/patients/$patientId")({
   head: () => ({
