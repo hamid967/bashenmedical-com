@@ -1,18 +1,17 @@
 /**
  * Hook — G3 complaint classification. Called from a DB trigger via pg_net
- * (or manually) with { complaint_id } and authenticated by apikey header.
+ * (or manually) with { complaint_id }.
+ * Auth: server-only INTERNAL_CRON_SECRET (constant-time compare).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyInternalCronSecret } from "@/lib/security/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/classify-complaint")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const provided = request.headers.get("apikey");
-        if (!expected || provided !== expected) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        const denied = verifyInternalCronSecret(request);
+        if (denied) return denied;
         let body: { complaint_id?: string } = {};
         try {
           body = await request.json();

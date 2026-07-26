@@ -1,18 +1,16 @@
 /**
  * Cron hook — G3 no-show batch scoring.
- * Authenticated by Supabase anon key in `apikey` header (canonical pg_cron pattern).
+ * Auth: server-only INTERNAL_CRON_SECRET (constant-time compare).
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { verifyInternalCronSecret } from "@/lib/security/cron-auth.server";
 
 export const Route = createFileRoute("/api/public/hooks/predict-no-show")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env.SUPABASE_PUBLISHABLE_KEY;
-        const provided = request.headers.get("apikey");
-        if (!expected || provided !== expected) {
-          return new Response("Unauthorized", { status: 401 });
-        }
+        const denied = verifyInternalCronSecret(request);
+        if (denied) return denied;
         const { runPredictNoShowBatch } = await import("@/lib/ai/predict-no-show.server");
         try {
           const result = await runPredictNoShowBatch(48);
