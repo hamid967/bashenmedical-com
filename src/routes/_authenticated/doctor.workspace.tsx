@@ -131,7 +131,6 @@ function DoctorWorkspacePage() {
           appt={openVisit.appt}
           visitId={openVisit.visit_id}
           onClose={() => setOpenVisit(null)}
-          onOpenHistory={() => setOpenHistory(openVisit.appt)}
         />
       ) : null}
       {openFollowUp ? (
