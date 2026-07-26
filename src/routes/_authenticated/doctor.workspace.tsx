@@ -18,6 +18,10 @@ import {
   X,
   RefreshCw,
   History,
+  Pill,
+  Plus,
+  Trash2,
+  Printer,
 } from "lucide-react";
 import {
   listMyTodayAppointments,
@@ -25,6 +29,9 @@ import {
   saveVisit,
   holdFollowUp,
   listPatientHistory,
+  listVisitPrescriptions,
+  addPrescription,
+  cancelPrescription,
 } from "@/lib/admin/doctor-today.functions";
 import { SOAP_TEMPLATES, getTemplate } from "@/lib/clinical/soap-templates";
 
