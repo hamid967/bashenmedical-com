@@ -1589,19 +1589,41 @@ function LabOrdersPanel({ appt }: { appt: ApptRow }) {
                     {r.report_date ?? new Date(r.created_at).toISOString().slice(0, 10)}
                   </div>
                 </div>
-                {r.status !== "cancelled" && !r.released_at ? (
+                <div className="flex shrink-0 items-center gap-1">
                   <button
                     type="button"
-                    onClick={() => {
-                      if (window.confirm("إلغاء هذا الطلب؟")) cancel.mutate(r.id);
-                    }}
-                    disabled={cancel.isPending}
-                    className="rounded p-1 text-destructive hover:bg-destructive/10 disabled:opacity-40"
-                    aria-label="إلغاء الطلب"
+                    onClick={() =>
+                      printOrderTicket(appt, "lab", {
+                        id: r.id,
+                        title: r.title ?? "—",
+                        subtitle: r.test_type,
+                        notes: r.summary,
+                        status: r.status,
+                        released: !!r.released_at,
+                        date: r.report_date ?? new Date(r.created_at).toISOString().slice(0, 10),
+                      })
+                    }
+                    className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="طباعة تذكرة الطلب"
+                    title="طباعة تذكرة"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Printer className="h-3.5 w-3.5" />
                   </button>
-                ) : null}
+                  {r.status !== "cancelled" && !r.released_at ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm("إلغاء هذا الطلب؟")) cancel.mutate(r.id);
+                      }}
+                      disabled={cancel.isPending}
+                      className="rounded p-1 text-destructive hover:bg-destructive/10 disabled:opacity-40"
+                      aria-label="إلغاء الطلب"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  ) : null}
+                </div>
+
               </div>
             </li>
           ))}
