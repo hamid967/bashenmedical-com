@@ -58,6 +58,7 @@ import { Route as AuthenticatedCommandCenterRouteImport } from './routes/_authen
 import { Route as AuthenticatedComplaintsAdminRouteImport } from './routes/_authenticated/complaints-admin'
 import { Route as AuthenticatedCorporateAdminRouteImport } from './routes/_authenticated/corporate-admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDoctorRouteImport } from './routes/_authenticated/doctor'
 import { Route as AuthenticatedDoctorsManagementRouteImport } from './routes/_authenticated/doctors-management'
 import { Route as AuthenticatedHomeCareAdminRouteImport } from './routes/_authenticated/home-care-admin'
 import { Route as AuthenticatedHrManagementRouteImport } from './routes/_authenticated/hr-management'
@@ -176,6 +177,8 @@ import { Route as AuthenticatedAdminV3RouteImport } from './routes/_authenticate
 import { Route as AuthenticatedAdminVisualAnalyticsRouteImport } from './routes/_authenticated/admin.visual-analytics'
 import { Route as AuthenticatedAdminWebVitalsRouteImport } from './routes/_authenticated/admin.web-vitals'
 import { Route as AuthenticatedAdminWhatsappRouteImport } from './routes/_authenticated/admin.whatsapp'
+import { Route as AuthenticatedDoctorIndexRouteImport } from './routes/_authenticated/doctor.index'
+import { Route as AuthenticatedDoctorWorkspaceRouteImport } from './routes/_authenticated/doctor.workspace'
 import { Route as AuthenticatedMyAiHistoryRouteImport } from './routes/_authenticated/my.ai-history'
 import { Route as AuthenticatedOwnerIndexRouteImport } from './routes/_authenticated/owner.index'
 import { Route as AuthenticatedOwnerAccountsRouteImport } from './routes/_authenticated/owner.accounts'
@@ -556,6 +559,11 @@ const AuthenticatedCorporateAdminRoute =
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDoctorRoute = AuthenticatedDoctorRouteImport.update({
+  id: '/doctor',
+  path: '/doctor',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDoctorsManagementRoute =
@@ -1214,6 +1222,18 @@ const AuthenticatedAdminWhatsappRoute =
     id: '/whatsapp',
     path: '/whatsapp',
     getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedDoctorIndexRoute =
+  AuthenticatedDoctorIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedDoctorRoute,
+  } as any)
+const AuthenticatedDoctorWorkspaceRoute =
+  AuthenticatedDoctorWorkspaceRouteImport.update({
+    id: '/workspace',
+    path: '/workspace',
+    getParentRoute: () => AuthenticatedDoctorRoute,
   } as any)
 const AuthenticatedMyAiHistoryRoute =
   AuthenticatedMyAiHistoryRouteImport.update({
@@ -1999,6 +2019,7 @@ export interface FileRoutesByFullPath {
   '/complaints-admin': typeof AuthenticatedComplaintsAdminRoute
   '/corporate-admin': typeof AuthenticatedCorporateAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/doctor': typeof AuthenticatedDoctorRouteWithChildren
   '/doctors-management': typeof AuthenticatedDoctorsManagementRoute
   '/home-care-admin': typeof AuthenticatedHomeCareAdminRoute
   '/hr-management': typeof AuthenticatedHrManagementRoute
@@ -2116,6 +2137,7 @@ export interface FileRoutesByFullPath {
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRouteWithChildren
+  '/doctor/workspace': typeof AuthenticatedDoctorWorkspaceRoute
   '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
@@ -2168,6 +2190,7 @@ export interface FileRoutesByFullPath {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/doctor/': typeof AuthenticatedDoctorIndexRoute
   '/owner/': typeof AuthenticatedOwnerIndexRoute
   '/patient/': typeof AuthenticatedPatientIndexRoute
   '/patients/': typeof AuthenticatedPatientsIndexRoute
@@ -2405,6 +2428,7 @@ export interface FileRoutesByTo {
   '/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/admin/whatsapp': typeof AuthenticatedAdminWhatsappRouteWithChildren
+  '/doctor/workspace': typeof AuthenticatedDoctorWorkspaceRoute
   '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
@@ -2457,6 +2481,7 @@ export interface FileRoutesByTo {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/doctor': typeof AuthenticatedDoctorIndexRoute
   '/owner': typeof AuthenticatedOwnerIndexRoute
   '/patient': typeof AuthenticatedPatientIndexRoute
   '/patients': typeof AuthenticatedPatientsIndexRoute
@@ -2584,6 +2609,7 @@ export interface FileRoutesById {
   '/_authenticated/complaints-admin': typeof AuthenticatedComplaintsAdminRoute
   '/_authenticated/corporate-admin': typeof AuthenticatedCorporateAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/doctor': typeof AuthenticatedDoctorRouteWithChildren
   '/_authenticated/doctors-management': typeof AuthenticatedDoctorsManagementRoute
   '/_authenticated/home-care-admin': typeof AuthenticatedHomeCareAdminRoute
   '/_authenticated/hr-management': typeof AuthenticatedHrManagementRoute
@@ -2701,6 +2727,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/visual-analytics': typeof AuthenticatedAdminVisualAnalyticsRoute
   '/_authenticated/admin/web-vitals': typeof AuthenticatedAdminWebVitalsRoute
   '/_authenticated/admin/whatsapp': typeof AuthenticatedAdminWhatsappRouteWithChildren
+  '/_authenticated/doctor/workspace': typeof AuthenticatedDoctorWorkspaceRoute
   '/_authenticated/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/_authenticated/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/_authenticated/owner/audit': typeof AuthenticatedOwnerAuditRoute
@@ -2753,6 +2780,7 @@ export interface FileRoutesById {
   '/api/public/health': typeof ApiPublicHealthRoute
   '/media/stories/$slug': typeof MediaStoriesSlugRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/doctor/': typeof AuthenticatedDoctorIndexRoute
   '/_authenticated/owner/': typeof AuthenticatedOwnerIndexRoute
   '/_authenticated/patient/': typeof AuthenticatedPatientIndexRoute
   '/_authenticated/patients/': typeof AuthenticatedPatientsIndexRoute
@@ -2880,6 +2908,7 @@ export interface FileRouteTypes {
     | '/complaints-admin'
     | '/corporate-admin'
     | '/dashboard'
+    | '/doctor'
     | '/doctors-management'
     | '/home-care-admin'
     | '/hr-management'
@@ -2997,6 +3026,7 @@ export interface FileRouteTypes {
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
     | '/admin/whatsapp'
+    | '/doctor/workspace'
     | '/my/ai-history'
     | '/owner/accounts'
     | '/owner/audit'
@@ -3049,6 +3079,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/media/stories/$slug'
     | '/admin/'
+    | '/doctor/'
     | '/owner/'
     | '/patient/'
     | '/patients/'
@@ -3286,6 +3317,7 @@ export interface FileRouteTypes {
     | '/admin/visual-analytics'
     | '/admin/web-vitals'
     | '/admin/whatsapp'
+    | '/doctor/workspace'
     | '/my/ai-history'
     | '/owner/accounts'
     | '/owner/audit'
@@ -3338,6 +3370,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/media/stories/$slug'
     | '/admin'
+    | '/doctor'
     | '/owner'
     | '/patient'
     | '/patients'
@@ -3464,6 +3497,7 @@ export interface FileRouteTypes {
     | '/_authenticated/complaints-admin'
     | '/_authenticated/corporate-admin'
     | '/_authenticated/dashboard'
+    | '/_authenticated/doctor'
     | '/_authenticated/doctors-management'
     | '/_authenticated/home-care-admin'
     | '/_authenticated/hr-management'
@@ -3581,6 +3615,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/visual-analytics'
     | '/_authenticated/admin/web-vitals'
     | '/_authenticated/admin/whatsapp'
+    | '/_authenticated/doctor/workspace'
     | '/_authenticated/my/ai-history'
     | '/_authenticated/owner/accounts'
     | '/_authenticated/owner/audit'
@@ -3633,6 +3668,7 @@ export interface FileRouteTypes {
     | '/api/public/health'
     | '/media/stories/$slug'
     | '/_authenticated/admin/'
+    | '/_authenticated/doctor/'
     | '/_authenticated/owner/'
     | '/_authenticated/patient/'
     | '/_authenticated/patients/'
@@ -4156,6 +4192,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/doctor': {
+      id: '/_authenticated/doctor'
+      path: '/doctor'
+      fullPath: '/doctor'
+      preLoaderRoute: typeof AuthenticatedDoctorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/doctors-management': {
@@ -4983,6 +5026,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/whatsapp'
       preLoaderRoute: typeof AuthenticatedAdminWhatsappRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/doctor/': {
+      id: '/_authenticated/doctor/'
+      path: '/'
+      fullPath: '/doctor/'
+      preLoaderRoute: typeof AuthenticatedDoctorIndexRouteImport
+      parentRoute: typeof AuthenticatedDoctorRoute
+    }
+    '/_authenticated/doctor/workspace': {
+      id: '/_authenticated/doctor/workspace'
+      path: '/workspace'
+      fullPath: '/doctor/workspace'
+      preLoaderRoute: typeof AuthenticatedDoctorWorkspaceRouteImport
+      parentRoute: typeof AuthenticatedDoctorRoute
     }
     '/_authenticated/my/ai-history': {
       id: '/_authenticated/my/ai-history'
@@ -6267,6 +6324,19 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
 const AuthenticatedAdminRouteWithChildren =
   AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
 
+interface AuthenticatedDoctorRouteChildren {
+  AuthenticatedDoctorWorkspaceRoute: typeof AuthenticatedDoctorWorkspaceRoute
+  AuthenticatedDoctorIndexRoute: typeof AuthenticatedDoctorIndexRoute
+}
+
+const AuthenticatedDoctorRouteChildren: AuthenticatedDoctorRouteChildren = {
+  AuthenticatedDoctorWorkspaceRoute: AuthenticatedDoctorWorkspaceRoute,
+  AuthenticatedDoctorIndexRoute: AuthenticatedDoctorIndexRoute,
+}
+
+const AuthenticatedDoctorRouteWithChildren =
+  AuthenticatedDoctorRoute._addFileChildren(AuthenticatedDoctorRouteChildren)
+
 interface AuthenticatedMyRouteChildren {
   AuthenticatedMyAiHistoryRoute: typeof AuthenticatedMyAiHistoryRoute
 }
@@ -6463,6 +6533,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedComplaintsAdminRoute: typeof AuthenticatedComplaintsAdminRoute
   AuthenticatedCorporateAdminRoute: typeof AuthenticatedCorporateAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDoctorRoute: typeof AuthenticatedDoctorRouteWithChildren
   AuthenticatedDoctorsManagementRoute: typeof AuthenticatedDoctorsManagementRoute
   AuthenticatedHomeCareAdminRoute: typeof AuthenticatedHomeCareAdminRoute
   AuthenticatedHrManagementRoute: typeof AuthenticatedHrManagementRoute
@@ -6510,6 +6581,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedComplaintsAdminRoute: AuthenticatedComplaintsAdminRoute,
   AuthenticatedCorporateAdminRoute: AuthenticatedCorporateAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDoctorRoute: AuthenticatedDoctorRouteWithChildren,
   AuthenticatedDoctorsManagementRoute: AuthenticatedDoctorsManagementRoute,
   AuthenticatedHomeCareAdminRoute: AuthenticatedHomeCareAdminRoute,
   AuthenticatedHrManagementRoute: AuthenticatedHrManagementRoute,
