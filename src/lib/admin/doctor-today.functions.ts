@@ -215,3 +215,42 @@ export const holdFollowUp = createServerFn({ method: "POST" })
     if (iErr) throw new Error(iErr.message);
     return { ok: true, reference };
   });
+
+/* ----------------------------- 5) Patient history ------------------------ */
+
+const historySchema = z.object({ patient_id: z.string().uuid() });
+
+export const listPatientHistory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => historySchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const today = new Date().toISOString().slice(0, 10);
+
+    const [apptsRes, visitsRes] = await Promise.all([
+      context.supabase
+        .from("appointments")
+        .select(
+          "id, reference_number, appointment_date, appointment_time, status, chief_complaint, " +
+            "doctor:doctors(id, name_ar, name_en), branch:branches(id, name_ar, name_en)",
+        )
+        .eq("patient_id", data.patient_id)
+        .lt("appointment_date", today)
+        .order("appointment_date", { ascending: false })
+        .order("appointment_time", { ascending: false })
+        .limit(50),
+      context.supabase
+        .from("patient_visits")
+        .select(
+          "id, visit_date, chief_complaint, subjective, objective, assessment, plan, follow_up_date, appointment_id",
+        )
+        .eq("patient_id", data.patient_id)
+        .eq("doctor_id", doctorId)
+        .order("visit_date", { ascending: false })
+        .limit(30),
+    ]);
+    if (apptsRes.error) throw new Error(apptsRes.error.message);
+    if (visitsRes.error) throw new Error(visitsRes.error.message);
+    return { appointments: apptsRes.data ?? [], visits: visitsRes.data ?? [] };
+  });
