@@ -1272,3 +1272,455 @@ function escapeHtml(s: string) {
     c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === '"' ? "&quot;" : "&#39;",
   );
 }
+
+/* ---------------------------- Orders (Lab/Rad) --------------------------- */
+
+type LabOrderRow = {
+  id: string;
+  title: string | null;
+  test_type: string | null;
+  summary: string | null;
+  status: string | null;
+  report_date: string | null;
+  released_at: string | null;
+  created_at: string;
+};
+type RadOrderRow = {
+  id: string;
+  modality: string | null;
+  body_part: string | null;
+  findings: string | null;
+  status: string | null;
+  report_date: string | null;
+  released_at: string | null;
+  created_at: string;
+};
+
+const LAB_CATALOG = [
+  "CBC — تعداد الدم الكامل",
+  "Fasting Blood Sugar",
+  "HbA1c",
+  "Lipid Profile",
+  "Liver Function (LFT)",
+  "Kidney Function (KFT)",
+  "TSH",
+  "Vitamin D",
+  "Urinalysis",
+  "CRP",
+];
+const RAD_CATALOG = [
+  "X-Ray — أشعة سينية",
+  "Ultrasound — موجات صوتية",
+  "CT — مقطعية",
+  "MRI — رنين مغناطيسي",
+  "Mammography",
+  "DEXA — كثافة العظام",
+];
+
+function OrdersSection({ appt }: { appt: ApptRow }) {
+  const [tab, setTab] = useState<"lab" | "rad">("lab");
+  return (
+    <section className="rounded-md border bg-muted/30 p-2.5">
+      <header className="mb-2 flex items-center gap-2">
+        {tab === "lab" ? (
+          <FlaskConical className="h-4 w-4 text-primary" />
+        ) : (
+          <Scan className="h-4 w-4 text-primary" />
+        )}
+        <h3 className="text-xs font-semibold">طلبات المختبر والأشعة</h3>
+        <div className="ms-auto inline-flex rounded-md border bg-background p-0.5 text-[11px]">
+          <button
+            type="button"
+            onClick={() => setTab("lab")}
+            className={`rounded px-2 py-0.5 ${tab === "lab" ? "bg-primary text-primary-foreground" : ""}`}
+          >
+            مختبر
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("rad")}
+            className={`rounded px-2 py-0.5 ${tab === "rad" ? "bg-primary text-primary-foreground" : ""}`}
+          >
+            أشعة
+          </button>
+        </div>
+      </header>
+
+      {!appt.patient_id ? (
+        <p className="text-[11px] text-muted-foreground">
+          لا يمكن إصدار طلبات قبل ربط المريض بالحجز.
+        </p>
+      ) : tab === "lab" ? (
+        <LabOrdersPanel appt={appt} />
+      ) : (
+        <RadOrdersPanel appt={appt} />
+      )}
+    </section>
+  );
+}
+
+function LabOrdersPanel({ appt }: { appt: ApptRow }) {
+  const listFn = useServerFn(listVisitLabOrders);
+  const addFn = useServerFn(addLabOrder);
+  const cancelFn = useServerFn(cancelLabOrder);
+  const qc = useQueryClient();
+  const qk = ["doctor", "lab-orders", appt.id];
+
+  const query = useQuery({
+    queryKey: qk,
+    queryFn: () => listFn({ data: { appointment_id: appt.id } }),
+    enabled: !!appt.patient_id,
+    staleTime: 15_000,
+  });
+  const rows: LabOrderRow[] = (query.data?.rows as any) ?? [];
+
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState("");
+  const [testType, setTestType] = useState("");
+  const [summary, setSummary] = useState("");
+
+  const reset = () => {
+    setTitle("");
+    setTestType("");
+    setSummary("");
+    setShowForm(false);
+  };
+  const add = useMutation({
+    mutationFn: () =>
+      addFn({
+        data: {
+          appointment_id: appt.id,
+          title: title.trim(),
+          test_type: testType.trim() || null,
+          summary: summary.trim() || null,
+        },
+      }),
+    onSuccess: () => {
+      reset();
+      qc.invalidateQueries({ queryKey: qk });
+    },
+  });
+  const cancel = useMutation({
+    mutationFn: (id: string) => cancelFn({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk }),
+  });
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-muted-foreground">
+          {query.isLoading ? "جاري التحميل…" : `${rows.length} طلب`}
+        </span>
+        <button
+          type="button"
+          onClick={() => setShowForm((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-[11px] hover:bg-muted"
+        >
+          <Plus className="h-3 w-3" />
+          {showForm ? "إخفاء" : "طلب فحص"}
+        </button>
+      </div>
+      {showForm ? (
+        <div className="space-y-2 rounded-md border bg-background p-2">
+          <label className="block space-y-1">
+            <span className="text-[11px]">اسم الفحص *</span>
+            <input
+              list="lab-catalog"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              maxLength={200}
+              placeholder="اختر من القائمة أو اكتب"
+              className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+            />
+            <datalist id="lab-catalog">
+              {LAB_CATALOG.map((v) => (
+                <option key={v} value={v} />
+              ))}
+            </datalist>
+          </label>
+          <label className="block space-y-1">
+            <span className="text-[11px]">النوع/القسم</span>
+            <input
+              value={testType}
+              onChange={(e) => setTestType(e.target.value)}
+              maxLength={120}
+              placeholder="مثال: Hematology"
+              className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-[11px]">ملاحظات سريرية</span>
+            <textarea
+              value={summary}
+              onChange={(e) => setSummary(e.target.value)}
+              rows={2}
+              maxLength={2000}
+              className="w-full rounded-md border bg-background p-2 text-xs"
+            />
+          </label>
+          {add.isError ? (
+            <p className="text-[11px] text-destructive">{(add.error as Error).message}</p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-md border px-2 py-1 text-[11px] hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="button"
+              disabled={!title.trim() || add.isPending}
+              onClick={() => add.mutate()}
+              className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+            >
+              {add.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+              حفظ الطلب
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {rows.length === 0 && !query.isLoading ? (
+        <p className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
+          لا توجد طلبات مختبر لهذا المريض من قِبَلك.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {rows.map((r) => (
+            <li
+              key={r.id}
+              className={`rounded-md border p-2 text-xs ${r.status === "cancelled" ? "opacity-60" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <strong className="truncate">{r.title ?? "—"}</strong>
+                    {r.test_type ? (
+                      <span className="text-muted-foreground">— {r.test_type}</span>
+                    ) : null}
+                    <OrderStatusPill status={r.status} released={!!r.released_at} />
+                  </div>
+                  {r.summary ? (
+                    <p className="mt-0.5 whitespace-pre-wrap text-[11px] text-muted-foreground">
+                      {r.summary}
+                    </p>
+                  ) : null}
+                  <div className="mt-0.5 text-[10px] text-muted-foreground">
+                    {r.report_date ?? new Date(r.created_at).toISOString().slice(0, 10)}
+                  </div>
+                </div>
+                {r.status !== "cancelled" && !r.released_at ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("إلغاء هذا الطلب؟")) cancel.mutate(r.id);
+                    }}
+                    disabled={cancel.isPending}
+                    className="rounded p-1 text-destructive hover:bg-destructive/10 disabled:opacity-40"
+                    aria-label="إلغاء الطلب"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function RadOrdersPanel({ appt }: { appt: ApptRow }) {
+  const listFn = useServerFn(listVisitRadOrders);
+  const addFn = useServerFn(addRadOrder);
+  const cancelFn = useServerFn(cancelRadOrder);
+  const qc = useQueryClient();
+  const qk = ["doctor", "rad-orders", appt.id];
+
+  const query = useQuery({
+    queryKey: qk,
+    queryFn: () => listFn({ data: { appointment_id: appt.id } }),
+    enabled: !!appt.patient_id,
+    staleTime: 15_000,
+  });
+  const rows: RadOrderRow[] = (query.data?.rows as any) ?? [];
+
+  const [showForm, setShowForm] = useState(false);
+  const [modality, setModality] = useState("");
+  const [bodyPart, setBodyPart] = useState("");
+  const [findings, setFindings] = useState("");
+
+  const reset = () => {
+    setModality("");
+    setBodyPart("");
+    setFindings("");
+    setShowForm(false);
+  };
+  const add = useMutation({
+    mutationFn: () =>
+      addFn({
+        data: {
+          appointment_id: appt.id,
+          modality: modality.trim(),
+          body_part: bodyPart.trim() || null,
+          findings: findings.trim() || null,
+        },
+      }),
+    onSuccess: () => {
+      reset();
+      qc.invalidateQueries({ queryKey: qk });
+    },
+  });
+  const cancel = useMutation({
+    mutationFn: (id: string) => cancelFn({ data: { id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk }),
+  });
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] text-muted-foreground">
+          {query.isLoading ? "جاري التحميل…" : `${rows.length} طلب`}
+        </span>
+        <button
+          type="button"
+          onClick={() => setShowForm((v) => !v)}
+          className="inline-flex items-center gap-1 rounded-md border bg-background px-2 py-1 text-[11px] hover:bg-muted"
+        >
+          <Plus className="h-3 w-3" />
+          {showForm ? "إخفاء" : "طلب أشعة"}
+        </button>
+      </div>
+      {showForm ? (
+        <div className="space-y-2 rounded-md border bg-background p-2">
+          <label className="block space-y-1">
+            <span className="text-[11px]">نوع الأشعة *</span>
+            <input
+              list="rad-catalog"
+              value={modality}
+              onChange={(e) => setModality(e.target.value)}
+              maxLength={80}
+              placeholder="اختر من القائمة أو اكتب"
+              className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+            />
+            <datalist id="rad-catalog">
+              {RAD_CATALOG.map((v) => (
+                <option key={v} value={v} />
+              ))}
+            </datalist>
+          </label>
+          <label className="block space-y-1">
+            <span className="text-[11px]">المنطقة</span>
+            <input
+              value={bodyPart}
+              onChange={(e) => setBodyPart(e.target.value)}
+              maxLength={120}
+              placeholder="مثال: الصدر، الركبة اليمنى"
+              className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+            />
+          </label>
+          <label className="block space-y-1">
+            <span className="text-[11px]">ملاحظات سريرية</span>
+            <textarea
+              value={findings}
+              onChange={(e) => setFindings(e.target.value)}
+              rows={2}
+              maxLength={2000}
+              className="w-full rounded-md border bg-background p-2 text-xs"
+            />
+          </label>
+          {add.isError ? (
+            <p className="text-[11px] text-destructive">{(add.error as Error).message}</p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-md border px-2 py-1 text-[11px] hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="button"
+              disabled={!modality.trim() || add.isPending}
+              onClick={() => add.mutate()}
+              className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+            >
+              {add.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+              حفظ الطلب
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {rows.length === 0 && !query.isLoading ? (
+        <p className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
+          لا توجد طلبات أشعة لهذا المريض من قِبَلك.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {rows.map((r) => (
+            <li
+              key={r.id}
+              className={`rounded-md border p-2 text-xs ${r.status === "cancelled" ? "opacity-60" : ""}`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <strong className="truncate">{r.modality ?? "—"}</strong>
+                    {r.body_part ? (
+                      <span className="text-muted-foreground">— {r.body_part}</span>
+                    ) : null}
+                    <OrderStatusPill status={r.status} released={!!r.released_at} />
+                  </div>
+                  {r.findings ? (
+                    <p className="mt-0.5 whitespace-pre-wrap text-[11px] text-muted-foreground">
+                      {r.findings}
+                    </p>
+                  ) : null}
+                  <div className="mt-0.5 text-[10px] text-muted-foreground">
+                    {r.report_date ?? new Date(r.created_at).toISOString().slice(0, 10)}
+                  </div>
+                </div>
+                {r.status !== "cancelled" && !r.released_at ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("إلغاء هذا الطلب؟")) cancel.mutate(r.id);
+                    }}
+                    disabled={cancel.isPending}
+                    className="rounded p-1 text-destructive hover:bg-destructive/10 disabled:opacity-40"
+                    aria-label="إلغاء الطلب"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+function OrderStatusPill({ status, released }: { status: string | null; released: boolean }) {
+  const cls = released
+    ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+    : status === "cancelled"
+      ? "bg-destructive/15 text-destructive"
+      : status === "in_progress"
+        ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+        : "bg-muted text-muted-foreground";
+  const label = released
+    ? "صادر"
+    : status === "cancelled"
+      ? "ملغي"
+      : status === "in_progress"
+        ? "قيد التنفيذ"
+        : "قيد الانتظار";
+  return <span className={`rounded px-1 text-[10px] ${cls}`}>{label}</span>;
+}
