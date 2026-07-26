@@ -350,7 +350,7 @@ function VisitDialog({
       skipFirstRef.current = false;
       return;
     }
-    const snapshot = { chief, s, o, a, p, followUp };
+    const snapshot = { chief, s, o, a, p, followUp, templateId };
     try {
       window.localStorage.setItem(draftKey, JSON.stringify(snapshot));
     } catch {
@@ -402,9 +402,74 @@ function VisitDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chief, s, o, a, p, followUp]);
 
+  const allSoapEmpty = !s.trim() && !o.trim() && !a.trim() && !p.trim();
+
+  function applyTemplate(id: string, mode: "fill-empty" | "replace") {
+    const tpl = getTemplate(id);
+    if (!tpl) return;
+    setTemplateId(id);
+    const apply = (cur: string, next: string) =>
+      mode === "replace" ? next : cur.trim() ? cur : next;
+    setS((v) => apply(v, tpl.subjective));
+    setO((v) => apply(v, tpl.objective));
+    setA((v) => apply(v, tpl.assessment));
+    setP((v) => apply(v, tpl.plan));
+    setTemplateNote(
+      mode === "replace"
+        ? `تم استبدال حقول SOAP بقالب «${tpl.label_ar}».`
+        : `تم تطبيق قالب «${tpl.label_ar}» على الحقول الفارغة فقط.`,
+    );
+    window.setTimeout(() => setTemplateNote(""), 4000);
+  }
+
   return (
     <DialogShell title={`زيارة — ${appt.patient_name ?? "المريض"}`} onClose={onClose}>
       <div className="space-y-3 text-sm">
+        <div className="rounded-md border bg-muted/30 p-2">
+          <div className="mb-1 flex items-center justify-between gap-2">
+            <span className="text-xs font-medium">قالب سريع للكشف</span>
+            {templateId ? (
+              <span className="text-[11px] text-muted-foreground">
+                القالب الحالي: {getTemplate(templateId)?.label_ar}
+              </span>
+            ) : null}
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {SOAP_TEMPLATES.map((t) => {
+              const active = t.id === templateId;
+              return (
+                <button
+                  key={t.id}
+                  type="button"
+                  onClick={() =>
+                    applyTemplate(t.id, allSoapEmpty ? "fill-empty" : "fill-empty")
+                  }
+                  className={`rounded-full border px-2.5 py-1 text-xs transition ${
+                    active
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "hover:bg-background"
+                  }`}
+                  title={t.label_en}
+                >
+                  {t.label_ar}
+                </button>
+              );
+            })}
+            {templateId ? (
+              <button
+                type="button"
+                onClick={() => applyTemplate(templateId, "replace")}
+                className="rounded-full border border-amber-500/40 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-700 dark:text-amber-300"
+                title="استبدال الحقول بمحتوى القالب"
+              >
+                استبدال بالقالب الحالي
+              </button>
+            ) : null}
+          </div>
+          {templateNote ? (
+            <p className="mt-1.5 text-[11px] text-muted-foreground">{templateNote}</p>
+          ) : null}
+        </div>
         <div className="flex items-center justify-end text-xs" aria-live="polite">
           <AutosaveIndicator state={autoState} savedAt={savedAt} />
         </div>
