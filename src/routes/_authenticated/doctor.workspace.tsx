@@ -1273,6 +1273,83 @@ function escapeHtml(s: string) {
   );
 }
 
+function printOrderTicket(
+  appt: ApptRow,
+  kind: "lab" | "rad",
+  order: {
+    title: string;
+    subtitle?: string | null;
+    notes?: string | null;
+    status?: string | null;
+    released?: boolean;
+    date?: string | null;
+    id: string;
+  },
+) {
+  const today = new Date().toLocaleString("ar-SA");
+  const branch = appt.branch?.name_ar ?? appt.branch?.name_en ?? "";
+  const kindLabel = kind === "lab" ? "طلب مختبر / Lab Order" : "طلب أشعة / Radiology Order";
+  const statusLabel = order.released
+    ? "صادر"
+    : order.status === "cancelled"
+      ? "ملغي"
+      : order.status === "in_progress"
+        ? "قيد التنفيذ"
+        : "قيد الانتظار";
+  const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<title>${escapeHtml(kindLabel)} — ${escapeHtml(appt.patient_name ?? "")}</title>
+<style>
+  @page { size: A5; margin: 12mm; }
+  *{box-sizing:border-box}
+  body{font-family:-apple-system,'Segoe UI',Tahoma,sans-serif;color:#111;margin:0;padding:16px;font-size:12px}
+  .head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:8px;margin-bottom:10px}
+  .brand{font-size:16px;font-weight:700}
+  .kind{background:#111;color:#fff;padding:4px 8px;border-radius:4px;font-size:11px;font-weight:600}
+  .sub{color:#555;font-size:11px;margin-top:2px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;border:1px solid #ccc;border-radius:6px;padding:10px;margin-bottom:12px}
+  .grid div{font-size:11px}
+  .grid strong{display:block;color:#555;font-weight:500;font-size:10px;margin-bottom:2px}
+  .order{border:1px solid #111;border-radius:6px;padding:12px;margin-bottom:12px}
+  .order h2{margin:0 0 6px;font-size:14px}
+  .order .st{display:inline-block;background:#eee;padding:2px 8px;border-radius:10px;font-size:10px;margin-bottom:6px}
+  .notes{border-top:1px dashed #ccc;margin-top:8px;padding-top:8px;font-size:11px;white-space:pre-wrap}
+  .sig{margin-top:24px;display:flex;justify-content:space-between;font-size:11px;color:#333}
+  .foot{margin-top:14px;text-align:center;color:#888;font-size:10px}
+  .ref{font-family:monospace;font-size:10px;color:#666}
+  @media print { .no-print{display:none} body{padding:0} }
+</style></head><body>
+  <div class="head">
+    <div>
+      <div class="brand">مجمع باعشن الطبي</div>
+      <div class="sub">${escapeHtml(branch)} · ${today}</div>
+    </div>
+    <div class="kind">${escapeHtml(kindLabel)}</div>
+  </div>
+  <div class="grid">
+    <div><strong>المريض</strong>${escapeHtml(appt.patient_name ?? "—")}</div>
+    <div><strong>الجوال</strong>${escapeHtml(appt.patient_phone ?? "—")}</div>
+    <div><strong>الطبيب</strong>${escapeHtml(appt.doctor?.name_ar ?? appt.doctor?.name_en ?? "—")}</div>
+    <div><strong>مرجع الزيارة</strong>${escapeHtml(appt.reference_number ?? "—")}</div>
+  </div>
+  <div class="order">
+    <span class="st">${escapeHtml(statusLabel)}</span>
+    <h2>${escapeHtml(order.title)}</h2>
+    ${order.subtitle ? `<div class="sub">${escapeHtml(order.subtitle)}</div>` : ""}
+    ${order.notes ? `<div class="notes">${escapeHtml(order.notes)}</div>` : ""}
+    <div class="ref" style="margin-top:8px">Order ID: ${escapeHtml(order.id)}${order.date ? ` · ${escapeHtml(order.date)}` : ""}</div>
+  </div>
+  <div class="sig"><span>توقيع الطبيب: ______________</span><span>ختم المنشأة</span></div>
+  <div class="foot">تُقدَّم هذه التذكرة في قسم ${kind === "lab" ? "المختبر" : "الأشعة"} لإتمام الإجراء.</div>
+  <script>window.onload=()=>setTimeout(()=>window.print(),80);</script>
+</body></html>`;
+  const w = window.open("", "_blank", "width=800,height=900");
+  if (!w) return;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+
 /* ---------------------------- Orders (Lab/Rad) --------------------------- */
 
 type LabOrderRow = {
