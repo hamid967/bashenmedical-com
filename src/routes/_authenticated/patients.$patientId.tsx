@@ -219,7 +219,7 @@ function PatientDetail() {
       </div>
 
       <Tabs defaultValue="profile">
-        <TabsList className="grid grid-cols-2 sm:grid-cols-4 sm:inline-flex h-auto">
+        <TabsList className="grid grid-cols-2 sm:grid-cols-5 sm:inline-flex h-auto">
           <TabsTrigger value="profile">
             <User className="h-4 w-4 ml-1" /> بيانات
           </TabsTrigger>
@@ -228,6 +228,9 @@ function PatientDetail() {
           </TabsTrigger>
           <TabsTrigger value="visits">
             <History className="h-4 w-4 ml-1" /> الزيارات
+          </TabsTrigger>
+          <TabsTrigger value="orders">
+            <FlaskConical className="h-4 w-4 ml-1" /> المختبر/الأشعة
           </TabsTrigger>
           <TabsTrigger value="attachments">
             <Paperclip className="h-4 w-4 ml-1" /> المرفقات
@@ -271,6 +274,9 @@ function PatientDetail() {
 
         <TabsContent value="visits" className="mt-4">
           <VisitsSection patientId={patientId} />
+        </TabsContent>
+        <TabsContent value="orders" className="mt-4">
+          <OrdersHistorySection patientId={patientId} />
         </TabsContent>
         <TabsContent value="attachments" className="mt-4">
           <AttachmentsSection patientId={patientId} />
