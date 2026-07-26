@@ -62,6 +62,7 @@ function DoctorWorkspacePage() {
 
   const [openVisit, setOpenVisit] = useState<{ appt: ApptRow; visit_id: string } | null>(null);
   const [openFollowUp, setOpenFollowUp] = useState<ApptRow | null>(null);
+  const [openHistory, setOpenHistory] = useState<ApptRow | null>(null);
 
   const rows: ApptRow[] = (query.data?.rows as unknown as ApptRow[]) ?? [];
   const counts = summarize(rows);
