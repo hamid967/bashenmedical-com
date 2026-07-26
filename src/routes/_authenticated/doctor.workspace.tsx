@@ -186,10 +186,12 @@ function DoctorRow({
   row,
   onStarted,
   onFollowUp,
+  onHistory,
 }: {
   row: ApptRow;
   onStarted: (visit_id: string) => void;
   onFollowUp: () => void;
+  onHistory: () => void;
 }) {
   const startFn = useServerFn(startVisit);
   const qc = useQueryClient();
