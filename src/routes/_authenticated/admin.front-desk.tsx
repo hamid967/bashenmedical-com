@@ -384,6 +384,19 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                         label="إلغاء"
                         variant="danger"
                       />
+                      <ActionBtn
+                        onClick={() =>
+                          printCheckInTicket({
+                            patientName: r.patient_name,
+                            reference: r.reference_number ?? r.id.slice(0, 8),
+                            doctorName: r.doctor?.name_ar ?? r.doctor?.name_en,
+                            appointmentTime: r.appointment_time,
+                            queueNumber: r.queue?.queue_number ?? null,
+                          })
+                        }
+                        icon={<Printer className="h-3.5 w-3.5" />}
+                        label="تذكرة"
+                      />
                     </div>
                   </td>
                 </tr>
