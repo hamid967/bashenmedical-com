@@ -118,6 +118,7 @@ function DoctorWorkspacePage() {
                   row={r}
                   onStarted={(visit_id) => setOpenVisit({ appt: r, visit_id })}
                   onFollowUp={() => setOpenFollowUp(r)}
+                  onHistory={() => setOpenHistory(r)}
                 />
               ))}
             </tbody>
@@ -130,10 +131,14 @@ function DoctorWorkspacePage() {
           appt={openVisit.appt}
           visitId={openVisit.visit_id}
           onClose={() => setOpenVisit(null)}
+          onOpenHistory={() => setOpenHistory(openVisit.appt)}
         />
       ) : null}
       {openFollowUp ? (
         <FollowUpDialog appt={openFollowUp} onClose={() => setOpenFollowUp(null)} />
+      ) : null}
+      {openHistory ? (
+        <HistoryDialog appt={openHistory} onClose={() => setOpenHistory(null)} />
       ) : null}
     </div>
   );
