@@ -517,6 +517,19 @@ function QueueTab({ branchId }: { branchId: string | null }) {
                     label="تخطٍ"
                     variant="warn"
                   />
+                  <ActionBtn
+                    onClick={() =>
+                      printCheckInTicket({
+                        patientName: r.appointment?.patient_name,
+                        reference: r.appointment?.reference_number,
+                        doctorName: g.doctor?.name_ar ?? g.doctor?.name_en,
+                        appointmentTime: r.appointment?.appointment_time,
+                        queueNumber: r.queue_number,
+                      })
+                    }
+                    icon={<Printer className="h-3.5 w-3.5" />}
+                    label="تذكرة"
+                  />
                 </div>
               </li>
             ))}
