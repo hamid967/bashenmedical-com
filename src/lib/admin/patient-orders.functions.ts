@@ -31,14 +31,11 @@ const updateSchema = z.object({
   status: ORDER_STATUS,
 });
 
-function patchFor(status: OrderStatus): Record<string, unknown> {
-  const now = new Date().toISOString();
-  const patch: Record<string, unknown> = { status };
-  if (status === "completed") patch.released_at = now;
-  if (status === "pending" || status === "in_progress" || status === "cancelled") {
-    patch.released_at = null;
-  }
-  return patch;
+function patchFor(status: OrderStatus): { status: OrderStatus; released_at: string | null } {
+  return {
+    status,
+    released_at: status === "completed" ? new Date().toISOString() : null,
+  };
 }
 
 export const listPatientLabOrders = createServerFn({ method: "POST" })
