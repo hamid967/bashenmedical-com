@@ -18,6 +18,10 @@ import {
   X,
   RefreshCw,
   History,
+  Pill,
+  Plus,
+  Trash2,
+  Printer,
 } from "lucide-react";
 import {
   listMyTodayAppointments,
@@ -25,6 +29,9 @@ import {
   saveVisit,
   holdFollowUp,
   listPatientHistory,
+  listVisitPrescriptions,
+  addPrescription,
+  cancelPrescription,
 } from "@/lib/admin/doctor-today.functions";
 import { SOAP_TEMPLATES, getTemplate } from "@/lib/clinical/soap-templates";
 
@@ -478,6 +485,9 @@ function VisitDialog({
         <FieldArea label="Objective — الفحص السريري" value={o} onChange={setO} rows={3} max={4000} />
         <FieldArea label="Assessment — التشخيص" value={a} onChange={setA} rows={3} max={4000} />
         <FieldArea label="Plan — الخطة العلاجية" value={p} onChange={setP} rows={3} max={4000} />
+
+        <RxSection appt={appt} />
+
         <label className="block space-y-1">
           <span className="text-xs">تاريخ المتابعة (اختياري)</span>
           <input
@@ -925,5 +935,331 @@ function TabBtn({
     >
       {children}
     </button>
+  );
+}
+
+/* ------------------------------ Rx section --------------------------- */
+
+type RxRow = {
+  id: string;
+  medication: string;
+  dosage: string | null;
+  instructions: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  refills_remaining: number;
+  status: string;
+  notes: string | null;
+  created_at: string;
+};
+
+function RxSection({ appt }: { appt: ApptRow }) {
+  const listFn = useServerFn(listVisitPrescriptions);
+  const addFn = useServerFn(addPrescription);
+  const cancelFn = useServerFn(cancelPrescription);
+  const qc = useQueryClient();
+  const qk = ["doctor", "rx", appt.id];
+
+  const query = useQuery({
+    queryKey: qk,
+    queryFn: () => listFn({ data: { appointment_id: appt.id } }),
+    enabled: !!appt.patient_id,
+    staleTime: 15_000,
+  });
+  const rows: RxRow[] = (query.data?.rows as any) ?? [];
+
+  const [showForm, setShowForm] = useState(false);
+  const [medication, setMedication] = useState("");
+  const [dosage, setDosage] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [startDate, setStartDate] = useState<string>(new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState<string>("");
+  const [refills, setRefills] = useState<number>(0);
+
+  const reset = () => {
+    setMedication("");
+    setDosage("");
+    setInstructions("");
+    setEndDate("");
+    setRefills(0);
+    setShowForm(false);
+  };
+
+  const add = useMutation({
+    mutationFn: () =>
+      addFn({
+        data: {
+          appointment_id: appt.id,
+          medication: medication.trim(),
+          dosage: dosage.trim() || null,
+          instructions: instructions.trim() || null,
+          start_date: startDate || null,
+          end_date: endDate || null,
+          refills_remaining: Number.isFinite(refills) ? refills : 0,
+        },
+      }),
+    onSuccess: () => {
+      reset();
+      qc.invalidateQueries({ queryKey: qk });
+    },
+  });
+
+  const cancel = useMutation({
+    mutationFn: (id: string) => cancelFn({ data: { prescription_id: id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: qk }),
+  });
+
+  return (
+    <section className="rounded-md border bg-muted/30 p-2.5">
+      <header className="mb-2 flex items-center gap-2">
+        <Pill className="h-4 w-4 text-primary" />
+        <h3 className="text-xs font-semibold">الوصفات الطبية</h3>
+        <span className="text-[11px] text-muted-foreground">({rows.length})</span>
+        <div className="ms-auto flex gap-1">
+          {rows.some((r) => r.status === "active") ? (
+            <button
+              type="button"
+              onClick={() => printRxSheet(appt, rows.filter((r) => r.status === "active"))}
+              className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] hover:bg-background"
+            >
+              <Printer className="h-3 w-3" />
+              طباعة
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setShowForm((v) => !v)}
+            className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] hover:bg-background"
+          >
+            <Plus className="h-3 w-3" />
+            {showForm ? "إخفاء" : "إضافة"}
+          </button>
+        </div>
+      </header>
+
+      {!appt.patient_id ? (
+        <p className="text-[11px] text-muted-foreground">لا يمكن إصدار وصفات قبل ربط المريض بالحجز.</p>
+      ) : null}
+
+      {showForm && appt.patient_id ? (
+        <div className="mb-2 space-y-2 rounded-md border bg-background p-2">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="block space-y-1">
+              <span className="text-[11px]">الدواء *</span>
+              <input
+                value={medication}
+                onChange={(e) => setMedication(e.target.value)}
+                maxLength={200}
+                placeholder="مثال: Paracetamol 500mg"
+                className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[11px]">الجرعة</span>
+              <input
+                value={dosage}
+                onChange={(e) => setDosage(e.target.value)}
+                maxLength={120}
+                placeholder="1 قرص كل 8 ساعات"
+                className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[11px]">تاريخ البدء</span>
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[11px]">تاريخ الانتهاء</span>
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+              />
+            </label>
+            <label className="block space-y-1">
+              <span className="text-[11px]">التعبئات المتبقية</span>
+              <input
+                type="number"
+                min={0}
+                max={12}
+                value={refills}
+                onChange={(e) => setRefills(parseInt(e.target.value, 10) || 0)}
+                className="h-8 w-full rounded-md border bg-background px-2 text-xs"
+              />
+            </label>
+          </div>
+          <label className="block space-y-1">
+            <span className="text-[11px]">تعليمات للمريض</span>
+            <textarea
+              value={instructions}
+              onChange={(e) => setInstructions(e.target.value)}
+              maxLength={1000}
+              rows={2}
+              className="w-full rounded-md border bg-background p-2 text-xs"
+            />
+          </label>
+          {add.isError ? (
+            <p className="text-[11px] text-destructive">{(add.error as Error).message}</p>
+          ) : null}
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={reset}
+              className="rounded-md border px-2 py-1 text-[11px] hover:bg-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="button"
+              disabled={!medication.trim() || add.isPending}
+              onClick={() => add.mutate()}
+              className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
+            >
+              {add.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plus className="h-3 w-3" />
+              )}
+              حفظ الوصفة
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {query.isLoading ? (
+        <p className="text-[11px] text-muted-foreground">جاري التحميل…</p>
+      ) : rows.length === 0 ? (
+        <p className="rounded-md border border-dashed p-3 text-center text-[11px] text-muted-foreground">
+          لا توجد وصفات لهذا المريض من قِبَلك.
+        </p>
+      ) : (
+        <ul className="space-y-1.5">
+          {rows.map((rx) => (
+            <li
+              key={rx.id}
+              className={`rounded-md border p-2 text-xs ${
+                rx.status === "cancelled" ? "opacity-60" : ""
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <strong className="truncate">{rx.medication}</strong>
+                    {rx.dosage ? (
+                      <span className="text-muted-foreground">— {rx.dosage}</span>
+                    ) : null}
+                    <span
+                      className={`rounded px-1 text-[10px] ${
+                        rx.status === "active"
+                          ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                          : rx.status === "cancelled"
+                            ? "bg-destructive/15 text-destructive"
+                            : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {rx.status === "active"
+                        ? "نشط"
+                        : rx.status === "cancelled"
+                          ? "ملغي"
+                          : "منجز"}
+                    </span>
+                  </div>
+                  {rx.instructions ? (
+                    <p className="mt-0.5 whitespace-pre-wrap text-[11px] text-muted-foreground">
+                      {rx.instructions}
+                    </p>
+                  ) : null}
+                  <div className="mt-0.5 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
+                    {rx.start_date ? <span>من {rx.start_date}</span> : null}
+                    {rx.end_date ? <span>إلى {rx.end_date}</span> : null}
+                    {rx.refills_remaining > 0 ? (
+                      <span>تعبئات: {rx.refills_remaining}</span>
+                    ) : null}
+                  </div>
+                </div>
+                {rx.status === "active" ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm("إلغاء هذه الوصفة؟")) cancel.mutate(rx.id);
+                    }}
+                    disabled={cancel.isPending}
+                    className="rounded p-1 text-destructive hover:bg-destructive/10 disabled:opacity-40"
+                    aria-label="إلغاء الوصفة"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                ) : null}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+function printRxSheet(appt: ApptRow, rows: RxRow[]) {
+  const today = new Date().toLocaleDateString("ar-SA");
+  const branch = appt.branch?.name_ar ?? appt.branch?.name_en ?? "";
+  const items = rows
+    .map(
+      (r, i) => `
+        <li>
+          <div class="med">${i + 1}. ${escapeHtml(r.medication)}${
+            r.dosage ? ` — <span class="muted">${escapeHtml(r.dosage)}</span>` : ""
+          }</div>
+          ${r.instructions ? `<div class="ins">${escapeHtml(r.instructions)}</div>` : ""}
+          <div class="meta">
+            ${r.start_date ? `من ${r.start_date}` : ""}
+            ${r.end_date ? ` — إلى ${r.end_date}` : ""}
+            ${r.refills_remaining > 0 ? ` — تعبئات: ${r.refills_remaining}` : ""}
+          </div>
+        </li>`,
+    )
+    .join("");
+  const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8">
+<title>وصفة طبية — ${escapeHtml(appt.patient_name ?? "")}</title>
+<style>
+  body{font-family:-apple-system,'Segoe UI',Tahoma,sans-serif;padding:24px;color:#111;}
+  h1{margin:0 0 4px;font-size:18px}
+  .sub{color:#555;font-size:12px;margin-bottom:16px}
+  .patient{border:1px solid #ddd;padding:10px;border-radius:6px;font-size:13px;margin-bottom:14px}
+  ol{padding-inline-start:0;list-style:none}
+  li{border-bottom:1px dashed #ccc;padding:8px 0}
+  .med{font-weight:600;font-size:14px}
+  .ins{font-size:12px;margin-top:2px}
+  .meta{font-size:11px;color:#666;margin-top:2px}
+  .muted{color:#666;font-weight:400}
+  .sig{margin-top:32px;display:flex;justify-content:space-between;font-size:12px;color:#333}
+  @media print{.no-print{display:none}}
+</style></head><body>
+  <h1>مجمع باعشن الطبي</h1>
+  <div class="sub">${escapeHtml(branch)} · وصفة طبية · ${today}</div>
+  <div class="patient">
+    <div><strong>المريض:</strong> ${escapeHtml(appt.patient_name ?? "—")}</div>
+    <div><strong>الجوال:</strong> ${escapeHtml(appt.patient_phone ?? "—")}</div>
+    <div><strong>المرجع:</strong> ${escapeHtml(appt.reference_number ?? "—")}</div>
+  </div>
+  <ol>${items}</ol>
+  <div class="sig"><span>توقيع الطبيب: ______________</span><span>الختم</span></div>
+  <script>window.onload=()=>window.print();</script>
+</body></html>`;
+  const w = window.open("", "_blank", "width=800,height=900");
+  if (!w) return;
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+function escapeHtml(s: string) {
+  return s.replace(/[&<>"']/g, (c) =>
+    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === '"' ? "&quot;" : "&#39;",
   );
 }

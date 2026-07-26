@@ -254,3 +254,125 @@ export const listPatientHistory = createServerFn({ method: "POST" })
     if (visitsRes.error) throw new Error(visitsRes.error.message);
     return { appointments: apptsRes.data ?? [], visits: visitsRes.data ?? [] };
   });
+
+/* ----------------------------- 6) Prescriptions (Rx) --------------------- */
+
+const RX_COLS =
+  "id, medication, dosage, instructions, start_date, end_date, refills_remaining, status, notes, created_at";
+
+const rxListSchema = z.object({ appointment_id: z.string().uuid() });
+
+export const listVisitPrescriptions = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => rxListSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+
+    const { data: appt, error: aErr } = await context.supabase
+      .from("appointments")
+      .select("id, doctor_id, patient_id")
+      .eq("id", data.appointment_id)
+      .maybeSingle();
+    if (aErr) throw new Error(aErr.message);
+    if (!appt || appt.doctor_id !== doctorId) throw new Error("الحجز غير موجود أو غير مسموح.");
+    if (!appt.patient_id) return { rows: [] };
+
+    const { data: rows, error } = await context.supabase
+      .from("prescriptions")
+      .select(RX_COLS)
+      .eq("patient_id", appt.patient_id)
+      .eq("doctor_id", doctorId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const rxAddSchema = z.object({
+  appointment_id: z.string().uuid(),
+  medication: z.string().trim().min(1).max(200),
+  dosage: z.string().trim().max(120).optional().nullable(),
+  instructions: z.string().trim().max(1000).optional().nullable(),
+  start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  end_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  refills_remaining: z.number().int().min(0).max(12).default(0),
+  notes: z.string().trim().max(500).optional().nullable(),
+});
+
+export const addPrescription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => rxAddSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+
+    const { data: appt, error: aErr } = await context.supabase
+      .from("appointments")
+      .select("id, doctor_id, patient_id, branch_id")
+      .eq("id", data.appointment_id)
+      .maybeSingle();
+    if (aErr) throw new Error(aErr.message);
+    if (!appt || appt.doctor_id !== doctorId) throw new Error("الحجز غير موجود أو غير مسموح.");
+    if (!appt.patient_id) throw new Error("لا يمكن إصدار الوصفة قبل ربط المريض بالحجز.");
+    if (data.end_date && data.start_date && data.end_date < data.start_date) {
+      throw new Error("تاريخ نهاية الوصفة قبل تاريخ البدء.");
+    }
+
+    const { data: inserted, error } = await context.supabase
+      .from("prescriptions")
+      .insert({
+        patient_id: appt.patient_id,
+        doctor_id: doctorId,
+        branch_id: appt.branch_id ?? null,
+        medication: data.medication,
+        dosage: data.dosage ?? null,
+        instructions: data.instructions ?? null,
+        start_date: data.start_date ?? null,
+        end_date: data.end_date ?? null,
+        refills_remaining: data.refills_remaining ?? 0,
+        notes: data.notes ?? null,
+        status: "active",
+        created_by: context.userId,
+      })
+      .select(RX_COLS)
+      .single();
+    if (error) throw new Error(error.message);
+    return { row: inserted };
+  });
+
+const rxCancelSchema = z.object({
+  prescription_id: z.string().uuid(),
+});
+
+export const cancelPrescription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => rxCancelSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+
+    const { data: rx, error: fErr } = await context.supabase
+      .from("prescriptions")
+      .select("id, doctor_id, status")
+      .eq("id", data.prescription_id)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!rx || rx.doctor_id !== doctorId) throw new Error("الوصفة غير موجودة أو غير مسموح.");
+    if (rx.status !== "active") throw new Error("لا يمكن إلغاء وصفة غير نشطة.");
+
+    const { error } = await context.supabase
+      .from("prescriptions")
+      .update({ status: "cancelled" })
+      .eq("id", rx.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
