@@ -17,12 +17,14 @@ import {
   Loader2,
   X,
   RefreshCw,
+  History,
 } from "lucide-react";
 import {
   listMyTodayAppointments,
   startVisit,
   saveVisit,
   holdFollowUp,
+  listPatientHistory,
 } from "@/lib/admin/doctor-today.functions";
 
 export const Route = createFileRoute("/_authenticated/doctor/workspace")({
@@ -60,6 +62,7 @@ function DoctorWorkspacePage() {
 
   const [openVisit, setOpenVisit] = useState<{ appt: ApptRow; visit_id: string } | null>(null);
   const [openFollowUp, setOpenFollowUp] = useState<ApptRow | null>(null);
+  const [openHistory, setOpenHistory] = useState<ApptRow | null>(null);
 
   const rows: ApptRow[] = (query.data?.rows as unknown as ApptRow[]) ?? [];
   const counts = summarize(rows);
@@ -115,6 +118,7 @@ function DoctorWorkspacePage() {
                   row={r}
                   onStarted={(visit_id) => setOpenVisit({ appt: r, visit_id })}
                   onFollowUp={() => setOpenFollowUp(r)}
+                  onHistory={() => setOpenHistory(r)}
                 />
               ))}
             </tbody>
@@ -131,6 +135,9 @@ function DoctorWorkspacePage() {
       ) : null}
       {openFollowUp ? (
         <FollowUpDialog appt={openFollowUp} onClose={() => setOpenFollowUp(null)} />
+      ) : null}
+      {openHistory ? (
+        <HistoryDialog appt={openHistory} onClose={() => setOpenHistory(null)} />
       ) : null}
     </div>
   );
@@ -178,10 +185,12 @@ function DoctorRow({
   row,
   onStarted,
   onFollowUp,
+  onHistory,
 }: {
   row: ApptRow;
   onStarted: (visit_id: string) => void;
   onFollowUp: () => void;
+  onHistory: () => void;
 }) {
   const startFn = useServerFn(startVisit);
   const qc = useQueryClient();
@@ -245,6 +254,13 @@ function DoctorRow({
               onClick={onFollowUp}
               icon={<CalendarPlus className="h-3 w-3" />}
               label="متابعة"
+            />
+          ) : null}
+          {row.patient_id ? (
+            <ActionBtn
+              onClick={onHistory}
+              icon={<History className="h-3 w-3" />}
+              label="السجل"
             />
           ) : null}
         </div>
@@ -676,5 +692,170 @@ function DialogShell({
         {children}
       </div>
     </div>
+  );
+}
+
+/* --------------------------- History dialog --------------------------- */
+
+type HistoryAppt = {
+  id: string;
+  reference_number: string | null;
+  appointment_date: string | null;
+  appointment_time: string | null;
+  status: string;
+  chief_complaint: string | null;
+  doctor: { id: string; name_ar: string | null; name_en: string | null } | null;
+  branch: { id: string; name_ar: string | null; name_en: string | null } | null;
+};
+
+type HistoryVisit = {
+  id: string;
+  visit_date: string | null;
+  chief_complaint: string | null;
+  subjective: string | null;
+  objective: string | null;
+  assessment: string | null;
+  plan: string | null;
+  follow_up_date: string | null;
+  appointment_id: string | null;
+};
+
+function HistoryDialog({ appt, onClose }: { appt: ApptRow; onClose: () => void }) {
+  const historyFn = useServerFn(listPatientHistory);
+  const enabled = !!appt.patient_id;
+  const query = useQuery({
+    queryKey: ["doctor", "patient-history", appt.patient_id],
+    queryFn: () => historyFn({ data: { patient_id: appt.patient_id as string } }),
+    enabled,
+    staleTime: 30_000,
+  });
+  const [tab, setTab] = useState<"visits" | "appointments">("visits");
+  const appointments: HistoryAppt[] = (query.data?.appointments as any) ?? [];
+  const visits: HistoryVisit[] = (query.data?.visits as any) ?? [];
+
+  return (
+    <DialogShell title={`سجل المريض — ${appt.patient_name ?? "—"}`} onClose={onClose}>
+      <div className="space-y-3 text-sm">
+        <div className="flex gap-2 border-b">
+          <TabBtn active={tab === "visits"} onClick={() => setTab("visits")}>
+            الفحوصات ({visits.length})
+          </TabBtn>
+          <TabBtn active={tab === "appointments"} onClick={() => setTab("appointments")}>
+            المواعيد السابقة ({appointments.length})
+          </TabBtn>
+        </div>
+
+        {!enabled ? (
+          <p className="text-xs text-muted-foreground">لا يوجد ملف مريض مرتبط.</p>
+        ) : query.isLoading ? (
+          <p className="inline-flex items-center gap-2 text-xs text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> جاري التحميل…
+          </p>
+        ) : query.isError ? (
+          <p className="text-xs text-destructive">
+            تعذّر التحميل: {(query.error as Error).message}
+          </p>
+        ) : tab === "visits" ? (
+          visits.length === 0 ? (
+            <p className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
+              لا توجد زيارات سابقة مسجّلة لك مع هذا المريض.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {visits.map((v) => (
+                <li key={v.id} className="rounded-md border p-3">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-mono">{v.visit_date ?? "—"}</span>
+                    {v.follow_up_date ? (
+                      <span className="text-muted-foreground">متابعة: {v.follow_up_date}</span>
+                    ) : null}
+                  </div>
+                  {v.chief_complaint ? (
+                    <p className="mt-1 text-xs">
+                      <strong>الشكوى:</strong> {v.chief_complaint}
+                    </p>
+                  ) : null}
+                  <SoapBlock label="S" text={v.subjective} />
+                  <SoapBlock label="O" text={v.objective} />
+                  <SoapBlock label="A" text={v.assessment} />
+                  <SoapBlock label="P" text={v.plan} />
+                </li>
+              ))}
+            </ul>
+          )
+        ) : appointments.length === 0 ? (
+          <p className="rounded-md border border-dashed p-6 text-center text-xs text-muted-foreground">
+            لا توجد مواعيد سابقة.
+          </p>
+        ) : (
+          <div className="overflow-x-auto rounded-md border">
+            <table className="min-w-full text-xs">
+              <thead className="bg-muted/50">
+                <tr>
+                  <th className="p-2 text-start">التاريخ</th>
+                  <th className="p-2 text-start">المرجع</th>
+                  <th className="p-2 text-start">الطبيب</th>
+                  <th className="p-2 text-start">الفرع</th>
+                  <th className="p-2 text-start">الشكوى</th>
+                  <th className="p-2 text-start">الحالة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {appointments.map((r) => (
+                  <tr key={r.id} className="border-t">
+                    <td className="p-2 font-mono">
+                      {r.appointment_date ?? "—"}
+                      {r.appointment_time ? ` ${r.appointment_time.slice(0, 5)}` : ""}
+                    </td>
+                    <td className="p-2 font-mono">{r.reference_number ?? "—"}</td>
+                    <td className="p-2">{r.doctor?.name_ar ?? r.doctor?.name_en ?? "—"}</td>
+                    <td className="p-2">{r.branch?.name_ar ?? r.branch?.name_en ?? "—"}</td>
+                    <td className="max-w-[180px] p-2 text-muted-foreground">
+                      <span className="line-clamp-2">{r.chief_complaint ?? "—"}</span>
+                    </td>
+                    <td className="p-2">
+                      <StatusBadge status={r.status} />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </DialogShell>
+  );
+}
+
+function SoapBlock({ label, text }: { label: string; text: string | null }) {
+  if (!text) return null;
+  return (
+    <p className="mt-1 whitespace-pre-wrap text-xs">
+      <strong className="text-muted-foreground">{label}:</strong> {text}
+    </p>
+  );
+}
+
+function TabBtn({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`-mb-px border-b-2 px-3 py-1.5 text-xs transition ${
+        active
+          ? "border-primary text-primary"
+          : "border-transparent text-muted-foreground hover:text-foreground"
+      }`}
+    >
+      {children}
+    </button>
   );
 }
