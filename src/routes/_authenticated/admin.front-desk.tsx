@@ -49,6 +49,58 @@ const searchSchema = z.object({
   tab: z.enum(["front-desk", "queue"]).default("front-desk"),
 });
 
+/**
+ * Open a print-optimized window with a bilingual check-in ticket.
+ * No layout impact on the parent page; uses window.open + document.write.
+ */
+function printCheckInTicket(t: {
+  patientName: string | null | undefined;
+  reference: string | null | undefined;
+  doctorName: string | null | undefined;
+  appointmentTime: string | null | undefined;
+  queueNumber: number | string | null | undefined;
+  branchName?: string | null;
+}) {
+  const now = new Date();
+  const stamp = now.toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" });
+  const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>تذكرة استقبال</title>
+<style>
+  @page { size: 80mm auto; margin: 6mm; }
+  body { font-family: -apple-system, "Segoe UI", Tahoma, sans-serif; color:#0f172a; margin:0; padding:8px; }
+  .brand { text-align:center; font-weight:700; font-size:14px; }
+  .sub { text-align:center; font-size:11px; color:#475569; margin-bottom:8px; }
+  .num { text-align:center; font-size:48px; font-weight:800; letter-spacing:2px; margin:8px 0; }
+  .row { display:flex; justify-content:space-between; font-size:12px; padding:3px 0; border-bottom:1px dashed #cbd5e1; }
+  .lbl { color:#64748b; }
+  .foot { text-align:center; font-size:10px; color:#64748b; margin-top:10px; }
+</style></head><body>
+  <div class="brand">مجمع باعشن الطبي</div>
+  <div class="sub">Baeshen Medical Complex</div>
+  ${t.queueNumber != null ? `<div class="num">#${t.queueNumber}</div>` : ""}
+  <div class="row"><span class="lbl">المريض</span><span>${escapeHtml(t.patientName ?? "—")}</span></div>
+  <div class="row"><span class="lbl">الطبيب</span><span>${escapeHtml(t.doctorName ?? "—")}</span></div>
+  <div class="row"><span class="lbl">الوقت</span><span>${escapeHtml(t.appointmentTime ?? "—")}</span></div>
+  <div class="row"><span class="lbl">المرجع</span><span>${escapeHtml(t.reference ?? "—")}</span></div>
+  ${t.branchName ? `<div class="row"><span class="lbl">الفرع</span><span>${escapeHtml(t.branchName)}</span></div>` : ""}
+  <div class="foot">${escapeHtml(stamp)}</div>
+  <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),300);};</script>
+</body></html>`;
+  const w = window.open("", "_blank", "width=380,height=640");
+  if (!w) {
+    alert("تعذّر فتح نافذة الطباعة. الرجاء السماح للنوافذ المنبثقة.");
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+function escapeHtml(s: string): string {
+  return s.replace(/[&<>"']/g, (c) =>
+    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === '"' ? "&quot;" : "&#39;",
+  );
+}
+
 export const Route = createFileRoute("/_authenticated/admin/front-desk")({
   validateSearch: searchSchema,
   head: () => ({
