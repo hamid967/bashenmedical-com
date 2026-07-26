@@ -1477,19 +1477,19 @@ function OrdersPanel({
 }) {
   const qc = useQueryClient();
   const listFn = useServerFn(
-    kind === "lab" ? listPatientLabOrders : listPatientRadOrders,
+    (kind === "lab" ? listPatientLabOrders : listPatientRadOrders) as typeof listPatientLabOrders,
   );
   const updateFn = useServerFn(
-    kind === "lab" ? updateLabOrderStatus : updateRadOrderStatus,
+    (kind === "lab" ? updateLabOrderStatus : updateRadOrderStatus) as typeof updateLabOrderStatus,
   );
   const queryKey = ["patient-orders", kind, patientId];
 
   const q = useQuery({
     queryKey,
-    queryFn: () => listFn({ data: { patient_id: patientId } }),
+    queryFn: () => listFn({ data: { patient_id: patientId } }) as Promise<{ rows: OrderRow[] }>,
   });
 
-  const rows: OrderRow[] = (q.data?.rows ?? []) as OrderRow[];
+  const rows: OrderRow[] = q.data?.rows ?? [];
 
   async function setStatus(id: string, status: OrderStatus) {
     try {
