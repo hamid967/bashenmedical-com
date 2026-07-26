@@ -26,6 +26,7 @@ import {
   holdFollowUp,
   listPatientHistory,
 } from "@/lib/admin/doctor-today.functions";
+import { SOAP_TEMPLATES, getTemplate } from "@/lib/clinical/soap-templates";
 
 export const Route = createFileRoute("/_authenticated/doctor/workspace")({
   head: () => ({
