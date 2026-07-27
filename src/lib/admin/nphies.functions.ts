@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(ctx: { supabase: unknown; userId: string }) {
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
   const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" }),
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "super_admin" }),
@@ -78,28 +78,28 @@ export const getNphiesLogs = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     const providerIds = Array.from(
-      new Set((rows ?? []).map((r: unknown) => r.provider_id).filter(Boolean)),
+      new Set((rows ?? []).map((r: any) => r.provider_id).filter(Boolean)),
     ) as string[];
     const doctorIds = Array.from(
-      new Set((rows ?? []).map((r: unknown) => r.doctor_id).filter(Boolean)),
+      new Set((rows ?? []).map((r: any) => r.doctor_id).filter(Boolean)),
     ) as string[];
 
     const [providersRes, doctorsRes] = await Promise.all([
       providerIds.length
         ? context.supabase.from("insurance_providers").select("id, name_ar").in("id", providerIds)
-        : Promise.resolve({ data: [] as unknown[] }),
+        : Promise.resolve({ data: [] as any[] }),
       doctorIds.length
         ? context.supabase.from("doctors").select("id, name_ar").in("id", doctorIds)
-        : Promise.resolve({ data: [] as unknown[] }),
+        : Promise.resolve({ data: [] as any[] }),
     ]);
     const providerMap = new Map<string, string>(
-      (providersRes.data ?? []).map((p: unknown) => [p.id, p.name_ar]),
+      (providersRes.data ?? []).map((p: any) => [p.id, p.name_ar]),
     );
     const doctorMap = new Map<string, string>(
-      (doctorsRes.data ?? []).map((d: unknown) => [d.id, d.name_ar]),
+      (doctorsRes.data ?? []).map((d: any) => [d.id, d.name_ar]),
     );
 
-    const enriched: NphiesLogRow[] = (rows ?? []).map((r: unknown) => ({
+    const enriched: NphiesLogRow[] = (rows ?? []).map((r: any) => ({
       ...r,
       provider_name_ar: r.provider_id ? (providerMap.get(r.provider_id) ?? null) : null,
       doctor_name_ar: r.doctor_id ? (doctorMap.get(r.doctor_id) ?? null) : null,

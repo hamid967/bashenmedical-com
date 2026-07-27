@@ -90,9 +90,9 @@ export function AdminDoctorsPage() {
 
   const branches = branchesQ.data ?? [];
   const specialties = specialtiesQ.data ?? [];
-  const branchName = (id: string | null) => branches.find((b: unknown) => b.id === id)?.name_ar ?? "—";
+  const branchName = (id: string | null) => branches.find((b: any) => b.id === id)?.name_ar ?? "—";
   const specialtyName = (id: string | null) =>
-    specialties.find((s: unknown) => s.id === id)?.name_ar ?? "—";
+    specialties.find((s: any) => s.id === id)?.name_ar ?? "—";
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6" dir="rtl">
@@ -233,8 +233,8 @@ function DoctorFormDialog({
   onSave,
 }: {
   value: Partial<DoctorRecord>;
-  branches: unknown[];
-  specialties: unknown[];
+  branches: any[];
+  specialties: any[];
   saving: boolean;
   onClose: () => void;
   onSave: (v: Partial<DoctorRecord>) => void;
@@ -253,7 +253,7 @@ function DoctorFormDialog({
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     // Clean nullable empty strings
-    const cleaned: unknown = { ...form };
+    const cleaned: any = { ...form };
     for (const k of ["title_ar", "title_en", "photo_url", "slug", "bio_ar", "bio_en"] as const) {
       if (cleaned[k] === "") cleaned[k] = null;
     }
@@ -324,7 +324,7 @@ function DoctorFormDialog({
               className="input"
             >
               <option value="">— بدون —</option>
-              {specialties.map((s: unknown) => (
+              {specialties.map((s: any) => (
                 <option key={s.id} value={s.id}>
                   {s.name_ar}
                 </option>
@@ -338,7 +338,7 @@ function DoctorFormDialog({
               className="input"
             >
               <option value="">— بدون —</option>
-              {branches.map((b: unknown) => (
+              {branches.map((b: any) => (
                 <option key={b.id} value={b.id}>
                   {b.name_ar}
                 </option>

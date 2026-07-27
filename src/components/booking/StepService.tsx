@@ -13,7 +13,7 @@ export function StepService({
   onPick: (v: ServiceType) => void;
 }) {
   const { t } = useTranslation("booking");
-  const items: { id: ServiceType; icon: unknown; disabled?: boolean }[] = [
+  const items: { id: ServiceType; icon: any; disabled?: boolean }[] = [
     { id: "clinic", icon: Stethoscope },
     { id: "followup", icon: Activity },
     { id: "radiology", icon: Scan, disabled: true },

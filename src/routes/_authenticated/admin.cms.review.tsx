@@ -48,9 +48,9 @@ function ReviewQueue() {
                 </td>
               </tr>
             )}
-            {data.map((r: unknown) => (
+            {data.map((r: any) => (
               <tr key={r.id} className="border-t hover:bg-accent/30">
-                <td className="p-2 text-xs">{(CMS_KINDS as unknown)[r.kind]?.label ?? r.kind}</td>
+                <td className="p-2 text-xs">{(CMS_KINDS as any)[r.kind]?.label ?? r.kind}</td>
                 <td className="p-2">
                   <Link
                     to="/admin/cms/$kind/$id"

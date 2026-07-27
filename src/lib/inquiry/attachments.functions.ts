@@ -31,7 +31,7 @@ const ALLOWED = new Map<string, string>([
 const BUCKET = "inquiry-attachments";
 
 async function assertAccessibleInquiry(
-  supabase: unknown,
+  supabase: any,
   userId: string,
   inquiryId: string,
 ): Promise<{ isOwner: boolean; isStaff: boolean; isClosed: boolean }> {
@@ -142,7 +142,7 @@ export const registerInquiryAttachment = createServerFn({ method: "POST" })
       .from(BUCKET)
       .list(parent, { search: objName, limit: 1 });
     if (lErr) throw new Error(lErr.message);
-    const obj = (listed ?? []).find((o: unknown) => o.name === objName);
+    const obj = (listed ?? []).find((o: any) => o.name === objName);
     if (!obj) throw new Error("لم يتم رفع الملف بعد. أعد المحاولة.");
     const actualSize = (obj.metadata?.size as number | undefined) ?? 0;
     if (actualSize <= 0 || actualSize > MAX_BYTES) {
@@ -201,8 +201,8 @@ export const listInquiryAttachments = createServerFn({ method: "GET" })
 
     // Only issue signed URLs for files that passed the scan.
     const cleanPaths = (rows ?? [])
-      .filter((r: unknown) => r.scan_status === "clean")
-      .map((r: unknown) => r.storage_path);
+      .filter((r: any) => r.scan_status === "clean")
+      .map((r: any) => r.storage_path);
     const urlByPath = new Map<string, string>();
     if (cleanPaths.length) {
       const { data: signed } = await supabase.storage
@@ -212,7 +212,7 @@ export const listInquiryAttachments = createServerFn({ method: "GET" })
         if (s.path && s.signedUrl) urlByPath.set(s.path, s.signedUrl);
       }
     }
-    return (rows ?? []).map((r: unknown) => ({
+    return (rows ?? []).map((r: any) => ({
       id: r.id,
       file_name: r.file_name,
       content_type: r.content_type,
@@ -448,7 +448,7 @@ export const scanInquiryAttachment = createServerFn({ method: "POST" })
       }
       const bytes = new Uint8Array(await dl.data.arrayBuffer());
       result = scanBuffer(bytes, row.content_type);
-    } catch (e: unknown) {
+    } catch (e: any) {
       await supabaseAdmin
         .from("service_inquiry_attachments")
         .update({

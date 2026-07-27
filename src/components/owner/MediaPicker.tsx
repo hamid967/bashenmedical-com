@@ -58,9 +58,9 @@ export function MediaPicker({
   async function refresh() {
     setLoading(true);
     try {
-      const rows: unknown = await listFn({});
+      const rows: any = await listFn({});
       setItems(rows as Item[]);
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر تحميل الوسائط");
     } finally {
       setLoading(false);
@@ -82,7 +82,7 @@ export function MediaPicker({
     setUploading(true);
     try {
       const data_base64 = await fileToBase64(file);
-      const row: unknown = await uploadFn({
+      const row: any = await uploadFn({
         data: {
           file_name: file.name,
           mime_type: file.type || "application/octet-stream",
@@ -94,7 +94,7 @@ export function MediaPicker({
       setItems((xs) => [row as Item, ...xs]);
       setSelected(row as Item);
       setAlt("");
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error(err?.message ?? "تعذّر الرفع");
     } finally {
       setUploading(false);

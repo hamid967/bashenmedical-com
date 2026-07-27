@@ -11,10 +11,10 @@ export const Route = createFileRoute("/p/$slug")({
     if (!loaderData) {
       return { meta: [{ title: "الصفحة غير موجودة" }, { name: "robots", content: "noindex" }] };
     }
-    const p: unknown = loaderData.page;
+    const p: any = loaderData.page;
     const title = p.seo_title || p.title_ar;
     const desc = p.seo_description || "";
-    const meta: unknown[] = [
+    const meta: any[] = [
       { title },
       { name: "description", content: desc },
       { property: "og:title", content: title },
@@ -48,7 +48,7 @@ export const Route = createFileRoute("/p/$slug")({
 });
 
 function PublicPage() {
-  const { page } = Route.useLoaderData() as { page: unknown };
+  const { page } = Route.useLoaderData() as { page: any };
   return (
     <article className="max-w-3xl mx-auto px-4 py-12 md:py-16" dir="rtl">
       <header className="mb-8 border-b pb-6">

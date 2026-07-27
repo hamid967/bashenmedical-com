@@ -34,7 +34,7 @@ export type MyOrderTimelineEvent = {
 export type MyOrderDetails = {
   kind: OrderTableKind;
   id: string;
-  order: Record<string, unknown>;
+  order: Record<string, any>;
   attachments: Array<{
     id: string;
     file_name: string | null;
@@ -74,7 +74,7 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
     const patientId = patient?.id ?? null;
 
     const { data: order, error } = await supabase
-      .from(KIND_TO_TABLE[data.kind] as unknown)
+      .from(KIND_TO_TABLE[data.kind] as any)
       .select("*")
       .eq("id", data.id)
       .maybeSingle();
@@ -82,9 +82,9 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
     if (!order) throw new Error("لم يُعثر على الطلب.");
 
     // ownership check (بعد التحقق من RLS، هذا حزام أمان إضافي على مستوى التطبيق).
-    const ownerByPatient = patientId && (order as unknown).patient_id === patientId;
+    const ownerByPatient = patientId && (order as any).patient_id === patientId;
     const ownerByPhone =
-      phone && ((order as unknown).patient_phone === phone || (order as unknown).phone === phone);
+      phone && ((order as any).patient_phone === phone || (order as any).phone === phone);
     if (!ownerByPatient && !ownerByPhone) {
       throw new Error("لا تملك صلاحية الاطّلاع على هذا الطلب.");
     }
@@ -98,14 +98,14 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
         .eq("patient_id", patientId)
         .order("created_at", { ascending: false })
         .limit(50);
-      attachments = (atts ?? []) as unknown;
+      attachments = (atts ?? []) as any;
     }
 
     // timeline
     const timeline: MyOrderTimelineEvent[] = [];
-    if ((order as unknown).created_at) {
+    if ((order as any).created_at) {
       timeline.push({
-        at: (order as unknown).created_at,
+        at: (order as any).created_at,
         kind: "created",
         title: "تم إرسال الطلب",
       });
@@ -118,7 +118,7 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
         .eq("appointment_id", data.id)
         .order("changed_at", { ascending: true })
         .limit(200);
-      for (const row of (audit ?? []) as unknown[]) {
+      for (const row of (audit ?? []) as any[]) {
         if (row.old_status || row.new_status) {
           timeline.push({
             at: row.changed_at,
@@ -137,11 +137,11 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
         }
       }
     } else if (
-      (order as unknown).updated_at &&
-      (order as unknown).updated_at !== (order as unknown).created_at
+      (order as any).updated_at &&
+      (order as any).updated_at !== (order as any).created_at
     ) {
       timeline.push({
-        at: (order as unknown).updated_at,
+        at: (order as any).updated_at,
         kind: "updated",
         title: "تحديث الطلب",
       });
@@ -151,7 +151,7 @@ export const getMyOrderDetails = createServerFn({ method: "GET" })
     return {
       kind: data.kind,
       id: data.id,
-      order: order as unknown,
+      order: order as any,
       attachments,
       timeline,
     };

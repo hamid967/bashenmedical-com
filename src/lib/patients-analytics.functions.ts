@@ -9,10 +9,10 @@ import { z } from "zod";
 type Role = "admin" | "reception" | "pharmacy" | "super_admin" | "doctor";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function getRoles(sb: unknown, userId: string): Promise<Role[]> {
+async function getRoles(sb: any, userId: string): Promise<Role[]> {
   const { data } = await sb.from("user_roles").select("role").eq("user_id", userId);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  return (data ?? []).map((r: unknown) => r.role as Role);
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 function ensureStaff(roles: Role[]) {
   const ok = roles.some((r) =>
@@ -75,7 +75,7 @@ export const getPatientAnalytics = createServerFn({ method: "POST" })
   .validator((d) => Input.parse(d))
   .handler(async ({ data, context }): Promise<PatientAnalytics> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
 
@@ -89,7 +89,7 @@ export const getPatientAnalytics = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const patients = ((rows ?? []) as unknown[]).filter((p) => {
+    const patients = ((rows ?? []) as any[]).filter((p) => {
       const age = ageFromDOB(p.date_of_birth);
       if (data.minAge != null && (age == null || age < data.minAge)) return false;
       if (data.maxAge != null && (age == null || age > data.maxAge)) return false;
@@ -137,7 +137,7 @@ export const getPatientAnalytics = createServerFn({ method: "POST" })
     const changeDaily = new Map<string, number>();
     const changeTo = new Map<string, number>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const row of (audit ?? []) as unknown[]) {
+    for (const row of (audit ?? []) as any[]) {
       const meta = row.metadata ?? {};
       // Bulk events: increment by count, single by 1. Filter by branch when possible.
       if (row.action === "patient.status_changed") {
@@ -196,7 +196,7 @@ export const listBranchesForAnalytics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
     const { data } = await sb
@@ -204,7 +204,7 @@ export const listBranchesForAnalytics = createServerFn({ method: "GET" })
       .select("id, name_ar")
       .order("name_ar", { ascending: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ((data ?? []) as unknown[]).map((b) => ({
+    return ((data ?? []) as any[]).map((b) => ({
       id: b.id as string,
       name_ar: b.name_ar as string,
     }));
@@ -214,7 +214,7 @@ export const listDoctorsForAnalytics = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
     const { data } = await sb
@@ -222,7 +222,7 @@ export const listDoctorsForAnalytics = createServerFn({ method: "GET" })
       .select("id, name_ar, branch_id")
       .order("name_ar", { ascending: true });
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return ((data ?? []) as unknown[]).map((d) => ({
+    return ((data ?? []) as any[]).map((d) => ({
       id: d.id as string,
       name_ar: d.name_ar as string,
       branch_id: d.branch_id as string | null,
@@ -271,7 +271,7 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
   .validator((d) => TransitionsInput.parse(d))
   .handler(async ({ data, context }): Promise<PatientTransitions> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
 
@@ -281,7 +281,7 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
     const { data: pRows, error: pErr } = await pq.limit(20000);
     if (pErr) throw new Error(pErr.message);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let eligibleIds = new Set<string>(((pRows ?? []) as unknown[]).map((r) => r.id as string));
+    let eligibleIds = new Set<string>(((pRows ?? []) as any[]).map((r) => r.id as string));
 
     if (data.doctorId) {
       const { data: vRows } = await sb
@@ -291,7 +291,7 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
         .limit(20000);
 
       const withDoctor = new Set<string>(
-        ((vRows ?? []) as unknown[]).map((r) => r.patient_id as string),
+        ((vRows ?? []) as any[]).map((r) => r.patient_id as string),
       );
       eligibleIds = new Set([...eligibleIds].filter((id) => withDoctor.has(id)));
     }
@@ -317,7 +317,7 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
         .lte("created_at", `${toISO}T23:59:59`)
         .limit(10000);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (rows ?? []) as unknown[];
+      return (rows ?? []) as any[];
     }
 
     function aggregate(
@@ -334,7 +334,7 @@ export const getPatientTransitions = createServerFn({ method: "POST" })
       const daily = new Map<string, number>();
       let total = 0;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const row of rows as unknown[]) {
+      for (const row of rows as any[]) {
         const meta = row.metadata ?? {};
         const day = (row.created_at ?? "").slice(0, 10);
         if (row.action === "patient.status_changed") {
@@ -454,7 +454,7 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
   .validator((d) => RecentEventsInput.parse(d))
   .handler(async ({ data, context }): Promise<RecentStatusEvent[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
 
@@ -463,7 +463,7 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
     if (data.branchId) pq = pq.eq("branch_id", data.branchId);
     const { data: pRows } = await pq.limit(20000);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let eligible = new Set<string>(((pRows ?? []) as unknown[]).map((r) => r.id as string));
+    let eligible = new Set<string>(((pRows ?? []) as any[]).map((r) => r.id as string));
     if (data.doctorId) {
       const { data: vRows } = await sb
         .from("patient_visits")
@@ -471,7 +471,7 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
         .eq("doctor_id", data.doctorId)
         .limit(20000);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const withDoc = new Set<string>(((vRows ?? []) as unknown[]).map((r) => r.patient_id as string));
+      const withDoc = new Set<string>(((vRows ?? []) as any[]).map((r) => r.patient_id as string));
       eligible = new Set([...eligible].filter((id) => withDoc.has(id)));
     }
     const applyFilter = data.branchId != null || data.doctorId != null;
@@ -491,7 +491,7 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
     const actorIds = new Set<string>();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const row of (rows ?? []) as unknown[]) {
+    for (const row of (rows ?? []) as any[]) {
       if (events.length >= limit) break;
       const meta = row.metadata ?? {};
       if (row.action === "patient.status_changed") {
@@ -542,9 +542,9 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
         .select("id, full_name_ar, mrn, branches(name_ar)")
         .in("id", [...patientIds]);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const map = new Map<string, unknown>();
+      const map = new Map<string, any>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const p of (pats ?? []) as unknown[]) map.set(p.id, p);
+      for (const p of (pats ?? []) as any[]) map.set(p.id, p);
       for (const e of events) {
         if (e.patient_id && map.has(e.patient_id)) {
           const p = map.get(e.patient_id);
@@ -563,12 +563,12 @@ export const listRecentStatusChanges = createServerFn({ method: "POST" })
         .in("id", [...actorIds]);
       const nameMap = new Map<string, string>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const p of (profs ?? []) as unknown[]) nameMap.set(p.id, p.full_name ?? "");
+      for (const p of (profs ?? []) as any[]) nameMap.set(p.id, p.full_name ?? "");
       // We stored actor id in a local; re-loop using rows
 
       const rowMap = new Map<string, string | null>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const row of (rows ?? []) as unknown[]) rowMap.set(row.id, row.actor ?? null);
+      for (const row of (rows ?? []) as any[]) rowMap.set(row.id, row.actor ?? null);
       for (const e of events) {
         const actor = rowMap.get(e.audit_id);
         if (actor) e.actor_name = nameMap.get(actor) ?? null;
@@ -603,7 +603,7 @@ export const listPatientsForKpi = createServerFn({ method: "POST" })
   .validator((d) => KpiPatientsInput.parse(d))
   .handler(async ({ data, context }): Promise<KpiPatientRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
 
@@ -619,7 +619,7 @@ export const listPatientsForKpi = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filtered = ((rows ?? []) as unknown[]).filter((p) => {
+    const filtered = ((rows ?? []) as any[]).filter((p) => {
       const age = ageFromDOB(p.date_of_birth);
       if (data.minAge != null && (age == null || age < data.minAge)) return false;
       if (data.maxAge != null && (age == null || age > data.maxAge)) return false;
@@ -699,7 +699,7 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
   .validator((d) => TransitionRowsInput.parse(d))
   .handler(async ({ data, context }): Promise<PatientTransitionsPage> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
 
@@ -713,9 +713,9 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
     if (pErr) throw new Error(pErr.message);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const patientMap = new Map<string, unknown>();
+    const patientMap = new Map<string, any>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const p of (pRows ?? []) as unknown[]) {
+    for (const p of (pRows ?? []) as any[]) {
       const age = ageFromDOB(p.date_of_birth);
       if (data.minAge != null && (age == null || age < data.minAge)) continue;
       if (data.maxAge != null && (age == null || age > data.maxAge)) continue;
@@ -735,7 +735,7 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
         .eq("doctor_id", data.doctorId)
         .limit(20000);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const withDoc = new Set<string>(((vRows ?? []) as unknown[]).map((r) => r.patient_id as string));
+      const withDoc = new Set<string>(((vRows ?? []) as any[]).map((r) => r.patient_id as string));
       for (const id of [...patientMap.keys()]) if (!withDoc.has(id)) patientMap.delete(id);
     }
 
@@ -754,7 +754,7 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
     const actorIds = new Set<string>();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const ev of (audit ?? []) as unknown[]) {
+    for (const ev of (audit ?? []) as any[]) {
       if (rows.length >= limit) break;
       const meta = ev.metadata ?? {};
       const reason = (ev.reason as string) ?? (meta.reason as string) ?? null;
@@ -807,11 +807,11 @@ export const listPatientTransitionRows = createServerFn({ method: "POST" })
         .in("id", [...actorIds]);
       const nameMap = new Map<string, string>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const p of (profs ?? []) as unknown[]) nameMap.set(p.id, p.full_name ?? "");
+      for (const p of (profs ?? []) as any[]) nameMap.set(p.id, p.full_name ?? "");
 
       const actorByAudit = new Map<string, string | null>();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const ev of (audit ?? []) as unknown[]) actorByAudit.set(ev.id, ev.actor ?? null);
+      for (const ev of (audit ?? []) as any[]) actorByAudit.set(ev.id, ev.actor ?? null);
       for (const r of rows) {
         const a = actorByAudit.get(r.audit_id);
         if (a) r.actor_name = nameMap.get(a) ?? null;
@@ -911,7 +911,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
   .validator((d) => TransitionsStatsInput.parse(d))
   .handler(async ({ data, context }): Promise<TransitionsStats> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb: unknown = context.supabase;
+    const sb: any = context.supabase;
     const roles = await getRoles(sb, context.userId);
     ensureStaff(roles);
 
@@ -922,7 +922,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
 
     const patientToBranch = new Map<string, string | null>();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const p of (pRows ?? []) as unknown[]) patientToBranch.set(p.id, p.branch_id ?? null);
+    for (const p of (pRows ?? []) as any[]) patientToBranch.set(p.id, p.branch_id ?? null);
 
     // Load transition events
     const { data: rows } = await sb
@@ -963,7 +963,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for (const row of (rows ?? []) as unknown[]) {
+    for (const row of (rows ?? []) as any[]) {
       const meta = row.metadata ?? {};
       const created = row.created_at as string;
       const day = created.slice(0, 10);
@@ -1048,7 +1048,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     if (branchIds.length) {
       const { data: bRows } = await sb.from("branches").select("id, name_ar").in("id", branchIds);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const b of (bRows ?? []) as unknown[]) branchNameMap.set(b.id, b.name_ar ?? "—");
+      for (const b of (bRows ?? []) as any[]) branchNameMap.set(b.id, b.name_ar ?? "—");
     }
 
     // Enrich actor names
@@ -1057,7 +1057,7 @@ export const getTransitionsStats = createServerFn({ method: "POST" })
     if (actorIds.length) {
       const { data: aRows } = await sb.from("profiles").select("id, full_name").in("id", actorIds);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const p of (aRows ?? []) as unknown[]) actorNameMap.set(p.id, p.full_name ?? "—");
+      for (const p of (aRows ?? []) as any[]) actorNameMap.set(p.id, p.full_name ?? "—");
     }
 
     // Fill daily series

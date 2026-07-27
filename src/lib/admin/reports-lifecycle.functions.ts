@@ -15,7 +15,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { assertHasAnyRole } from "./_guard";
 
-async function requirePermission(supabase: unknown, userId: string, key: string): Promise<void> {
+async function requirePermission(supabase: any, userId: string, key: string): Promise<void> {
   const { data, error } = await supabase.rpc("has_permission", {
     _user_id: userId,
     _permission_key: key,
@@ -24,7 +24,7 @@ async function requirePermission(supabase: unknown, userId: string, key: string)
   if (data !== true) throw new Error("ليست لديك صلاحية تنفيذ هذه العملية.");
 }
 
-async function nextVersionNumber(supabase: unknown, reportId: string): Promise<number> {
+async function nextVersionNumber(supabase: any, reportId: string): Promise<number> {
   const { data, error } = await supabase
     .from("report_versions")
     .select("version_number")
@@ -37,7 +37,7 @@ async function nextVersionNumber(supabase: unknown, reportId: string): Promise<n
 }
 
 async function snapshotVersion(
-  supabase: unknown,
+  supabase: any,
   userId: string,
   reportId: string,
   summary: string | null,
@@ -71,7 +71,7 @@ export const saveMedicalReportDraft = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertHasAnyRole(context.supabase, context.userId, ["admin", "doctor"]);
     await requirePermission(context.supabase, context.userId, "reports.medical.publish");
-    const patch: Record<string, unknown> = { updated_at: new Date().toISOString() };
+    const patch: Record<string, any> = { updated_at: new Date().toISOString() };
     if (data.title_ar !== undefined) patch.title_ar = data.title_ar;
     if (data.title_en !== undefined) patch.title_en = data.title_en;
     if (data.summary !== undefined) patch.summary = data.summary;
@@ -123,7 +123,7 @@ export const publishMedicalReport = createServerFn({ method: "POST" })
     if (before.status === "revoked") throw new Error("لا يمكن نشر تقرير مسحوب.");
     if (before.status === "published") throw new Error("التقرير منشور بالفعل.");
 
-    const patch: Record<string, unknown> = {
+    const patch: Record<string, any> = {
       status: "published",
       published_at: new Date().toISOString(),
     };

@@ -1,7 +1,7 @@
 /**
  * Admin — Services Health.
  * Aggregates the latest status per internal "service" surface plus the most
- * recent error (if unknown). Read-only; admin/super_admin only.
+ * recent error (if any). Read-only; admin/super_admin only.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
@@ -23,7 +23,7 @@ export interface ServiceHealth {
 
 const ONE_HOUR = () => new Date(Date.now() - 60 * 60 * 1000).toISOString();
 
-async function aiStreamingHealth(sb: unknown): Promise<ServiceHealth> {
+async function aiStreamingHealth(sb: any): Promise<ServiceHealth> {
   const since = ONE_HOUR();
   const { data: recent } = await sb
     .from("ai_stream_events")
@@ -32,8 +32,8 @@ async function aiStreamingHealth(sb: unknown): Promise<ServiceHealth> {
     .order("created_at", { ascending: false })
     .limit(500);
   const rows = recent ?? [];
-  const ok = rows.filter((r: unknown) => r.completed && !r.error_status).length;
-  const err = rows.filter((r: unknown) => r.error_status || r.error_type).length;
+  const ok = rows.filter((r: any) => r.completed && !r.error_status).length;
+  const err = rows.filter((r: any) => r.error_status || r.error_type).length;
   const { data: lastErr } = await sb
     .from("ai_stream_events")
     .select("created_at, error_status, error_type")
@@ -59,7 +59,7 @@ async function aiStreamingHealth(sb: unknown): Promise<ServiceHealth> {
   };
 }
 
-async function nphiesHealth(sb: unknown): Promise<ServiceHealth> {
+async function nphiesHealth(sb: any): Promise<ServiceHealth> {
   const since = ONE_HOUR();
   const { data: rows } = await sb
     .from("nphies_requests")
@@ -68,7 +68,7 @@ async function nphiesHealth(sb: unknown): Promise<ServiceHealth> {
     .order("created_at", { ascending: false })
     .limit(500);
   const list = rows ?? [];
-  const ok = list.filter((r: unknown) => !r.error_message && (r.http_status ?? 0) < 400).length;
+  const ok = list.filter((r: any) => !r.error_message && (r.http_status ?? 0) < 400).length;
   const err = list.length - ok;
   const { data: lastErr } = await sb
     .from("nphies_requests")
@@ -92,7 +92,7 @@ async function nphiesHealth(sb: unknown): Promise<ServiceHealth> {
   };
 }
 
-async function notificationsHealth(sb: unknown): Promise<ServiceHealth[]> {
+async function notificationsHealth(sb: any): Promise<ServiceHealth[]> {
   const since = ONE_HOUR();
   const { data: rows } = await sb
     .from("notification_delivery_logs")
@@ -101,7 +101,7 @@ async function notificationsHealth(sb: unknown): Promise<ServiceHealth[]> {
     .order("created_at", { ascending: false })
     .limit(1000);
   const list = rows ?? [];
-  const channels = Array.from(new Set(list.map((r: unknown) => r.channel).filter(Boolean)));
+  const channels = Array.from(new Set(list.map((r: any) => r.channel).filter(Boolean)));
   if (channels.length === 0) {
     return [
       {
@@ -116,11 +116,11 @@ async function notificationsHealth(sb: unknown): Promise<ServiceHealth[]> {
       },
     ];
   }
-  return channels.map((ch: unknown) => {
-    const sub = list.filter((r: unknown) => r.channel === ch);
-    const ok = sub.filter((r: unknown) => r.status === "sent" || r.status === "delivered").length;
-    const err = sub.filter((r: unknown) => r.status === "failed" || r.error_message).length;
-    const lastErr = sub.find((r: unknown) => r.error_message || r.status === "failed");
+  return channels.map((ch: any) => {
+    const sub = list.filter((r: any) => r.channel === ch);
+    const ok = sub.filter((r: any) => r.status === "sent" || r.status === "delivered").length;
+    const err = sub.filter((r: any) => r.status === "failed" || r.error_message).length;
+    const lastErr = sub.find((r: any) => r.error_message || r.status === "failed");
     const total = ok + err;
     const status: ServiceHealthStatus =
       total === 0 ? "idle" : err === 0 ? "ok" : err / total > 0.2 ? "down" : "degraded";
@@ -137,7 +137,7 @@ async function notificationsHealth(sb: unknown): Promise<ServiceHealth[]> {
   });
 }
 
-async function integrationsHealth(sb: unknown): Promise<ServiceHealth[]> {
+async function integrationsHealth(sb: any): Promise<ServiceHealth[]> {
   const since = ONE_HOUR();
   const { data: rows } = await sb
     .from("integration_logs")
@@ -146,7 +146,7 @@ async function integrationsHealth(sb: unknown): Promise<ServiceHealth[]> {
     .order("created_at", { ascending: false })
     .limit(1000);
   const list = rows ?? [];
-  const keys = Array.from(new Set(list.map((r: unknown) => r.integration_key).filter(Boolean)));
+  const keys = Array.from(new Set(list.map((r: any) => r.integration_key).filter(Boolean)));
   if (keys.length === 0) {
     return [
       {
@@ -161,14 +161,14 @@ async function integrationsHealth(sb: unknown): Promise<ServiceHealth[]> {
       },
     ];
   }
-  return keys.map((k: unknown) => {
-    const sub = list.filter((r: unknown) => r.integration_key === k);
-    const ok = sub.filter((r: unknown) => r.status === "success" || r.status === "ok").length;
+  return keys.map((k: any) => {
+    const sub = list.filter((r: any) => r.integration_key === k);
+    const ok = sub.filter((r: any) => r.status === "success" || r.status === "ok").length;
     const err = sub.filter(
-      (r: unknown) => r.status === "error" || r.status === "failed" || r.error_message,
+      (r: any) => r.status === "error" || r.status === "failed" || r.error_message,
     ).length;
     const lastErr = sub.find(
-      (r: unknown) => r.error_message || r.status === "error" || r.status === "failed",
+      (r: any) => r.error_message || r.status === "error" || r.status === "failed",
     );
     const total = ok + err;
     const status: ServiceHealthStatus =
@@ -186,7 +186,7 @@ async function integrationsHealth(sb: unknown): Promise<ServiceHealth[]> {
   });
 }
 
-async function apiPermissionsHealth(sb: unknown): Promise<ServiceHealth> {
+async function apiPermissionsHealth(sb: any): Promise<ServiceHealth> {
   const since = ONE_HOUR();
   const { data: rows } = await sb
     .from("api_permission_errors")
@@ -212,7 +212,7 @@ async function apiPermissionsHealth(sb: unknown): Promise<ServiceHealth> {
   };
 }
 
-async function aiSafetyHealth(sb: unknown): Promise<ServiceHealth> {
+async function aiSafetyHealth(sb: any): Promise<ServiceHealth> {
   const since = ONE_HOUR();
   const { data: rows } = await sb
     .from("ai_safety_incidents")
@@ -224,7 +224,7 @@ async function aiSafetyHealth(sb: unknown): Promise<ServiceHealth> {
   const err = list.length;
   const last = list[0];
   const critical = list.filter(
-    (r: unknown) => r.severity === "high" || r.severity === "critical",
+    (r: any) => r.severity === "high" || r.severity === "critical",
   ).length;
   const status: ServiceHealthStatus = err === 0 ? "ok" : critical > 0 ? "down" : "degraded";
   return {
@@ -241,7 +241,7 @@ async function aiSafetyHealth(sb: unknown): Promise<ServiceHealth> {
   };
 }
 
-async function paymentsHealth(sb: unknown): Promise<ServiceHealth> {
+async function paymentsHealth(sb: any): Promise<ServiceHealth> {
   const since = ONE_HOUR();
   const { data: whRows } = await sb
     .from("payment_webhook_events")
@@ -250,8 +250,8 @@ async function paymentsHealth(sb: unknown): Promise<ServiceHealth> {
     .order("created_at", { ascending: false })
     .limit(500);
   const wh = whRows ?? [];
-  const ok = wh.filter((r: unknown) => r.processed && !r.error_message).length;
-  const err = wh.filter((r: unknown) => r.error_message).length;
+  const ok = wh.filter((r: any) => r.processed && !r.error_message).length;
+  const err = wh.filter((r: any) => r.error_message).length;
   const { data: lastErr } = await sb
     .from("payment_webhook_events")
     .select("created_at, error_message")
@@ -275,7 +275,7 @@ async function paymentsHealth(sb: unknown): Promise<ServiceHealth> {
   };
 }
 
-async function backupHealth(sb: unknown): Promise<ServiceHealth> {
+async function backupHealth(sb: any): Promise<ServiceHealth> {
   // Lovable Cloud manages point-in-time backups. We expose a lightweight
   // heartbeat: newest write across audit_logs indicates DB reachability, and
   // an optional system_settings.last_backup_at note (if the ops team records it).
@@ -291,7 +291,7 @@ async function backupHealth(sb: unknown): Promise<ServiceHealth> {
     .eq("key", "last_backup_at")
     .maybeSingle();
   const lastBackup: string | null =
-    (setting?.value as unknown)?.timestamp ?? setting?.updated_at ?? null;
+    (setting?.value as any)?.timestamp ?? setting?.updated_at ?? null;
   const ageHours = lastBackup ? (Date.now() - Date.parse(lastBackup)) / 3600_000 : null;
   const status: ServiceHealthStatus =
     ageHours == null ? "unknown" : ageHours < 26 ? "ok" : ageHours < 48 ? "degraded" : "down";

@@ -217,7 +217,7 @@ function QuickSnapshotGrid({ data, loading }: { data: Snapshot | undefined; load
             {actions.items.slice(0, 2).map((a) => (
               <Link
                 key={a.id}
-                to={a.href as unknown}
+                to={a.href as any}
                 className={`block text-[11px] rounded-md border px-2 py-1 truncate ${SEVERITY_STYLES[a.severity]}`}
                 title={a.label}
               >

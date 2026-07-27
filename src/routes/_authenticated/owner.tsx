@@ -21,11 +21,11 @@ export const Route = createFileRoute("/_authenticated/owner")({
       if (!status.hasAccess) throw redirect({ to: "/portal" });
       return { ownerStatus: status };
     } catch (e) {
-      if ((e as unknown)?.isRedirect) throw e;
+      if ((e as any)?.isRedirect) throw e;
       throw redirect({ to: "/portal" });
     }
   },
-  loader: ({ context }) => ({ ownerStatus: (context as unknown).ownerStatus }),
+  loader: ({ context }) => ({ ownerStatus: (context as any).ownerStatus }),
   head: () => ({
     meta: [
       { title: "Site Builder | مجمع باعشن الطبي" },

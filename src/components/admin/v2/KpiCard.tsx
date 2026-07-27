@@ -67,8 +67,8 @@ export function KpiCard({
         : "rgba(239,68,68,0.15)";
   const deltaColor = good === null ? "#94a3b8" : good ? "#4ade80" : "#f87171";
 
-  const Wrapper: unknown = drillTo ? Link : "div";
-  const wrapperProps: unknown = drillTo
+  const Wrapper: any = drillTo ? Link : "div";
+  const wrapperProps: any = drillTo
     ? { to: drillTo, className: "group block" }
     : { className: "block" };
 

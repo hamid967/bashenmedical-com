@@ -105,13 +105,13 @@ function InboxDetailPage() {
   const canReopen = isActionAllowedForRoles(roles, "reopen");
 
   const [busy, setBusy] = useState<string | null>(null);
-  async function run(label: string, fn: () => Promise<unknown>) {
+  async function run(label: string, fn: () => Promise<any>) {
     try {
       setBusy(label);
       await fn();
       toast.success("تم تنفيذ الإجراء");
       refresh();
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر تنفيذ الإجراء");
     } finally {
       setBusy(null);

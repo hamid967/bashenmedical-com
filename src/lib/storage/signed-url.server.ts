@@ -50,7 +50,7 @@ type AuthProof =
   | { assertAuthorized: () => Promise<void> | void; authorized?: never };
 
 export type CreatePatientSignedUrlInput = {
-  client: SupabaseClient<unknown, unknown, unknown>;
+  client: SupabaseClient<any, any, any>;
   bucket: string;
   path: string;
   /** Optional filename to force as `Content-Disposition: attachment; filename=...` */

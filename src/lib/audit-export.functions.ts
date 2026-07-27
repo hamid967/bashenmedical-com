@@ -7,9 +7,9 @@ import { z } from "zod";
 
 const MAX_ROWS = 10000;
 
-async function assertStaff(supabase: unknown, userId: string) {
+async function assertStaff(supabase: any, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (data ?? []).map((r: unknown) => r.role as string);
+  const roles = (data ?? []).map((r: any) => r.role as string);
   if (!roles.some((r: string) => ["admin", "super_admin", "reception"].includes(r))) {
     throw new Error("ليست لديك الصلاحية لعرض/تصدير السجلات.");
   }
@@ -32,9 +32,9 @@ const filterSchema = z.object({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type AuditRow = Record<string, unknown>;
+export type AuditRow = Record<string, any>;
 
-async function fetchAppointmentAudit(supabase: unknown, f: z.infer<typeof filterSchema>) {
+async function fetchAppointmentAudit(supabase: any, f: z.infer<typeof filterSchema>) {
   let q = supabase
     .from("appointment_audit")
     .select(
@@ -50,19 +50,19 @@ async function fetchAppointmentAudit(supabase: unknown, f: z.infer<typeof filter
   if (error) throw new Error(error.message);
 
   const apptIds = Array.from(
-    new Set((rows ?? []).map((r: unknown) => r.appointment_id).filter(Boolean)),
+    new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean)),
   ) as string[];
   const actorIds = Array.from(
-    new Set((rows ?? []).map((r: unknown) => r.changed_by).filter(Boolean)),
+    new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)),
   ) as string[];
 
-  const apptMap = new Map<string, unknown>();
+  const apptMap = new Map<string, any>();
   if (apptIds.length) {
     const { data: appts } = await supabase
       .from("appointments")
       .select("id, patient_name, patient_phone, branch_id")
       .in("id", apptIds);
-    for (const a of (appts ?? []) as unknown[]) apptMap.set(a.id, a);
+    for (const a of (appts ?? []) as any[]) apptMap.set(a.id, a);
   }
 
   const actorMap = new Map<string, string>();
@@ -71,10 +71,10 @@ async function fetchAppointmentAudit(supabase: unknown, f: z.infer<typeof filter
       .from("profiles")
       .select("id, full_name")
       .in("id", actorIds);
-    for (const p of (profs ?? []) as unknown[]) actorMap.set(p.id, p.full_name ?? p.id);
+    for (const p of (profs ?? []) as any[]) actorMap.set(p.id, p.full_name ?? p.id);
   }
 
-  let filtered = (rows ?? []) as unknown[];
+  let filtered = (rows ?? []) as any[];
   if (f.branch_id) {
     filtered = filtered.filter((r) => apptMap.get(r.appointment_id)?.branch_id === f.branch_id);
   }
@@ -95,7 +95,7 @@ async function fetchAppointmentAudit(supabase: unknown, f: z.infer<typeof filter
   });
 }
 
-async function fetchSecurityAudit(supabase: unknown, f: z.infer<typeof filterSchema>) {
+async function fetchSecurityAudit(supabase: any, f: z.infer<typeof filterSchema>) {
   let q = supabase
     .from("security_audit_log")
     .select(
@@ -112,7 +112,7 @@ async function fetchSecurityAudit(supabase: unknown, f: z.infer<typeof filterSch
   if (error) throw new Error(error.message);
 
   const actorIds = Array.from(
-    new Set((rows ?? []).map((r: unknown) => r.actor).filter(Boolean)),
+    new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)),
   ) as string[];
   const actorMap = new Map<string, string>();
   if (actorIds.length) {
@@ -120,11 +120,11 @@ async function fetchSecurityAudit(supabase: unknown, f: z.infer<typeof filterSch
       .from("profiles")
       .select("id, full_name")
       .in("id", actorIds);
-    for (const p of (profs ?? []) as unknown[]) actorMap.set(p.id, p.full_name ?? p.id);
+    for (const p of (profs ?? []) as any[]) actorMap.set(p.id, p.full_name ?? p.id);
   }
 
   return (rows ?? []).map(
-    (r: unknown) =>
+    (r: any) =>
       ({
         created_at: r.created_at,
         action: r.action,
@@ -141,7 +141,7 @@ async function fetchSecurityAudit(supabase: unknown, f: z.infer<typeof filterSch
   );
 }
 
-async function fetchReminderAudit(supabase: unknown, f: z.infer<typeof filterSchema>) {
+async function fetchReminderAudit(supabase: any, f: z.infer<typeof filterSchema>) {
   let q = supabase
     .from("reminder_preference_audit")
     .select(
@@ -157,19 +157,19 @@ async function fetchReminderAudit(supabase: unknown, f: z.infer<typeof filterSch
   if (error) throw new Error(error.message);
 
   const apptIds = Array.from(
-    new Set((rows ?? []).map((r: unknown) => r.appointment_id).filter(Boolean)),
+    new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean)),
   ) as string[];
   const actorIds = Array.from(
-    new Set((rows ?? []).map((r: unknown) => r.changed_by).filter(Boolean)),
+    new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)),
   ) as string[];
 
-  const apptMap = new Map<string, unknown>();
+  const apptMap = new Map<string, any>();
   if (apptIds.length) {
     const { data: appts } = await supabase
       .from("appointments")
       .select("id, patient_name, patient_phone, branch_id")
       .in("id", apptIds);
-    for (const a of (appts ?? []) as unknown[]) apptMap.set(a.id, a);
+    for (const a of (appts ?? []) as any[]) apptMap.set(a.id, a);
   }
 
   const actorMap = new Map<string, string>();
@@ -178,10 +178,10 @@ async function fetchReminderAudit(supabase: unknown, f: z.infer<typeof filterSch
       .from("profiles")
       .select("id, full_name")
       .in("id", actorIds);
-    for (const p of (profs ?? []) as unknown[]) actorMap.set(p.id, p.full_name ?? p.id);
+    for (const p of (profs ?? []) as any[]) actorMap.set(p.id, p.full_name ?? p.id);
   }
 
-  let filtered = (rows ?? []) as unknown[];
+  let filtered = (rows ?? []) as any[];
   if (f.branch_id) {
     filtered = filtered.filter((r) => apptMap.get(r.appointment_id)?.branch_id === f.branch_id);
   }
@@ -202,16 +202,16 @@ async function fetchReminderAudit(supabase: unknown, f: z.infer<typeof filterSch
   });
 }
 
-async function fetchDashboardRecent(supabase: unknown, f: z.infer<typeof filterSchema>) {
+async function fetchDashboardRecent(supabase: any, f: z.infer<typeof filterSchema>) {
   const { data, error } = await supabase.rpc(
-    "dashboard_recent_activity" as unknown,
+    "dashboard_recent_activity" as any,
     {
       _branch_id: f.branch_id ?? null,
       _limit: Math.min(f.limit, 500),
-    } as unknown,
+    } as any,
   );
   if (error) throw new Error(error.message);
-  let rows = (data ?? []) as unknown[];
+  let rows = (data ?? []) as any[];
   if (f.from) rows = rows.filter((r) => r.changed_at >= f.from!);
   if (f.to) rows = rows.filter((r) => r.changed_at <= f.to!);
   if (f.event) rows = rows.filter((r) => r.new_status === f.event);

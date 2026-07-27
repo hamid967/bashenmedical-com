@@ -62,7 +62,7 @@ function MessagingSettingsPage() {
       qc.invalidateQueries({ queryKey: ["messaging-config"] });
       qc.invalidateQueries({ queryKey: ["clinic-settings"] });
     },
-    onError: (err: unknown) => {
+    onError: (err: any) => {
       toast.error(err?.message ?? "تعذّر الحفظ");
     },
   });

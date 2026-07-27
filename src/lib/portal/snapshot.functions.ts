@@ -144,7 +144,7 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
     const patientId = patientRes.data?.id ?? null;
     const profile = profileRes.data;
 
-    const empty = { data: [] as unknown[], error: null };
+    const empty = { data: [] as any[], error: null };
 
     const [
       apptRes,
@@ -255,13 +255,13 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
         time: a.appointment_time,
         status: a.status,
         reason: a.reason,
-        doctor: (docRes.data as unknown) ?? null,
-        branch: (brRes.data as unknown) ?? null,
+        doctor: (docRes.data as any) ?? null,
+        branch: (brRes.data as any) ?? null,
       };
     }
 
     // Outstanding invoices — subtract completed payments
-    const invRows = (invoicesRes.data ?? []) as unknown[];
+    const invRows = (invoicesRes.data ?? []) as any[];
     const invIds = invRows.map((r) => r.id);
     const paidMap = new Map<string, number>();
     if (invIds.length) {
@@ -270,7 +270,7 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
         .select("invoice_id, amount, status")
         .in("invoice_id", invIds)
         .eq("status", "completed");
-      for (const p of (payRes.data ?? []) as unknown[]) {
+      for (const p of (payRes.data ?? []) as any[]) {
         paidMap.set(p.invoice_id, (paidMap.get(p.invoice_id) ?? 0) + Number(p.amount ?? 0));
       }
     }
@@ -291,7 +291,7 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
     const outstandingTotal = outstandingItems.reduce((s, i) => s + i.due_amount, 0);
 
     // Insurance approvals — group
-    const insRows = (insuranceRes.data ?? []) as unknown[];
+    const insRows = (insuranceRes.data ?? []) as any[];
     const insPending = insRows.filter(
       (r) => r.status === "pending" || r.status === "submitted",
     ).length;
@@ -299,13 +299,13 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
     const insNeedsInfo = insRows.filter((r) => r.status === "additional_info_required").length;
 
     // Service inquiries
-    const inqRows = (inquiriesRes.data ?? []) as unknown[];
+    const inqRows = (inquiriesRes.data ?? []) as any[];
     const openInquiries = inqRows.filter(
       (r) => !["closed", "resolved", "cancelled"].includes(String(r.internal_status ?? "")),
     );
 
     // Notifications
-    const notifRows = (notificationsRes.data ?? []) as unknown[];
+    const notifRows = (notificationsRes.data ?? []) as any[];
     const unreadNotifications = notifRows.filter((r) => !r.read_at).length;
 
     // Required actions
@@ -343,10 +343,10 @@ export const getPortalQuickSnapshot = createServerFn({ method: "GET" })
       });
     }
 
-    const reportRows = (reportsRes.data ?? []) as unknown[];
-    const rxRows = (prescriptionsRes.data ?? []) as unknown[];
-    const annRows = (announcementsRes.data ?? []) as unknown[];
-    const offerRows = (offersRes.data ?? []) as unknown[];
+    const reportRows = (reportsRes.data ?? []) as any[];
+    const rxRows = (prescriptionsRes.data ?? []) as any[];
+    const annRows = (announcementsRes.data ?? []) as any[];
+    const offerRows = (offersRes.data ?? []) as any[];
 
     return {
       nextAppointment,

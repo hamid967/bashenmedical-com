@@ -102,7 +102,7 @@ function PageEditor() {
     if (isNew) return;
     (async () => {
       try {
-        const row: unknown = await getFn({ data: { id } });
+        const row: any = await getFn({ data: { id } });
         setForm({
           slug: row.slug ?? "",
           title_ar: row.title_ar ?? "",
@@ -116,7 +116,7 @@ function PageEditor() {
           show_in_nav: !!row.show_in_nav,
           nav_order: row.nav_order ?? 0,
         });
-      } catch (e: unknown) {
+      } catch (e: any) {
         toast.error(e?.message ?? "تعذّر التحميل");
       } finally {
         setLoading(false);
@@ -133,7 +133,7 @@ function PageEditor() {
     try {
       const payload = { ...form, status: nextStatus ?? form.status };
       if (isNew) {
-        const row: unknown = await createFn({ data: payload });
+        const row: any = await createFn({ data: payload });
         toast.success("تم إنشاء الصفحة");
         navigate({ to: "/owner/pages/$id", params: { id: row.id } });
       } else {
@@ -141,7 +141,7 @@ function PageEditor() {
         toast.success("تم الحفظ");
         setForm((f) => ({ ...f, status: payload.status }));
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر الحفظ");
     } finally {
       setSaving(false);

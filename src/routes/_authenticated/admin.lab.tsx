@@ -251,7 +251,7 @@ function LabEditor({
   const [testType, setTestType] = useState(value?.test_type ?? "");
   const [summary, setSummary] = useState(value?.summary ?? "");
   const [status, setStatus] = useState<"pending" | "in_progress" | "released">(
-    (value?.status as unknown) ?? "pending",
+    (value?.status as any) ?? "pending",
   );
   const [reportDate, setReportDate] = useState(
     value?.report_date ?? new Date().toISOString().slice(0, 10),
@@ -333,7 +333,7 @@ function LabEditor({
                 />
                 {showPicker && patientQ.data?.rows?.length ? (
                   <ul className="absolute z-10 mt-1 w-full bg-background border rounded max-h-56 overflow-auto">
-                    {patientQ.data.rows.map((p: unknown) => (
+                    {patientQ.data.rows.map((p: any) => (
                       <li key={p.id}>
                         <button
                           className="w-full text-right px-3 py-2 hover:bg-muted text-sm"
@@ -388,7 +388,7 @@ function LabEditor({
               <label className="text-xs text-muted-foreground">الحالة</label>
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as unknown)}
+                onChange={(e) => setStatus(e.target.value as any)}
                 className="w-full px-3 py-2 rounded border bg-background text-sm"
               >
                 <option value="pending">قيد الانتظار</option>

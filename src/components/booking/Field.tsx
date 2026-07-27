@@ -30,7 +30,7 @@ export function Field({
     [error ? errorId : null, hint ? hintId : null].filter(Boolean).join(" ") || undefined;
 
   const enhanced = isValidElement(children)
-    ? cloneElement(children as ReactElement<unknown>, {
+    ? cloneElement(children as ReactElement<any>, {
         id,
         "aria-describedby": describedBy,
         "aria-required": required || undefined,

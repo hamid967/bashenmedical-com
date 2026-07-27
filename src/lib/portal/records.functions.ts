@@ -133,7 +133,7 @@ export const getMyMedicalRecords = createServerFn({ method: "GET" })
     const items: TimelineItem[] = [];
 
     for (const v of visitsRes.data ?? []) {
-      const doc = (v as unknown).doctors?.name_ar as string | undefined;
+      const doc = (v as any).doctors?.name_ar as string | undefined;
       items.push({
         id: `visit-${v.id}`,
         kind: "visit",

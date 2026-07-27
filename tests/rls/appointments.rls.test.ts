@@ -105,7 +105,7 @@ async function main() {
         appointment_time: "11:00",
         status: "confirmed", // trigger should force to 'new'
         notes: "attempted staff note", // trigger should NULL
-      } as unknown);
+      } as any);
       assert(!error, `insert failed: ${error?.message}`);
       const { data: row } = await admin
         .from("appointments")
@@ -122,7 +122,7 @@ async function main() {
         patient_phone: "12",
         appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
         appointment_time: "11:00",
-      } as unknown);
+      } as any);
       assert(error, "expected rejection");
     });
 
@@ -132,7 +132,7 @@ async function main() {
         patient_phone: "0512345678",
         appointment_date: "2000-01-01",
         appointment_time: "11:00",
-      } as unknown);
+      } as any);
       assert(error, "expected rejection");
     });
 

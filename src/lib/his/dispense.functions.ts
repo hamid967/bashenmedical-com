@@ -9,7 +9,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { assertHasRole } from "@/lib/admin/_guard";
 
-async function assertPharmacyAccess(ctx: { supabase: unknown; userId: string }) {
+async function assertPharmacyAccess(ctx: { supabase: any; userId: string }) {
   const [a, p] = await Promise.all([
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" }),
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "pharmacy" }),

@@ -6,7 +6,7 @@ import { assertOwnerOnly } from "./_access";
 const KIND = z.enum(["service", "page"]);
 const PERM = z.enum(["view", "edit", "manage"]);
 
-async function audit(supa: unknown, actor: string, action: string, record_id: string, meta: unknown) {
+async function audit(supa: any, actor: string, action: string, record_id: string, meta: any) {
   try {
     await supa.from("security_audit_log").insert({
       action,
@@ -30,12 +30,12 @@ export const listResources = createServerFn({ method: "GET" })
       supabaseAdmin.from("custom_pages").select("id,title,slug,status").order("title"),
     ]);
     return {
-      services: (services.data ?? []).map((s: unknown) => ({
+      services: (services.data ?? []).map((s: any) => ({
         id: s.id,
         label: s.name_ar || s.name_en || s.slug,
         slug: s.slug,
       })),
-      pages: (pages.data ?? []).map((p: unknown) => ({
+      pages: (pages.data ?? []).map((p: any) => ({
         id: p.id,
         label: p.title || p.slug,
         slug: p.slug,

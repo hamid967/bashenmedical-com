@@ -10,9 +10,9 @@ import { z } from "zod";
 
 type Role = "admin" | "super_admin" | "reception" | "doctor" | "pharmacy";
 
-async function getRoles(sb: unknown, userId: string): Promise<Role[]> {
+async function getRoles(sb: any, userId: string): Promise<Role[]> {
   const { data } = await sb.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: unknown) => r.role as Role);
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 function ensureStaff(roles: Role[]) {
   if (!roles.some((r) => (["admin", "super_admin", "reception"] as Role[]).includes(r)))
@@ -589,7 +589,7 @@ export const getReminderDeliveryStats = createServerFn({ method: "POST" })
       const st = r.send_status as keyof typeof totals;
       if (st in totals) totals[st]++;
       const ch = byChannelMap.get(r.channel as string);
-      if (ch && st in ch) (ch as unknown)[st]++;
+      if (ch && st in ch) (ch as any)[st]++;
       const key =
         bucket === "hour" ? String(r.created_at).slice(0, 13) : String(r.created_at).slice(0, 10);
       const b = bucketMap.get(key);
@@ -599,7 +599,7 @@ export const getReminderDeliveryStats = createServerFn({ method: "POST" })
       }
     }
 
-    const byChannel = CHANNELS.map((c) => ({ channel: c, ...(byChannelMap.get(c) as unknown) }));
+    const byChannel = CHANNELS.map((c) => ({ channel: c, ...(byChannelMap.get(c) as any) }));
     const byBucket = Array.from(bucketMap.entries())
       .sort(([a], [b]) => (a < b ? -1 : 1))
       .map(([label, v]) => ({ label, ...v }));

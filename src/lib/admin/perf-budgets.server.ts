@@ -97,8 +97,8 @@ export async function runPerfBudgetSweep(): Promise<PerfSweepResult> {
       }
       // Restrict to exact pathname matches (defence against ILIKE substrings).
       const values = (rows ?? [])
-        .filter((r: unknown) => pathnameOf(r.url ?? "") === b.path)
-        .map((r: unknown) => Number(r.value))
+        .filter((r: any) => pathnameOf(r.url ?? "") === b.path)
+        .map((r: any) => Number(r.value))
         .filter((v) => Number.isFinite(v))
         .sort((a, b) => a - b);
       if (values.length < b.min_samples) continue;
@@ -154,7 +154,7 @@ export async function runPerfBudgetSweep(): Promise<PerfSweepResult> {
         webhook_status = res.status;
         if (res.ok) result.webhook_sent++;
         else result.errors.push(`webhook ${res.status} for ${b.path}/${b.metric}`);
-      } catch (e: unknown) {
+      } catch (e: any) {
         result.errors.push(`webhook error ${b.path}/${b.metric}: ${e?.message ?? "unknown"}`);
       }
       await supabaseAdmin
@@ -164,7 +164,7 @@ export async function runPerfBudgetSweep(): Promise<PerfSweepResult> {
           email_status: notify.email_recipients?.length ? "queued" : null,
         })
         .eq("id", inserted.id);
-    } catch (e: unknown) {
+    } catch (e: any) {
       result.errors.push(`${b.path}/${b.metric}: ${e?.message ?? "unknown"}`);
     }
   }

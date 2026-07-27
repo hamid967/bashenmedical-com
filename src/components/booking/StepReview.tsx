@@ -25,9 +25,9 @@ export function StepReview({
 }: {
   lang: "ar" | "en";
   state: State;
-  branches: unknown[];
-  specialties: unknown[];
-  doctors: unknown[];
+  branches: any[];
+  specialties: any[];
+  doctors: any[];
   errorMsg: string | null;
   errorKind?: Exclude<BookingSubmitKind, "success">;
   errorCode?: string | null;
@@ -41,7 +41,7 @@ export function StepReview({
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
   const spec = specialties.find((s) => s.id === state.specialtyId);
-  const doc = doctors.find((d: unknown) => d.id === state.doctorId);
+  const doc = doctors.find((d: any) => d.id === state.doctorId);
   const est = state.patient.insuranceEstimate;
   const isInsurance = state.patient.payerType === "insurance";
   const rows = [

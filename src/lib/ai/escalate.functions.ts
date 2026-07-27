@@ -58,9 +58,9 @@ export const escalateAiConversation = createServerFn({ method: "POST" })
 
     return {
       ok: true,
-      inboxItemId: (row as unknown).inbox_item_id as string,
-      requestNumber: (row as unknown).request_number as string,
-      incidentId: (row as unknown).incident_id as string,
+      inboxItemId: (row as any).inbox_item_id as string,
+      requestNumber: (row as any).request_number as string,
+      incidentId: (row as any).incident_id as string,
     };
   });
 
@@ -91,7 +91,7 @@ export const listAiSafetyIncidents = createServerFn({ method: "GET" })
       if (/not found/i.test(msg)) throw new Error("conversation_not_found");
       throw new Error("list_failed");
     }
-    return (rows ?? []).map((r: unknown) => ({
+    return (rows ?? []).map((r: any) => ({
       id: r.id,
       kind: r.kind,
       severity: r.severity,
@@ -129,7 +129,7 @@ export const listAiIncidentEvents = createServerFn({ method: "GET" })
       if (/not found/i.test(msg)) throw new Error("incident_not_found");
       throw new Error("list_failed");
     }
-    return (rows ?? []).map((r: unknown) => ({
+    return (rows ?? []).map((r: any) => ({
       id: r.id,
       itemId: r.item_id,
       eventType: r.event_type,

@@ -183,7 +183,7 @@ export function MediaPicker({
     if (file) handleFile(file);
   };
 
-  const openEditorFromLibrary = (row: unknown) => {
+  const openEditorFromLibrary = (row: any) => {
     if (!row.is_image) {
       onSelect({
         id: row.id,
@@ -325,7 +325,7 @@ export function MediaPicker({
               )}
               {query.data && query.data.rows.length > 0 && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-1">
-                  {query.data.rows.map((row: unknown) => {
+                  {query.data.rows.map((row: any) => {
                     const active = value && row.url === value;
                     return (
                       <button

@@ -47,7 +47,7 @@ function SettingsPage() {
 
   useEffect(() => {
     if (q.data?.settings) {
-      const s = q.data.settings as unknown;
+      const s = q.data.settings as any;
       setForm({
         name_ar: s.name_ar ?? "",
         name_en: s.name_en ?? "",

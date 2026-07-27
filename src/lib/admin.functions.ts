@@ -4,9 +4,9 @@ import { z } from "zod";
 
 type Role = "admin" | "reception" | "pharmacy" | "super_admin";
 
-async function getRoles(supabase: unknown, userId: string): Promise<Role[]> {
+async function getRoles(supabase: any, userId: string): Promise<Role[]> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: unknown) => r.role as Role);
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 
 function ensureRole(roles: Role[], allowed: Role[]) {
@@ -22,7 +22,7 @@ function ensureRole(roles: Role[], allowed: Role[]) {
  * Handles: RLS denials, check-constraint violations, FK/unique conflicts,
  * missing rows, and network timeouts. Keeps raw details in the log server-side.
  */
-function humanizeSupabaseError(err: unknown, fallback = "تعذّر تنفيذ الطلب."): string {
+function humanizeSupabaseError(err: any, fallback = "تعذّر تنفيذ الطلب."): string {
   if (!err) return fallback;
   const code: string | undefined = err.code ?? err.details?.code;
   const msg: string = String(err.message ?? err.details ?? "");
@@ -309,7 +309,7 @@ export const getAdminKpis = createServerFn({ method: "GET" })
 
     // Fetch current + previous windows in parallel (only tables the user's role touches).
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sbAny: unknown = sb;
+    const sbAny: any = sb;
     const q = (table: string): Promise<{ data: Array<{ created_at: string | null }> | null }> =>
       sbAny.from(table).select("created_at").gte("created_at", prevStartIso).limit(20000);
 
@@ -439,7 +439,7 @@ export const updateAppointmentStatus = createServerFn({ method: "POST" })
     ) => {
       try {
         await sb.rpc(
-          "log_security_event" as unknown,
+          "log_security_event" as any,
           {
             _action: "appointment_status_update_denied",
             _appointment_id: data.id,
@@ -447,7 +447,7 @@ export const updateAppointmentStatus = createServerFn({ method: "POST" })
             _to_status: data.status,
             _reason: denyReason,
             _metadata: { actor: actorId, requested_reason: data.reason ?? null, ...(extra ?? {}) },
-          } as unknown,
+          } as any,
         );
       } catch (e) {
         console.error("[security-audit] failed to log denial", e);
@@ -456,7 +456,7 @@ export const updateAppointmentStatus = createServerFn({ method: "POST" })
 
     // 1) Authenticated user (middleware) + role gate
     const roles = (await getRoles(sb, actorId)) as StaffRole[];
-    if (!roles.some((r) => (["admin", "reception", "super_admin"] as unknown[]).includes(r as unknown))) {
+    if (!roles.some((r) => (["admin", "reception", "super_admin"] as any[]).includes(r as any))) {
       await logDenied("role_denied", null, { roles });
       throw new Error("ليست لديك الصلاحية لتنفيذ هذا الإجراء.");
     }
@@ -484,7 +484,7 @@ export const updateAppointmentStatus = createServerFn({ method: "POST" })
       data.reason,
     );
     if (!check.ok) {
-      await logDenied((check as unknown).code ?? "transition_denied", current.status, {
+      await logDenied((check as any).code ?? "transition_denied", current.status, {
         message: check.message,
         roles,
       });
@@ -494,12 +494,12 @@ export const updateAppointmentStatus = createServerFn({ method: "POST" })
 
     // 5) Perform the update via RPC (carries reason into the audit trigger)
     const { error } = await sb.rpc(
-      "update_appointment_status" as unknown,
+      "update_appointment_status" as any,
       {
         _id: data.id,
         _status: data.status,
         _reason: data.reason ?? null,
-      } as unknown,
+      } as any,
     );
     if (error) {
       await logDenied("rpc_error", current.status, { code: error.code });
@@ -523,12 +523,12 @@ export const updateAppointmentNotes = createServerFn({ method: "POST" })
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin", "reception"]);
     const { error } = await context.supabase.rpc(
-      "update_appointment_notes" as unknown,
+      "update_appointment_notes" as any,
       {
         _id: data.id,
         _notes: data.notes,
         _reason: data.reason ?? null,
-      } as unknown,
+      } as any,
     );
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
@@ -548,7 +548,7 @@ export const listAppointmentAudit = createServerFn({ method: "GET" })
       .limit(200);
     if (error) throw new Error(humanizeSupabaseError(error));
     // Enrich with actor email (best-effort; requires admin)
-    const ids = Array.from(new Set((rows ?? []).map((r: unknown) => r.changed_by).filter(Boolean)));
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)));
     const emailById = new Map<string, string>();
     if (ids.length) {
       const { data: profs } = await context.supabase
@@ -557,7 +557,7 @@ export const listAppointmentAudit = createServerFn({ method: "GET" })
         .in("id", ids);
       for (const p of profs ?? []) emailById.set(p.id, p.full_name ?? "");
     }
-    return (rows ?? []).map((r: unknown) => ({
+    return (rows ?? []).map((r: any) => ({
       ...r,
       changed_by_name: r.changed_by ? (emailById.get(r.changed_by) ?? null) : null,
     }));
@@ -667,7 +667,7 @@ export const createDoctor = createServerFn({ method: "POST" })
     const payload = { ...data, photo_url: data.photo_url || null };
     const { data: row, error } = await context.supabase
       .from("doctors")
-      .insert(payload as unknown)
+      .insert(payload as any)
       .select()
       .single();
     if (error) throw new Error(humanizeSupabaseError(error));
@@ -681,7 +681,7 @@ export const updateDoctor = createServerFn({ method: "POST" })
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
     const { id, ...rest } = data;
-    const payload: unknown = { ...rest };
+    const payload: any = { ...rest };
     if ("photo_url" in payload) payload.photo_url = payload.photo_url || null;
     const { error } = await context.supabase.from("doctors").update(payload).eq("id", id);
     if (error) throw new Error(humanizeSupabaseError(error));
@@ -736,7 +736,7 @@ export const createSpecialty = createServerFn({ method: "POST" })
     ensureRole(roles, ["admin"]);
     const { data: row, error } = await context.supabase
       .from("specialties")
-      .insert(data as unknown)
+      .insert(data as any)
       .select()
       .single();
     if (error) throw new Error(humanizeSupabaseError(error));
@@ -752,7 +752,7 @@ export const updateSpecialty = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     const { error } = await context.supabase
       .from("specialties")
-      .update(rest as unknown)
+      .update(rest as any)
       .eq("id", id);
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
@@ -804,7 +804,7 @@ export const createAvailability = createServerFn({ method: "POST" })
     if (data.start_time >= data.end_time) throw new Error("وقت البداية يجب أن يسبق النهاية");
     const { data: row, error } = await context.supabase
       .from("availability")
-      .insert(data as unknown)
+      .insert(data as any)
       .select()
       .single();
     if (error) throw new Error(humanizeSupabaseError(error));
@@ -865,7 +865,7 @@ export const listReminderPreferenceAudit = createServerFn({ method: "GET" })
     if (error) throw new Error(humanizeSupabaseError(error));
 
     // Enrich actor names (best-effort).
-    const ids = Array.from(new Set((rows ?? []).map((r: unknown) => r.changed_by).filter(Boolean)));
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.changed_by).filter(Boolean)));
     const nameById = new Map<string, string>();
     if (ids.length) {
       const { data: profs } = await context.supabase
@@ -876,7 +876,7 @@ export const listReminderPreferenceAudit = createServerFn({ method: "GET" })
     }
 
     return {
-      rows: (rows ?? []).map((r: unknown) => ({
+      rows: (rows ?? []).map((r: any) => ({
         ...r,
         changed_by_name: r.changed_by ? (nameById.get(r.changed_by) ?? null) : null,
       })),
@@ -953,7 +953,7 @@ export const getReminderPreferenceStats = createServerFn({ method: "GET" })
 
     const apptsTotal = total.count ?? 0;
     const distinctAppts = new Set<string>(
-      (auditApptIds.data ?? []).map((r: unknown) => r.appointment_id),
+      (auditApptIds.data ?? []).map((r: any) => r.appointment_id),
     ).size;
     const pct = (n: number, d: number) => (d > 0 ? Math.round((n / d) * 1000) / 10 : 0);
 
@@ -1020,11 +1020,11 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
     let matching = apptRows ?? [];
     if (data.phone) {
       const digits = data.phone.replace(/\D/g, "");
-      matching = matching.filter((a: unknown) => (a.patient_phone ?? "").replace(/\D/g, "") === digits);
+      matching = matching.filter((a: any) => (a.patient_phone ?? "").replace(/\D/g, "") === digits);
     }
     if (data.ref) {
       const ref = data.ref.toLowerCase().replace(/-/g, "");
-      matching = matching.filter((a: unknown) => a.id.toLowerCase().replace(/-/g, "").startsWith(ref));
+      matching = matching.filter((a: any) => a.id.toLowerCase().replace(/-/g, "").startsWith(ref));
     }
 
     const header =
@@ -1035,7 +1035,7 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
     }
 
     // 2) Fetch audit rows for those appointments, optional date range.
-    const ids = matching.map((a: unknown) => a.id);
+    const ids = matching.map((a: any) => a.id);
     let auditQ = sb
       .from("reminder_preference_audit")
       .select("*")
@@ -1049,7 +1049,7 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
 
     // 3) Enrich actor names.
     const actorIds = Array.from(
-      new Set((audit ?? []).map((r: unknown) => r.changed_by).filter(Boolean)),
+      new Set((audit ?? []).map((r: any) => r.changed_by).filter(Boolean)),
     );
     const nameById = new Map<string, string>();
     if (actorIds.length) {
@@ -1057,14 +1057,14 @@ export const exportReminderPreferenceAuditCsv = createServerFn({ method: "POST" 
       for (const p of profs ?? []) nameById.set(p.id, p.full_name ?? "");
     }
 
-    const apptById = new Map<string, unknown>(matching.map((a: unknown) => [a.id, a]));
-    const esc = (v: unknown): string => {
+    const apptById = new Map<string, any>(matching.map((a: any) => [a.id, a]));
+    const esc = (v: any): string => {
       if (v === null || v === undefined) return "";
       const s = String(v);
       return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const body = (audit ?? [])
-      .map((r: unknown) => {
+      .map((r: any) => {
         const a = apptById.get(r.appointment_id) ?? {};
         return [
           r.changed_at,
@@ -1129,7 +1129,7 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
       }
       const { data: appts, error: apErr } = await apQ;
       if (apErr) throw new Error(humanizeSupabaseError(apErr));
-      let ids = (appts ?? []).map((a: unknown) => a.id as string);
+      let ids = (appts ?? []).map((a: any) => a.id as string);
       if (data.ref) {
         const cleanRef = data.ref.replace(/[^a-fA-F0-9]/g, "").toLowerCase();
         if (cleanRef.length > 0) {
@@ -1159,9 +1159,9 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
     if (error) throw new Error(humanizeSupabaseError(error));
 
     const appointmentIds = Array.from(
-      new Set((rows ?? []).map((r: unknown) => r.appointment_id).filter(Boolean)),
+      new Set((rows ?? []).map((r: any) => r.appointment_id).filter(Boolean)),
     );
-    const actorIds = Array.from(new Set((rows ?? []).map((r: unknown) => r.actor).filter(Boolean)));
+    const actorIds = Array.from(new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)));
 
     const [apptsRes, profilesRes] = await Promise.all([
       appointmentIds.length
@@ -1169,18 +1169,18 @@ export const listSecurityAuditLog = createServerFn({ method: "POST" })
             .from("appointments")
             .select("id, patient_name, patient_phone, appointment_date, appointment_time")
             .in("id", appointmentIds)
-        : Promise.resolve({ data: [], error: null } as unknown),
+        : Promise.resolve({ data: [], error: null } as any),
       actorIds.length
         ? supabase.from("profiles").select("id, full_name, phone").in("id", actorIds)
-        : Promise.resolve({ data: [], error: null } as unknown),
+        : Promise.resolve({ data: [], error: null } as any),
     ]);
 
-    const apptMap = new Map<string, unknown>();
-    for (const a of (apptsRes.data ?? []) as unknown[]) apptMap.set(a.id, a);
-    const profileMap = new Map<string, unknown>();
-    for (const p of (profilesRes.data ?? []) as unknown[]) profileMap.set(p.id, p);
+    const apptMap = new Map<string, any>();
+    for (const a of (apptsRes.data ?? []) as any[]) apptMap.set(a.id, a);
+    const profileMap = new Map<string, any>();
+    for (const p of (profilesRes.data ?? []) as any[]) profileMap.set(p.id, p);
 
-    const items = (rows ?? []).map((r: unknown) => ({
+    const items = (rows ?? []).map((r: any) => ({
       id: r.id,
       action: r.action,
       actor: r.actor,
@@ -1214,7 +1214,7 @@ export const listSecurityAuditActions = createServerFn({ method: "GET" })
     ensureRole(roles, ["admin"]);
     const { data, error } = await supabase.from("security_audit_log").select("action").limit(1000);
     if (error) throw new Error(humanizeSupabaseError(error));
-    const actions = Array.from(new Set((data ?? []).map((r: unknown) => r.action))).sort();
+    const actions = Array.from(new Set((data ?? []).map((r: any) => r.action))).sort();
     return { actions };
   });
 
@@ -1250,7 +1250,7 @@ export const createFaq = createServerFn({ method: "POST" })
     ensureRole(roles, ["admin"]);
     const { data: row, error } = await context.supabase
       .from("faqs")
-      .insert(data as unknown)
+      .insert(data as any)
       .select()
       .single();
     if (error) throw new Error(humanizeSupabaseError(error));
@@ -1266,7 +1266,7 @@ export const updateFaq = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     const { error } = await context.supabase
       .from("faqs")
-      .update(rest as unknown)
+      .update(rest as any)
       .eq("id", id);
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
@@ -1321,7 +1321,7 @@ export const createAboutSection = createServerFn({ method: "POST" })
     ensureRole(roles, ["admin"]);
     const { data: row, error } = await context.supabase
       .from("about_sections")
-      .insert(data as unknown)
+      .insert(data as any)
       .select()
       .single();
     if (error) throw new Error(humanizeSupabaseError(error));
@@ -1337,7 +1337,7 @@ export const updateAboutSection = createServerFn({ method: "POST" })
     const { id, ...rest } = data;
     const { error } = await context.supabase
       .from("about_sections")
-      .update(rest as unknown)
+      .update(rest as any)
       .eq("id", id);
     if (error) throw new Error(humanizeSupabaseError(error));
     return { ok: true };
@@ -1464,7 +1464,7 @@ export const createBranch = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin"]);
-    const payload: unknown = { ...data };
+    const payload: any = { ...data };
     if (payload.email === "") payload.email = null;
     if (payload.hero_image_url === "") payload.hero_image_url = null;
     const { data: row, error } = await context.supabase
@@ -1499,7 +1499,7 @@ export const createAppointmentAdmin = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roles = await getRoles(context.supabase, context.userId);
     ensureRole(roles, ["admin", "reception"]);
-    const payload: unknown = {
+    const payload: any = {
       patient_name: data.patient_name,
       patient_phone: data.patient_phone,
       national_id: data.national_id ?? null,

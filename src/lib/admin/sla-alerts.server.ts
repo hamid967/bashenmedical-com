@@ -83,7 +83,7 @@ export async function runSweep(): Promise<SweepResult> {
   result.scanned = items?.length ?? 0;
   if (!items?.length) return result;
 
-  const ids = items.map((i: unknown) => i.id);
+  const ids = items.map((i: any) => i.id);
   const { data: events } = await supabaseAdmin
     .from("inbox_events")
     .select("item_id, action, created_at")
@@ -102,18 +102,18 @@ export async function runSweep(): Promise<SweepResult> {
     .from("sla_alert_log")
     .select("item_id, kind")
     .in("item_id", ids);
-  const alreadyAlerted = new Set((alerted ?? []).map((a: unknown) => `${a.item_id}:${a.kind}`));
+  const alreadyAlerted = new Set((alerted ?? []).map((a: any) => `${a.item_id}:${a.kind}`));
 
   const now = Date.now();
   type Breach = {
-    item: unknown;
+    item: any;
     kind: "response" | "resolution";
     overdueMs: number;
     thresholdMin: number;
   };
   const breaches: Breach[] = [];
 
-  for (const it of items as unknown[]) {
+  for (const it of items as any[]) {
     const priority = it.priority as Priority;
     if (PRIORITY_RANK[priority] < minRank) continue;
     const t = SLA_THRESHOLDS[priority];
@@ -182,7 +182,7 @@ export async function runSweep(): Promise<SweepResult> {
         webhook_status = res.status;
         if (res.ok) result.webhook_sent++;
         else result.errors.push(`webhook ${res.status} for ${b.item.request_number}`);
-      } catch (e: unknown) {
+      } catch (e: any) {
         result.errors.push(`webhook error ${b.item.request_number}: ${e?.message ?? "unknown"}`);
       }
     }

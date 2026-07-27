@@ -104,8 +104,8 @@ export const getAdminWhatsappRequest = createServerFn({ method: "GET" })
       .limit(50);
     if (uErr) throw new Error(uErr.message);
 
-    let delivery: unknown[] = [];
-    const phone = (row as unknown).mobile_e164 || (row as unknown).mobile_number;
+    let delivery: any[] = [];
+    const phone = (row as any).mobile_e164 || (row as any).mobile_number;
     if (phone) {
       const { data: dRows } = await context.supabase
         .from("notification_delivery_logs")

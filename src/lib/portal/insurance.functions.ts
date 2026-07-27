@@ -327,7 +327,7 @@ export const verifyMyInsurance = createServerFn({ method: "POST" })
   });
 
 async function logAttempt(
-  supabase: unknown,
+  supabase: any,
   userId: string,
   data: z.infer<typeof VerifySchema>,
   policy: string,
@@ -400,7 +400,7 @@ export const attachVerificationToAppointment = createServerFn({ method: "POST" }
       .eq("id", data.appointment_id)
       .maybeSingle();
     if (apptErr) throw new Error(apptErr.message);
-    const ownerId = (appt as unknown)?.patients?.user_id ?? null;
+    const ownerId = (appt as any)?.patients?.user_id ?? null;
     if (!appt || (ownerId && ownerId !== userId)) {
       throw new Error("لا يمكن ربط هذا التحقق بالموعد.");
     }

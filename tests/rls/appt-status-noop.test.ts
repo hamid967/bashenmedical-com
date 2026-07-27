@@ -107,7 +107,7 @@ async function run() {
         // reason is required only when NEW status is cancel/no_show AND the
         // status changes; for a no-op the trigger short-circuits before the
         // enforcement, so passing null is safe here too.
-        const { error } = await client.rpc("update_appointment_status" as unknown, {
+        const { error } = await client.rpc("update_appointment_status" as any, {
           _id: id,
           _status: s,
           _reason: null,
@@ -123,14 +123,14 @@ async function run() {
       const id = await newAppt("new");
       created.push(id);
       // First: no-op
-      await recepC.rpc("update_appointment_status" as unknown, {
+      await recepC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "new",
         _reason: null,
       });
       assert((await auditOf(id)).length === 0, "no-op leaked an audit row");
       // Then: real transition
-      const { error } = await recepC.rpc("update_appointment_status" as unknown, {
+      const { error } = await recepC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "confirmed",
         _reason: null,

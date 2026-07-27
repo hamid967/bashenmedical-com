@@ -19,7 +19,7 @@ export function StepDoctor({
   alternatives,
 }: {
   lang: "ar" | "en";
-  doctors: unknown[];
+  doctors: any[];
   value: string | null;
   onPick: (v: string) => void;
   onPickAny?: () => void;

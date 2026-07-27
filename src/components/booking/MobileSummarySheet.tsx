@@ -22,9 +22,9 @@ export function MobileSummarySheet({
 }: {
   lang: "ar" | "en";
   state: State;
-  branches: unknown[];
-  specialties: unknown[];
-  doctors: unknown[];
+  branches: any[];
+  specialties: any[];
+  doctors: any[];
   onEdit: (step: number) => void;
 }) {
   const { t } = useTranslation("booking");

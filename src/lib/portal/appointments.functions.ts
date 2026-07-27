@@ -11,7 +11,7 @@ import { assertPatientAccess } from "@/lib/patient/authz.server";
 import { z } from "zod";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function resolveScope(supabase: unknown, userId: string) {
+async function resolveScope(supabase: any, userId: string) {
   const [{ data: patient }, { data: profile }] = await Promise.all([
     supabase.from("patients").select("id, mrn").eq("profile_id", userId).maybeSingle(),
     supabase.from("profiles").select("id, phone").eq("id", userId).maybeSingle(),
@@ -24,7 +24,7 @@ async function resolveScope(supabase: unknown, userId: string) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function applyScope(query: unknown, scope: { patientId: string | null; phone: string | null }) {
+function applyScope(query: any, scope: { patientId: string | null; phone: string | null }) {
   if (scope.patientId) return query.eq("patient_id", scope.patientId);
   if (scope.phone) return query.eq("patient_phone", scope.phone);
   return query.eq("patient_id", "00000000-0000-0000-0000-000000000000");
@@ -126,11 +126,11 @@ export const listMyAppointments = createServerFn({ method: "POST" })
     ]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const docMap = new Map<string, unknown>((docsRes.data ?? []).map((d: unknown) => [d.id, d]));
+    const docMap = new Map<string, any>((docsRes.data ?? []).map((d: any) => [d.id, d]));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const brMap = new Map<string, unknown>((brRes.data ?? []).map((b: unknown) => [b.id, b]));
+    const brMap = new Map<string, any>((brRes.data ?? []).map((b: any) => [b.id, b]));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const spMap = new Map<string, unknown>((specRes.data ?? []).map((s: unknown) => [s.id, s]));
+    const spMap = new Map<string, any>((specRes.data ?? []).map((s: any) => [s.id, s]));
 
     return {
       scope,
@@ -146,7 +146,7 @@ export const listMyAppointments = createServerFn({ method: "POST" })
 /* ------------------------ ownership guard for actions --------------------- */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function loadOwnedAppointment(supabase: unknown, userId: string, id: string) {
+async function loadOwnedAppointment(supabase: any, userId: string, id: string) {
   const scope = await resolveScope(supabase, userId);
   const { data, error } = await supabase
     .from("appointments")
@@ -404,8 +404,8 @@ export const performSelfCheckIn = createServerFn({ method: "POST" })
         "queue_number, appointment_id, appointments!inner(appointment_date, doctor_id, branch_id)",
       )
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .eq("appointments.appointment_date" as unknown, appt.appointment_date)
-      .eq("appointments.doctor_id" as unknown, appt.doctor_id ?? "")
+      .eq("appointments.appointment_date" as any, appt.appointment_date)
+      .eq("appointments.doctor_id" as any, appt.doctor_id ?? "")
       .order("queue_number", { ascending: false })
       .limit(1);
     const nextQueue =

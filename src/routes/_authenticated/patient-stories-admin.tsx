@@ -88,7 +88,7 @@ function PatientStoriesAdminPage() {
       );
       qc.invalidateQueries({ queryKey: ["patient-stories-admin"] });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل التحديث"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل التحديث"),
   });
 
   return (

@@ -36,29 +36,29 @@ export async function runCmsPublishSweep(): Promise<CmsPublishResult> {
           published_at: now,
           scheduled_at: null,
         })
-        .eq("id", (entry as unknown).id);
+        .eq("id", (entry as any).id);
       if (uerr) throw new Error(uerr.message);
 
       await supabaseAdmin
         .from("cms_schedule")
         .update({ job_state: "done", ran_at: now })
-        .eq("entry_id", (entry as unknown).id)
+        .eq("entry_id", (entry as any).id)
         .eq("job_state", "pending");
 
       await supabaseAdmin.from("cms_audit").insert({
-        entry_id: (entry as unknown).id,
-        version_id: (entry as unknown).current_version_id,
+        entry_id: (entry as any).id,
+        version_id: (entry as any).current_version_id,
         actor_id: null,
         action: "publish_scheduled",
         metadata: { source: "cron" },
       });
       out.published++;
-    } catch (e: unknown) {
-      out.errors.push(`${(entry as unknown).id}: ${e?.message ?? "unknown"}`);
+    } catch (e: any) {
+      out.errors.push(`${(entry as any).id}: ${e?.message ?? "unknown"}`);
       await supabaseAdmin
         .from("cms_schedule")
         .update({ job_state: "error", ran_at: now, error: e?.message ?? "unknown" })
-        .eq("entry_id", (entry as unknown).id)
+        .eq("entry_id", (entry as any).id)
         .eq("job_state", "pending");
     }
   }

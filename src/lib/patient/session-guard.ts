@@ -38,7 +38,7 @@ function currentNext(): string {
 let redirecting = false;
 
 export async function signalPatientSessionExpired(
-  router: Router<unknown, unknown, unknown, unknown>,
+  router: Router<any, any, any, any>,
   queryClient: QueryClient,
   opts?: { next?: string; skipSignOut?: boolean },
 ) {
@@ -77,7 +77,7 @@ export async function signalPatientSessionExpired(
  * and routes the user to the Session Expired state.
  */
 export function usePatientSessionGuard(
-  router: Router<unknown, unknown, unknown, unknown>,
+  router: Router<any, any, any, any>,
   queryClient: QueryClient,
 ) {
   const mounted = useRef(false);
