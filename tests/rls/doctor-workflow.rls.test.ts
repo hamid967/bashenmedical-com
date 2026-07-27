@@ -218,21 +218,18 @@ async function main() {
     assert(error, "anon was able to submit national_id — regression!");
   });
 
-  await test("anon INSERT without national_id still works", async () => {
-    const { data, error } = await anon
-      .from("appointments")
-      .insert({
-        patient_name: "Guest",
-        patient_phone: "+966500000010",
-        appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
-        appointment_time: "12:00",
-        status: "new",
-      })
-      .select("id")
-      .single();
-    assert(!error, error?.message ?? "");
-    assert(data.id, "no row returned");
-    await admin.from("appointments").delete().eq("id", data.id);
+  await test("anon direct INSERT is blocked (booking goes via RPC book_appointment_atomic)", async () => {
+    const { error } = await anon.from("appointments").insert({
+      patient_name: "Guest",
+      patient_phone: "+966500000010",
+      appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+      appointment_time: "12:00",
+      status: "new",
+    });
+    // Expected: policy short-circuits to _appointment_belongs_to_me which is
+    // not executable by anon. Real guest booking uses the SECURITY DEFINER
+    // RPC path, not direct table INSERT.
+    assert(error, "anon direct table INSERT should not be reachable — use RPC");
   });
 
   // Cleanup
