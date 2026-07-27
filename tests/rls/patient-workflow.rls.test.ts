@@ -116,7 +116,13 @@ async function verifyProfilePhone(userId: string, phone: string) {
   if (error) throw error;
 }
 
-async function seedAppointmentForPhone(phone: string) {
+async function anyDoctorId(): Promise<string> {
+  const { data, error } = await admin.from("doctors").select("id").limit(1).single();
+  if (error) throw error;
+  return data.id as string;
+}
+
+async function seedAppointmentForPhone(phone: string, doctorId: string) {
   // Leave `patient_id` NULL so RLS falls through to the phone-verified
   // ownership branch (`_appointment_belongs_to_me`). The FK on patient_id
   // targets `patients.id`, not `auth.uid`, so the equality branch of the
@@ -126,6 +132,7 @@ async function seedAppointmentForPhone(phone: string) {
     .insert({
       patient_name: "Appt " + Date.now(),
       patient_phone: phone,
+      doctor_id: doctorId,
       appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
       appointment_time: "09:30",
       status: "new",
