@@ -8545,6 +8545,60 @@ export type Database = {
         Args: { _id: string; _reply: string }
         Returns: undefined
       }
+      reschedule_appointment_atomic: {
+        Args: {
+          _appointment_id: string
+          _new_date: string
+          _new_time: string
+          _reason: string
+        }
+        Returns: {
+          appointment_date: string
+          appointment_time: string
+          arrived_at: string | null
+          booked_for_dependent_id: string | null
+          booking_source: Database["public"]["Enums"]["booking_source"]
+          branch_id: string | null
+          called_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          doctor_id: string | null
+          estimated_cost_sar: number | null
+          estimated_wait_min: number | null
+          gender: string | null
+          id: string
+          idempotency_key: string | null
+          insurance_coverage_percent: number | null
+          insurance_member_id: string | null
+          insurance_policy_number: string | null
+          insurance_provider_id: string | null
+          insurance_status: string
+          is_demo: boolean
+          national_id: string | null
+          no_show_risk: number | null
+          notes: string | null
+          patient_email: string | null
+          patient_id: string | null
+          patient_name: string
+          patient_phone: string
+          patient_share_sar: number | null
+          reason: string | null
+          reference_number: string | null
+          reminder_24h: boolean
+          reminder_2h: boolean
+          reminder_offsets_minutes: number[]
+          specialty_id: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          updated_at: string
+          whatsapp_opt_in: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reschedule_appointment_by_ref: {
         Args: {
           _new_date: string
@@ -8666,6 +8720,60 @@ export type Database = {
           status: string
           title: string
         }[]
+      }
+      transition_appointment_status: {
+        Args: {
+          _appointment_id: string
+          _metadata?: Json
+          _reason?: string
+          _to_status: Database["public"]["Enums"]["appointment_status"]
+        }
+        Returns: {
+          appointment_date: string
+          appointment_time: string
+          arrived_at: string | null
+          booked_for_dependent_id: string | null
+          booking_source: Database["public"]["Enums"]["booking_source"]
+          branch_id: string | null
+          called_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          doctor_id: string | null
+          estimated_cost_sar: number | null
+          estimated_wait_min: number | null
+          gender: string | null
+          id: string
+          idempotency_key: string | null
+          insurance_coverage_percent: number | null
+          insurance_member_id: string | null
+          insurance_policy_number: string | null
+          insurance_provider_id: string | null
+          insurance_status: string
+          is_demo: boolean
+          national_id: string | null
+          no_show_risk: number | null
+          notes: string | null
+          patient_email: string | null
+          patient_id: string | null
+          patient_name: string
+          patient_phone: string
+          patient_share_sar: number | null
+          reason: string | null
+          reference_number: string | null
+          reminder_24h: boolean
+          reminder_2h: boolean
+          reminder_offsets_minutes: number[]
+          specialty_id: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          updated_at: string
+          whatsapp_opt_in: boolean
+        }
+        SetofOptions: {
+          from: "*"
+          to: "appointments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       transition_insurance_approval: {
         Args: {
