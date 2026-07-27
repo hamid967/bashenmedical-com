@@ -122,7 +122,7 @@ async function anyDoctorId(): Promise<string> {
   return data.id as string;
 }
 
-async function seedAppointmentForPhone(phone: string, doctorId: string) {
+async function seedAppointmentForPhone(phone: string, doctorId: string, time: string) {
   // Leave `patient_id` NULL so RLS falls through to the phone-verified
   // ownership branch (`_appointment_belongs_to_me`). The FK on patient_id
   // targets `patients.id`, not `auth.uid`, so the equality branch of the
