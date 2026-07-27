@@ -66,7 +66,7 @@ export type ReconciliationSummary = {
 
 export const getDailyReconciliation = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => schema.parse(d ?? {}))
+  .validator((d: any) => schema.parse(d ?? {}))
   .handler(
     async ({
       data,
@@ -110,7 +110,7 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
       }
       const { data: invoices, error: invErr } = await invQ;
       if (invErr) throw new Error(invErr.message);
-      const invoiceRows = (invoices ?? []) as unknown[];
+      const invoiceRows = (invoices ?? []) as any[];
 
       if (invoiceRows.length === 0) {
         // Still return NPHIES totals for context.
@@ -131,7 +131,7 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
           paymentsByInvoice.set(p.invoice_id, cur);
         }
         // Refunds
-        const paymentIds = (pays ?? []).map((p: unknown) => p.id).filter(Boolean);
+        const paymentIds = (pays ?? []).map((p: any) => p.id).filter(Boolean);
         // refunds table linked via payment_id
         const { data: refunds } = await context.supabase
           .from("refunds")
@@ -142,7 +142,7 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
           );
         for (const rf of refunds ?? []) {
           if (rf.status !== "succeeded") continue;
-          const invId = (rf as unknown).payments?.invoice_id;
+          const invId = (rf as any).payments?.invoice_id;
           if (!invId) continue;
           const cur = paymentsByInvoice.get(invId) ?? { collected: 0, refunded: 0 };
           cur.refunded += Number(rf.amount);
@@ -159,10 +159,10 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
         .gte("created_at", dayStart)
         .lte("created_at", dayEnd);
       if (nphErr) throw new Error(nphErr.message);
-      const nphiesRows = (nphies ?? []) as unknown[];
+      const nphiesRows = (nphies ?? []) as any[];
 
       // Build lookup key: doctor_id|national_id
-      const nphiesByKey = new Map<string, unknown>();
+      const nphiesByKey = new Map<string, any>();
       for (const n of nphiesRows) {
         if (!n.doctor_id || !n.patient_national_id) continue;
         const key = `${n.doctor_id}|${n.patient_national_id}`;
@@ -179,7 +179,7 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
       const matchedNphiesIds = new Set<string>();
 
       // 3.5) Active adjustments for these invoices
-      const adjustmentsByInvoice = new Map<string, unknown>();
+      const adjustmentsByInvoice = new Map<string, any>();
       const extraNphiesIds: string[] = [];
       if (invoiceIds.length > 0) {
         const { data: adjs, error: adjErr } = await context.supabase
@@ -199,7 +199,7 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
         }
       }
       // Load NPHIES rows referenced by adjustments but not in the day window
-      const extraNphiesById = new Map<string, unknown>();
+      const extraNphiesById = new Map<string, any>();
       if (extraNphiesIds.length > 0) {
         const { data: extras } = await context.supabase
           .from("nphies_requests")
@@ -218,13 +218,13 @@ export const getDailyReconciliation = createServerFn({ method: "GET" })
         const doctorId = appt?.doctor_id ?? null;
         const adjustment = adjustmentsByInvoice.get(inv.id) ?? null;
 
-        let nphiesMatch: unknown =
+        let nphiesMatch: any =
           doctorId && nationalId ? nphiesByKey.get(`${doctorId}|${nationalId}`) : null;
         if (adjustment?.unlink_nphies) nphiesMatch = null;
         if (adjustment?.linked_nphies_request_id) {
           nphiesMatch =
             extraNphiesById.get(adjustment.linked_nphies_request_id) ??
-            nphiesRows.find((n: unknown) => n.id === adjustment.linked_nphies_request_id) ??
+            nphiesRows.find((n: any) => n.id === adjustment.linked_nphies_request_id) ??
             nphiesMatch;
         }
         if (nphiesMatch) matchedNphiesIds.add(nphiesMatch.id);
@@ -467,7 +467,7 @@ function fmtNum(n: number | null | undefined): number | null {
 
 export const getReconciliationDetail = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => detailSchema.parse(d))
+  .validator((d: any) => detailSchema.parse(d))
   .handler(async ({ data, context }): Promise<ReconciliationDetail> => {
     await assertHasRole(context.supabase, context.userId, "admin");
 
@@ -484,11 +484,11 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
     if (invErr) throw new Error(invErr.message);
     if (!inv) throw new Error("الفاتورة غير موجودة");
 
-    const appt: unknown = (inv as unknown).appointment ?? null;
-    const patient: unknown = (inv as unknown).patient ?? null;
+    const appt: any = (inv as any).appointment ?? null;
+    const patient: any = (inv as any).patient ?? null;
     const nationalId: string | null = patient?.national_id ?? appt?.national_id ?? null;
     const doctorId: string | null = appt?.doctor_id ?? null;
-    const day: string | null = appt?.appointment_date ?? (inv as unknown).issued_at ?? null;
+    const day: string | null = appt?.appointment_date ?? (inv as any).issued_at ?? null;
 
     const { data: pays, error: payErr } = await context.supabase
       .from("payments")
@@ -498,7 +498,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       .eq("invoice_id", data.invoice_id)
       .order("created_at", { ascending: true });
     if (payErr) throw new Error(payErr.message);
-    const payments: ReconciliationPaymentRow[] = (pays ?? []).map((p: unknown) => ({
+    const payments: ReconciliationPaymentRow[] = (pays ?? []).map((p: any) => ({
       ...p,
       amount: Number(p.amount ?? 0),
     }));
@@ -514,7 +514,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         .in("payment_id", paymentIds)
         .order("created_at", { ascending: true });
       if (rfErr) throw new Error(rfErr.message);
-      refunds = (rfs ?? []).map((r: unknown) => ({ ...r, amount: Number(r.amount ?? 0) }));
+      refunds = (rfs ?? []).map((r: any) => ({ ...r, amount: Number(r.amount ?? 0) }));
     }
 
     const collected = payments
@@ -540,7 +540,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         .lte("created_at", dayEnd)
         .order("created_at", { ascending: false });
       if (nErr) throw new Error(nErr.message);
-      const base = (nRows ?? []).map((n: unknown) => ({
+      const base = (nRows ?? []).map((n: any) => ({
         id: n.id,
         created_at: n.created_at,
         mode: n.mode,
@@ -568,7 +568,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       .eq("invoice_id", data.invoice_id)
       .order("created_at", { ascending: false });
     if (adjErr) throw new Error(adjErr.message);
-    const adjRaw = (adjRows ?? []) as unknown[];
+    const adjRaw = (adjRows ?? []) as any[];
 
     // Resolve user names for creators / revokers
     const userIds = Array.from(
@@ -580,7 +580,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name")
         .in("id", userIds);
-      for (const p of (profs ?? []) as unknown[]) {
+      for (const p of (profs ?? []) as any[]) {
         userNames.set(p.id, p.full_name || p.id.slice(0, 8));
       }
     }
@@ -647,7 +647,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       primary = existing;
     }
 
-    const billed = Number((inv as unknown).total ?? 0);
+    const billed = Number((inv as any).total ?? 0);
     const covered = primary?.covered_amount ?? null;
     const patientShare = primary?.patient_share ?? null;
     const baseExpected =
@@ -658,7 +658,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         : baseExpected;
     const variance = expectedShare != null ? netCollected - expectedShare : netCollected - billed;
     const effectiveStatus: string | null =
-      activeAdjustment?.override_invoice_status ?? (inv as unknown).status ?? null;
+      activeAdjustment?.override_invoice_status ?? (inv as any).status ?? null;
 
     const flags: string[] = [];
     if (Math.abs(variance) > 0.009) flags.push("variance");
@@ -674,10 +674,10 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       flags.push("resolved");
     }
 
-    const currency: string = (inv as unknown).currency ?? "SAR";
+    const currency: string = (inv as any).currency ?? "SAR";
     const row: ReconciliationRow = {
-      invoice_id: (inv as unknown).id,
-      invoice_number: (inv as unknown).invoice_number ?? null,
+      invoice_id: (inv as any).id,
+      invoice_number: (inv as any).invoice_number ?? null,
       status: effectiveStatus,
       appointment_id: appt?.id ?? null,
       appointment_ref: appt?.reference_number ?? null,
@@ -763,11 +763,11 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       key: "status_consistency",
       label: "اتساق حالة الفاتورة",
       expected: netCollected >= billed - 0.009 ? "paid" : "issued/pending",
-      actual: (inv as unknown).status ?? "—",
+      actual: (inv as any).status ?? "—",
       delta: null,
       status:
-        (netCollected >= billed - 0.009 && (inv as unknown).status === "paid") ||
-        (netCollected + 0.009 < billed && (inv as unknown).status !== "paid")
+        (netCollected >= billed - 0.009 && (inv as any).status === "paid") ||
+        (netCollected + 0.009 < billed && (inv as any).status !== "paid")
           ? "match"
           : "diff",
     });
@@ -795,15 +795,15 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
     return {
       row,
       invoice: {
-        id: (inv as unknown).id,
-        invoice_number: (inv as unknown).invoice_number ?? null,
-        status: (inv as unknown).status ?? null,
-        issued_at: (inv as unknown).issued_at ?? null,
-        paid_at: (inv as unknown).paid_at ?? null,
+        id: (inv as any).id,
+        invoice_number: (inv as any).invoice_number ?? null,
+        status: (inv as any).status ?? null,
+        issued_at: (inv as any).issued_at ?? null,
+        paid_at: (inv as any).paid_at ?? null,
         total: round2(billed),
         currency,
-        notes: (inv as unknown).notes ?? null,
-        pdf_path: (inv as unknown).pdf_path ?? null,
+        notes: (inv as any).notes ?? null,
+        pdf_path: (inv as any).pdf_path ?? null,
       },
       payments,
       refunds,
@@ -844,7 +844,7 @@ const applySchema = z
 
 export const listReconciliationAdjustments = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => z.object({ invoice_id: z.string().uuid() }).parse(d))
+  .validator((d: any) => z.object({ invoice_id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }): Promise<ReconciliationAdjustmentRow[]> => {
     await assertHasRole(context.supabase, context.userId, "admin");
     const { data: rows, error } = await context.supabase
@@ -855,7 +855,7 @@ export const listReconciliationAdjustments = createServerFn({ method: "GET" })
       .eq("invoice_id", data.invoice_id)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    const raw = (rows ?? []) as unknown[];
+    const raw = (rows ?? []) as any[];
     const userIds = Array.from(
       new Set(raw.flatMap((r) => [r.created_by, r.revoked_by]).filter(Boolean)),
     ) as string[];
@@ -865,7 +865,7 @@ export const listReconciliationAdjustments = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name")
         .in("id", userIds);
-      for (const p of (profs ?? []) as unknown[]) {
+      for (const p of (profs ?? []) as any[]) {
         names.set(p.id, p.full_name || p.id.slice(0, 8));
       }
     }
@@ -891,7 +891,7 @@ export const listReconciliationAdjustments = createServerFn({ method: "GET" })
 
 export const applyReconciliationAdjustment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) => applySchema.parse(d))
+  .validator((d: any) => applySchema.parse(d))
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     await assertHasRole(context.supabase, context.userId, "admin");
 
@@ -938,7 +938,7 @@ export const applyReconciliationAdjustment = createServerFn({ method: "POST" })
 
 export const revokeReconciliationAdjustment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .validator((d: unknown) =>
+  .validator((d: any) =>
     z
       .object({
         id: z.string().uuid(),
