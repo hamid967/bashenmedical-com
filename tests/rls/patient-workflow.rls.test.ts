@@ -163,8 +163,12 @@ async function main() {
   await upsertPatientProfile(userA.userId, "MRN-A-" + stamp);
   await upsertPatientProfile(userB.userId, "MRN-B-" + stamp);
 
-  const apptA = await seedAppointmentForPatient(userA.userId, "+966500000101");
-  const apptB = await seedAppointmentForPatient(userB.userId, "+966500000102");
+  const phoneA = "+966500000101";
+  const phoneB = "+966500000102";
+  await verifyProfilePhone(userA.userId, phoneA);
+  await verifyProfilePhone(userB.userId, phoneB);
+  const apptA = await seedAppointmentForPhone(phoneA);
+  const apptB = await seedAppointmentForPhone(phoneB);
 
   const rxA = await seedPrescription(patientsRowA);
   const rxB = await seedPrescription(patientsRowB);
