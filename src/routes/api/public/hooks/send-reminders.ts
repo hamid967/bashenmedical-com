@@ -105,7 +105,7 @@ async function sendTwilioMessage(opts: {
   }
 }
 
-async function sendMessagingRun(admin: unknown): Promise<{
+async function sendMessagingRun(admin: any): Promise<{
   sms_sent: number;
   sms_failed: number;
   sms_skipped: number;
@@ -184,7 +184,7 @@ function getAdminClient() {
   });
 }
 
-async function sendPushRun(admin: unknown): Promise<{
+async function sendPushRun(admin: any): Promise<{
   enqueue: unknown;
   sent: number;
   failed: number;
@@ -245,7 +245,7 @@ async function sendPushRun(admin: unknown): Promise<{
       staffUsersCache.set(key, []);
       return [];
     }
-    const ids: string[] = Array.from(new Set((data ?? []).map((r: unknown) => r.user_id as string)));
+    const ids: string[] = Array.from(new Set((data ?? []).map((r: any) => r.user_id as string)));
     staffUsersCache.set(key, ids);
     return ids;
   }

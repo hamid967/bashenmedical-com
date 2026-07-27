@@ -157,7 +157,7 @@ const AdminInput = z.object({
   limit: z.number().int().min(1).max(1000).default(300),
 });
 
-async function ensureStaff(supabase: unknown, userId: string): Promise<void> {
+async function ensureStaff(supabase: any, userId: string): Promise<void> {
   for (const role of ["admin", "super_admin"] as const) {
     const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: role });
     if (data) return;

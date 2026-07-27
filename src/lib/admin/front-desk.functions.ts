@@ -74,20 +74,20 @@ export const listTodayAppointments = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const ids = (rows ?? []).map((r: unknown) => r.id);
-    let queueByAppt: Record<string, unknown> = {};
+    const ids = (rows ?? []).map((r: any) => r.id);
+    let queueByAppt: Record<string, any> = {};
     if (ids.length > 0) {
       const { data: qrows, error: qerr } = await context.supabase
         .from("queue_entries")
         .select("id, appointment_id, queue_number, status, called_at, started_at, completed_at")
         .in("appointment_id", ids);
       if (qerr) throw new Error(qerr.message);
-      queueByAppt = Object.fromEntries((qrows ?? []).map((r: unknown) => [r.appointment_id, r]));
+      queueByAppt = Object.fromEntries((qrows ?? []).map((r: any) => [r.appointment_id, r]));
     }
 
     return {
       date: day,
-      rows: (rows ?? []).map((r: unknown) => ({ ...r, queue: queueByAppt[r.id] ?? null })),
+      rows: (rows ?? []).map((r: any) => ({ ...r, queue: queueByAppt[r.id] ?? null })),
     };
   });
 
@@ -236,12 +236,12 @@ export const searchPatientByIdentifier = createServerFn({ method: "GET" })
       .limit(25);
     if (e2) throw new Error(e2.message);
 
-    const knownIds = new Set((direct ?? []).map((r: unknown) => r.id));
+    const knownIds = new Set((direct ?? []).map((r: any) => r.id));
     const missingIds = (idHits ?? [])
-      .map((r: unknown) => r.patient_id)
+      .map((r: any) => r.patient_id)
       .filter((id: string) => !knownIds.has(id));
 
-    let extra: unknown[] = [];
+    let extra: any[] = [];
     if (missingIds.length > 0) {
       let q2 = context.supabase
         .from("patients")

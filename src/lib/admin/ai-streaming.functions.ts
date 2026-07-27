@@ -16,7 +16,7 @@ const RangeInput = z.object({
   surface: z.enum(["public", "portal", "admin", "all"]).default("all"),
 });
 
-async function ensureStaff(supabase: unknown, userId: string): Promise<void> {
+async function ensureStaff(supabase: any, userId: string): Promise<void> {
   for (const role of ["admin", "super_admin"] as const) {
     const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: role });
     if (data) return;

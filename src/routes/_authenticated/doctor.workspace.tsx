@@ -80,7 +80,7 @@ function DoctorWorkspacePage() {
   const [openFollowUp, setOpenFollowUp] = useState<ApptRow | null>(null);
   const [openHistory, setOpenHistory] = useState<ApptRow | null>(null);
 
-  const rows: ApptRow[] = (query.data?.rows as unknown as ApptRow[]) ?? [];
+  const rows: ApptRow[] = (query.data?.rows as any as ApptRow[]) ?? [];
   const counts = summarize(rows);
 
   return (
@@ -212,7 +212,7 @@ function DoctorRow({
   const qc = useQueryClient();
   const start = useMutation({
     mutationFn: () => startFn({ data: { appointment_id: row.id } }),
-    onSuccess: (r: unknown) => {
+    onSuccess: (r: any) => {
       onStarted(r.visit_id);
       qc.invalidateQueries({ queryKey: ["doctor", "workspace", "today"] });
     },
@@ -341,7 +341,7 @@ function VisitDialog({
           finalize,
         },
       }),
-    onSuccess: (r: unknown) => {
+    onSuccess: (r: any) => {
       qc.invalidateQueries({ queryKey: ["doctor", "workspace", "today"] });
       if (r?.finalized) {
         try {
@@ -823,8 +823,8 @@ function HistoryDialog({ appt, onClose }: { appt: ApptRow; onClose: () => void }
     staleTime: 30_000,
   });
   const [tab, setTab] = useState<"visits" | "appointments">("visits");
-  const appointments: HistoryAppt[] = (query.data?.appointments as unknown) ?? [];
-  const visits: HistoryVisit[] = (query.data?.visits as unknown) ?? [];
+  const appointments: HistoryAppt[] = (query.data?.appointments as any) ?? [];
+  const visits: HistoryVisit[] = (query.data?.visits as any) ?? [];
 
   return (
     <DialogShell title={`سجل المريض — ${appt.patient_name ?? "—"}`} onClose={onClose}>
@@ -981,7 +981,7 @@ function RxSection({ appt }: { appt: ApptRow }) {
     enabled: !!appt.patient_id,
     staleTime: 15_000,
   });
-  const rows: RxRow[] = (query.data?.rows as unknown) ?? [];
+  const rows: RxRow[] = (query.data?.rows as any) ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [medication, setMedication] = useState("");
@@ -1456,7 +1456,7 @@ function LabOrdersPanel({ appt }: { appt: ApptRow }) {
     enabled: !!appt.patient_id,
     staleTime: 15_000,
   });
-  const rows: LabOrderRow[] = (query.data?.rows as unknown) ?? [];
+  const rows: LabOrderRow[] = (query.data?.rows as any) ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -1655,7 +1655,7 @@ function RadOrdersPanel({ appt }: { appt: ApptRow }) {
     enabled: !!appt.patient_id,
     staleTime: 15_000,
   });
-  const rows: RadOrderRow[] = (query.data?.rows as unknown) ?? [];
+  const rows: RadOrderRow[] = (query.data?.rows as any) ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [modality, setModality] = useState("");

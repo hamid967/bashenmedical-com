@@ -449,7 +449,7 @@ function DependentCard({
       toast.success(i18n.t("portalFamily:access_updated"));
       qc.invalidateQueries({ queryKey: ["portal", "dependents"] });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? i18n.t("portalFamily:update_failed")),
+    onError: (e: any) => toast.error(e?.message ?? i18n.t("portalFamily:update_failed")),
   });
   const badgeCls = verified
     ? "bg-emerald-50 text-emerald-700"

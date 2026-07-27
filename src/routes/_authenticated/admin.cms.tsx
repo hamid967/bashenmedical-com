@@ -52,7 +52,7 @@ export function CmsDashboard() {
               <Icon className="w-4 h-4" />
               <span>{label}</span>
             </div>
-            <div className="text-2xl font-bold mt-1">{(data.totals as unknown)[key] ?? 0}</div>
+            <div className="text-2xl font-bold mt-1">{(data.totals as any)[key] ?? 0}</div>
           </Card>
         ))}
       </div>
@@ -93,7 +93,7 @@ export function CmsDashboard() {
           <div className="text-sm text-muted-foreground">لا يوجد نشاط بعد.</div>
         ) : (
           <ul className="space-y-2">
-            {data.recent.map((r: unknown) => (
+            {data.recent.map((r: any) => (
               <li
                 key={r.id}
                 className="flex items-center justify-between text-sm border-b py-2 last:border-0"

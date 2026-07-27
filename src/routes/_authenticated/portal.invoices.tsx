@@ -370,7 +370,7 @@ function InvoiceDetails({
       qc.invalidateQueries({ queryKey: ["portal", "invoices"] });
       onPaid();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إتمام الدفع"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر إتمام الدفع"),
   });
 
   return (

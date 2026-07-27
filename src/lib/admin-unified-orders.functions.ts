@@ -13,9 +13,9 @@ import type { OrderTableKind } from "@/lib/unified-status";
 
 type Role = "admin" | "reception" | "pharmacy" | "super_admin";
 
-async function getRoles(supabase: unknown, userId: string): Promise<Role[]> {
+async function getRoles(supabase: any, userId: string): Promise<Role[]> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: unknown) => r.role as Role);
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 function ensureAdminOrReception(roles: Role[]) {
   if (roles.includes("super_admin")) return;
@@ -89,7 +89,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
     const supabase = context.supabase;
 
     const build = (table: string, columns: string, searchOr?: string) => {
-      let sel: unknown = (supabase as unknown)
+      let sel: any = (supabase as any)
         .from(table)
         .select(columns)
         .order(sortCol, { ascending: false })
@@ -170,22 +170,22 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
 
     // إثراء الفاتورة/المختبر/الأشعة باسم وهاتف المريض
     const patientIds = new Set<string>();
-    for (const r of (iRes.data ?? []) as unknown[]) if (r.patient_id) patientIds.add(r.patient_id);
-    for (const r of (lRes.data ?? []) as unknown[]) if (r.patient_id) patientIds.add(r.patient_id);
-    for (const r of (rRes.data ?? []) as unknown[]) if (r.patient_id) patientIds.add(r.patient_id);
+    for (const r of (iRes.data ?? []) as any[]) if (r.patient_id) patientIds.add(r.patient_id);
+    for (const r of (lRes.data ?? []) as any[]) if (r.patient_id) patientIds.add(r.patient_id);
+    for (const r of (rRes.data ?? []) as any[]) if (r.patient_id) patientIds.add(r.patient_id);
     const pmap = new Map<string, { name: string | null; phone: string | null }>();
     if (patientIds.size) {
       const { data: pats } = await supabase
         .from("patients")
         .select("id, full_name, phone")
         .in("id", Array.from(patientIds));
-      for (const p of (pats ?? []) as unknown[])
+      for (const p of (pats ?? []) as any[])
         pmap.set(p.id, { name: p.full_name ?? null, phone: p.phone ?? null });
     }
 
     const out: UnifiedAdminOrder[] = [];
 
-    for (const r of (aRes.data ?? []) as unknown[]) {
+    for (const r of (aRes.data ?? []) as any[]) {
       out.push({
         kind: "appointment",
         id: r.id,
@@ -200,7 +200,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
           : null,
       });
     }
-    for (const r of (cRes.data ?? []) as unknown[]) {
+    for (const r of (cRes.data ?? []) as any[]) {
       out.push({
         kind: "complaint",
         id: r.id,
@@ -213,7 +213,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         meta: typeof r.message === "string" ? r.message.slice(0, 60) : null,
       });
     }
-    for (const r of (mRes.data ?? []) as unknown[]) {
+    for (const r of (mRes.data ?? []) as any[]) {
       out.push({
         kind: "medicine_order",
         id: r.id,
@@ -226,7 +226,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         meta: r.delivery_type ?? null,
       });
     }
-    for (const r of (hRes.data ?? []) as unknown[]) {
+    for (const r of (hRes.data ?? []) as any[]) {
       out.push({
         kind: "home_care",
         id: r.id,
@@ -239,7 +239,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         meta: r.service_type ?? null,
       });
     }
-    for (const r of (sRes.data ?? []) as unknown[]) {
+    for (const r of (sRes.data ?? []) as any[]) {
       out.push({
         kind: "second_opinion",
         id: r.id,
@@ -252,7 +252,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         meta: r.specialty ?? null,
       });
     }
-    for (const r of (iRes.data ?? []) as unknown[]) {
+    for (const r of (iRes.data ?? []) as any[]) {
       const p = r.patient_id ? pmap.get(r.patient_id) : null;
       out.push({
         kind: "invoice",
@@ -266,7 +266,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         meta: null,
       });
     }
-    for (const r of (lRes.data ?? []) as unknown[]) {
+    for (const r of (lRes.data ?? []) as any[]) {
       const p = r.patient_id ? pmap.get(r.patient_id) : null;
       out.push({
         kind: "lab_report",
@@ -280,7 +280,7 @@ export const listAllUnifiedOrders = createServerFn({ method: "GET" })
         meta: r.title ?? r.test_type ?? null,
       });
     }
-    for (const r of (rRes.data ?? []) as unknown[]) {
+    for (const r of (rRes.data ?? []) as any[]) {
       const p = r.patient_id ? pmap.get(r.patient_id) : null;
       out.push({
         kind: "radiology_report",

@@ -58,7 +58,7 @@ const Body = z.object({
 });
 
 async function auditInvocation(
-  sb: unknown,
+  sb: any,
   row: {
     user_id: string;
     tool: string;
@@ -213,7 +213,7 @@ export const Route = createFileRoute("/api/ai/staff-action")({
 });
 
 async function buildSummary(
-  sb: unknown,
+  sb: any,
   tool: StaffToolName,
   params: Record<string, unknown>,
 ): Promise<string> {
@@ -233,7 +233,7 @@ async function buildSummary(
 }
 
 async function execute(
-  sb: unknown,
+  sb: any,
   tool: StaffToolName,
   params: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {

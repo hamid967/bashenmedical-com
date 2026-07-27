@@ -234,7 +234,7 @@ function ReportsPage() {
     try {
       const { url } = await getUrl({ data: { id: r.id } });
       window.open(url, "_blank", "noopener,noreferrer");
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر تنزيل التقرير.");
     } finally {
       setDownloading(null);
@@ -471,7 +471,7 @@ function ReportDetailDialog({
     try {
       const { url } = await getMainUrl({ data: { id: d.id } });
       window.open(url, "_blank", "noopener,noreferrer");
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر التنزيل.");
     } finally {
       setBusy(null);
@@ -485,7 +485,7 @@ function ReportDetailDialog({
         data: { report_id: d.id, version_number: versionNumber },
       });
       window.open(url, "_blank", "noopener,noreferrer");
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر تنزيل النسخة.");
     } finally {
       setBusy(null);

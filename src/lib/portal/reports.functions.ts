@@ -57,7 +57,7 @@ export const listMyMedicalReports = createServerFn({ method: "GET" })
       .order("published_at", { ascending: false, nullsFirst: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: unknown) => ({
+    return (data ?? []).map((r: any) => ({
       id: r.id,
       report_type: r.report_type,
       title_ar: r.title_ar,
@@ -120,7 +120,7 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
         .select("file_path, status, revoked_at, patient_id, report_type, title_ar")
         .eq("id", data.id)
         .maybeSingle();
-      const r = reportRes.data as unknown;
+      const r = reportRes.data as any;
       if (!r || r.patient_id !== patientId) throw new Error("التقرير غير موجود.");
       if (r.status !== "published" || r.revoked_at) throw new Error("التقرير غير متاح للتنزيل.");
       if (!r.file_path) throw new Error("لا يوجد ملف مرفق بهذا التقرير.");
@@ -133,7 +133,7 @@ export const getMyMedicalReportFileUrl = createServerFn({ method: "POST" })
 
       await logAttempt("success");
       return { url: signed.signedUrl, expiresIn: SIGNED_URL_TTL_SECONDS };
-    } catch (err: unknown) {
+    } catch (err: any) {
       await logAttempt("failure", err?.message ?? "unknown");
       throw err;
     }
@@ -187,8 +187,8 @@ export const getMyMedicalReportDetail = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (error) throw new Error(error.message);
-    if (!r || (r as unknown).patient_id !== patientId) throw new Error("التقرير غير موجود.");
-    if ((r as unknown).status !== "published") throw new Error("التقرير غير متاح.");
+    if (!r || (r as any).patient_id !== patientId) throw new Error("التقرير غير موجود.");
+    if ((r as any).status !== "published") throw new Error("التقرير غير متاح.");
 
     // Versions are staff-only via RLS; read with admin after ownership check above.
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -199,22 +199,22 @@ export const getMyMedicalReportDetail = createServerFn({ method: "POST" })
       .order("version_number", { ascending: false });
 
     return {
-      id: (r as unknown).id,
-      report_type: (r as unknown).report_type,
-      title_ar: (r as unknown).title_ar,
-      title_en: (r as unknown).title_en,
-      summary: (r as unknown).summary,
-      file_path: (r as unknown).file_path,
-      status: (r as unknown).status,
-      published_at: (r as unknown).published_at,
-      is_demo: !!(r as unknown).is_demo,
-      doctor_name_ar: (r as unknown).doctors?.name_ar ?? null,
-      created_at: (r as unknown).created_at,
-      updated_at: (r as unknown).updated_at,
-      appointment_id: (r as unknown).appointment_id,
-      appointment_date: (r as unknown).appointments?.appointment_date ?? null,
-      branch_name_ar: (r as unknown).appointments?.branches?.name_ar ?? null,
-      versions: (versions ?? []).map((v: unknown) => ({
+      id: (r as any).id,
+      report_type: (r as any).report_type,
+      title_ar: (r as any).title_ar,
+      title_en: (r as any).title_en,
+      summary: (r as any).summary,
+      file_path: (r as any).file_path,
+      status: (r as any).status,
+      published_at: (r as any).published_at,
+      is_demo: !!(r as any).is_demo,
+      doctor_name_ar: (r as any).doctors?.name_ar ?? null,
+      created_at: (r as any).created_at,
+      updated_at: (r as any).updated_at,
+      appointment_id: (r as any).appointment_id,
+      appointment_date: (r as any).appointments?.appointment_date ?? null,
+      branch_name_ar: (r as any).appointments?.branches?.name_ar ?? null,
+      versions: (versions ?? []).map((v: any) => ({
         version_number: v.version_number,
         changed_at: v.changed_at,
         summary: v.summary,
@@ -270,7 +270,7 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
         .select("patient_id, status, revoked_at")
         .eq("id", data.report_id)
         .maybeSingle();
-      const rr = reportRes.data as unknown;
+      const rr = reportRes.data as any;
       if (!rr || rr.patient_id !== patientId) throw new Error("التقرير غير موجود.");
       if (rr.status !== "published" || rr.revoked_at) throw new Error("التقرير غير متاح.");
 
@@ -288,8 +288,8 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
         .eq("id", data.report_id)
         .maybeSingle();
       const baseName = buildDownloadName(
-        (meta as unknown)?.title_ar ?? null,
-        (meta as unknown)?.report_type ?? "report",
+        (meta as any)?.title_ar ?? null,
+        (meta as any)?.report_type ?? "report",
         v.file_path,
       );
       const dotIdx = baseName.lastIndexOf(".");
@@ -305,7 +305,7 @@ export const getMyMedicalReportVersionFileUrl = createServerFn({ method: "POST" 
 
       await logAttempt("success");
       return { url: signed.signedUrl, expiresIn: SIGNED_URL_TTL_SECONDS };
-    } catch (err: unknown) {
+    } catch (err: any) {
       await logAttempt("failure", err?.message ?? "unknown");
       throw err;
     }
@@ -351,7 +351,7 @@ export const listMyReportDownloads = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const ids = Array.from(new Set((rows ?? []).map((r: unknown) => r.entity_id).filter(Boolean)));
+    const ids = Array.from(new Set((rows ?? []).map((r: any) => r.entity_id).filter(Boolean)));
     let titles = new Map<string, { title_ar: string | null; report_type: ReportType | null }>();
     if (ids.length) {
       const { data: reps } = await supabaseAdmin
@@ -359,13 +359,13 @@ export const listMyReportDownloads = createServerFn({ method: "POST" })
         .select("id, title_ar, report_type")
         .in("id", ids);
       titles = new Map(
-        (reps ?? []).map((r: unknown) => [r.id, { title_ar: r.title_ar, report_type: r.report_type }]),
+        (reps ?? []).map((r: any) => [r.id, { title_ar: r.title_ar, report_type: r.report_type }]),
       );
     }
 
     const needle = data.q?.trim().toLowerCase() ?? "";
     return (rows ?? [])
-      .map((r: unknown): MyReportDownloadEntry => {
+      .map((r: any): MyReportDownloadEntry => {
         const m = (r.metadata ?? {}) as Record<string, unknown>;
         const t = r.entity_id ? titles.get(r.entity_id) : undefined;
         const status =

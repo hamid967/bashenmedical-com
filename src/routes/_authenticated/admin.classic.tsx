@@ -169,7 +169,7 @@ function AdminDashboard() {
   const rolesQuery = useQuery({ queryKey: ["my-roles"], queryFn: () => myRolesFn() });
 
   const rawRoles = rolesQuery.data?.roles ?? [];
-  const isSuperAdmin = rawRoles.includes("super_admin" as unknown);
+  const isSuperAdmin = rawRoles.includes("super_admin" as any);
   // super_admin يرث كل الصلاحيات
   const roles = isSuperAdmin
     ? (Array.from(new Set([...rawRoles, "admin", "reception", "pharmacy"])) as typeof rawRoles)
@@ -186,7 +186,7 @@ function AdminDashboard() {
       const uid = data.user?.id ?? null;
       const email = data.user?.email ?? null;
       const { logAuthEvent } = await import("@/lib/auth-log.functions");
-      await (logAuthEvent as unknown)({ data: { action: "logout", user_id: uid, email } }).catch(
+      await (logAuthEvent as any)({ data: { action: "logout", user_id: uid, email } }).catch(
         () => {},
       );
     } catch {}
@@ -220,7 +220,7 @@ function AdminDashboard() {
     );
   }
 
-  const tabs: { id: Tab; label: string; icon: unknown; show: boolean }[] = [
+  const tabs: { id: Tab; label: string; icon: any; show: boolean }[] = [
     { id: "overview" as Tab, label: "نظرة عامة", icon: LayoutDashboard, show: true },
     { id: "appointments" as Tab, label: "المواعيد", icon: CalendarDays, show: canSeeAppts },
     { id: "orders" as Tab, label: "طلبات الأدوية", icon: Pill, show: canSeeOrders },
@@ -363,7 +363,7 @@ function AdminDashboard() {
           )}
           {(roles.includes("admin") ||
             roles.includes("reception") ||
-            roles.includes("doctor" as unknown)) && (
+            roles.includes("doctor" as any)) && (
             <Link
               to="/patients"
               className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted"
@@ -525,7 +525,7 @@ function StatCard({
 }: {
   label: string;
   value: number;
-  icon: unknown;
+  icon: any;
   tone?: string;
 }) {
   return (
@@ -632,7 +632,7 @@ function AppointmentsTab() {
       toast.success(`تم تحديث الحالة إلى: ${label}`);
       q.refetch();
     },
-    onError: (e: unknown) => {
+    onError: (e: any) => {
       const msg: string = e?.message ?? "";
       // Unify DB-side reason failures (empty after trim / whitespace-only incl. \n \t NBSP)
       // to the same user-facing message used by client-side pre-validation.
@@ -661,7 +661,7 @@ function AppointmentsTab() {
       toast.success("تم تحديث الملاحظات");
       q.refetch();
     },
-    onError: (e: unknown) => {
+    onError: (e: any) => {
       const msg: string = e?.message ?? "";
       if (/notes_too_long/i.test(msg) || /الملاحظات طويلة جدًا/.test(msg)) {
         toast.error("الملاحظات طويلة جدًا (الحد الأقصى 500 حرفًا)");
@@ -707,7 +707,7 @@ function AppointmentsTab() {
   };
 
   if (q.isLoading) return <div className="text-muted-foreground">جارٍ التحميل…</div>;
-  const all = (q.data ?? []) as unknown[];
+  const all = (q.data ?? []) as any[];
   const rows = all.filter((r) => {
     if (filter !== "all" && r.status !== filter) return false;
     if (search) {
@@ -773,7 +773,7 @@ function AppointmentsTab() {
                 </td>
               </tr>
             )}
-            {rows.map((r: unknown) => {
+            {rows.map((r: any) => {
               const status = r.status as ApptStatus;
               const pending = m.isPending && m.variables?.id === r.id;
               const isFinal =
@@ -909,8 +909,8 @@ function AuditModal({
     queryKey: ["appt-reminder-audit", appointmentId],
     queryFn: () => remFn({ data: { appointmentId, pageSize: 100 } }),
   });
-  const rows = (q.data ?? []) as unknown[];
-  const reminderRows = ((rq.data as unknown)?.rows ?? []) as unknown[];
+  const rows = (q.data ?? []) as any[];
+  const reminderRows = ((rq.data as any)?.rows ?? []) as any[];
   const statusLabel = (v: string | null) =>
     v ? (APPT_STATUS.find((s) => s.value === v)?.label ?? v) : "—";
 
@@ -996,12 +996,12 @@ function OrdersTab() {
   const updateFn = useServerFn(updateOrderStatus);
   const q = useQuery({ queryKey: ["admin-orders"], queryFn: () => listFn() });
   const m = useMutation({
-    mutationFn: (v: { id: string; status: unknown }) => updateFn({ data: v }),
+    mutationFn: (v: { id: string; status: any }) => updateFn({ data: v }),
     onSuccess: () => {
       toast.success("تم التحديث");
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل التحديث"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل التحديث"),
   });
 
   if (q.isLoading) return <div className="text-muted-foreground">جارٍ التحميل…</div>;
@@ -1028,7 +1028,7 @@ function OrdersTab() {
               </td>
             </tr>
           )}
-          {rows.map((r: unknown) => (
+          {rows.map((r: any) => (
             <tr key={r.id} className="border-t border-border">
               <td className="px-4 py-3 font-medium">{r.patient_name}</td>
               <td className="px-4 py-3" dir="ltr">
@@ -1122,7 +1122,7 @@ function DoctorsTab() {
       toast.success("تم التحديث");
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل التحديث"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل التحديث"),
   });
   const deleteM = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
@@ -1130,11 +1130,11 @@ function DoctorsTab() {
       toast.success("تم الحذف");
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
   const saveM = useMutation({
     mutationFn: async (form: DoctorForm) => {
-      const payload: unknown = {
+      const payload: any = {
         specialty_id: form.specialty_id || null,
         name_ar: form.name_ar.trim(),
         name_en: form.name_en.trim(),
@@ -1158,7 +1158,7 @@ function DoctorsTab() {
       setEditing(null);
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
   if (q.isLoading) return <div className="text-muted-foreground">جارٍ التحميل…</div>;
@@ -1196,7 +1196,7 @@ function DoctorsTab() {
                 </td>
               </tr>
             )}
-            {rows.map((r: unknown) => (
+            {rows.map((r: any) => (
               <tr key={r.id} className="border-t border-border">
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-3">
@@ -1270,7 +1270,7 @@ function DoctorsTab() {
       {editing && (
         <DoctorFormModal
           value={editing}
-          specialties={specialties as unknown[]}
+          specialties={specialties as any[]}
           saving={saveM.isPending}
           onCancel={() => setEditing(null)}
           onSave={(v) => saveM.mutate(v)}
@@ -1506,7 +1506,7 @@ function SpecialtiesTab() {
       toast.success("تم الحذف");
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
   const saveM = useMutation({
     mutationFn: async (f: SpecialtyForm) => {
@@ -1528,7 +1528,7 @@ function SpecialtiesTab() {
       setEditing(null);
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
   if (q.isLoading) return <div className="text-muted-foreground">جارٍ التحميل…</div>;
@@ -1565,7 +1565,7 @@ function SpecialtiesTab() {
                 </td>
               </tr>
             )}
-            {rows.map((r: unknown) => (
+            {rows.map((r: any) => (
               <tr key={r.id} className="border-t border-border">
                 <td className="px-4 py-3">
                   <div className="font-medium">{r.name_ar}</div>
@@ -1808,7 +1808,7 @@ function AvailabilityTab() {
       toast.success("تمت إضافة الفترة");
       slotsQ.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الإضافة"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الإضافة"),
   });
   const delM = useMutation({
     mutationFn: (id: string) => deleteFn({ data: { id } }),
@@ -1816,7 +1816,7 @@ function AvailabilityTab() {
       toast.success("تم الحذف");
       slotsQ.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
 
   const doctors = doctorsQ.data ?? [];
@@ -1832,7 +1832,7 @@ function AvailabilityTab() {
           className={`${inputCls} mt-2 max-w-md`}
         >
           <option value="">— اختر —</option>
-          {doctors.map((d: unknown) => (
+          {doctors.map((d: any) => (
             <option key={d.id} value={d.id}>
               {d.name_ar} {d.specialties?.name_ar ? `— ${d.specialties.name_ar}` : ""}
             </option>
@@ -1922,7 +1922,7 @@ function AvailabilityTab() {
                     </td>
                   </tr>
                 )}
-                {slots.map((s: unknown) => (
+                {slots.map((s: any) => (
                   <tr key={s.id} className="border-t border-border">
                     <td className="px-4 py-3 font-medium">{WEEKDAYS[s.weekday]}</td>
                     <td className="px-4 py-3" dir="ltr">
@@ -2240,7 +2240,7 @@ function RemindersDeliveryTab({
             <label className="mb-1 block text-xs font-medium text-muted-foreground">القناة</label>
             <select
               value={channel}
-              onChange={(e) => setChannel(e.target.value as unknown)}
+              onChange={(e) => setChannel(e.target.value as any)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">الكل</option>
@@ -2255,7 +2255,7 @@ function RemindersDeliveryTab({
             <label className="mb-1 block text-xs font-medium text-muted-foreground">المستقبل</label>
             <select
               value={audience}
-              onChange={(e) => setAudience(e.target.value as unknown)}
+              onChange={(e) => setAudience(e.target.value as any)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">الكل</option>
@@ -2267,7 +2267,7 @@ function RemindersDeliveryTab({
             <label className="mb-1 block text-xs font-medium text-muted-foreground">الحالة</label>
             <select
               value={status}
-              onChange={(e) => setStatus(e.target.value as unknown)}
+              onChange={(e) => setStatus(e.target.value as any)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">الكل</option>
@@ -2985,7 +2985,7 @@ function ClickableStatCard({
 }: {
   label: string;
   value: number;
-  icon: unknown;
+  icon: any;
   onClick: () => void;
   hint?: string;
 }) {
@@ -3382,7 +3382,7 @@ function RemindersAuditTab() {
             </label>
             <select
               value={reminderKind}
-              onChange={(e) => setReminderKind(e.target.value as unknown)}
+              onChange={(e) => setReminderKind(e.target.value as any)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">الكل</option>
@@ -3394,7 +3394,7 @@ function RemindersAuditTab() {
             <label className="mb-1 block text-xs font-medium text-muted-foreground">المصدر</label>
             <select
               value={source}
-              onChange={(e) => setSource(e.target.value as unknown)}
+              onChange={(e) => setSource(e.target.value as any)}
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">الكل</option>
@@ -3448,7 +3448,7 @@ function RemindersAuditTab() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {rows.map((r: unknown) => {
+              {rows.map((r: any) => {
                 const ref = String(r.appointment_id).replace(/-/g, "").slice(0, 8);
                 return (
                   <tr key={r.id} className="hover:bg-muted/30">
@@ -3736,7 +3736,7 @@ function ExportRemindersCsvPanel() {
       } else {
         toast.success(`تم تصدير ${res.count.toLocaleString("ar-EG")} سجل.`);
       }
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر التصدير.");
     } finally {
       setBusy(false);
@@ -3815,7 +3815,7 @@ function csvEscape(v: unknown): string {
 }
 
 function exportSecurityAuditCsv(
-  items: unknown[],
+  items: any[],
   filters: { ref: string; phone: string; action: string; from: string; to: string; limit: number },
 ) {
   const headers = [
@@ -4055,7 +4055,7 @@ function SecurityAuditTab() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {items.map((it: unknown) => (
+                {items.map((it: any) => (
                   <tr key={it.id} className="hover:bg-muted/20">
                     <td className="px-3 py-2 whitespace-nowrap text-xs text-muted-foreground">
                       {new Date(it.created_at).toLocaleString("ar-EG")}
@@ -4110,7 +4110,7 @@ type ContentSub = "faqs" | "about" | "specialties";
 
 function ContentTab() {
   const [sub, setSub] = useState<ContentSub>("faqs");
-  const subs: { id: ContentSub; label: string; icon: unknown }[] = [
+  const subs: { id: ContentSub; label: string; icon: any }[] = [
     { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
     { id: "about", label: "من نحن", icon: Info },
     { id: "specialties", label: "التخصصات", icon: Tag },
@@ -4176,7 +4176,7 @@ function FaqsTab() {
       toast.success("تم الحذف");
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
   const saveM = useMutation({
     mutationFn: async (f: FaqForm) => {
@@ -4196,7 +4196,7 @@ function FaqsTab() {
       setEditing(null);
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
   if (q.isLoading) return <div className="text-muted-foreground">جارٍ التحميل…</div>;
@@ -4231,7 +4231,7 @@ function FaqsTab() {
                 </td>
               </tr>
             )}
-            {rows.map((r: unknown) => (
+            {rows.map((r: any) => (
               <tr key={r.id} className="border-t border-border">
                 <td className="px-4 py-3">
                   <div className="font-medium">{r.question_ar}</div>
@@ -4456,7 +4456,7 @@ function AboutSectionsTab() {
       toast.success("تم الحذف");
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
   });
   const saveM = useMutation({
     mutationFn: async (f: AboutForm) => {
@@ -4477,7 +4477,7 @@ function AboutSectionsTab() {
       setEditing(null);
       q.refetch();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
   if (q.isLoading) return <div className="text-muted-foreground">جارٍ التحميل…</div>;
@@ -4513,7 +4513,7 @@ function AboutSectionsTab() {
                 </td>
               </tr>
             )}
-            {rows.map((r: unknown) => (
+            {rows.map((r: any) => (
               <tr key={r.id} className="border-t border-border">
                 <td className="px-4 py-3">
                   <div className="font-medium">{r.title_ar ?? r.section_key}</div>

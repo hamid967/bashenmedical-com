@@ -37,7 +37,7 @@ function OwnerServicesList() {
       toast.success("تم الحذف");
       q.refetch();
       router.invalidate();
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر الحذف");
     } finally {
       setBusy(null);
@@ -48,7 +48,7 @@ function OwnerServicesList() {
     try {
       await toggle({ data: { id, is_active: v } });
       q.refetch();
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر التحديث");
     }
   }
@@ -95,7 +95,7 @@ function OwnerServicesList() {
               </tr>
             </thead>
             <tbody>
-              {q.data.map((s: unknown) => (
+              {q.data.map((s: any) => (
                 <tr key={s.id} className="border-t hover:bg-slate-50/50">
                   <td className="px-4 py-3 text-slate-500">{s.display_order}</td>
                   <td className="px-4 py-3">

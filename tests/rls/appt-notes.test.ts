@@ -112,7 +112,7 @@ async function run() {
       const id = await newAppt("new");
       created.push(id);
       const reason = "تحديث ملاحظات أثناء الاتصال";
-      const { error } = await recepC.rpc("update_appointment_notes" as unknown, {
+      const { error } = await recepC.rpc("update_appointment_notes" as any, {
         _id: id,
         _notes: "المريض يفضل الفترة الصباحية",
         _reason: reason,
@@ -130,7 +130,7 @@ async function run() {
       const id = await newAppt("new");
       created.push(id);
       await admin.from("appointments").update({ notes: "قديم" }).eq("id", id);
-      const { error } = await adminC.rpc("update_appointment_notes" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_notes" as any, {
         _id: id,
         _notes: null,
         _reason: "مسح",
@@ -145,7 +145,7 @@ async function run() {
       const id = await newAppt("new");
       created.push(id);
       await admin.from("appointments").update({ notes: "ثابت" }).eq("id", id);
-      await pharmC.rpc("update_appointment_notes" as unknown, {
+      await pharmC.rpc("update_appointment_notes" as any, {
         _id: id,
         _notes: "محاولة تعديل",
         _reason: null,
@@ -157,7 +157,7 @@ async function run() {
     await test("patient (no role) cannot mutate notes", async () => {
       const id = await newAppt("new");
       created.push(id);
-      await patC.rpc("update_appointment_notes" as unknown, {
+      await patC.rpc("update_appointment_notes" as any, {
         _id: id,
         _notes: "لست موظفًا",
         _reason: null,
@@ -170,7 +170,7 @@ async function run() {
     await test("DB trigger: cancelled without reason → check_violation", async () => {
       const id = await newAppt("confirmed");
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "cancelled",
         _reason: "",
@@ -186,7 +186,7 @@ async function run() {
     await test("DB trigger: no_show without reason → check_violation", async () => {
       const id = await newAppt("confirmed");
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "no_show",
         _reason: null,
@@ -202,7 +202,7 @@ async function run() {
       const id = await newAppt("confirmed");
       created.push(id);
       const reason = "طلب المريض";
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "cancelled",
         _reason: reason,

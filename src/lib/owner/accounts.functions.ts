@@ -20,7 +20,7 @@ const ROLES = [
 export type AppRole = (typeof ROLES)[number];
 
 async function logAudit(
-  supa: unknown,
+  supa: any,
   actor: string,
   action: string,
   record_id: string | null,
@@ -75,11 +75,11 @@ export const listAccounts = createServerFn({ method: "POST" })
       supabaseAdmin.from("user_roles").select("user_id,role").in("user_id", ids),
     ]);
     const profiles = new Map<string, { full_name: string | null; phone: string | null }>();
-    (profilesRes.data ?? []).forEach((p: unknown) =>
+    (profilesRes.data ?? []).forEach((p: any) =>
       profiles.set(p.id, { full_name: p.full_name, phone: p.phone }),
     );
     const rolesByUser = new Map<string, string[]>();
-    (rolesRes.data ?? []).forEach((r: unknown) => {
+    (rolesRes.data ?? []).forEach((r: any) => {
       const arr = rolesByUser.get(r.user_id) ?? [];
       arr.push(r.role);
       rolesByUser.set(r.user_id, arr);
@@ -88,7 +88,7 @@ export const listAccounts = createServerFn({ method: "POST" })
     const now = Date.now();
     let enriched = page.users.map((u) => {
       const prof = profiles.get(u.id);
-      const banned_until = (u as unknown).banned_until ?? null;
+      const banned_until = (u as any).banned_until ?? null;
       const disabled = Boolean(banned_until && new Date(banned_until).getTime() > now);
       const confirmed = Boolean(u.email_confirmed_at || u.phone_confirmed_at);
       return {
@@ -234,7 +234,7 @@ export const setUserBan = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.auth.admin.updateUserById(data.user_id, {
       ban_duration: data.disable ? "876000h" : "none",
-    } as unknown);
+    } as any);
     if (error) throw new Error(error.message);
     await logAudit(
       supabaseAdmin,

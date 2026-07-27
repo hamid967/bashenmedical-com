@@ -49,7 +49,7 @@ export const listNoShowPredictions = createServerFn({ method: "GET" })
     if (data.organizationId) q = q.eq("organization_id", data.organizationId);
     const { data: rows, error } = await q.order("risk", { ascending: false }).limit(data.limit);
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r: unknown) => ({
+    return (rows ?? []).map((r: any) => ({
       appointment_id: r.appointment_id,
       risk: Number(r.risk),
       top_factors: r.top_factors ?? [],

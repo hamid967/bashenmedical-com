@@ -105,7 +105,7 @@ function AuditPage() {
     const header = "created_at,action,actor_id,actor_email,actor_name,record_id,table_name,ip\n";
     const body = rows
       .map((r) => {
-        const a = (q.data.actors as unknown)?.[r.actor ?? ""] ?? {};
+        const a = (q.data.actors as any)?.[r.actor ?? ""] ?? {};
         return [
           r.created_at,
           r.action,
@@ -244,7 +244,7 @@ function AuditPage() {
             </thead>
             <tbody className="divide-y divide-slate-100">
               {q.data.rows.map((r) => {
-                const a = (q.data.actors as unknown)?.[r.actor ?? ""] ?? {};
+                const a = (q.data.actors as any)?.[r.actor ?? ""] ?? {};
                 return (
                   <tr key={r.id} className="hover:bg-slate-50">
                     <td className="px-3 py-2 text-slate-500 whitespace-nowrap">

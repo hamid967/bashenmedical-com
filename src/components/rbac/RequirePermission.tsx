@@ -46,7 +46,7 @@ export function RequirePermission({
     return (
       <Denied
         title="تعذّر التحقق من الصلاحيات"
-        message={(q.error as unknown)?.message ?? "أعد تحميل الصفحة أو سجّل الدخول مجدداً."}
+        message={(q.error as any)?.message ?? "أعد تحميل الصفحة أو سجّل الدخول مجدداً."}
       />
     );
   }

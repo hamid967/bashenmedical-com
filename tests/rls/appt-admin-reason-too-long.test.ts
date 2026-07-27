@@ -125,12 +125,12 @@ let user: { userId: string; email: string; password: string } | null = null;
           created.push(a.id);
           const before = await rowOf(a.id);
 
-          const { error } = await c.rpc("update_appointment_status" as unknown, {
+          const { error } = await c.rpc("update_appointment_status" as any, {
             _id: a.id,
             _status: status,
             _reason: raw,
           });
-          assertTooLongError(error as unknown);
+          assertTooLongError(error as any);
 
           const after = await rowOf(a.id);
           assert(
@@ -150,12 +150,12 @@ let user: { userId: string; email: string; password: string } | null = null;
         created.push(a.id);
         const before = await rowOf(a.id);
 
-        const { error } = await c.rpc("update_appointment_notes" as unknown, {
+        const { error } = await c.rpc("update_appointment_notes" as any, {
           _id: a.id,
           _notes: "ملاحظة جديدة",
           _reason: raw,
         });
-        assertTooLongError(error as unknown);
+        assertTooLongError(error as any);
 
         const after = await rowOf(a.id);
         assert(
@@ -172,7 +172,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       const a = await newAppt("confirmed");
       created.push(a.id);
       const raw = `  \u00A0${"د".repeat(REASON_MAX)}\u00A0  `; // 500 after trim
-      const { error } = await c.rpc("update_appointment_status" as unknown, {
+      const { error } = await c.rpc("update_appointment_status" as any, {
         _id: a.id,
         _status: "cancelled",
         _reason: raw,

@@ -153,7 +153,7 @@ async function fetchDoctors(specialtyId: string | null, branchId: string | null)
     _branch_id: branchId ?? undefined,
   });
   if (error) return [];
-  const list = (data ?? []) as unknown[];
+  const list = (data ?? []) as any[];
   return specialtyId ? list.filter((d) => d.specialty_id === specialtyId) : list;
 }
 
@@ -397,7 +397,7 @@ function BookPage() {
   // to pull specialty/branch from.
   useEffect(() => {
     if (isConcreteDoctorId(state.doctorId) && !state.specialtyId && doctors.length) {
-      const d = doctors.find((x: unknown) => x.id === state.doctorId);
+      const d = doctors.find((x: any) => x.id === state.doctorId);
       if (d)
         dispatch({
           t: "set",
@@ -493,7 +493,7 @@ function BookPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slotHold.expired, state.step]);
 
-  // Warn before losing an unsent draft: unknown patient input on step ≥ 4 counts.
+  // Warn before losing an unsent draft: any patient input on step ≥ 4 counts.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const hasDraft =
@@ -618,7 +618,7 @@ function BookPage() {
   // slot on the same date (>= originally requested time when possible).
   async function findAlternativeDoctor(date: string, preferredTime: string | null) {
     if (!state.specialtyId) return null;
-    const candidates = (doctors as unknown[])
+    const candidates = (doctors as any[])
       .filter((d) => d.id !== state.doctorId && d.specialty_id === state.specialtyId)
       .slice(0, 6);
     if (!candidates.length) return null;
@@ -633,7 +633,7 @@ function BookPage() {
         return { doctor: d, time: pick };
       }),
     );
-    const found = results.filter(Boolean) as { doctor: unknown; time: string }[];
+    const found = results.filter(Boolean) as { doctor: any; time: string }[];
     if (!found.length) return null;
     found.sort((a, b) => a.time.localeCompare(b.time));
     const best = found[0];

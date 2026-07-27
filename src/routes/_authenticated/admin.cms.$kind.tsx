@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/admin/cms/$kind")({
   head: ({ params }) => ({
     meta: [
-      { title: `CMS — ${(CMS_KINDS as unknown)[params.kind]?.label ?? params.kind}` },
+      { title: `CMS — ${(CMS_KINDS as any)[params.kind]?.label ?? params.kind}` },
       { name: "description", content: "إدارة عناصر المحتوى" },
     ],
   }),
@@ -33,7 +33,7 @@ function CmsListPage() {
   const { data } = useSuspenseQuery({
     queryKey: ["cms", "list", kind, status, q],
     queryFn: () =>
-      list({ data: { kind, status: (status || undefined) as unknown, q: q || undefined } }),
+      list({ data: { kind, status: (status || undefined) as any, q: q || undefined } }),
     staleTime: 15_000,
   });
 
@@ -48,7 +48,7 @@ function CmsListPage() {
       qc.invalidateQueries({ queryKey: ["cms"] });
       navigate({ to: "/admin/cms/$kind/$id", params: { kind, id: r.id } });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الإنشاء"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الإنشاء"),
   });
 
   if (!def) return <div className="p-6">نوع محتوى غير معروف</div>;
@@ -127,7 +127,7 @@ function CmsListPage() {
                 </td>
               </tr>
             )}
-            {(data ?? []).map((r: unknown) => (
+            {(data ?? []).map((r: any) => (
               <tr key={r.id} className="border-t hover:bg-accent/30">
                 <td className="p-2">
                   <Link

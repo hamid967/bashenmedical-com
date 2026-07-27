@@ -85,7 +85,7 @@ export const getAdminInvoice = createServerFn({ method: "GET" })
 // ---------------------------------------------------------------
 import { assertHasAnyRole } from "./_guard";
 
-async function requirePermission(supabase: unknown, userId: string, key: string): Promise<void> {
+async function requirePermission(supabase: any, userId: string, key: string): Promise<void> {
   const { data, error } = await supabase.rpc("has_permission", {
     _user_id: userId,
     _permission_key: key,
@@ -165,8 +165,8 @@ export const recordPayment = createServerFn({ method: "POST" })
       .select("amount, status")
       .eq("invoice_id", data.invoice_id);
     const paid = (sums ?? [])
-      .filter((p: unknown) => p.status === "succeeded")
-      .reduce((a: number, b: unknown) => a + Number(b.amount), 0);
+      .filter((p: any) => p.status === "succeeded")
+      .reduce((a: number, b: any) => a + Number(b.amount), 0);
     const nextStatus = paid >= Number(inv.total) ? "paid" : paid > 0 ? "partially_paid" : "pending";
     await context.supabase
       .from("invoices")
@@ -291,7 +291,7 @@ export const decideRefund = createServerFn({ method: "POST" })
     if (!legal[cur.status]?.includes(data.decision))
       throw new Error(`الانتقال ${cur.status} → ${data.decision} غير مسموح.`);
 
-    const patch: unknown = {
+    const patch: any = {
       status: data.decision,
       approved_by: context.userId,
       decision_reason: data.decision_reason ?? null,

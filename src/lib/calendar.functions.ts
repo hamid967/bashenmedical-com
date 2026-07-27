@@ -8,9 +8,9 @@ import { z } from "zod";
 
 type Role = "admin" | "reception" | "pharmacy" | "super_admin" | "doctor";
 
-async function getRoles(sb: unknown, userId: string): Promise<Role[]> {
+async function getRoles(sb: any, userId: string): Promise<Role[]> {
   const { data } = await sb.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: unknown) => r.role as Role);
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 
 function ensureStaff(roles: Role[]) {
@@ -107,7 +107,7 @@ export const rescheduleAppointment = createServerFn({ method: "POST" })
     // Best-effort audit log (matches pattern used in updateAppointmentStatus)
     try {
       await sb.rpc(
-        "log_security_event" as unknown,
+        "log_security_event" as any,
         {
           _action: "appointment_rescheduled",
           _appointment_id: data.id,
@@ -115,7 +115,7 @@ export const rescheduleAppointment = createServerFn({ method: "POST" })
           _to_status: current.status,
           _reason: `${current.appointment_date} ${current.appointment_time} → ${data.date} ${time}`,
           _metadata: { actor: context.userId },
-        } as unknown,
+        } as any,
       );
     } catch (e) {
       console.warn("[calendar] audit log failed", e);

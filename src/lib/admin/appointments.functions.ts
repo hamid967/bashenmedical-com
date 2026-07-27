@@ -33,7 +33,7 @@ export const listAdminAppointments = createServerFn({ method: "GET" })
       .order("appointment_time", { ascending: false })
       .range(data.offset, data.offset + data.limit - 1);
     if (data.branch_id) q = q.eq("branch_id", data.branch_id);
-    if (data.status) q = q.eq("status", data.status as unknown);
+    if (data.status) q = q.eq("status", data.status as any);
     if (data.from) q = q.gte("appointment_date", data.from);
     if (data.to) q = q.lte("appointment_date", data.to);
     if (data.q) {

@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const STAFF_ROLES = ["admin", "super_admin", "reception"] as const;
 
-async function assertStaff(supabase: unknown, userId: string) {
+async function assertStaff(supabase: any, userId: string) {
   for (const role of STAFF_ROLES) {
     const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: role });
     if (data) return;

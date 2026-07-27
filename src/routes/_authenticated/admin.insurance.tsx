@@ -162,7 +162,7 @@ function InsurancePage() {
     staleTime: 60_000,
   });
 
-  const rows: unknown[] = list.data?.rows ?? [];
+  const rows: any[] = list.data?.rows ?? [];
   const total: number = list.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -259,7 +259,7 @@ function InsurancePage() {
             className="rounded-md border bg-background px-3 py-2 text-sm"
           >
             <option value="">كل الشركات</option>
-            {(providers.data?.rows ?? []).map((p: unknown) => (
+            {(providers.data?.rows ?? []).map((p: any) => (
               <option key={p.id} value={p.id}>
                 {p.name_ar || p.name_en}
               </option>

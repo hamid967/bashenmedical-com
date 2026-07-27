@@ -14,7 +14,7 @@ import { recordSensitiveAccess } from "@/lib/audit/sensitive-access.server";
 // Phase 3B: audit-log reads are gated on the `audit.export` permission
 // (held globally by `auditor` and `super_admin`). Global-only scope —
 // audit visibility spans all branches.
-async function assertAuditReader(supabase: unknown, userId: string) {
+async function assertAuditReader(supabase: any, userId: string) {
   await assertPermission({ supabase, userId }, PERMISSIONS.AuditExport);
 }
 

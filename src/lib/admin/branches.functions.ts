@@ -99,9 +99,9 @@ export const listAdminBranches = createServerFn({ method: "GET" })
       });
       return m;
     };
-    const docs = tally(doctorsRes.data as unknown);
-    const appts = tally(apptsRes.data as unknown);
-    const ecs = tally(ecRes.data as unknown);
+    const docs = tally(doctorsRes.data as any);
+    const appts = tally(apptsRes.data as any);
+    const ecs = tally(ecRes.data as any);
 
     const enriched: BranchRow[] = branches.map((b) => ({
       ...b,
@@ -177,7 +177,7 @@ export const getAdminBranch = createServerFn({ method: "GET" })
     return {
       branch,
       doctors: doctorsRes.data ?? [],
-      excellence_centers: (ecRes.data ?? []).map((r: unknown) => r.excellence_centers).filter(Boolean),
+      excellence_centers: (ecRes.data ?? []).map((r: any) => r.excellence_centers).filter(Boolean),
       today_appts: todayApptsRes.count ?? 0,
       upcoming_appts: upcomingApptsRes.data ?? [],
     };

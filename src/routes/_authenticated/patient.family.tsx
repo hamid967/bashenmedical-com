@@ -123,26 +123,26 @@ function FamilyPage() {
   const invalidate = () => qc.invalidateQueries({ queryKey: ["patient", "family"] });
 
   const createMut = useMutation({
-    mutationFn: (v: FormState) => createDependent({ data: toPayload(v) as unknown }),
+    mutationFn: (v: FormState) => createDependent({ data: toPayload(v) as any }),
     onSuccess: () => {
       toast.success("تمت إضافة التابع");
       setDialogMode("closed");
       setForm(emptyForm);
       invalidate();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذر إضافة التابع"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذر إضافة التابع"),
   });
 
   const updateMut = useMutation({
     mutationFn: (v: FormState & { id: string }) =>
-      updateDependent({ data: { id: v.id, ...toPayload(v) } as unknown }),
+      updateDependent({ data: { id: v.id, ...toPayload(v) } as any }),
     onSuccess: () => {
       toast.success("تم تحديث البيانات");
       setDialogMode("closed");
       setEditing(null);
       invalidate();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذر التحديث"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذر التحديث"),
   });
 
   const deleteMut = useMutation({
@@ -152,7 +152,7 @@ function FamilyPage() {
       setConfirmDelete(null);
       invalidate();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذر الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذر الحذف"),
   });
 
   const openCreate = () => {
@@ -165,7 +165,7 @@ function FamilyPage() {
     setForm({
       full_name: d.full_name ?? "",
       relationship: d.relationship,
-      gender: (d.gender as unknown) ?? "",
+      gender: (d.gender as any) ?? "",
       date_of_birth: d.date_of_birth ?? "",
       national_id: d.national_id ?? "",
       phone: d.phone ?? "",
@@ -174,7 +174,7 @@ function FamilyPage() {
   };
 
   const bookFor = (d: Dependent) => {
-    navigate({ to: "/book", search: { subject: d.id } as unknown });
+    navigate({ to: "/book", search: { subject: d.id } as any });
   };
 
   const submit = () => {
@@ -316,7 +316,7 @@ function FamilyPage() {
                 <Label>صلة القرابة *</Label>
                 <Select
                   value={form.relationship}
-                  onValueChange={(v) => setForm({ ...form, relationship: v as unknown })}
+                  onValueChange={(v) => setForm({ ...form, relationship: v as any })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -334,7 +334,7 @@ function FamilyPage() {
                 <Label>الجنس</Label>
                 <Select
                   value={form.gender || undefined}
-                  onValueChange={(v) => setForm({ ...form, gender: v as unknown })}
+                  onValueChange={(v) => setForm({ ...form, gender: v as any })}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="—" />

@@ -79,7 +79,7 @@ async function handle(request: Request): Promise<Response> {
         "Cache-Control": "no-store",
       },
     });
-  } catch (e: unknown) {
+  } catch (e: any) {
     return new Response(`export_failed: ${e?.message ?? "unknown"}`, { status: 500 });
   }
 }

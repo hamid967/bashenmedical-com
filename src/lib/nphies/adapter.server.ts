@@ -216,7 +216,7 @@ async function httpDriver(
     const text = await res.text().catch(() => "");
     throw new Error(`NPHIES eligibility error: ${res.status} ${text.slice(0, 240)}`);
   }
-  const body = (await res.json()) as unknown;
+  const body = (await res.json()) as any;
   const respIssues = validateEligibilityResponse(body);
 
   const bene = body?.insurance?.[0] ?? {};

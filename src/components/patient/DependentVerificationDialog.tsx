@@ -180,7 +180,7 @@ export function DependentVerificationDialog({
       invalidate();
       invalidateFamily();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إرسال الطلب"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر إرسال الطلب"),
   });
 
   const cancelMut = useMutation({
@@ -190,7 +190,7 @@ export function DependentVerificationDialog({
       invalidate();
       invalidateFamily();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر الإلغاء"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر الإلغاء"),
   });
 
   const deleteDocMut = useMutation({
@@ -199,7 +199,7 @@ export function DependentVerificationDialog({
       toast.success("تم حذف المرفق");
       invalidate();
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر الحذف"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر الحذف"),
   });
 
   async function uploadFiles(files: FileList | null) {
@@ -239,7 +239,7 @@ export function DependentVerificationDialog({
         });
         toast.success(`تم رفع ${f.name}`);
         invalidate();
-      } catch (e: unknown) {
+      } catch (e: any) {
         toast.error(e?.message ?? `تعذّر رفع ${f.name}`);
       } finally {
         setUploadingName(null);
@@ -373,7 +373,7 @@ function NewRequestForm({
     <div className="grid gap-3 py-1">
       <div className="grid gap-1.5">
         <Label>صلة القرابة المُعلنة</Label>
-        <Select value={relationship} onValueChange={(v) => setRelationship(v as unknown)}>
+        <Select value={relationship} onValueChange={(v) => setRelationship(v as any)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>

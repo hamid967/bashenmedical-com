@@ -64,7 +64,7 @@ function SecurityPage() {
       if (error) throw error;
       setEnroll({ id: data.id, qr: data.totp.qr_code, secret: data.totp.secret });
       setEnrolling(true);
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e.message || "تعذّر بدء التسجيل");
     } finally {
       setEnrollBusy(false);
@@ -88,7 +88,7 @@ function SecurityPage() {
       setEnrolling(false);
       setEnrollCode("");
       await refresh();
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e.message || "الرمز غير صحيح");
     } finally {
       setEnrollBusy(false);
@@ -123,7 +123,7 @@ function SecurityPage() {
       setChallengeCode("");
       await refresh();
       navigate({ to: "/owner" });
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e.message || "الرمز غير صحيح");
     } finally {
       setChallengeBusy(false);
@@ -137,7 +137,7 @@ function SecurityPage() {
       if (error) throw error;
       toast.success("تم الحذف");
       await refresh();
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e.message);
     }
   };

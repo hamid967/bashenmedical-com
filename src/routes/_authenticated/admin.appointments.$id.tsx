@@ -39,7 +39,7 @@ function AppointmentDetail() {
     );
   if (q.isError) throw q.error;
   if (!q.data) throw notFound();
-  const { appointment: a, history } = q.data as unknown;
+  const { appointment: a, history } = q.data as any;
 
   return (
     <div className="container-app py-8">
@@ -111,7 +111,7 @@ function AppointmentDetail() {
             <p className="mt-2 text-sm text-muted-foreground">لا يوجد سجل حالات.</p>
           ) : (
             <ul className="mt-2 space-y-1 text-sm">
-              {history.map((h: unknown) => (
+              {history.map((h: any) => (
                 <li key={h.id} className="flex justify-between border-b py-1">
                   <span>
                     {h.from_status ?? "—"} ← {h.to_status}

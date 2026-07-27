@@ -75,7 +75,7 @@ function WhatsappDetailPage() {
     );
   }
 
-  const { row, updates, delivery } = q.data as unknown;
+  const { row, updates, delivery } = q.data as any;
   const branch = row.branch;
 
   return (
@@ -163,7 +163,7 @@ function WhatsappDetailPage() {
           </div>
         ) : (
           <ul className="divide-y">
-            {updates.map((u: unknown) => (
+            {updates.map((u: any) => (
               <li key={u.id} className="px-3 py-2 text-sm">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <span className="font-medium">{u.update_type}</span>
@@ -204,7 +204,7 @@ function WhatsappDetailPage() {
               </tr>
             </thead>
             <tbody>
-              {delivery.map((d: unknown) => (
+              {delivery.map((d: any) => (
                 <tr key={d.id} className="border-t">
                   <td className="px-3 py-2">{d.template ?? "—"}</td>
                   <td className="px-3 py-2">{d.provider ?? "—"}</td>

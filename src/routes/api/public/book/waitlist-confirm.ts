@@ -57,7 +57,7 @@ export const Route = createFileRoute("/api/public/book/waitlist-confirm")({
           const { data, error } = await supabaseAdmin.rpc("confirm_waitlist_offer", {
             _ref: parsed.data.ref.toUpperCase(),
             _phone4: parsed.data.phone4,
-          } as unknown);
+          } as any);
           if (error) {
             return json(500, { ok: false, kind: "server", message: "تعذّر تأكيد الحجز." });
           }

@@ -126,7 +126,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       await test(`notes ${name} → stored trimmed, audit matches`, async () => {
         const a = await newAppt();
         created.push(a.id);
-        const { error } = await c.rpc("update_appointment_notes" as unknown, {
+        const { error } = await c.rpc("update_appointment_notes" as any, {
           _id: a.id,
           _notes: raw,
           _reason: "تحديث ملاحظات",
@@ -167,7 +167,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       const a = await newAppt();
       created.push(a.id);
       const raw = `\n\t \u00A0${core500}\u00A0 \r\n`;
-      const { error } = await c.rpc("update_appointment_notes" as unknown, {
+      const { error } = await c.rpc("update_appointment_notes" as any, {
         _id: a.id,
         _notes: raw,
         _reason: null,
@@ -189,7 +189,7 @@ let user: { userId: string; email: string; password: string } | null = null;
     await test("notes = NULL clears existing value", async () => {
       const a = await newAppt("قيمة قديمة");
       created.push(a.id);
-      const { error } = await c.rpc("update_appointment_notes" as unknown, {
+      const { error } = await c.rpc("update_appointment_notes" as any, {
         _id: a.id,
         _notes: null,
         _reason: "مسح",
@@ -215,7 +215,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       await test(`notes whitespace-only (${label}) → rejected, nothing written`, async () => {
         const a = await newAppt("ثابتة");
         created.push(a.id);
-        const { error } = await c.rpc("update_appointment_notes" as unknown, {
+        const { error } = await c.rpc("update_appointment_notes" as any, {
           _id: a.id,
           _notes: ws,
           _reason: null,
@@ -245,7 +245,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       await test(`notes ${name} → rejected as notes_too_long`, async () => {
         const a = await newAppt("ثابتة");
         created.push(a.id);
-        const { error } = await c.rpc("update_appointment_notes" as unknown, {
+        const { error } = await c.rpc("update_appointment_notes" as any, {
           _id: a.id,
           _notes: raw,
           _reason: null,

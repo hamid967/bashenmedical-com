@@ -84,20 +84,20 @@ function ServiceCatalogAdmin() {
   }, [rows, listQuery.data]);
 
   const upsertMut = useMutation({
-    mutationFn: (v: unknown) => upsertFn({ data: v }),
+    mutationFn: (v: any) => upsertFn({ data: v }),
     onSuccess: () => {
       toast.success("تم الحفظ");
       setShowAdd(false);
       setNewRow({ slug: "", name_ar: "", name_en: "", display_order: 100, is_active: true });
       qc.invalidateQueries({ queryKey: ["admin", "service-catalog"] });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر الحفظ"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر الحفظ"),
   });
 
   const toggleMut = useMutation({
     mutationFn: (v: { id: string; is_active: boolean }) => toggleFn({ data: v }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "service-catalog"] }),
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر تغيير الحالة"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر تغيير الحالة"),
   });
 
   const reorderMut = useMutation({
@@ -109,7 +109,7 @@ function ServiceCatalogAdmin() {
       toast.success("تم حفظ الترتيب");
       qc.invalidateQueries({ queryKey: ["admin", "service-catalog"] });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر حفظ الترتيب"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر حفظ الترتيب"),
   });
 
   function move(i: number, dir: -1 | 1) {

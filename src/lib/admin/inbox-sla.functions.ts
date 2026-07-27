@@ -47,7 +47,7 @@ const TERMINAL_STATUSES: readonly InboxStatus[] = [
 const isTerminal = (s: InboxStatus) => TERMINAL_STATUSES.includes(s);
 
 // -------------- Auth --------------
-async function assertInboxStaff(supabase: unknown, userId: string): Promise<StaffRole[]> {
+async function assertInboxStaff(supabase: any, userId: string): Promise<StaffRole[]> {
   const checks = await Promise.all(
     STAFF_ROLES.map((r) => supabase.rpc("has_role", { _user_id: userId, _role: r })),
   );
@@ -142,7 +142,7 @@ export const getInboxSlaOverview = createServerFn({ method: "GET" })
     type EventRow = {
       item_id: string;
       action: string;
-      to_value: unknown;
+      to_value: any;
       created_at: string;
     };
 

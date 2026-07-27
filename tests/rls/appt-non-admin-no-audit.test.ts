@@ -151,7 +151,7 @@ const users: Array<{ userId: string; email: string; password: string }> = [];
           const a = await newAppt();
           created.push(a.id);
           const before = await rowOf(a.id);
-          const { error } = await client.rpc("update_appointment_status" as unknown, {
+          const { error } = await client.rpc("update_appointment_status" as any, {
             _id: a.id,
             _status: status,
             _reason: reason,
@@ -172,7 +172,7 @@ const users: Array<{ userId: string; email: string; password: string }> = [];
         const a = await newAppt();
         created.push(a.id);
         const before = await rowOf(a.id);
-        const { error } = await client.rpc("update_appointment_notes" as unknown, {
+        const { error } = await client.rpc("update_appointment_notes" as any, {
           _id: a.id,
           _notes: "محاولة تعديل عبر RPC",
           _reason: null,
@@ -194,7 +194,7 @@ const users: Array<{ userId: string; email: string; password: string }> = [];
     await test("control: admin RPC status change → 1 audit row (setup works)", async () => {
       const a = await newAppt();
       created.push(a.id);
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: a.id,
         _status: "completed",
         _reason: null,

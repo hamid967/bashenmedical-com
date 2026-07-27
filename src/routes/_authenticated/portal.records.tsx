@@ -162,13 +162,13 @@ function RecordsPage() {
     onSuccess: (res) => {
       window.open(res.url, "_blank", "noopener,noreferrer");
     },
-    onError: (err: unknown) => toast.error(err?.message ?? "تعذّر فتح الملف"),
+    onError: (err: any) => toast.error(err?.message ?? "تعذّر فتح الملف"),
   });
 
   const aiMut = useMutation({
     mutationFn: () => getRecordsAiSummary(),
     onSuccess: (res) => setAiSummary(res),
-    onError: (err: unknown) => toast.error(err?.message ?? "تعذّر توليد الملخص"),
+    onError: (err: any) => toast.error(err?.message ?? "تعذّر توليد الملخص"),
   });
 
   if (!data.patient) {
@@ -399,7 +399,7 @@ function RecordsPage() {
                               <button
                                 onClick={() =>
                                   downloadMut.mutate({
-                                    bucket: it.file!.bucket as unknown,
+                                    bucket: it.file!.bucket as any,
                                     path: it.file!.path,
                                   })
                                 }

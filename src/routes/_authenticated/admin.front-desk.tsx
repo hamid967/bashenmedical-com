@@ -22,7 +22,6 @@ import {
   ClipboardList,
   Loader2,
   PhoneCall,
-  Printer,
   RefreshCw,
   Search,
   SkipForward,
@@ -48,58 +47,6 @@ import {
 const searchSchema = z.object({
   tab: z.enum(["front-desk", "queue"]).default("front-desk"),
 });
-
-/**
- * Open a print-optimized window with a bilingual check-in ticket.
- * No layout impact on the parent page; uses window.open + document.write.
- */
-function printCheckInTicket(t: {
-  patientName: string | null | undefined;
-  reference: string | null | undefined;
-  doctorName: string | null | undefined;
-  appointmentTime: string | null | undefined;
-  queueNumber: number | string | null | undefined;
-  branchName?: string | null;
-}) {
-  const now = new Date();
-  const stamp = now.toLocaleString("ar-SA", { timeZone: "Asia/Riyadh" });
-  const html = `<!doctype html><html dir="rtl" lang="ar"><head><meta charset="utf-8"><title>تذكرة استقبال</title>
-<style>
-  @page { size: 80mm auto; margin: 6mm; }
-  body { font-family: -apple-system, "Segoe UI", Tahoma, sans-serif; color:#0f172a; margin:0; padding:8px; }
-  .brand { text-align:center; font-weight:700; font-size:14px; }
-  .sub { text-align:center; font-size:11px; color:#475569; margin-bottom:8px; }
-  .num { text-align:center; font-size:48px; font-weight:800; letter-spacing:2px; margin:8px 0; }
-  .row { display:flex; justify-content:space-between; font-size:12px; padding:3px 0; border-bottom:1px dashed #cbd5e1; }
-  .lbl { color:#64748b; }
-  .foot { text-align:center; font-size:10px; color:#64748b; margin-top:10px; }
-</style></head><body>
-  <div class="brand">مجمع باعشن الطبي</div>
-  <div class="sub">Baeshen Medical Complex</div>
-  ${t.queueNumber != null ? `<div class="num">#${t.queueNumber}</div>` : ""}
-  <div class="row"><span class="lbl">المريض</span><span>${escapeHtml(t.patientName ?? "—")}</span></div>
-  <div class="row"><span class="lbl">الطبيب</span><span>${escapeHtml(t.doctorName ?? "—")}</span></div>
-  <div class="row"><span class="lbl">الوقت</span><span>${escapeHtml(t.appointmentTime ?? "—")}</span></div>
-  <div class="row"><span class="lbl">المرجع</span><span>${escapeHtml(t.reference ?? "—")}</span></div>
-  ${t.branchName ? `<div class="row"><span class="lbl">الفرع</span><span>${escapeHtml(t.branchName)}</span></div>` : ""}
-  <div class="foot">${escapeHtml(stamp)}</div>
-  <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),300);};</script>
-</body></html>`;
-  const w = window.open("", "_blank", "width=380,height=640");
-  if (!w) {
-    alert("تعذّر فتح نافذة الطباعة. الرجاء السماح للنوافذ المنبثقة.");
-    return;
-  }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : c === '"' ? "&quot;" : "&#39;",
-  );
-}
 
 export const Route = createFileRoute("/_authenticated/admin/front-desk")({
   validateSearch: searchSchema,
@@ -135,7 +82,7 @@ function FrontDeskPage() {
   const { branchId } = useActiveBranch();
   const qc = useQueryClient();
 
-  // Realtime: unknown change to queue_entries in this branch invalidates both
+  // Realtime: any change to queue_entries in this branch invalidates both
   // datasets — the appointments list joins the queue row, so it needs to
   // refresh too.
   useEffect(() => {
@@ -283,7 +230,7 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
               </tr>
             </thead>
             <tbody>
-              {query.data.rows.map((r: unknown) => (
+              {query.data.rows.map((r: any) => (
                 <tr key={r.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono text-xs">{r.appointment_time ?? "—"}</td>
                   <td className="p-3 font-mono text-xs">
@@ -384,19 +331,6 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
                         label="إلغاء"
                         variant="danger"
                       />
-                      <ActionBtn
-                        onClick={() =>
-                          printCheckInTicket({
-                            patientName: r.patient_name,
-                            reference: r.reference_number ?? r.id.slice(0, 8),
-                            doctorName: r.doctor?.name_ar ?? r.doctor?.name_en,
-                            appointmentTime: r.appointment_time,
-                            queueNumber: r.queue?.queue_number ?? null,
-                          })
-                        }
-                        icon={<Printer className="h-3.5 w-3.5" />}
-                        label="تذكرة"
-                      />
                     </div>
                   </td>
                 </tr>
@@ -457,8 +391,8 @@ function QueueTab({ branchId }: { branchId: string | null }) {
     return <EmptyState message="طابور اليوم فارغ." />;
 
   // Group by doctor
-  const groups = new Map<string, { doctor: unknown; rows: unknown[] }>();
-  for (const row of query.data.rows as unknown[]) {
+  const groups = new Map<string, { doctor: any; rows: any[] }>();
+  for (const row of query.data.rows as any[]) {
     const key = row.doctor?.id ?? "unknown";
     const g = groups.get(key) ?? { doctor: row.doctor, rows: [] };
     g.rows.push(row);
@@ -477,7 +411,7 @@ function QueueTab({ branchId }: { branchId: string | null }) {
             <span className="text-xs text-muted-foreground">{g.rows.length} مريض</span>
           </header>
           <ul className="divide-y">
-            {g.rows.map((r: unknown) => (
+            {g.rows.map((r: any) => (
               <li key={r.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
                 <span className="inline-flex h-8 w-10 items-center justify-center rounded-md bg-muted font-mono text-xs">
                   #{r.queue_number}
@@ -516,19 +450,6 @@ function QueueTab({ branchId }: { branchId: string | null }) {
                     icon={<SkipForward className="h-3.5 w-3.5" />}
                     label="تخطٍ"
                     variant="warn"
-                  />
-                  <ActionBtn
-                    onClick={() =>
-                      printCheckInTicket({
-                        patientName: r.appointment?.patient_name,
-                        reference: r.appointment?.reference_number,
-                        doctorName: g.doctor?.name_ar ?? g.doctor?.name_en,
-                        appointmentTime: r.appointment?.appointment_time,
-                        queueNumber: r.queue_number,
-                      })
-                    }
-                    icon={<Printer className="h-3.5 w-3.5" />}
-                    label="تذكرة"
                   />
                 </div>
               </li>
@@ -671,7 +592,7 @@ function PatientSnapshotDialog({ patientId, onClose }: { patientId: string; onCl
               <p className="text-xs text-muted-foreground">لا يوجد.</p>
             ) : (
               <ul className="space-y-1">
-                {data.allergies.map((a: unknown, i: number) => (
+                {data.allergies.map((a: any, i: number) => (
                   <li
                     key={i}
                     className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-xs"
@@ -705,7 +626,7 @@ function PatientSnapshotDialog({ patientId, onClose }: { patientId: string; onCl
               <p className="text-xs text-muted-foreground">لا يوجد.</p>
             ) : (
               <ul className="space-y-1">
-                {data.recent_appointments.map((a: unknown) => (
+                {data.recent_appointments.map((a: any) => (
                   <li key={a.id} className="flex justify-between rounded border px-2 py-1 text-xs">
                     <span>
                       <span className="font-mono">{a.appointment_date}</span> {a.appointment_time} ·{" "}

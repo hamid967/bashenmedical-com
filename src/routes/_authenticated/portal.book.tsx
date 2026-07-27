@@ -244,7 +244,7 @@ function BookPage() {
           filter: `doctor_id=eq.${doctorId}`,
         },
         (payload) => {
-          const row: unknown = payload.new ?? payload.old;
+          const row: any = payload.new ?? payload.old;
           if (row?.slot_date === dateStr) {
             qc.invalidateQueries({
               queryKey: ["portal", "booking", "avail-slots", doctorId, dateStr, branchId],
@@ -314,7 +314,7 @@ function BookPage() {
         queryKey: ["portal", "booking", "avail-slots", doctorId, dateStr, branchId],
       });
     },
-    onError: (err: unknown) => toast.error(err?.message ?? "تعذّر حفظ الحجز"),
+    onError: (err: any) => toast.error(err?.message ?? "تعذّر حفظ الحجز"),
   });
 
   const verifyMut = useMutation({
@@ -333,7 +333,7 @@ function BookPage() {
       setVerify(r);
       qc.invalidateQueries({ queryKey: ["portal", "insurance-verify-history"] });
     },
-    onError: (err: unknown) => {
+    onError: (err: any) => {
       setVerify(null);
       toast.error(err?.message ?? "تعذّر التحقق من الأهلية");
     },
@@ -371,7 +371,7 @@ function BookPage() {
   const selectedDoctor = options.doctors.find((d) => d.id === doctorId);
   const selectedBranch = options.branches.find((b) => b.id === branchId);
   const selectedSpecialty = options.specialties.find((s) => s.id === specialtyId);
-  const selectedProvider = options.providers?.find((p: unknown) => p.id === providerId);
+  const selectedProvider = options.providers?.find((p: any) => p.id === providerId);
 
   function handleConfirm() {
     if (!doctorId || !dateStr || !slot || !slotId) return;
@@ -833,7 +833,7 @@ function BookPage() {
                     <SelectValue placeholder="اختر جهة التأمين" />
                   </SelectTrigger>
                   <SelectContent className="pointer-events-auto">
-                    {(options.providers ?? []).map((p: unknown) => (
+                    {(options.providers ?? []).map((p: any) => (
                       <SelectItem key={p.id} value={p.id}>
                         {p.name_ar}
                         {typeof p.coverage_percent === "number"

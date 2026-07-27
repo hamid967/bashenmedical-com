@@ -321,7 +321,7 @@ export const CMS_KIND_LIST: KindDef[] = Object.values(CMS_KINDS);
 /** Compute % of required (or all if none required) fields with non-empty values in a payload. */
 export function computeCompleteness(
   kind: CmsKind,
-  payload: Record<string, unknown> | null | undefined,
+  payload: Record<string, any> | null | undefined,
 ): number {
   const def = CMS_KINDS[kind];
   if (!def) return 0;

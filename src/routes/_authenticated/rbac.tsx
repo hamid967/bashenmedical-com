@@ -92,8 +92,8 @@ function RbacPage() {
   const toggleFn = useServerFn(setRolePermission);
 
   const myRoles = useQuery({ queryKey: ["my-roles"], queryFn: () => myRolesFn() });
-  const isSuper = (myRoles.data?.roles ?? []).includes("super_admin" as unknown);
-  const isAdmin = (myRoles.data?.roles ?? []).includes("admin" as unknown) || isSuper;
+  const isSuper = (myRoles.data?.roles ?? []).includes("super_admin" as any);
+  const isAdmin = (myRoles.data?.roles ?? []).includes("admin" as any) || isSuper;
 
   const [tab, setTab] = useState<Tab>("users");
 
@@ -111,7 +111,7 @@ function RbacPage() {
     );
   }
 
-  const tabs: Array<{ id: Tab; label: string; icon: unknown }> = [
+  const tabs: Array<{ id: Tab; label: string; icon: any }> = [
     { id: "users", label: "المستخدمون", icon: Users },
     { id: "roles", label: "الأدوار", icon: Layers },
     { id: "permissions", label: "الصلاحيات", icon: KeyRound },
@@ -188,10 +188,10 @@ function RbacPage() {
 /* ------------------------------- Users tab ------------------------------ */
 
 function UsersTab(props: {
-  listFn: unknown;
-  branchesFn: unknown;
-  assignFn: unknown;
-  revokeFn: unknown;
+  listFn: any;
+  branchesFn: any;
+  assignFn: any;
+  revokeFn: any;
   isSuper: boolean;
   qc: ReturnType<typeof useQueryClient>;
 }) {
@@ -212,7 +212,7 @@ function UsersTab(props: {
       qc.invalidateQueries({ queryKey: ["rbac-users"] });
       setOpenFor(null);
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر التعيين"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر التعيين"),
   });
 
   const revokeMut = useMutation({
@@ -221,7 +221,7 @@ function UsersTab(props: {
       toast.success("تم إلغاء الصلاحية");
       qc.invalidateQueries({ queryKey: ["rbac-users"] });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر الإلغاء"),
+    onError: (e: any) => toast.error(e?.message ?? "تعذّر الإلغاء"),
   });
 
   const filtered = useMemo(() => {
@@ -229,7 +229,7 @@ function UsersTab(props: {
     if (!q.trim()) return list;
     const s = q.trim().toLowerCase();
     return list.filter(
-      (u: unknown) =>
+      (u: any) =>
         (u.full_name ?? "").toLowerCase().includes(s) ||
         (u.email ?? "").toLowerCase().includes(s) ||
         (u.phone ?? "").toLowerCase().includes(s),
@@ -272,9 +272,9 @@ function UsersTab(props: {
                 </td>
               </tr>
             )}
-            {filtered.map((u: unknown) => {
+            {filtered.map((u: any) => {
               const branchMap = new Map<string, string>(
-                (branches.data ?? []).map((b: unknown) => [b.id as string, b.name_ar as string]),
+                (branches.data ?? []).map((b: any) => [b.id as string, b.name_ar as string]),
               );
               return (
                 <tr key={u.user_id} className="border-t border-border align-top">
@@ -288,7 +288,7 @@ function UsersTab(props: {
                       {u.roles.length === 0 && (
                         <span className="text-xs text-muted-foreground">بدون أدوار</span>
                       )}
-                      {u.roles.map((r: unknown) => (
+                      {u.roles.map((r: any) => (
                         <span
                           key={`${r.role}-${r.branch_id ?? "all"}`}
                           className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
@@ -338,7 +338,7 @@ function UsersTab(props: {
                           className="rounded-md border border-input bg-background px-2 py-1 text-xs"
                         >
                           <option value="">كل الفروع</option>
-                          {(branches.data ?? []).map((b: unknown) => (
+                          {(branches.data ?? []).map((b: any) => (
                             <option key={b.id} value={b.id}>
                               {b.name_ar}
                             </option>
@@ -414,9 +414,9 @@ function RolesTab() {
 /* --------------------------- Permissions tab ---------------------------- */
 
 function PermissionsTab(props: {
-  catalogFn: unknown;
-  matrixFn: unknown;
-  toggleFn: unknown;
+  catalogFn: any;
+  matrixFn: any;
+  toggleFn: any;
   isSuper: boolean;
   qc: ReturnType<typeof useQueryClient>;
 }) {
@@ -435,14 +435,14 @@ function PermissionsTab(props: {
       toggleFn({ data: v }),
     onMutate: async (v) => {
       await qc.cancelQueries({ queryKey: ["rbac-perm-matrix"] });
-      const prev = qc.getQueryData<Record<string, unknown>[]>(["rbac-perm-matrix"]) ?? [];
+      const prev = qc.getQueryData<any[]>(["rbac-perm-matrix"]) ?? [];
       const next = v.enabled
         ? [...prev, { role: v.role, permission_key: v.permission_key }]
         : prev.filter((r) => !(r.role === v.role && r.permission_key === v.permission_key));
       qc.setQueryData(["rbac-perm-matrix"], next);
       return { prev };
     },
-    onError: (e: unknown, _v, ctx) => {
+    onError: (e: any, _v, ctx) => {
       if (ctx?.prev) qc.setQueryData(["rbac-perm-matrix"], ctx.prev);
       toast.error(e?.message ?? "تعذّر تحديث الصلاحية");
     },
@@ -456,7 +456,7 @@ function PermissionsTab(props: {
   if (catalog.isError) {
     return (
       <div className="py-8 text-center text-destructive">
-        {(catalog.error as unknown)?.message ?? "تعذّر تحميل الصلاحيات"}
+        {(catalog.error as any)?.message ?? "تعذّر تحميل الصلاحيات"}
       </div>
     );
   }
@@ -464,7 +464,7 @@ function PermissionsTab(props: {
   // group by category
   const byCat = new Map<string, typeof catalog.data>();
   for (const p of catalog.data ?? []) {
-    const arr = byCat.get(p.category) ?? ([] as unknown);
+    const arr = byCat.get(p.category) ?? ([] as any);
     arr.push(p);
     byCat.set(p.category, arr);
   }
@@ -500,7 +500,7 @@ function PermissionsTab(props: {
                   {cat}
                 </td>
               </tr>,
-              ...(perms ?? []).map((p: unknown) => (
+              ...(perms ?? []).map((p: any) => (
                 <tr key={p.key} className="border-t border-border">
                   <td className="sticky right-0 z-10 bg-card px-3 py-2 text-right">
                     <div className="font-medium">{p.description_ar}</div>
@@ -573,7 +573,7 @@ function ImportExportToolbar(props: { isSuper: boolean; qc: ReturnType<typeof us
       a.remove();
       URL.revokeObjectURL(url);
       toast.success("تم تصدير الإعدادات");
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر التصدير");
     } finally {
       setBusy(false);
@@ -586,7 +586,7 @@ function ImportExportToolbar(props: { isSuper: boolean; qc: ReturnType<typeof us
   };
 
   const handleImport = async () => {
-    let payload: unknown;
+    let payload: any;
     try {
       payload = JSON.parse(text);
     } catch {
@@ -599,7 +599,7 @@ function ImportExportToolbar(props: { isSuper: boolean; qc: ReturnType<typeof us
     }
     try {
       setBusy(true);
-      const res: unknown = await importFn({ data: { mode, payload } });
+      const res: any = await importFn({ data: { mode, payload } });
       qc.invalidateQueries({ queryKey: ["rbac-perm-matrix"] });
       const bits = [
         `أُضيفت ${res.added}`,
@@ -611,7 +611,7 @@ function ImportExportToolbar(props: { isSuper: boolean; qc: ReturnType<typeof us
       toast.success(`تم الاستيراد — ${bits.join(" • ")}`);
       setImportOpen(false);
       setText("");
-    } catch (e: unknown) {
+    } catch (e: any) {
       toast.error(e?.message ?? "تعذّر الاستيراد");
     } finally {
       setBusy(false);

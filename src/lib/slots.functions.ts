@@ -130,8 +130,8 @@ export const bookSlotAsGuardian = createServerFn({ method: "POST" })
 
     if (data.dependentId) {
       const { data: allowed, error: guardErr } = await supabase.rpc(
-        "can_book_for_dependent" as unknown,
-        { _guardian: userId, _dependent: data.dependentId } as unknown,
+        "can_book_for_dependent" as any,
+        { _guardian: userId, _dependent: data.dependentId } as any,
       );
       if (guardErr) throw new Error("تعذّر التحقق من صلاحية الحجز نيابةً.");
       if (allowed !== true) {
@@ -162,7 +162,7 @@ export const bookSlotAsGuardian = createServerFn({ method: "POST" })
       const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       await supabaseAdmin
         .from("appointments")
-        .update({ booked_for_dependent_id: data.dependentId } as unknown)
+        .update({ booked_for_dependent_id: data.dependentId } as any)
         .eq("id", appointmentId);
     }
 
@@ -227,8 +227,8 @@ export const cancelMyAppointment = createServerFn({ method: "POST" })
     //    phone ownership + allowed transitions.
     const reasonText = (data.reason ?? "").trim() || "إلغاء ذاتي من بوابة المريض";
     const { error: updErr } = await sb.rpc(
-      "update_appointment_status" as unknown,
-      { _id: data.appointmentId, _status: "cancelled", _reason: reasonText } as unknown,
+      "update_appointment_status" as any,
+      { _id: data.appointmentId, _status: "cancelled", _reason: reasonText } as any,
     );
     if (updErr) throw new Error("تعذّر إلغاء الحجز. حاول لاحقًا.");
 
@@ -270,7 +270,7 @@ export const generateSlots = createServerFn({ method: "POST" })
     // Authorize: only admin/reception/doctor can generate slots
     const roleChecks = await Promise.all(
       (["admin", "reception", "doctor"] as const).map((r) =>
-        context.supabase.rpc("has_role", { _user_id: context.userId, _role: r as unknown }),
+        context.supabase.rpc("has_role", { _user_id: context.userId, _role: r as any }),
       ),
     );
     const allowed = roleChecks.some((r) => r.data === true);
@@ -383,7 +383,7 @@ export const listSlotsAdmin = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roleChecks = await Promise.all(
       (["admin", "reception", "doctor"] as const).map((r) =>
-        context.supabase.rpc("has_role", { _user_id: context.userId, _role: r as unknown }),
+        context.supabase.rpc("has_role", { _user_id: context.userId, _role: r as any }),
       ),
     );
     if (!roleChecks.some((r) => r.data === true)) {
@@ -413,7 +413,7 @@ export const deleteSlot = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const roleChecks = await Promise.all(
       (["admin", "reception", "doctor"] as const).map((r) =>
-        context.supabase.rpc("has_role", { _user_id: context.userId, _role: r as unknown }),
+        context.supabase.rpc("has_role", { _user_id: context.userId, _role: r as any }),
       ),
     );
     if (!roleChecks.some((r) => r.data === true)) {

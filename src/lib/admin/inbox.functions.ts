@@ -81,7 +81,7 @@ export type InboxItem = {
   assigned_to: string | null;
   linked_appointment_id: string | null;
   required_action: string | null;
-  metadata: Record<string, unknown>;
+  metadata: Record<string, any>;
   last_action_at: string | null;
   archived_at: string | null;
   created_at: string;
@@ -94,8 +94,8 @@ export type InboxEvent = {
   item_id: string;
   actor_user_id: string | null;
   action: InboxActionKind;
-  from_value: unknown;
-  to_value: unknown;
+  from_value: any;
+  to_value: any;
   note: string | null;
   created_at: string;
 };
@@ -104,7 +104,7 @@ export type InboxEvent = {
 export const STAFF_ROLES = ["admin", "super_admin", "reception", "support_agent"] as const;
 export type StaffRole = (typeof STAFF_ROLES)[number];
 
-async function assertInboxStaff(supabase: unknown, userId: string): Promise<StaffRole[]> {
+async function assertInboxStaff(supabase: any, userId: string): Promise<StaffRole[]> {
   const checks = await Promise.all(
     STAFF_ROLES.map((role) => supabase.rpc("has_role", { _user_id: userId, _role: role })),
   );
@@ -136,7 +136,7 @@ export function assertAllowed(roles: StaffRole[], action: InboxActionKind) {
 }
 
 async function logEvent(
-  supabase: unknown,
+  supabase: any,
   itemId: string,
   action: InboxActionKind,
   from: unknown,
@@ -183,7 +183,7 @@ export const listInboxItems = createServerFn({ method: "GET" })
   .validator((d: unknown) => ListInput.parse(d ?? {}))
   .handler(async ({ data, context }): Promise<InboxItem[]> => {
     await assertInboxStaff(context.supabase, context.userId);
-    let q: unknown = context.supabase
+    let q: any = context.supabase
       .from("inbox_items")
       .select("*")
       .order("created_at", { ascending: false })
@@ -280,7 +280,7 @@ export const getInboxCounts = createServerFn({ method: "GET" })
 // ---------------- Mutations (each = 1 audit event) ----------------
 const IdOnly = z.object({ id: z.string().uuid() });
 
-async function loadItem(supabase: unknown, id: string): Promise<InboxItem> {
+async function loadItem(supabase: any, id: string): Promise<InboxItem> {
   const { data, error } = await supabase.from("inbox_items").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("الطلب غير موجود.");
@@ -330,7 +330,7 @@ export const transferInboxItem = createServerFn({ method: "POST" })
     const roles = await assertInboxStaff(context.supabase, context.userId);
     assertAllowed(roles, "transfer");
     const before = await loadItem(context.supabase, data.id);
-    const patch: Record<string, unknown> = {};
+    const patch: Record<string, any> = {};
     if (data.department !== undefined) patch.department = data.department;
     if (data.branch_id !== undefined) patch.branch_id = data.branch_id;
     if (!Object.keys(patch).length) throw new Error("لا يوجد تحويل صالح.");
@@ -508,7 +508,7 @@ export const linkInboxAppointment = createServerFn({ method: "POST" })
       if (error) throw new Error(error.message);
       if (!appt) throw new Error("الموعد غير موجود.");
     }
-    const patch: Record<string, unknown> = {
+    const patch: Record<string, any> = {
       linked_appointment_id: data.appointment_id,
     };
     if (data.appointment_id && before.status !== "appointment_created") {

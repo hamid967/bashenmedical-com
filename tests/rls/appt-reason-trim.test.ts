@@ -120,7 +120,7 @@ async function run() {
       created.push(id);
       const raw = "  اتصل المريض لإلغاء الحجز  ";
       const trimmed = reasonSchema.parse(raw)!; // what the server function forwards
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "cancelled",
         _reason: trimmed,
@@ -140,7 +140,7 @@ async function run() {
       created.push(id);
       const raw = "\n المريض لم يحضر بعد الاتصال \t";
       const trimmed = reasonSchema.parse(raw)!;
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "no_show",
         _reason: trimmed,
@@ -156,7 +156,7 @@ async function run() {
     await test("cancelled: empty-string reason → rejected by trigger", async () => {
       const id = await newAppt("confirmed");
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "cancelled",
         _reason: "",
@@ -174,7 +174,7 @@ async function run() {
       const id = await newAppt("confirmed");
       created.push(id);
       const rawTrimmed = reasonSchema.parse("   \n\t   "); // === ""
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "no_show",
         _reason: rawTrimmed,
@@ -190,7 +190,7 @@ async function run() {
     await test("cancelled: NULL reason → rejected by trigger", async () => {
       const id = await newAppt("confirmed");
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "cancelled",
         _reason: null,
@@ -205,7 +205,7 @@ async function run() {
     await test("confirmed (non-cancel/no_show): reason optional, empty accepted", async () => {
       const id = await newAppt("new");
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
+      const { error } = await adminC.rpc("update_appointment_status" as any, {
         _id: id,
         _status: "confirmed",
         _reason: "",

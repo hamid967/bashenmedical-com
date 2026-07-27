@@ -12,9 +12,9 @@ import { z } from "zod";
 
 type Role = "admin" | "reception" | "pharmacy" | "super_admin";
 
-async function getRoles(supabase: unknown, userId: string): Promise<Role[]> {
+async function getRoles(supabase: any, userId: string): Promise<Role[]> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: unknown) => r.role as Role);
+  return (data ?? []).map((r: any) => r.role as Role);
 }
 
 function ensureAdmin(roles: Role[]) {

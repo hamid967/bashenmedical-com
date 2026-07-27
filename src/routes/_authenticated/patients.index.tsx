@@ -135,7 +135,7 @@ function PatientsList() {
             </div>
             <select
               value={branchId}
-              onChange={(e) => setBranchId(e.target.value as unknown)}
+              onChange={(e) => setBranchId(e.target.value as any)}
               className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="all">كل الفروع</option>
@@ -347,7 +347,7 @@ function CreatePatientDialog({
     try {
       const { mrn } = await generateMrnFn({ data: { branchId: form.branch_id } });
       const { data: user } = await supabase.auth.getUser();
-      const payload: unknown = {
+      const payload: any = {
         branch_id: form.branch_id,
         mrn,
         full_name_ar: form.full_name_ar.trim(),
@@ -372,7 +372,7 @@ function CreatePatientDialog({
       if (error) throw error;
       toast.success(`تم إنشاء الملف: ${mrn}`);
       onCreated();
-    } catch (err: unknown) {
+    } catch (err: any) {
       toast.error(err?.message ?? "تعذّر الإنشاء");
     } finally {
       setSaving(false);

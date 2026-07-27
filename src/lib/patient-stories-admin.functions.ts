@@ -5,7 +5,7 @@ import { z } from "zod";
 const STATUSES = ["pending_review", "published", "rejected"] as const;
 export type PatientStoryStatus = (typeof STATUSES)[number];
 
-async function assertAdmin(ctx: { supabase: unknown; userId: string }) {
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
   const { data, error } = await ctx.supabase.rpc("has_role", {
     _user_id: ctx.userId,
     _role: "admin",

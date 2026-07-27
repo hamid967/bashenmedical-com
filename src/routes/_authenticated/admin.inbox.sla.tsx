@@ -494,17 +494,17 @@ function AlertConfigCard() {
       toast.success("تم حفظ إعدادات التنبيهات");
       qc.invalidateQueries({ queryKey: ["sla-alert-config"] });
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
   const sweep = useMutation({
     mutationFn: () => runSweep(),
-    onSuccess: (r: unknown) => {
+    onSuccess: (r: any) => {
       toast.success(
         `فحص فوري: ${r.new_breaches} تجاوز جديد • webhook ${r.webhook_sent} • بريد ${r.email_queued}`,
       );
     },
-    onError: (e: unknown) => toast.error(e?.message ?? "فشل الفحص"),
+    onError: (e: any) => toast.error(e?.message ?? "فشل الفحص"),
   });
 
   const testWebhook = useMutation({
@@ -518,7 +518,7 @@ function AlertConfigCard() {
       if (r.ok) toast.success(`نجح الاختبار (HTTP ${r.status} • ${r.duration_ms}ms)`);
       else toast.error(r.error ?? "فشل الاختبار");
     },
-    onError: (e: unknown) => {
+    onError: (e: any) => {
       setTestResult({
         ok: false,
         status: null,
@@ -555,7 +555,7 @@ function AlertConfigCard() {
           <span className="block text-xs text-muted-foreground mb-1">الحد الأدنى للأولوية</span>
           <select
             value={minPriority}
-            onChange={(e) => setMinPriority(e.target.value as unknown)}
+            onChange={(e) => setMinPriority(e.target.value as any)}
             className="w-full border rounded px-2 py-1 bg-background"
           >
             <option value="urgent">عاجل فقط</option>

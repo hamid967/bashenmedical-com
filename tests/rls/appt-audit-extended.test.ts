@@ -146,7 +146,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       await test(`status=${status} with reason=null → rejected, no audit row`, async () => {
         const a = await newAppt("confirmed");
         created.push(a.id);
-        const { error } = await c.rpc("update_appointment_status" as unknown, {
+        const { error } = await c.rpc("update_appointment_status" as any, {
           _id: a.id,
           _status: status,
           _reason: null,
@@ -166,7 +166,7 @@ let user: { userId: string; email: string; password: string } | null = null;
     await test("non-required status (confirmed→completed) via RPC with reason=null → audit reason IS null", async () => {
       const a = await newAppt("confirmed");
       created.push(a.id);
-      const { error } = await c.rpc("update_appointment_status" as unknown, {
+      const { error } = await c.rpc("update_appointment_status" as any, {
         _id: a.id,
         _status: "completed",
         _reason: null,
@@ -206,7 +206,7 @@ let user: { userId: string; email: string; password: string } | null = null;
         { to: "completed" as const, reason: null },
       ];
       for (const s of steps) {
-        const { error } = await c.rpc("update_appointment_status" as unknown, {
+        const { error } = await c.rpc("update_appointment_status" as any, {
           _id: a.id,
           _status: s.to,
           _reason: s.reason,
@@ -214,7 +214,7 @@ let user: { userId: string; email: string; password: string } | null = null;
         assert(!error, `rpc failed at step ${s.to}: ${error?.code} ${error?.message}`);
       }
       // Extra step needing a reason
-      const { error: e3 } = await c.rpc("update_appointment_status" as unknown, {
+      const { error: e3 } = await c.rpc("update_appointment_status" as any, {
         _id: a.id,
         _status: "cancelled",
         _reason: "قرار المريض",

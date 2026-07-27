@@ -89,7 +89,7 @@ export const listInsuranceApprovals = createServerFn({ method: "GET" })
 
     let filtered = rows ?? [];
     if (data.branch_id) {
-      filtered = filtered.filter((r: unknown) => r?.appointment?.branch_id === data.branch_id);
+      filtered = filtered.filter((r: any) => r?.appointment?.branch_id === data.branch_id);
     }
     return { rows: filtered, total: count ?? filtered.length };
   });
@@ -136,7 +136,7 @@ export const getInsuranceApproval = createServerFn({ method: "GET" })
     if (approvalRes.error) throw new Error(approvalRes.error.message);
     if (!approvalRes.data) throw new Error("NOT_FOUND");
     if (eventsRes.error) throw new Error(eventsRes.error.message);
-    return { ...(approvalRes.data as unknown), events: eventsRes.data ?? [] };
+    return { ...(approvalRes.data as any), events: eventsRes.data ?? [] };
   });
 
 // Alias expected by the existing detail route.
@@ -183,13 +183,13 @@ export const transitionInsuranceApproval = createServerFn({ method: "POST" })
     if (data.patient_share !== undefined) meta.patient_share = data.patient_share;
     if (data.missing_documents !== undefined) meta.missing_documents = data.missing_documents;
 
-    const { data: row, error } = await (context.supabase as unknown).rpc(
+    const { data: row, error } = await (context.supabase as any).rpc(
       "transition_insurance_approval",
       {
         _approval_id: data.approval_id,
         _to_status: data.to_status,
         _note: data.note ?? null,
-        _meta: meta as unknown as unknown,
+        _meta: meta as unknown as any,
       },
     );
     if (error) {
@@ -232,13 +232,13 @@ export const decideInsuranceApproval = createServerFn({ method: "POST" })
     if (curErr) throw new Error(curErr.message);
     if (!cur) throw new Error("الطلب غير موجود.");
 
-    const sb = context.supabase as unknown;
+    const sb = context.supabase as any;
     const rpc = (to_status: InsuranceStatus, note?: string) =>
       sb.rpc("transition_insurance_approval", {
         _approval_id: data.id,
         _to_status: to_status,
         _note: note ?? null,
-        _meta: {} as unknown as unknown,
+        _meta: {} as unknown as any,
       });
 
     let status = cur.status as InsuranceStatus;

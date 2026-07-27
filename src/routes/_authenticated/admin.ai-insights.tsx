@@ -275,7 +275,7 @@ function RecsTab({ tenantId }: { tenantId: string | null }) {
   };
   return (
     <div className="grid gap-3 md:grid-cols-2">
-      {data.map((r: unknown) => (
+      {data.map((r: any) => (
         <div key={r.id} className="border rounded-lg p-4 space-y-2 bg-card">
           <div className="flex items-center gap-2">
             <PriorityBadge priority={r.priority} />
@@ -328,7 +328,7 @@ function ComplaintsTab({ tenantId }: { tenantId: string | null }) {
           </tr>
         </thead>
         <tbody>
-          {data.map((c: unknown) => (
+          {data.map((c: any) => (
             <tr key={c.id} className="border-t">
               <Td>{c.reference}</Td>
               <Td>{c.type}</Td>
