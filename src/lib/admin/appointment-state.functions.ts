@@ -50,8 +50,8 @@ export const transitionAppointmentStatus = createServerFn({ method: "POST" })
     const { data: row, error } = await context.supabase.rpc("transition_appointment_status", {
       _appointment_id: data.appointment_id,
       _to_status: data.to_status,
-      _reason: data.reason ?? null,
-      _metadata: (data.metadata ?? {}) as object,
+      _reason: data.reason ?? undefined,
+      _metadata: (data.metadata ?? {}) as never,
     });
     if (error) throw new Error(error.message);
     return { ok: true as const, appointment: row };
