@@ -107,21 +107,6 @@ async function upsertPatientProfile(userId: string, mrn: string) {
   if (error) throw error;
 }
 
-async function verifyProfilePhone(userId: string, phone: string) {
-  // The `users read own appointments` policy resolves ownership via
-  // `_appointment_belongs_to_me(phone)`, which requires a verified phone
-  // on `public.profiles` matching (digits-only) the appointment phone.
-  //
-  // `_guard_profile_verified_phone` blocks writes to `verified_phone` /
-  // `phone_verified_at` unless the transaction sets the GUC
-  // `app.allow_verified_phone_write='on'`. supabase-js opens a new
-  // connection per request, so we shell out to `psql` for one transaction
-  // that sets the local GUC and performs the write atomically.
-  const { spawnSync } = await import("node:child_process");
-  const sql = `BEGIN; SET LOCAL app.allow_verified_phone_write='on'; UPDATE public.profiles SET verified_phone=$$${phone}$$, phone_verified_at=now() WHERE id=$$${userId}$$; COMMIT;`;
-  const res = spawnSync("psql", ["-v", "ON_ERROR_STOP=1", "-c", sql], { encoding: "utf8" });
-  if (res.status !== 0) throw new Error(`psql verifyProfilePhone failed: ${res.stderr}`);
-}
 
 function randomTime(): string {
   const h = 6 + Math.floor(Math.random() * 12);
