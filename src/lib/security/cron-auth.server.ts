@@ -13,10 +13,7 @@ export function verifyInternalCronSecret(request: Request): Response | null {
   const bearer = auth.replace(/^Bearer\s+/i, "").trim();
   const url = new URL(request.url);
   const provided =
-    request.headers.get("x-cron-secret") ||
-    bearer ||
-    url.searchParams.get("secret") ||
-    "";
+    request.headers.get("x-cron-secret") || bearer || url.searchParams.get("secret") || "";
 
   const a = Buffer.from(provided);
   const b = Buffer.from(expected);

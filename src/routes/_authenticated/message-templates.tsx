@@ -46,7 +46,7 @@ export const Route = createFileRoute("/_authenticated/message-templates")({
 const CHANNELS: Array<{
   value: MessageChannel;
   label: string;
-  Icon: any;
+  Icon: unknown;
   color: string;
   hint: string;
 }> = [
@@ -89,8 +89,8 @@ const CHANNELS: Array<{
 
 const CHANNEL_META: Record<
   MessageChannel,
-  { value: MessageChannel; label: string; Icon: any; color: string; hint: string }
-> = Object.fromEntries(CHANNELS.map((c) => [c.value, c])) as any;
+  { value: MessageChannel; label: string; Icon: unknown; color: string; hint: string }
+> = Object.fromEntries(CHANNELS.map((c) => [c.value, c])) as unknown;
 
 type FormState = {
   id: string | null;
@@ -161,7 +161,7 @@ function MessageTemplatesPage() {
       });
       setErrors({});
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
   const remove = useMutation({
@@ -171,7 +171,7 @@ function MessageTemplatesPage() {
       qc.invalidateQueries({ queryKey: ["message-templates"] });
       setForm(EMPTY);
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل الحذف"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحذف"),
   });
 
   function validate(v: FormState) {
@@ -229,7 +229,7 @@ function MessageTemplatesPage() {
       setTestRecipient("");
       qc.invalidateQueries({ queryKey: ["admin-notif"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل الإرسال التجريبي"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل الإرسال التجريبي"),
   });
 
   function insertVariable(key: string) {

@@ -11,7 +11,7 @@
  *    Pass `context.claims` to `assertOwnerOnly` to enforce it.
  */
 
-async function hasRole(supabase: any, userId: string, role: string): Promise<boolean> {
+async function hasRole(supabase: unknown, userId: string, role: string): Promise<boolean> {
   const { data, error } = await supabase.rpc("has_role", {
     _user_id: userId,
     _role: role,
@@ -21,19 +21,19 @@ async function hasRole(supabase: any, userId: string, role: string): Promise<boo
 }
 
 /** Throws if the caller's session is not AAL2 (MFA-verified). */
-export function assertAAL2(claims: any): void {
+export function assertAAL2(claims: unknown): void {
   const aal = claims?.aal;
   if (aal !== "aal2") {
     const err = new Error(
       "هذه العملية تتطلب التحقق متعدد العوامل (MFA). فعّل رمز TOTP من صفحة الأمان ثم أعِد المحاولة.",
     );
-    (err as any).code = "MFA_REQUIRED";
+    (err as unknown).code = "MFA_REQUIRED";
     throw err;
   }
 }
 
 /** Owner OR editor. Use for read/create/update endpoints. */
-export async function assertContentAccess(supabase: any, userId: string): Promise<void> {
+export async function assertContentAccess(supabase: unknown, userId: string): Promise<void> {
   const [isOwner, isEditor] = await Promise.all([
     hasRole(supabase, userId, "super_admin"),
     hasRole(supabase, userId, "content_manager"),
@@ -48,7 +48,7 @@ export async function assertContentAccess(supabase: any, userId: string): Promis
  * When `claims` is passed, also enforces AAL2 (MFA) — required for all
  * super_admin endpoints.
  */
-export async function assertOwnerOnly(supabase: any, userId: string, claims?: any): Promise<void> {
+export async function assertOwnerOnly(supabase: unknown, userId: string, claims?: unknown): Promise<void> {
   const ok = await hasRole(supabase, userId, "super_admin");
   if (!ok) throw new Error("هذه العملية مخصصة لمالك الموقع فقط.");
   if (claims !== undefined) assertAAL2(claims);

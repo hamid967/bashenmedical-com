@@ -9,7 +9,7 @@ export function StepBranch({
   onPick,
 }: {
   lang: "ar" | "en";
-  branches: any[];
+  branches: unknown[];
   value: string | null;
   onPick: (v: string) => void;
 }) {

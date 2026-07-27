@@ -64,7 +64,7 @@ function ServiceEditor() {
     if (isNew) return;
     (async () => {
       try {
-        const row: any = await getFn({ data: { id } });
+        const row: unknown = await getFn({ data: { id } });
         setForm({
           slug: row.slug ?? "",
           name_ar: row.name_ar ?? "",
@@ -78,7 +78,7 @@ function ServiceEditor() {
           display_order: row.display_order ?? 0,
           is_active: !!row.is_active,
         });
-      } catch (e: any) {
+      } catch (e: unknown) {
         toast.error(e?.message ?? "تعذّر التحميل");
       } finally {
         setLoading(false);
@@ -105,17 +105,17 @@ function ServiceEditor() {
         image_url: form.image_url || null,
         display_order: Number(form.display_order) || 0,
         is_active: form.is_active,
-      } as any;
+      } as unknown;
 
       if (isNew) {
-        const row: any = await createFn({ data: payload });
+        const row: unknown = await createFn({ data: payload });
         toast.success("تم إنشاء الخدمة");
         navigate({ to: "/owner/services/$id", params: { id: row.id } });
       } else {
         await updateFn({ data: { id, ...payload } });
         toast.success("تم الحفظ");
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "تعذّر الحفظ");
     } finally {
       setSaving(false);

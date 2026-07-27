@@ -36,7 +36,7 @@ function PatientDetail() {
     );
   if (q.isError) throw q.error;
   if (!q.data) throw notFound();
-  const p: any = q.data.patient;
+  const p: unknown = q.data.patient;
 
   return (
     <div className="container-app py-8">

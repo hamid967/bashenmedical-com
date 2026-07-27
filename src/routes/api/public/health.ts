@@ -34,8 +34,7 @@ const headers = {
 export const Route = createFileRoute("/api/public/health")({
   server: {
     handlers: {
-      GET: async () =>
-        new Response(JSON.stringify(payload()), { status: 200, headers }),
+      GET: async () => new Response(JSON.stringify(payload()), { status: 200, headers }),
       HEAD: async () => new Response(null, { status: 200, headers }),
     },
   },

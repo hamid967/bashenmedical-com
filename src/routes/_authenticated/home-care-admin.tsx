@@ -56,12 +56,12 @@ function HomeCareAdminPage() {
 
   const mutation = useMutation({
     mutationFn: (v: { id: string; status?: string; notes?: string }) =>
-      updateFn({ data: v as any }),
+      updateFn({ data: v as unknown }),
     onSuccess: () => {
       toast.success("تم التحديث");
       qc.invalidateQueries({ queryKey: ["admin", "home-care"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل التحديث"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل التحديث"),
   });
 
   const rows = useMemo(() => listQuery.data ?? [], [listQuery.data]);
@@ -130,7 +130,7 @@ function HomeCareAdminPage() {
               </tr>
             </thead>
             <tbody>
-              {rows.map((r: any) => (
+              {rows.map((r: unknown) => (
                 <tr key={r.id} className="border-t border-border align-top">
                   <td className="p-3 font-medium">{r.patient_name || "—"}</td>
                   <td className="p-3 font-mono text-xs">{r.patient_phone || "—"}</td>

@@ -241,7 +241,7 @@ function Page() {
               <span className="text-muted-foreground">الجدول</span>
               <select
                 value={table}
-                onChange={(e) => setTable(e.target.value as any)}
+                onChange={(e) => setTable(e.target.value as unknown)}
                 className="h-9 rounded-md border border-input bg-background px-2 text-sm"
               >
                 <option value="all">كل الجداول</option>
@@ -397,7 +397,7 @@ function Page() {
             </div>
           ) : logsQ.isError ? (
             <div className="rounded-xl border border-red-500/40 bg-red-500/5 p-6 text-sm text-red-700">
-              تعذّر تحميل السجل: {String((logsQ.error as any)?.message ?? logsQ.error)}
+              تعذّر تحميل السجل: {String((logsQ.error as unknown)?.message ?? logsQ.error)}
             </div>
           ) : rows.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">

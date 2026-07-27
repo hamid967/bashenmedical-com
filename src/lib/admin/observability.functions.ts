@@ -72,7 +72,7 @@ export const getSloSummary = createServerFn({ method: "GET" })
     });
 
     // 2) Client errors (table just added; use loose typing until codegen)
-    const { count: errCount } = await (supabase as any)
+    const { count: errCount } = await (supabase as unknown)
       .from("client_error_events")
       .select("id", { count: "exact", head: true })
       .gte("ts", since)
@@ -167,7 +167,7 @@ export const listClientErrors = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<{ rows: ClientErrorRow[] }> => {
     await assertConsoleAccess(context);
     const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
-    let q = (context.supabase as any)
+    let q = (context.supabase as unknown)
       .from("client_error_events")
       .select("id, ts, route, message, mechanism, severity, fingerprint, release, user_agent")
       .gte("ts", since)
@@ -195,7 +195,7 @@ export const getClientErrorFingerprints = createServerFn({ method: "GET" })
   .handler(async ({ data, context }): Promise<{ groups: ErrorFingerprintRow[] }> => {
     await assertConsoleAccess(context);
     const since = new Date(Date.now() - data.windowHours * 3600_000).toISOString();
-    const { data: rows, error } = await (context.supabase as any)
+    const { data: rows, error } = await (context.supabase as unknown)
       .from("client_error_events")
       .select("fingerprint, message, route, mechanism, ts")
       .gte("ts", since)

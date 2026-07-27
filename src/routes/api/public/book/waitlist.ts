@@ -93,7 +93,7 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
               preferred_from: parsed.data.preferred_from,
               preferred_to: parsed.data.preferred_to,
               notes: parsed.data.notes ?? null,
-            } as any)
+            } as unknown)
             .select("id")
             .single();
           if (insErr || !inserted) {
@@ -163,9 +163,9 @@ export const Route = createFileRoute("/api/public/book/waitlist")({
             preferred_to: data.preferred_to,
             created_at: data.created_at,
             doctor_name,
-            offered_date: (data as any).offered_date ?? null,
-            offered_time: (data as any).offered_time ?? null,
-            offered_expires_at: (data as any).offered_expires_at ?? null,
+            offered_date: (data as unknown).offered_date ?? null,
+            offered_time: (data as unknown).offered_time ?? null,
+            offered_expires_at: (data as unknown).offered_expires_at ?? null,
           });
         } catch {
           return json(500, { ok: false, kind: "server", message: "خطأ داخلي غير متوقع." });

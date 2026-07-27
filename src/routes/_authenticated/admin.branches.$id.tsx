@@ -150,7 +150,7 @@ function BranchDetail() {
               </div>
             ) : (
               <ul className="divide-y">
-                {query.data.doctors.map((d: any) => (
+                {query.data.doctors.map((d: unknown) => (
                   <li key={d.id} className="px-4 py-2 flex items-center justify-between text-sm">
                     <div>
                       <div className="font-medium">{d.full_name_ar}</div>
@@ -187,7 +187,7 @@ function BranchDetail() {
                     </tr>
                   </thead>
                   <tbody>
-                    {query.data.upcoming_appts.map((a: any) => (
+                    {query.data.upcoming_appts.map((a: unknown) => (
                       <tr key={a.id} className="border-t">
                         <td className="px-3 py-2 tabular-nums">{a.appointment_date}</td>
                         <td className="px-3 py-2 tabular-nums font-mono text-xs">
@@ -211,7 +211,7 @@ function BranchDetail() {
                 <h2 className="text-sm font-medium">مراكز التميّز</h2>
               </div>
               <ul className="flex flex-wrap gap-2">
-                {query.data.excellence_centers.map((ec: any) => (
+                {query.data.excellence_centers.map((ec: unknown) => (
                   <li key={ec.id} className="rounded-md border px-2 py-1 text-xs">
                     {ec.name_ar}
                   </li>

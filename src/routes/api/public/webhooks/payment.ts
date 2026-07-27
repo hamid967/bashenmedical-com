@@ -52,7 +52,7 @@ export const Route = createFileRoute("/api/public/webhooks/payment")({
         const expBuf = Buffer.from(expected);
         const valid = sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf);
 
-        let parsed: any = {};
+        let parsed: unknown = {};
         try {
           parsed = body ? JSON.parse(body) : {};
         } catch {

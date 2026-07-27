@@ -42,7 +42,7 @@ function AuditPage() {
                 </td>
               </tr>
             )}
-            {data.map((a: any) => (
+            {data.map((a: unknown) => (
               <tr key={a.id} className="border-t">
                 <td className="p-2 text-xs text-muted-foreground">
                   {new Date(a.created_at).toLocaleString("ar")}

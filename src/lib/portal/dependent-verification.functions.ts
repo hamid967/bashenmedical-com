@@ -181,7 +181,7 @@ export const registerVerificationDocument = createServerFn({ method: "POST" })
       .from(BUCKET)
       .list(parent, { search: name, limit: 1 });
     if (lErr) throw new Error(lErr.message);
-    const obj = (listed ?? []).find((o: any) => o.name === name);
+    const obj = (listed ?? []).find((o: unknown) => o.name === name);
     if (!obj) throw new Error("لم يتم رفع الملف بعد.");
     const actualSize = (obj.metadata?.size as number | undefined) ?? 0;
     if (actualSize <= 0 || actualSize > MAX_BYTES) {
@@ -279,7 +279,7 @@ export const listDependentVerificationRequests = createServerFn({ method: "POST"
     if (error) throw new Error(error.message);
     if (!rows || rows.length === 0) return [];
 
-    const ids = rows.map((r: any) => r.id);
+    const ids = rows.map((r: unknown) => r.id);
     const { data: docs, error: dErr } = await supabase
       .from("dependent_verification_documents")
       .select("id, request_id, storage_path, file_name, content_type, size_bytes, created_at")
@@ -287,7 +287,7 @@ export const listDependentVerificationRequests = createServerFn({ method: "POST"
       .order("created_at", { ascending: false });
     if (dErr) throw new Error(dErr.message);
 
-    const paths = (docs ?? []).map((d: any) => d.storage_path);
+    const paths = (docs ?? []).map((d: unknown) => d.storage_path);
     const urlByPath = new Map<string, string>();
     if (paths.length) {
       const { data: signed } = await supabase.storage
@@ -310,7 +310,7 @@ export const listDependentVerificationRequests = createServerFn({ method: "POST"
       });
       byReq.set(d.request_id, arr);
     }
-    return rows.map((r: any) => ({
+    return rows.map((r: unknown) => ({
       id: r.id,
       dependent_id: r.dependent_id,
       status: r.status,

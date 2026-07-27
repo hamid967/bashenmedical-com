@@ -70,10 +70,10 @@ function McpStatusPage() {
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       setOauthMeta({
         state: "ok",
-        message: `resource: ${(body as any)?.resource ?? "—"}`,
+        message: `resource: ${(body as unknown)?.resource ?? "—"}`,
         data: body,
       });
-    } catch (e: any) {
+    } catch (e: unknown) {
       setOauthMeta({ state: "error", message: e?.message ?? String(e) });
     }
 
@@ -86,10 +86,10 @@ function McpStatusPage() {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         setIssuerMeta({
           state: "ok",
-          message: `issuer: ${(body as any)?.issuer ?? issuer}`,
+          message: `issuer: ${(body as unknown)?.issuer ?? issuer}`,
           data: body,
         });
-      } catch (e: any) {
+      } catch (e: unknown) {
         setIssuerMeta({ state: "error", message: e?.message ?? String(e) });
       }
     }
@@ -128,7 +128,7 @@ function McpStatusPage() {
         const text = await res.text().catch(() => "");
         throw new Error(`HTTP ${res.status} ${text.slice(0, 200)}`);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setMcpPing({ state: "error", message: e?.message ?? String(e) });
     }
   }
@@ -197,7 +197,7 @@ function McpStatusPage() {
           <p className="text-sm text-muted-foreground">لا توجد أدوات مُعلَنة في manifest.</p>
         ) : (
           <ul className="divide-y divide-border">
-            {tools.map((t: any) => (
+            {tools.map((t: unknown) => (
               <li key={t.name} className="py-3">
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">{t.name}</span>
@@ -224,7 +224,7 @@ function McpStatusPage() {
 
       <TryToolSection tools={tools} />
 
-      <ToolInvocationsSection toolNames={tools.map((t: any) => t.name)} />
+      <ToolInvocationsSection toolNames={tools.map((t: unknown) => t.name)} />
     </main>
   );
 }
@@ -247,7 +247,7 @@ const EXAMPLE_ARGS: Record<string, string> = {
 }`,
 };
 
-function TryToolSection({ tools }: { tools: any[] }) {
+function TryToolSection({ tools }: { tools: unknown[] }) {
   const run = useServerFn(runMcpTool);
   const [toolName, setToolName] = useState<string>(tools[0]?.name ?? "");
   const [argsText, setArgsText] = useState<string>(EXAMPLE_ARGS[tools[0]?.name] ?? "{}");

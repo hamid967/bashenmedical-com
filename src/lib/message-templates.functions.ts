@@ -8,9 +8,9 @@ import { z } from "zod";
 
 type Role = "admin" | "super_admin" | "reception" | "doctor" | "pharmacy";
 
-async function getRoles(sb: any, userId: string): Promise<Role[]> {
+async function getRoles(sb: unknown, userId: string): Promise<Role[]> {
   const { data } = await sb.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: any) => r.role as Role);
+  return (data ?? []).map((r: unknown) => r.role as Role);
 }
 function ensureStaff(roles: Role[]) {
   if (!roles.some((r) => (["admin", "super_admin", "reception"] as Role[]).includes(r)))

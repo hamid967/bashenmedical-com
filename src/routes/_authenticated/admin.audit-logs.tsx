@@ -39,7 +39,7 @@ export const Route = createFileRoute("/_authenticated/admin/audit-logs")({
 
 const PAGE_SIZE = 50;
 
-const AUDIT_EXPORT_COLS: Column<any>[] = [
+const AUDIT_EXPORT_COLS: Column<unknown>[] = [
   {
     header: "الوقت",
     accessor: (r) => (r.created_at ? new Date(r.created_at).toLocaleString("ar-SA") : ""),
@@ -64,7 +64,7 @@ export function AuditLogsPage() {
   const rolesQ = useQuery({ queryKey: ["my-roles"], queryFn: () => rolesFn() });
   const isStaff = useMemo(() => {
     const r = rolesQ.data?.roles ?? [];
-    return r.includes("admin" as any) || r.includes("super_admin" as any);
+    return r.includes("admin" as unknown) || r.includes("super_admin" as unknown);
   }, [rolesQ.data]);
 
   const [q, setQ] = useState(search.q ?? "");
@@ -244,7 +244,7 @@ export function AuditLogsPage() {
               const CHUNK = 500;
               const MAX = 5000;
               const cap = Math.min(total, MAX);
-              const out: any[] = [];
+              const out: unknown[] = [];
               for (let off = 0; off < cap; off += CHUNK) {
                 const res = await listFn({
                   data: {
@@ -298,7 +298,7 @@ export function AuditLogsPage() {
                 </td>
               </tr>
             )}
-            {rows.map((r: any) => (
+            {rows.map((r: unknown) => (
               <tr
                 key={r.id}
                 onClick={() => setSelected(r)}
@@ -360,7 +360,7 @@ export function AuditLogsPage() {
   );
 }
 
-function DetailModal({ row, onClose }: { row: any; onClose: () => void }) {
+function DetailModal({ row, onClose }: { row: unknown; onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -412,7 +412,7 @@ function DetailModal({ row, onClose }: { row: any; onClose: () => void }) {
   );
 }
 
-function Info({ label, value, mono }: { label: string; value: any; mono?: boolean }) {
+function Info({ label, value, mono }: { label: string; value: unknown; mono?: boolean }) {
   return (
     <div>
       <div className="text-xs font-medium text-muted-foreground">{label}</div>
@@ -426,7 +426,7 @@ function Info({ label, value, mono }: { label: string; value: any; mono?: boolea
   );
 }
 
-function JsonPane({ title, value }: { title: string; value: any }) {
+function JsonPane({ title, value }: { title: string; value: unknown }) {
   return (
     <div>
       <div className="mb-1 text-xs font-medium text-muted-foreground">{title}</div>

@@ -1162,7 +1162,7 @@ function DoctorBranchesTab({
         )
         .eq("doctor_id", doctorId);
       if (error) throw error;
-      const rows = ((data ?? []) as any[])
+      const rows = ((data ?? []) as unknown[])
         .map((r) => {
           const b = r.branches;
           if (!b || b.is_active === false) return null;
@@ -1188,7 +1188,7 @@ function DoctorBranchesTab({
           .eq("id", fallbackBranchId)
           .eq("is_active", true)
           .maybeSingle();
-        if (b) rows.push({ ...(b as any), is_primary: true });
+        if (b) rows.push({ ...(b as unknown), is_primary: true });
       }
       // Primary first, then by name.
       rows.sort((a, b) =>
@@ -1408,7 +1408,7 @@ function DoctorRatings({ doctorId, lang }: { doctorId: string; lang: string }) {
         _doctor_id: doctorId,
       });
       if (error) throw error;
-      const row = (data as any[])?.[0];
+      const row = (data as unknown[])?.[0];
       return { average: row?.average ?? null, count: Number(row?.count ?? 0) };
     },
     staleTime: 60_000,

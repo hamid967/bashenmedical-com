@@ -56,7 +56,7 @@ export const listOwnerMedia = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(200);
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: any) => ({
+    return (data ?? []).map((r: unknown) => ({
       ...r,
       url: `/api/public/media/${r.storage_path}`,
     }));

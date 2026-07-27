@@ -130,7 +130,7 @@ function AppointmentsPage() {
               </tr>
             </thead>
             <tbody>
-              {query.data.rows.map((r: any) => (
+              {query.data.rows.map((r: unknown) => (
                 <tr key={r.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono text-xs">
                     <Link

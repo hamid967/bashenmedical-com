@@ -83,7 +83,7 @@ function SecondOpinionAdminPage() {
       toast.success("تم التحديث");
       qc.invalidateQueries({ queryKey: ["second-opinion-admin"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل التحديث"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل التحديث"),
   });
 
   async function loadAttachments(row: Row) {
@@ -93,7 +93,7 @@ function SecondOpinionAdminPage() {
     try {
       const res = await urlsFn({ data: { paths: row.upload_paths } });
       setAttachments((s) => ({ ...s, [row.id]: res }));
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "فشل جلب المرفقات");
     } finally {
       setLoadingAtt(null);

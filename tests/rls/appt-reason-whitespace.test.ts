@@ -148,7 +148,7 @@ async function runDbTests() {
         created.push(id);
         const trimmed = reasonSchema.parse(raw)!;
         assert(trimmed === want, `pre-flight: Zod trim mismatch got ${JSON.stringify(trimmed)}`);
-        const { error } = await adminC.rpc("update_appointment_status" as any, {
+        const { error } = await adminC.rpc("update_appointment_status" as unknown, {
           _id: id,
           _status: "cancelled",
           _reason: trimmed,
@@ -172,7 +172,7 @@ async function runDbTests() {
         trimmed === "",
         `precondition: expected '' after trim, got ${JSON.stringify(trimmed)}`,
       );
-      const { error } = await adminC.rpc("update_appointment_status" as any, {
+      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "cancelled",
         _reason: trimmed,

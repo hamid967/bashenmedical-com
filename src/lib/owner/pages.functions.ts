@@ -74,7 +74,7 @@ export const createOwnerPage = createServerFn({ method: "POST" })
   .validator((d: unknown) => pageInput.parse(d))
   .handler(async ({ data, context }) => {
     await assertOwner(context.supabase, context.userId);
-    const payload: any = {
+    const payload: unknown = {
       ...data,
       og_image: data.og_image || null,
       created_by: context.userId,

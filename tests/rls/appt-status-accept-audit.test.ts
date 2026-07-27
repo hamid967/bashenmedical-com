@@ -127,7 +127,7 @@ let user: { userId: string; email: string; password: string } | null = null;
         await test(`${status} + ${name} → audit.reason == trimmed`, async () => {
           const a = await newAppt();
           created.push(a.id);
-          const { error } = await c.rpc("update_appointment_status" as any, {
+          const { error } = await c.rpc("update_appointment_status" as unknown, {
             _id: a.id,
             _status: status,
             _reason: raw,
@@ -169,7 +169,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       const a = await newAppt();
       created.push(a.id);
       const raw = `\n\t \u00A0${core500}\u00A0 \r\n`;
-      const { error } = await c.rpc("update_appointment_status" as any, {
+      const { error } = await c.rpc("update_appointment_status" as unknown, {
         _id: a.id,
         _status: "cancelled",
         _reason: raw,
@@ -197,7 +197,7 @@ let user: { userId: string; email: string; password: string } | null = null;
           const a = await newAppt();
           created.push(a.id);
           const before = a.status;
-          const { error } = await c.rpc("update_appointment_status" as any, {
+          const { error } = await c.rpc("update_appointment_status" as unknown, {
             _id: a.id,
             _status: status,
             _reason: ws,

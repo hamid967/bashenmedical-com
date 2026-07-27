@@ -130,7 +130,7 @@ const padded = (s: string) => `  \t \u00A0\n\r\n${s}\u00A0 \t\r\n  `;
       await test(`status=cancelled reason (${label}) → interior preserved, edges trimmed`, async () => {
         const a = await newAppt();
         created.push(a.id);
-        const { error } = await c.rpc("update_appointment_status" as any, {
+        const { error } = await c.rpc("update_appointment_status" as unknown, {
           _id: a.id,
           _status: "cancelled",
           _reason: padded(interior),
@@ -154,7 +154,7 @@ const padded = (s: string) => `  \t \u00A0\n\r\n${s}\u00A0 \t\r\n  `;
         created.push(a.id);
         const paddedNotes = padded(interior);
         const paddedReason = padded(interior);
-        const { error } = await c.rpc("update_appointment_notes" as any, {
+        const { error } = await c.rpc("update_appointment_notes" as unknown, {
           _id: a.id,
           _notes: paddedNotes,
           _reason: paddedReason,

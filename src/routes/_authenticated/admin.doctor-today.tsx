@@ -130,7 +130,7 @@ function DoctorRow({
   const qc = useQueryClient();
   const start = useMutation({
     mutationFn: () => startFn({ data: { appointment_id: row.id } }),
-    onSuccess: (r: any) => {
+    onSuccess: (r: unknown) => {
       onStarted(r.visit_id);
       qc.invalidateQueries({ queryKey: ["admin", "doctor-today"] });
     },
@@ -231,7 +231,7 @@ function VisitDialog({
           finalize,
         },
       }),
-    onSuccess: (r: any) => {
+    onSuccess: (r: unknown) => {
       qc.invalidateQueries({ queryKey: ["admin", "doctor-today"] });
       if (r.finalized) onClose();
     },

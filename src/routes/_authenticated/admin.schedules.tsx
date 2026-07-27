@@ -44,7 +44,7 @@ function SchedulesPage() {
     queryFn: () => leavesFn({ data: { branch_id: branchId || undefined, limit: 100, offset: 0 } }),
     enabled: tab === "leaves",
   });
-  const q: any = tab === "slots" ? slots : leaves;
+  const q: unknown = tab === "slots" ? slots : leaves;
 
   return (
     <div className="container-app py-6">
@@ -106,7 +106,7 @@ function SchedulesPage() {
               )}
             </thead>
             <tbody>
-              {q.data.rows.map((r: any) =>
+              {q.data.rows.map((r: unknown) =>
                 tab === "slots" ? (
                   <tr key={r.id} className="border-t hover:bg-muted/30">
                     <td className="p-3">{r.slot_date}</td>

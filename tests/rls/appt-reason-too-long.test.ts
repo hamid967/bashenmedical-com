@@ -106,7 +106,7 @@ let user: { userId: string; email: string; password: string } | null = null;
         await test(`${status} + ${name} → accepted`, async () => {
           const a = await newAppt();
           created.push(a.id);
-          const { error } = await c.rpc("update_appointment_status" as any, {
+          const { error } = await c.rpc("update_appointment_status" as unknown, {
             _id: a.id,
             _status: status,
             _reason: raw,
@@ -135,7 +135,7 @@ let user: { userId: string; email: string; password: string } | null = null;
           created.push(a.id);
           const before = a.status;
 
-          const { error } = await c.rpc("update_appointment_status" as any, {
+          const { error } = await c.rpc("update_appointment_status" as unknown, {
             _id: a.id,
             _status: status,
             _reason: raw,
@@ -184,14 +184,14 @@ let user: { userId: string; email: string; password: string } | null = null;
       const a = await newAppt();
       created.push(a.id);
       // First: rejected too-long attempt
-      const bad = await c.rpc("update_appointment_status" as any, {
+      const bad = await c.rpc("update_appointment_status" as unknown, {
         _id: a.id,
         _status: "cancelled",
         _reason: at501,
       });
       assert(!!bad.error, "expected first attempt to be rejected");
       // Then: valid retry
-      const ok = await c.rpc("update_appointment_status" as any, {
+      const ok = await c.rpc("update_appointment_status" as unknown, {
         _id: a.id,
         _status: "cancelled",
         _reason: "طلب المريض",

@@ -118,7 +118,7 @@ export function BranchesList() {
         </div>
         <select
           value={status}
-          onChange={(e) => setStatus(e.target.value as any)}
+          onChange={(e) => setStatus(e.target.value as unknown)}
           className="rounded-md border bg-background px-3 py-2 text-sm"
           aria-label="الحالة"
         >

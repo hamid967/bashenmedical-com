@@ -8,7 +8,7 @@ import { z } from "zod";
 
 const STAFF_ROLES = ["admin", "super_admin"] as const;
 
-async function assertAdmin(supabase: any, userId: string) {
+async function assertAdmin(supabase: unknown, userId: string) {
   for (const r of STAFF_ROLES) {
     const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: r });
     if (data) return;
@@ -144,7 +144,7 @@ export const testSlaAlertWebhook = createServerFn({ method: "POST" })
         response_body: text.slice(0, 2000),
         error: res.ok ? null : `HTTP ${res.status}`,
       };
-    } catch (e: any) {
+    } catch (e: unknown) {
       return {
         ok: false,
         status: null,

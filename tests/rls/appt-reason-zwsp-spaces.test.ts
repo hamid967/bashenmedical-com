@@ -193,7 +193,7 @@ async function runDbTests() {
           trimmed === want,
           `pre-flight Zod mismatch:\n  got=${JSON.stringify(trimmed)}\n  want=${JSON.stringify(want)}`,
         );
-        const { error } = await adminC.rpc("update_appointment_status" as any, {
+        const { error } = await adminC.rpc("update_appointment_status" as unknown, {
           _id: id,
           _status: "cancelled",
           _reason: trimmed,
@@ -218,7 +218,7 @@ async function runDbTests() {
       // they stay. Result equals the raw string.
       const trimmed = reasonSchema.parse(raw)!;
       assert(trimmed.length > 0, `expected non-empty after trim, got ${JSON.stringify(trimmed)}`);
-      const { error } = await adminC.rpc("update_appointment_status" as any, {
+      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "cancelled",
         _reason: trimmed,

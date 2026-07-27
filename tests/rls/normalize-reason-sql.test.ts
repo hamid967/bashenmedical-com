@@ -42,7 +42,7 @@ function assert(cond: unknown, msg: string): asserts cond {
 }
 
 async function norm(raw: string | null): Promise<string | null> {
-  const { data, error } = await sb.rpc("normalize_reason" as any, { _raw: raw });
+  const { data, error } = await sb.rpc("normalize_reason" as unknown, { _raw: raw });
   if (error) throw new Error(`rpc failed: ${error.message}`);
   return data as string | null;
 }

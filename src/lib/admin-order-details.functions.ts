@@ -17,9 +17,9 @@ import { z } from "zod";
 import type { OrderTableKind } from "@/lib/unified-status";
 
 type Role = "admin" | "reception" | "pharmacy" | "super_admin";
-async function getRoles(supabase: any, userId: string): Promise<Role[]> {
+async function getRoles(supabase: unknown, userId: string): Promise<Role[]> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: any) => r.role as Role);
+  return (data ?? []).map((r: unknown) => r.role as Role);
 }
 function ensureAdminOrReception(roles: Role[]) {
   if (roles.includes("super_admin")) return;
@@ -50,7 +50,7 @@ export type TimelineEvent = {
 export type OrderDetails = {
   kind: OrderTableKind;
   id: string;
-  order: Record<string, any>;
+  order: Record<string, unknown>;
   patient: {
     id: string | null;
     full_name: string | null;
@@ -96,7 +96,7 @@ export const getOrderDetails = createServerFn({ method: "GET" })
     const table = KIND_TO_TABLE[data.kind];
 
     const { data: order, error } = await supabase
-      .from(table as any)
+      .from(table as unknown)
       .select("*")
       .eq("id", data.id)
       .maybeSingle();
@@ -104,9 +104,9 @@ export const getOrderDetails = createServerFn({ method: "GET" })
     if (!order) throw new Error("لم يُعثر على الطلب.");
 
     // resolve patient (best-effort)
-    let patientRow: any = null;
-    const phone: string | null = (order as any).patient_phone ?? (order as any).phone ?? null;
-    const patientId: string | null = (order as any).patient_id ?? null;
+    let patientRow: unknown = null;
+    const phone: string | null = (order as unknown).patient_phone ?? (order as unknown).phone ?? null;
+    const patientId: string | null = (order as unknown).patient_id ?? null;
     if (patientId) {
       const { data: p } = await supabase
         .from("patients")
@@ -132,14 +132,14 @@ export const getOrderDetails = createServerFn({ method: "GET" })
         .eq("patient_id", patientRow.id)
         .order("created_at", { ascending: false })
         .limit(50);
-      attachments = (atts ?? []) as any;
+      attachments = (atts ?? []) as unknown;
     }
 
     // timeline
     const timeline: TimelineEvent[] = [];
-    if ((order as any).created_at) {
+    if ((order as unknown).created_at) {
       timeline.push({
-        at: (order as any).created_at,
+        at: (order as unknown).created_at,
         kind: "created",
         title: "تم إنشاء الطلب",
       });
@@ -154,7 +154,7 @@ export const getOrderDetails = createServerFn({ method: "GET" })
         .limit(200);
       // enrich actors
       const actorIds = Array.from(
-        new Set(((audit ?? []) as any[]).map((r) => r.changed_by).filter(Boolean)),
+        new Set(((audit ?? []) as unknown[]).map((r) => r.changed_by).filter(Boolean)),
       );
       const nameById = new Map<string, string>();
       if (actorIds.length) {
@@ -162,9 +162,9 @@ export const getOrderDetails = createServerFn({ method: "GET" })
           .from("profiles")
           .select("id, full_name")
           .in("id", actorIds);
-        for (const p of (profs ?? []) as any[]) nameById.set(p.id, p.full_name ?? "");
+        for (const p of (profs ?? []) as unknown[]) nameById.set(p.id, p.full_name ?? "");
       }
-      for (const row of (audit ?? []) as any[]) {
+      for (const row of (audit ?? []) as unknown[]) {
         const actor = (row.changed_by && nameById.get(row.changed_by)) || row.actor_kind || null;
         if (row.old_status || row.new_status) {
           timeline.push({
@@ -186,11 +186,11 @@ export const getOrderDetails = createServerFn({ method: "GET" })
         }
       }
     } else if (
-      (order as any).updated_at &&
-      (order as any).updated_at !== (order as any).created_at
+      (order as unknown).updated_at &&
+      (order as unknown).updated_at !== (order as unknown).created_at
     ) {
       timeline.push({
-        at: (order as any).updated_at,
+        at: (order as unknown).updated_at,
         kind: "updated",
         title: "تحديث الطلب",
       });
@@ -201,7 +201,7 @@ export const getOrderDetails = createServerFn({ method: "GET" })
     return {
       kind: data.kind,
       id: data.id,
-      order: order as any,
+      order: order as unknown,
       patient: patientRow,
       attachments,
       timeline,

@@ -101,14 +101,14 @@ function InsuranceDetailPage() {
   }
 
   if (q.isError) throw q.error;
-  const r: any = q.data;
+  const r: unknown = q.data;
   if (!r) throw notFound();
 
   const patient = r.patient;
   const provider = r.provider;
   const appt = r.appointment;
   const branch = appt?.branch;
-  const attachments: any[] = Array.isArray(r.attachments) ? r.attachments : [];
+  const attachments: unknown[] = Array.isArray(r.attachments) ? r.attachments : [];
   const missingDocs: string[] = Array.isArray(r.missing_documents) ? r.missing_documents : [];
 
   return (

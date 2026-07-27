@@ -63,7 +63,7 @@ export const updatePerfBudget = createServerFn({ method: "POST" })
     if (data.window_hours !== undefined) patch.window_hours = data.window_hours;
     if (data.min_samples !== undefined) patch.min_samples = data.min_samples;
     if (data.enabled !== undefined) patch.enabled = data.enabled;
-    const { error } = await (context.supabase.from("perf_budgets") as any)
+    const { error } = await (context.supabase.from("perf_budgets") as unknown)
       .update(patch)
       .eq("id", data.id);
     if (error) throw new Error(error.message);

@@ -118,7 +118,7 @@ let adminU: Awaited<ReturnType<typeof createUser>> | null = null;
         const id = await newAppt();
         created.push(id);
         const before = await stateOf(id);
-        const { error } = await client.rpc("update_appointment_status" as any, {
+        const { error } = await client.rpc("update_appointment_status" as unknown, {
           _id: id,
           _status: "cancelled",
           _reason: "محاولة إلغاء",
@@ -148,7 +148,7 @@ let adminU: Awaited<ReturnType<typeof createUser>> | null = null;
         const id = await newAppt();
         created.push(id);
         const before = await stateOf(id);
-        const { error } = await client.rpc("update_appointment_notes" as any, {
+        const { error } = await client.rpc("update_appointment_notes" as unknown, {
           _id: id,
           _notes: "محاولة تعديل ملاحظة",
           _reason: "غير مصرح",
@@ -172,7 +172,7 @@ let adminU: Awaited<ReturnType<typeof createUser>> | null = null;
         const id = await newAppt();
         created.push(id);
         const before = await stateOf(id);
-        await client.rpc("update_appointment_notes" as any, {
+        await client.rpc("update_appointment_notes" as unknown, {
           _id: id,
           _notes: null,
           _reason: null,
@@ -190,7 +190,7 @@ let adminU: Awaited<ReturnType<typeof createUser>> | null = null;
     await test("control: admin can update_appointment_status → state changes + audit row", async () => {
       const id = await newAppt();
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as any, {
+      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "cancelled",
         _reason: "طلب المريض",
@@ -208,7 +208,7 @@ let adminU: Awaited<ReturnType<typeof createUser>> | null = null;
     await test("control: admin can update_appointment_notes → state changes + audit row", async () => {
       const id = await newAppt();
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_notes" as any, {
+      const { error } = await adminC.rpc("update_appointment_notes" as unknown, {
         _id: id,
         _notes: "ملاحظة جديدة",
         _reason: "تحديث",

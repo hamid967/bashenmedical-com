@@ -79,9 +79,7 @@ describe("verifyHCaptcha — fail-closed", () => {
     setEnv({ NODE_ENV: "production", HCAPTCHA_SECRET: "secret" });
     vi.stubGlobal(
       "fetch",
-      vi.fn(
-        async () => new Response("boom", { status: 500 }),
-      ),
+      vi.fn(async () => new Response("boom", { status: 500 })),
     );
     const r = await verifyHCaptcha("x".repeat(50), null);
     expect(r.ok).toBe(false);

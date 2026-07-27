@@ -30,7 +30,7 @@ function OwnerPagesList() {
       await del({ data: { id } });
       toast.success("تم حذف الصفحة");
       router.invalidate();
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "تعذّر الحذف");
     } finally {
       setBusy(null);
@@ -79,7 +79,7 @@ function OwnerPagesList() {
               </tr>
             </thead>
             <tbody>
-              {q.data.map((p: any) => (
+              {q.data.map((p: unknown) => (
                 <tr key={p.id} className="border-t hover:bg-slate-50/50">
                   <td className="px-4 py-3 font-medium text-slate-900">{p.title_ar}</td>
                   <td className="px-4 py-3 text-slate-500 font-mono text-xs">/p/{p.slug}</td>

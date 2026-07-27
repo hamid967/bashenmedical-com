@@ -29,7 +29,7 @@ async function handle(request: Request): Promise<Response> {
     const { runSweep } = await import("@/lib/admin/sla-alerts.server");
     const result = await runSweep();
     return Response.json({ ok: true, ...result });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return Response.json({ ok: false, error: e?.message ?? "sweep_failed" }, { status: 500 });
   }
 }

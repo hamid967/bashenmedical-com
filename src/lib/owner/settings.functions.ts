@@ -46,7 +46,7 @@ export const updateClinicSettings = createServerFn({ method: "POST" })
       action: "owner.settings_update",
       actor: context.userId,
       table_name: "clinic_settings",
-      metadata: data as any,
+      metadata: data as unknown,
     });
     return { ok: true };
   });

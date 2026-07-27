@@ -145,8 +145,8 @@ function WhatsappPage() {
   const params = useMemo(
     () => ({
       branch_id: branchId ?? undefined,
-      internal_status: (search.internal_status as any) || undefined,
-      handoff_status: (search.handoff_status as any) || undefined,
+      internal_status: (search.internal_status as unknown) || undefined,
+      handoff_status: (search.handoff_status as unknown) || undefined,
       q: search.q || undefined,
       from: search.from ? new Date(search.from).toISOString() : undefined,
       to: search.to ? new Date(search.to).toISOString() : undefined,
@@ -169,7 +169,7 @@ function WhatsappPage() {
     queryFn: () => listFn({ data: params }),
   });
 
-  const rows: any[] = list.data?.rows ?? [];
+  const rows: unknown[] = list.data?.rows ?? [];
   const total: number = list.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 

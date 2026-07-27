@@ -49,15 +49,15 @@ export const logAuthEvent = createServerFn({ method: "POST" })
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
     const { error } = await supa.rpc(
-      "log_auth_event" as any,
+      "log_auth_event" as unknown,
       {
         _action: data.action,
         _user_id: data.user_id ?? null,
         _email: data.email ?? null,
         _ip: ip,
         _ua: ua,
-        _metadata: (data.metadata ?? null) as any,
-      } as any,
+        _metadata: (data.metadata ?? null) as unknown,
+      } as unknown,
     );
     if (error) {
       // Never block auth flow on logging errors

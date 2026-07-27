@@ -135,7 +135,7 @@ function FrontDeskPage() {
   const { branchId } = useActiveBranch();
   const qc = useQueryClient();
 
-  // Realtime: any change to queue_entries in this branch invalidates both
+  // Realtime: unknown change to queue_entries in this branch invalidates both
   // datasets — the appointments list joins the queue row, so it needs to
   // refresh too.
   useEffect(() => {
@@ -283,7 +283,7 @@ function FrontDeskTab({ branchId }: { branchId: string | null }) {
               </tr>
             </thead>
             <tbody>
-              {query.data.rows.map((r: any) => (
+              {query.data.rows.map((r: unknown) => (
                 <tr key={r.id} className="border-t hover:bg-muted/30">
                   <td className="p-3 font-mono text-xs">{r.appointment_time ?? "—"}</td>
                   <td className="p-3 font-mono text-xs">
@@ -457,8 +457,8 @@ function QueueTab({ branchId }: { branchId: string | null }) {
     return <EmptyState message="طابور اليوم فارغ." />;
 
   // Group by doctor
-  const groups = new Map<string, { doctor: any; rows: any[] }>();
-  for (const row of query.data.rows as any[]) {
+  const groups = new Map<string, { doctor: unknown; rows: unknown[] }>();
+  for (const row of query.data.rows as unknown[]) {
     const key = row.doctor?.id ?? "unknown";
     const g = groups.get(key) ?? { doctor: row.doctor, rows: [] };
     g.rows.push(row);
@@ -477,7 +477,7 @@ function QueueTab({ branchId }: { branchId: string | null }) {
             <span className="text-xs text-muted-foreground">{g.rows.length} مريض</span>
           </header>
           <ul className="divide-y">
-            {g.rows.map((r: any) => (
+            {g.rows.map((r: unknown) => (
               <li key={r.id} className="flex flex-wrap items-center gap-3 p-3 text-sm">
                 <span className="inline-flex h-8 w-10 items-center justify-center rounded-md bg-muted font-mono text-xs">
                   #{r.queue_number}
@@ -671,7 +671,7 @@ function PatientSnapshotDialog({ patientId, onClose }: { patientId: string; onCl
               <p className="text-xs text-muted-foreground">لا يوجد.</p>
             ) : (
               <ul className="space-y-1">
-                {data.allergies.map((a: any, i: number) => (
+                {data.allergies.map((a: unknown, i: number) => (
                   <li
                     key={i}
                     className="rounded border border-amber-500/30 bg-amber-500/5 px-2 py-1 text-xs"
@@ -705,7 +705,7 @@ function PatientSnapshotDialog({ patientId, onClose }: { patientId: string; onCl
               <p className="text-xs text-muted-foreground">لا يوجد.</p>
             ) : (
               <ul className="space-y-1">
-                {data.recent_appointments.map((a: any) => (
+                {data.recent_appointments.map((a: unknown) => (
                   <li key={a.id} className="flex justify-between rounded border px-2 py-1 text-xs">
                     <span>
                       <span className="font-mono">{a.appointment_date}</span> {a.appointment_time} ·{" "}

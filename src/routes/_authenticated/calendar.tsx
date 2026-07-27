@@ -148,7 +148,7 @@ function CalendarPage() {
       toast.success("تم إعادة الجدولة");
       qc.invalidateQueries({ queryKey: ["calendar", "appts"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إعادة الجدولة"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إعادة الجدولة"),
   });
 
   const shift = (units: number) => {
@@ -273,7 +273,7 @@ function CalendarPage() {
               className="bg-transparent text-sm outline-none"
             >
               <option value="">كل الفروع</option>
-              {(branchesQ.data ?? []).map((b: any) => (
+              {(branchesQ.data ?? []).map((b: unknown) => (
                 <option key={b.id} value={b.id}>
                   {b.name_ar}
                 </option>
@@ -290,8 +290,8 @@ function CalendarPage() {
             >
               <option value="">كل الأطباء</option>
               {(doctorsQ.data ?? [])
-                .filter((d: any) => !branchId || !d.branch_id || d.branch_id === branchId)
-                .map((d: any) => (
+                .filter((d: unknown) => !branchId || !d.branch_id || d.branch_id === branchId)
+                .map((d: unknown) => (
                   <option key={d.id} value={d.id}>
                     {d.name_ar}
                   </option>
@@ -310,7 +310,7 @@ function CalendarPage() {
 
       {apptsQ.isError && (
         <div className="mb-4 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
-          {(apptsQ.error as any)?.message ?? "تعذّر تحميل المواعيد."}
+          {(apptsQ.error as unknown)?.message ?? "تعذّر تحميل المواعيد."}
         </div>
       )}
 

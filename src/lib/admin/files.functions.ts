@@ -65,7 +65,7 @@ export const listAdminFiles = createServerFn({ method: "GET" })
       .limit(500);
     if (error) throw new Error(error.message);
 
-    const list = (rows ?? []) as Array<any>;
+    const list = (rows ?? []) as Array<unknown>;
 
     // Compute KPIs on the unfiltered set
     const today = new Date();
@@ -132,8 +132,8 @@ export const getAdminFile = createServerFn({ method: "GET" })
         .maybeSingle();
       if (prof)
         uploader = {
-          id: (prof as any).id,
-          name: (prof as any).full_name ?? null,
+          id: (prof as unknown).id,
+          name: (prof as unknown).full_name ?? null,
         };
     }
 
