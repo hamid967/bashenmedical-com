@@ -86,11 +86,20 @@ async function createDoctorFor(userId: string, name: string) {
 }
 
 async function createPatient() {
+  const { data: branch, error: bErr } = await admin
+    .from("branches")
+    .select("id")
+    .limit(1)
+    .single();
+  if (bErr) throw bErr;
+  const suffix = Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
   const { data, error } = await admin
     .from("patients")
     .insert({
-      full_name: "Test Patient " + Date.now(),
+      full_name_ar: "مريض اختبار " + suffix,
       phone: "+96650" + Math.floor(1e7 + Math.random() * 9e7),
+      branch_id: branch.id,
+      mrn: "TEST-" + suffix,
     })
     .select("id")
     .single();
