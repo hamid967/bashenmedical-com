@@ -116,6 +116,12 @@ async function verifyProfilePhone(userId: string, phone: string) {
   if (error) throw error;
 }
 
+function randomTime(): string {
+  const h = 6 + Math.floor(Math.random() * 12);
+  const m = Math.floor(Math.random() * 60);
+  return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+}
+
 async function anyDoctorId(): Promise<string> {
   const { data, error } = await admin.from("doctors").select("id").limit(1).single();
   if (error) throw error;
@@ -175,8 +181,8 @@ async function main() {
   const docId = await anyDoctorId();
   await verifyProfilePhone(userA.userId, phoneA);
   await verifyProfilePhone(userB.userId, phoneB);
-  const apptA = await seedAppointmentForPhone(phoneA, docId, "09:30");
-  const apptB = await seedAppointmentForPhone(phoneB, docId, "10:15");
+  const apptA = await seedAppointmentForPhone(phoneA, docId, randomTime());
+  const apptB = await seedAppointmentForPhone(phoneB, docId, randomTime());
 
   const rxA = await seedPrescription(patientsRowA);
   const rxB = await seedPrescription(patientsRowB);
