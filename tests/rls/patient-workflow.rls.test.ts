@@ -102,13 +102,30 @@ async function upsertPatientProfile(userId: string, mrn: string) {
   if (error) throw error;
 }
 
-async function seedAppointmentForPatient(patientAuthUid: string, phone: string) {
+async function verifyProfilePhone(userId: string, phone: string) {
+  // The `users read own appointments` policy resolves ownership via
+  // `_appointment_belongs_to_me(phone)`, which requires a verified phone
+  // on `public.profiles` matching (digits-only) the appointment phone.
+  const { error } = await admin
+    .from("profiles")
+    .upsert({
+      id: userId,
+      verified_phone: phone,
+      phone_verified_at: new Date().toISOString(),
+    });
+  if (error) throw error;
+}
+
+async function seedAppointmentForPhone(phone: string) {
+  // Leave `patient_id` NULL so RLS falls through to the phone-verified
+  // ownership branch (`_appointment_belongs_to_me`). The FK on patient_id
+  // targets `patients.id`, not `auth.uid`, so the equality branch of the
+  // policy is unreachable for real bookings.
   const { data, error } = await admin
     .from("appointments")
     .insert({
       patient_name: "Appt " + Date.now(),
       patient_phone: phone,
-      patient_id: patientAuthUid, // policy compares to auth.uid()
       appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
       appointment_time: "09:30",
       status: "new",
