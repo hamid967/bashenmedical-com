@@ -172,10 +172,11 @@ async function main() {
 
   const phoneA = "+966500000101";
   const phoneB = "+966500000102";
+  const docId = await anyDoctorId();
   await verifyProfilePhone(userA.userId, phoneA);
   await verifyProfilePhone(userB.userId, phoneB);
-  const apptA = await seedAppointmentForPhone(phoneA);
-  const apptB = await seedAppointmentForPhone(phoneB);
+  const apptA = await seedAppointmentForPhone(phoneA, docId);
+  const apptB = await seedAppointmentForPhone(phoneB, docId);
 
   const rxA = await seedPrescription(patientsRowA);
   const rxB = await seedPrescription(patientsRowB);
