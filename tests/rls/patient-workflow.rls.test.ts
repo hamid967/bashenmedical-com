@@ -173,13 +173,11 @@ async function main() {
   await upsertPatientProfile(userA.userId, "MRN-A-" + stamp);
   await upsertPatientProfile(userB.userId, "MRN-B-" + stamp);
 
-  const phoneA = "+966500000101";
+  const phoneA = "+966500000101"; // eslint-disable-line
   const phoneB = "+966500000102";
   const docId = await anyDoctorId();
-  await verifyProfilePhone(userA.userId, phoneA);
-  await verifyProfilePhone(userB.userId, phoneB);
-  const apptA = await seedAppointmentForPhone(phoneA, docId, randomTime());
-  const apptB = await seedAppointmentForPhone(phoneB, docId, randomTime());
+  const apptA = await seedAppointmentForPatient(patientsRowA, phoneA, docId, randomTime());
+  const apptB = await seedAppointmentForPatient(patientsRowB, phoneB, docId, randomTime());
 
   const rxA = await seedPrescription(patientsRowA);
   const rxB = await seedPrescription(patientsRowB);
