@@ -120,16 +120,21 @@ async function anyDoctorId(): Promise<string> {
   return data.id as string;
 }
 
-async function seedAppointmentForPhone(phone: string, doctorId: string, time: string) {
-  // Leave `patient_id` NULL so RLS falls through to the phone-verified
-  // ownership branch (`_appointment_belongs_to_me`). The FK on patient_id
-  // targets `patients.id`, not `auth.uid`, so the equality branch of the
-  // policy is unreachable for real bookings.
+async function seedAppointmentForPatient(
+  patientId: string,
+  phone: string,
+  doctorId: string,
+  time: string,
+) {
+  // With `patients.id = auth.uid()` for the test users, the ownership
+  // branch `patient_id = auth.uid()` in the `users read own appointments`
+  // policy resolves cleanly and the FK on patient_id is still satisfied.
   const { data, error } = await admin
     .from("appointments")
     .insert({
       patient_name: "Appt " + Date.now(),
       patient_phone: phone,
+      patient_id: patientId,
       doctor_id: doctorId,
       appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
       appointment_time: time,
