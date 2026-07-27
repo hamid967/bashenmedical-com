@@ -215,3 +215,333 @@ export const holdFollowUp = createServerFn({ method: "POST" })
     if (iErr) throw new Error(iErr.message);
     return { ok: true, reference };
   });
+
+/* --------------------------- 5) Patient history --------------------------- */
+
+const patientIdSchema = z.object({ patient_id: z.string().uuid() });
+
+export const listPatientHistory = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => patientIdSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+
+    const { data: appointments, error: aErr } = await context.supabase
+      .from("appointments")
+      .select(
+        "id, reference_number, appointment_date, appointment_time, status, chief_complaint, " +
+          "doctor:doctors(id, name_ar, name_en), branch:branches(id, name_ar, name_en)",
+      )
+      .eq("patient_id", data.patient_id)
+      .eq("doctor_id", doctorId)
+      .order("appointment_date", { ascending: false })
+      .order("appointment_time", { ascending: false })
+      .limit(50);
+    if (aErr) throw new Error(aErr.message);
+
+    const { data: visits, error: vErr } = await context.supabase
+      .from("patient_visits")
+      .select(
+        "id, visit_date, chief_complaint, subjective, objective, assessment, plan, follow_up_date, appointment_id",
+      )
+      .eq("patient_id", data.patient_id)
+      .eq("doctor_id", doctorId)
+      .order("visit_date", { ascending: false })
+      .limit(50);
+    if (vErr) throw new Error(vErr.message);
+
+    return { appointments: appointments ?? [], visits: visits ?? [] };
+  });
+
+/* ---------------- Helpers: resolve patient from appointment ---------------- */
+
+async function resolveApptPatient(
+  supabase: any,
+  apptId: string,
+  doctorId: string,
+): Promise<{ patient_id: string; branch_id: string | null }> {
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("id, doctor_id, patient_id, branch_id")
+    .eq("id", apptId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data || data.doctor_id !== doctorId) {
+    throw new Error("الحجز غير موجود أو غير مسموح.");
+  }
+  if (!data.patient_id) {
+    throw new Error("لا يمكن تنفيذ العملية قبل ربط المريض بالحجز.");
+  }
+  return { patient_id: data.patient_id, branch_id: data.branch_id ?? null };
+}
+
+/* ------------------------------ 6) Prescriptions ------------------------------ */
+
+const listApptSchema = z.object({ appointment_id: z.string().uuid() });
+
+export const listVisitPrescriptions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => listApptSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { patient_id } = await resolveApptPatient(
+      context.supabase,
+      data.appointment_id,
+      doctorId,
+    );
+    const { data: rows, error } = await context.supabase
+      .from("prescriptions")
+      .select(
+        "id, medication, dosage, instructions, start_date, end_date, refills_remaining, status, notes, created_at",
+      )
+      .eq("patient_id", patient_id)
+      .eq("doctor_id", doctorId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const addRxSchema = z.object({
+  appointment_id: z.string().uuid(),
+  medication: z.string().trim().min(1).max(200),
+  dosage: z.string().trim().max(120).optional().nullable(),
+  instructions: z.string().trim().max(2000).optional().nullable(),
+  start_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  end_date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .optional()
+    .nullable(),
+  refills_remaining: z.number().int().min(0).max(24).default(0),
+});
+
+export const addPrescription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => addRxSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { patient_id, branch_id } = await resolveApptPatient(
+      context.supabase,
+      data.appointment_id,
+      doctorId,
+    );
+    const { data: row, error } = await context.supabase
+      .from("prescriptions")
+      .insert({
+        patient_id,
+        doctor_id: doctorId,
+        branch_id,
+        medication: data.medication,
+        dosage: data.dosage ?? null,
+        instructions: data.instructions ?? null,
+        start_date: data.start_date ?? null,
+        end_date: data.end_date ?? null,
+        refills_remaining: data.refills_remaining ?? 0,
+        status: "active",
+        created_by: context.userId,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id };
+  });
+
+export const cancelPrescription = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => z.object({ prescription_id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { data: rx, error: fErr } = await context.supabase
+      .from("prescriptions")
+      .select("id, doctor_id, status")
+      .eq("id", data.prescription_id)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!rx || rx.doctor_id !== doctorId) {
+      throw new Error("الوصفة غير موجودة أو غير مسموح.");
+    }
+    if (rx.status === "cancelled") return { ok: true };
+    const { error } = await context.supabase
+      .from("prescriptions")
+      .update({ status: "cancelled" })
+      .eq("id", rx.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ------------------------------ 7) Lab orders ------------------------------ */
+
+export const listVisitLabOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => listApptSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { patient_id } = await resolveApptPatient(
+      context.supabase,
+      data.appointment_id,
+      doctorId,
+    );
+    const { data: rows, error } = await context.supabase
+      .from("lab_reports")
+      .select("id, title, test_type, summary, status, report_date, released_at, created_at")
+      .eq("patient_id", patient_id)
+      .eq("ordered_by", doctorId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const addLabSchema = z.object({
+  appointment_id: z.string().uuid(),
+  title: z.string().trim().min(1).max(200),
+  test_type: z.string().trim().max(120).optional().nullable(),
+  summary: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const addLabOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => addLabSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { patient_id } = await resolveApptPatient(
+      context.supabase,
+      data.appointment_id,
+      doctorId,
+    );
+    const { data: row, error } = await context.supabase
+      .from("lab_reports")
+      .insert({
+        patient_id,
+        ordered_by: doctorId,
+        title: data.title,
+        test_type: data.test_type ?? null,
+        summary: data.summary ?? null,
+        status: "pending",
+        report_date: new Date().toISOString().slice(0, 10),
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id };
+  });
+
+export const cancelLabOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { data: order, error: fErr } = await context.supabase
+      .from("lab_reports")
+      .select("id, ordered_by, status, released_at")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!order || order.ordered_by !== doctorId) {
+      throw new Error("الطلب غير موجود أو غير مسموح.");
+    }
+    if (order.released_at) throw new Error("لا يمكن إلغاء طلب صادر بالفعل.");
+    if (order.status === "cancelled") return { ok: true };
+    const { error } = await context.supabase
+      .from("lab_reports")
+      .update({ status: "cancelled" })
+      .eq("id", order.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/* ---------------------------- 8) Radiology orders --------------------------- */
+
+export const listVisitRadOrders = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => listApptSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { patient_id } = await resolveApptPatient(
+      context.supabase,
+      data.appointment_id,
+      doctorId,
+    );
+    const { data: rows, error } = await context.supabase
+      .from("radiology_reports")
+      .select("id, modality, body_part, findings, status, report_date, released_at, created_at")
+      .eq("patient_id", patient_id)
+      .eq("ordered_by", doctorId)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return { rows: rows ?? [] };
+  });
+
+const addRadSchema = z.object({
+  appointment_id: z.string().uuid(),
+  modality: z.string().trim().min(1).max(80),
+  body_part: z.string().trim().max(120).optional().nullable(),
+  findings: z.string().trim().max(2000).optional().nullable(),
+});
+
+export const addRadOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => addRadSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { patient_id } = await resolveApptPatient(
+      context.supabase,
+      data.appointment_id,
+      doctorId,
+    );
+    const { data: row, error } = await context.supabase
+      .from("radiology_reports")
+      .insert({
+        patient_id,
+        ordered_by: doctorId,
+        modality: data.modality,
+        body_part: data.body_part ?? null,
+        findings: data.findings ?? null,
+        status: "pending",
+        report_date: new Date().toISOString().slice(0, 10),
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id };
+  });
+
+export const cancelRadOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertHasAnyRole(context.supabase, context.userId, [...DOCTOR_ROLES]);
+    const doctorId = await resolveDoctorId(context.supabase, context.userId);
+    const { data: order, error: fErr } = await context.supabase
+      .from("radiology_reports")
+      .select("id, ordered_by, status, released_at")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fErr) throw new Error(fErr.message);
+    if (!order || order.ordered_by !== doctorId) {
+      throw new Error("الطلب غير موجود أو غير مسموح.");
+    }
+    if (order.released_at) throw new Error("لا يمكن إلغاء طلب صادر بالفعل.");
+    if (order.status === "cancelled") return { ok: true };
+    const { error } = await context.supabase
+      .from("radiology_reports")
+      .update({ status: "cancelled" })
+      .eq("id", order.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
