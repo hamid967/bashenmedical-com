@@ -80,7 +80,7 @@ export const listAdminInquiries = createServerFn({ method: "GET" })
 
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
-    return (rows ?? []).map((r: any) => ({
+    return (rows ?? []).map((r: unknown) => ({
       id: r.id,
       request_number: r.request_number,
       full_name: r.full_name,
@@ -132,7 +132,7 @@ export const getInquiryDetail = createServerFn({ method: "GET" })
 
     // Best-effort actor names for the timeline
     const actorIds = Array.from(
-      new Set((timeline.data ?? []).map((u: any) => u.created_by).filter(Boolean)),
+      new Set((timeline.data ?? []).map((u: unknown) => u.created_by).filter(Boolean)),
     ) as string[];
     let profiles: Record<string, string | null> = {};
     if (actorIds.length) {
@@ -140,12 +140,12 @@ export const getInquiryDetail = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name")
         .in("id", actorIds);
-      profiles = Object.fromEntries((profs ?? []).map((p: any) => [p.id, p.full_name]));
+      profiles = Object.fromEntries((profs ?? []).map((p: unknown) => [p.id, p.full_name]));
     }
 
     return {
       inquiry: row.data,
-      timeline: (timeline.data ?? []).map((t: any) => ({
+      timeline: (timeline.data ?? []).map((t: unknown) => ({
         ...t,
         actor_name: t.created_by ? (profiles[t.created_by] ?? null) : null,
       })),
@@ -163,13 +163,13 @@ export const listAssignableStaff = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     const map = new Map<string, { user_id: string; name: string | null; roles: string[] }>();
     for (const r of data ?? []) {
-      const uid = (r as any).user_id as string;
+      const uid = (r as unknown).user_id as string;
       const prev = map.get(uid);
-      const name = ((r as any).profiles?.full_name as string | null) ?? null;
+      const name = ((r as unknown).profiles?.full_name as string | null) ?? null;
       if (prev) {
-        if (!prev.roles.includes((r as any).role)) prev.roles.push((r as any).role);
+        if (!prev.roles.includes((r as unknown).role)) prev.roles.push((r as unknown).role);
       } else {
-        map.set(uid, { user_id: uid, name, roles: [(r as any).role] });
+        map.set(uid, { user_id: uid, name, roles: [(r as unknown).role] });
       }
     }
     return Array.from(map.values()).sort((a, b) =>

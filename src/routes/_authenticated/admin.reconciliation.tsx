@@ -82,10 +82,7 @@ function ReconciliationPage() {
   const date = search.date ?? todayIso();
   const [showOnlyVariance, setShowOnlyVariance] = useState(false);
 
-  const params = useMemo(
-    () => ({ date, branch_id: branchId ?? undefined }),
-    [date, branchId],
-  );
+  const params = useMemo(() => ({ date, branch_id: branchId ?? undefined }), [date, branchId]);
 
   const q = useQuery({
     queryKey: ["admin-reconciliation", params],
@@ -201,7 +198,10 @@ function ReconciliationPage() {
       </header>
 
       {/* Summary cards */}
-      <section className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6" aria-label="ملخّص اليوم">
+      <section
+        className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-6"
+        aria-label="ملخّص اليوم"
+      >
         <SummaryCard label="عدد الفواتير" value={summary?.invoice_count ?? "—"} />
         <SummaryCard label="إجمالي الفواتير" value={money(summary?.total_billed)} />
         <SummaryCard label="المحصّل الصافي" value={money(summary?.total_net_collected)} />
@@ -305,7 +305,9 @@ function ReconciliationPage() {
                         {r.patient_national_id ? ` • ${r.patient_national_id}` : ""}
                       </div>
                     </td>
-                    <td className="px-3 py-2 text-end tabular-nums">{money(r.billed, r.currency)}</td>
+                    <td className="px-3 py-2 text-end tabular-nums">
+                      {money(r.billed, r.currency)}
+                    </td>
                     <td className="px-3 py-2 text-end tabular-nums">
                       <div>{money(r.net_collected, r.currency)}</div>
                       {r.refunded > 0 ? (
@@ -408,7 +410,8 @@ function ReconciliationPage() {
             مطالبات NPHIES بدون فاتورة مطابقة ({unmatched.length})
           </h2>
           <p className="mt-1 text-xs text-muted-foreground">
-            مطالبات سُجّلت في NPHIES في هذا اليوم ولم يُعثر لها على فاتورة مقابلة عبر (الطبيب × الهوية).
+            مطالبات سُجّلت في NPHIES في هذا اليوم ولم يُعثر لها على فاتورة مقابلة عبر (الطبيب ×
+            الهوية).
           </p>
           <div className="mt-3 overflow-x-auto rounded-lg border">
             <table className="w-full text-sm">
@@ -430,9 +433,7 @@ function ReconciliationPage() {
                       {new Date(n.created_at).toLocaleString("ar-SA")}
                     </td>
                     <td className="px-3 py-2 text-xs">{n.mode}</td>
-                    <td className="px-3 py-2 font-mono text-xs">
-                      {n.patient_national_id ?? "—"}
-                    </td>
+                    <td className="px-3 py-2 font-mono text-xs">{n.patient_national_id ?? "—"}</td>
                     <td className="px-3 py-2 font-mono text-xs">
                       {n.doctor_id ? n.doctor_id.slice(0, 8) : "—"}
                     </td>

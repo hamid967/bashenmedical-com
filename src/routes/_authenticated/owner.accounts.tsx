@@ -34,13 +34,13 @@ function AccountsPage() {
 
   const q = useQuery({
     queryKey: ["owner-accounts", page, search, status, role],
-    queryFn: () => listAccounts({ data: { page, perPage: 50, search, status, role: role as any } }),
+    queryFn: () => listAccounts({ data: { page, perPage: 50, search, status, role: role as unknown } }),
   });
 
   const invalidate = () => qc.invalidateQueries({ queryKey: ["owner-accounts"] });
 
   const mGrant = useMutation({
-    mutationFn: (v: { user_id: string; role: any }) => grantRole({ data: v }),
+    mutationFn: (v: { user_id: string; role: unknown }) => grantRole({ data: v }),
     onSuccess: () => {
       toast.success("تم تعيين الدور");
       invalidate();
@@ -48,7 +48,7 @@ function AccountsPage() {
     onError: (e: Error) => toast.error(e.message),
   });
   const mRevoke = useMutation({
-    mutationFn: (v: { user_id: string; role: any }) => revokeRole({ data: v }),
+    mutationFn: (v: { user_id: string; role: unknown }) => revokeRole({ data: v }),
     onSuccess: () => {
       toast.success("تم إزالة الدور");
       invalidate();
@@ -117,7 +117,7 @@ function AccountsPage() {
           <select
             value={status}
             onChange={(e) => {
-              setStatus(e.target.value as any);
+              setStatus(e.target.value as unknown);
               setPage(1);
             }}
             className="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white"

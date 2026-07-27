@@ -480,7 +480,7 @@ function KpiHeader24h({ k }: { k: NotificationDeliveryKpis }) {
             <ul className="space-y-1">
               {k.avgDeliveryMsByChannel.map((c) => (
                 <li key={c.channel} className="flex items-center justify-between text-xs">
-                  <span className="text-foreground">{channelLabel(c.channel as any)}</span>
+                  <span className="text-foreground">{channelLabel(c.channel as unknown)}</span>
                   <span className="font-mono tabular-nums text-slate-700">
                     {fmtMs(c.avgMs)}
                     <span className="text-[10px] text-muted-foreground mr-1">
@@ -551,7 +551,7 @@ function StatsRow({ stats }: { stats: NotificationDeliveryStats }) {
       {byChannel.map(([ch, v]) => (
         <Kpi
           key={ch}
-          label={channelLabel(ch as any)}
+          label={channelLabel(ch as unknown)}
           value={v.total.toLocaleString("ar")}
           hint={v.failed > 0 ? `${v.failed} فشل` : "بدون فشل"}
           tone={v.failed > 0 ? "danger" : "ok"}

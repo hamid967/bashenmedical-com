@@ -18,12 +18,11 @@ async function handle(request: Request): Promise<Response> {
   const denied = verifyInternalCronSecret(request);
   if (denied) return denied;
 
-
   try {
     const { runCmsPublishSweep } = await import("@/lib/admin/cms/cms-publish.server");
     const result = await runCmsPublishSweep();
     return Response.json({ ok: true, ...result });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return Response.json({ ok: false, error: e?.message ?? "sweep_failed" }, { status: 500 });
   }
 }

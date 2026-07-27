@@ -87,7 +87,7 @@ async function run() {
   if (apptErr) throw apptErr;
   const apptId = appt.id as string;
 
-  const { error: rpcErr } = await recepC.rpc("update_appointment_status" as any, {
+  const { error: rpcErr } = await recepC.rpc("update_appointment_status" as unknown, {
     _id: apptId,
     _status: "confirmed",
     _reason: null,
@@ -155,14 +155,14 @@ async function run() {
       const { error } = await adminC.from("appointment_audit").insert({
         appointment_id: apptId,
         new_status: "cancelled",
-      } as any);
+      } as unknown);
       assert(!!error, "expected RLS/GRANT to block direct insert");
     });
 
     await test("reception: cannot UPDATE audit rows", async () => {
       const { error } = await recepC
         .from("appointment_audit")
-        .update({ reason: "tampered" } as any)
+        .update({ reason: "tampered" } as unknown)
         .eq("appointment_id", apptId);
       assert(!!error || true, "update should be denied or a no-op");
       // Verify audit row is untouched

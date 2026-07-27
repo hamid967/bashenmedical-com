@@ -131,7 +131,7 @@ export const Route = createFileRoute("/api/public/book/cancel")({
             _id: match.id,
             _status: "cancelled",
             _reason: selfReason,
-          } as any);
+          } as unknown);
           if (updErr) {
             return json(500, {
               ok: false,

@@ -212,7 +212,7 @@ function DoctorRow({
   const qc = useQueryClient();
   const start = useMutation({
     mutationFn: () => startFn({ data: { appointment_id: row.id } }),
-    onSuccess: (r: any) => {
+    onSuccess: (r: unknown) => {
       onStarted(r.visit_id);
       qc.invalidateQueries({ queryKey: ["doctor", "workspace", "today"] });
     },
@@ -273,11 +273,7 @@ function DoctorRow({
             />
           ) : null}
           {row.patient_id ? (
-            <ActionBtn
-              onClick={onHistory}
-              icon={<History className="h-3 w-3" />}
-              label="السجل"
-            />
+            <ActionBtn onClick={onHistory} icon={<History className="h-3 w-3" />} label="السجل" />
           ) : null}
         </div>
         {start.isError ? (
@@ -345,7 +341,7 @@ function VisitDialog({
           finalize,
         },
       }),
-    onSuccess: (r: any) => {
+    onSuccess: (r: unknown) => {
       qc.invalidateQueries({ queryKey: ["doctor", "workspace", "today"] });
       if (r?.finalized) {
         try {
@@ -456,13 +452,9 @@ function VisitDialog({
                 <button
                   key={t.id}
                   type="button"
-                  onClick={() =>
-                    applyTemplate(t.id, allSoapEmpty ? "fill-empty" : "fill-empty")
-                  }
+                  onClick={() => applyTemplate(t.id, allSoapEmpty ? "fill-empty" : "fill-empty")}
                   className={`rounded-full border px-2.5 py-1 text-xs transition ${
-                    active
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "hover:bg-background"
+                    active ? "border-primary bg-primary/10 text-primary" : "hover:bg-background"
                   }`}
                   title={t.label_en}
                 >
@@ -489,8 +481,20 @@ function VisitDialog({
           <AutosaveIndicator state={autoState} savedAt={savedAt} />
         </div>
         <FieldArea label="الشكوى الرئيسية" value={chief} onChange={setChief} rows={2} max={500} />
-        <FieldArea label="Subjective — الأعراض من المريض" value={s} onChange={setS} rows={3} max={4000} />
-        <FieldArea label="Objective — الفحص السريري" value={o} onChange={setO} rows={3} max={4000} />
+        <FieldArea
+          label="Subjective — الأعراض من المريض"
+          value={s}
+          onChange={setS}
+          rows={3}
+          max={4000}
+        />
+        <FieldArea
+          label="Objective — الفحص السريري"
+          value={o}
+          onChange={setO}
+          rows={3}
+          max={4000}
+        />
         <FieldArea label="Assessment — التشخيص" value={a} onChange={setA} rows={3} max={4000} />
         <FieldArea label="Plan — الخطة العلاجية" value={p} onChange={setP} rows={3} max={4000} />
 
@@ -566,7 +570,9 @@ function AutosaveIndicator({
     return (
       <span className="inline-flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
         <CheckCircle2 className="h-3 w-3" /> تم الحفظ
-        {savedAt ? ` ${savedAt.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}` : ""}
+        {savedAt
+          ? ` ${savedAt.toLocaleTimeString("ar-SA", { hour: "2-digit", minute: "2-digit" })}`
+          : ""}
       </span>
     );
   if (state === "error")
@@ -817,8 +823,8 @@ function HistoryDialog({ appt, onClose }: { appt: ApptRow; onClose: () => void }
     staleTime: 30_000,
   });
   const [tab, setTab] = useState<"visits" | "appointments">("visits");
-  const appointments: HistoryAppt[] = (query.data?.appointments as any) ?? [];
-  const visits: HistoryVisit[] = (query.data?.visits as any) ?? [];
+  const appointments: HistoryAppt[] = (query.data?.appointments as unknown) ?? [];
+  const visits: HistoryVisit[] = (query.data?.visits as unknown) ?? [];
 
   return (
     <DialogShell title={`سجل المريض — ${appt.patient_name ?? "—"}`} onClose={onClose}>
@@ -975,7 +981,7 @@ function RxSection({ appt }: { appt: ApptRow }) {
     enabled: !!appt.patient_id,
     staleTime: 15_000,
   });
-  const rows: RxRow[] = (query.data?.rows as any) ?? [];
+  const rows: RxRow[] = (query.data?.rows as unknown) ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [medication, setMedication] = useState("");
@@ -1028,7 +1034,12 @@ function RxSection({ appt }: { appt: ApptRow }) {
           {rows.some((r) => r.status === "active") ? (
             <button
               type="button"
-              onClick={() => printRxSheet(appt, rows.filter((r) => r.status === "active"))}
+              onClick={() =>
+                printRxSheet(
+                  appt,
+                  rows.filter((r) => r.status === "active"),
+                )
+              }
               className="inline-flex items-center gap-1 rounded-md border px-2 py-1 text-[11px] hover:bg-background"
             >
               <Printer className="h-3 w-3" />
@@ -1047,7 +1058,9 @@ function RxSection({ appt }: { appt: ApptRow }) {
       </header>
 
       {!appt.patient_id ? (
-        <p className="text-[11px] text-muted-foreground">لا يمكن إصدار وصفات قبل ربط المريض بالحجز.</p>
+        <p className="text-[11px] text-muted-foreground">
+          لا يمكن إصدار وصفات قبل ربط المريض بالحجز.
+        </p>
       ) : null}
 
       {showForm && appt.patient_id ? (
@@ -1172,11 +1185,7 @@ function RxSection({ appt }: { appt: ApptRow }) {
                             : "bg-muted text-muted-foreground"
                       }`}
                     >
-                      {rx.status === "active"
-                        ? "نشط"
-                        : rx.status === "cancelled"
-                          ? "ملغي"
-                          : "منجز"}
+                      {rx.status === "active" ? "نشط" : rx.status === "cancelled" ? "ملغي" : "منجز"}
                     </span>
                   </div>
                   {rx.instructions ? (
@@ -1187,9 +1196,7 @@ function RxSection({ appt }: { appt: ApptRow }) {
                   <div className="mt-0.5 flex flex-wrap gap-2 text-[10px] text-muted-foreground">
                     {rx.start_date ? <span>من {rx.start_date}</span> : null}
                     {rx.end_date ? <span>إلى {rx.end_date}</span> : null}
-                    {rx.refills_remaining > 0 ? (
-                      <span>تعبئات: {rx.refills_remaining}</span>
-                    ) : null}
+                    {rx.refills_remaining > 0 ? <span>تعبئات: {rx.refills_remaining}</span> : null}
                   </div>
                 </div>
                 {rx.status === "active" ? (
@@ -1350,7 +1357,6 @@ function printOrderTicket(
   w.document.close();
 }
 
-
 /* ---------------------------- Orders (Lab/Rad) --------------------------- */
 
 type LabOrderRow = {
@@ -1450,7 +1456,7 @@ function LabOrdersPanel({ appt }: { appt: ApptRow }) {
     enabled: !!appt.patient_id,
     staleTime: 15_000,
   });
-  const rows: LabOrderRow[] = (query.data?.rows as any) ?? [];
+  const rows: LabOrderRow[] = (query.data?.rows as unknown) ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [title, setTitle] = useState("");
@@ -1553,7 +1559,11 @@ function LabOrdersPanel({ appt }: { appt: ApptRow }) {
               onClick={() => add.mutate()}
               className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
             >
-              {add.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+              {add.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plus className="h-3 w-3" />
+              )}
               حفظ الطلب
             </button>
           </div>
@@ -1623,7 +1633,6 @@ function LabOrdersPanel({ appt }: { appt: ApptRow }) {
                     </button>
                   ) : null}
                 </div>
-
               </div>
             </li>
           ))}
@@ -1646,7 +1655,7 @@ function RadOrdersPanel({ appt }: { appt: ApptRow }) {
     enabled: !!appt.patient_id,
     staleTime: 15_000,
   });
-  const rows: RadOrderRow[] = (query.data?.rows as any) ?? [];
+  const rows: RadOrderRow[] = (query.data?.rows as unknown) ?? [];
 
   const [showForm, setShowForm] = useState(false);
   const [modality, setModality] = useState("");
@@ -1749,7 +1758,11 @@ function RadOrdersPanel({ appt }: { appt: ApptRow }) {
               onClick={() => add.mutate()}
               className="inline-flex items-center gap-1 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground disabled:opacity-40"
             >
-              {add.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Plus className="h-3 w-3" />}
+              {add.isPending ? (
+                <Loader2 className="h-3 w-3 animate-spin" />
+              ) : (
+                <Plus className="h-3 w-3" />
+              )}
               حفظ الطلب
             </button>
           </div>
@@ -1819,7 +1832,6 @@ function RadOrdersPanel({ appt }: { appt: ApptRow }) {
                     </button>
                   ) : null}
                 </div>
-
               </div>
             </li>
           ))}

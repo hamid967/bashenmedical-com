@@ -167,7 +167,7 @@ function ReportsPage() {
               </tr>
             </thead>
             <tbody>
-              {query.data.rows.map((r: any) => (
+              {query.data.rows.map((r: unknown) => (
                 <tr key={r.id} className="border-t hover:bg-muted/30">
                   <td className="p-3">{r.title_ar ?? r.title_en ?? r.title ?? "—"}</td>
                   <td className="p-3">{r.report_type ?? r.test_type ?? r.modality ?? "—"}</td>
@@ -234,10 +234,10 @@ function MedicalReportActions({ id, status }: { id: string; status: string }) {
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [revokeReason, setRevokeReason] = useState("");
   const [versionsOpen, setVersionsOpen] = useState(false);
-  const [versions, setVersions] = useState<any[] | null>(null);
+  const [versions, setVersions] = useState<Record<string, unknown>[] | null>(null);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-reports"] });
-  const wrap = (p: Promise<any>, ok: string) =>
+  const wrap = (p: Promise<unknown>, ok: string) =>
     p
       .then(() => {
         toast.success(ok);

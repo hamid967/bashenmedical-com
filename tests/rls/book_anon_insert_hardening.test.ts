@@ -62,7 +62,7 @@ async function run() {
       appointment_time: "10:00",
       status: "confirmed", // attacker injection
       notes: "leaked private note", // attacker injection
-    } as any);
+    } as unknown);
     assert(!error, `insert failed: ${error?.message}`);
     const { data: rows } = await admin
       .from("appointments")

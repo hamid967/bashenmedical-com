@@ -61,17 +61,17 @@ function CmsEditor() {
   const canPublish = roleInfo.role === "admin" || roleInfo.role === "super_admin";
 
   const [tab, setTab] = useState<Tab>("ar");
-  const [ar, setAr] = useState<Record<string, any>>({});
-  const [en, setEn] = useState<Record<string, any>>({});
+  const [ar, setAr] = useState<Record<string, unknown>>({});
+  const [en, setEn] = useState<Record<string, unknown>>({});
   const [seo, setSeo] = useState<Record<string, string>>({});
   const [ogImage, setOgImage] = useState<string>("");
   const [note, setNote] = useState("");
   const [publishAt, setPublishAt] = useState<string>("");
 
   useEffect(() => {
-    setAr((data.current?.payload_ar as any) ?? {});
-    setEn((data.current?.payload_en as any) ?? {});
-    setSeo((data.current?.seo as any) ?? {});
+    setAr((data.current?.payload_ar as unknown) ?? {});
+    setEn((data.current?.payload_en as unknown) ?? {});
+    setSeo((data.current?.seo as unknown) ?? {});
     setOgImage((data.current?.og_image_url as string) ?? "");
   }, [data.current?.id]);
 
@@ -92,16 +92,16 @@ function CmsEditor() {
       setNote("");
       qc.invalidateQueries({ queryKey: ["cms"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل الحفظ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل الحفظ"),
   });
 
-  const runAction = (fn: () => Promise<any>, ok: string) =>
+  const runAction = (fn: () => Promise<unknown>, ok: string) =>
     fn()
       .then(() => {
         toast.success(ok);
         qc.invalidateQueries({ queryKey: ["cms"] });
       })
-      .catch((e: any) => toast.error(e?.message ?? "فشل"));
+      .catch((e: unknown) => toast.error(e?.message ?? "فشل"));
 
   const preview = useMutation({
     mutationFn: () => previewFn({ data: { entry_id: id } }),
@@ -109,7 +109,7 @@ function CmsEditor() {
       navigator.clipboard?.writeText(r.token).catch(() => {});
       toast.success("تم إنشاء رمز المعاينة (نُسخ للحافظة)");
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل"),
   });
 
   const status = data.entry.status as string;
@@ -125,8 +125,8 @@ function CmsEditor() {
         <h1 className="text-xl font-bold">{data.entry.title ?? "(بدون عنوان)"}</h1>
         <Badge variant="outline">{status}</Badge>
         <span className="text-[11px] text-muted-foreground">
-          AR {(data.entry.locale_completeness as any)?.ar ?? 0}% · EN{" "}
-          {(data.entry.locale_completeness as any)?.en ?? 0}%
+          AR {(data.entry.locale_completeness as unknown)?.ar ?? 0}% · EN{" "}
+          {(data.entry.locale_completeness as unknown)?.en ?? 0}%
         </span>
         <div className="flex-1" />
         <Button size="sm" onClick={() => save.mutate()} disabled={save.isPending}>
@@ -345,15 +345,15 @@ function FieldsEditor({
   dir,
 }: {
   fields: FieldDef[];
-  value: Record<string, any>;
-  onChange: (v: Record<string, any>) => void;
+  value: Record<string, unknown>;
+  onChange: (v: Record<string, unknown>) => void;
   dir: "rtl" | "ltr";
 }) {
   return (
     <Card className="p-4 space-y-3" dir={dir}>
       {fields.map((f) => {
         const v = value[f.name];
-        const set = (nv: any) => onChange({ ...value, [f.name]: nv });
+        const set = (nv: unknown) => onChange({ ...value, [f.name]: nv });
         if (f.type === "boolean") {
           return (
             <label key={f.name} className="flex items-center gap-2 text-sm">
@@ -397,8 +397,8 @@ function ListField({
   onChange,
 }: {
   f: FieldDef;
-  value: any[];
-  onChange: (v: any[]) => void;
+  value: unknown[];
+  onChange: (v: unknown[]) => void;
 }) {
   const cols = f.itemFields ?? [];
   return (
@@ -480,16 +480,16 @@ function HistoryPanel({
   fetchVersion,
 }: {
   entryId: string;
-  versions: any[];
+  versions: unknown[];
   currentId: string | null;
   canPublish: boolean;
   onRollback: (versionId: string) => void;
-  fetchAudit: () => Promise<any[]>;
-  fetchVersion: (versionId: string) => Promise<any>;
+  fetchAudit: () => Promise<Record<string, unknown>[]>;
+  fetchVersion: (versionId: string) => Promise<unknown>;
 }) {
-  const [audit, setAudit] = useState<any[] | null>(null);
-  const [diffLeft, setDiffLeft] = useState<any | null>(null);
-  const [diffRight, setDiffRight] = useState<any | null>(null);
+  const [audit, setAudit] = useState<Record<string, unknown>[] | null>(null);
+  const [diffLeft, setDiffLeft] = useState<Record<string, unknown> | null>(null);
+  const [diffRight, setDiffRight] = useState<Record<string, unknown> | null>(null);
   const [diffLoading, setDiffLoading] = useState(false);
 
   const loadDiff = async (leftId: string, rightId: string) => {
@@ -498,7 +498,7 @@ function HistoryPanel({
       const [l, r] = await Promise.all([fetchVersion(leftId), fetchVersion(rightId)]);
       setDiffLeft(l);
       setDiffRight(r);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "فشل تحميل المقارنة");
     } finally {
       setDiffLoading(false);
@@ -575,7 +575,7 @@ function HistoryPanel({
         </div>
         {audit && (
           <ul className="space-y-1 text-xs font-mono">
-            {audit.map((a: any) => (
+            {audit.map((a: unknown) => (
               <li key={a.id} className="border-b py-1 last:border-0">
                 <span className="text-muted-foreground">
                   {new Date(a.created_at).toLocaleString("ar")}
@@ -591,7 +591,7 @@ function HistoryPanel({
   );
 }
 
-function flattenPayload(prefix: string, val: any, out: Record<string, string>) {
+function flattenPayload(prefix: string, val: unknown, out: Record<string, string>) {
   if (val === null || val === undefined) {
     out[prefix] = "";
     return;
@@ -613,9 +613,9 @@ function flattenPayload(prefix: string, val: any, out: Record<string, string>) {
   out[prefix] = String(val);
 }
 
-function DiffTable({ left, right }: { left: any; right: any }) {
+function DiffTable({ left, right }: { left: unknown; right: unknown }) {
   const rows = useMemo(() => {
-    const buckets: Array<[string, any, any]> = [];
+    const buckets: Array<[string, unknown, unknown]> = [];
     for (const label of ["payload_ar", "payload_en", "seo"] as const) {
       const l: Record<string, string> = {};
       const r: Record<string, string> = {};

@@ -22,14 +22,14 @@ const StatusSchema = z.enum([
 
 /* ----------------------- audit helper ----------------------- */
 async function audit(
-  supabase: any,
+  supabase: unknown,
   actorId: string,
   action: string,
   entryId: string | null,
   versionId: string | null,
-  before: any,
-  after: any,
-  metadata?: any,
+  before: unknown,
+  after: unknown,
+  metadata?: unknown,
 ) {
   await supabase.from("cms_audit").insert({
     entry_id: entryId,
@@ -59,7 +59,7 @@ export const getCmsDashboard = createServerFn({ method: "GET" })
       .from("cms_entries")
       .select("id, kind, status, title, updated_at, scheduled_at, locale_completeness");
     if (error) throw new Error(error.message);
-    const rows = (data ?? []) as any[];
+    const rows = (data ?? []) as unknown[];
     const by = (s: string) => rows.filter((r) => r.status === s).length;
     return {
       totals: {
@@ -124,9 +124,9 @@ export const getCmsEntry = createServerFn({ method: "GET" })
       .order("version_no", { ascending: false })
       .limit(50);
 
-    const currentId = (entry as any).current_version_id;
+    const currentId = (entry as unknown).current_version_id;
     const current =
-      (versions ?? []).find((v: any) => v.id === currentId) ?? (versions ?? [])[0] ?? null;
+      (versions ?? []).find((v: unknown) => v.id === currentId) ?? (versions ?? [])[0] ?? null;
     return { entry, current, versions: versions ?? [] };
   });
 
@@ -267,11 +267,11 @@ export const saveCmsVersion = createServerFn({ method: "POST" })
 const IdOnly = z.object({ entry_id: z.string().uuid() });
 const IdWithComment = IdOnly.extend({ comment: z.string().max(1000).optional() });
 
-async function loadEntry(supabase: any, id: string) {
+async function loadEntry(supabase: unknown, id: string) {
   const { data, error } = await supabase.from("cms_entries").select("*").eq("id", id).maybeSingle();
   if (error) throw new Error(error.message);
   if (!data) throw new Error("Entry not found");
-  return data as any;
+  return data as unknown;
 }
 
 export const submitCmsForReview = createServerFn({ method: "POST" })
@@ -494,8 +494,8 @@ export const rollbackCmsVersion = createServerFn({ method: "POST" })
     if (nerr) throw new Error(nerr.message);
 
     const completeness = {
-      ar: computeCompleteness(entry.kind as CmsKind, target.payload_ar as any),
-      en: computeCompleteness(entry.kind as CmsKind, target.payload_en as any),
+      ar: computeCompleteness(entry.kind as CmsKind, target.payload_ar as unknown),
+      en: computeCompleteness(entry.kind as CmsKind, target.payload_en as unknown),
     };
     const now = new Date().toISOString();
     await context.supabase

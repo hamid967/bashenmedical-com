@@ -69,7 +69,7 @@ const DAY_AR: Record<string, string> = {
   Friday: "الجمعة",
 };
 
-function toForm(row: any): FormState {
+function toForm(row: unknown): FormState {
   return {
     name_ar: row?.name_ar ?? "",
     name_en: row?.name_en ?? "",
@@ -115,13 +115,13 @@ function ClinicSettingsPage() {
   }, [data, form]);
 
   const mutation = useMutation({
-    mutationFn: (payload: any) => saveSettings({ data: payload }),
+    mutationFn: (payload: unknown) => saveSettings({ data: payload }),
     onSuccess: () => {
       toast.success("تم حفظ إعدادات العيادة");
       qc.invalidateQueries({ queryKey: ["admin", "clinic-settings"] });
       qc.invalidateQueries({ queryKey: ["clinic-settings"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر الحفظ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر الحفظ"),
   });
 
   if (isLoading) {

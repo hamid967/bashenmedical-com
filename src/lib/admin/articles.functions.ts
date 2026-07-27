@@ -73,7 +73,7 @@ export const listAdminArticles = createServerFn({ method: "GET" })
     if (kpisRes.error) throw new Error(kpisRes.error.message);
     if (catsRes.error) throw new Error(catsRes.error.message);
 
-    const enriched: ArticleRow[] = (rows ?? []).map((r: any) => ({
+    const enriched: ArticleRow[] = (rows ?? []).map((r: unknown) => ({
       id: r.id,
       slug: r.slug,
       title_ar: r.title_ar,

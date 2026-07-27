@@ -130,7 +130,7 @@ export const updateSystemSetting = createServerFn({ method: "POST" })
     const { data: row, error } = await sb
       .from("system_settings")
       .update({
-        value: parsed as any,
+        value: parsed as unknown,
         description: data.description ?? null,
         updated_by: context.userId,
         updated_at: new Date().toISOString(),

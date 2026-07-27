@@ -231,7 +231,7 @@ async function runDbEffectTests() {
     await test("reception: new → confirmed writes audit row", async () => {
       const id = await newAppt("new");
       created.push(id);
-      const { error } = await recepC.rpc("update_appointment_status" as any, {
+      const { error } = await recepC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "confirmed",
         _reason: null,
@@ -251,7 +251,7 @@ async function runDbEffectTests() {
       const id = await newAppt("confirmed");
       created.push(id);
       const reason = "اتصل المريض لإلغاء الحجز";
-      const { error } = await recepC.rpc("update_appointment_status" as any, {
+      const { error } = await recepC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "cancelled",
         _reason: reason,
@@ -265,7 +265,7 @@ async function runDbEffectTests() {
     await test("admin: cancelled → new (reopen) allowed", async () => {
       const id = await newAppt("cancelled");
       created.push(id);
-      const { error } = await adminC.rpc("update_appointment_status" as any, {
+      const { error } = await adminC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "new",
         _reason: "إعادة فتح",
@@ -278,7 +278,7 @@ async function runDbEffectTests() {
       const id = await newAppt("new");
       created.push(id);
       // RLS blocks the underlying UPDATE; RPC returns success (0 rows) but nothing changes.
-      await patC.rpc("update_appointment_status" as any, {
+      await patC.rpc("update_appointment_status" as unknown, {
         _id: id,
         _status: "confirmed",
         _reason: null,

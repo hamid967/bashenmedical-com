@@ -42,7 +42,7 @@ export const listMyInquiries = createServerFn({ method: "GET" })
       .limit(100);
 
     if (error) throw new Error(error.message);
-    return (data ?? []).map((r: any) => ({
+    return (data ?? []).map((r: unknown) => ({
       id: r.id,
       request_number: r.request_number,
       full_name: r.full_name,

@@ -160,7 +160,7 @@ function PatientDetail() {
 
   const p = patientQ.data;
   const criticalAllergies = (allergiesQ.data ?? []).filter(
-    (a: any) => a.severity === "severe" || a.severity === "life_threatening",
+    (a: unknown) => a.severity === "severe" || a.severity === "life_threatening",
   );
 
   return (
@@ -181,7 +181,7 @@ function PatientDetail() {
             <div className="font-bold text-red-700">تنبيه حساسية خطيرة</div>
             <div className="text-sm text-red-800 mt-1">
               {criticalAllergies
-                .map((a: any) => `${a.allergen}${a.reaction ? ` (${a.reaction})` : ""}`)
+                .map((a: unknown) => `${a.allergen}${a.reaction ? ` (${a.reaction})` : ""}`)
                 .join("، ")}
             </div>
           </div>
@@ -422,7 +422,7 @@ function InfoRow({
   label,
   value,
 }: {
-  icon: any;
+  icon: unknown;
   label: string;
   value: React.ReactNode;
 }) {
@@ -543,7 +543,7 @@ function AllergiesSection({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground text-center py-6">لا توجد حساسية مسجّلة</p>
       ) : (
         <ul className="divide-y divide-border">
-          {q.data?.map((a: any) => (
+          {q.data?.map((a: unknown) => (
             <li key={a.id} className="py-3 flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -597,7 +597,7 @@ function AllergiesSection({ patientId }: { patientId: string }) {
               patient_id: patientId,
               allergen: v.allergen,
               reaction: v.reaction || null,
-              severity: (v.severity || "mild") as any,
+              severity: (v.severity || "mild") as unknown,
               noted_on: v.noted_on || null,
               notes: v.notes || null,
               recorded_by: u.user?.id ?? null,
@@ -645,7 +645,7 @@ function MedicationsSection({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground text-center py-6">لا توجد أدوية مسجّلة</p>
       ) : (
         <ul className="divide-y divide-border">
-          {q.data?.map((m: any) => (
+          {q.data?.map((m: unknown) => (
             <li key={m.id} className="py-3 flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -710,7 +710,7 @@ function MedicationsSection({ patientId }: { patientId: string }) {
               route: v.route || null,
               start_date: v.start_date || null,
               end_date: v.end_date || null,
-              status: (v.status || "active") as any,
+              status: (v.status || "active") as unknown,
               prescribed_by_name: v.prescribed_by_name || null,
               notes: v.notes || null,
               recorded_by: u.user?.id ?? null,
@@ -757,7 +757,7 @@ function HistorySection({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground text-center py-6">لا توجد سجلات</p>
       ) : (
         <ul className="divide-y divide-border">
-          {q.data?.map((h: any) => (
+          {q.data?.map((h: unknown) => (
             <li key={h.id} className="py-3 flex items-start justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
@@ -819,8 +819,8 @@ function HistorySection({ patientId }: { patientId: string }) {
             const { error } = await supabase.from("patient_medical_history").insert({
               patient_id: patientId,
               condition: v.condition,
-              category: (v.category || "past") as any,
-              status: (v.status || "active") as any,
+              category: (v.category || "past") as unknown,
+              status: (v.status || "active") as unknown,
               onset_date: v.onset_date || null,
               resolution_date: v.resolution_date || null,
               notes: v.notes || null,
@@ -862,7 +862,7 @@ function SurgeriesSection({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground text-center py-6">لا توجد عمليات</p>
       ) : (
         <ul className="divide-y divide-border">
-          {q.data?.map((s: any) => (
+          {q.data?.map((s: unknown) => (
             <li key={s.id} className="py-3 flex items-start justify-between gap-3">
               <div>
                 <div className="font-semibold">{s.procedure_name}</div>
@@ -946,7 +946,7 @@ function VisitsSection({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground text-center py-6">لا توجد زيارات</p>
       ) : (
         <ul className="space-y-3">
-          {q.data?.map((v: any) => (
+          {q.data?.map((v: unknown) => (
             <li key={v.id} className="rounded-xl border border-border p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="font-semibold text-sm">
@@ -1055,7 +1055,7 @@ function VisitDialog({
       toast.success("تم حفظ الزيارة");
       onSaved();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message ?? "تعذّر الحفظ");
     } finally {
       setSaving(false);
@@ -1093,8 +1093,8 @@ function VisitDialog({
               <div key={k}>
                 <label className="text-[10px] text-muted-foreground">{l}</label>
                 <input
-                  value={(f as any)[k]}
-                  onChange={(e) => u(k as any, e.target.value)}
+                  value={(f as unknown)[k]}
+                  onChange={(e) => u(k as unknown, e.target.value)}
                   className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-xs"
                 />
               </div>
@@ -1109,8 +1109,8 @@ function VisitDialog({
             <div key={k}>
               <label className="text-xs text-muted-foreground">{l}</label>
               <textarea
-                value={(f as any)[k]}
-                onChange={(e) => u(k as any, e.target.value)}
+                value={(f as unknown)[k]}
+                onChange={(e) => u(k as unknown, e.target.value)}
                 className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 min-h-24"
               />
             </div>
@@ -1192,7 +1192,7 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
       const { error } = await supabase.from("patient_attachments").insert({
         patient_id: patientId,
         title: title.trim(),
-        category: category as any,
+        category: category as unknown,
         file_path: path,
         mime_type: file.type || null,
         size_bytes: file.size,
@@ -1203,7 +1203,7 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
       setTitle("");
       if (fileRef.current) fileRef.current.value = "";
       q.refetch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message ?? "تعذّر الرفع");
     } finally {
       setUploading(false);
@@ -1214,7 +1214,7 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
     try {
       const { url } = await getSigned({ data: { attachment_id: attachmentId } });
       window.open(url, "_blank", "noopener");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message ?? "تعذّر التنزيل");
     }
   };
@@ -1272,7 +1272,7 @@ function AttachmentsSection({ patientId }: { patientId: string }) {
         <p className="text-sm text-muted-foreground text-center py-6">لا توجد مرفقات</p>
       ) : (
         <ul className="divide-y divide-border">
-          {q.data?.map((a: any) => (
+          {q.data?.map((a: unknown) => (
             <li key={a.id} className="py-3 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="font-medium truncate">{a.title}</div>
@@ -1341,7 +1341,7 @@ function SimpleFormDialog({
       await onSubmit(values);
       toast.success("تم الحفظ");
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message ?? "تعذّر الحفظ");
     } finally {
       setSaving(false);
@@ -1496,7 +1496,7 @@ function OrdersPanel({
       await updateFn({ data: { id, status } });
       toast.success(`تم تحديث الحالة إلى: ${ORDER_STATUS_LABEL[status]}`);
       qc.invalidateQueries({ queryKey });
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "تعذّر تحديث الحالة");
     }
   }
@@ -1521,7 +1521,8 @@ function OrdersPanel({
             const label = kind === "lab" ? (r.title ?? r.test_type ?? "—") : (r.modality ?? "—");
             const sub =
               kind === "lab"
-                ? (r.test_type && r.title && r.test_type !== r.title ? r.test_type : r.summary) ?? null
+                ? ((r.test_type && r.title && r.test_type !== r.title ? r.test_type : r.summary) ??
+                  null)
                 : [r.body_part, r.findings].filter(Boolean).join(" — ") || null;
             return (
               <div key={r.id} className="p-3 flex flex-wrap items-start justify-between gap-3">

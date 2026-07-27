@@ -118,7 +118,7 @@ function ServiceInquiriesAdminPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const cleanFilters = useMemo(() => {
-    const f: any = { limit: 200 };
+    const f: unknown = { limit: 200 };
     if (filters.status) f.status = filters.status;
     if (filters.whatsapp_status) f.whatsapp_status = filters.whatsapp_status;
     if (filters.source) f.source = filters.source;
@@ -358,7 +358,7 @@ function InquiryDrawer({
       toast.success("تم تحديث التعيين");
       refresh();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر التعيين"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر التعيين"),
   });
   const statusMut = useMutation({
     mutationFn: (v: { status: (typeof STATUSES)[number]; reason?: string }) =>
@@ -367,7 +367,7 @@ function InquiryDrawer({
       toast.success("تم تحديث الحالة");
       refresh();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر التحديث"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر التحديث"),
   });
   const noteMut = useMutation({
     mutationFn: (v: { text: string; visibility: "internal" | "public" }) =>
@@ -377,7 +377,7 @@ function InquiryDrawer({
       setNoteText("");
       refresh();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر حفظ الملاحظة"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر حفظ الملاحظة"),
   });
   const notifyMut = useMutation({
     mutationFn: (v: { title: string; body: string }) => notifyFn({ data: { id, ...v } }),
@@ -387,7 +387,7 @@ function InquiryDrawer({
       setNotifyBody("");
       refresh();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إرسال الإشعار"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إرسال الإشعار"),
   });
   const closeMut = useMutation({
     mutationFn: (v: { outcome: "completed" | "cancelled"; reason?: string }) =>
@@ -396,7 +396,7 @@ function InquiryDrawer({
       toast.success("تم إغلاق الطلب");
       refresh();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إغلاق الطلب"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إغلاق الطلب"),
   });
 
   const [noteText, setNoteText] = useState("");
@@ -406,8 +406,8 @@ function InquiryDrawer({
   const [reason, setReason] = useState("");
 
   const d = detailQuery.data;
-  const inquiry: any = d?.inquiry ?? null;
-  const timeline: any[] = d?.timeline ?? [];
+  const inquiry: unknown = d?.inquiry ?? null;
+  const timeline: unknown[] = d?.timeline ?? [];
   const isClosed = inquiry?.closed_at != null;
   const { can } = usePermissions();
   const branchId: string | null = inquiry?.branch_id ?? null;
@@ -719,7 +719,7 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
   );
 }
 
-function formatMetadata(m: Record<string, any>): string {
+function formatMetadata(m: Record<string, unknown>): string {
   return Object.entries(m)
     .map(
       ([k, v]) =>

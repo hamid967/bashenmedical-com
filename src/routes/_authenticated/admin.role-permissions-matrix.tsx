@@ -99,7 +99,7 @@ export function RolePermissionsMatrixPage() {
       typeof permsQ.data extends undefined ? never : NonNullable<typeof permsQ.data>
     > = {};
     for (const p of permsQ.data ?? []) {
-      (g[p.category] ||= [] as any).push(p);
+      (g[p.category] ||= [] as unknown).push(p);
     }
     return g;
   }, [permsQ.data]);
@@ -142,7 +142,7 @@ export function RolePermissionsMatrixPage() {
             className="rounded-md border border-border bg-background px-3 py-2 text-sm"
           >
             <option value="all">جميع الفروع</option>
-            {(branchesQ.data ?? []).map((b: any) => (
+            {(branchesQ.data ?? []).map((b: unknown) => (
               <option key={b.id} value={b.id}>
                 {b.name_ar}
               </option>
@@ -212,7 +212,7 @@ export function RolePermissionsMatrixPage() {
                         {category}
                       </td>
                     </tr>
-                    {(perms as any[]).map((p) => (
+                    {(perms as unknown[]).map((p) => (
                       <tr key={p.key} className="border-t border-border hover:bg-muted/20">
                         <td className="sticky right-0 z-10 bg-card px-3 py-2 text-right">
                           <div className="text-foreground">{p.description_ar}</div>

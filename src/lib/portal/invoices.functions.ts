@@ -4,7 +4,7 @@ import { z } from "zod";
 
 /* ---------- helpers ---------- */
 
-async function resolvePatientId(supabase: any, userId: string): Promise<string | null> {
+async function resolvePatientId(supabase: unknown, userId: string): Promise<string | null> {
   const { data } = await supabase
     .from("patients")
     .select("id")
@@ -13,7 +13,7 @@ async function resolvePatientId(supabase: any, userId: string): Promise<string |
   return data?.id ?? null;
 }
 
-async function loadInvoicePayments(supabase: any, invoiceIds: string[]) {
+async function loadInvoicePayments(supabase: unknown, invoiceIds: string[]) {
   if (invoiceIds.length === 0) return new Map<string, number>();
   const { data } = await supabase
     .from("payments")
@@ -60,10 +60,10 @@ export const listMyInvoices = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
 
-    const ids = (rows ?? []).map((r: any) => r.id);
+    const ids = (rows ?? []).map((r: unknown) => r.id);
     const paidMap = await loadInvoicePayments(supabase, ids);
 
-    const invoices = (rows ?? []).map((r: any) => {
+    const invoices = (rows ?? []).map((r: unknown) => {
       const paid = paidMap.get(r.id) ?? 0;
       const total = Number(r.total ?? 0);
       return {
@@ -87,11 +87,11 @@ export const listMyInvoices = createServerFn({ method: "GET" })
       .from("invoices")
       .select("id, total, status")
       .eq("patient_id", patientId);
-    const allIds = (allRows ?? []).map((r: any) => r.id);
+    const allIds = (allRows ?? []).map((r: unknown) => r.id);
     const allPaidMap = await loadInvoicePayments(supabase, allIds);
     let totalSum = 0;
     let paidSum = 0;
-    for (const r of (allRows ?? []) as any[]) {
+    for (const r of (allRows ?? []) as unknown[]) {
       totalSum += Number(r.total ?? 0);
       paidSum += allPaidMap.get(r.id) ?? 0;
     }
@@ -135,8 +135,8 @@ export const getMyInvoice = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false });
 
     const paid = (pays ?? [])
-      .filter((p: any) => ["succeeded", "completed", "paid"].includes(p.status))
-      .reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
+      .filter((p: unknown) => ["succeeded", "completed", "paid"].includes(p.status))
+      .reduce((s: number, p: unknown) => s + Number(p.amount ?? 0), 0);
 
     const total = Number(inv.total ?? 0);
     return {
@@ -182,10 +182,10 @@ export const listMyPayments = createServerFn({ method: "GET" })
       .from("invoices")
       .select("id, invoice_number")
       .eq("patient_id", patientId);
-    const invIds = (invs ?? []).map((r: any) => r.id);
+    const invIds = (invs ?? []).map((r: unknown) => r.id);
     if (invIds.length === 0) return { payments: [] };
     const numberByInvoice = new Map<string, string | null>(
-      (invs ?? []).map((r: any) => [r.id as string, (r.invoice_number as string | null) ?? null]),
+      (invs ?? []).map((r: unknown) => [r.id as string, (r.invoice_number as string | null) ?? null]),
     );
 
     const { data: pays, error } = await supabase
@@ -199,7 +199,7 @@ export const listMyPayments = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     return {
-      payments: (pays ?? []).map((p: any) => ({
+      payments: (pays ?? []).map((p: unknown) => ({
         ...p,
         invoice_number: numberByInvoice.get(p.invoice_id) ?? null,
       })) as Array<{
@@ -250,8 +250,8 @@ export const createDemoInvoicePayment = createServerFn({ method: "POST" })
       .select("amount, status")
       .eq("invoice_id", inv.id);
     const paid = (existing ?? [])
-      .filter((p: any) => ["succeeded", "completed", "paid"].includes(p.status))
-      .reduce((s: number, p: any) => s + Number(p.amount ?? 0), 0);
+      .filter((p: unknown) => ["succeeded", "completed", "paid"].includes(p.status))
+      .reduce((s: number, p: unknown) => s + Number(p.amount ?? 0), 0);
     const remaining = Math.max(0, Number(inv.total ?? 0) - paid);
     if (remaining <= 0) throw new Error("الفاتورة مسددة بالكامل");
 

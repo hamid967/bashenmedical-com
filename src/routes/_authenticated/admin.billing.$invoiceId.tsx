@@ -87,7 +87,7 @@ function InvoiceDetailPage() {
   const q = useQuery({
     queryKey: ["admin-invoice", invoiceId],
     queryFn: () => getFn({ data: { id: invoiceId } }),
-    retry: (failureCount, err: any) =>
+    retry: (failureCount, err: unknown) =>
       !String(err?.message ?? "").includes("غير موجودة") && failureCount < 2,
   });
 
@@ -108,7 +108,7 @@ function InvoiceDetailPage() {
     throw q.error;
   }
 
-  const inv: any = q.data;
+  const inv: unknown = q.data;
   const patient = inv.patient;
   const appt = inv.appointment;
   const branch = appt?.branch;
@@ -239,7 +239,7 @@ function InvoiceDetailPage() {
 }
 
 // ------------- Billing state-machine actions (B3) -------------
-function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () => void }) {
+function BillingActions({ invoice, onChanged }: { invoice: unknown; onChanged: () => void }) {
   const qc = useQueryClient();
   const listRefundsFn = useServerFn(listInvoiceRefunds);
   const recordFn = useServerFn(recordPayment);
@@ -274,12 +274,12 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
         data: {
           invoice_id: invoice.id,
           amount: Number(payAmount),
-          method: payMethod as any,
+          method: payMethod as unknown,
           idempotency_key: `manual-${invoice.id}-${Date.now()}`,
           note: payNote || undefined,
         },
       }),
-    onSuccess: (r: any) => {
+    onSuccess: (r: unknown) => {
       toast.success(r.deduplicated ? "دفعة مسجّلة مسبقاً (نفس المفتاح)." : "تم تسجيل الدفعة.");
       setPayOpen(false);
       setPayNote("");
@@ -307,7 +307,7 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
           reason: refundReason.trim(),
         },
       }),
-    onSuccess: (r: any) => {
+    onSuccess: (r: unknown) => {
       toast.success(`تم إنشاء طلب استرداد ${r.receipt_reference}.`);
       setRefundOpen(null);
       setRefundAmount("");
@@ -364,7 +364,7 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
           <div className="text-sm text-muted-foreground">لا توجد دفعات مسجّلة.</div>
         ) : (
           <ul className="space-y-2 text-sm">
-            {payments.data.payments.map((p: any) => (
+            {payments.data.payments.map((p: unknown) => (
               <li key={p.id} className="rounded-md border p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -390,7 +390,7 @@ function BillingActions({ invoice, onChanged }: { invoice: any; onChanged: () =>
                 </div>
                 {p.refunds && p.refunds.length > 0 && (
                   <ul className="mt-2 space-y-1 border-t pt-2 text-xs">
-                    {p.refunds.map((r: any) => (
+                    {p.refunds.map((r: unknown) => (
                       <li key={r.id} className="flex flex-wrap items-center justify-between gap-2">
                         <span>
                           <span className="font-mono">{r.receipt_reference}</span> ·{" "}

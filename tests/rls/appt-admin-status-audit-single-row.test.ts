@@ -139,7 +139,7 @@ let user: { userId: string; email: string; password: string } | null = null;
         const a = await newAppt(from);
         created.push(a.id);
 
-        const { error } = await c.rpc("update_appointment_status" as any, {
+        const { error } = await c.rpc("update_appointment_status" as unknown, {
           _id: a.id,
           _status: to,
           _reason: raw,

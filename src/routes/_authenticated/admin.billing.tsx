@@ -143,7 +143,7 @@ function BillingPage() {
     queryFn: () => listFn({ data: params }),
   });
 
-  const rows: any[] = list.data?.rows ?? [];
+  const rows: unknown[] = list.data?.rows ?? [];
   const total: number = list.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 

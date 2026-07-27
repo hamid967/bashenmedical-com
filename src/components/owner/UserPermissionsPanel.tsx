@@ -79,7 +79,7 @@ export function UserPermissionsPanel({ userId }: { userId: string }) {
         <div className="text-[11px] text-slate-400">لا صلاحيات مخصصة بعد.</div>
       ) : (
         <ul className="space-y-1.5">
-          {permsQ.data!.rows.map((r: any) => (
+          {permsQ.data!.rows.map((r: unknown) => (
             <li
               key={r.id}
               className="flex items-center justify-between gap-2 px-2 py-1.5 rounded bg-slate-50 border border-slate-100 text-[11px]"

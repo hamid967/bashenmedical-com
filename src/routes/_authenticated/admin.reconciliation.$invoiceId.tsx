@@ -155,11 +155,7 @@ function ReconciliationDetailPage() {
           label="الفرق"
           value={money(row.variance, ccy)}
           tone={
-            Math.abs(row.variance) <= 0.009
-              ? "success"
-              : row.variance < 0
-                ? "danger"
-                : "warning"
+            Math.abs(row.variance) <= 0.009 ? "success" : row.variance < 0 ? "danger" : "warning"
           }
         />
       </section>
@@ -174,7 +170,10 @@ function ReconciliationDetailPage() {
           <ul className="mt-3 space-y-2 text-sm">
             {flagsExplained.map((f) => (
               <li key={f.code} className="flex gap-2">
-                <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500" aria-hidden="true" />
+                <span
+                  className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500"
+                  aria-hidden="true"
+                />
                 <div>
                   <div className="font-medium">{f.label}</div>
                   <div className="text-xs text-muted-foreground">{f.detail}</div>
@@ -198,8 +197,6 @@ function ReconciliationDetailPage() {
         history={adjustmentHistory}
         nphiesCandidates={nphies}
       />
-
-
 
       {/* Field-level diffs */}
       <section>
@@ -252,7 +249,9 @@ function ReconciliationDetailPage() {
           icon={<ShieldAlert className="h-4 w-4" aria-hidden="true" />}
           title="مطالبة NPHIES المطابقة"
           subtitle={row.nphies_request_id ? row.nphies_request_id.slice(0, 8) : "لا توجد"}
-          href={row.nphies_request_id ? `/admin/nphies?request=${row.nphies_request_id}` : undefined}
+          href={
+            row.nphies_request_id ? `/admin/nphies?request=${row.nphies_request_id}` : undefined
+          }
           meta={[
             ["الوضع", row.nphies_mode ?? "—"],
             [
@@ -402,11 +401,7 @@ function ReconciliationDetailPage() {
                     </td>
                     <td className="px-3 py-2 text-xs">{n.mode}</td>
                     <td className="px-3 py-2 text-xs">
-                      {n.eligible === true
-                        ? "مؤهل"
-                        : n.eligible === false
-                          ? "غير مؤهل"
-                          : "—"}
+                      {n.eligible === true ? "مؤهل" : n.eligible === false ? "غير مؤهل" : "—"}
                     </td>
                     <td className="px-3 py-2 text-xs text-muted-foreground">
                       {n.reason ?? n.error_message ?? "—"}
@@ -473,9 +468,7 @@ function StatusPill({ status }: { status: string | null }) {
     : failed
       ? "bg-destructive/10 text-destructive"
       : "bg-muted text-muted-foreground";
-  return (
-    <span className={`rounded-full px-2 py-0.5 text-[10px] ${cls}`}>{status ?? "—"}</span>
-  );
+  return <span className={`rounded-full px-2 py-0.5 text-[10px] ${cls}`}>{status ?? "—"}</span>;
 }
 
 function FieldRow({ d, ccy }: { d: ReconciliationFieldDiff; ccy: string }) {
@@ -535,7 +528,9 @@ function SourceCard({
         <div className="flex items-center gap-2 text-sm font-semibold">
           {icon} {title}
         </div>
-        {href ? <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" /> : null}
+        {href ? (
+          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
+        ) : null}
       </div>
       <div className="mt-1 font-mono text-xs text-muted-foreground">{subtitle}</div>
       <dl className="mt-3 space-y-1 text-xs">
@@ -549,7 +544,10 @@ function SourceCard({
     </div>
   );
   return href ? (
-    <a href={href} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg">
+    <a
+      href={href}
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+    >
       {inner}
     </a>
   ) : (
@@ -604,13 +602,7 @@ function AdjustmentPanel({
     unlink_nphies?: boolean;
     linked_nphies_request_id?: string | null;
     override_expected_share?: number | null;
-    override_invoice_status?:
-      | "issued"
-      | "pending"
-      | "paid"
-      | "cancelled"
-      | "refunded"
-      | null;
+    override_invoice_status?: "issued" | "pending" | "paid" | "cancelled" | "refunded" | null;
     resolved?: boolean;
   };
 
@@ -648,14 +640,8 @@ function AdjustmentPanel({
       linked_nphies_request_id: linkMode === "link" && linkedId ? linkedId : null,
       override_expected_share:
         overrideShareEnabled && overrideShare !== "" ? Number(overrideShare) : null,
-      override_invoice_status:
-        (statusOverride || null) as
-          | "issued"
-          | "pending"
-          | "paid"
-          | "cancelled"
-          | "refunded"
-          | null,
+      override_invoice_status: (statusOverride || null) as
+        "issued" | "pending" | "paid" | "cancelled" | "refunded" | null,
       resolved,
     };
     apply.mutate(payload);
@@ -684,7 +670,8 @@ function AdjustmentPanel({
             </>
           ) : (
             <>
-              <Pencil className="h-3.5 w-3.5" /> {activeAdjustment ? "استبدال التعديل" : "تعديل يدوي"}
+              <Pencil className="h-3.5 w-3.5" />{" "}
+              {activeAdjustment ? "استبدال التعديل" : "تعديل يدوي"}
             </>
           )}
         </button>
@@ -715,7 +702,8 @@ function AdjustmentPanel({
                 )}
                 {activeAdjustment.override_expected_share != null && (
                   <li>
-                    • حصة المريض المتوقعة: {money(activeAdjustment.override_expected_share, currency)}
+                    • حصة المريض المتوقعة:{" "}
+                    {money(activeAdjustment.override_expected_share, currency)}
                   </li>
                 )}
                 {activeAdjustment.override_invoice_status && (
@@ -775,8 +763,8 @@ function AdjustmentPanel({
                 {nphiesCandidates.map((n) => (
                   <option key={n.id} value={n.id}>
                     {new Date(n.created_at).toLocaleString("ar-SA")} •{" "}
-                    {n.eligible === true ? "مؤهل" : n.eligible === false ? "غير مؤهل" : "—"} •
-                    تغطية {money(n.covered_amount, currency)} • حصة {money(n.patient_share, currency)}
+                    {n.eligible === true ? "مؤهل" : n.eligible === false ? "غير مؤهل" : "—"} • تغطية{" "}
+                    {money(n.covered_amount, currency)} • حصة {money(n.patient_share, currency)}
                   </option>
                 ))}
               </select>
@@ -931,4 +919,3 @@ function Tag({ children }: { children: React.ReactNode }) {
     <span className="rounded-full bg-muted px-2 py-0.5 text-muted-foreground">{children}</span>
   );
 }
-

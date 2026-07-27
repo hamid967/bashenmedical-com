@@ -26,7 +26,7 @@ export type AdminRadiologyReport = {
   } | null;
 };
 
-async function assertRadAccess(ctx: { supabase: any; userId: string }) {
+async function assertRadAccess(ctx: { supabase: unknown; userId: string }) {
   const [a, d] = await Promise.all([
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" }),
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "doctor" }),
@@ -51,7 +51,7 @@ export const listAdminRadiologyReports = createServerFn({ method: "GET" })
   .validator((d: unknown) => ListInput.parse(d ?? {}))
   .handler(async ({ data, context }) => {
     await assertRadAccess(context);
-    let q: any = context.supabase
+    let q: unknown = context.supabase
       .from("radiology_reports")
       .select(
         "id, patient_id, modality, body_part, findings, status, report_date, file_path, ordered_by, released_at, created_at, patient:patients(id, full_name_ar, mrn, phone)",
@@ -104,14 +104,14 @@ export const upsertRadiologyReport = createServerFn({ method: "POST" })
       ordered_by: context.userId,
     };
     if (data.id) {
-      const { error } = await (context.supabase as any)
+      const { error } = await (context.supabase as unknown)
         .from("radiology_reports")
         .update(payload)
         .eq("id", data.id);
       if (error) throw new Error(error.message);
       return { ok: true, id: data.id };
     }
-    const { data: row, error } = await (context.supabase as any)
+    const { data: row, error } = await (context.supabase as unknown)
       .from("radiology_reports")
       .insert(payload)
       .select("id")

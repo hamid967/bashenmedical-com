@@ -84,7 +84,7 @@ function ArticleDetail() {
 
   useEffect(() => {
     if (query.data?.article && !form) {
-      const a: any = query.data.article;
+      const a: unknown = query.data.article;
       setForm({
         title_ar: a.title_ar ?? "",
         title_en: a.title_en ?? "",
@@ -162,7 +162,7 @@ function ArticleDetail() {
     );
   }
 
-  const article: any = query.data!.article;
+  const article: unknown = query.data!.article;
   const cats = catsQuery.data ?? [];
 
   return (

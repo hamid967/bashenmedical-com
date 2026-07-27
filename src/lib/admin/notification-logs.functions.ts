@@ -29,7 +29,7 @@ export type NotificationDeliveryLog = {
 
 export type NotificationDeliveryLogDetail = NotificationDeliveryLog & {
   updated_at: string;
-  metadata: Record<string, any> | null;
+  metadata: Record<string, unknown> | null;
   notification: {
     id: string;
     kind: string | null;
@@ -39,7 +39,7 @@ export type NotificationDeliveryLogDetail = NotificationDeliveryLog & {
     sent_at: string | null;
     audience: string | null;
     created_at: string;
-    metadata: Record<string, any> | null;
+    metadata: Record<string, unknown> | null;
   } | null;
 };
 
@@ -86,8 +86,8 @@ export const listNotificationDeliveryLogs = createServerFn({ method: "GET" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return (rows ?? []).map((r) => {
-      const meta = (r as { metadata?: Record<string, any> | null }).metadata;
-      const is_test = !!(meta && (meta as Record<string, any>).test === true);
+      const meta = (r as { metadata?: Record<string, unknown> | null }).metadata;
+      const is_test = !!(meta && (meta as Record<string, unknown>).test === true);
       return { ...(r as object), is_test } as NotificationDeliveryLog;
     });
   });
@@ -151,7 +151,7 @@ export const exportNotificationDeliveryLogsCsv = createServerFn({ method: "GET" 
     ];
     const lines: string[] = [headers.join(",")];
     for (const r of rows ?? []) {
-      const meta = (r.metadata as Record<string, any> | null) ?? null;
+      const meta = (r.metadata as Record<string, unknown> | null) ?? null;
       const isTest = !!(meta && meta.test === true);
       lines.push(
         [
@@ -212,12 +212,12 @@ export const getNotificationDeliveryLogDetail = createServerFn({ method: "GET" }
       if (n) {
         notification = {
           ...n,
-          metadata: (n.metadata as Record<string, any> | null) ?? null,
+          metadata: (n.metadata as Record<string, unknown> | null) ?? null,
         };
       }
     }
 
-    const meta = (log.metadata as Record<string, any> | null) ?? null;
+    const meta = (log.metadata as Record<string, unknown> | null) ?? null;
     return {
       ...(log as object),
       metadata: meta,
@@ -291,8 +291,8 @@ export const retryNotificationDeliveryLog = createServerFn({ method: "POST" })
     }
 
     // 3) Insert new pending attempt on the same channel/notification.
-    const srcMeta = (src.metadata as Record<string, any> | null) ?? {};
-    const newMeta: Record<string, any> = {
+    const srcMeta = (src.metadata as Record<string, unknown> | null) ?? {};
+    const newMeta: Record<string, unknown> = {
       retry_of: src.id,
       idempotency_key: idempotencyKey,
       requested_by: context.userId,

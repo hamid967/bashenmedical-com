@@ -42,13 +42,13 @@ export function PerfBudgetsPanel() {
   const [sweepMsg, setSweepMsg] = useState<string | null>(null);
   const sweepMut = useMutation({
     mutationFn: async () => sweepFn(),
-    onSuccess: (res: any) => {
+    onSuccess: (res: unknown) => {
       setSweepMsg(
         `تم الفحص: ${res.scanned} سياسة · ${res.breaches} تجاوز · ${res.new_alerts} تنبيه جديد`,
       );
       qc.invalidateQueries({ queryKey: ["admin", "perf-budget-alerts"] });
     },
-    onError: (e: any) => setSweepMsg(`تعذّر الفحص: ${e?.message ?? "خطأ"}`),
+    onError: (e: unknown) => setSweepMsg(`تعذّر الفحص: ${e?.message ?? "خطأ"}`),
   });
 
   const toggleMut = useMutation({

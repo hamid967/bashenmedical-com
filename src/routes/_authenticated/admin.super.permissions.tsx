@@ -191,7 +191,7 @@ export function SuperPermissionsPage() {
       }
       return { prev, cellKey };
     },
-    onError: (err: any, v, ctx) => {
+    onError: (err: unknown, v, ctx) => {
       // 1) Rollback the optimistic cache change
       if (ctx?.prev !== undefined) {
         qc.setQueryData(matrixQuery.queryKey, ctx.prev);
@@ -344,7 +344,7 @@ export function SuperPermissionsPage() {
         }
       }
       setImportPayload(payload);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setImportPayload(null);
       setImportError(err?.message ?? "تعذّر قراءة الملف.");
     }
@@ -354,7 +354,7 @@ export function SuperPermissionsPage() {
     if (!importPayload) return;
     setImporting(true);
     try {
-      const res: any = await importFn({
+      const res: unknown = await importFn({
         data: {
           mode: importMode,
           payload: { version: 1, roles: importPayload },
@@ -371,7 +371,7 @@ export function SuperPermissionsPage() {
       setImportFileName(null);
       if (fileRef.current) fileRef.current.value = "";
       qc.invalidateQueries({ queryKey: ["rbac", "role-permissions-matrix"] });
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err?.message ?? "تعذّر الاستيراد");
     } finally {
       setImporting(false);
@@ -457,7 +457,7 @@ export function SuperPermissionsPage() {
             </SelectContent>
           </Select>
 
-          <Select value={roleFocus} onValueChange={(v) => setRoleFocus(v as any)}>
+          <Select value={roleFocus} onValueChange={(v) => setRoleFocus(v as unknown)}>
             <SelectTrigger>
               <SelectValue placeholder="الدور" />
             </SelectTrigger>
@@ -473,7 +473,7 @@ export function SuperPermissionsPage() {
 
           <Select
             value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as any)}
+            onValueChange={(v) => setStatusFilter(v as unknown)}
             disabled={roleFocus === "all"}
           >
             <SelectTrigger>
@@ -624,7 +624,7 @@ export function SuperPermissionsPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">وضع التطبيق</label>
-              <Select value={importMode} onValueChange={(v) => setImportMode(v as any)}>
+              <Select value={importMode} onValueChange={(v) => setImportMode(v as unknown)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

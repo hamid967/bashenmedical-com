@@ -28,7 +28,7 @@ export const listDataContracts = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<{ contracts: DataContract[] }> => {
     await assertHasRole(context.supabase, context.userId, "admin");
-    const { data, error } = await context.supabase.rpc("admin_list_data_contracts" as any);
+    const { data, error } = await context.supabase.rpc("admin_list_data_contracts" as unknown);
     if (error) throw new Error(error.message);
     return { contracts: (data ?? []) as DataContract[] };
   });

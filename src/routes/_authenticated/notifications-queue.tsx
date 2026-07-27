@@ -33,7 +33,7 @@ export const Route = createFileRoute("/_authenticated/notifications-queue")({
   ),
 });
 
-const CHANNEL_LABEL: Record<string, { label: string; Icon: any; color: string }> = {
+const CHANNEL_LABEL: Record<string, { label: string; Icon: unknown; color: string }> = {
   sms: { label: "SMS", Icon: MessageSquare, color: "bg-teal-100 text-teal-900" },
   whatsapp: { label: "WhatsApp", Icon: MessageCircle, color: "bg-emerald-100 text-emerald-900" },
   email: { label: "Email", Icon: Mail, color: "bg-teal-100 text-teal-900" },
@@ -76,7 +76,7 @@ function NotificationsQueuePage() {
       toast.success("تم التحديث");
       qc.invalidateQueries({ queryKey: ["notif-queue"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "خطأ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "خطأ"),
   });
 
   return (
@@ -138,7 +138,7 @@ function NotificationsQueuePage() {
         {(["pending", "sent", "failed", "skipped", null] as const).map((s) => (
           <button
             key={String(s)}
-            onClick={() => setStatus(s as any)}
+            onClick={() => setStatus(s as unknown)}
             className={`rounded-full border px-3 py-1 text-xs transition ${
               status === s
                 ? "border-primary bg-primary/10 text-primary"

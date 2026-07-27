@@ -75,7 +75,7 @@ export function InquiryAttachments({
       toast.success("تم حذف المرفق");
       qc.invalidateQueries({ queryKey: listKey });
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر حذف المرفق"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر حذف المرفق"),
   });
 
   async function handleFiles(files: FileList | null) {
@@ -131,11 +131,11 @@ export function InquiryAttachments({
             }
             qc.invalidateQueries({ queryKey: listKey });
           })
-          .catch((e: any) => {
+          .catch((e: unknown) => {
             toast.error(`تعذّر إتمام فحص ${file.name}: ${e?.message ?? ""}`);
             qc.invalidateQueries({ queryKey: listKey });
           });
-      } catch (e: any) {
+      } catch (e: unknown) {
         toast.error(e?.message ?? `تعذّر رفع ${file.name}`);
       } finally {
         setUploading(false);

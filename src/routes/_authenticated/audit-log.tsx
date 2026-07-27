@@ -27,11 +27,11 @@ const SENSITIVE_KEYS = new Set([
   "file_url",
 ]);
 
-function sanitize(value: any): any {
+function sanitize(value: unknown): unknown {
   if (value === null || value === undefined) return value;
   if (Array.isArray(value)) return value.map(sanitize);
   if (typeof value === "object") {
-    const out: Record<string, any> = {};
+    const out: Record<string, unknown> = {};
     for (const [k, v] of Object.entries(value)) {
       if (SENSITIVE_KEYS.has(k)) continue;
       out[k] = sanitize(v);
@@ -41,29 +41,29 @@ function sanitize(value: any): any {
   return value;
 }
 
-function formatVal(v: any): string {
+function formatVal(v: unknown): string {
   if (v === null || v === undefined) return "∅";
   if (typeof v === "object") return JSON.stringify(v);
   return String(v);
 }
 
 /** Human-readable "field: old → new" list, one per line. */
-function formatChanges(metadata: any): string {
+function formatChanges(metadata: unknown): string {
   if (!metadata || typeof metadata !== "object") return "";
   const clean = sanitize(metadata);
   const parts: string[] = [];
   if (clean.changes && typeof clean.changes === "object") {
-    for (const [k, diff] of Object.entries<any>(clean.changes)) {
+    for (const [k, diff] of Object.entries<unknown>(clean.changes)) {
       parts.push(`${k}: ${formatVal(diff?.old)} → ${formatVal(diff?.new)}`);
     }
   }
   if (clean.new && typeof clean.new === "object" && !clean.changes) {
-    for (const [k, v] of Object.entries<any>(clean.new)) {
+    for (const [k, v] of Object.entries<unknown>(clean.new)) {
       parts.push(`+ ${k}: ${formatVal(v)}`);
     }
   }
   if (clean.old && typeof clean.old === "object" && !clean.changes && !clean.new) {
-    for (const [k, v] of Object.entries<any>(clean.old)) {
+    for (const [k, v] of Object.entries<unknown>(clean.old)) {
       parts.push(`- ${k}: ${formatVal(v)}`);
     }
   }
@@ -113,7 +113,7 @@ function downloadCsv(rows: Array<Record<string, unknown>>, filename: string) {
   ];
   const lines = [headerLabels.join(",")];
   for (const r of rows) {
-    const row = r as any;
+    const row = r as unknown;
     const enriched = {
       ...row,
       changes: formatChanges(row.metadata),
@@ -165,14 +165,14 @@ function AuditLogPage() {
 
   const myRoles = useQuery({ queryKey: ["my-roles"], queryFn: () => myRolesFn() });
   const isAdmin =
-    (myRoles.data?.roles ?? []).includes("admin" as any) ||
-    (myRoles.data?.roles ?? []).includes("super_admin" as any);
+    (myRoles.data?.roles ?? []).includes("admin" as unknown) ||
+    (myRoles.data?.roles ?? []).includes("super_admin" as unknown);
 
   const [action, setAction] = useState<string>(search.action ?? "");
   const [from, setFrom] = useState<string>(search.from ?? "");
   const [to, setTo] = useState<string>(search.to ?? "");
   const [limit, setLimit] = useState<number>(100);
-  const [selected, setSelected] = useState<any | null>(null);
+  const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const highlightId = search.id;
 
   const actions = useQuery({
@@ -198,7 +198,7 @@ function AuditLogPage() {
   // Auto-open the requested audit event when deep-linked via ?id=
   useEffect(() => {
     if (!highlightId || !log.data) return;
-    const found = (log.data as any[]).find((r) => r.id === highlightId);
+    const found = (log.data as unknown[]).find((r) => r.id === highlightId);
     if (found) setSelected(found);
   }, [highlightId, log.data]);
 
@@ -300,7 +300,7 @@ function AuditLogPage() {
             const rows = log.data ?? [];
             if (rows.length === 0) return;
             const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
-            downloadCsv(rows as any, `audit-log-${stamp}.csv`);
+            downloadCsv(rows as unknown, `audit-log-${stamp}.csv`);
           }}
           disabled={!log.data || log.data.length === 0}
           className="inline-flex items-center gap-1.5 rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-50"
@@ -405,7 +405,7 @@ function Field({ label, value, mono }: { label: string; value: React.ReactNode; 
   );
 }
 
-function AuditDetailModal({ row, onClose }: { row: any; onClose: () => void }) {
+function AuditDetailModal({ row, onClose }: { row: unknown; onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
@@ -485,7 +485,7 @@ function AuditDetailModal({ row, onClose }: { row: any; onClose: () => void }) {
   );
 }
 
-function copyJson(value: any, label: string) {
+function copyJson(value: unknown, label: string) {
   const text = typeof value === "string" ? value : JSON.stringify(value, null, 2);
   navigator.clipboard
     .writeText(text)
@@ -500,7 +500,7 @@ function JsonBlock({
   defaultOpen = true,
 }: {
   title: string;
-  value: any;
+  value: unknown;
   tone?: "before" | "after" | "diff" | "neutral";
   defaultOpen?: boolean;
 }) {
@@ -544,21 +544,21 @@ function JsonBlock({
   );
 }
 
-function MetadataBlocks({ metadata }: { metadata: any }) {
+function MetadataBlocks({ metadata }: { metadata: unknown }) {
   if (!metadata || typeof metadata !== "object") {
     return <div className="text-sm text-muted-foreground">لا توجد بيانات إضافية.</div>;
   }
-  const clean = sanitize(metadata) as any;
+  const clean = sanitize(metadata) as unknown;
   const changes = clean.changes && typeof clean.changes === "object" ? clean.changes : null;
   const beforeVal =
     clean.old ??
     (changes
-      ? Object.fromEntries(Object.entries<any>(changes).map(([k, v]) => [k, v?.old]))
+      ? Object.fromEntries(Object.entries<unknown>(changes).map(([k, v]) => [k, v?.old]))
       : null);
   const afterVal =
     clean.new ??
     (changes
-      ? Object.fromEntries(Object.entries<any>(changes).map(([k, v]) => [k, v?.new]))
+      ? Object.fromEntries(Object.entries<unknown>(changes).map(([k, v]) => [k, v?.new]))
       : null);
 
   // Anything not covered by before/after/changes we still show as a raw block.

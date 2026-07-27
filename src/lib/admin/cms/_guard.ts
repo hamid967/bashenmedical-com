@@ -4,7 +4,7 @@
  *   - `assertCmsPublisher` — admin OR super_admin only (approve, publish, schedule, rollback, archive).
  *   - `assertCmsSuper` — super_admin only (nav / footer / policies / seo_defaults).
  */
-export type CmsGuardCtx = { supabase: any; userId: string };
+export type CmsGuardCtx = { supabase: unknown; userId: string };
 
 async function hasAny(ctx: CmsGuardCtx, roles: readonly string[]): Promise<boolean> {
   const checks = await Promise.all(

@@ -67,260 +67,267 @@ export type ReconciliationSummary = {
 export const getDailyReconciliation = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .validator((d: unknown) => schema.parse(d ?? {}))
-  .handler(async ({ data, context }): Promise<{
-    summary: ReconciliationSummary;
-    rows: ReconciliationRow[];
-    unmatchedNphies: Array<{
-      id: string;
-      created_at: string;
-      mode: string;
-      doctor_id: string | null;
-      patient_national_id: string | null;
-      covered_amount: number | null;
-      patient_share: number | null;
-      eligible: boolean | null;
-    }>;
-  }> => {
-    await assertHasRole(context.supabase, context.userId, "admin");
+  .handler(
+    async ({
+      data,
+      context,
+    }): Promise<{
+      summary: ReconciliationSummary;
+      rows: ReconciliationRow[];
+      unmatchedNphies: Array<{
+        id: string;
+        created_at: string;
+        mode: string;
+        doctor_id: string | null;
+        patient_national_id: string | null;
+        covered_amount: number | null;
+        patient_share: number | null;
+        eligible: boolean | null;
+      }>;
+    }> => {
+      await assertHasRole(context.supabase, context.userId, "admin");
 
-    const day = data.date ?? new Date().toISOString().slice(0, 10);
-    const dayStart = new Date(`${day}T00:00:00.000Z`).toISOString();
-    const dayEnd = new Date(`${day}T23:59:59.999Z`).toISOString();
+      const day = data.date ?? new Date().toISOString().slice(0, 10);
+      const dayStart = new Date(`${day}T00:00:00.000Z`).toISOString();
+      const dayEnd = new Date(`${day}T23:59:59.999Z`).toISOString();
 
-    // 1) Invoices issued on the target date (+ appointment + branch + patient)
-    const invoiceCols =
-      "id, invoice_number, total, currency, status, issued_at, " +
-      "patient:patients(id, full_name_ar, full_name_en, national_id), " +
-      "appointment:appointments(id, reference_number, branch_id, doctor_id, appointment_date, national_id, " +
-      "branch:branches(id, name_ar, name_en))";
-    let invQ = context.supabase
-      .from("invoices")
-      .select(invoiceCols)
-      .eq("issued_at", day);
-    if (data.branch_id) {
-      // Filter via nested join
-      invQ = context.supabase
-        .from("invoices")
-        .select(invoiceCols.replace("appointment:appointments(", "appointment:appointments!inner("))
-        .eq("issued_at", day)
-        .eq("appointment.branch_id", data.branch_id);
-    }
-    const { data: invoices, error: invErr } = await invQ;
-    if (invErr) throw new Error(invErr.message);
-    const invoiceRows = (invoices ?? []) as any[];
-
-    if (invoiceRows.length === 0) {
-      // Still return NPHIES totals for context.
-    }
-
-    // 2) Payments for these invoices (succeeded only for collected totals)
-    const invoiceIds = invoiceRows.map((r) => r.id);
-    let paymentsByInvoice = new Map<string, { collected: number; refunded: number }>();
-    if (invoiceIds.length > 0) {
-      const { data: pays, error: payErr } = await context.supabase
-        .from("payments")
-        .select("id, invoice_id, amount, status")
-        .in("invoice_id", invoiceIds);
-      if (payErr) throw new Error(payErr.message);
-      for (const p of pays ?? []) {
-        const cur = paymentsByInvoice.get(p.invoice_id) ?? { collected: 0, refunded: 0 };
-        if (p.status === "succeeded") cur.collected += Number(p.amount);
-        paymentsByInvoice.set(p.invoice_id, cur);
+      // 1) Invoices issued on the target date (+ appointment + branch + patient)
+      const invoiceCols =
+        "id, invoice_number, total, currency, status, issued_at, " +
+        "patient:patients(id, full_name_ar, full_name_en, national_id), " +
+        "appointment:appointments(id, reference_number, branch_id, doctor_id, appointment_date, national_id, " +
+        "branch:branches(id, name_ar, name_en))";
+      let invQ = context.supabase.from("invoices").select(invoiceCols).eq("issued_at", day);
+      if (data.branch_id) {
+        // Filter via nested join
+        invQ = context.supabase
+          .from("invoices")
+          .select(
+            invoiceCols.replace("appointment:appointments(", "appointment:appointments!inner("),
+          )
+          .eq("issued_at", day)
+          .eq("appointment.branch_id", data.branch_id);
       }
-      // Refunds
-      const paymentIds = (pays ?? []).map((p: any) => p.id).filter(Boolean);
-      // refunds table linked via payment_id
-      const { data: refunds } = await context.supabase
-        .from("refunds")
-        .select("payment_id, amount, status, payments!inner(invoice_id)")
-        .in("payment_id", paymentIds.length ? paymentIds : ["00000000-0000-0000-0000-000000000000"]);
-      for (const rf of refunds ?? []) {
-        if (rf.status !== "succeeded") continue;
-        const invId = (rf as any).payments?.invoice_id;
-        if (!invId) continue;
-        const cur = paymentsByInvoice.get(invId) ?? { collected: 0, refunded: 0 };
-        cur.refunded += Number(rf.amount);
-        paymentsByInvoice.set(invId, cur);
+      const { data: invoices, error: invErr } = await invQ;
+      if (invErr) throw new Error(invErr.message);
+      const invoiceRows = (invoices ?? []) as unknown[];
+
+      if (invoiceRows.length === 0) {
+        // Still return NPHIES totals for context.
       }
-    }
 
-    // 3) NPHIES requests for the day (best-effort match by doctor_id + national_id)
-    const { data: nphies, error: nphErr } = await context.supabase
-      .from("nphies_requests")
-      .select(
-        "id, created_at, mode, doctor_id, patient_national_id, covered_amount, patient_share, eligible, http_status",
-      )
-      .gte("created_at", dayStart)
-      .lte("created_at", dayEnd);
-    if (nphErr) throw new Error(nphErr.message);
-    const nphiesRows = (nphies ?? []) as any[];
-
-    // Build lookup key: doctor_id|national_id
-    const nphiesByKey = new Map<string, any>();
-    for (const n of nphiesRows) {
-      if (!n.doctor_id || !n.patient_national_id) continue;
-      const key = `${n.doctor_id}|${n.patient_national_id}`;
-      // Prefer eligible=true, otherwise latest
-      const existing = nphiesByKey.get(key);
-      if (
-        !existing ||
-        (n.eligible === true && existing.eligible !== true) ||
-        new Date(n.created_at).getTime() > new Date(existing.created_at).getTime()
-      ) {
-        nphiesByKey.set(key, n);
-      }
-    }
-    const matchedNphiesIds = new Set<string>();
-
-    // 3.5) Active adjustments for these invoices
-    const adjustmentsByInvoice = new Map<string, any>();
-    const extraNphiesIds: string[] = [];
-    if (invoiceIds.length > 0) {
-      const { data: adjs, error: adjErr } = await context.supabase
-        .from("reconciliation_adjustments")
-        .select(
-          "id, invoice_id, linked_nphies_request_id, unlink_nphies, override_expected_share, override_invoice_status, resolved, reason, created_at",
-        )
-        .in("invoice_id", invoiceIds)
-        .is("revoked_at", null)
-        .order("created_at", { ascending: false });
-      if (adjErr) throw new Error(adjErr.message);
-      for (const a of adjs ?? []) {
-        if (!adjustmentsByInvoice.has(a.invoice_id)) {
-          adjustmentsByInvoice.set(a.invoice_id, a);
-          if (a.linked_nphies_request_id) extraNphiesIds.push(a.linked_nphies_request_id);
+      // 2) Payments for these invoices (succeeded only for collected totals)
+      const invoiceIds = invoiceRows.map((r) => r.id);
+      const paymentsByInvoice = new Map<string, { collected: number; refunded: number }>();
+      if (invoiceIds.length > 0) {
+        const { data: pays, error: payErr } = await context.supabase
+          .from("payments")
+          .select("id, invoice_id, amount, status")
+          .in("invoice_id", invoiceIds);
+        if (payErr) throw new Error(payErr.message);
+        for (const p of pays ?? []) {
+          const cur = paymentsByInvoice.get(p.invoice_id) ?? { collected: 0, refunded: 0 };
+          if (p.status === "succeeded") cur.collected += Number(p.amount);
+          paymentsByInvoice.set(p.invoice_id, cur);
+        }
+        // Refunds
+        const paymentIds = (pays ?? []).map((p: unknown) => p.id).filter(Boolean);
+        // refunds table linked via payment_id
+        const { data: refunds } = await context.supabase
+          .from("refunds")
+          .select("payment_id, amount, status, payments!inner(invoice_id)")
+          .in(
+            "payment_id",
+            paymentIds.length ? paymentIds : ["00000000-0000-0000-0000-000000000000"],
+          );
+        for (const rf of refunds ?? []) {
+          if (rf.status !== "succeeded") continue;
+          const invId = (rf as unknown).payments?.invoice_id;
+          if (!invId) continue;
+          const cur = paymentsByInvoice.get(invId) ?? { collected: 0, refunded: 0 };
+          cur.refunded += Number(rf.amount);
+          paymentsByInvoice.set(invId, cur);
         }
       }
-    }
-    // Load NPHIES rows referenced by adjustments but not in the day window
-    const extraNphiesById = new Map<string, any>();
-    if (extraNphiesIds.length > 0) {
-      const { data: extras } = await context.supabase
+
+      // 3) NPHIES requests for the day (best-effort match by doctor_id + national_id)
+      const { data: nphies, error: nphErr } = await context.supabase
         .from("nphies_requests")
         .select(
           "id, created_at, mode, doctor_id, patient_national_id, covered_amount, patient_share, eligible, http_status",
         )
-        .in("id", extraNphiesIds);
-      for (const n of extras ?? []) extraNphiesById.set(n.id, n);
-    }
+        .gte("created_at", dayStart)
+        .lte("created_at", dayEnd);
+      if (nphErr) throw new Error(nphErr.message);
+      const nphiesRows = (nphies ?? []) as unknown[];
 
-    // 4) Merge into rows
-    const rows: ReconciliationRow[] = invoiceRows.map((inv) => {
-      const appt = inv.appointment ?? null;
-      const patient = inv.patient ?? null;
-      const nationalId = patient?.national_id ?? appt?.national_id ?? null;
-      const doctorId = appt?.doctor_id ?? null;
-      const adjustment = adjustmentsByInvoice.get(inv.id) ?? null;
-
-      let nphiesMatch: any =
-        doctorId && nationalId ? nphiesByKey.get(`${doctorId}|${nationalId}`) : null;
-      if (adjustment?.unlink_nphies) nphiesMatch = null;
-      if (adjustment?.linked_nphies_request_id) {
-        nphiesMatch =
-          extraNphiesById.get(adjustment.linked_nphies_request_id) ??
-          nphiesRows.find((n: any) => n.id === adjustment.linked_nphies_request_id) ??
-          nphiesMatch;
+      // Build lookup key: doctor_id|national_id
+      const nphiesByKey = new Map<string, unknown>();
+      for (const n of nphiesRows) {
+        if (!n.doctor_id || !n.patient_national_id) continue;
+        const key = `${n.doctor_id}|${n.patient_national_id}`;
+        // Prefer eligible=true, otherwise latest
+        const existing = nphiesByKey.get(key);
+        if (
+          !existing ||
+          (n.eligible === true && existing.eligible !== true) ||
+          new Date(n.created_at).getTime() > new Date(existing.created_at).getTime()
+        ) {
+          nphiesByKey.set(key, n);
+        }
       }
-      if (nphiesMatch) matchedNphiesIds.add(nphiesMatch.id);
+      const matchedNphiesIds = new Set<string>();
 
-      const effectiveStatus: string | null = adjustment?.override_invoice_status ?? inv.status ?? null;
-      const billed = Number(inv.total ?? 0);
-      const pay = paymentsByInvoice.get(inv.id) ?? { collected: 0, refunded: 0 };
-      const netCollected = pay.collected - pay.refunded;
-      const covered = nphiesMatch?.covered_amount != null ? Number(nphiesMatch.covered_amount) : null;
-      const patientShare =
-        nphiesMatch?.patient_share != null ? Number(nphiesMatch.patient_share) : null;
-      const baseExpected =
-        patientShare != null ? patientShare : covered != null ? billed - covered : null;
-      const expectedShare =
-        adjustment?.override_expected_share != null
-          ? Number(adjustment.override_expected_share)
-          : baseExpected;
-      const variance = expectedShare != null ? netCollected - expectedShare : netCollected - billed;
-
-      const flags: string[] = [];
-      if (Math.abs(variance) > 0.009) flags.push("variance");
-      if (!nphiesMatch && appt?.insurance_provider_id) flags.push("missing_nphies");
-      if (effectiveStatus !== "paid" && netCollected >= billed - 0.009)
-        flags.push("collected_not_marked_paid");
-      if (effectiveStatus === "paid" && netCollected + 0.009 < billed)
-        flags.push("marked_paid_underpaid");
-      if (billed === 0) flags.push("zero_billed");
-      if (adjustment?.resolved) {
-        // Resolved adjustments suppress the variance flag; keep an explicit marker.
-        const idx = flags.indexOf("variance");
-        if (idx >= 0) flags.splice(idx, 1);
-        flags.push("resolved");
+      // 3.5) Active adjustments for these invoices
+      const adjustmentsByInvoice = new Map<string, unknown>();
+      const extraNphiesIds: string[] = [];
+      if (invoiceIds.length > 0) {
+        const { data: adjs, error: adjErr } = await context.supabase
+          .from("reconciliation_adjustments")
+          .select(
+            "id, invoice_id, linked_nphies_request_id, unlink_nphies, override_expected_share, override_invoice_status, resolved, reason, created_at",
+          )
+          .in("invoice_id", invoiceIds)
+          .is("revoked_at", null)
+          .order("created_at", { ascending: false });
+        if (adjErr) throw new Error(adjErr.message);
+        for (const a of adjs ?? []) {
+          if (!adjustmentsByInvoice.has(a.invoice_id)) {
+            adjustmentsByInvoice.set(a.invoice_id, a);
+            if (a.linked_nphies_request_id) extraNphiesIds.push(a.linked_nphies_request_id);
+          }
+        }
+      }
+      // Load NPHIES rows referenced by adjustments but not in the day window
+      const extraNphiesById = new Map<string, unknown>();
+      if (extraNphiesIds.length > 0) {
+        const { data: extras } = await context.supabase
+          .from("nphies_requests")
+          .select(
+            "id, created_at, mode, doctor_id, patient_national_id, covered_amount, patient_share, eligible, http_status",
+          )
+          .in("id", extraNphiesIds);
+        for (const n of extras ?? []) extraNphiesById.set(n.id, n);
       }
 
-      return {
-        invoice_id: inv.id,
-        invoice_number: inv.invoice_number ?? null,
-        status: effectiveStatus,
-        appointment_id: appt?.id ?? null,
-        appointment_ref: appt?.reference_number ?? null,
-        branch_id: appt?.branch_id ?? null,
-        branch_name: appt?.branch?.name_ar ?? appt?.branch?.name_en ?? null,
-        patient_id: patient?.id ?? null,
-        patient_name: patient?.full_name_ar ?? patient?.full_name_en ?? null,
-        patient_national_id: nationalId,
-        doctor_id: doctorId,
-        billed,
-        collected: pay.collected,
-        refunded: pay.refunded,
-        net_collected: netCollected,
-        nphies_covered: covered,
-        nphies_patient_share: patientShare,
-        nphies_request_id: nphiesMatch?.id ?? null,
-        nphies_mode: nphiesMatch?.mode ?? null,
-        nphies_eligible: nphiesMatch?.eligible ?? null,
-        expected_patient_share: expectedShare,
-        variance: Number(variance.toFixed(2)),
-        currency: inv.currency ?? "SAR",
-        flags,
-        adjusted: !!adjustment,
-        adjustment_reason: adjustment?.reason ?? null,
+      // 4) Merge into rows
+      const rows: ReconciliationRow[] = invoiceRows.map((inv) => {
+        const appt = inv.appointment ?? null;
+        const patient = inv.patient ?? null;
+        const nationalId = patient?.national_id ?? appt?.national_id ?? null;
+        const doctorId = appt?.doctor_id ?? null;
+        const adjustment = adjustmentsByInvoice.get(inv.id) ?? null;
+
+        let nphiesMatch: unknown =
+          doctorId && nationalId ? nphiesByKey.get(`${doctorId}|${nationalId}`) : null;
+        if (adjustment?.unlink_nphies) nphiesMatch = null;
+        if (adjustment?.linked_nphies_request_id) {
+          nphiesMatch =
+            extraNphiesById.get(adjustment.linked_nphies_request_id) ??
+            nphiesRows.find((n: unknown) => n.id === adjustment.linked_nphies_request_id) ??
+            nphiesMatch;
+        }
+        if (nphiesMatch) matchedNphiesIds.add(nphiesMatch.id);
+
+        const effectiveStatus: string | null =
+          adjustment?.override_invoice_status ?? inv.status ?? null;
+        const billed = Number(inv.total ?? 0);
+        const pay = paymentsByInvoice.get(inv.id) ?? { collected: 0, refunded: 0 };
+        const netCollected = pay.collected - pay.refunded;
+        const covered =
+          nphiesMatch?.covered_amount != null ? Number(nphiesMatch.covered_amount) : null;
+        const patientShare =
+          nphiesMatch?.patient_share != null ? Number(nphiesMatch.patient_share) : null;
+        const baseExpected =
+          patientShare != null ? patientShare : covered != null ? billed - covered : null;
+        const expectedShare =
+          adjustment?.override_expected_share != null
+            ? Number(adjustment.override_expected_share)
+            : baseExpected;
+        const variance =
+          expectedShare != null ? netCollected - expectedShare : netCollected - billed;
+
+        const flags: string[] = [];
+        if (Math.abs(variance) > 0.009) flags.push("variance");
+        if (!nphiesMatch && appt?.insurance_provider_id) flags.push("missing_nphies");
+        if (effectiveStatus !== "paid" && netCollected >= billed - 0.009)
+          flags.push("collected_not_marked_paid");
+        if (effectiveStatus === "paid" && netCollected + 0.009 < billed)
+          flags.push("marked_paid_underpaid");
+        if (billed === 0) flags.push("zero_billed");
+        if (adjustment?.resolved) {
+          // Resolved adjustments suppress the variance flag; keep an explicit marker.
+          const idx = flags.indexOf("variance");
+          if (idx >= 0) flags.splice(idx, 1);
+          flags.push("resolved");
+        }
+
+        return {
+          invoice_id: inv.id,
+          invoice_number: inv.invoice_number ?? null,
+          status: effectiveStatus,
+          appointment_id: appt?.id ?? null,
+          appointment_ref: appt?.reference_number ?? null,
+          branch_id: appt?.branch_id ?? null,
+          branch_name: appt?.branch?.name_ar ?? appt?.branch?.name_en ?? null,
+          patient_id: patient?.id ?? null,
+          patient_name: patient?.full_name_ar ?? patient?.full_name_en ?? null,
+          patient_national_id: nationalId,
+          doctor_id: doctorId,
+          billed,
+          collected: pay.collected,
+          refunded: pay.refunded,
+          net_collected: netCollected,
+          nphies_covered: covered,
+          nphies_patient_share: patientShare,
+          nphies_request_id: nphiesMatch?.id ?? null,
+          nphies_mode: nphiesMatch?.mode ?? null,
+          nphies_eligible: nphiesMatch?.eligible ?? null,
+          expected_patient_share: expectedShare,
+          variance: Number(variance.toFixed(2)),
+          currency: inv.currency ?? "SAR",
+          flags,
+          adjusted: !!adjustment,
+          adjustment_reason: adjustment?.reason ?? null,
+        };
+      });
+
+      // 5) Unmatched NPHIES rows (potential leakage / claims without invoice)
+      const unmatchedNphies = nphiesRows
+        .filter((n) => !matchedNphiesIds.has(n.id))
+        .map((n) => ({
+          id: n.id,
+          created_at: n.created_at,
+          mode: n.mode,
+          doctor_id: n.doctor_id,
+          patient_national_id: n.patient_national_id,
+          covered_amount: n.covered_amount != null ? Number(n.covered_amount) : null,
+          patient_share: n.patient_share != null ? Number(n.patient_share) : null,
+          eligible: n.eligible,
+        }));
+
+      // 6) Summary
+      const summary: ReconciliationSummary = {
+        date: day,
+        branch_id: data.branch_id ?? null,
+        invoice_count: rows.length,
+        total_billed: round2(rows.reduce((s, r) => s + r.billed, 0)),
+        total_collected: round2(rows.reduce((s, r) => s + r.collected, 0)),
+        total_refunded: round2(rows.reduce((s, r) => s + r.refunded, 0)),
+        total_net_collected: round2(rows.reduce((s, r) => s + r.net_collected, 0)),
+        total_nphies_covered: round2(rows.reduce((s, r) => s + (r.nphies_covered ?? 0), 0)),
+        total_expected_patient_share: round2(
+          rows.reduce((s, r) => s + (r.expected_patient_share ?? 0), 0),
+        ),
+        total_variance: round2(rows.reduce((s, r) => s + r.variance, 0)),
+        matched_nphies: matchedNphiesIds.size,
+        unmatched_nphies_requests: unmatchedNphies.length,
+        discrepancy_count: rows.filter((r) => r.flags.includes("variance")).length,
       };
-    });
 
-
-    // 5) Unmatched NPHIES rows (potential leakage / claims without invoice)
-    const unmatchedNphies = nphiesRows
-      .filter((n) => !matchedNphiesIds.has(n.id))
-      .map((n) => ({
-        id: n.id,
-        created_at: n.created_at,
-        mode: n.mode,
-        doctor_id: n.doctor_id,
-        patient_national_id: n.patient_national_id,
-        covered_amount: n.covered_amount != null ? Number(n.covered_amount) : null,
-        patient_share: n.patient_share != null ? Number(n.patient_share) : null,
-        eligible: n.eligible,
-      }));
-
-    // 6) Summary
-    const summary: ReconciliationSummary = {
-      date: day,
-      branch_id: data.branch_id ?? null,
-      invoice_count: rows.length,
-      total_billed: round2(rows.reduce((s, r) => s + r.billed, 0)),
-      total_collected: round2(rows.reduce((s, r) => s + r.collected, 0)),
-      total_refunded: round2(rows.reduce((s, r) => s + r.refunded, 0)),
-      total_net_collected: round2(rows.reduce((s, r) => s + r.net_collected, 0)),
-      total_nphies_covered: round2(
-        rows.reduce((s, r) => s + (r.nphies_covered ?? 0), 0),
-      ),
-      total_expected_patient_share: round2(
-        rows.reduce((s, r) => s + (r.expected_patient_share ?? 0), 0),
-      ),
-      total_variance: round2(rows.reduce((s, r) => s + r.variance, 0)),
-      matched_nphies: matchedNphiesIds.size,
-      unmatched_nphies_requests: unmatchedNphies.length,
-      discrepancy_count: rows.filter((r) => r.flags.includes("variance")).length,
-    };
-
-    return { summary, rows, unmatchedNphies };
-  });
+      return { summary, rows, unmatchedNphies };
+    },
+  );
 
 function round2(n: number): number {
   return Math.round(n * 100) / 100;
@@ -477,11 +484,11 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
     if (invErr) throw new Error(invErr.message);
     if (!inv) throw new Error("الفاتورة غير موجودة");
 
-    const appt: any = (inv as any).appointment ?? null;
-    const patient: any = (inv as any).patient ?? null;
+    const appt: unknown = (inv as unknown).appointment ?? null;
+    const patient: unknown = (inv as unknown).patient ?? null;
     const nationalId: string | null = patient?.national_id ?? appt?.national_id ?? null;
     const doctorId: string | null = appt?.doctor_id ?? null;
-    const day: string | null = appt?.appointment_date ?? (inv as any).issued_at ?? null;
+    const day: string | null = appt?.appointment_date ?? (inv as unknown).issued_at ?? null;
 
     const { data: pays, error: payErr } = await context.supabase
       .from("payments")
@@ -491,7 +498,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       .eq("invoice_id", data.invoice_id)
       .order("created_at", { ascending: true });
     if (payErr) throw new Error(payErr.message);
-    const payments: ReconciliationPaymentRow[] = (pays ?? []).map((p: any) => ({
+    const payments: ReconciliationPaymentRow[] = (pays ?? []).map((p: unknown) => ({
       ...p,
       amount: Number(p.amount ?? 0),
     }));
@@ -507,7 +514,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         .in("payment_id", paymentIds)
         .order("created_at", { ascending: true });
       if (rfErr) throw new Error(rfErr.message);
-      refunds = (rfs ?? []).map((r: any) => ({ ...r, amount: Number(r.amount ?? 0) }));
+      refunds = (rfs ?? []).map((r: unknown) => ({ ...r, amount: Number(r.amount ?? 0) }));
     }
 
     const collected = payments
@@ -533,7 +540,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         .lte("created_at", dayEnd)
         .order("created_at", { ascending: false });
       if (nErr) throw new Error(nErr.message);
-      const base = (nRows ?? []).map((n: any) => ({
+      const base = (nRows ?? []).map((n: unknown) => ({
         id: n.id,
         created_at: n.created_at,
         mode: n.mode,
@@ -561,13 +568,11 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       .eq("invoice_id", data.invoice_id)
       .order("created_at", { ascending: false });
     if (adjErr) throw new Error(adjErr.message);
-    const adjRaw = (adjRows ?? []) as any[];
+    const adjRaw = (adjRows ?? []) as unknown[];
 
     // Resolve user names for creators / revokers
     const userIds = Array.from(
-      new Set(
-        adjRaw.flatMap((a) => [a.created_by, a.revoked_by]).filter(Boolean),
-      ),
+      new Set(adjRaw.flatMap((a) => [a.created_by, a.revoked_by]).filter(Boolean)),
     ) as string[];
     const userNames = new Map<string, string>();
     if (userIds.length > 0) {
@@ -575,7 +580,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name")
         .in("id", userIds);
-      for (const p of (profs ?? []) as any[]) {
+      for (const p of (profs ?? []) as unknown[]) {
         userNames.set(p.id, p.full_name || p.id.slice(0, 8));
       }
     }
@@ -585,7 +590,8 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       invoice_id: a.invoice_id,
       linked_nphies_request_id: a.linked_nphies_request_id,
       unlink_nphies: !!a.unlink_nphies,
-      override_expected_share: a.override_expected_share != null ? Number(a.override_expected_share) : null,
+      override_expected_share:
+        a.override_expected_share != null ? Number(a.override_expected_share) : null,
       override_invoice_status: a.override_invoice_status,
       resolved: !!a.resolved,
       reason: a.reason,
@@ -641,7 +647,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       primary = existing;
     }
 
-    const billed = Number((inv as any).total ?? 0);
+    const billed = Number((inv as unknown).total ?? 0);
     const covered = primary?.covered_amount ?? null;
     const patientShare = primary?.patient_share ?? null;
     const baseExpected =
@@ -652,7 +658,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
         : baseExpected;
     const variance = expectedShare != null ? netCollected - expectedShare : netCollected - billed;
     const effectiveStatus: string | null =
-      activeAdjustment?.override_invoice_status ?? (inv as any).status ?? null;
+      activeAdjustment?.override_invoice_status ?? (inv as unknown).status ?? null;
 
     const flags: string[] = [];
     if (Math.abs(variance) > 0.009) flags.push("variance");
@@ -668,10 +674,10 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       flags.push("resolved");
     }
 
-    const currency: string = (inv as any).currency ?? "SAR";
+    const currency: string = (inv as unknown).currency ?? "SAR";
     const row: ReconciliationRow = {
-      invoice_id: (inv as any).id,
-      invoice_number: (inv as any).invoice_number ?? null,
+      invoice_id: (inv as unknown).id,
+      invoice_number: (inv as unknown).invoice_number ?? null,
       status: effectiveStatus,
       appointment_id: appt?.id ?? null,
       appointment_ref: appt?.reference_number ?? null,
@@ -697,7 +703,6 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       adjusted: !!activeAdjustment,
       adjustment_reason: activeAdjustment?.reason ?? null,
     };
-
 
     const fieldDiffs: ReconciliationFieldDiff[] = [];
     const pushMoney = (
@@ -758,11 +763,11 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
       key: "status_consistency",
       label: "اتساق حالة الفاتورة",
       expected: netCollected >= billed - 0.009 ? "paid" : "issued/pending",
-      actual: (inv as any).status ?? "—",
+      actual: (inv as unknown).status ?? "—",
       delta: null,
       status:
-        (netCollected >= billed - 0.009 && (inv as any).status === "paid") ||
-        (netCollected + 0.009 < billed && (inv as any).status !== "paid")
+        (netCollected >= billed - 0.009 && (inv as unknown).status === "paid") ||
+        (netCollected + 0.009 < billed && (inv as unknown).status !== "paid")
           ? "match"
           : "diff",
     });
@@ -778,11 +783,7 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
             : "غير محدد"
         : "لا توجد",
       delta: null,
-      status: !appt?.insurance_provider_id
-        ? "info"
-        : primary?.eligible === true
-          ? "match"
-          : "diff",
+      status: !appt?.insurance_provider_id ? "info" : primary?.eligible === true ? "match" : "diff",
     });
 
     const flagsExplained = flags.map((code) => ({
@@ -794,15 +795,15 @@ export const getReconciliationDetail = createServerFn({ method: "GET" })
     return {
       row,
       invoice: {
-        id: (inv as any).id,
-        invoice_number: (inv as any).invoice_number ?? null,
-        status: (inv as any).status ?? null,
-        issued_at: (inv as any).issued_at ?? null,
-        paid_at: (inv as any).paid_at ?? null,
+        id: (inv as unknown).id,
+        invoice_number: (inv as unknown).invoice_number ?? null,
+        status: (inv as unknown).status ?? null,
+        issued_at: (inv as unknown).issued_at ?? null,
+        paid_at: (inv as unknown).paid_at ?? null,
         total: round2(billed),
         currency,
-        notes: (inv as any).notes ?? null,
-        pdf_path: (inv as any).pdf_path ?? null,
+        notes: (inv as unknown).notes ?? null,
+        pdf_path: (inv as unknown).pdf_path ?? null,
       },
       payments,
       refunds,
@@ -854,7 +855,7 @@ export const listReconciliationAdjustments = createServerFn({ method: "GET" })
       .eq("invoice_id", data.invoice_id)
       .order("created_at", { ascending: false });
     if (error) throw new Error(error.message);
-    const raw = (rows ?? []) as any[];
+    const raw = (rows ?? []) as unknown[];
     const userIds = Array.from(
       new Set(raw.flatMap((r) => [r.created_by, r.revoked_by]).filter(Boolean)),
     ) as string[];
@@ -864,7 +865,7 @@ export const listReconciliationAdjustments = createServerFn({ method: "GET" })
         .from("profiles")
         .select("id, full_name")
         .in("id", userIds);
-      for (const p of (profs ?? []) as any[]) {
+      for (const p of (profs ?? []) as unknown[]) {
         names.set(p.id, p.full_name || p.id.slice(0, 8));
       }
     }
@@ -959,4 +960,3 @@ export const revokeReconciliationAdjustment = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
-

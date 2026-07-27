@@ -62,7 +62,7 @@ const EVENT_OPTIONS: Record<Kind, Array<{ value: string; label: string }>> = {
   ],
 };
 
-const COLUMNS: Record<Kind, Column<any>[]> = {
+const COLUMNS: Record<Kind, Column<unknown>[]> = {
   appointment_audit: [
     { header: "التاريخ", accessor: (r) => new Date(r.changed_at).toLocaleString("ar") },
     { header: "المريض", accessor: (r) => r.patient_name },
@@ -148,7 +148,7 @@ function AuditExportPage() {
       }),
   });
 
-  const preview = useMemo<any[]>(() => ((rowsQ.data as any[]) ?? []).slice(0, 100), [rowsQ.data]);
+  const preview = useMemo<Record<string, unknown>[]>(() => ((rowsQ.data as unknown[]) ?? []).slice(0, 100), [rowsQ.data]);
   const cols = COLUMNS[kind];
 
   async function handleExport() {
@@ -171,7 +171,7 @@ function AuditExportPage() {
       const stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-");
       exportCsv(`${kind}-${stamp}.csv`, cols, full);
       toast.success(`تم تصدير ${full.length} سجل.`);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "تعذّر التصدير.");
     }
   }
@@ -287,7 +287,7 @@ function AuditExportPage() {
                   </div>
                 ) : rowsQ.isError ? (
                   <div className="text-sm text-destructive py-8 text-center">
-                    {(rowsQ.error as any)?.message ?? "تعذّر التحميل."}
+                    {(rowsQ.error as unknown)?.message ?? "تعذّر التحميل."}
                   </div>
                 ) : preview.length === 0 ? (
                   <div className="text-sm text-muted-foreground py-8 text-center">

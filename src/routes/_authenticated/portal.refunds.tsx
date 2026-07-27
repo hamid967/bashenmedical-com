@@ -645,7 +645,7 @@ function fmtDateTime(iso: string | null) {
   }
 }
 type Status = "pending" | "approved" | "processed" | "rejected" | "canceled";
-const STATUS_META: Record<Status, { label: string; cls: string; icon: any }> = {
+const STATUS_META: Record<Status, { label: string; cls: string; icon: unknown }> = {
   pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-700", icon: Clock },
   approved: { label: "معتمدة (قيد الصرف)", cls: "bg-teal-50 text-teal-700", icon: CheckCircle2 },
   processed: { label: "تمت المعالجة", cls: "bg-emerald-50 text-emerald-700", icon: CheckCircle2 },
@@ -668,7 +668,7 @@ const STATUS_TABS: Array<{ key: string; label: string }> = [
   { key: "rejected", label: "مرفوضة" },
   { key: "canceled", label: "ملغاة" },
 ];
-const SORT_OPTIONS: Array<{ key: string; label: string; icon: any }> = [
+const SORT_OPTIONS: Array<{ key: string; label: string; icon: unknown }> = [
   { key: "updated_desc", label: "آخر تحديث (الأحدث)", icon: ArrowDownWideNarrow },
   { key: "updated_asc", label: "آخر تحديث (الأقدم)", icon: ArrowUpWideNarrow },
   { key: "created_desc", label: "تاريخ الطلب (الأحدث)", icon: ArrowDownWideNarrow },
@@ -691,7 +691,7 @@ function PortalRefundsPage() {
     [data.refunds, receipt],
   );
   const closeReceipt = () =>
-    navigate({ search: (prev: any) => ({ ...prev, receipt: undefined }), replace: true });
+    navigate({ search: (prev: unknown) => ({ ...prev, receipt: undefined }), replace: true });
 
   const safeStatus = STATUS_TABS.some((t) => t.key === status) ? status : "all";
   const safeSort = SORT_OPTIONS.some((s) => s.key === sort) ? sort : "updated_desc";
@@ -739,9 +739,9 @@ function PortalRefundsPage() {
   );
 
   const setStatus = (key: string) =>
-    navigate({ search: (prev: any) => ({ ...prev, status: key }), replace: true });
+    navigate({ search: (prev: unknown) => ({ ...prev, status: key }), replace: true });
   const setSort = (key: string) =>
-    navigate({ search: (prev: any) => ({ ...prev, sort: key }), replace: true });
+    navigate({ search: (prev: unknown) => ({ ...prev, sort: key }), replace: true });
 
   return (
     <div className="portal-magazine min-h-full">
@@ -922,7 +922,7 @@ function RefundRow({ r, onOpen }: { r: RefundRow; onOpen: () => void }) {
       toast.success("تم إلغاء الطلب");
       qc.invalidateQueries({ queryKey: ["portal", "refunds"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إلغاء الطلب"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إلغاء الطلب"),
   });
 
   return (
@@ -1009,7 +1009,7 @@ type TimelineStep = {
   at: string | null;
   note?: string | null;
   state: "done" | "current" | "upcoming" | "skipped" | "failed";
-  icon: any;
+  icon: unknown;
 };
 
 function buildTimeline(r: RefundRow): TimelineStep[] {
@@ -1134,7 +1134,7 @@ function RefundDetailsDrawer({ r, onClose }: { r: RefundRow; onClose: () => void
       qc.invalidateQueries({ queryKey: ["portal", "refunds"] });
       onClose();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إلغاء الطلب"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إلغاء الطلب"),
   });
 
   return (
@@ -1526,7 +1526,7 @@ function NewRefundDrawer({
           amount: amount ? Number(amount) : undefined,
         },
       }),
-    onSuccess: (res: any) => {
+    onSuccess: (res: unknown) => {
       const ref = res?.receipt_reference;
       toast.success(
         ref
@@ -1536,7 +1536,7 @@ function NewRefundDrawer({
       qc.invalidateQueries({ queryKey: ["portal", "refunds"] });
       onClose();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إرسال الطلب"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إرسال الطلب"),
   });
 
   const canSubmit =

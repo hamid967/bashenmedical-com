@@ -48,7 +48,7 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
         .select("id,full_name")
         .ilike("full_name", `%${q}%`)
         .limit(200);
-      (profs ?? []).forEach((p: any) => ids.add(p.id));
+      (profs ?? []).forEach((p: unknown) => ids.add(p.id));
 
       actorIds = Array.from(ids);
       if (actorIds.length === 0) {
@@ -76,7 +76,7 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
 
     // Enrich with actor identity for display
     const distinctActors = Array.from(
-      new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)),
+      new Set((rows ?? []).map((r: unknown) => r.actor).filter(Boolean)),
     ) as string[];
     const actors: Record<string, { email: string | null; full_name: string | null }> = {};
     if (distinctActors.length) {
@@ -84,7 +84,7 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
         supabaseAdmin.from("profiles").select("id,full_name").in("id", distinctActors),
       ]);
       const nameById = new Map<string, string | null>();
-      (profRes.data ?? []).forEach((p: any) => nameById.set(p.id, p.full_name ?? null));
+      (profRes.data ?? []).forEach((p: unknown) => nameById.set(p.id, p.full_name ?? null));
       await Promise.all(
         distinctActors.map(async (id) => {
           try {
@@ -101,7 +101,7 @@ export const listOwnerAudit = createServerFn({ method: "POST" })
     }
 
     return {
-      rows: (rows ?? []).map((r: any) => ({
+      rows: (rows ?? []).map((r: unknown) => ({
         ...r,
         ip_address: r.ip_address == null ? null : String(r.ip_address),
       })),

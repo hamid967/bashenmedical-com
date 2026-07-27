@@ -16,7 +16,7 @@ import { assertHasAnyRole } from "./_guard";
 
 const DOCTOR_ROLES = ["doctor", "super_admin"] as const;
 
-async function resolveDoctorId(supabase: any, userId: string): Promise<string> {
+async function resolveDoctorId(supabase: unknown, userId: string): Promise<string> {
   const { data, error } = await supabase
     .from("doctor_profiles")
     .select("doctor_id, is_active")
@@ -386,7 +386,7 @@ const RAD_COLS =
 
 const orderListSchema = z.object({ appointment_id: z.string().uuid() });
 
-async function loadApptForOrder(sb: any, apptId: string, doctorId: string) {
+async function loadApptForOrder(sb: unknown, apptId: string, doctorId: string) {
   const { data: appt, error } = await sb
     .from("appointments")
     .select("id, doctor_id, patient_id")
@@ -461,8 +461,7 @@ export const cancelLabOrder = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (fErr) throw new Error(fErr.message);
-    if (!row || row.ordered_by !== context.userId)
-      throw new Error("الطلب غير موجود أو غير مسموح.");
+    if (!row || row.ordered_by !== context.userId) throw new Error("الطلب غير موجود أو غير مسموح.");
     if (row.released_at) throw new Error("لا يمكن إلغاء طلب صادر بالنتيجة.");
     const { error } = await context.supabase
       .from("lab_reports")
@@ -534,8 +533,7 @@ export const cancelRadOrder = createServerFn({ method: "POST" })
       .eq("id", data.id)
       .maybeSingle();
     if (fErr) throw new Error(fErr.message);
-    if (!row || row.ordered_by !== context.userId)
-      throw new Error("الطلب غير موجود أو غير مسموح.");
+    if (!row || row.ordered_by !== context.userId) throw new Error("الطلب غير موجود أو غير مسموح.");
     if (row.released_at) throw new Error("لا يمكن إلغاء طلب صادر بالنتيجة.");
     const { error } = await context.supabase
       .from("radiology_reports")

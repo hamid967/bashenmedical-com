@@ -105,7 +105,7 @@ let user: { userId: string; email: string; password: string } | null = null;
           created.push(a.id);
           const before = a.status;
 
-          const { error } = await c.rpc("update_appointment_status" as any, {
+          const { error } = await c.rpc("update_appointment_status" as unknown, {
             _id: a.id,
             _status: status,
             _reason: raw,
@@ -134,7 +134,7 @@ let user: { userId: string; email: string; password: string } | null = null;
           );
 
           // (4) subsequent valid call succeeds — context is not lost / locked
-          const { error: err2 } = await c.rpc("update_appointment_status" as any, {
+          const { error: err2 } = await c.rpc("update_appointment_status" as unknown, {
             _id: a.id,
             _status: status,
             _reason: "طلب المريض",

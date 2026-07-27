@@ -7,7 +7,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(ctx: { supabase: any; userId: string }) {
+async function assertAdmin(ctx: { supabase: unknown; userId: string }) {
   const [{ data: isAdmin }, { data: isSuper }] = await Promise.all([
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "admin" }),
     ctx.supabase.rpc("has_role", { _user_id: ctx.userId, _role: "super_admin" }),
@@ -82,16 +82,16 @@ export const getNoShowRisk = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     const doctorIds = Array.from(
-      new Set((rows ?? []).map((r: any) => r.doctor_id).filter(Boolean)),
+      new Set((rows ?? []).map((r: unknown) => r.doctor_id).filter(Boolean)),
     ) as string[];
     const doctorsRes = doctorIds.length
       ? await context.supabase.from("doctors").select("id, name_ar").in("id", doctorIds)
-      : { data: [] as any[] };
+      : { data: [] as unknown[] };
     const doctorMap = new Map<string, string>(
-      (doctorsRes.data ?? []).map((d: any) => [d.id, d.name_ar]),
+      (doctorsRes.data ?? []).map((d: unknown) => [d.id, d.name_ar]),
     );
 
-    const enriched: NoShowRiskRow[] = (rows ?? []).map((r: any) => ({
+    const enriched: NoShowRiskRow[] = (rows ?? []).map((r: unknown) => ({
       ...r,
       doctor_name_ar: r.doctor_id ? (doctorMap.get(r.doctor_id) ?? null) : null,
     }));
@@ -117,7 +117,7 @@ export const getNoShowRisk = createServerFn({ method: "GET" })
       _to: toISO,
     });
     if (suggErr) throw new Error(suggErr.message);
-    const suggestions: OverbookingSuggestion[] = (suggRows ?? []).map((s: any) => ({
+    const suggestions: OverbookingSuggestion[] = (suggRows ?? []).map((s: unknown) => ({
       doctor_id: s.doctor_id,
       doctor_name_ar: s.doctor_id ? (doctorMap.get(s.doctor_id) ?? null) : null,
       branch_id: s.branch_id,

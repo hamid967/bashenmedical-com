@@ -21,7 +21,7 @@ const ROLES = [
 ] as const;
 export type AppRole = (typeof ROLES)[number];
 
-function humanize(err: any, fallback = "تعذّر تنفيذ الطلب.") {
+function humanize(err: unknown, fallback = "تعذّر تنفيذ الطلب.") {
   if (!err) return fallback;
   const msg = String(err.message ?? "");
   if (/forbidden|42501|permission denied/i.test(msg))
@@ -31,9 +31,9 @@ function humanize(err: any, fallback = "تعذّر تنفيذ الطلب.") {
   return msg || fallback;
 }
 
-async function getRoles(supabase: any, userId: string): Promise<AppRole[]> {
+async function getRoles(supabase: unknown, userId: string): Promise<AppRole[]> {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  return (data ?? []).map((r: any) => r.role as AppRole);
+  return (data ?? []).map((r: unknown) => r.role as AppRole);
 }
 
 function getClientMeta() {
@@ -57,7 +57,7 @@ function getClientMeta() {
 export const listUsersWithRoles = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("list_users_with_roles" as any);
+    const { data, error } = await context.supabase.rpc("list_users_with_roles" as unknown);
     if (error) throw new Error(humanize(error));
     return (data ?? []) as Array<{
       user_id: string;
@@ -83,14 +83,14 @@ export const assignRole = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { ip, ua } = getClientMeta();
     const { error } = await context.supabase.rpc(
-      "assign_user_role" as any,
+      "assign_user_role" as unknown,
       {
         _user_id: data.user_id,
         _role: data.role,
         _branch_id: data.branch_id ?? null,
         _ip: ip,
         _ua: ua,
-      } as any,
+      } as unknown,
     );
     if (error) throw new Error(humanize(error));
     return { ok: true };
@@ -102,13 +102,13 @@ export const revokeRole = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const { ip, ua } = getClientMeta();
     const { error } = await context.supabase.rpc(
-      "revoke_user_role" as any,
+      "revoke_user_role" as unknown,
       {
         _user_id: data.user_id,
         _role: data.role,
         _ip: ip,
         _ua: ua,
-      } as any,
+      } as unknown,
     );
     if (error) throw new Error(humanize(error));
     return { ok: true };
@@ -130,7 +130,7 @@ export const listBranchesForRbac = createServerFn({ method: "GET" })
 export const listPermissionsCatalog = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("list_permissions_catalog" as any);
+    const { data, error } = await context.supabase.rpc("list_permissions_catalog" as unknown);
     if (error) throw new Error(humanize(error));
     return (data ?? []) as Array<{
       key: string;
@@ -143,7 +143,7 @@ export const listPermissionsCatalog = createServerFn({ method: "GET" })
 export const listRolePermissionsMatrix = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.rpc("list_role_permissions_matrix" as any);
+    const { data, error } = await context.supabase.rpc("list_role_permissions_matrix" as unknown);
     if (error) throw new Error(humanize(error));
     return (data ?? []) as Array<{ role: AppRole; permission_key: string }>;
   });
@@ -161,12 +161,12 @@ export const setRolePermission = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.rpc(
-      "set_role_permission" as any,
+      "set_role_permission" as unknown,
       {
         _role: data.role,
         _permission_key: data.permission_key,
         _enabled: data.enabled,
-      } as any,
+      } as unknown,
     );
     if (error) throw new Error(humanize(error));
     return { ok: true };
@@ -199,8 +199,8 @@ export const listRolePermissionAudit = createServerFn({ method: "GET" })
   )
   .handler(async ({ data, context }) => {
     const { data: rows, error } = await context.supabase.rpc(
-      "list_role_permission_audit" as any,
-      { _limit: data.limit, _offset: data.offset } as any,
+      "list_role_permission_audit" as unknown,
+      { _limit: data.limit, _offset: data.offset } as unknown,
     );
     if (error) throw new Error(humanize(error));
     return (rows ?? []) as RolePermissionAuditRow[];
@@ -216,14 +216,14 @@ export const exportRolePermissions = createServerFn({ method: "GET" })
       throw new Error("ليست لديك الصلاحية.");
     }
     const [{ data: matrix, error: e1 }, { data: catalog, error: e2 }] = await Promise.all([
-      context.supabase.rpc("list_role_permissions_matrix" as any),
-      context.supabase.rpc("list_permissions_catalog" as any),
+      context.supabase.rpc("list_role_permissions_matrix" as unknown),
+      context.supabase.rpc("list_permissions_catalog" as unknown),
     ]);
     if (e1) throw new Error(humanize(e1));
     if (e2) throw new Error(humanize(e2));
 
     const grouped: Record<string, string[]> = {};
-    for (const r of (matrix ?? []) as any[]) {
+    for (const r of (matrix ?? []) as unknown[]) {
       (grouped[r.role] ??= []).push(r.permission_key);
     }
     for (const k of Object.keys(grouped)) grouped[k].sort();
@@ -232,7 +232,7 @@ export const exportRolePermissions = createServerFn({ method: "GET" })
       version: 1 as const,
       exported_at: new Date().toISOString(),
       exported_by: context.userId,
-      known_permissions: ((catalog ?? []) as any[]).map((c) => c.key).sort(),
+      known_permissions: ((catalog ?? []) as unknown[]).map((c) => c.key).sort(),
       roles: grouped,
     };
   });
@@ -258,12 +258,12 @@ export const importRolePermissions = createServerFn({ method: "POST" })
 
     // Fetch known permission keys to reject unknown entries
     const { data: cat } = await supabase.from("permissions").select("key");
-    const known = new Set<string>(((cat ?? []) as any[]).map((r) => r.key));
+    const known = new Set<string>(((cat ?? []) as unknown[]).map((r) => r.key));
 
     // Current matrix
-    const { data: current } = await supabase.rpc("list_role_permissions_matrix" as any);
+    const { data: current } = await supabase.rpc("list_role_permissions_matrix" as unknown);
     const currentByRole = new Map<string, Set<string>>();
-    for (const r of (current ?? []) as any[]) {
+    for (const r of (current ?? []) as unknown[]) {
       const s = currentByRole.get(r.role) ?? new Set<string>();
       s.add(r.permission_key);
       currentByRole.set(r.role, s);
@@ -306,12 +306,12 @@ export const importRolePermissions = createServerFn({ method: "POST" })
       for (const k of desired) {
         if (existing.has(k)) continue;
         const { error } = await supabase.rpc(
-          "set_role_permission" as any,
+          "set_role_permission" as unknown,
           {
             _role: role,
             _permission_key: k,
             _enabled: true,
-          } as any,
+          } as unknown,
         );
         if (error) stats.errors.push(`+${role}:${k}: ${error.message}`);
         else stats.added++;
@@ -322,12 +322,12 @@ export const importRolePermissions = createServerFn({ method: "POST" })
         for (const k of existing) {
           if (desired.has(k)) continue;
           const { error } = await supabase.rpc(
-            "set_role_permission" as any,
+            "set_role_permission" as unknown,
             {
               _role: role,
               _permission_key: k,
               _enabled: false,
-            } as any,
+            } as unknown,
           );
           if (error) stats.errors.push(`-${role}:${k}: ${error.message}`);
           else stats.removed++;
@@ -350,7 +350,7 @@ export const getMyPermissions = createServerFn({ method: "GET" })
         userId,
         roles,
         isSuper: true,
-        permissions: (data ?? []).map((p: any) => p.key as string),
+        permissions: (data ?? []).map((p: unknown) => p.key as string),
       };
     }
     if (roles.length === 0) {
@@ -359,8 +359,8 @@ export const getMyPermissions = createServerFn({ method: "GET" })
     const { data } = await supabase
       .from("role_permissions")
       .select("permission_key")
-      .in("role", roles as any);
-    const perms = Array.from(new Set((data ?? []).map((r: any) => r.permission_key as string)));
+      .in("role", roles as unknown);
+    const perms = Array.from(new Set((data ?? []).map((r: unknown) => r.permission_key as string)));
     return { userId, roles, isSuper: false, permissions: perms };
   });
 
@@ -400,7 +400,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
     if (error) throw new Error(humanize(error));
 
     const actorIds = Array.from(
-      new Set((rows ?? []).map((r: any) => r.actor).filter(Boolean)),
+      new Set((rows ?? []).map((r: unknown) => r.actor).filter(Boolean)),
     ) as string[];
     const actorMap = new Map<string, { name: string | null; phone: string | null }>();
     if (actorIds.length) {
@@ -408,13 +408,13 @@ export const listAuditLog = createServerFn({ method: "POST" })
         .from("profiles")
         .select("id, full_name, phone")
         .in("id", actorIds);
-      for (const p of (profs ?? []) as any[]) {
+      for (const p of (profs ?? []) as unknown[]) {
         actorMap.set(p.id, { name: p.full_name ?? null, phone: p.phone ?? null });
       }
     }
 
     const branchIds = Array.from(
-      new Set((rows ?? []).map((r: any) => r.branch_id).filter(Boolean)),
+      new Set((rows ?? []).map((r: unknown) => r.branch_id).filter(Boolean)),
     ) as string[];
     const branchMap = new Map<string, string>();
     if (branchIds.length) {
@@ -422,12 +422,12 @@ export const listAuditLog = createServerFn({ method: "POST" })
         .from("branches")
         .select("id, name_ar, name_en")
         .in("id", branchIds);
-      for (const b of (brs ?? []) as any[]) {
+      for (const b of (brs ?? []) as unknown[]) {
         branchMap.set(b.id, b.name_ar ?? b.name_en ?? b.id);
       }
     }
 
-    return (rows ?? []).map((r: any) => ({
+    return (rows ?? []).map((r: unknown) => ({
       id: r.id as string,
       action: r.action as string,
       actor: r.actor as string | null,
@@ -437,7 +437,7 @@ export const listAuditLog = createServerFn({ method: "POST" })
       from_status: r.from_status as string | null,
       to_status: r.to_status as string | null,
       reason: r.reason as string | null,
-      metadata: r.metadata as any,
+      metadata: r.metadata as unknown,
       ip_address: r.ip_address as string | null,
       user_agent: r.user_agent as string | null,
       created_at: r.created_at as string,
@@ -460,7 +460,7 @@ export const listAuditActions = createServerFn({ method: "GET" })
       .select("action")
       .limit(2000);
     if (error) throw new Error(humanize(error));
-    return Array.from(new Set((data ?? []).map((r: any) => r.action))).sort();
+    return Array.from(new Set((data ?? []).map((r: unknown) => r.action))).sort();
   });
 
 /* ---------------- RBAC-focused audit log ---------------- */
@@ -479,7 +479,7 @@ const rbacAuditFilterSchema = z.object({
   limit: z.number().int().min(1).max(500).default(200),
 });
 
-function extractTargets(row: any): {
+function extractTargets(row: unknown): {
   target_user_id: string | null;
   role: string | null;
   permission_key: string | null;
@@ -525,7 +525,7 @@ export const listRbacAuditLog = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(humanize(error));
 
-    let filtered = (rows ?? []) as any[];
+    let filtered = (rows ?? []) as unknown[];
     if (data.target_user || data.role || data.permission_key || data.q) {
       const needle = data.q?.toLowerCase() ?? "";
       filtered = filtered.filter((r) => {
@@ -555,7 +555,7 @@ export const listRbacAuditLog = createServerFn({ method: "POST" })
         .from("profiles")
         .select("id, full_name, phone")
         .in("id", Array.from(userIds));
-      for (const p of (profs ?? []) as any[]) {
+      for (const p of (profs ?? []) as unknown[]) {
         profileMap.set(p.id, { name: p.full_name ?? null, phone: p.phone ?? null });
       }
     }

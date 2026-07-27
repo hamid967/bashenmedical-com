@@ -2,7 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 
-async function resolvePatientId(supabase: any, userId: string): Promise<string | null> {
+async function resolvePatientId(supabase: unknown, userId: string): Promise<string | null> {
   const { data } = await supabase
     .from("patients")
     .select("id")
@@ -25,18 +25,18 @@ export const listMyRefunds = createServerFn({ method: "GET" })
       .from("invoices")
       .select("id, invoice_number, currency")
       .eq("patient_id", patientId);
-    const invIds = (invs ?? []).map((r: any) => r.id);
+    const invIds = (invs ?? []).map((r: unknown) => r.id);
     if (invIds.length === 0) return { refunds: [] };
 
     const { data: pays } = await supabase
       .from("payments")
       .select("id, invoice_id, amount, method, gateway, paid_at")
       .in("invoice_id", invIds);
-    const payIds = (pays ?? []).map((p: any) => p.id);
+    const payIds = (pays ?? []).map((p: unknown) => p.id);
     if (payIds.length === 0) return { refunds: [] };
 
-    const payById = new Map<string, any>((pays ?? []).map((p: any) => [p.id, p]));
-    const invById = new Map<string, any>((invs ?? []).map((i: any) => [i.id, i]));
+    const payById = new Map<string, unknown>((pays ?? []).map((p: unknown) => [p.id, p]));
+    const invById = new Map<string, unknown>((invs ?? []).map((i: unknown) => [i.id, i]));
 
     const { data: rows, error } = await supabase
       .from("refunds")
@@ -48,7 +48,7 @@ export const listMyRefunds = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
 
     return {
-      refunds: (rows ?? []).map((r: any) => {
+      refunds: (rows ?? []).map((r: unknown) => {
         const pay = payById.get(r.payment_id);
         const inv = pay ? invById.get(pay.invoice_id) : null;
         return {
@@ -117,8 +117,8 @@ export const requestRefund = createServerFn({ method: "POST" })
       .select("amount, status")
       .eq("payment_id", pay.id);
     const alreadyRequested = (prior ?? [])
-      .filter((r: any) => ["pending", "approved", "processed"].includes(r.status))
-      .reduce((s: number, r: any) => s + Number(r.amount ?? 0), 0);
+      .filter((r: unknown) => ["pending", "approved", "processed"].includes(r.status))
+      .reduce((s: number, r: unknown) => s + Number(r.amount ?? 0), 0);
     const maxRefundable = Math.max(0, Number(pay.amount ?? 0) - alreadyRequested);
     if (maxRefundable <= 0) throw new Error("لا يوجد مبلغ قابل للاسترداد على هذه الدفعة");
 

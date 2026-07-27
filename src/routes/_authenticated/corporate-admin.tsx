@@ -81,7 +81,7 @@ function CorporateAdminPage() {
       toast.success("تم التحديث");
       qc.invalidateQueries({ queryKey: ["corporate-admin"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "فشل التحديث"),
+    onError: (e: unknown) => toast.error(e?.message ?? "فشل التحديث"),
   });
 
   return (

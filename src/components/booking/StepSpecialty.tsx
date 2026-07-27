@@ -9,7 +9,7 @@ export function StepSpecialty({
   onPick,
 }: {
   lang: "ar" | "en";
-  specialties: any[];
+  specialties: unknown[];
   value: string | null;
   onPick: (v: string) => void;
 }) {

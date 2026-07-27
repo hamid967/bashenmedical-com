@@ -266,7 +266,7 @@ async function main() {
         .eq("appointment_id", apptId)
         .eq("reminder_kind", "reminder_2h");
       assert((data ?? []).length >= 1, "trigger row for reminder_2h missing");
-      const row = (data ?? []).at(-1) as any;
+      const row = (data ?? []).at(-1) as unknown;
       assert(row.source === "staff", `expected source=staff, got ${row.source}`);
       assert(
         row.changed_by === staffU.userId,

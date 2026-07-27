@@ -13,7 +13,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 /* ------------------------------ helpers ---------------------------------- */
 
 async function hasPermission(
-  supabase: any,
+  supabase: unknown,
   userId: string,
   permissionKey: string,
 ): Promise<boolean> {
@@ -31,7 +31,7 @@ async function hasPermission(
 }
 
 async function assertPermission(
-  supabase: any,
+  supabase: unknown,
   userId: string,
   permissionKey: string,
 ): Promise<void> {
@@ -314,7 +314,7 @@ export const setFeatureFlag = createServerFn({ method: "POST" })
     const { error } = await supabase.from("system_settings").upsert(
       {
         key: FLAGS_KEY,
-        value: next as any,
+        value: next as unknown,
         description: "Runtime feature flags managed by Super Admin",
         updated_by: userId,
         updated_at: new Date().toISOString(),
@@ -348,7 +348,7 @@ export const deleteFeatureFlag = createServerFn({ method: "POST" })
     const { error } = await supabase.from("system_settings").upsert(
       {
         key: FLAGS_KEY,
-        value: current as any,
+        value: current as unknown,
         updated_by: userId,
         updated_at: new Date().toISOString(),
       },

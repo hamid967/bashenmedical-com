@@ -4,9 +4,9 @@ import { z } from "zod";
 
 type Role = "admin" | "super_admin";
 
-async function ensureAdmin(supabase: any, userId: string) {
+async function ensureAdmin(supabase: unknown, userId: string) {
   const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-  const roles = (data ?? []).map((r: any) => r.role as Role);
+  const roles = (data ?? []).map((r: unknown) => r.role as Role);
   if (!roles.includes("admin") && !roles.includes("super_admin")) {
     throw new Error("ليست لديك الصلاحية لإدارة كتالوج الخدمات.");
   }

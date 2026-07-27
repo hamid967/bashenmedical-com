@@ -4,7 +4,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const STAFF_ROLES = ["admin", "super_admin", "reception"] as const;
 
-async function assertStaff(supabase: any, userId: string) {
+async function assertStaff(supabase: unknown, userId: string) {
   for (const role of STAFF_ROLES) {
     const { data } = await supabase.rpc("has_role", { _user_id: userId, _role: role });
     if (data) return;
@@ -70,7 +70,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(300);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "appointment",
@@ -98,7 +98,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(300);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "service_inquiry",
@@ -124,7 +124,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(300);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "home_care",
@@ -150,7 +150,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(200);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "corporate",
@@ -176,7 +176,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(200);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "second_opinion",
@@ -202,7 +202,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(200);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "complaint",
@@ -228,7 +228,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(200);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "medicine_order",
@@ -254,7 +254,7 @@ export const getUnifiedInbox = createServerFn({ method: "GET" })
         .lte("created_at", end)
         .order("created_at", { ascending: false })
         .limit(200);
-      (rows ?? []).forEach((r: any) =>
+      (rows ?? []).forEach((r: unknown) =>
         results.push({
           id: r.id,
           source: "waitlist",

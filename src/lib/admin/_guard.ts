@@ -7,7 +7,7 @@
  * Denials throw an Arabic user-facing error (rendered by the caller's
  * error boundary). We deliberately do NOT expose which role was missing.
  */
-export type AdminGuardContext = { supabase: any; userId: string };
+export type AdminGuardContext = { supabase: unknown; userId: string };
 
 const CONSOLE_ROLES = ["admin", "super_admin"] as const;
 
@@ -41,7 +41,7 @@ export type Role =
   | "doctor";
 
 export async function assertHasRole(
-  supabase: any,
+  supabase: unknown,
   userId: string,
   role: Role = "admin",
 ): Promise<true> {
@@ -64,7 +64,7 @@ export async function assertHasRole(
  * implicitly accepted so top-level owners are never walled off.
  */
 export async function assertHasAnyRole(
-  supabase: any,
+  supabase: unknown,
   userId: string,
   roles: Role[],
 ): Promise<true> {

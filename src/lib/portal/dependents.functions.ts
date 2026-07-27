@@ -94,7 +94,7 @@ function normalizeScopes(raw: unknown): DependentAccessScopes {
   };
 }
 
-function normalizeDependent(row: any): Dependent {
+function normalizeDependent(row: unknown): Dependent {
   return {
     ...row,
     access_scopes: normalizeScopes(row?.access_scopes),
@@ -215,7 +215,7 @@ export const setDependentAccessScopes = createServerFn({ method: "POST" })
     } as DependentAccessScopes;
     const { data: row, error } = await supabase
       .from("dependents")
-      .update({ access_scopes: merged as any })
+      .update({ access_scopes: merged as unknown })
       .eq("id", data.id)
       .eq("guardian_user_id", userId)
       .select(DEPENDENT_COLS)
@@ -331,7 +331,7 @@ export const listDependentAppointments = createServerFn({ method: "POST" })
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
 
-    return (rows ?? []).map((r: any) => ({
+    return (rows ?? []).map((r: unknown) => ({
       id: r.id,
       appointment_date: r.appointment_date,
       appointment_time: r.appointment_time,

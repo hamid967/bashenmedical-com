@@ -101,7 +101,7 @@ function DoctorsManagementPage() {
             onChange={setBranchId}
             options={[
               { value: "", label: "كل الفروع" },
-              ...((branchesQ.data ?? []) as any[]).map((b) => ({ value: b.id, label: b.name_ar })),
+              ...((branchesQ.data ?? []) as unknown[]).map((b) => ({ value: b.id, label: b.name_ar })),
             ]}
           />
           <FilterSelect
@@ -110,7 +110,7 @@ function DoctorsManagementPage() {
             onChange={setSpecialtyId}
             options={[
               { value: "", label: "كل التخصصات" },
-              ...((specialtiesQ.data ?? []) as any[]).map((s) => ({
+              ...((specialtiesQ.data ?? []) as unknown[]).map((s) => ({
                 value: s.id,
                 label: s.name_ar,
               })),
@@ -146,7 +146,7 @@ function DoctorsManagementPage() {
             )}
             {overviewQ.isError && (
               <div className="p-4 text-sm text-destructive">
-                {(overviewQ.error as any)?.message ?? "خطأ"}
+                {(overviewQ.error as unknown)?.message ?? "خطأ"}
               </div>
             )}
             {filtered.map((d) => {
@@ -389,7 +389,7 @@ function SchedulePanel({ doctorId, branchId }: { doctorId: string; branchId: str
       qc.invalidateQueries({ queryKey: ["dm", "avail", doctorId] });
       qc.invalidateQueries({ queryKey: ["dm", "overview"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "خطأ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "خطأ"),
   });
 
   const delM = useMutation({
@@ -399,12 +399,12 @@ function SchedulePanel({ doctorId, branchId }: { doctorId: string; branchId: str
       qc.invalidateQueries({ queryKey: ["dm", "avail", doctorId] });
       qc.invalidateQueries({ queryKey: ["dm", "overview"] });
     },
-    onError: (e: any) => toast.error(e?.message ?? "خطأ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "خطأ"),
   });
 
   const grouped = useMemo(() => {
-    const m: Record<number, any[]> = {};
-    (q.data ?? []).forEach((r: any) => {
+    const m: Record<number, Record<string, unknown>[]> = {};
+    (q.data ?? []).forEach((r: unknown) => {
       (m[r.weekday] ??= []).push(r);
     });
     return m;
@@ -476,7 +476,7 @@ function SchedulePanel({ doctorId, branchId }: { doctorId: string; branchId: str
 
       {q.isLoading && <div className="text-sm text-muted-foreground">جارٍ التحميل…</div>}
       {q.isError && (
-        <div className="text-sm text-destructive">{(q.error as any)?.message ?? "خطأ"}</div>
+        <div className="text-sm text-destructive">{(q.error as unknown)?.message ?? "خطأ"}</div>
       )}
 
       <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
@@ -490,7 +490,7 @@ function SchedulePanel({ doctorId, branchId }: { doctorId: string; branchId: str
               </div>
               {list.length === 0 && <div className="text-xs text-muted-foreground">لا يوجد</div>}
               <ul className="space-y-1">
-                {list.map((s: any) => (
+                {list.map((s: unknown) => (
                   <li
                     key={s.id}
                     className="flex items-center justify-between rounded border border-border/60 bg-muted/20 px-2 py-1 text-sm"
@@ -567,7 +567,7 @@ function LeavesPanel({
       qc.invalidateQueries({ queryKey: ["dm", "leaves", doctorId] });
       onMutated();
     },
-    onError: (e: any) => toast.error(e?.message ?? "خطأ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "خطأ"),
   });
 
   const delM = useMutation({
@@ -577,7 +577,7 @@ function LeavesPanel({
       qc.invalidateQueries({ queryKey: ["dm", "leaves", doctorId] });
       onMutated();
     },
-    onError: (e: any) => toast.error(e?.message ?? "خطأ"),
+    onError: (e: unknown) => toast.error(e?.message ?? "خطأ"),
   });
 
   return (
@@ -631,7 +631,7 @@ function LeavesPanel({
 
       {q.isLoading && <div className="text-sm text-muted-foreground">جارٍ التحميل…</div>}
       {q.isError && (
-        <div className="text-sm text-destructive">{(q.error as any)?.message ?? "خطأ"}</div>
+        <div className="text-sm text-destructive">{(q.error as unknown)?.message ?? "خطأ"}</div>
       )}
 
       <div className="overflow-hidden rounded-md border border-border">

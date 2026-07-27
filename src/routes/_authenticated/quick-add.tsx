@@ -224,7 +224,7 @@ function BranchForm() {
       setErrors({});
       setSubmitAttempted(false);
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إضافة العيادة"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إضافة العيادة"),
   });
 
   const errorCount = Object.keys(errors).length;
@@ -346,7 +346,7 @@ function DoctorForm() {
   });
 
   const m = useMutation({
-    mutationFn: (data: any) => submit({ data }),
+    mutationFn: (data: unknown) => submit({ data }),
     onSuccess: () => {
       toast.success("تمت إضافة الطبيب بنجاح");
       setForm({
@@ -358,7 +358,7 @@ function DoctorForm() {
         slug: "",
       });
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إضافة الطبيب"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إضافة الطبيب"),
   });
 
   // Quick-create specialty inline so a new clinic isn't blocked by missing specialties.
@@ -379,13 +379,13 @@ function DoctorForm() {
           sort_order: 0,
         },
       }),
-    onSuccess: (row: any) => {
+    onSuccess: (row: unknown) => {
       toast.success("تمت إضافة التخصص");
       setNewSpecAr("");
       setForm((f) => ({ ...f, specialty_id: row.id }));
       specialtiesQ.refetch();
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إضافة التخصص"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إضافة التخصص"),
   });
 
   const disabled = m.isPending || !form.name_ar;
@@ -450,7 +450,7 @@ function DoctorForm() {
             onChange={(e) => setForm({ ...form, specialty_id: e.target.value })}
           >
             <option value="">— بدون —</option>
-            {(specialtiesQ.data ?? []).map((s: any) => (
+            {(specialtiesQ.data ?? []).map((s: unknown) => (
               <option key={s.id} value={s.id}>
                 {s.name_ar}
               </option>
@@ -464,7 +464,7 @@ function DoctorForm() {
             onChange={(e) => setForm({ ...form, branch_id: e.target.value })}
           >
             <option value="">— بدون —</option>
-            {(branchesQ.data ?? []).map((b: any) => (
+            {(branchesQ.data ?? []).map((b: unknown) => (
               <option key={b.id} value={b.id}>
                 {b.name_ar}
               </option>
@@ -519,19 +519,19 @@ function AppointmentForm() {
     reason: "",
   });
 
-  const doctors = (doctorsQ.data ?? []).filter((d: any) => {
+  const doctors = (doctorsQ.data ?? []).filter((d: unknown) => {
     if (form.branch_id && d.branch_id !== form.branch_id) return false;
     if (form.specialty_id && d.specialty_id !== form.specialty_id) return false;
     return d.is_active !== false;
   });
 
   const m = useMutation({
-    mutationFn: (data: any) => submit({ data }),
+    mutationFn: (data: unknown) => submit({ data }),
     onSuccess: () => {
       toast.success("تم إنشاء الموعد وتأكيده");
       setForm({ ...form, patient_name: "", patient_phone: "", reason: "" });
     },
-    onError: (e: any) => toast.error(e?.message ?? "تعذّر إنشاء الموعد"),
+    onError: (e: unknown) => toast.error(e?.message ?? "تعذّر إنشاء الموعد"),
   });
 
   const disabled =
@@ -589,7 +589,7 @@ function AppointmentForm() {
             onChange={(e) => setForm({ ...form, branch_id: e.target.value, doctor_id: "" })}
           >
             <option value="">— أي فرع —</option>
-            {(branchesQ.data ?? []).map((b: any) => (
+            {(branchesQ.data ?? []).map((b: unknown) => (
               <option key={b.id} value={b.id}>
                 {b.name_ar}
               </option>
@@ -603,7 +603,7 @@ function AppointmentForm() {
             onChange={(e) => setForm({ ...form, specialty_id: e.target.value, doctor_id: "" })}
           >
             <option value="">— أي تخصص —</option>
-            {(specialtiesQ.data ?? []).map((s: any) => (
+            {(specialtiesQ.data ?? []).map((s: unknown) => (
               <option key={s.id} value={s.id}>
                 {s.name_ar}
               </option>
@@ -620,7 +620,7 @@ function AppointmentForm() {
           <option value="">
             — {form.specialty_id ? "أي طبيب من هذا التخصص" : "اختر طبيبًا"} —
           </option>
-          {doctors.map((d: any) => (
+          {doctors.map((d: unknown) => (
             <option key={d.id} value={d.id}>
               {d.name_ar}
             </option>
@@ -886,7 +886,7 @@ function ImportPanel() {
       setRows(parsed);
       if (parsed.length === 0) toast.error("الملف فارغ أو غير صالح");
       else toast.success(`تم قراءة ${parsed.length} سطرًا`);
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast.error(e?.message ?? "تعذّر قراءة الملف");
     }
   };
@@ -908,13 +908,13 @@ function ImportPanel() {
               phone: r.phone || null,
               email: r.email || null,
               address_ar: r.address_ar || null,
-            } as any,
+            } as unknown,
           });
         } else if (kind === "doctor") {
           const specialty_id = r.specialty
-            ? findByName(specialtiesQ.data as any, r.specialty)
+            ? findByName(specialtiesQ.data as unknown, r.specialty)
             : null;
-          const branch_id = r.branch ? findByName(branchesQ.data as any, r.branch) : null;
+          const branch_id = r.branch ? findByName(branchesQ.data as unknown, r.branch) : null;
           if (r.specialty && !specialty_id) throw new Error(`تخصص غير موجود: ${r.specialty}`);
           if (r.branch && !branch_id) throw new Error(`فرع غير موجود: ${r.branch}`);
           await submitDoctor({
@@ -928,14 +928,14 @@ function ImportPanel() {
               languages: [],
               is_active: true,
               sort_order: 0,
-            } as any,
+            } as unknown,
           });
         } else {
           const specialty_id = r.specialty
-            ? findByName(specialtiesQ.data as any, r.specialty)
+            ? findByName(specialtiesQ.data as unknown, r.specialty)
             : null;
-          const branch_id = r.branch ? findByName(branchesQ.data as any, r.branch) : null;
-          const doctor_id = r.doctor ? findByName(doctorsQ.data as any, r.doctor) : null;
+          const branch_id = r.branch ? findByName(branchesQ.data as unknown, r.branch) : null;
+          const doctor_id = r.doctor ? findByName(doctorsQ.data as unknown, r.doctor) : null;
           if (r.specialty && !specialty_id) throw new Error(`تخصص غير موجود: ${r.specialty}`);
           if (r.branch && !branch_id) throw new Error(`فرع غير موجود: ${r.branch}`);
           if (r.doctor && !doctor_id) throw new Error(`طبيب غير موجود: ${r.doctor}`);
@@ -952,11 +952,11 @@ function ImportPanel() {
               appointment_time: time,
               reason: r.reason || null,
               status: "confirmed",
-            } as any,
+            } as unknown,
           });
         }
         out.push({ index: i + 1, ok: true, message: "تمت الإضافة", data: r });
-      } catch (e: any) {
+      } catch (e: unknown) {
         out.push({ index: i + 1, ok: false, message: e?.message ?? "فشل", data: r });
       }
       setResults([...out]);

@@ -20,19 +20,19 @@ export function SummarySidebar({
 }: {
   lang: "ar" | "en";
   state: State;
-  branches: any[];
-  specialties: any[];
-  doctors: any[];
+  branches: unknown[];
+  specialties: unknown[];
+  doctors: unknown[];
   onEdit: (step: number) => void;
 }) {
   const { t } = useTranslation("booking");
   const branch = branches.find((b) => b.id === state.branchId);
   const spec = specialties.find((s) => s.id === state.specialtyId);
-  const doc = doctors.find((d: any) => d.id === state.doctorId);
+  const doc = doctors.find((d: unknown) => d.id === state.doctorId);
 
   const serviceKey = (state.serviceType ?? null) as ServiceType | null;
 
-  const rows: { label: string; value: string | null; step: number; icon: any }[] = [
+  const rows: { label: string; value: string | null; step: number; icon: unknown }[] = [
     {
       label: t("summary.service"),
       value: serviceKey ? t(`service.${serviceKey}`) : null,

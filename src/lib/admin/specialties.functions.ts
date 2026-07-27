@@ -86,8 +86,8 @@ export const listAdminSpecialties = createServerFn({ method: "GET" })
       });
       return m;
     };
-    const docs = tally(doctorsRes.data as any);
-    const appts = tally(apptsRes.data as any);
+    const docs = tally(doctorsRes.data as unknown);
+    const appts = tally(apptsRes.data as unknown);
 
     const enriched: SpecialtyRow[] = specialties.map((s) => ({
       ...s,

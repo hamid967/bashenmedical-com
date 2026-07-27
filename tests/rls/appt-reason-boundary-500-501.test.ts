@@ -105,7 +105,7 @@ let user: { userId: string; email: string; password: string } | null = null;
     await test("status=cancelled + reason len 500 (with edge padding) → 1 audit row, reason len 500", async () => {
       const a = await newAppt();
       created.push(a.id);
-      const { error } = await c.rpc("update_appointment_status" as any, {
+      const { error } = await c.rpc("update_appointment_status" as unknown, {
         _id: a.id,
         _status: "cancelled",
         _reason: paddedCore(REASON_MAX),
@@ -127,7 +127,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       const a = await newAppt();
       created.push(a.id);
       const before = await rowOf(a.id);
-      const { error } = await c.rpc("update_appointment_status" as any, {
+      const { error } = await c.rpc("update_appointment_status" as unknown, {
         _id: a.id,
         _status: "cancelled",
         _reason: paddedCore(REASON_MAX + 1),
@@ -147,7 +147,7 @@ let user: { userId: string; email: string; password: string } | null = null;
     await test("notes update + reason len 500 (with edge padding) → 1 audit row, reason len 500", async () => {
       const a = await newAppt("confirmed", "قديم");
       created.push(a.id);
-      const { error } = await c.rpc("update_appointment_notes" as any, {
+      const { error } = await c.rpc("update_appointment_notes" as unknown, {
         _id: a.id,
         _notes: "جديد",
         _reason: paddedCore(REASON_MAX, "ب"),
@@ -169,7 +169,7 @@ let user: { userId: string; email: string; password: string } | null = null;
       const a = await newAppt("confirmed", "قديم");
       created.push(a.id);
       const before = await rowOf(a.id);
-      const { error } = await c.rpc("update_appointment_notes" as any, {
+      const { error } = await c.rpc("update_appointment_notes" as unknown, {
         _id: a.id,
         _notes: "جديد",
         _reason: paddedCore(REASON_MAX + 1, "ب"),
@@ -190,7 +190,7 @@ let user: { userId: string; email: string; password: string } | null = null;
     await test("status=no_show + plain reason len 501 (no padding) → rejected, no audit row", async () => {
       const a = await newAppt();
       created.push(a.id);
-      const { error } = await c.rpc("update_appointment_status" as any, {
+      const { error } = await c.rpc("update_appointment_status" as unknown, {
         _id: a.id,
         _status: "no_show",
         _reason: core501,
