@@ -484,12 +484,12 @@ function HistoryPanel({
   currentId: string | null;
   canPublish: boolean;
   onRollback: (versionId: string) => void;
-  fetchAudit: () => Promise<any[]>;
+  fetchAudit: () => Promise<Record<string, unknown>[]>;
   fetchVersion: (versionId: string) => Promise<unknown>;
 }) {
-  const [audit, setAudit] = useState<any[] | null>(null);
-  const [diffLeft, setDiffLeft] = useState<any | null>(null);
-  const [diffRight, setDiffRight] = useState<any | null>(null);
+  const [audit, setAudit] = useState<Record<string, unknown>[] | null>(null);
+  const [diffLeft, setDiffLeft] = useState<Record<string, unknown> | null>(null);
+  const [diffRight, setDiffRight] = useState<Record<string, unknown> | null>(null);
   const [diffLoading, setDiffLoading] = useState(false);
 
   const loadDiff = async (leftId: string, rightId: string) => {

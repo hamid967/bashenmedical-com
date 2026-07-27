@@ -172,7 +172,7 @@ function AuditLogPage() {
   const [from, setFrom] = useState<string>(search.from ?? "");
   const [to, setTo] = useState<string>(search.to ?? "");
   const [limit, setLimit] = useState<number>(100);
-  const [selected, setSelected] = useState<any | null>(null);
+  const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
   const highlightId = search.id;
 
   const actions = useQuery({

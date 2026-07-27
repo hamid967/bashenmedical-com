@@ -234,7 +234,7 @@ function MedicalReportActions({ id, status }: { id: string; status: string }) {
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [revokeReason, setRevokeReason] = useState("");
   const [versionsOpen, setVersionsOpen] = useState(false);
-  const [versions, setVersions] = useState<any[] | null>(null);
+  const [versions, setVersions] = useState<Record<string, unknown>[] | null>(null);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ["admin-reports"] });
   const wrap = (p: Promise<unknown>, ok: string) =>

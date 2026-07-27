@@ -403,7 +403,7 @@ function SchedulePanel({ doctorId, branchId }: { doctorId: string; branchId: str
   });
 
   const grouped = useMemo(() => {
-    const m: Record<number, any[]> = {};
+    const m: Record<number, Record<string, unknown>[]> = {};
     (q.data ?? []).forEach((r: unknown) => {
       (m[r.weekday] ??= []).push(r);
     });

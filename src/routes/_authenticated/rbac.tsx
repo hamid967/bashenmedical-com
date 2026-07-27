@@ -435,7 +435,7 @@ function PermissionsTab(props: {
       toggleFn({ data: v }),
     onMutate: async (v) => {
       await qc.cancelQueries({ queryKey: ["rbac-perm-matrix"] });
-      const prev = qc.getQueryData<any[]>(["rbac-perm-matrix"]) ?? [];
+      const prev = qc.getQueryData<Record<string, unknown>[]>(["rbac-perm-matrix"]) ?? [];
       const next = v.enabled
         ? [...prev, { role: v.role, permission_key: v.permission_key }]
         : prev.filter((r) => !(r.role === v.role && r.permission_key === v.permission_key));

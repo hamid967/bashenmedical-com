@@ -73,7 +73,7 @@ export function AuditLogsPage() {
   const [from, setFrom] = useState(search.from ?? "");
   const [to, setTo] = useState(search.to ?? "");
   const [page, setPage] = useState<number>(search.page ?? 0);
-  const [selected, setSelected] = useState<any | null>(null);
+  const [selected, setSelected] = useState<Record<string, unknown> | null>(null);
 
   const facets = useQuery({
     queryKey: ["audit-facets"],
