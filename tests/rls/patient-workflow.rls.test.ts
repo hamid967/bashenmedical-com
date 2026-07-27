@@ -265,13 +265,23 @@ async function main() {
   console.log("\nRatings — write-only for patients, no cross-patient mutations:");
   let myRatingId: string | null = null;
   await test("Patient A can submit a public rating", async () => {
-    const { data, error } = await patA
+    // Patients have no SELECT policy on patient_ratings, so `.select()` after
+    // insert would fail even though the INSERT itself is allowed. Insert
+    // without returning and then look the row up as service_role.
+    const { error } = await patA
       .from("patient_ratings")
-      .insert({ rating: 5, source: "public", patient_name: "أ. اختبار", comment: "شكراً" })
-      .select("id")
-      .single();
+      .insert({ rating: 5, source: "public", patient_name: "أ. اختبار", comment: "شكراً" });
     assert(!error, error?.message ?? "");
-    myRatingId = data.id;
+    const { data: found, error: fErr } = await admin
+      .from("patient_ratings")
+      .select("id")
+      .eq("patient_name", "أ. اختبار")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    assert(!fErr, fErr?.message ?? "");
+    assert(found?.id, "insert appeared to succeed but row is missing");
+    myRatingId = found.id;
   });
 
   await test("Patient A CANNOT reply to any rating (staff-only UPDATE)", async () => {
