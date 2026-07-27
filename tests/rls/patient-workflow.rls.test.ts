@@ -134,7 +134,7 @@ async function seedAppointmentForPhone(phone: string, doctorId: string, time: st
       patient_phone: phone,
       doctor_id: doctorId,
       appointment_date: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
-      appointment_time: "09:30",
+      appointment_time: time,
       status: "new",
     })
     .select("id")
@@ -175,8 +175,8 @@ async function main() {
   const docId = await anyDoctorId();
   await verifyProfilePhone(userA.userId, phoneA);
   await verifyProfilePhone(userB.userId, phoneB);
-  const apptA = await seedAppointmentForPhone(phoneA, docId);
-  const apptB = await seedAppointmentForPhone(phoneB, docId);
+  const apptA = await seedAppointmentForPhone(phoneA, docId, "09:30");
+  const apptB = await seedAppointmentForPhone(phoneB, docId, "10:15");
 
   const rxA = await seedPrescription(patientsRowA);
   const rxB = await seedPrescription(patientsRowB);
