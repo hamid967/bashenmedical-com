@@ -80,9 +80,14 @@ async function createPatientRow(profileUserId: string, name: string) {
     .single();
   if (bErr) throw bErr;
   const suffix = Date.now().toString().slice(-6) + Math.floor(Math.random() * 1000);
+  // Force `patients.id = auth user id`. The `users read own appointments`
+  // policy compares `appointments.patient_id = auth.uid()`, and the FK
+  // targets `patients.id`. Aligning both makes the ownership branch
+  // reachable without touching the `verified_phone` guard trigger.
   const { data, error } = await admin
     .from("patients")
     .insert({
+      id: profileUserId,
       full_name_ar: name,
       phone: "+96650" + Math.floor(1e7 + Math.random() * 9e7),
       branch_id: branch.id,
