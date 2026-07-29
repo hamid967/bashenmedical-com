@@ -71,8 +71,15 @@ async def main():
         context = await browser.new_context(viewport={"width": 1280, "height": 1800})
         page = await context.new_page()
 
-        await assert_team_active(page, "/team")
-        await assert_team_active(page, "/team/leadership")
+        # Verify active state across the /team root and all known sub-routes.
+        # Prefix matching must keep header + footer /team links active on every one.
+        sub_paths = [
+            "/team",
+            "/team/leadership",
+            "/team/about",
+        ]
+        for path in sub_paths:
+            await assert_team_active(page, path)
 
         # Sanity: on an unrelated route, the /team link must NOT be active.
         await page.goto(f"{BASE}/about", wait_until="domcontentloaded")
