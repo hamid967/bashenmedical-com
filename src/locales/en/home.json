@@ -34,5 +34,12 @@
   "ready_for_a_better_care_experience": "Ready for a better care experience?",
   "book_now_or_leave_your_number_we_ll_call": "Book now or leave your number — we'll call you within minutes.",
   "book_now": "Book now",
-  "call_us": "Call us"
+  "call_us": "Call us",
+  "specialties_title": "Browse our medical specialties",
+  "specialties_sub": "Consultant care across 12+ specialties, under one roof.",
+  "all_specialties": "All specialties",
+  "doctors_title": "Our consultants & doctors",
+  "doctors_sub": "A team of certified doctors at your service.",
+  "nav_doctors": "Doctors",
+  "book_with_doctor": "Book with doctor"
 }

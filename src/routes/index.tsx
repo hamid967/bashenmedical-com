@@ -15,6 +15,9 @@ import {
   Search,
   Clock3,
   HeartPulse,
+  FlaskConical,
+  Scan,
+  Video,
 } from "lucide-react";
 import { buildLocalBusinessSchema } from "@/lib/localBusinessSchema";
 import { clinicSettingsQuery, type ClinicSettings } from "@/lib/clinicSettings";
@@ -34,6 +37,63 @@ import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 import { DoctorAutocomplete } from "@/components/home/DoctorAutocomplete";
 import { NewDoctorsSection } from "@/components/home/NewDoctorsSection";
 import i18n from "i18next";
+
+// UDH-style headline e-services surfaced on the homepage as quick-access tiles.
+const HOME_ESERVICES: {
+  key: string;
+  ar: string;
+  en: string;
+  subAr: string;
+  subEn: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  {
+    key: "book",
+    ar: "احجز موعد",
+    en: "Book Appointment",
+    subAr: "عيادات خارجية فورية",
+    subEn: "Instant outpatient booking",
+    to: "/book",
+    icon: CalendarCheck2,
+  },
+  {
+    key: "manage",
+    ar: "إدارة / إلغاء موعد",
+    en: "Manage / Cancel",
+    subAr: "تعديل أو إلغاء حجزك",
+    subEn: "Edit or cancel a booking",
+    to: "/lookup",
+    icon: Search,
+  },
+  {
+    key: "lab",
+    ar: "تقارير المختبر",
+    en: "Lab Reports",
+    subAr: "نتائج التحاليل",
+    subEn: "View lab results",
+    to: "/my",
+    icon: FlaskConical,
+  },
+  {
+    key: "radiology",
+    ar: "تقارير الأشعة",
+    en: "Radiology Reports",
+    subAr: "صور وتقارير الأشعة",
+    subEn: "Imaging & reports",
+    to: "/my",
+    icon: Scan,
+  },
+  {
+    key: "telemed",
+    ar: "استشارة عن بُعد",
+    en: "Online Consultation",
+    subAr: "مكالمة فيديو مع طبيبك",
+    subEn: "Video visit with a doctor",
+    to: "/telemedicine",
+    icon: Video,
+  },
+];
 
 const HOME_URL = "https://bashenmedical.com/";
 const HOME_TITLE = "مجمع باعشن الطبي بصبيا جازان | Baeshen Medical";
@@ -441,6 +501,53 @@ function HomePage() {
               {i18n.t("home:by_continuing_you_accept_our_privacy_pol")}
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ===== E-SERVICES (UDH-style quick access) ===== */}
+      <section className="py-16 md:py-20">
+        <div className="container-app">
+          <div className="mb-10">
+            <JazanSectionLabel>{isAr ? "الخدمات الإلكترونية" : "E-Services"}</JazanSectionLabel>
+            <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
+              <h2 className="text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
+                {isAr
+                  ? "كل خدماتك الطبية بنقرة واحدة"
+                  : "All your medical services, one click away"}
+              </h2>
+              <Link
+                to="/services"
+                className="inline-flex items-center gap-1 text-sm font-semibold text-[color:var(--neon-teal)] hover:opacity-80"
+              >
+                {isAr ? "كل الخدمات الإلكترونية" : "All e-services"}
+                <ArrowLeft className={`h-4 w-4 ${i18n.t("home:rotate_180")}`} />
+              </Link>
+            </div>
+          </div>
+          <StaggerReveal className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {HOME_ESERVICES.map((s) => {
+              const Icon = s.icon;
+              return (
+                <RevealItem key={s.key}>
+                  <Link
+                    to={s.to}
+                    className="glass-fut group flex h-full flex-col items-center gap-2 p-5 text-center transition-transform hover:-translate-y-0.5"
+                  >
+                    <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[color:var(--neon-teal)]/15 text-[color:var(--neon-teal)]">
+                      <Icon className="h-6 w-6" />
+                    </span>
+                    <span className="text-sm font-bold text-[color:var(--fut-ink)]">
+                      {isAr ? s.ar : s.en}
+                    </span>
+                    <span className="text-[11px] leading-4 text-[color:var(--fut-ink-dim)]">
+                      {isAr ? s.subAr : s.subEn}
+                    </span>
+                  </Link>
+                </RevealItem>
+              );
+            })}
+          </StaggerReveal>
+          <JazanDivider variant="subtle" className="mt-16" />
         </div>
       </section>
 

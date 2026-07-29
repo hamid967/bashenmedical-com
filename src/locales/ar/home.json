@@ -34,5 +34,12 @@
   "ready_for_a_better_care_experience": "جاهز لتجربة أفضل لرعايتك؟",
   "book_now_or_leave_your_number_we_ll_call": "احجز الآن أو اترك رقمك ونتصل بك خلال دقائق.",
   "book_now": "احجز الآن",
-  "call_us": "اتصل بنا"
+  "call_us": "اتصل بنا",
+  "specialties_title": "تصفّح تخصصاتنا الطبية",
+  "specialties_sub": "رعاية استشارية في أكثر من 12 تخصصًا تحت سقف واحد.",
+  "all_specialties": "كل التخصصات",
+  "doctors_title": "استشاريونا وأطباؤنا",
+  "doctors_sub": "نخبة من الأطباء المعتمدين في خدمتك.",
+  "nav_doctors": "الأطباء",
+  "book_with_doctor": "احجز مع الطبيب"
 }

@@ -60,6 +60,9 @@ export function Header() {
       to: "/services",
       label: th("services"),
       children: [
+        { to: "/book", label: th("bookAppointment"), desc: th("bookAppointmentDesc") },
+        { to: "/lookup", label: th("manageAppointment"), desc: th("manageAppointmentDesc") },
+        { to: "/track", label: th("trackOrder"), desc: th("trackOrderDesc") },
         { to: "/services", label: th("allEServices"), desc: th("allEServicesDesc") },
         { to: "/packages", label: th("packages"), desc: th("packagesDesc") },
         { to: "/telemedicine", label: th("telemedicine"), desc: th("telemedicineDesc") },
