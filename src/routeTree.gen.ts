@@ -119,6 +119,7 @@ import { Route as ReservationsNewRouteImport } from './routes/reservations.new'
 import { Route as SettingsGithubRouteImport } from './routes/settings.github'
 import { Route as SpecialtiesIndexRouteImport } from './routes/specialties.index'
 import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
+import { Route as TeamLeadershipRouteImport } from './routes/team.leadership'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -883,6 +884,11 @@ const SpecialtiesSlugRoute = SpecialtiesSlugRouteImport.update({
   id: '/specialties/$slug',
   path: '/specialties/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TeamLeadershipRoute = TeamLeadershipRouteImport.update({
+  id: '/leadership',
+  path: '/leadership',
+  getParentRoute: () => TeamRoute,
 } as any)
 const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
   id: '/.lovable/oauth/consent',
@@ -2008,7 +2014,7 @@ export interface FileRoutesByFullPath {
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/team': typeof TeamRoute
+  '/team': typeof TeamRouteWithChildren
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
   '/verify': typeof VerifyRoute
@@ -2082,6 +2088,7 @@ export interface FileRoutesByFullPath {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/team/leadership': typeof TeamLeadershipRoute
   '/auth/': typeof AuthIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
   '/health/': typeof HealthIndexRoute
@@ -2305,7 +2312,7 @@ export interface FileRoutesByTo {
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/team': typeof TeamRoute
+  '/team': typeof TeamRouteWithChildren
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
   '/verify': typeof VerifyRoute
@@ -2374,6 +2381,7 @@ export interface FileRoutesByTo {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/team/leadership': typeof TeamLeadershipRoute
   '/auth': typeof AuthIndexRoute
   '/doctors': typeof DoctorsIndexRoute
   '/health': typeof HealthIndexRoute
@@ -2600,7 +2608,7 @@ export interface FileRoutesById {
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/team': typeof TeamRoute
+  '/team': typeof TeamRouteWithChildren
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
   '/verify': typeof VerifyRoute
@@ -2674,6 +2682,7 @@ export interface FileRoutesById {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/team/leadership': typeof TeamLeadershipRoute
   '/auth/': typeof AuthIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
   '/health/': typeof HealthIndexRoute
@@ -2974,6 +2983,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/team/leadership'
     | '/auth/'
     | '/doctors/'
     | '/health/'
@@ -3266,6 +3276,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/team/leadership'
     | '/auth'
     | '/doctors'
     | '/health'
@@ -3565,6 +3576,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/team/leadership'
     | '/auth/'
     | '/doctors/'
     | '/health/'
@@ -3791,7 +3803,7 @@ export interface RootRouteChildren {
   SecondOpinionRoute: typeof SecondOpinionRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  TeamRoute: typeof TeamRoute
+  TeamRoute: typeof TeamRouteWithChildren
   TelemedicineRoute: typeof TelemedicineRoute
   TrackRoute: typeof TrackRoute
   VerifyRoute: typeof VerifyRoute
@@ -4633,6 +4645,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/specialties/$slug'
       preLoaderRoute: typeof SpecialtiesSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/team/leadership': {
+      id: '/team/leadership'
+      path: '/leadership'
+      fullPath: '/team/leadership'
+      preLoaderRoute: typeof TeamLeadershipRouteImport
+      parentRoute: typeof TeamRoute
     }
     '/.lovable/oauth/consent': {
       id: '/.lovable/oauth/consent'
@@ -6724,6 +6743,16 @@ const ReservationsRouteWithChildren = ReservationsRoute._addFileChildren(
   ReservationsRouteChildren,
 )
 
+interface TeamRouteChildren {
+  TeamLeadershipRoute: typeof TeamLeadershipRoute
+}
+
+const TeamRouteChildren: TeamRouteChildren = {
+  TeamLeadershipRoute: TeamLeadershipRoute,
+}
+
+const TeamRouteWithChildren = TeamRoute._addFileChildren(TeamRouteChildren)
+
 interface MediaStoriesRouteChildren {
   MediaStoriesSlugRoute: typeof MediaStoriesSlugRoute
 }
@@ -6783,7 +6812,7 @@ const rootRouteChildren: RootRouteChildren = {
   SecondOpinionRoute: SecondOpinionRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  TeamRoute: TeamRoute,
+  TeamRoute: TeamRouteWithChildren,
   TelemedicineRoute: TelemedicineRoute,
   TrackRoute: TrackRoute,
   VerifyRoute: VerifyRoute,
