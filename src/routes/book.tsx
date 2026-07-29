@@ -1002,9 +1002,10 @@ function BookPage() {
                       });
                       goto(jumpToStep);
                     }}
-                    onFallbackToClassic={() =>
-                      dispatch({ t: "set", p: { serviceType: "clinic" } })
-                    }
+                    onFallbackToClassic={() => {
+                      dispatch({ t: "set", p: { serviceType: "clinic" } });
+                      goto(2);
+                    }}
                     onOpenWaitlist={() => navigate({ to: "/waitlist" })}
                   />
                 ) : (
