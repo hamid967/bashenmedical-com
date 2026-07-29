@@ -9,7 +9,11 @@ import {
   PhoneCall,
   Bot,
   Square,
+  CalendarCheck,
+  CalendarClock,
+  Video,
 } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui-v3";
 import { Textarea } from "@/components/ui-v3";
@@ -52,6 +56,19 @@ const SUGGESTIONS_EN = [
   "I want to book a dental appointment",
   "Which insurance plans are accepted?",
   "What are your branch working hours?",
+];
+
+// Non-AI quick actions that route the user straight to key patient flows.
+// These never call the model and carry no medical advice / patient data.
+const QUICK_LINKS: {
+  to: string;
+  ar: string;
+  en: string;
+  icon: React.ComponentType<{ className?: string }>;
+}[] = [
+  { to: "/book", ar: "احجز موعد", en: "Book appointment", icon: CalendarCheck },
+  { to: "/lookup", ar: "إدارة موعد", en: "Manage appointment", icon: CalendarClock },
+  { to: "/telemedicine", ar: "استشارة عن بُعد", en: "Online consultation", icon: Video },
 ];
 
 export function BaeshenAssistant() {
@@ -428,6 +445,26 @@ export function BaeshenAssistant() {
             {messages.length === 0 && (
               <div className="space-y-3">
                 <p className="text-sm text-muted-foreground">{t("welcome")}</p>
+                <div className="grid grid-cols-3 gap-2">
+                  {QUICK_LINKS.map((q) => {
+                    const Icon = q.icon;
+                    return (
+                      <Link
+                        key={q.to}
+                        to={q.to}
+                        onClick={() => setOpen(false)}
+                        className="flex flex-col items-center gap-1.5 rounded-lg border bg-card px-2 py-2.5 text-center hover:border-primary/40 hover:bg-primary/5"
+                      >
+                        <span className="grid h-8 w-8 place-items-center rounded-md bg-primary/10 text-primary">
+                          <Icon className="h-4 w-4" />
+                        </span>
+                        <span className="text-[10px] font-semibold leading-3 text-foreground">
+                          {isAr ? q.ar : q.en}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
                 <div className="grid gap-2">
                   {suggestions.map((s) => (
                     <button
