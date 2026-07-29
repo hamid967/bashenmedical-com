@@ -348,6 +348,40 @@ export function Header() {
       {open && (
         <div className="xl:hidden border-t border-border bg-background max-h-[calc(100vh-4rem)] overflow-auto">
           <div className="container-app py-3 flex flex-col gap-0.5">
+            {/* UDH-style e-services quick access (mobile-first) */}
+            <div className="mb-3 grid grid-cols-3 gap-2">
+              {(
+                [
+                  { to: "/book", label: th("bookAppointment"), icon: CalendarCheck },
+                  { to: "/lookup", label: th("manageAppointment"), icon: Search },
+                  { to: "/track", label: th("trackOrder"), icon: MapPin },
+                  { to: "/telemedicine", label: th("telemedicine"), icon: Video },
+                  { to: "/pharmacy", label: t("nav_pharmacy"), icon: Pill },
+                  { to: "/services", label: th("allEServices"), icon: LayoutGrid },
+                ] as {
+                  to: string;
+                  label: string;
+                  icon: React.ComponentType<{ className?: string }>;
+                }[]
+              ).map((s) => {
+                const Icon = s.icon;
+                return (
+                  <Link
+                    key={s.to}
+                    to={s.to}
+                    onClick={() => setOpen(false)}
+                    className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 text-center hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="text-[11px] font-semibold leading-4 text-foreground">
+                      {s.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
             {nav.map((n) => (
               <div key={n.to}>
                 <Link
