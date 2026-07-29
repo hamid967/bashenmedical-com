@@ -13,7 +13,7 @@
 
 ## Cursor Cloud specific instructions
 
-Runtime/tooling: this repo uses **Bun** (`bun.lock`) as the package manager and runtime. Node 22 and Python 3.12 are preinstalled; Bun is installed into `~/.bun/bin` (ensure it is on `PATH`). Standard commands live in `README.md` and `package.json` scripts — the notes below only cover non-obvious gotchas.
+Runtime/tooling: this repo uses **Bun** (`bun.lock`, `bunfig.toml`) as the package manager and runtime — Bun, not npm, so ignore `package-lock.json`. Node 22 and Python 3.12 are preinstalled; Bun is installed into `~/.bun/bin` (ensure it is on `PATH`). Standard commands live in `README.md` and `package.json` scripts — the notes below only cover non-obvious gotchas.
 
 - **Dev server:** run `bun --bun run dev` (serves http://localhost:8080), NOT `bun run dev`. Plain `bun run dev` executes Vite 8 under Node and crashes with `ERR_REQUIRE_CYCLE_MODULE` (from `@lovable.dev/vite-tanstack-config`). The `--bun` flag runs Vite under the Bun runtime and works.
 - **Typecheck:** the `typecheck` script calls `tsgo`, which is NOT in `package.json` deps, so `bun run typecheck` fails with `tsgo: command not found`. Use `bunx tsgo --noEmit` (package `@typescript/native-preview`), as the docs do. It currently reports 0 type errors.
