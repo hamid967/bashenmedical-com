@@ -1,4 +1,32 @@
 {
+  "concierge": {
+    "searchPlaceholder": "Search for a doctor, specialty, or symptom...",
+    "nearestSlot": "Next available now",
+    "searchingNearest": "Searching…",
+    "nearestSlotsHeading": "Earliest slots across all doctors",
+    "triageHeading": "How are you feeling today?",
+    "showAllSymptoms": "View all specialties",
+    "recommendedHeading": "Recommended doctors",
+    "specialty": "Specialty",
+    "symptom": {
+      "acute_pain": "Sudden pain",
+      "checkup": "Full check-up",
+      "followup": "Follow-up",
+      "other": "Other symptoms"
+    },
+    "bookNow": "Book appointment",
+    "matchesInsurance": "Covered by {{name}}",
+    "insuranceHeading": "Smart insurance check",
+    "insuranceProvider": "Insurance provider",
+    "insuranceNone": "No insurance",
+    "nphiesConnected": "Connected to NPHIES",
+    "waitlistHeading": "Smart waitlist",
+    "waitlistBody": "Preferred doctor unavailable? We'll ping you on WhatsApp the moment a slot opens.",
+    "waitlistCta": "Join the waitlist",
+    "statBranches": "Branches",
+    "statDoctors": "Doctors available",
+    "classicFlow": "Switch to classic step-by-step booking"
+  },
   "page": {
     "title": "Book an appointment",
     "subtitle": "Follow the steps to complete your booking — you can go back anytime.",
