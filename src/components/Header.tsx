@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { getActiveOptions, getNavActiveProps } from "@/lib/nav-active";
 import {
   Menu,
   X,
@@ -277,12 +278,8 @@ export function Header() {
                     ? "px-3 py-2 text-sm font-semibold rounded-md transition text-[color:var(--jazan-teal,#075E63)] bg-[color:var(--jazan-gold,#C7A46B)]/15 ring-1 ring-[color:var(--jazan-gold,#C7A46B)]/50 hover:bg-[color:var(--jazan-gold,#C7A46B)]/25"
                     : "px-3 py-2 text-sm font-medium text-foreground/85 rounded-md hover:text-primary hover:bg-primary/5 transition"
                 }
-                activeProps={{
-                  className: n.featured
-                    ? "!bg-[color:var(--jazan-gold,#C7A46B)]/35 !ring-2 !text-[color:var(--jazan-teal,#075E63)] shadow-sm"
-                    : "text-primary bg-primary/10",
-                }}
-                activeOptions={{ exact: n.to === "/" }}
+                activeProps={getNavActiveProps({ featured: n.featured })}
+                activeOptions={getActiveOptions(n.to)}
               >
                 {n.label}
               </Link>
