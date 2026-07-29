@@ -981,14 +981,43 @@ function BookPage() {
                 />
               )}
             {state.step === 1 && (
-              <StepService
-                lang={lang}
-                value={state.serviceType}
-                onPick={(v) => {
-                  dispatch({ t: "set", p: { serviceType: v } });
-                  goto(2);
-                }}
-              />
+              <>
+                {state.serviceType === null ? (
+                  <ConciergeLanding
+                    lang={lang}
+                    specialties={specialties as any}
+                    doctors={doctors as any}
+                    branches={branches as any}
+                    onPick={(patch: ConciergePatch, jumpToStep: number) => {
+                      dispatch({
+                        t: "set",
+                        p: {
+                          serviceType: patch.serviceType ?? "clinic",
+                          ...(patch.specialtyId !== undefined
+                            ? { specialtyId: patch.specialtyId }
+                            : {}),
+                          ...(patch.doctorId !== undefined ? { doctorId: patch.doctorId } : {}),
+                          ...(patch.branchId !== undefined ? { branchId: patch.branchId } : {}),
+                        },
+                      });
+                      goto(jumpToStep);
+                    }}
+                    onFallbackToClassic={() =>
+                      dispatch({ t: "set", p: { serviceType: "clinic" } })
+                    }
+                    onOpenWaitlist={() => navigate({ to: "/waitlist" })}
+                  />
+                ) : (
+                  <StepService
+                    lang={lang}
+                    value={state.serviceType}
+                    onPick={(v) => {
+                      dispatch({ t: "set", p: { serviceType: v } });
+                      goto(2);
+                    }}
+                  />
+                )}
+              </>
             )}
             {state.step === 2 && (
               <StepBranch
