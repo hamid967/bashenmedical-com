@@ -1,82 +1,41 @@
-# G3 — Analytics AI
+## SECURITY DEFINER Audit — الدفعة الثانية
 
-ثلاث قدرات ذكية فوق بيانات BI الموجودة (bi_daily_kpis + appointments + complaints)، بدون أي بيانات مستخدم إضافية، وباستخدام Lovable AI Gateway (بدون مفتاح خارجي).
+### الهدف
+تقليل صلاحيات `EXECUTE` على الدوال `SECURITY DEFINER` المتبقية (حوالي 146 تحذير 0028/0029) مع توثيق كل خطوة، بدون كسر أي مسار عام موثّق في `PUBLIC_READ_ALLOWLIST`.
 
-## القدرات
+### الخطوات
 
-### 1) No-Show Prediction
-- ميزات مشتقة من `appointments`: تاريخ الحجز vs موعد الزيارة (lead time)، الفرع، التخصص، وقت اليوم، تاريخ العميل (نسبة الغياب السابقة)، نوع التأمين، عدد التأكيدات (SMS/WA).
-- محرك افتراضي: **Logistic scoring** خفيف داخل PL/pgSQL (بدون تدريب خارجي)، مع طبقة اختيارية تستدعي Gemini لتفسير عوامل الخطر لكل حالة.
-- ناتج: `no_show_predictions(appointment_id, risk 0-1, top_factors[], recommendation)` يتحدّث ساعياً عبر pg_cron.
+1. **جرد شامل قبل التنفيذ**
+   - استعلام `pg_proc` لكل دوال `prosecdef = true` في `public` مع أعمدة: `anon_exec`, `authenticated_exec`, `public_exec`, بادئة `_`، وجود على الـallowlist.
+   - حفظ الناتج في `docs/reports/secdef-inventory-2026-07-29.md` كخط أساس.
 
-### 2) Smart Recommendations
-- توصيات على مستوى الفرع/التخصص/اليوم: تعديل السعة، إضافة إشعار تذكير إضافي، عرض slots بديلة.
-- تُولَّد بواسطة server function تستدعي `google/gemini-3.6-flash` مع KPIs مجمّعة (بدون PII).
+2. **تصنيف الدوال إلى ثلاث فئات**
+   - **A. Trigger-only / Internal helpers** — لا تُستدعى من العميل: `REVOKE EXECUTE FROM anon, authenticated, PUBLIC` والإبقاء على `service_role` فقط.
+   - **B. Authenticated-only RPCs** (لوحات إدارية، admin/doctor/staff): `REVOKE FROM anon, PUBLIC` والإبقاء على `authenticated` (مع حماية داخلية `has_role`).
+   - **C. Public/Guest RPCs** على الـallowlist (`book_slot`, `track_orders_by_phone`, …): إبقاء `anon` صراحةً، مع `REVOKE FROM PUBLIC` للتأكد أن لا leakage غير مقصود.
 
-### 3) Complaint Classification
-- تصنيف تلقائي لكل شكوى جديدة (fields من `complaints`): الفئة، الحدة، القسم المسؤول، توصية رد.
-- Trigger على `AFTER INSERT` → استدعاء server function `classifyComplaint` → تحديث الأعمدة `ai_category`, `ai_severity`, `ai_suggested_owner`.
+3. **Migration واحدة قابلة للمراجعة**
+   - ملف SQL منفصل يحتوي فقط `REVOKE`/`GRANT` بدون تعديل جسم أي دالة.
+   - كل مجموعة معلّقة بسطر يشرح فئتها ومبرّرها.
+   - لا مساس بالدوال المُعالجة في الدفعة الأولى (`refresh_bi_daily_kpis`, `admin_list_data_contracts`, …).
 
-## المخطط الفني
+4. **التحقق بعد التنفيذ**
+   - إعادة تشغيل `supabase--linter` ومقارنة عدد تحذيرات 0028/0029.
+   - تشغيل `tests/security/test_secdef_privileges.py` و`test_execute_privileges_regression.py` و`test_a2_a3_grants_pinned.py` — لا بد أن تمر كلها.
+   - تشغيل `tests/rls/doctor-workflow.rls.test.ts` و`patient-workflow.rls.test.ts` كتحقّق دخاني على أهم مسارات RLS التي تعتمد على دوال SECDEF.
 
-### قاعدة البيانات (migration واحدة)
-```text
-CREATE TABLE no_show_predictions (
-  appointment_id uuid PK REFERENCES appointments,
-  risk numeric(4,3),
-  top_factors jsonb,
-  recommendation text,
-  computed_at timestamptz
-);
+5. **التوثيق**
+   - `docs/reports/secdef-batch2-2026-07-29.md`: جدول قبل/بعد لكل دالة (الدور، EXECUTE قبل، EXECUTE بعد، المبرّر، حماية داخلية موجودة).
+   - تحديث `docs/security/public_read_allowlist.md` إذا تغيّر أي إدخال.
+   - تحديث `tests/security/test_secdef_privileges.py::PUBLIC_READ_ALLOWLIST` إن اقتضى الأمر.
 
-ALTER TABLE complaints
-  ADD COLUMN ai_category text,
-  ADD COLUMN ai_severity text,
-  ADD COLUMN ai_suggested_owner text,
-  ADD COLUMN ai_classified_at timestamptz;
+### مخرجات نهائية
+- Migration واحدة تحتوي `REVOKE`/`GRANT` مصنّفة.
+- تقريران في `docs/reports/`: الجرد + قبل/بعد.
+- تحذيرات 0028/0029 تقترب من الصفر باستثناء ما هو في الـallowlist رسميًا.
+- كل الاختبارات الأمنية وRLS خضراء.
 
-CREATE TABLE ai_recommendations (
-  id uuid PK, scope text, scope_id text,
-  kind text, payload jsonb, generated_at timestamptz, dismissed_at timestamptz
-);
-```
-+ GRANTs + RLS: قراءة للأدوار admin/analyst فقط، service_role للكتابة.
-
-### Server Functions (TanStack، مسار `src/lib/ai/`)
-- `predictNoShow.functions.ts` — batch job، يقرأ المواعيد القادمة (48h) ويكتب `no_show_predictions`.
-- `generateRecommendations.functions.ts` — يقرأ `bi_daily_kpis` آخر 30 يوم ويولّد ≤10 توصيات.
-- `classifyComplaint.functions.ts` — استدعاء واحد لكل شكوى، محمي بـ `assertHasRole('admin'|'analyst')` أو DB trigger.
-
-### واجهة الإدارة
-- `/admin/ai-insights` — 3 تبويبات:
-  - **No-Show**: جدول المواعيد عالية الخطر + زر "إرسال تذكير الآن".
-  - **Recommendations**: بطاقات + accept/dismiss.
-  - **Complaints AI**: جدول تصنيفات + دقة يدوية (override).
-
-### الجدولة
-- `pg_cron` كل ساعة: `predictNoShow` (48h window).
-- `pg_cron` يومياً 06:00: `generateRecommendations`.
-- شكاوى: real-time عبر trigger + net.http_post إلى `/api/public/hooks/classify-complaint`.
-
-### الأمان
-- كل الاستدعاءات لـ Lovable AI من الخادم فقط (`LOVABLE_API_KEY`).
-- PII masking قبل الإرسال: لا أسماء/أرقام هوية/جوال — فقط hashed ids + متغيرات رقمية.
-- تسجيل التوكنات في `ai_usage_costs` كما هو النمط الحالي.
-- RLS: قراءة للـ `admin` و`analyst` فقط عبر `has_role`.
-
-### الاختبارات
-- Unit: مصنّف الشكاوى (mock gateway) + PII masking.
-- Integration: RLS matrix للجداول الثلاثة.
-- E2E: `/admin/ai-insights` تفتح فقط لـ admin/analyst وتعرض بيانات.
-
-## Rollout
-1. Migration + GRANTs + RLS.
-2. Server functions + PII masker.
-3. UI `/admin/ai-insights`.
-4. Cron jobs + trigger.
-5. اختبارات + توثيق في `docs/ai-insights.md`.
-
-## خارج النطاق
-- تدريب نماذج ML مخصصة (ML pipelines).
-- بيانات ديموغرافية إضافية.
-- تنبؤات مالية / إيرادات — تُعالج في G3.2 لاحقاً.
+### خارج النطاق
+- لا تعديل على أجسام الدوال (search_path/security invoker) — يبقى للدفعة الثالثة إن لزم.
+- NPHIES والدفع مؤجّلان.
+- refactor `any` → typed خارج نطاق هذه الدفعة.

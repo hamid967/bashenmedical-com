@@ -59,7 +59,13 @@ PUBLIC_READ_ALLOWLIST = {
     # Telemetry reporter — bounded SECURITY DEFINER writer; anon must be able
     # to log its own 401/403 for the permission-watchdog. See A3 migration.
     "record_permission_error",
+    # Batch 2 (2026-07-29): guest booking + auth-event paths.
+    # Protected internally (rate-limit / signed ref / OTP).
+    "confirm_appointment_booking",
+    "verify_appointment_by_reference",
+    "log_auth_event",
 }
+
 
 
 # Functions we expect to be REVOKED from anon (runtime probe list).
