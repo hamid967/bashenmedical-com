@@ -1,4 +1,32 @@
 {
+  "concierge": {
+    "searchPlaceholder": "ابحث عن طبيب، تخصص، أو عَرَض طبي...",
+    "nearestSlot": "أقرب موعد متاح الآن",
+    "searchingNearest": "جارٍ البحث…",
+    "nearestSlotsHeading": "أقرب المواعيد المتاحة عبر جميع الأطباء",
+    "triageHeading": "بماذا تشعر اليوم؟",
+    "showAllSymptoms": "عرض كل التخصصات",
+    "recommendedHeading": "أطباء موصى بهم",
+    "specialty": "تخصص",
+    "symptom": {
+      "acute_pain": "ألم مفاجئ",
+      "checkup": "فحص شامل",
+      "followup": "متابعة حالة",
+      "other": "أعراض أخرى"
+    },
+    "bookNow": "حجز موعد",
+    "matchesInsurance": "مطابق لتأمين {{name}}",
+    "insuranceHeading": "التحقق الذكي من التأمين",
+    "insuranceProvider": "مزود الخدمة",
+    "insuranceNone": "بدون تأمين",
+    "nphiesConnected": "تم الربط مع منصة نفيس (NPHIES)",
+    "waitlistHeading": "قائمة الانتظار الذكية",
+    "waitlistBody": "هل الطبيب المفضل غير متاح؟ سنشعرك فوراً عبر الواتساب عند شغور موعد قريب.",
+    "waitlistCta": "سجّل في الانتظار",
+    "statBranches": "الفروع",
+    "statDoctors": "أطباء متاحون",
+    "classicFlow": "التبديل إلى الحجز التقليدي (خطوة بخطوة)"
+  },
   "page": {
     "title": "احجز موعدك",
     "subtitle": "اتبع الخطوات لإتمام حجز موعدك — يمكنك الرجوع في أي وقت.",
