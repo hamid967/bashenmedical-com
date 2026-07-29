@@ -179,8 +179,11 @@ export function ConciergeLanding({
   }
 
   function pickSymptom(preset: SymptomPreset) {
+    // Always route through the branch step (2) so the user picks a branch
+    // before specialty/doctor. The wizard renders any preset specialty as
+    // already selected on step 3.
     if (preset.key === "other") {
-      onPick({ serviceType: "clinic" }, 3);
+      onPick({ serviceType: "clinic" }, 2);
       return;
     }
     if (preset.key === "followup") {
@@ -189,8 +192,9 @@ export function ConciergeLanding({
     }
     const sp = findSpecialtyBySlugs(specialties, preset.slugs);
     if (sp) onPick({ serviceType: preset.serviceType, specialtyId: sp.id }, 2);
-    else onPick({ serviceType: preset.serviceType }, 3);
+    else onPick({ serviceType: preset.serviceType }, 2);
   }
+
 
   function pickDoctor(d: DoctorRow) {
     onPick(
