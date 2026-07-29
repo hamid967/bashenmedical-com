@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { getActiveOptions, getFooterActiveProps } from "@/lib/nav-active";
 import { Instagram, MapPin, Phone, Mail, Clock, ShieldCheck, Award, Siren } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useI18n } from "@/lib/i18n";
@@ -75,11 +76,8 @@ export function Footer() {
               <Link
                 to="/team"
                 className="hover:text-primary font-semibold text-foreground transition-colors"
-                activeOptions={{ exact: false }}
-                activeProps={{
-                  className:
-                    "text-primary underline underline-offset-4 decoration-2 decoration-[color:var(--jazan-gold,#C7A46B)]",
-                }}
+                activeOptions={getActiveOptions("/team")}
+                activeProps={getFooterActiveProps()}
               >
                 {t("nav_team")}
               </Link>
