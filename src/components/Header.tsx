@@ -12,6 +12,17 @@ import {
   Siren,
   MapPin,
   Clock,
+  CalendarCheck,
+  Search,
+  LayoutGrid,
+  CreditCard,
+  Video,
+  Home as HomeIcon,
+  Pill,
+  ShieldCheck,
+  Stethoscope,
+  Building2,
+  Plane,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,10 +36,17 @@ import { JazanPattern, JazanIconFrame, JazanSectionLabel } from "@/components/ja
 
 const bmcLogo = bmcLogoAsset.url;
 
+type NavChild = {
+  to: string;
+  label: string;
+  desc?: string;
+  icon?: React.ComponentType<{ className?: string }>;
+};
+
 type NavItem = {
   to: string;
   label: string;
-  children?: { to: string; label: string; desc?: string }[];
+  children?: NavChild[];
 };
 
 export function Header() {
@@ -60,18 +78,47 @@ export function Header() {
       to: "/services",
       label: th("services"),
       children: [
-        { to: "/book", label: th("bookAppointment"), desc: th("bookAppointmentDesc") },
-        { to: "/lookup", label: th("manageAppointment"), desc: th("manageAppointmentDesc") },
-        { to: "/track", label: th("trackOrder"), desc: th("trackOrderDesc") },
-        { to: "/services", label: th("allEServices"), desc: th("allEServicesDesc") },
-        { to: "/packages", label: th("packages"), desc: th("packagesDesc") },
-        { to: "/telemedicine", label: th("telemedicine"), desc: th("telemedicineDesc") },
-        { to: "/home-care", label: th("homeCare"), desc: th("homeCareDesc") },
-        { to: "/pharmacy", label: t("nav_pharmacy"), desc: th("pharmacyDesc") },
-        { to: "/insurance", label: th("insurance"), desc: th("insuranceDesc") },
-        { to: "/second-opinion", label: th("secondOpinion"), desc: th("secondOpinionDesc") },
-        { to: "/corporate", label: th("corporate"), desc: th("corporateDesc") },
-        { to: "/international-patients", label: th("internationalPatients") },
+        {
+          to: "/book",
+          label: th("bookAppointment"),
+          desc: th("bookAppointmentDesc"),
+          icon: CalendarCheck,
+        },
+        {
+          to: "/lookup",
+          label: th("manageAppointment"),
+          desc: th("manageAppointmentDesc"),
+          icon: Search,
+        },
+        { to: "/track", label: th("trackOrder"), desc: th("trackOrderDesc"), icon: MapPin },
+        {
+          to: "/services",
+          label: th("allEServices"),
+          desc: th("allEServicesDesc"),
+          icon: LayoutGrid,
+        },
+        { to: "/packages", label: th("packages"), desc: th("packagesDesc"), icon: CreditCard },
+        {
+          to: "/telemedicine",
+          label: th("telemedicine"),
+          desc: th("telemedicineDesc"),
+          icon: Video,
+        },
+        { to: "/home-care", label: th("homeCare"), desc: th("homeCareDesc"), icon: HomeIcon },
+        { to: "/pharmacy", label: t("nav_pharmacy"), desc: th("pharmacyDesc"), icon: Pill },
+        { to: "/insurance", label: th("insurance"), desc: th("insuranceDesc"), icon: ShieldCheck },
+        {
+          to: "/second-opinion",
+          label: th("secondOpinion"),
+          desc: th("secondOpinionDesc"),
+          icon: Stethoscope,
+        },
+        { to: "/corporate", label: th("corporate"), desc: th("corporateDesc"), icon: Building2 },
+        {
+          to: "/international-patients",
+          label: th("internationalPatients"),
+          icon: Plane,
+        },
       ],
     },
     {
@@ -173,17 +220,51 @@ export function Header() {
                   {n.label}
                   <ChevronDown className="h-3.5 w-3.5" />
                 </Link>
-                {openMenu === n.to && (
-                  <div className="absolute top-full start-0 mt-1 w-72 rounded-xl border border-[var(--jazan-gold,#C7A46B)]/40 bg-popover shadow-lg p-3 grid gap-1 ring-1 ring-[var(--jazan-teal,#075E63)]/10">
-                    <JazanSectionLabel className="px-2 pb-1">{n.label}</JazanSectionLabel>
-                    {n.children.map((c) => (
-                      <Link key={c.to} to={c.to} className="rounded-lg px-3 py-2 hover:bg-muted">
-                        <div className="text-sm font-semibold text-foreground">{c.label}</div>
-                        {c.desc && <div className="text-xs text-muted-foreground">{c.desc}</div>}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                {openMenu === n.to &&
+                  (n.children.some((c) => c.icon) ? (
+                    // Mega-menu: icon tiles in a 2-column grid (UDH-style nav).
+                    <div className="absolute top-full start-0 mt-1 w-[34rem] max-w-[calc(100vw-2rem)] rounded-xl border border-[var(--jazan-gold,#C7A46B)]/40 bg-popover shadow-lg p-3 ring-1 ring-[var(--jazan-teal,#075E63)]/10">
+                      <JazanSectionLabel className="px-2 pb-2">{n.label}</JazanSectionLabel>
+                      <div className="grid grid-cols-2 gap-1">
+                        {n.children.map((c) => {
+                          const Icon = c.icon;
+                          return (
+                            <Link
+                              key={c.to}
+                              to={c.to}
+                              className="group flex items-start gap-3 rounded-lg px-3 py-2.5 hover:bg-muted"
+                            >
+                              {Icon && (
+                                <span className="mt-0.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                                  <Icon className="h-4 w-4" />
+                                </span>
+                              )}
+                              <span className="min-w-0">
+                                <span className="block text-sm font-semibold text-foreground">
+                                  {c.label}
+                                </span>
+                                {c.desc && (
+                                  <span className="block text-xs text-muted-foreground leading-5">
+                                    {c.desc}
+                                  </span>
+                                )}
+                              </span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="absolute top-full start-0 mt-1 w-72 rounded-xl border border-[var(--jazan-gold,#C7A46B)]/40 bg-popover shadow-lg p-3 grid gap-1 ring-1 ring-[var(--jazan-teal,#075E63)]/10">
+                      <JazanSectionLabel className="px-2 pb-1">{n.label}</JazanSectionLabel>
+                      {n.children.map((c) => (
+                        <Link key={c.to} to={c.to} className="rounded-lg px-3 py-2 hover:bg-muted">
+                          <div className="text-sm font-semibold text-foreground">{c.label}</div>
+                          {c.desc && <div className="text-xs text-muted-foreground">{c.desc}</div>}
+                        </Link>
+                      ))}
+                    </div>
+                  ))}
               </div>
             ) : (
               <Link
@@ -267,6 +348,40 @@ export function Header() {
       {open && (
         <div className="xl:hidden border-t border-border bg-background max-h-[calc(100vh-4rem)] overflow-auto">
           <div className="container-app py-3 flex flex-col gap-0.5">
+            {/* UDH-style e-services quick access (mobile-first) */}
+            <div className="mb-3 grid grid-cols-3 gap-2">
+              {(
+                [
+                  { to: "/book", label: th("bookAppointment"), icon: CalendarCheck },
+                  { to: "/lookup", label: th("manageAppointment"), icon: Search },
+                  { to: "/track", label: th("trackOrder"), icon: MapPin },
+                  { to: "/telemedicine", label: th("telemedicine"), icon: Video },
+                  { to: "/pharmacy", label: t("nav_pharmacy"), icon: Pill },
+                  { to: "/services", label: th("allEServices"), icon: LayoutGrid },
+                ] as {
+                  to: string;
+                  label: string;
+                  icon: React.ComponentType<{ className?: string }>;
+                }[]
+              ).map((s) => {
+                const Icon = s.icon;
+                return (
+                  <Link
+                    key={s.to}
+                    to={s.to}
+                    onClick={() => setOpen(false)}
+                    className="flex flex-col items-center gap-1.5 rounded-xl border border-border bg-card p-3 text-center hover:border-primary/40 hover:bg-primary/5"
+                  >
+                    <span className="grid h-9 w-9 place-items-center rounded-lg bg-primary/10 text-primary">
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="text-[11px] font-semibold leading-4 text-foreground">
+                      {s.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
             {nav.map((n) => (
               <div key={n.to}>
                 <Link
