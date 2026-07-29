@@ -72,7 +72,14 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <Link to="/team" className="hover:text-primary font-semibold text-foreground">
+              <Link
+                to="/team"
+                className="hover:text-primary font-semibold text-foreground transition-colors"
+                activeProps={{
+                  className:
+                    "text-primary underline underline-offset-4 decoration-2 decoration-[color:var(--jazan-gold,#C7A46B)]",
+                }}
+              >
                 {t("nav_team")}
               </Link>
             </li>
