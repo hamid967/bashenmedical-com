@@ -48,6 +48,7 @@ import {
 } from "@/components/booking/types";
 import { Stepper } from "@/components/booking/Stepper";
 import { StepService } from "@/components/booking/StepService";
+import { ConciergeLanding, type ConciergePatch } from "@/components/booking/ConciergeLanding";
 import { StepBranch } from "@/components/booking/StepBranch";
 import { StepSpecialty } from "@/components/booking/StepSpecialty";
 import { StepDoctor } from "@/components/booking/StepDoctor";
