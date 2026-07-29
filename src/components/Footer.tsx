@@ -72,6 +72,11 @@ export function Footer() {
               </Link>
             </li>
             <li>
+              <Link to="/team" className="hover:text-primary font-semibold text-foreground">
+                {t("nav_team")}
+              </Link>
+            </li>
+            <li>
               <Link to="/excellence" className="hover:text-primary">
                 {tf("excellenceCenters")}
               </Link>
