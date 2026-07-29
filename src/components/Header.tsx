@@ -47,6 +47,7 @@ type NavItem = {
   to: string;
   label: string;
   children?: NavChild[];
+  featured?: boolean;
 };
 
 export function Header() {
@@ -71,6 +72,7 @@ export function Header() {
     { to: "/", label: t("nav_home") },
     { to: "/about", label: t("nav_about") },
     { to: "/branches", label: th("ourHospitals") },
+    { to: "/team", label: t("nav_team"), featured: true },
     { to: "/excellence", label: th("excellenceCenters") },
     { to: "/specialties", label: t("nav_specialties") },
     { to: "/doctors", label: t("nav_doctors") },
@@ -270,7 +272,11 @@ export function Header() {
               <Link
                 key={n.to}
                 to={n.to}
-                className="px-3 py-2 text-sm font-medium text-foreground/85 rounded-md hover:text-primary hover:bg-primary/5 transition"
+                className={
+                  n.featured
+                    ? "px-3 py-2 text-sm font-semibold rounded-md transition text-[color:var(--jazan-teal,#075E63)] bg-[color:var(--jazan-gold,#C7A46B)]/15 ring-1 ring-[color:var(--jazan-gold,#C7A46B)]/50 hover:bg-[color:var(--jazan-gold,#C7A46B)]/25"
+                    : "px-3 py-2 text-sm font-medium text-foreground/85 rounded-md hover:text-primary hover:bg-primary/5 transition"
+                }
                 activeProps={{ className: "text-primary bg-primary/10" }}
                 activeOptions={{ exact: n.to === "/" }}
               >
