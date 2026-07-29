@@ -119,6 +119,7 @@ import { Route as ReservationsNewRouteImport } from './routes/reservations.new'
 import { Route as SettingsGithubRouteImport } from './routes/settings.github'
 import { Route as SpecialtiesIndexRouteImport } from './routes/specialties.index'
 import { Route as SpecialtiesSlugRouteImport } from './routes/specialties.$slug'
+import { Route as TeamAboutRouteImport } from './routes/team.about'
 import { Route as TeamLeadershipRouteImport } from './routes/team.leadership'
 import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
@@ -884,6 +885,11 @@ const SpecialtiesSlugRoute = SpecialtiesSlugRouteImport.update({
   id: '/specialties/$slug',
   path: '/specialties/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const TeamAboutRoute = TeamAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => TeamRoute,
 } as any)
 const TeamLeadershipRoute = TeamLeadershipRouteImport.update({
   id: '/leadership',
@@ -2088,6 +2094,7 @@ export interface FileRoutesByFullPath {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/team/about': typeof TeamAboutRoute
   '/team/leadership': typeof TeamLeadershipRoute
   '/auth/': typeof AuthIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
@@ -2381,6 +2388,7 @@ export interface FileRoutesByTo {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/team/about': typeof TeamAboutRoute
   '/team/leadership': typeof TeamLeadershipRoute
   '/auth': typeof AuthIndexRoute
   '/doctors': typeof DoctorsIndexRoute
@@ -2682,6 +2690,7 @@ export interface FileRoutesById {
   '/reservations/new': typeof ReservationsNewRoute
   '/settings/github': typeof SettingsGithubRoute
   '/specialties/$slug': typeof SpecialtiesSlugRoute
+  '/team/about': typeof TeamAboutRoute
   '/team/leadership': typeof TeamLeadershipRoute
   '/auth/': typeof AuthIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
@@ -2983,6 +2992,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/team/about'
     | '/team/leadership'
     | '/auth/'
     | '/doctors/'
@@ -3276,6 +3286,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/team/about'
     | '/team/leadership'
     | '/auth'
     | '/doctors'
@@ -3576,6 +3587,7 @@ export interface FileRouteTypes {
     | '/reservations/new'
     | '/settings/github'
     | '/specialties/$slug'
+    | '/team/about'
     | '/team/leadership'
     | '/auth/'
     | '/doctors/'
@@ -4645,6 +4657,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/specialties/$slug'
       preLoaderRoute: typeof SpecialtiesSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/team/about': {
+      id: '/team/about'
+      path: '/about'
+      fullPath: '/team/about'
+      preLoaderRoute: typeof TeamAboutRouteImport
+      parentRoute: typeof TeamRoute
     }
     '/team/leadership': {
       id: '/team/leadership'
@@ -6744,10 +6763,12 @@ const ReservationsRouteWithChildren = ReservationsRoute._addFileChildren(
 )
 
 interface TeamRouteChildren {
+  TeamAboutRoute: typeof TeamAboutRoute
   TeamLeadershipRoute: typeof TeamLeadershipRoute
 }
 
 const TeamRouteChildren: TeamRouteChildren = {
+  TeamAboutRoute: TeamAboutRoute,
   TeamLeadershipRoute: TeamLeadershipRoute,
 }
 
