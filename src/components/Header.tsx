@@ -47,6 +47,7 @@ type NavItem = {
   to: string;
   label: string;
   children?: NavChild[];
+  featured?: boolean;
 };
 
 export function Header() {
