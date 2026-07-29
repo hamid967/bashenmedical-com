@@ -13,19 +13,10 @@
 
 ## Cursor Cloud specific instructions
 
-Stack: TanStack Start (React 19) SSR app + Supabase, managed with **Bun** (`bun.lock`, `bunfig.toml`). Package manager is Bun, not npm — ignore `package-lock.json`. The update script installs Bun (if missing) and runs `bun install`.
+Runtime/tooling: this repo uses **Bun** (`bun.lock`, `bunfig.toml`) as the package manager and runtime — Bun, not npm, so ignore `package-lock.json`. Node 22 and Python 3.12 are preinstalled; Bun is installed into `~/.bun/bin` (ensure it is on `PATH`). Standard commands live in `README.md` and `package.json` scripts — the notes below only cover non-obvious gotchas.
 
-### Running the dev server (important gotcha)
-- Run the dev server with **`bun --bun run dev`**, NOT `bun run dev`. Plain `bun run dev` launches Vite under Node and crashes with `ERR_REQUIRE_CYCLE_MODULE` (Vite 8 ESM required in a cycle from the Lovable CJS config). Forcing the Bun runtime (`--bun`) fixes it.
-- Dev server serves on `http://localhost:8080` (port/host are set by `@lovable.dev/vite-tanstack-config`).
-
-### Supabase secrets / what works without them
-- `.env` ships only the anon `VITE_SUPABASE_*` / `SUPABASE_PUBLISHABLE_KEY` + `SUPABASE_URL`. There is **no `SUPABASE_SERVICE_ROLE_KEY`** in this environment.
-- Without the service role key, the app boots and the public `/book` wizard loads real branches/specialties/doctors, but the availability resolver and booking-write path return empty/blocked, so you can't complete a persisted booking. `src/integrations/supabase/client.server.ts` (`supabaseAdmin`) throws if `SUPABASE_SERVICE_ROLE_KEY` is unset.
-- The public booking API (`/api/public/book/create`) also requires a WhatsApp OTP verification challenge, so full bookings can't be driven end-to-end here.
-- The `tests/rls/*` and Playwright `tests/e2e/*` suites require `SUPABASE_SERVICE_ROLE_KEY` (+ `E2E_*` accounts). They skip/fail without those secrets by design; unit tests and Vitest do NOT need any secret.
-
-### Lint / test / typecheck (what CI actually gates on)
-- CI's `lint-and-typecheck` job does NOT run the whole-repo `bun run lint` / `bun run format:check` clean — it runs scoped checks: `bun run lint:inserts`, `bun run lint:portal-tokens`, `codemod:portal-tokens:check`, plus doc/unit checks. See `.github/workflows/ci.yml`.
-- Tests: `bun run test:vitest` (Vitest, no secrets) and the CI unit loop `for f in tests/unit/*.test.ts; do bun "$f"; done`. React tests: `bun test tests/react/`.
-- `typecheck` calls **`tsgo`**, which comes from `@typescript/native-preview` and is **not a declared dependency**. Run it via `bunx @typescript/native-preview --noEmit` (or install that package) — plain `bun run typecheck` fails with `tsgo: command not found`.
+- **Dev server:** run `bun --bun run dev` (serves http://localhost:8080), NOT `bun run dev`. Plain `bun run dev` executes Vite 8 under Node and crashes with `ERR_REQUIRE_CYCLE_MODULE` (from `@lovable.dev/vite-tanstack-config`). The `--bun` flag runs Vite under the Bun runtime and works.
+- **Typecheck:** the `typecheck` script calls `tsgo`, which is NOT in `package.json` deps, so `bun run typecheck` fails with `tsgo: command not found`. Use `bunx tsgo --noEmit` (package `@typescript/native-preview`), as the docs do. It currently reports 0 type errors.
+- **Tests come in two styles:** `describe`-based specs run under `bun run test:vitest` (via the `bun:test`→`vitest` alias) or `bun test <dir>`; standalone script tests run via `bun <file>` (this is what the CI "Unit tests" loop does). Running a `describe`-based spec with plain `bun <file>` errors `Cannot use describe outside of the test runner`. `tests/react/` is not part of CI and has some pre-existing failing assertions.
+- **Lint:** full `eslint .` (`bun run lint`) reports thousands of pre-existing issues and is NOT a CI gate. CI only runs scoped scripts: `format:check`, `lint:inserts`, `lint:portal-tokens`, `codemod:portal-tokens:check`. These can report pre-existing violations on non-`main` branches — the tooling itself runs fine.
+- **Supabase secrets / booking writes:** `.env` ships only the publishable (anon) key + URL. Client-side reads (branches, specialties, doctors, `availability`) work. But: (1) server routes using the service-role admin client (`src/integrations/supabase/client.server.ts`) require `SUPABASE_SERVICE_ROLE_KEY` (absent), so `/api/public/book/*` availability+create, `inquiries/create`, and the `/book` wizard's date/availability step return nothing; (2) completing a booking is otherwise RLS-gated — a direct anon insert into `appointments` fails with `permission denied for function _appointment_belongs_to_me`, so it needs an authenticated patient session. To run RLS/E2E suites or complete a real booking, provide `SUPABASE_SERVICE_ROLE_KEY` (+ `E2E_ADMIN_EMAIL`/`E2E_PATIENT_*` for E2E). The `pre-push` husky hook runs `bun run check:rls` and will fail without these secrets (use `git push --no-verify` to bypass).
