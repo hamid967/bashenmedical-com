@@ -41,6 +41,7 @@ import { Route as ReservationsRouteImport } from './routes/reservations'
 import { Route as SecondOpinionRouteImport } from './routes/second-opinion'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TeamRouteImport } from './routes/team'
 import { Route as TelemedicineRouteImport } from './routes/telemedicine'
 import { Route as TrackRouteImport } from './routes/track'
 import { Route as VerifyRouteImport } from './routes/verify'
@@ -463,6 +464,11 @@ const ServicesRoute = ServicesRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TeamRoute = TeamRouteImport.update({
+  id: '/team',
+  path: '/team',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TelemedicineRoute = TelemedicineRouteImport.update({
@@ -2002,6 +2008,7 @@ export interface FileRoutesByFullPath {
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/team': typeof TeamRoute
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
   '/verify': typeof VerifyRoute
@@ -2298,6 +2305,7 @@ export interface FileRoutesByTo {
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/team': typeof TeamRoute
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
   '/verify': typeof VerifyRoute
@@ -2592,6 +2600,7 @@ export interface FileRoutesById {
   '/second-opinion': typeof SecondOpinionRoute
   '/services': typeof ServicesRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/team': typeof TeamRoute
   '/telemedicine': typeof TelemedicineRoute
   '/track': typeof TrackRoute
   '/verify': typeof VerifyRoute
@@ -2891,6 +2900,7 @@ export interface FileRouteTypes {
     | '/second-opinion'
     | '/services'
     | '/sitemap.xml'
+    | '/team'
     | '/telemedicine'
     | '/track'
     | '/verify'
@@ -3187,6 +3197,7 @@ export interface FileRouteTypes {
     | '/second-opinion'
     | '/services'
     | '/sitemap.xml'
+    | '/team'
     | '/telemedicine'
     | '/track'
     | '/verify'
@@ -3480,6 +3491,7 @@ export interface FileRouteTypes {
     | '/second-opinion'
     | '/services'
     | '/sitemap.xml'
+    | '/team'
     | '/telemedicine'
     | '/track'
     | '/verify'
@@ -3779,6 +3791,7 @@ export interface RootRouteChildren {
   SecondOpinionRoute: typeof SecondOpinionRoute
   ServicesRoute: typeof ServicesRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TeamRoute: typeof TeamRoute
   TelemedicineRoute: typeof TelemedicineRoute
   TrackRoute: typeof TrackRoute
   VerifyRoute: typeof VerifyRoute
@@ -4073,6 +4086,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/team': {
+      id: '/team'
+      path: '/team'
+      fullPath: '/team'
+      preLoaderRoute: typeof TeamRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/telemedicine': {
@@ -6763,6 +6783,7 @@ const rootRouteChildren: RootRouteChildren = {
   SecondOpinionRoute: SecondOpinionRoute,
   ServicesRoute: ServicesRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TeamRoute: TeamRoute,
   TelemedicineRoute: TelemedicineRoute,
   TrackRoute: TrackRoute,
   VerifyRoute: VerifyRoute,
