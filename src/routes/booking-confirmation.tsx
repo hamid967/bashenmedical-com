@@ -30,6 +30,7 @@ import {
   type ShareBooking,
 } from "@/lib/booking-share";
 import { OrderTimeline } from "@/components/booking/OrderTimeline";
+import { EServicesQuickAccess } from "@/components/home/EServicesQuickAccess";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 
 const searchSchema = z.object({
@@ -592,6 +593,14 @@ function BookingConfirmationPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Explore other e-services (UDH-style cross-links) */}
+      <div className="mx-auto mt-12 max-w-4xl">
+        <h2 className="mb-4 text-center text-lg font-bold text-foreground">
+          {lang === "ar" ? "استكشف خدماتنا الإلكترونية" : "Explore our e-services"}
+        </h2>
+        <EServicesQuickAccess className="" />
       </div>
     </div>
   );
