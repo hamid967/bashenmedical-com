@@ -499,6 +499,95 @@ function ServicesPortal() {
           )}
         </div>
       </section>
+
+      {/* Medical services & branches — Andalusia-style second layer */}
+      <section className="border-t border-border bg-[color:var(--brand-mint)]/35 py-14 md:py-16">
+        <div className="container-app grid gap-8 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p className="text-xs font-bold tracking-wide text-[color:var(--brand-gold)]">
+              {lang === "ar" ? "الخدمات الطبية" : "Clinical services"}
+            </p>
+            <h2 className="mt-2 text-2xl font-bold text-[color:var(--brand-deep)] md:text-3xl">
+              {lang === "ar"
+                ? "تخصصات ومراكز تميز في فروعنا"
+                : "Specialties and excellence centers at our branches"}
+            </h2>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-muted-foreground md:text-base">
+              {lang === "ar"
+                ? "تصفّح التخصصات الطبية، أو افتح صفحة فرعك للاطلاع على الخدمات والأطباء والحجز المباشر — بنفس وضوح صفحات المستشفيات الرائدة."
+                : "Browse medical specialties, or open your branch page for services, doctors, and direct booking."}
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                to="/specialties"
+                className="inline-flex items-center rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground hover:opacity-95"
+              >
+                {lang === "ar" ? "التخصصات الطبية" : "Medical specialties"}
+              </Link>
+              <Link
+                to="/branches"
+                className="inline-flex items-center rounded-xl border border-border bg-card px-5 py-3 text-sm font-semibold hover:border-primary/40"
+              >
+                {lang === "ar" ? "خدمات الفروع" : "Branch services"}
+              </Link>
+              <Link
+                to="/excellence"
+                className="inline-flex items-center rounded-xl border border-transparent px-3 py-3 text-sm font-semibold text-primary hover:underline"
+              >
+                {lang === "ar" ? "مراكز التميز" : "Excellence centers"}
+              </Link>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              to="/branches/$slug"
+              params={{ slug: "main" }}
+              search={{ service: undefined }}
+              className="rounded-2xl border border-border bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+            >
+              <p className="font-bold text-[color:var(--brand-deep)]">
+                {lang === "ar" ? "مجمع باعشن — صبيا" : "Baeshen — Sabya"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {lang === "ar" ? "خدمات الفرع والحجز" : "Branch services & booking"}
+              </p>
+            </Link>
+            <Link
+              to="/doctors"
+              className="rounded-2xl border border-border bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+            >
+              <p className="font-bold text-[color:var(--brand-deep)]">
+                {lang === "ar" ? "دليل الأطباء" : "Doctor directory"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {lang === "ar" ? "ابحث واحجز" : "Search and book"}
+              </p>
+            </Link>
+            <Link
+              to="/telemedicine"
+              className="rounded-2xl border border-border bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+            >
+              <p className="font-bold text-[color:var(--brand-deep)]">
+                {lang === "ar" ? "استشارة عن بُعد" : "Telemedicine"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {lang === "ar" ? "زيارة فيديو" : "Video visit"}
+              </p>
+            </Link>
+            <Link
+              to="/home-care"
+              className="rounded-2xl border border-border bg-card p-4 transition hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-md"
+            >
+              <p className="font-bold text-[color:var(--brand-deep)]">
+                {lang === "ar" ? "الرعاية المنزلية" : "Home care"}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {lang === "ar" ? "زيارة إلى منزلك" : "Care at home"}
+              </p>
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

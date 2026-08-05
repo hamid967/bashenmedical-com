@@ -8,11 +8,15 @@ import {
   useRouter,
 } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { MapPin, Phone, Clock, Siren, Building2, ArrowLeft, CalendarPlus } from "lucide-react";
-import { PageHero } from "@/components/PageShell";
+import { ArrowLeft } from "lucide-react";
 import { BranchBookingForm } from "@/components/BranchBookingForm";
-import { BranchServicesExplorer } from "@/components/BranchServicesExplorer";
-import { getBranchDetail, type PublicBranch } from "@/lib/branches.functions";
+import { BranchPageHero } from "@/components/branch/BranchPageHero";
+import { BranchQuickBar } from "@/components/branch/BranchQuickBar";
+import { BranchServicesGrid } from "@/components/branch/BranchServicesGrid";
+import { BranchDoctorsStrip } from "@/components/branch/BranchDoctorsStrip";
+import { BranchVisitInfo } from "@/components/branch/BranchVisitInfo";
+import { EServicesQuickAccess } from "@/components/home/EServicesQuickAccess";
+import { getBranchDetail } from "@/lib/branches.functions";
 
 const branchQuery = (slug: string) =>
   queryOptions({
@@ -50,6 +54,7 @@ export const Route = createFileRoute("/branches/$slug")({
       b.city_ar,
       "مجمع باعشن الطبي",
       "حجز موعد",
+      "خدمات طبية",
       ...specialties.slice(0, 8).map((s) => s.name_ar),
       ...centers.slice(0, 4).map((c) => c.name_ar),
     ]
@@ -141,40 +146,15 @@ export const Route = createFileRoute("/branches/$slug")({
 
 function BranchDetailPending() {
   return (
-    <div
-      className="container-app py-8 grid gap-6 lg:grid-cols-3"
-      aria-busy="true"
-      aria-label="جاري تحميل بيانات الفرع"
-    >
-      <aside className="lg:col-span-1 space-y-4">
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="aspect-[16/9] bg-muted animate-pulse" />
-          <div className="p-4 space-y-3">
-            <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-2/3 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-1/2 bg-muted rounded animate-pulse" />
-            <div className="h-10 w-full bg-muted rounded animate-pulse mt-2" />
-          </div>
+    <div aria-busy="true" aria-label="جاري تحميل بيانات الفرع">
+      <div className="min-h-[min(78vh,640px)] animate-pulse bg-muted" />
+      <div className="container-app space-y-8 py-10">
+        <div className="h-10 w-full max-w-xl animate-pulse rounded-xl bg-muted" />
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="h-48 animate-pulse rounded-2xl bg-muted" />
+          ))}
         </div>
-      </aside>
-      <div className="lg:col-span-2 space-y-4">
-        <div className="rounded-2xl border border-border bg-card overflow-hidden">
-          <div className="p-4 border-b border-border flex items-center justify-between">
-            <div className="h-5 w-56 bg-muted rounded animate-pulse" />
-            <div className="h-4 w-16 bg-muted rounded animate-pulse" />
-          </div>
-          <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
-            <div className="p-4 space-y-3 border-b lg:border-b-0 lg:border-l border-border">
-              <div className="h-10 w-full bg-muted rounded-lg animate-pulse" />
-              <div className="h-8 w-full bg-muted rounded-lg animate-pulse" />
-              {Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="h-12 w-full bg-muted/70 rounded-lg animate-pulse" />
-              ))}
-            </div>
-            <div className="min-h-[360px] bg-muted animate-pulse" />
-          </div>
-        </div>
-        <div className="h-40 rounded-2xl bg-muted animate-pulse" />
       </div>
     </div>
   );
@@ -186,7 +166,7 @@ function BranchError({ error, reset }: ErrorComponentProps) {
     <div className="container-app py-16 text-center">
       <ErrorComponent error={error} />
       <button
-        className="mt-4 rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm"
+        className="mt-4 rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
         onClick={() => {
           reset();
           router.invalidate();
@@ -212,177 +192,82 @@ function BranchNotFound() {
   );
 }
 
-const DAY_LABELS: Record<string, string> = {
-  sat: "السبت",
-  sun: "الأحد",
-  mon: "الاثنين",
-  tue: "الثلاثاء",
-  wed: "الأربعاء",
-  thu: "الخميس",
-  fri: "الجمعة",
-};
-
-function formatHours(hours: PublicBranch["working_hours"]) {
-  if (!hours || typeof hours !== "object") return [];
-  return Object.entries(hours).map(([k, v]) => ({
-    day: DAY_LABELS[k.toLowerCase()] ?? k,
-    time: String(v),
-  }));
-}
-
 function BranchDetailPage() {
   const { slug } = Route.useParams();
   const { data } = useSuspenseQuery(branchQuery(slug));
   const [preselectedSpecialtyId, setPreselectedSpecialtyId] = useState<string | null>(null);
   const [preselectToken, setPreselectToken] = useState(0);
   if (!data) return null;
-  const { branch: b, centers, specialties } = data;
-  const hours = formatHours(b.working_hours);
+
+  const { branch: b, centers, specialties, doctors } = data;
   const directions =
     b.lat != null && b.lng != null
       ? `https://www.google.com/maps/dir/?api=1&destination=${b.lat},${b.lng}`
       : null;
 
-  const handleBookService = (payload: { specialtyId: string | null; label: string }) => {
-    if (!payload.specialtyId) return;
-    setPreselectedSpecialtyId(payload.specialtyId);
-    setPreselectToken((n: number) => n + 1);
+  const handleBookSpecialty = (specialtyId: string) => {
+    setPreselectedSpecialtyId(specialtyId);
+    setPreselectToken((n) => n + 1);
+    if (typeof document !== "undefined") {
+      document.getElementById("book")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   return (
     <>
-      <PageHero
-        eyebrow={b.city_ar ?? "فرع"}
-        title={b.name_ar}
-        subtitle={b.description_ar ?? "معلومات كاملة عن الفرع والخدمات المتوفرة."}
+      <BranchPageHero
+        branch={b}
+        specialtyCount={specialties.length}
+        doctorCount={doctors.length}
+        directionsUrl={directions}
       />
+      <BranchQuickBar branch={b} directionsUrl={directions} />
 
-      <section className="container-app py-8 grid gap-6 lg:grid-cols-3">
-        {/* Sidebar: contact + actions */}
-        <aside className="lg:col-span-1 space-y-4">
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
-            <div className="aspect-[16/9] bg-gradient-to-br from-primary/20 to-accent/20">
-              {b.hero_image_url ? (
-                <img
-                  src={b.hero_image_url}
-                  alt={b.name_ar}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full grid place-items-center">
-                  <Building2 className="h-14 w-14 text-primary/60" />
-                </div>
-              )}
-            </div>
-            <div className="p-4 space-y-3 text-sm">
-              {b.address_ar && (
-                <div className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                  <span>{b.address_ar}</span>
-                </div>
-              )}
-              {b.phone && (
-                <div className="flex items-start gap-2">
-                  <Phone className="h-4 w-4 mt-0.5 text-primary shrink-0" />
-                  <a href={`tel:${b.phone}`} className="hover:text-primary" dir="ltr">
-                    {b.phone}
-                  </a>
-                </div>
-              )}
-              {b.emergency_phone && (
-                <div className="flex items-start gap-2">
-                  <Siren className="h-4 w-4 mt-0.5 text-destructive shrink-0" />
-                  <a
-                    href={`tel:${b.emergency_phone}`}
-                    className="text-destructive font-semibold"
-                    dir="ltr"
-                  >
-                    طوارئ: {b.emergency_phone}
-                  </a>
-                </div>
-              )}
-            </div>
+      {/* Patient e-services strip — same pattern as hospital hubs */}
+      <div className="border-b border-border bg-[color:var(--brand-mint)]/40 py-8">
+        <EServicesQuickAccess className="container-app" />
+      </div>
 
-            <div className="p-4 pt-0 flex flex-col gap-2">
-              <a
-                href="#book"
-                className="inline-flex items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 py-2.5 text-sm font-semibold hover:opacity-95"
-              >
-                <CalendarPlus className="h-4 w-4" /> احجز في هذا الفرع
-              </a>
-              {b.phone && (
-                <a
-                  href={`tel:${b.phone}`}
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-primary text-primary px-4 py-2.5 text-sm font-semibold hover:bg-primary/5"
-                >
-                  <Phone className="h-4 w-4" /> اتصل بالفرع
-                </a>
-              )}
-              {directions && (
-                <a
-                  href={directions}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center justify-center gap-2 rounded-md border border-border px-4 py-2.5 text-sm hover:bg-muted"
-                >
-                  <MapPin className="h-4 w-4" /> الاتجاهات على الخريطة
-                </a>
-              )}
-            </div>
-          </div>
+      <div className="container-app space-y-16 py-12 md:space-y-20 md:py-16">
+        <BranchServicesGrid
+          branchId={b.id}
+          specialties={specialties}
+          centers={centers}
+          onBookSpecialty={handleBookSpecialty}
+        />
 
-          {hours.length > 0 && (
-            <div className="rounded-2xl border border-border bg-card p-4">
-              <h3 className="flex items-center gap-2 text-sm font-bold mb-3">
-                <Clock className="h-4 w-4 text-primary" /> ساعات العمل
-              </h3>
-              <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-sm">
-                {hours.map((h) => (
-                  <div key={h.day} className="flex justify-between gap-2">
-                    <dt className="text-muted-foreground">{h.day}</dt>
-                    <dd dir="ltr">{h.time}</dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
-          )}
-        </aside>
+        <BranchDoctorsStrip branchId={b.id} doctors={doctors} />
 
-        {/* Main: services explorer with filter + map */}
-        <div className="lg:col-span-2 space-y-6">
-          {specialties.length === 0 && centers.length === 0 ? (
-            <div className="rounded-2xl border border-border bg-card p-8 text-center text-muted-foreground">
-              لم يتم إضافة خدمات أو مراكز تميز لهذا الفرع بعد.
-            </div>
-          ) : (
-            <BranchServicesExplorer
-              branch={b}
-              specialties={specialties}
-              centers={centers}
-              onBookService={handleBookService}
-            />
-          )}
+        <BranchVisitInfo branch={b} directionsUrl={directions} />
 
-          <section id="book">
-            <BranchBookingForm
-              branchId={b.id}
-              branchNameAr={b.name_ar}
-              specialties={specialties}
-              preselectedSpecialtyId={preselectedSpecialtyId}
-              preselectToken={preselectToken}
-            />
-          </section>
+        <section id="book" className="scroll-mt-24">
+          <header className="mb-6 max-w-2xl">
+            <p className="text-xs font-bold tracking-wide text-[color:var(--brand-gold)]">الحجز</p>
+            <h2 className="mt-2 text-2xl font-bold text-[color:var(--brand-deep)] md:text-3xl">
+              احجز موعدك في {b.name_ar}
+            </h2>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground md:text-base">
+              أكمل بيانات الموعد خلال دقائق — الفرع محدد مسبقًا.
+            </p>
+          </header>
+          <BranchBookingForm
+            branchId={b.id}
+            branchNameAr={b.name_ar}
+            specialties={specialties}
+            preselectedSpecialtyId={preselectedSpecialtyId}
+            preselectToken={preselectToken}
+          />
+        </section>
 
-          <div>
-            <Link
-              to="/branches"
-              className="inline-flex items-center gap-2 text-sm text-primary hover:underline"
-            >
-              <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> جميع الفروع
-            </Link>
-          </div>
+        <div>
+          <Link
+            to="/branches"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4 rtl:rotate-180" /> جميع الفروع
+          </Link>
         </div>
-      </section>
+      </div>
     </>
   );
 }
