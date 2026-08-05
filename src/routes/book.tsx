@@ -4,6 +4,9 @@
  *   4. Doctor            5. Date         6. Time
  *   7. Patient info      8. Review       → submits then navigates to /booking-confirmation
  *
+ * Auth: guests are redirected to /auth/login?next=/book — booking requires a
+ * registered platform account. APIs also require a Bearer session token.
+ *
  * Uses existing public APIs:
  *   - list_public_branches / specialties / list_public_doctors  (Supabase RPC)
  *   - GET  /api/public/book/availability
@@ -16,7 +19,7 @@
  *
  * Wizard step components live in src/components/booking/*.
  */
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate, redirect } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useI18n } from "@/lib/i18n";
@@ -115,16 +118,28 @@ const search = z.object({
 
 export const Route = createFileRoute("/book")({
   validateSearch: search,
+  ssr: false,
+  beforeLoad: async ({ location }) => {
+    const { data, error } = await supabase.auth.getUser();
+    if (error || !data.user) {
+      const next = `${location.pathname}${location.searchStr || ""}`;
+      throw redirect({
+        to: "/auth/login",
+        search: { next },
+      });
+    }
+    return { user: data.user };
+  },
   head: () => ({
     meta: [
       ...bmcOgImageMeta(),
       { title: "احجز موعدًا | مجمع باعشن الطبي" },
       {
         name: "description",
-        content: "احجز موعدك مع أطبائنا خطوة بخطوة: اختر الفرع، التخصص، الطبيب، ثم الموعد المناسب.",
+        content: "احجز موعدك بعد تسجيل الدخول: اختر الفرع، التخصص، الطبيب، ثم الموعد المناسب.",
       },
       { property: "og:title", content: "احجز موعدًا — مجمع باعشن الطبي" },
-      { property: "og:description", content: "نظام حجز سريع وسهل عبر خطوات واضحة." },
+      { property: "og:description", content: "الحجز متاح لأعضاء المنصة المسجّلين فقط." },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -784,6 +799,16 @@ function BookPage() {
       goto(SUCCESS_STEP);
     } else {
       const isSlotTaken = res.kind === "conflict" || res.code === "SLOT_TAKEN";
+      if (res.kind === "auth") {
+        toast.error(res.message);
+        navigate({
+          to: "/auth/login",
+          search: {
+            next: `${window.location.pathname}${window.location.search}`,
+          },
+        });
+        return;
+      }
       const isInvalidIdemKey = res.code === "INVALID_IDEMPOTENCY_KEY";
       if (isSlotTaken) {
         const msg = t("page.slotTakenClear");

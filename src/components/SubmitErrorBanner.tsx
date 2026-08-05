@@ -46,6 +46,11 @@ const FALLBACK_META: Record<
     titleEn: "Server error",
     icon: <ServerCrash className="h-5 w-5" />,
   },
+  auth: {
+    titleAr: "يلزم تسجيل الدخول",
+    titleEn: "Sign-in required",
+    icon: <ShieldAlert className="h-5 w-5" />,
+  },
   unknown: {
     titleAr: "حدث خطأ غير متوقع",
     titleEn: "Unexpected error",

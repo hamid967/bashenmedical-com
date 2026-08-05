@@ -74,6 +74,7 @@ function LoginPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nextParam = sanitizeNext(search.next);
+  const bookingIntent = !!nextParam && (nextParam === "/book" || nextParam.startsWith("/book?"));
 
   // If already signed in, bounce out immediately. Honor a stashed post-SSO next.
   useEffect(() => {
@@ -163,6 +164,21 @@ function LoginPage() {
         <CardDescription>مجمع باعشن الطبي — دخول موحّد آمن</CardDescription>
       </CardHeader>
       <CardContent>
+        {bookingIntent && (
+          <Alert className="mb-4 border-[color:var(--brand-gold-soft)] bg-[color:var(--brand-mist)]">
+            <AlertDescription className="text-[color:var(--brand-deep)] text-sm leading-6">
+              حجز المواعيد متاح لأعضاء المنصة فقط. سجّل الدخول أو{" "}
+              <Link
+                to="/auth/register"
+                search={{ next: nextParam ?? "/book" }}
+                className="font-semibold underline"
+              >
+                أنشئ حسابًا
+              </Link>{" "}
+              للمتابعة إلى صفحة الحجز.
+            </AlertDescription>
+          </Alert>
+        )}
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>{error}</AlertDescription>
@@ -275,7 +291,11 @@ function LoginPage() {
 
         <div className="mt-6 pt-4 border-t text-center text-sm text-muted-foreground">
           مستخدم جديد؟{" "}
-          <Link to="/auth/register" className="text-primary underline">
+          <Link
+            to="/auth/register"
+            search={nextParam ? { next: nextParam } : undefined}
+            className="text-primary underline"
+          >
             إنشاء حساب
           </Link>
         </div>

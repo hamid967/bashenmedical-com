@@ -18,8 +18,9 @@
  *   - DB / RLS    → 400 { ok:false, kind:'db', message } (friendlyInsertError)
  *   - Success     → 200 { ok:true, reference:'BMC-YYYYMMDD-XXXX' | null }
  *
- * The RPC uses SECURITY DEFINER; the anon publishable key is enough to call
- * it. `supabaseAdmin` is only used for the pre-flight fast-path conflict
+ * The RPC uses SECURITY DEFINER. Callers must be authenticated (Bearer
+ * access token); `patient_id` is taken from the session, never from the body.
+ * `supabaseAdmin` is only used for the pre-flight fast-path conflict
  * hint so the user sees a friendly 409 before hitting the RPC.
  */
 import { createFileRoute } from "@tanstack/react-router";
@@ -27,6 +28,7 @@ import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { friendlyInsertError, FRIENDLY_INSERT_MESSAGES } from "@/lib/insert-errors";
+import { requireBearerUser } from "@/lib/auth/require-bearer.server";
 import {
   NAME_MIN,
   NAME_MAX,
@@ -175,6 +177,17 @@ export const Route = createFileRoute("/api/public/book/create")({
               `srv-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`);
         const respond = (status: number, body: Record<string, unknown>) =>
           json(status, body, { "X-Correlation-Id": correlationId });
+
+        const auth = await requireBearerUser(request);
+        if (!auth.ok) {
+          return respond(auth.status, {
+            ok: false,
+            kind: "auth",
+            code: auth.code,
+            message: auth.message,
+          });
+        }
+        const { userId } = auth.user;
 
         let body: unknown;
         try {
@@ -408,6 +421,21 @@ export const Route = createFileRoute("/api/public/book/create")({
         const cleanEmail = (parsed.data.patient_email ?? "").trim().toLowerCase() || null;
         const insurancePatch = await buildInsurancePatch(supa, parsed.data);
 
+        // Link to the authenticated member's patient chart when one exists.
+        // `appointments.patient_id` references `patients.id` (not auth.users).
+        let patientChartId: string | null = null;
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data: chart } = await supabaseAdmin
+            .from("patients")
+            .select("id")
+            .eq("profile_id", userId)
+            .maybeSingle();
+          patientChartId = chart?.id ?? null;
+        } catch {
+          /* optional link — booking still proceeds for authenticated users */
+        }
+
         const payload: Record<string, unknown> = {
           patient_name: parsed.data.patient_name,
           patient_phone: parsed.data.patient_phone,
@@ -423,6 +451,7 @@ export const Route = createFileRoute("/api/public/book/create")({
           reminder_24h: parsed.data.reminder_24h,
           reminder_2h: parsed.data.reminder_2h,
           idempotency_key: idempotencyKey,
+          patient_id: patientChartId,
           ...insurancePatch,
         };
 

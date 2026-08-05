@@ -21,6 +21,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { getRequestIP, getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
+import { requireBearerUser } from "@/lib/auth/require-bearer.server";
 
 const HOLD_MINUTES = 5;
 
@@ -118,6 +119,16 @@ export const Route = createFileRoute("/api/public/book/hold")({
   server: {
     handlers: {
       POST: async ({ request }) => {
+        const auth = await requireBearerUser(request);
+        if (!auth.ok) {
+          return json(auth.status, {
+            ok: false,
+            kind: "auth",
+            code: auth.code,
+            message: auth.message,
+          });
+        }
+
         let body: unknown;
         try {
           body = await request.json();
@@ -230,6 +241,16 @@ export const Route = createFileRoute("/api/public/book/hold")({
       },
 
       DELETE: async ({ request }) => {
+        const auth = await requireBearerUser(request);
+        if (!auth.ok) {
+          return json(auth.status, {
+            ok: false,
+            kind: "auth",
+            code: auth.code,
+            message: auth.message,
+          });
+        }
+
         let body: unknown;
         try {
           body = await request.json();

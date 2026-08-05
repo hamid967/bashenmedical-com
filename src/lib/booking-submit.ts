@@ -32,7 +32,15 @@ export type BookingSubmitPayload = {
 };
 
 export type BookingSubmitKind =
-  "success" | "validation" | "db" | "conflict" | "network" | "timeout" | "server" | "unknown";
+  | "success"
+  | "validation"
+  | "db"
+  | "conflict"
+  | "network"
+  | "timeout"
+  | "server"
+  | "auth"
+  | "unknown";
 
 export type BookingSubmitResult =
   | { ok: true; kind: "success"; reference: string | null }
@@ -53,6 +61,7 @@ const FALLBACK_MESSAGES: Record<Exclude<BookingSubmitKind, "success">, string> =
   network: "تعذّر الاتصال بالخادم. تحقّق من اتصال الإنترنت وحاول مرة أخرى.",
   timeout: "استغرقت العملية وقتًا أطول من المعتاد. حاول مرة أخرى.",
   server: "حدث خطأ مؤقت في الخادم. حاول مرة أخرى بعد قليل.",
+  auth: "يجب تسجيل الدخول أو إنشاء حساب لحجز موعد.",
   unknown: "تعذّر إرسال الطلب. حاول مرة أخرى.",
 };
 
@@ -152,15 +161,26 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
   // attempt series (fast-path replay, RPC call, RPC replay, conflict).
   const correlationId = getOrCreateCorrelationId();
 
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "Idempotency-Key": idempotencyKey,
+    "X-Correlation-Id": correlationId,
+  };
+  try {
+    const { data } = await (
+      await import("@/integrations/supabase/client")
+    ).supabase.auth.getSession();
+    const token = data.session?.access_token;
+    if (token) headers.Authorization = `Bearer ${token}`;
+  } catch {
+    /* proceed — server will reject with AUTH_REQUIRED */
+  }
+
   let res: Response;
   try {
     res = await fetch("/api/public/book/create", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Idempotency-Key": idempotencyKey,
-        "X-Correlation-Id": correlationId,
-      },
+      headers,
       body: JSON.stringify(payload),
       signal: controller.signal,
     });
@@ -196,6 +216,16 @@ export async function submitBooking(payload: BookingSubmitPayload): Promise<Book
     // Success — retire the current key so the next booking gets a fresh one.
     clearBookingIdempotencyKey();
     return { ok: true, kind: "success", reference: body.reference ?? null };
+  }
+
+  if (res.status === 401 || body.kind === "auth" || body.code === "AUTH_REQUIRED") {
+    clearBookingIdempotencyKey();
+    return {
+      ok: false,
+      kind: "auth",
+      message: body.message?.trim() || FALLBACK_MESSAGES.auth,
+      code: body.code ?? "AUTH_REQUIRED",
+    };
   }
 
   // A 409 with code=SLOT_TAKEN is the canonical slot-clash signal from the
