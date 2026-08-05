@@ -21,6 +21,16 @@ export const Route = createFileRoute("/_authenticated/owner/services/$id")({
   component: ServiceEditor,
 });
 
+const CATEGORIES = [
+  { value: "", label: "— بدون (استفسار فقط) —" },
+  { value: "appointments", label: "المواعيد" },
+  { value: "records", label: "الملفات الطبية" },
+  { value: "pharmacy", label: "الصيدلية" },
+  { value: "care", label: "الرعاية" },
+  { value: "billing", label: "الفواتير والتأمين" },
+  { value: "support", label: "الدعم" },
+] as const;
+
 type Form = {
   slug: string;
   name_ar: string;
@@ -31,6 +41,10 @@ type Form = {
   price_from: string;
   duration_min: string;
   image_url: string;
+  href: string;
+  category: string;
+  requires_auth: boolean;
+  show_in_portal: boolean;
   display_order: number;
   is_active: boolean;
 };
@@ -44,6 +58,10 @@ const EMPTY: Form = {
   price_from: "",
   duration_min: "",
   image_url: "",
+  href: "",
+  category: "",
+  requires_auth: false,
+  show_in_portal: false,
   display_order: 0,
   is_active: true,
 };
@@ -75,6 +93,10 @@ function ServiceEditor() {
           price_from: row.price_from != null ? String(row.price_from) : "",
           duration_min: row.duration_min != null ? String(row.duration_min) : "",
           image_url: row.image_url ?? "",
+          href: row.href ?? "",
+          category: row.category ?? "",
+          requires_auth: !!row.requires_auth,
+          show_in_portal: !!row.show_in_portal,
           display_order: row.display_order ?? 0,
           is_active: !!row.is_active,
         });
@@ -103,6 +125,10 @@ function ServiceEditor() {
         price_from: form.price_from ? Number(form.price_from) : null,
         duration_min: form.duration_min ? Number(form.duration_min) : null,
         image_url: form.image_url || null,
+        href: form.href || null,
+        category: form.category || null,
+        requires_auth: form.requires_auth,
+        show_in_portal: form.show_in_portal,
         display_order: Number(form.display_order) || 0,
         is_active: form.is_active,
       } as any;
@@ -154,7 +180,7 @@ function ServiceEditor() {
             dir="ltr"
             value={form.slug}
             onChange={(e) => up("slug", e.target.value.toLowerCase())}
-            placeholder="dental-cleaning"
+            placeholder="esvc-book"
           />
         </div>
         <div>
@@ -168,7 +194,7 @@ function ServiceEditor() {
         <div className="md:col-span-2">
           <Label>الوصف (عربي)</Label>
           <Textarea
-            rows={4}
+            rows={3}
             value={form.description_ar}
             onChange={(e) => up("description_ar", e.target.value)}
           />
@@ -177,11 +203,52 @@ function ServiceEditor() {
           <Label>Description (EN)</Label>
           <Textarea
             dir="ltr"
-            rows={4}
+            rows={3}
             value={form.description_en}
             onChange={(e) => up("description_en", e.target.value)}
           />
         </div>
+
+        <div className="md:col-span-2 rounded-lg bg-slate-50 border p-4 space-y-3">
+          <div className="text-sm font-semibold text-slate-800">عرض في بوابة الخدمات (/services)</div>
+          <div className="flex items-center justify-between">
+            <Label>تظهر في البوابة</Label>
+            <Switch
+              checked={form.show_in_portal}
+              onCheckedChange={(v) => up("show_in_portal", v)}
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label>الرابط (مسار داخلي)</Label>
+              <Input
+                dir="ltr"
+                value={form.href}
+                onChange={(e) => up("href", e.target.value)}
+                placeholder="/book"
+              />
+            </div>
+            <div>
+              <Label>التصنيف</Label>
+              <select
+                className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+                value={form.category}
+                onChange={(e) => up("category", e.target.value)}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value || "none"} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="flex items-center justify-between">
+            <Label>تتطلب تسجيل دخول</Label>
+            <Switch checked={form.requires_auth} onCheckedChange={(v) => up("requires_auth", v)} />
+          </div>
+        </div>
+
         <div>
           <Label>السعر من (ر.س)</Label>
           <Input
@@ -229,7 +296,7 @@ function ServiceEditor() {
           />
         </div>
         <div className="md:col-span-2 flex items-center justify-between pt-2 border-t">
-          <Label>مفعّلة (تظهر في الموقع)</Label>
+          <Label>مفعّلة</Label>
           <Switch checked={form.is_active} onCheckedChange={(v) => up("is_active", v)} />
         </div>
       </div>

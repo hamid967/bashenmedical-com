@@ -187,6 +187,8 @@ import { Route as AuthenticatedMyAiHistoryRouteImport } from './routes/_authenti
 import { Route as AuthenticatedOwnerIndexRouteImport } from './routes/_authenticated/owner.index'
 import { Route as AuthenticatedOwnerAccountsRouteImport } from './routes/_authenticated/owner.accounts'
 import { Route as AuthenticatedOwnerAuditRouteImport } from './routes/_authenticated/owner.audit'
+import { Route as AuthenticatedOwnerControlRouteImport } from './routes/_authenticated/owner.control'
+import { Route as AuthenticatedOwnerMediaRouteImport } from './routes/_authenticated/owner.media'
 import { Route as AuthenticatedOwnerSecurityRouteImport } from './routes/_authenticated/owner.security'
 import { Route as AuthenticatedOwnerSettingsRouteImport } from './routes/_authenticated/owner.settings'
 import { Route as AuthenticatedPatientIndexRouteImport } from './routes/_authenticated/patient.index'
@@ -262,10 +264,14 @@ import { Route as AuthenticatedAdminSuperPermissionsRouteImport } from './routes
 import { Route as AuthenticatedAdminUsersIdRouteImport } from './routes/_authenticated/admin.users.$id'
 import { Route as AuthenticatedAdminWhatsappInquiryIdRouteImport } from './routes/_authenticated/admin.whatsapp.$inquiryId'
 import { Route as AuthenticatedOrdersUnifiedKindIdRouteImport } from './routes/_authenticated/orders-unified.$kind.$id'
+import { Route as AuthenticatedOwnerExcellenceIndexRouteImport } from './routes/_authenticated/owner.excellence.index'
+import { Route as AuthenticatedOwnerExcellenceIdRouteImport } from './routes/_authenticated/owner.excellence.$id'
 import { Route as AuthenticatedOwnerPagesIndexRouteImport } from './routes/_authenticated/owner.pages.index'
 import { Route as AuthenticatedOwnerPagesIdRouteImport } from './routes/_authenticated/owner.pages.$id'
 import { Route as AuthenticatedOwnerServicesIndexRouteImport } from './routes/_authenticated/owner.services.index'
 import { Route as AuthenticatedOwnerServicesIdRouteImport } from './routes/_authenticated/owner.services.$id'
+import { Route as AuthenticatedOwnerSpecialtiesIndexRouteImport } from './routes/_authenticated/owner.specialties.index'
+import { Route as AuthenticatedOwnerSpecialtiesIdRouteImport } from './routes/_authenticated/owner.specialties.$id'
 import { Route as AuthenticatedPortalReportsDownloadsRouteImport } from './routes/_authenticated/portal.reports.downloads'
 import { Route as ApiPublicAiStreamMetricsRouteImport } from './routes/api/public/ai/stream-metrics'
 import { Route as ApiPublicAppointmentsVerifyRouteImport } from './routes/api/public/appointments/verify'
@@ -1281,6 +1287,17 @@ const AuthenticatedOwnerAuditRoute = AuthenticatedOwnerAuditRouteImport.update({
   path: '/audit',
   getParentRoute: () => AuthenticatedOwnerRoute,
 } as any)
+const AuthenticatedOwnerControlRoute =
+  AuthenticatedOwnerControlRouteImport.update({
+    id: '/control',
+    path: '/control',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerMediaRoute = AuthenticatedOwnerMediaRouteImport.update({
+  id: '/media',
+  path: '/media',
+  getParentRoute: () => AuthenticatedOwnerRoute,
+} as any)
 const AuthenticatedOwnerSecurityRoute =
   AuthenticatedOwnerSecurityRouteImport.update({
     id: '/security',
@@ -1723,6 +1740,18 @@ const AuthenticatedOrdersUnifiedKindIdRoute =
     path: '/$kind/$id',
     getParentRoute: () => AuthenticatedOrdersUnifiedRoute,
   } as any)
+const AuthenticatedOwnerExcellenceIndexRoute =
+  AuthenticatedOwnerExcellenceIndexRouteImport.update({
+    id: '/excellence/',
+    path: '/excellence/',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerExcellenceIdRoute =
+  AuthenticatedOwnerExcellenceIdRouteImport.update({
+    id: '/excellence/$id',
+    path: '/excellence/$id',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
 const AuthenticatedOwnerPagesIndexRoute =
   AuthenticatedOwnerPagesIndexRouteImport.update({
     id: '/pages/',
@@ -1745,6 +1774,18 @@ const AuthenticatedOwnerServicesIdRoute =
   AuthenticatedOwnerServicesIdRouteImport.update({
     id: '/services/$id',
     path: '/services/$id',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerSpecialtiesIndexRoute =
+  AuthenticatedOwnerSpecialtiesIndexRouteImport.update({
+    id: '/specialties/',
+    path: '/specialties/',
+    getParentRoute: () => AuthenticatedOwnerRoute,
+  } as any)
+const AuthenticatedOwnerSpecialtiesIdRoute =
+  AuthenticatedOwnerSpecialtiesIdRouteImport.update({
+    id: '/specialties/$id',
+    path: '/specialties/$id',
     getParentRoute: () => AuthenticatedOwnerRoute,
   } as any)
 const AuthenticatedPortalReportsDownloadsRoute =
@@ -2169,6 +2210,8 @@ export interface FileRoutesByFullPath {
   '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
+  '/owner/control': typeof AuthenticatedOwnerControlRoute
+  '/owner/media': typeof AuthenticatedOwnerMediaRoute
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
@@ -2247,8 +2290,10 @@ export interface FileRoutesByFullPath {
   '/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
   '/admin/whatsapp/$inquiryId': typeof AuthenticatedAdminWhatsappInquiryIdRoute
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/owner/excellence/$id': typeof AuthenticatedOwnerExcellenceIdRoute
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
+  '/owner/specialties/$id': typeof AuthenticatedOwnerSpecialtiesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/appointments/verify': typeof ApiPublicAppointmentsVerifyRoute
@@ -2286,8 +2331,10 @@ export interface FileRoutesByFullPath {
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/api/public/warehouse/kpis': typeof ApiPublicWarehouseKpisRoute
   '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
+  '/owner/excellence/': typeof AuthenticatedOwnerExcellenceIndexRoute
   '/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
+  '/owner/specialties/': typeof AuthenticatedOwnerSpecialtiesIndexRoute
   '/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
@@ -2463,6 +2510,8 @@ export interface FileRoutesByTo {
   '/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/owner/audit': typeof AuthenticatedOwnerAuditRoute
+  '/owner/control': typeof AuthenticatedOwnerControlRoute
+  '/owner/media': typeof AuthenticatedOwnerMediaRoute
   '/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
@@ -2541,8 +2590,10 @@ export interface FileRoutesByTo {
   '/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
   '/admin/whatsapp/$inquiryId': typeof AuthenticatedAdminWhatsappInquiryIdRoute
   '/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/owner/excellence/$id': typeof AuthenticatedOwnerExcellenceIdRoute
   '/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
+  '/owner/specialties/$id': typeof AuthenticatedOwnerSpecialtiesIdRoute
   '/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/appointments/verify': typeof ApiPublicAppointmentsVerifyRoute
@@ -2580,8 +2631,10 @@ export interface FileRoutesByTo {
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/api/public/warehouse/kpis': typeof ApiPublicWarehouseKpisRoute
   '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
+  '/owner/excellence': typeof AuthenticatedOwnerExcellenceIndexRoute
   '/owner/pages': typeof AuthenticatedOwnerPagesIndexRoute
   '/owner/services': typeof AuthenticatedOwnerServicesIndexRoute
+  '/owner/specialties': typeof AuthenticatedOwnerSpecialtiesIndexRoute
   '/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
   '/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
@@ -2766,6 +2819,8 @@ export interface FileRoutesById {
   '/_authenticated/my/ai-history': typeof AuthenticatedMyAiHistoryRoute
   '/_authenticated/owner/accounts': typeof AuthenticatedOwnerAccountsRoute
   '/_authenticated/owner/audit': typeof AuthenticatedOwnerAuditRoute
+  '/_authenticated/owner/control': typeof AuthenticatedOwnerControlRoute
+  '/_authenticated/owner/media': typeof AuthenticatedOwnerMediaRoute
   '/_authenticated/owner/security': typeof AuthenticatedOwnerSecurityRoute
   '/_authenticated/owner/settings': typeof AuthenticatedOwnerSettingsRoute
   '/_authenticated/patient/appointments': typeof AuthenticatedPatientAppointmentsRoute
@@ -2844,8 +2899,10 @@ export interface FileRoutesById {
   '/_authenticated/admin/users/$id': typeof AuthenticatedAdminUsersIdRoute
   '/_authenticated/admin/whatsapp/$inquiryId': typeof AuthenticatedAdminWhatsappInquiryIdRoute
   '/_authenticated/orders-unified/$kind/$id': typeof AuthenticatedOrdersUnifiedKindIdRoute
+  '/_authenticated/owner/excellence/$id': typeof AuthenticatedOwnerExcellenceIdRoute
   '/_authenticated/owner/pages/$id': typeof AuthenticatedOwnerPagesIdRoute
   '/_authenticated/owner/services/$id': typeof AuthenticatedOwnerServicesIdRoute
+  '/_authenticated/owner/specialties/$id': typeof AuthenticatedOwnerSpecialtiesIdRoute
   '/_authenticated/portal/reports/downloads': typeof AuthenticatedPortalReportsDownloadsRoute
   '/api/public/ai/stream-metrics': typeof ApiPublicAiStreamMetricsRoute
   '/api/public/appointments/verify': typeof ApiPublicAppointmentsVerifyRoute
@@ -2883,8 +2940,10 @@ export interface FileRoutesById {
   '/api/public/reservations/session-from-auth': typeof ApiPublicReservationsSessionFromAuthRoute
   '/api/public/warehouse/kpis': typeof ApiPublicWarehouseKpisRoute
   '/api/public/webhooks/payment': typeof ApiPublicWebhooksPaymentRoute
+  '/_authenticated/owner/excellence/': typeof AuthenticatedOwnerExcellenceIndexRoute
   '/_authenticated/owner/pages/': typeof AuthenticatedOwnerPagesIndexRoute
   '/_authenticated/owner/services/': typeof AuthenticatedOwnerServicesIndexRoute
+  '/_authenticated/owner/specialties/': typeof AuthenticatedOwnerSpecialtiesIndexRoute
   '/_authenticated/admin/cms/$kind/$id': typeof AuthenticatedAdminCmsKindIdRoute
   '/_authenticated/admin/super/permissions/audit': typeof AuthenticatedAdminSuperPermissionsAuditRoute
   '/_authenticated/portal/orders/$kind/$id': typeof AuthenticatedPortalOrdersKindIdRoute
@@ -3069,6 +3128,8 @@ export interface FileRouteTypes {
     | '/my/ai-history'
     | '/owner/accounts'
     | '/owner/audit'
+    | '/owner/control'
+    | '/owner/media'
     | '/owner/security'
     | '/owner/settings'
     | '/patient/appointments'
@@ -3147,8 +3208,10 @@ export interface FileRouteTypes {
     | '/admin/users/$id'
     | '/admin/whatsapp/$inquiryId'
     | '/orders-unified/$kind/$id'
+    | '/owner/excellence/$id'
     | '/owner/pages/$id'
     | '/owner/services/$id'
+    | '/owner/specialties/$id'
     | '/portal/reports/downloads'
     | '/api/public/ai/stream-metrics'
     | '/api/public/appointments/verify'
@@ -3186,8 +3249,10 @@ export interface FileRouteTypes {
     | '/api/public/reservations/session-from-auth'
     | '/api/public/warehouse/kpis'
     | '/api/public/webhooks/payment'
+    | '/owner/excellence/'
     | '/owner/pages/'
     | '/owner/services/'
+    | '/owner/specialties/'
     | '/admin/cms/$kind/$id'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
@@ -3363,6 +3428,8 @@ export interface FileRouteTypes {
     | '/my/ai-history'
     | '/owner/accounts'
     | '/owner/audit'
+    | '/owner/control'
+    | '/owner/media'
     | '/owner/security'
     | '/owner/settings'
     | '/patient/appointments'
@@ -3441,8 +3508,10 @@ export interface FileRouteTypes {
     | '/admin/users/$id'
     | '/admin/whatsapp/$inquiryId'
     | '/orders-unified/$kind/$id'
+    | '/owner/excellence/$id'
     | '/owner/pages/$id'
     | '/owner/services/$id'
+    | '/owner/specialties/$id'
     | '/portal/reports/downloads'
     | '/api/public/ai/stream-metrics'
     | '/api/public/appointments/verify'
@@ -3480,8 +3549,10 @@ export interface FileRouteTypes {
     | '/api/public/reservations/session-from-auth'
     | '/api/public/warehouse/kpis'
     | '/api/public/webhooks/payment'
+    | '/owner/excellence'
     | '/owner/pages'
     | '/owner/services'
+    | '/owner/specialties'
     | '/admin/cms/$kind/$id'
     | '/admin/super/permissions/audit'
     | '/portal/orders/$kind/$id'
@@ -3665,6 +3736,8 @@ export interface FileRouteTypes {
     | '/_authenticated/my/ai-history'
     | '/_authenticated/owner/accounts'
     | '/_authenticated/owner/audit'
+    | '/_authenticated/owner/control'
+    | '/_authenticated/owner/media'
     | '/_authenticated/owner/security'
     | '/_authenticated/owner/settings'
     | '/_authenticated/patient/appointments'
@@ -3743,8 +3816,10 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/users/$id'
     | '/_authenticated/admin/whatsapp/$inquiryId'
     | '/_authenticated/orders-unified/$kind/$id'
+    | '/_authenticated/owner/excellence/$id'
     | '/_authenticated/owner/pages/$id'
     | '/_authenticated/owner/services/$id'
+    | '/_authenticated/owner/specialties/$id'
     | '/_authenticated/portal/reports/downloads'
     | '/api/public/ai/stream-metrics'
     | '/api/public/appointments/verify'
@@ -3782,8 +3857,10 @@ export interface FileRouteTypes {
     | '/api/public/reservations/session-from-auth'
     | '/api/public/warehouse/kpis'
     | '/api/public/webhooks/payment'
+    | '/_authenticated/owner/excellence/'
     | '/_authenticated/owner/pages/'
     | '/_authenticated/owner/services/'
+    | '/_authenticated/owner/specialties/'
     | '/_authenticated/admin/cms/$kind/$id'
     | '/_authenticated/admin/super/permissions/audit'
     | '/_authenticated/portal/orders/$kind/$id'
@@ -5144,6 +5221,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOwnerAuditRouteImport
       parentRoute: typeof AuthenticatedOwnerRoute
     }
+    '/_authenticated/owner/control': {
+      id: '/_authenticated/owner/control'
+      path: '/control'
+      fullPath: '/owner/control'
+      preLoaderRoute: typeof AuthenticatedOwnerControlRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/media': {
+      id: '/_authenticated/owner/media'
+      path: '/media'
+      fullPath: '/owner/media'
+      preLoaderRoute: typeof AuthenticatedOwnerMediaRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
     '/_authenticated/owner/security': {
       id: '/_authenticated/owner/security'
       path: '/security'
@@ -5669,6 +5760,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrdersUnifiedKindIdRouteImport
       parentRoute: typeof AuthenticatedOrdersUnifiedRoute
     }
+    '/_authenticated/owner/excellence/': {
+      id: '/_authenticated/owner/excellence/'
+      path: '/excellence'
+      fullPath: '/owner/excellence/'
+      preLoaderRoute: typeof AuthenticatedOwnerExcellenceIndexRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/excellence/$id': {
+      id: '/_authenticated/owner/excellence/$id'
+      path: '/excellence/$id'
+      fullPath: '/owner/excellence/$id'
+      preLoaderRoute: typeof AuthenticatedOwnerExcellenceIdRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
     '/_authenticated/owner/pages/': {
       id: '/_authenticated/owner/pages/'
       path: '/pages'
@@ -5695,6 +5800,20 @@ declare module '@tanstack/react-router' {
       path: '/services/$id'
       fullPath: '/owner/services/$id'
       preLoaderRoute: typeof AuthenticatedOwnerServicesIdRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/specialties/': {
+      id: '/_authenticated/owner/specialties/'
+      path: '/specialties'
+      fullPath: '/owner/specialties/'
+      preLoaderRoute: typeof AuthenticatedOwnerSpecialtiesIndexRouteImport
+      parentRoute: typeof AuthenticatedOwnerRoute
+    }
+    '/_authenticated/owner/specialties/$id': {
+      id: '/_authenticated/owner/specialties/$id'
+      path: '/specialties/$id'
+      fullPath: '/owner/specialties/$id'
+      preLoaderRoute: typeof AuthenticatedOwnerSpecialtiesIdRouteImport
       parentRoute: typeof AuthenticatedOwnerRoute
     }
     '/_authenticated/portal/reports/downloads': {
@@ -6442,25 +6561,39 @@ const AuthenticatedOrdersUnifiedRouteWithChildren =
 interface AuthenticatedOwnerRouteChildren {
   AuthenticatedOwnerAccountsRoute: typeof AuthenticatedOwnerAccountsRoute
   AuthenticatedOwnerAuditRoute: typeof AuthenticatedOwnerAuditRoute
+  AuthenticatedOwnerControlRoute: typeof AuthenticatedOwnerControlRoute
+  AuthenticatedOwnerMediaRoute: typeof AuthenticatedOwnerMediaRoute
   AuthenticatedOwnerSecurityRoute: typeof AuthenticatedOwnerSecurityRoute
   AuthenticatedOwnerSettingsRoute: typeof AuthenticatedOwnerSettingsRoute
   AuthenticatedOwnerIndexRoute: typeof AuthenticatedOwnerIndexRoute
+  AuthenticatedOwnerExcellenceIdRoute: typeof AuthenticatedOwnerExcellenceIdRoute
   AuthenticatedOwnerPagesIdRoute: typeof AuthenticatedOwnerPagesIdRoute
   AuthenticatedOwnerServicesIdRoute: typeof AuthenticatedOwnerServicesIdRoute
+  AuthenticatedOwnerSpecialtiesIdRoute: typeof AuthenticatedOwnerSpecialtiesIdRoute
+  AuthenticatedOwnerExcellenceIndexRoute: typeof AuthenticatedOwnerExcellenceIndexRoute
   AuthenticatedOwnerPagesIndexRoute: typeof AuthenticatedOwnerPagesIndexRoute
   AuthenticatedOwnerServicesIndexRoute: typeof AuthenticatedOwnerServicesIndexRoute
+  AuthenticatedOwnerSpecialtiesIndexRoute: typeof AuthenticatedOwnerSpecialtiesIndexRoute
 }
 
 const AuthenticatedOwnerRouteChildren: AuthenticatedOwnerRouteChildren = {
   AuthenticatedOwnerAccountsRoute: AuthenticatedOwnerAccountsRoute,
   AuthenticatedOwnerAuditRoute: AuthenticatedOwnerAuditRoute,
+  AuthenticatedOwnerControlRoute: AuthenticatedOwnerControlRoute,
+  AuthenticatedOwnerMediaRoute: AuthenticatedOwnerMediaRoute,
   AuthenticatedOwnerSecurityRoute: AuthenticatedOwnerSecurityRoute,
   AuthenticatedOwnerSettingsRoute: AuthenticatedOwnerSettingsRoute,
   AuthenticatedOwnerIndexRoute: AuthenticatedOwnerIndexRoute,
+  AuthenticatedOwnerExcellenceIdRoute: AuthenticatedOwnerExcellenceIdRoute,
   AuthenticatedOwnerPagesIdRoute: AuthenticatedOwnerPagesIdRoute,
   AuthenticatedOwnerServicesIdRoute: AuthenticatedOwnerServicesIdRoute,
+  AuthenticatedOwnerSpecialtiesIdRoute: AuthenticatedOwnerSpecialtiesIdRoute,
+  AuthenticatedOwnerExcellenceIndexRoute:
+    AuthenticatedOwnerExcellenceIndexRoute,
   AuthenticatedOwnerPagesIndexRoute: AuthenticatedOwnerPagesIndexRoute,
   AuthenticatedOwnerServicesIndexRoute: AuthenticatedOwnerServicesIndexRoute,
+  AuthenticatedOwnerSpecialtiesIndexRoute:
+    AuthenticatedOwnerSpecialtiesIndexRoute,
 }
 
 const AuthenticatedOwnerRouteWithChildren =

@@ -7051,12 +7051,14 @@ export type Database = {
       }
       service_catalog: {
         Row: {
+          category: string | null
           created_at: string
           department_id: string | null
           description_ar: string | null
           description_en: string | null
           display_order: number
           duration_min: number | null
+          href: string | null
           icon: string | null
           id: string
           image_url: string | null
@@ -7064,16 +7066,20 @@ export type Database = {
           name_ar: string
           name_en: string
           price_from: number | null
+          requires_auth: boolean
+          show_in_portal: boolean
           slug: string
           updated_at: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           department_id?: string | null
           description_ar?: string | null
           description_en?: string | null
           display_order?: number
           duration_min?: number | null
+          href?: string | null
           icon?: string | null
           id?: string
           image_url?: string | null
@@ -7081,16 +7087,20 @@ export type Database = {
           name_ar: string
           name_en: string
           price_from?: number | null
+          requires_auth?: boolean
+          show_in_portal?: boolean
           slug: string
           updated_at?: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           department_id?: string | null
           description_ar?: string | null
           description_en?: string | null
           display_order?: number
           duration_min?: number | null
+          href?: string | null
           icon?: string | null
           id?: string
           image_url?: string | null
@@ -7098,6 +7108,8 @@ export type Database = {
           name_ar?: string
           name_en?: string
           price_from?: number | null
+          requires_auth?: boolean
+          show_in_portal?: boolean
           slug?: string
           updated_at?: string
         }

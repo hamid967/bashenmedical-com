@@ -17,6 +17,10 @@ const slugSchema = z
   .max(80)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/);
 
+const categorySchema = z
+  .enum(["appointments", "records", "pharmacy", "care", "billing", "support"])
+  .nullish();
+
 const svcInput = z.object({
   slug: slugSchema,
   name_ar: z.string().trim().min(1).max(160),
@@ -27,6 +31,16 @@ const svcInput = z.object({
   price_from: z.number().nonnegative().nullish(),
   duration_min: z.number().int().min(0).max(1440).nullish(),
   image_url: z.string().trim().url().max(500).nullish().or(z.literal("")),
+  href: z
+    .string()
+    .trim()
+    .max(200)
+    .regex(/^(\/[\w\-./]*)?$/, "الرابط يجب أن يبدأ بـ /")
+    .nullish()
+    .or(z.literal("")),
+  category: categorySchema.or(z.literal("")),
+  requires_auth: z.boolean().default(false),
+  show_in_portal: z.boolean().default(false),
   display_order: z.number().int().min(0).max(9999).default(0),
   is_active: z.boolean().default(true),
 });
@@ -38,7 +52,7 @@ export const listOwnerServices = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("service_catalog")
       .select(
-        "id, slug, name_ar, name_en, description_ar, icon, price_from, duration_min, image_url, display_order, is_active, updated_at",
+        "id, slug, name_ar, name_en, description_ar, icon, price_from, duration_min, image_url, href, category, requires_auth, show_in_portal, display_order, is_active, updated_at",
       )
       .order("display_order", { ascending: true })
       .order("name_ar", { ascending: true });
@@ -72,6 +86,8 @@ export const createOwnerService = createServerFn({ method: "POST" })
         ...data,
         icon: data.icon || null,
         image_url: data.image_url || null,
+        href: data.href || null,
+        category: data.category || null,
       })
       .select("id")
       .single();
@@ -91,6 +107,8 @@ export const updateOwnerService = createServerFn({ method: "POST" })
         ...rest,
         icon: rest.icon || null,
         image_url: rest.image_url || null,
+        href: rest.href || null,
+        category: rest.category || null,
       })
       .eq("id", id);
     if (error) throw new Error(error.message);

@@ -171,7 +171,7 @@ export function ServiceInquiryDialog({
       const [svcRes, brRes, wa] = await Promise.all([
         supabase
           .from("service_catalog")
-          .select("id, name_ar")
+          .select("id, name_ar, show_in_portal")
           .eq("is_active", true)
           .order("display_order", { ascending: true }),
         supabase
@@ -182,7 +182,23 @@ export function ServiceInquiryDialog({
         fetchWhatsappNumber(),
       ]);
       if (cancel) return;
-      setServices((svcRes.data as ServiceRow[]) ?? []);
+      let inquiryServices: ServiceRow[] = [];
+      if (svcRes.error) {
+        // Column may be missing before migration — fall back to classic select.
+        const fb = await supabase
+          .from("service_catalog")
+          .select("id, name_ar")
+          .eq("is_active", true)
+          .order("display_order", { ascending: true });
+        inquiryServices = (fb.data as ServiceRow[]) ?? [];
+      } else {
+        inquiryServices = (
+          (svcRes.data as Array<ServiceRow & { show_in_portal?: boolean }>) ?? []
+        )
+          .filter((s) => !s.show_in_portal)
+          .map(({ id, name_ar }) => ({ id, name_ar }));
+      }
+      setServices(inquiryServices);
       setBranches((brRes.data as BranchRow[]) ?? []);
       setWhatsappNumber(wa);
     })();
