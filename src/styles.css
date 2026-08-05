@@ -3,9 +3,9 @@
 @import "tw-animate-css";
 
 @theme inline {
-  --font-sans: "Cairo", "Work Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Cairo", "Instrument Serif", "Work Sans", serif;
-  --font-body: "Cairo", "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Cairo", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Cairo", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "IBM Plex Sans Arabic", "Cairo", ui-sans-serif, system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -135,11 +135,17 @@
   }
   html {
     font-family: var(--font-body);
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.7;
+    letter-spacing: 0.005em;
   }
   [dir="rtl"] {
     text-align: right;
@@ -149,16 +155,12 @@
   h3,
   h4 {
     font-family: var(--font-display);
-    font-weight: 600;
-    letter-spacing: -0.015em;
-  }
-  /* Arabic content: keep Cairo for headings (Instrument Serif has no Arabic glyphs) */
-  [dir="rtl"] h1,
-  [dir="rtl"] h2,
-  [dir="rtl"] h3,
-  [dir="rtl"] h4 {
-    font-family: "Cairo", "Work Sans", sans-serif;
     font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  p {
+    line-height: 1.75;
   }
 }
 
@@ -167,6 +169,48 @@
   margin-inline: auto;
   padding-inline: 1rem;
   max-width: 1240px;
+}
+
+/* Site section rhythm — consistent vertical spacing + optional soft wash */
+@utility site-section {
+  position: relative;
+  padding-block: clamp(3.5rem, 6vw, 5.5rem);
+}
+
+@utility site-section-alt {
+  position: relative;
+  padding-block: clamp(3.5rem, 6vw, 5.5rem);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--brand-mint) 55%, transparent) 0%,
+      color-mix(in oklab, var(--brand-sky) 40%, transparent) 100%
+    );
+}
+
+@utility section-heading {
+  font-family: var(--font-display);
+  font-size: clamp(1.65rem, 2.4vw, 2.35rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+@utility section-lede {
+  margin-top: 0.65rem;
+  max-width: 36rem;
+  font-size: 1.05rem;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+
+@utility brand-mark {
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
+  color: var(--brand-deep);
 }
 
 @utility hero-gradient {
@@ -220,16 +264,12 @@
   color: var(--color-primary);
 }
 
-/* Display headings — Instrument Serif for LTR, Cairo for RTL (auto via @layer base). */
+/* Display headings — Cairo + IBM Plex for Arabic/LTR. */
 @utility h-display {
   font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: -0.015em;
-  line-height: 1.1;
-}
-[dir="rtl"] .h-display {
-  font-family: "Cairo", "Work Sans", sans-serif;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
 }
 
 /* Section eyebrow wrapper — the "chip + title + description" trio used above every section. */
@@ -750,8 +790,8 @@ html.reduce-motion *::after {
     radial-gradient(1200px 700px at 15% -10%, rgba(11, 133, 133, 0.1), transparent 55%),
     radial-gradient(900px 600px at 110% 5%, rgba(199, 164, 107, 0.08), transparent 55%),
     radial-gradient(700px 500px at 60% 110%, rgba(11, 133, 133, 0.06), transparent 55%);
-  --font-fut-display: "Cairo", "Tajawal", "IBM Plex Sans Arabic", sans-serif;
-  --font-fut-body: "Cairo", "IBM Plex Sans Arabic", "Tajawal", sans-serif;
+  --font-fut-display: "Cairo", "IBM Plex Sans Arabic", sans-serif;
+  --font-fut-body: "IBM Plex Sans Arabic", "Cairo", sans-serif;
 }
 
 .futuristic {
@@ -1103,8 +1143,8 @@ html.reduce-motion .pulse-soft {
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(0, 217, 192, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 217, 192, 0.05) 1px, transparent 1px);
+      linear-gradient(color-mix(in oklab, var(--brand) 8%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--brand) 8%, transparent) 1px, transparent 1px);
     background-size: 48px 48px;
     mask-image: radial-gradient(ellipse at center, black 40%, transparent 75%);
     pointer-events: none;
@@ -1136,18 +1176,18 @@ html.reduce-motion .pulse-soft {
   --mag-radius: 20px;
   --mag-shadow: 0 1px 2px rgba(7, 94, 99, 0.04), 0 8px 30px -18px rgba(7, 94, 99, 0.14);
   --mag-shadow-lift: 0 2px 4px rgba(7, 94, 99, 0.05), 0 24px 60px -30px rgba(7, 94, 99, 0.2);
-  font-family: "Cairo", "Figtree", ui-sans-serif, system-ui, sans-serif;
+  font-family: "IBM Plex Sans Arabic", "Cairo", ui-sans-serif, system-ui, sans-serif;
   color: var(--mag-ink);
   background: var(--mag-bg);
 }
 
 .portal-magazine :is(h1, h2, h3, h4) {
-  font-family: "Outfit", "Cairo", ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.01em;
+  font-family: "Cairo", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 [dir="rtl"] .portal-magazine :is(h1, h2, h3, h4) {
-  font-family: "Cairo", "Outfit", ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: 0;
+  font-family: "Cairo", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 @utility mag-card {
@@ -1180,7 +1220,7 @@ html.reduce-motion .pulse-soft {
 }
 
 /* =====================================================================
-   Admin Console — Cloud White palette + Outfit/Figtree typography
+   Admin Console — Cloud White palette + Cairo / IBM Plex typography
    Scoped to `.admin-console` (layout root)
    ===================================================================== */
 .admin-console {
@@ -1201,17 +1241,17 @@ html.reduce-motion .pulse-soft {
   --ac-danger: #c0392b;
   --ac-radius: 14px;
   --ac-shadow: 0 1px 2px rgba(7, 94, 99, 0.04), 0 6px 24px -18px rgba(7, 94, 99, 0.16);
-  font-family: "Cairo", "Figtree", ui-sans-serif, system-ui, sans-serif;
+  font-family: "IBM Plex Sans Arabic", "Cairo", ui-sans-serif, system-ui, sans-serif;
   color: var(--ac-ink);
   background: var(--ac-bg);
 }
 .admin-console :is(h1, h2, h3, h4) {
-  font-family: "Outfit", "Cairo", ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: -0.01em;
+  font-family: "Cairo", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.02em;
 }
 [dir="rtl"] .admin-console :is(h1, h2, h3, h4) {
-  font-family: "Cairo", "Outfit", ui-sans-serif, system-ui, sans-serif;
-  letter-spacing: 0;
+  font-family: "Cairo", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }
 
 @utility ac-card {

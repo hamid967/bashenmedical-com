@@ -32,7 +32,6 @@ import {
 import ogHomeAsset from "@/assets/og-home-bmc.jpg.asset.json";
 import { JazanPattern } from "@/components/jazan/JazanPattern";
 import { JazanSectionLabel } from "@/components/jazan/JazanSectionLabel";
-import { JazanDivider } from "@/components/jazan/JazanDivider";
 import { JazanIconFrame } from "@/components/jazan/JazanIconFrame";
 import { DoctorAutocomplete } from "@/components/home/DoctorAutocomplete";
 import { NewDoctorsSection } from "@/components/home/NewDoctorsSection";
@@ -209,7 +208,7 @@ const FEATURES = [
 ];
 
 function HomePage() {
-  const { t, lang } = useI18n();
+  const { lang } = useI18n();
   const navigate = useNavigate();
   const isAr = lang === "ar";
 
@@ -269,11 +268,9 @@ function HomePage() {
 
   return (
     <div className="futuristic" dir={i18n.t("home:ltr")}>
-      {/* ===== HERO ===== */}
-      <section className="aurora-bg grid-overlay relative overflow-hidden">
-        {/* Jazan heritage decorative layer — mountain terraces, coastal reflection, palm fronds */}
+      {/* ===== HERO — brand-first, one composition ===== */}
+      <section className="aurora-bg grid-overlay relative overflow-hidden min-h-[min(92dvh,880px)] flex flex-col justify-center">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-          {/* soft warm ivory glow from bottom */}
           <div
             className="absolute inset-x-0 bottom-0 h-2/3"
             style={{
@@ -281,7 +278,6 @@ function HomePage() {
                 "linear-gradient(to top, rgba(252,249,242,0.55), transparent 60%), radial-gradient(60% 50% at 50% 100%, rgba(199,164,107,0.10), transparent 70%)",
             }}
           />
-          {/* mountain terraces — layered ridges, RTL-flipped for balance */}
           <svg
             viewBox="0 0 1440 320"
             preserveAspectRatio="none"
@@ -301,22 +297,18 @@ function HomePage() {
                 <stop offset="100%" stopColor="#B85C3C" stopOpacity="0.18" />
               </linearGradient>
             </defs>
-            {/* far ridge */}
             <path
               d="M0,240 L120,180 L260,220 L420,150 L600,210 L780,140 L960,200 L1140,160 L1320,220 L1440,180 L1440,320 L0,320 Z"
               fill="url(#jazan-hero-mtn-1)"
             />
-            {/* mid ridge with terrace steps */}
             <path
               d="M0,280 L160,220 L180,240 L340,190 L360,210 L520,170 L540,190 L720,220 L900,180 L920,200 L1100,170 L1120,190 L1300,220 L1440,200 L1440,320 L0,320 Z"
               fill="url(#jazan-hero-mtn-2)"
             />
-            {/* front ridge — warmer terracotta hint */}
             <path
               d="M0,300 L200,260 L400,285 L620,250 L820,290 L1040,255 L1240,290 L1440,265 L1440,320 L0,320 Z"
               fill="url(#jazan-hero-mtn-3)"
             />
-            {/* coastal reflection line */}
             <line
               x1="0"
               y1="308"
@@ -328,7 +320,6 @@ function HomePage() {
               strokeDasharray="3 6"
             />
           </svg>
-          {/* palm frond, corner */}
           <svg
             viewBox="0 0 120 200"
             className="absolute -bottom-4 start-2 md:start-8 h-40 md:h-56 w-auto opacity-40"
@@ -349,91 +340,53 @@ function HomePage() {
               <circle cx="60" cy="34" r="4" fill="#C7A46B" opacity="0.7" stroke="none" />
             </g>
           </svg>
-          {/* faint Jazan diamond motif in top-end corner */}
-          <div className="absolute top-6 end-6 h-16 w-40 opacity-30">
+          <div className="absolute top-6 end-6 h-16 w-40 opacity-25">
             <JazanPattern variant="standard" />
           </div>
         </div>
 
-        <div className="container-app relative py-20 md:py-28">
+        <div className="container-app relative py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/80 px-4 py-1.5 text-[11px] tracking-[0.3em] uppercase text-[var(--jazan-teal)] shadow-sm">
-              <span
-                aria-hidden="true"
-                className="inline-block h-2 w-2 rotate-45 bg-[var(--jazan-terracotta)]"
-              />
-              {i18n.t("home:from_the_heart_of_jazan_baeshen_medical")}
-              <span
-                aria-hidden="true"
-                className="inline-block h-2 w-2 rotate-45 bg-[var(--jazan-gold)]"
-              />
-            </div>
-            <h1 className="mt-6 text-4xl md:text-6xl font-extrabold leading-[1.1]">
-              <span className="block text-[color:var(--fut-ink)]">
-                {i18n.t("home:baeshen_medical_complex_specialist_care")}
-              </span>
-              <span className="block text-neon">{i18n.t("home:in_sabya_jazan")}</span>
+            <p className="brand-mark text-[clamp(2.35rem,6vw,4.25rem)] text-[color:var(--brand-deep)]">
+              {isAr ? SITE.nameAr : SITE.nameEn}
+            </p>
+            <h1 className="mt-4 text-[clamp(1.35rem,3vw,2rem)] font-bold leading-snug text-[color:var(--fut-ink)]">
+              {i18n.t("home:baeshen_medical_complex_specialist_care")}{" "}
+              <span className="text-[color:var(--brand)]">{i18n.t("home:in_sabya_jazan")}</span>
             </h1>
-            <p className="mt-5 text-base md:text-lg text-[color:var(--fut-ink-muted)] leading-8">
+            <p className="mt-5 mx-auto max-w-xl text-base md:text-lg text-[color:var(--fut-ink-muted)] leading-8">
               {i18n.t("home:book_certified_consultants_track_reports")}
             </p>
-            {/* Jazan supporting phrase */}
-            <p className="mt-3 text-sm md:text-base font-medium text-[var(--jazan-terracotta)]">
-              {i18n.t("home:modern_medical_expertise_with_the_authen")}
-            </p>
 
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-3">
               <Link to="/book" className="btn-magnetic pulse-soft">
                 <CalendarCheck2 className="h-4 w-4" />
                 {i18n.t("home:book_an_appointment")}
               </Link>
               <Link
                 to="/doctors"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/50 bg-[var(--jazan-ivory)]/70 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] backdrop-blur-md hover:bg-[var(--jazan-ivory)] transition"
+                className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-gold)]/45 bg-white/80 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] backdrop-blur-md hover:bg-white transition"
               >
                 <Search className="h-4 w-4" />
                 {i18n.t("home:browse_doctors")}
               </Link>
-              <Link
-                to="/portal/dashboard"
-                className="inline-flex items-center gap-2 rounded-full border border-[var(--jazan-teal)]/40 bg-[var(--jazan-teal)]/10 px-5 py-3 text-sm font-semibold text-[var(--jazan-teal)] hover:bg-[var(--jazan-teal)]/15 transition"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                {i18n.t("home:patient_portal")}
-              </Link>
             </div>
 
-            <DoctorAutocomplete />
+            <div className="mt-8">
+              <DoctorAutocomplete />
+            </div>
           </div>
-
-          {/* Stats strip */}
-          <StaggerReveal className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3">
-            {STATS.map((s) => (
-              <RevealItem key={s.k} className="glass-fut p-5 text-center relative overflow-hidden">
-                <span
-                  aria-hidden="true"
-                  className="absolute -top-1 start-1/2 -translate-x-1/2 h-1 w-8 rounded-b bg-[var(--jazan-gold)]/70"
-                />
-                <div className="text-3xl md:text-4xl font-black text-neon">{s.k}</div>
-                <div className="mt-1 text-xs tracking-widest uppercase text-[color:var(--fut-ink-muted)]">
-                  {isAr ? s.ar : s.en}
-                </div>
-              </RevealItem>
-            ))}
-          </StaggerReveal>
         </div>
       </section>
 
       {/* ===== QUICK BOOKING ===== */}
-      <section className="relative py-16 md:py-20">
+      <section className="site-section">
         <div className="container-app">
           <div className="glass-fut mx-auto max-w-4xl p-6 md:p-8">
             <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <div className="text-[11px] tracking-[0.35em] uppercase text-[color:var(--neon-teal)]">
-                  {i18n.t("home:quick_booking")}
-                </div>
-                <h2 className="mt-2 text-2xl md:text-3xl font-bold text-[color:var(--fut-ink)]">
+                <div className="section-eyebrow">{i18n.t("home:quick_booking")}</div>
+                <h2 className="section-heading mt-2">
                   {i18n.t("home:start_your_appointment_in_30_seconds")}
                 </h2>
               </div>
@@ -504,13 +457,35 @@ function HomePage() {
         </div>
       </section>
 
-      {/* ===== E-SERVICES (UDH-style quick access) ===== */}
-      <section className="py-16 md:py-20">
+      {/* ===== TRUST STRIP (moved out of hero) ===== */}
+      <section className="pb-4">
+        <div className="container-app">
+          <StaggerReveal className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {STATS.map((s) => (
+              <RevealItem key={s.k} className="glass-fut p-5 text-center relative overflow-hidden">
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-1 start-1/2 -translate-x-1/2 h-1 w-8 rounded-b bg-[var(--jazan-gold)]/70"
+                />
+                <div className="text-2xl md:text-3xl font-extrabold text-[color:var(--brand-deep)]">
+                  {s.k}
+                </div>
+                <div className="mt-1 text-xs tracking-wide text-[color:var(--fut-ink-muted)]">
+                  {isAr ? s.ar : s.en}
+                </div>
+              </RevealItem>
+            ))}
+          </StaggerReveal>
+        </div>
+      </section>
+
+      {/* ===== E-SERVICES ===== */}
+      <section className="site-section-alt">
         <div className="container-app">
           <div className="mb-10">
             <JazanSectionLabel>{isAr ? "الخدمات الإلكترونية" : "E-Services"}</JazanSectionLabel>
             <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
-              <h2 className="text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
+              <h2 className="section-heading">
                 {isAr
                   ? "كل خدماتك الطبية بنقرة واحدة"
                   : "All your medical services, one click away"}
@@ -547,22 +522,17 @@ function HomePage() {
               );
             })}
           </StaggerReveal>
-          <JazanDivider variant="subtle" className="mt-16" />
         </div>
       </section>
 
       {/* ===== SPECIALTIES ===== */}
-      <section className="py-16 md:py-20">
+      <section className="site-section">
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
               <JazanSectionLabel>{i18n.t("home:specialties")}</JazanSectionLabel>
-              <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-                {i18n.t("home:specialties_title")}
-              </h2>
-              <p className="mt-2 max-w-2xl text-[color:var(--fut-ink-muted)]">
-                {i18n.t("home:specialties_sub")}
-              </p>
+              <h2 className="section-heading mt-2">{i18n.t("home:specialties_title")}</h2>
+              <p className="section-lede">{i18n.t("home:specialties_sub")}</p>
             </div>
             <Link
               to="/specialties"
@@ -609,20 +579,17 @@ function HomePage() {
             </StaggerReveal>
           </SkeletonSwap>
         </div>
-        <div className="container-app">
-          <JazanDivider variant="subtle" className="mt-16" />
-        </div>
       </section>
 
       {/* ===== ANNOUNCEMENTS ===== */}
       <AnnouncementsSection />
 
       {/* ===== WHY US ===== */}
-      <section className="py-16 md:py-20">
+      <section className="site-section-alt">
         <div className="container-app">
           <div className="mb-10 max-w-2xl">
             <JazanSectionLabel>{i18n.t("home:why_baeshen")}</JazanSectionLabel>
-            <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
+            <h2 className="section-heading mt-2">
               {i18n.t("home:trusted_care_concierge_experience")}
             </h2>
           </div>
@@ -644,22 +611,17 @@ function HomePage() {
               );
             })}
           </StaggerReveal>
-          <JazanDivider variant="subtle" className="mt-16" />
         </div>
       </section>
 
       {/* ===== FEATURED DOCTORS ===== */}
-      <section className="py-16 md:py-20">
+      <section className="site-section">
         <div className="container-app">
           <div className="mb-10 grid grid-cols-[minmax(0,1fr)_auto] items-end gap-4 sm:flex sm:flex-wrap sm:justify-between">
             <div className="min-w-0">
               <JazanSectionLabel>{i18n.t("home:medical_team")}</JazanSectionLabel>
-              <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-                {i18n.t("home:doctors_title")}
-              </h2>
-              <p className="mt-2 max-w-2xl text-[color:var(--fut-ink-muted)]">
-                {i18n.t("home:doctors_sub")}
-              </p>
+              <h2 className="section-heading mt-2">{i18n.t("home:doctors_title")}</h2>
+              <p className="section-lede">{i18n.t("home:doctors_sub")}</p>
             </div>
             <Link
               to="/doctors"
@@ -721,17 +683,12 @@ function HomePage() {
       <NewDoctorsSection />
 
       {/* ===== VISIT / MAP ===== */}
-      <section className="py-16 md:py-20">
-        <div className="container-app">
-          <JazanDivider variant="subtle" className="mb-12" />
-        </div>
+      <section className="site-section-alt">
         <div className="container-app grid items-center gap-8 md:grid-cols-2">
           <div>
             <JazanSectionLabel>{i18n.t("home:visit_us")}</JazanSectionLabel>
-            <h2 className="mt-2 text-3xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
-              {i18n.t("home:in_the_heart_of_sabya")}
-            </h2>
-            <p className="mt-3 text-[color:var(--fut-ink-muted)]">
+            <h2 className="section-heading mt-2">{i18n.t("home:in_the_heart_of_sabya")}</h2>
+            <p className="mt-3 text-[color:var(--fut-ink-muted)] leading-7">
               {isAr ? SITE.addressAr : SITE.addressEn}
             </p>
             <p className="mt-1 text-sm text-[color:var(--fut-ink-dim)]">
@@ -744,7 +701,7 @@ function HomePage() {
               </a>
               <Link
                 to="/contact"
-                className="neon-glow-hover inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[color:var(--fut-ink)]"
+                className="neon-glow-hover inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/90 px-5 py-3 text-sm font-semibold text-[color:var(--fut-ink)]"
               >
                 <Phone className="h-4 w-4" />
                 {i18n.t("home:contact_us")}
@@ -763,28 +720,37 @@ function HomePage() {
       </section>
 
       {/* ===== FINAL CTA ===== */}
-      <section className="pb-24 pt-8">
+      <section className="site-section pb-24">
         <div className="container-app">
-          <div className="glass-fut relative overflow-hidden p-8 md:p-12 text-center">
+          <div className="relative overflow-hidden rounded-[1.5rem] border border-[color:var(--brand-gold-soft)] px-8 py-12 md:px-12 text-center text-white"
+            style={{ background: "var(--fut-gradient-neon)" }}
+          >
             <div
-              className="pointer-events-none absolute inset-0 opacity-70"
-              style={{ background: "var(--fut-gradient-aurora)" }}
+              className="pointer-events-none absolute inset-0 opacity-40"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 45%), radial-gradient(circle at 80% 80%, rgba(199,164,107,0.25), transparent 50%)",
+              }}
+              aria-hidden
             />
             <div className="relative">
-              <h2 className="text-2xl md:text-4xl font-bold text-[color:var(--fut-ink)]">
+              <h2 className="text-2xl md:text-4xl font-bold text-white">
                 {i18n.t("home:ready_for_a_better_care_experience")}
               </h2>
-              <p className="mx-auto mt-3 max-w-xl text-[color:var(--fut-ink-muted)]">
+              <p className="mx-auto mt-3 max-w-xl text-white/85 leading-7">
                 {i18n.t("home:book_now_or_leave_your_number_we_ll_call")}
               </p>
-              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
-                <Link to="/book" className="btn-magnetic">
+              <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  to="/book"
+                  className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[color:var(--brand-deep)] hover:bg-[color:var(--brand-sand)] transition"
+                >
                   <CalendarCheck2 className="h-4 w-4" />
                   {i18n.t("home:book_now")}
                 </Link>
                 <Link
                   to="/contact"
-                  className="neon-glow-purple inline-flex items-center gap-2 rounded-full border border-[var(--fut-border)] bg-white/[0.04] px-5 py-3 text-sm font-semibold text-[color:var(--fut-ink)]"
+                  className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/15 transition"
                 >
                   <Phone className="h-4 w-4" />
                   {i18n.t("home:call_us")}
