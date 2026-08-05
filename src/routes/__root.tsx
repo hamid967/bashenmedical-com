@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { lazy, Suspense, useEffect, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -17,9 +17,6 @@ import { AnnouncementBar } from "@/components/AnnouncementBar";
 import { Footer } from "@/components/Footer";
 import { JazanSettingsProvider } from "@/components/jazan/JazanSettingsProvider";
 import { Toaster } from "sonner";
-const JazanIntro = lazy(() =>
-  import("@/components/JazanIntro").then((m) => ({ default: m.JazanIntro })),
-);
 import { BaeshenAssistant } from "@/components/assistant/BaeshenAssistant";
 import { FloatingWhatsAppButton } from "@/components/inquiry/FloatingWhatsAppButton";
 import { PwaUpdatePrompt } from "@/components/PwaUpdatePrompt";
@@ -172,7 +169,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Figtree:wght@400;500;600;700&family=Sora:wght@400;600;700;800&family=Manrope:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap",
       },
     ],
     scripts: [
@@ -267,9 +264,6 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <JazanSettingsProvider>
-          <Suspense fallback={null}>
-            <JazanIntro />
-          </Suspense>
           <div className="min-h-dvh flex flex-col">
             <AnnouncementBar />
             <Header />

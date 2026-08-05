@@ -65,8 +65,9 @@ export type JazanSettings = {
 
 export const DEFAULT_JAZAN_SETTINGS: JazanSettings = {
   intro: {
-    enabled: true,
-    frequency: "once_per_session",
+    // Intro overlay retired from the public shell — keep defaults off.
+    enabled: false,
+    frequency: "off",
     cooldownHours: 24 * 7,
     durationMs: 6_500,
     headlineAr: "مجمع باعشن الطبي",
