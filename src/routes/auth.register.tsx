@@ -37,6 +37,9 @@ function RegisterPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const bookingIntent =
+    !!search.next && (search.next === "/book" || search.next.startsWith("/book?"));
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -70,7 +73,12 @@ function RegisterPage() {
         </CardHeader>
         <CardContent>
           <Button asChild className="w-full">
-            <Link to="/auth/login">الذهاب لتسجيل الدخول</Link>
+            <Link
+              to="/auth/login"
+              search={search.next ? { next: search.next } : undefined}
+            >
+              الذهاب لتسجيل الدخول
+            </Link>
           </Button>
         </CardContent>
       </Card>
@@ -81,9 +89,20 @@ function RegisterPage() {
     <Card>
       <CardHeader className="text-center">
         <CardTitle>إنشاء حساب</CardTitle>
-        <CardDescription>سجّل رقم جوالك للتحقق منه أولاً</CardDescription>
+        <CardDescription>
+          {bookingIntent
+            ? "أنشئ حسابًا أولاً — حجز المواعيد متاح لأعضاء المنصة فقط"
+            : "سجّل رقم جوالك للتحقق منه أولاً"}
+        </CardDescription>
       </CardHeader>
       <CardContent>
+        {bookingIntent && (
+          <Alert className="mb-4 border-[color:var(--brand-gold-soft)] bg-[color:var(--brand-mist)]">
+            <AlertDescription className="text-[color:var(--brand-deep)] text-sm leading-6">
+              بعد إنشاء الحساب ستُعاد تلقائيًا إلى صفحة الحجز لإكمال موعدك.
+            </AlertDescription>
+          </Alert>
+        )}
         {error && (
           <Alert variant="destructive" className="mb-4">
             <AlertDescription>{error}</AlertDescription>
@@ -107,7 +126,11 @@ function RegisterPage() {
             إرسال رمز التحقق
           </Button>
           <div className="text-sm text-center">
-            <Link to="/auth/login" className="text-muted-foreground underline">
+            <Link
+              to="/auth/login"
+              search={search.next ? { next: search.next } : undefined}
+              className="text-muted-foreground underline"
+            >
               لدي حساب بالفعل
             </Link>
           </div>

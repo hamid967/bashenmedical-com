@@ -24,6 +24,7 @@ export type BookingErrorCode =
   | "TIMEOUT"
   | "SERVER"
   | "SESSION_EXPIRED"
+  | "AUTH_REQUIRED"
   | "UNKNOWN";
 
 export type BookingErrorRecovery =
@@ -167,6 +168,15 @@ const DESCRIPTORS: Record<BookingErrorCode, Omit<BookingErrorDescriptor, "code">
     recovery: "sign-in",
     recoverable: false,
   },
+  AUTH_REQUIRED: {
+    title: { ar: "يلزم تسجيل الدخول", en: "Sign-in required" },
+    message: {
+      ar: "حجز المواعيد متاح لأعضاء المنصة فقط. سجّل الدخول أو أنشئ حسابًا للمتابعة.",
+      en: "Booking is for registered members only. Sign in or create an account to continue.",
+    },
+    recovery: "sign-in",
+    recoverable: false,
+  },
   UNKNOWN: {
     title: { ar: "تعذّر إتمام الحجز", en: "Couldn't complete booking" },
     message: {
@@ -206,6 +216,8 @@ export function kindToCode(
     case "server":
     case "db":
       return "SERVER";
+    case "auth":
+      return "AUTH_REQUIRED";
     default:
       return "UNKNOWN";
   }
