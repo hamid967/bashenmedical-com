@@ -98,6 +98,7 @@ import { Route as AuthRegisterRouteImport } from './routes/auth.register'
 import { Route as AuthSessionExpiredRouteImport } from './routes/auth.session-expired'
 import { Route as AuthUpdateMobileRouteImport } from './routes/auth.update-mobile'
 import { Route as AuthVerifyRouteImport } from './routes/auth.verify'
+import { Route as BranchesIndexRouteImport } from './routes/branches.index'
 import { Route as BranchesSlugRouteImport } from './routes/branches.$slug'
 import { Route as DesignPortalPrimitivesRouteImport } from './routes/design.portal-primitives'
 import { Route as DesignStorybookRouteImport } from './routes/design.storybook'
@@ -780,6 +781,11 @@ const AuthVerifyRoute = AuthVerifyRouteImport.update({
   id: '/verify',
   path: '/verify',
   getParentRoute: () => AuthRoute,
+} as any)
+const BranchesIndexRoute = BranchesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BranchesRoute,
 } as any)
 const BranchesSlugRoute = BranchesSlugRouteImport.update({
   id: '/$slug',
@@ -2097,6 +2103,7 @@ export interface FileRoutesByFullPath {
   '/team/about': typeof TeamAboutRoute
   '/team/leadership': typeof TeamLeadershipRoute
   '/auth/': typeof AuthIndexRoute
+  '/branches/': typeof BranchesIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
   '/health/': typeof HealthIndexRoute
   '/specialties/': typeof SpecialtiesIndexRoute
@@ -2295,7 +2302,6 @@ export interface FileRoutesByTo {
   '/app': typeof AppRoute
   '/book': typeof BookRoute
   '/booking-confirmation': typeof BookingConfirmationRoute
-  '/branches': typeof BranchesRouteWithChildren
   '/careers': typeof CareersRoute
   '/complaints': typeof ComplaintsRoute
   '/complex': typeof ComplexRoute
@@ -2391,6 +2397,7 @@ export interface FileRoutesByTo {
   '/team/about': typeof TeamAboutRoute
   '/team/leadership': typeof TeamLeadershipRoute
   '/auth': typeof AuthIndexRoute
+  '/branches': typeof BranchesIndexRoute
   '/doctors': typeof DoctorsIndexRoute
   '/health': typeof HealthIndexRoute
   '/specialties': typeof SpecialtiesIndexRoute
@@ -2693,6 +2700,7 @@ export interface FileRoutesById {
   '/team/about': typeof TeamAboutRoute
   '/team/leadership': typeof TeamLeadershipRoute
   '/auth/': typeof AuthIndexRoute
+  '/branches/': typeof BranchesIndexRoute
   '/doctors/': typeof DoctorsIndexRoute
   '/health/': typeof HealthIndexRoute
   '/specialties/': typeof SpecialtiesIndexRoute
@@ -2995,6 +3003,7 @@ export interface FileRouteTypes {
     | '/team/about'
     | '/team/leadership'
     | '/auth/'
+    | '/branches/'
     | '/doctors/'
     | '/health/'
     | '/specialties/'
@@ -3193,7 +3202,6 @@ export interface FileRouteTypes {
     | '/app'
     | '/book'
     | '/booking-confirmation'
-    | '/branches'
     | '/careers'
     | '/complaints'
     | '/complex'
@@ -3289,6 +3297,7 @@ export interface FileRouteTypes {
     | '/team/about'
     | '/team/leadership'
     | '/auth'
+    | '/branches'
     | '/doctors'
     | '/health'
     | '/specialties'
@@ -3590,6 +3599,7 @@ export interface FileRouteTypes {
     | '/team/about'
     | '/team/leadership'
     | '/auth/'
+    | '/branches/'
     | '/doctors/'
     | '/health/'
     | '/specialties/'
@@ -4510,6 +4520,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/verify'
       preLoaderRoute: typeof AuthVerifyRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/branches/': {
+      id: '/branches/'
+      path: '/'
+      fullPath: '/branches/'
+      preLoaderRoute: typeof BranchesIndexRouteImport
+      parentRoute: typeof BranchesRoute
     }
     '/branches/$slug': {
       id: '/branches/$slug'
@@ -6714,10 +6731,12 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface BranchesRouteChildren {
   BranchesSlugRoute: typeof BranchesSlugRoute
+  BranchesIndexRoute: typeof BranchesIndexRoute
 }
 
 const BranchesRouteChildren: BranchesRouteChildren = {
   BranchesSlugRoute: BranchesSlugRoute,
+  BranchesIndexRoute: BranchesIndexRoute,
 }
 
 const BranchesRouteWithChildren = BranchesRoute._addFileChildren(
