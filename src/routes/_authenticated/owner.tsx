@@ -12,6 +12,10 @@ import {
   Settings,
   ScrollText,
   ShieldCheck,
+  Layers,
+  Sparkles,
+  Image as ImageIcon,
+  Gauge,
 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/owner")({
@@ -65,8 +69,12 @@ const NAV_GROUPS: ReadonlyArray<NavGroup> = [
     label: "المحتوى",
     items: [
       { to: "/owner", label: "الرئيسية", icon: LayoutDashboard, exact: true },
+      { to: "/owner/control", label: "مركز التحكم", icon: Gauge },
       { to: "/owner/pages", label: "الصفحات", icon: FileText },
       { to: "/owner/services", label: "الخدمات", icon: Stethoscope },
+      { to: "/owner/specialties", label: "التخصصات", icon: Layers },
+      { to: "/owner/excellence", label: "مراكز التميز", icon: Sparkles },
+      { to: "/owner/media", label: "الوسائط", icon: ImageIcon },
     ],
   },
   {

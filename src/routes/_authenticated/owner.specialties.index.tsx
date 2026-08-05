@@ -3,43 +3,35 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
 import {
-  listOwnerServices,
-  deleteOwnerService,
-  toggleOwnerService,
-  reorderOwnerServices,
-} from "@/lib/owner/services.functions";
+  listOwnerSpecialties,
+  deleteOwnerSpecialty,
+  toggleOwnerSpecialty,
+  reorderOwnerSpecialties,
+} from "@/lib/owner/specialties.functions";
 import { Button } from "@/components/ui-v3";
-import { Badge } from "@/components/ui-v3";
 import { Switch } from "@/components/ui-v3";
-import { Plus, Pencil, Trash2, Stethoscope, ChevronUp, ChevronDown, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Layers, ChevronUp, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/owner/services/")({
+export const Route = createFileRoute("/_authenticated/owner/specialties/")({
   head: () => ({
-    meta: [{ title: "الخدمات · Site Builder" }, { name: "robots", content: "noindex,nofollow" }],
+    meta: [{ title: "التخصصات · Site Builder" }, { name: "robots", content: "noindex,nofollow" }],
   }),
-  component: OwnerServicesList,
+  component: OwnerSpecialtiesList,
 });
 
-function OwnerServicesList() {
+function OwnerSpecialtiesList() {
   const router = useRouter();
-  const list = useServerFn(listOwnerServices);
-  const del = useServerFn(deleteOwnerService);
-  const toggle = useServerFn(toggleOwnerService);
-  const reorder = useServerFn(reorderOwnerServices);
+  const list = useServerFn(listOwnerSpecialties);
+  const del = useServerFn(deleteOwnerSpecialty);
+  const toggle = useServerFn(toggleOwnerSpecialty);
+  const reorder = useServerFn(reorderOwnerSpecialties);
   const [busy, setBusy] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "portal" | "inquiry">("all");
 
-  const q = useQuery({ queryKey: ["owner", "services"], queryFn: () => list() });
-
-  const rows = (q.data ?? []).filter((s: any) => {
-    if (filter === "portal") return s.show_in_portal;
-    if (filter === "inquiry") return !s.show_in_portal;
-    return true;
-  });
+  const q = useQuery({ queryKey: ["owner", "specialties"], queryFn: () => list() });
 
   async function handleDelete(id: string, name: string) {
-    if (!confirm(`حذف الخدمة "${name}" نهائياً؟`)) return;
+    if (!confirm(`حذف التخصص "${name}" نهائياً؟`)) return;
     setBusy(id);
     try {
       await del({ data: { id } });
@@ -63,19 +55,14 @@ function OwnerServicesList() {
   }
 
   async function move(id: string, dir: -1 | 1) {
-    const all = [...(q.data ?? [])];
-    const visible = rows;
-    const idx = visible.findIndex((r: any) => r.id === id);
+    const rows = [...(q.data ?? [])];
+    const idx = rows.findIndex((r: any) => r.id === id);
     const j = idx + dir;
-    if (idx < 0 || j < 0 || j >= visible.length) return;
-    // Swap display_order within current filter view
-    const a = visible[idx];
-    const b = visible[j];
-    const order = all.map((r: any) => {
-      if (r.id === a.id) return { id: r.id, display_order: b.display_order };
-      if (r.id === b.id) return { id: r.id, display_order: a.display_order };
-      return { id: r.id, display_order: r.display_order };
-    });
+    if (idx < 0 || j < 0 || j >= rows.length) return;
+    const tmp = rows[idx];
+    rows[idx] = rows[j];
+    rows[j] = tmp;
+    const order = rows.map((r: any, i: number) => ({ id: r.id, sort_order: (i + 1) * 10 }));
     try {
       await reorder({ data: { order } });
       q.refetch();
@@ -86,47 +73,20 @@ function OwnerServicesList() {
 
   return (
     <div className="p-6 md:p-8" dir="rtl">
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <Stethoscope className="h-6 w-6" /> إدارة الخدمات
+            <Layers className="h-6 w-6" /> إدارة التخصصات
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            فعّل «تظهر في البوابة» لعرض الخدمة في{" "}
-            <Link to="/services" className="text-blue-600 underline">
-              /services
-            </Link>
-            . خدمات الاستفسار تبقى لطلبات الواتساب.
+            تظهر في صفحة التخصصات، الحجز، ودليل الأطباء.
           </p>
         </div>
         <Button asChild>
-          <Link to="/owner/services/$id" params={{ id: "new" }}>
-            <Plus className="h-4 w-4 ml-1" /> خدمة جديدة
+          <Link to="/owner/specialties/$id" params={{ id: "new" }}>
+            <Plus className="h-4 w-4 ml-1" /> تخصص جديد
           </Link>
         </Button>
-      </div>
-
-      <div className="flex gap-2 mb-4">
-        {(
-          [
-            ["all", "الكل"],
-            ["portal", "البوابة"],
-            ["inquiry", "الاستفسارات"],
-          ] as const
-        ).map(([k, label]) => (
-          <button
-            key={k}
-            type="button"
-            onClick={() => setFilter(k)}
-            className={`px-3 h-8 rounded-full text-xs font-semibold border ${
-              filter === k
-                ? "bg-blue-600 text-white border-blue-600"
-                : "bg-white text-slate-600 border-slate-200"
-            }`}
-          >
-            {label}
-          </button>
-        ))}
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -134,10 +94,10 @@ function OwnerServicesList() {
           <div className="p-8 text-center text-slate-500">جاري التحميل…</div>
         ) : q.error ? (
           <div className="p-8 text-center text-red-600">{(q.error as Error).message}</div>
-        ) : !rows.length ? (
+        ) : !q.data?.length ? (
           <div className="p-12 text-center">
-            <Stethoscope className="h-10 w-10 mx-auto text-slate-300 mb-3" />
-            <div className="text-slate-700 font-medium">لا توجد خدمات</div>
+            <Layers className="h-10 w-10 mx-auto text-slate-300 mb-3" />
+            <div className="text-slate-700 font-medium">لا توجد تخصصات</div>
           </div>
         ) : (
           <table className="w-full text-sm">
@@ -145,14 +105,13 @@ function OwnerServicesList() {
               <tr>
                 <th className="px-4 py-3 text-right">الترتيب</th>
                 <th className="px-4 py-3 text-right">الاسم</th>
-                <th className="px-4 py-3 text-right">النوع</th>
-                <th className="px-4 py-3 text-right">الرابط</th>
-                <th className="px-4 py-3 text-right">مفعّلة</th>
+                <th className="px-4 py-3 text-right">Slug</th>
+                <th className="px-4 py-3 text-right">مفعّل</th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((s: any) => (
+              {q.data.map((s: any) => (
                 <tr key={s.id} className="border-t hover:bg-slate-50/50">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1">
@@ -172,40 +131,21 @@ function OwnerServicesList() {
                       >
                         <ChevronDown className="h-4 w-4" />
                       </button>
-                      <span className="text-slate-500 ms-1">{s.display_order}</span>
+                      <span className="text-slate-500 ms-1">{s.sort_order}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
                     <div className="font-medium text-slate-900">{s.name_ar}</div>
-                    <div className="text-xs text-slate-500 font-mono">{s.slug}</div>
+                    <div className="text-xs text-slate-500">{s.name_en}</div>
                   </td>
-                  <td className="px-4 py-3">
-                    {s.show_in_portal ? (
-                      <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                        بوابة
-                        {s.category ? ` · ${s.category}` : ""}
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline">استفسار</Badge>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-slate-600 font-mono text-xs">
-                    {s.href ? (
-                      <span className="inline-flex items-center gap-1">
-                        {s.href}
-                        <ExternalLink className="h-3 w-3" />
-                      </span>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
+                  <td className="px-4 py-3 text-slate-500 font-mono text-xs">{s.slug}</td>
                   <td className="px-4 py-3">
                     <Switch checked={s.is_active} onCheckedChange={(v) => handleToggle(s.id, v)} />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-1 justify-end">
                       <Button asChild size="icon" variant="ghost" title="تعديل" aria-label="تعديل">
-                        <Link to="/owner/services/$id" params={{ id: s.id }}>
+                        <Link to="/owner/specialties/$id" params={{ id: s.id }}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
