@@ -23,7 +23,7 @@ export function BranchQuickBar({ branch, directionsUrl }: Props) {
   ] as const;
 
   return (
-    <div className="sticky top-0 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/80">
+    <div className="sticky top-16 z-30 border-b border-border/80 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/80 md:top-[6.5rem]">
       <div className="container-app flex items-center gap-2 overflow-x-auto py-2.5">
         {items.map((item) => {
           const Icon = item.icon;
