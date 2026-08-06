@@ -408,6 +408,15 @@ function BookPage() {
     staleTime: 5 * 60_000,
   });
 
+  // Deep links often pass specialty slug (?specialty=internal-medicine).
+  // Normalize to UUID once specialties load so filters/holds stay consistent.
+  useEffect(() => {
+    if (!state.specialtyId || !specialties.length) return;
+    if (specialties.some((s: { id: string }) => s.id === state.specialtyId)) return;
+    const bySlug = specialties.find((s: { slug: string }) => s.slug === state.specialtyId);
+    if (bySlug) dispatch({ t: "set", p: { specialtyId: bySlug.id } });
+  }, [state.specialtyId, specialties]);
+
   // If the user picked a doctor via deep link, auto-fill branch & specialty.
   // Skip when the sentinel "any" is chosen — there's no concrete doctor row
   // to pull specialty/branch from.
@@ -902,11 +911,11 @@ function BookPage() {
       : Math.min(state.step, maxReachableStep(state, patientValidation.ok, insuranceValidation.ok));
 
   const stepAnnounce =
-    state.step === 9
-      ? STEPS[8]
+    state.step === SUCCESS_STEP
+      ? STEPS[SUCCESS_STEP - 1]
       : t("a11y.stepAnnounce", "الخطوة {{current}} من {{total}}: {{title}}", {
           current: displayedStep,
-          total: 8,
+          total: STEPS.length,
           title: STEPS[displayedStep - 1] ?? "",
         });
 
@@ -937,11 +946,13 @@ function BookPage() {
             <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <div
                 className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${Math.round(((displayedStep - 1) / 7) * 100)}%` }}
+                style={{
+                  width: `${Math.round(((displayedStep - 1) / Math.max(STEPS.length - 1, 1)) * 100)}%`,
+                }}
               />
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground text-center">
-              {t("page.stepOf", { current: displayedStep, total: 8 })}
+              {t("page.stepOf", { current: displayedStep, total: STEPS.length })}
             </div>
           </div>
         )}

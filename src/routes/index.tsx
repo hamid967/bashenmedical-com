@@ -45,6 +45,7 @@ const HOME_ESERVICES: {
   subAr: string;
   subEn: string;
   to: string;
+  search?: Record<string, string>;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
   {
@@ -69,18 +70,20 @@ const HOME_ESERVICES: {
     key: "lab",
     ar: "تقارير المختبر",
     en: "Lab Reports",
-    subAr: "نتائج التحاليل",
-    subEn: "View lab results",
-    to: "/my",
+    subAr: "من بوابة المريض بعد الدخول",
+    subEn: "Via patient portal after sign-in",
+    to: "/auth/login",
+    search: { next: "/my" },
     icon: FlaskConical,
   },
   {
     key: "radiology",
     ar: "تقارير الأشعة",
     en: "Radiology Reports",
-    subAr: "صور وتقارير الأشعة",
-    subEn: "Imaging & reports",
-    to: "/my",
+    subAr: "من بوابة المريض بعد الدخول",
+    subEn: "Via patient portal after sign-in",
+    to: "/auth/login",
+    search: { next: "/my" },
     icon: Scan,
   },
   {
@@ -506,6 +509,7 @@ function HomePage() {
                 <RevealItem key={s.key}>
                   <Link
                     to={s.to}
+                    search={s.search}
                     className="glass-fut group flex h-full flex-col items-center gap-2 p-5 text-center transition-transform hover:-translate-y-0.5"
                   >
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[color:var(--neon-teal)]/15 text-[color:var(--neon-teal)]">
@@ -561,7 +565,7 @@ function HomePage() {
                 <RevealItem key={s.id}>
                   <Link
                     to="/book"
-                    search={{ specialty: s.slug }}
+                    search={{ specialty: s.id }}
                     className="glass-fut neon-glow-hover group block h-full p-5 jazan-hairline jazan-hairline-hover transition"
                   >
                     <JazanIconFrame size="sm">
@@ -722,7 +726,8 @@ function HomePage() {
       {/* ===== FINAL CTA ===== */}
       <section className="site-section pb-24">
         <div className="container-app">
-          <div className="relative overflow-hidden rounded-[1.5rem] border border-[color:var(--brand-gold-soft)] px-8 py-12 md:px-12 text-center text-white"
+          <div
+            className="relative overflow-hidden rounded-[1.5rem] border border-[color:var(--brand-gold-soft)] px-8 py-12 md:px-12 text-center text-white"
             style={{ background: "var(--fut-gradient-neon)" }}
           >
             <div

@@ -101,8 +101,12 @@ export function DoctorAutocomplete() {
 
   const goToDoctor = (d: Doctor) => {
     const search: Record<string, string> = { doctor: d.id };
-    if (d.specialty_slug) search.specialty = d.specialty_slug;
-    else if (specialty) search.specialty = specialty;
+    if (specialty) {
+      const hit = specialties?.find((s) => s.slug === specialty);
+      search.specialty = hit?.id ?? specialty;
+    } else if (d.specialty_slug) {
+      search.specialty = d.specialty_slug;
+    }
     if (d.branch_id) search.branch = d.branch_id;
     else if (branch) search.branch = branch;
     setOpen(false);

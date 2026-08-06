@@ -46,6 +46,17 @@ function createSupabaseAdminClient() {
     throw new Error(message);
   }
 
+  // Reject publishable / anon keys mistakenly wired as service-role.
+  if (
+    SUPABASE_SERVICE_ROLE_KEY.startsWith("sb_publishable_") ||
+    SUPABASE_SERVICE_ROLE_KEY === process.env.SUPABASE_PUBLISHABLE_KEY
+  ) {
+    const message =
+      "SUPABASE_SERVICE_ROLE_KEY looks like a publishable/anon key. Use the service-role secret (sb_secret_… or JWT service_role).";
+    console.error(`[Supabase] ${message}`);
+    throw new Error(message);
+  }
+
   return createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     global: {
       fetch: createSupabaseFetch(SUPABASE_SERVICE_ROLE_KEY),

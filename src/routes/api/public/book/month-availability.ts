@@ -97,7 +97,14 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
               .eq("specialty_id", specialtyId!);
             if (branchId) q = q.eq("branch_id", branchId);
             const { data: docs, error } = await q;
-            if (error) return json(200, empty);
+            if (error) {
+              return json(503, {
+                ok: false,
+                code: "MONTH_AVAILABILITY_QUERY_FAILED",
+                message: "تعذّر جلب أيام التوفر.",
+                dates: [],
+              });
+            }
             candidateDoctorIds = (docs ?? []).map((d) => d.id as string);
           }
           if (candidateDoctorIds.length === 0) return json(200, empty);
@@ -155,8 +162,17 @@ export const Route = createFileRoute("/api/public/book/month-availability")({
           }
 
           return json(200, { ok: true, dates });
-        } catch {
-          return json(200, empty);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "unknown";
+          const isConfig = /SERVICE_ROLE|publishable|Missing Supabase/i.test(msg);
+          return json(isConfig ? 503 : 500, {
+            ok: false,
+            code: isConfig ? "SERVICE_MISCONFIGURED" : "MONTH_AVAILABILITY_FAILED",
+            message: isConfig
+              ? "خدمة المواعيد غير مهيأة. راجع مفتاح الخدمة."
+              : "تعذّر جلب أيام التوفر.",
+            dates: [],
+          });
         }
       },
     },

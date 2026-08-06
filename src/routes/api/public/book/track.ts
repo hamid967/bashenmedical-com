@@ -22,13 +22,14 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
+import { BOOKING_REF_RE } from "@/lib/booking/reference";
 
 const schema = z.object({
   reference: z
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^BAA-[0-9A-F]{8}$/, "رقم الطلب غير صالح (BAA-XXXXXXXX)"),
+    .regex(BOOKING_REF_RE, "رقم الطلب غير صالح (BMC-… أو BAA-XXXXXXXX)"),
   phone_last4: z
     .string()
     .trim()
