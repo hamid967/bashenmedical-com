@@ -1,12 +1,8 @@
 /**
- * `/auth/session-expired` — landing page when a protected server function
- * returns 401 while the tab is still open (session revoked from another
- * device, token expired past refresh window, etc.).
+ * `/auth/session-expired` — landing when a protected session ends.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { z } from "zod";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
-import { Button } from "@/components/ui-v3";
 import { Clock } from "lucide-react";
 
 const searchSchema = z.object({
@@ -28,23 +24,21 @@ function SessionExpiredPage() {
   const { next } = Route.useSearch();
   const loginSearch = next ? { next } : undefined;
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-muted flex items-center justify-center">
-          <Clock className="h-5 w-5 text-muted-foreground" aria-hidden />
-        </div>
-        <CardTitle>انتهت الجلسة</CardTitle>
-        <CardDescription>
-          تم إنهاء جلستك لأسباب أمنية. الرجاء تسجيل الدخول مرة أخرى للمتابعة.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Button asChild className="w-full">
-          <Link to="/auth/login" search={loginSearch as never}>
-            تسجيل الدخول
-          </Link>
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="text-center">
+      <div className="mx-auto mb-3 grid h-12 w-12 place-items-center rounded-full bg-muted text-muted-foreground">
+        <Clock className="h-5 w-5" aria-hidden />
+      </div>
+      <h1 className="auth-title">انتهت الجلسة</h1>
+      <p className="auth-subtitle">
+        تم إنهاء جلستك لأسباب أمنية. الرجاء تسجيل الدخول مرة أخرى للمتابعة.
+      </p>
+      <Link
+        to="/auth/login"
+        search={loginSearch as never}
+        className="auth-submit mt-6 inline-flex no-underline"
+      >
+        تسجيل الدخول
+      </Link>
+    </div>
   );
 }

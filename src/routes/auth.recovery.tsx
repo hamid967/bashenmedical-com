@@ -1,15 +1,10 @@
 /**
- * `/auth/recovery` — password reset via email link. Uses Supabase's
- * built-in recovery flow so we don't reinvent password reset.
+ * `/auth/recovery` — password reset via email link.
  */
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui-v3";
-import { Input } from "@/components/ui-v3";
-import { Label } from "@/components/ui-v3";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
@@ -48,50 +43,50 @@ function RecoveryPage() {
   }
 
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle>استعادة كلمة المرور</CardTitle>
-        <CardDescription>سنرسل رابط إعادة تعيين إلى بريدك</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {sent ? (
-          <Alert>
-            <AlertDescription>
-              تم إرسال رابط إعادة التعيين إلى {email}. تحقق من صندوق الوارد.
-            </AlertDescription>
-          </Alert>
-        ) : (
-          <>
-            {error && (
-              <Alert variant="destructive" className="mb-4">
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <div>
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  dir="ltr"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>
-                {busy && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                إرسال رابط الاستعادة
-              </Button>
-            </form>
-          </>
-        )}
-        <div className="mt-4 text-center text-sm">
-          <Link to="/auth/login" className="text-muted-foreground underline">
-            رجوع لتسجيل الدخول
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+    <div>
+      <h1 className="auth-title">استعادة كلمة المرور</h1>
+      <p className="auth-subtitle">سنرسل رابط إعادة تعيين إلى بريدك الإلكتروني</p>
+
+      {sent ? (
+        <Alert className="mt-4">
+          <AlertDescription>
+            تم إرسال رابط إعادة التعيين إلى {email}. تحقق من صندوق الوارد.
+          </AlertDescription>
+        </Alert>
+      ) : (
+        <>
+          {error && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+            <div>
+              <label className="auth-label" htmlFor="email">
+                البريد الإلكتروني
+                <span className="req">*</span>
+              </label>
+              <input
+                id="email"
+                className="auth-input"
+                type="email"
+                dir="ltr"
+                placeholder="اكتب عنوان بريدك الإلكتروني"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="auth-submit" disabled={busy}>
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+              إرسال رابط الاستعادة
+            </button>
+          </form>
+        </>
+      )}
+      <div className="auth-footer">
+        <Link to="/auth/login">رجوع لتسجيل الدخول</Link>
+      </div>
+    </div>
   );
 }
