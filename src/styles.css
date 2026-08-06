@@ -254,11 +254,11 @@
   background:
     linear-gradient(
       105deg,
-      color-mix(in oklab, var(--brand-deep) 82%, #041820) 0%,
-      color-mix(in oklab, var(--brand-deep) 48%, transparent) 48%,
-      color-mix(in oklab, var(--brand) 22%, transparent) 100%
+      color-mix(in oklab, var(--brand-deep) 72%, transparent) 0%,
+      color-mix(in oklab, var(--brand-deep) 38%, transparent) 42%,
+      color-mix(in oklab, var(--brand-deep) 12%, transparent) 100%
     ),
-    linear-gradient(to top, rgba(4, 18, 28, 0.55) 0%, transparent 42%);
+    linear-gradient(to top, rgba(4, 18, 28, 0.45) 0%, transparent 38%);
 }
 .home-hero__brand {
   font-size: clamp(2.4rem, 6.5vw, 4.4rem);
