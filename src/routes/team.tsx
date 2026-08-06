@@ -13,6 +13,7 @@ import { useI18n } from "@/lib/i18n";
 import type { DoctorRow } from "@/components/doctors/types";
 import { bmcOgImageMeta } from "@/lib/og-meta";
 import { buildBreadcrumbs } from "@/lib/localBusinessSchema";
+import { LEADERSHIP_ROLES } from "@/lib/team-roster";
 
 const SITE_URL = "https://bashenmedical.com";
 const PAGE_URL = `${SITE_URL}/team`;
@@ -65,52 +66,6 @@ export const Route = createFileRoute("/team")({
   component: TeamPage,
 });
 
-type LeaderRole = {
-  ar: string;
-  en: string;
-  desc_ar: string;
-  desc_en: string;
-};
-
-const LEADERSHIP: LeaderRole[] = [
-  {
-    ar: "المدير التنفيذي",
-    en: "Chief Executive",
-    desc_ar: "القيادة العامة والاستراتيجية التشغيلية للمجمع.",
-    desc_en: "Overall leadership and operational strategy.",
-  },
-  {
-    ar: "المدير الطبي",
-    en: "Chief Medical Officer",
-    desc_ar: "الإشراف على جودة الخدمات الطبية وسلامة المرضى.",
-    desc_en: "Oversees medical quality and patient safety.",
-  },
-  {
-    ar: "مدير العمليات",
-    en: "Chief Operations Officer",
-    desc_ar: "إدارة الفروع والعمليات اليومية والمشتريات.",
-    desc_en: "Branch operations, day-to-day execution, procurement.",
-  },
-  {
-    ar: "مدير تقنية المعلومات",
-    en: "Chief Technology Officer",
-    desc_ar: "المنصات الرقمية، البنية التحتية، وأمن المعلومات.",
-    desc_en: "Digital platforms, infrastructure, and security.",
-  },
-  {
-    ar: "مدير الجودة والاعتماد",
-    en: "Head of Quality & Accreditation",
-    desc_ar: "معايير الجودة، الاعتمادات، والتحسين المستمر.",
-    desc_en: "Quality standards, accreditations, continuous improvement.",
-  },
-  {
-    ar: "مدير خدمة العملاء",
-    en: "Head of Patient Experience",
-    desc_ar: "تجربة المريض والاستجابة لملاحظات الزوار.",
-    desc_en: "Patient journey and feedback response.",
-  },
-];
-
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   const chars = parts.slice(0, 2).map((p) => p[0] ?? "");
@@ -154,9 +109,17 @@ function TeamPage() {
   });
 
   const filteredDoctors = useMemo(() => {
+    const clean = doctors.filter((d) => {
+      const slug = (d.slug ?? "").toLowerCase();
+      const name = `${d.name_ar} ${d.name_en}`.toLowerCase();
+      if (slug.startsWith("e2e-") || slug.startsWith("demo-")) return false;
+      if (/\b(e2e|demo|اختبار)\b/i.test(name)) return false;
+      if (/^doctor [ab]\b/i.test(d.name_en ?? "")) return false;
+      return true;
+    });
     const term = q.trim().toLowerCase();
-    if (!term) return doctors;
-    return doctors.filter((d) => {
+    if (!term) return clean;
+    return clean.filter((d) => {
       const hay = [
         d.name_ar,
         d.name_en,
@@ -190,6 +153,26 @@ function TeamPage() {
                 ? "أطباء استشاريون، أخصائيون، وقيادة إدارية يعملون معًا لتقديم رعاية آمنة وشخصية في كل زيارة."
                 : "Consultants, specialists, and an administrative leadership working together to deliver safe, personal care at every visit."}
             </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                to="/team/about"
+                className="inline-flex rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-semibold hover:border-primary/40"
+              >
+                {ar ? "عن الفريق" : "About the team"}
+              </Link>
+              <Link
+                to="/team/leadership"
+                className="inline-flex rounded-full border border-border bg-card/80 px-4 py-2 text-sm font-semibold hover:border-primary/40"
+              >
+                {ar ? "الإدارة التنفيذية" : "Leadership"}
+              </Link>
+              <Link
+                to="/doctors"
+                className="inline-flex rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground"
+              >
+                {ar ? "كل الأطباء" : "All doctors"}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -208,8 +191,8 @@ function TeamPage() {
                 </h2>
                 <p className="text-sm text-muted-foreground">
                   {ar
-                    ? `${doctors.length} طبيب واستشاري في مختلف التخصصات`
-                    : `${doctors.length} doctors and consultants across specialties`}
+                    ? `${filteredDoctors.length} طبيب واستشاري في مختلف التخصصات`
+                    : `${filteredDoctors.length} doctors and consultants across specialties`}
                 </p>
               </div>
             </div>
@@ -250,13 +233,9 @@ function TeamPage() {
                   <div className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4 transition hover:border-primary/40 hover:shadow-md">
                     <Avatar src={d.photo_url} name={name} />
                     <div className="min-w-0 flex-1">
-                      {title && (
-                        <div className="text-xs text-muted-foreground">{title}</div>
-                      )}
+                      {title && <div className="text-xs text-muted-foreground">{title}</div>}
                       <div className="truncate font-semibold text-foreground">{name}</div>
-                      {specialty && (
-                        <div className="mt-1 text-sm text-primary">{specialty}</div>
-                      )}
+                      {specialty && <div className="mt-1 text-sm text-primary">{specialty}</div>}
                       {d.years_experience ? (
                         <div className="mt-1 text-xs text-muted-foreground">
                           {ar
@@ -306,12 +285,12 @@ function TeamPage() {
           </div>
 
           <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {LEADERSHIP.map((r) => {
+            {LEADERSHIP_ROLES.map((r) => {
               const name = ar ? r.ar : r.en;
               const desc = ar ? r.desc_ar : r.desc_en;
               return (
                 <li
-                  key={r.en}
+                  key={r.key}
                   className="flex items-start gap-4 rounded-2xl border border-border bg-card p-4"
                 >
                   <Avatar src={null} name={name} />
@@ -324,11 +303,19 @@ function TeamPage() {
             })}
           </ul>
 
-          <p className="mt-6 text-xs text-muted-foreground">
-            {ar
-              ? "الأسماء الشخصية للإدارة تُعرض داخل بوابة الموظفين ولا تُنشر علنًا حفاظًا على الخصوصية."
-              : "Individual leadership names are shown inside the staff portal and not published for privacy."}
-          </p>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-xs text-muted-foreground">
+              {ar
+                ? "الأسماء الشخصية للإدارة تُعرض داخل بوابة الموظفين ولا تُنشر علنًا حفاظًا على الخصوصية."
+                : "Individual leadership names are shown inside the staff portal and not published for privacy."}
+            </p>
+            <Link
+              to="/team/leadership"
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              {ar ? "تفاصيل الإدارة ←" : "Leadership details →"}
+            </Link>
+          </div>
         </section>
       </div>
     </div>
