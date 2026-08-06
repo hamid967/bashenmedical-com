@@ -101,6 +101,7 @@ export function DoctorAutocomplete() {
 
   const goToDoctor = (d: Doctor) => {
     const search: Record<string, string> = { doctor: d.id };
+    // Prefer UUID when filter was chosen; else keep slug (book resolves slug→id).
     if (specialty) {
       const hit = specialties?.find((s) => s.slug === specialty);
       search.specialty = hit?.id ?? specialty;
