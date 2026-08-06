@@ -1,12 +1,8 @@
 /**
- * `/auth` — thin parent layout for the unified auth flow.
- *
- * Replaces the legacy 882-line single-page auth screen. The new flow lives
- * in child routes: /auth/login, /auth/verify, /auth/register, /auth/recovery,
- * /auth/session-expired. This parent only renders the shared shell and lets
- * `auth.index.tsx` handle the "hit /auth directly" redirect.
+ * `/auth` — Andalusia-inspired split shell for all auth child routes.
  */
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { AuthShell } from "@/components/auth/AuthShell";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -20,10 +16,8 @@ export const Route = createFileRoute("/auth")({
     ],
   }),
   component: () => (
-    <main className="min-h-dvh bg-gradient-to-b from-background to-muted/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Outlet />
-      </div>
-    </main>
+    <AuthShell>
+      <Outlet />
+    </AuthShell>
   ),
 });

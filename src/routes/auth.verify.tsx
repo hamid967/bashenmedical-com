@@ -13,10 +13,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui-v3";
-import { Input } from "@/components/ui-v3";
-import { Label } from "@/components/ui-v3";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import { issueOtp, verifyOtp } from "@/lib/auth/otp.functions";
@@ -143,53 +139,52 @@ function VerifyPage() {
   }
 
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <CardTitle>أدخل رمز التحقق</CardTitle>
-        <CardDescription>
-          أرسلنا رمزًا مكوّنًا من 6 أرقام. ينتهي خلال {formatSeconds(secondsLeft)}.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Label htmlFor="otp">الرمز</Label>
-          <Input
-            id="otp"
-            inputMode="numeric"
-            autoComplete="one-time-code"
-            maxLength={6}
-            pattern="\d{6}"
-            value={code}
-            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-            dir="ltr"
-            className="text-center text-2xl tracking-[0.6em]"
-            required
-          />
-          <Button type="submit" className="w-full" disabled={busy || code.length !== 6}>
-            {busy && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-            تحقّق
-          </Button>
-        </form>
-        <div className="mt-4 flex items-center justify-between text-sm">
-          <Link to="/auth/login" className="text-muted-foreground underline">
-            رجوع
-          </Link>
-          <button
-            type="button"
-            onClick={handleResend}
-            disabled={resendCooldown > 0}
-            className="text-primary underline disabled:text-muted-foreground disabled:no-underline"
-          >
-            {resendCooldown > 0 ? `إعادة الإرسال بعد ${resendCooldown}s` : "إعادة إرسال الرمز"}
-          </button>
-        </div>
-      </CardContent>
-    </Card>
+    <div>
+      <h1 className="auth-title">أدخل رمز التحقق</h1>
+      <p className="auth-subtitle">
+        أرسلنا رمزًا مكوّنًا من 6 أرقام. ينتهي خلال {formatSeconds(secondsLeft)}.
+      </p>
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+        <label className="auth-label" htmlFor="otp">
+          الرمز
+          <span className="req">*</span>
+        </label>
+        <input
+          id="otp"
+          className="auth-input text-center text-2xl tracking-[0.6em]"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          maxLength={6}
+          pattern="\d{6}"
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+          dir="ltr"
+          required
+        />
+        <button type="submit" className="auth-submit" disabled={busy || code.length !== 6}>
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+          تحقّق
+        </button>
+      </form>
+      <div className="mt-4 flex items-center justify-between text-sm">
+        <Link to="/auth/login" className="text-muted-foreground underline">
+          رجوع
+        </Link>
+        <button
+          type="button"
+          onClick={handleResend}
+          disabled={resendCooldown > 0}
+          className="text-[color:var(--brand)] underline disabled:text-muted-foreground disabled:no-underline"
+        >
+          {resendCooldown > 0 ? `إعادة الإرسال بعد ${resendCooldown}s` : "إعادة إرسال الرمز"}
+        </button>
+      </div>
+    </div>
   );
 }
 

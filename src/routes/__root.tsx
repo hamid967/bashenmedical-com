@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -260,22 +261,25 @@ function RootComponent() {
       .then((m) => m.installBrowserErrorReporter())
       .catch(() => void 0);
   }, []);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const isAuthRoute = pathname === "/auth" || pathname.startsWith("/auth/");
+
   return (
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <JazanSettingsProvider>
           <div className="min-h-dvh flex flex-col">
-            <AnnouncementBar />
-            <Header />
+            {!isAuthRoute && <AnnouncementBar />}
+            {!isAuthRoute && <Header />}
             <main className="flex-1">
               <Outlet />
             </main>
-            <Footer />
+            {!isAuthRoute && <Footer />}
             <Toaster position="top-center" richColors closeButton />
-            <BaeshenAssistant />
-            <FloatingWhatsAppButton />
+            {!isAuthRoute && <BaeshenAssistant />}
+            {!isAuthRoute && <FloatingWhatsAppButton />}
             <PwaUpdatePrompt />
-            <CommandPaletteProvider />
+            {!isAuthRoute && <CommandPaletteProvider />}
           </div>
         </JazanSettingsProvider>
       </I18nProvider>

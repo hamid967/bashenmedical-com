@@ -1,26 +1,14 @@
 /**
- * `/auth/login` — unified sign-in with three tabs:
- *   1. Mobile OTP (WhatsApp) — patients and staff with a registered mobile
- *   2. Email + password fallback — for accounts that don't use OTP
- *   3. Nafath — disabled placeholder (adapter is not_configured)
- *
- * After a successful sign-in the client asks the server for the user's
- * primary role home (`getMyRolesAndHome`) and navigates there, unless a
- * sanitized `next` search param requested a specific same-origin path.
- * The client never trusts locally-decoded role claims for redirect.
+ * `/auth/login` — Andalusia-style welcome panel with email / phone tabs.
+ * Logic preserved: WhatsApp OTP, email+password, Google/Apple SSO, next redirect.
  */
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui-v3";
-import { Input } from "@/components/ui-v3";
-import { Label } from "@/components/ui-v3";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui-v3";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-v3";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, ShieldCheck, Apple } from "lucide-react";
+import { Eye, EyeOff, Loader2, Apple } from "lucide-react";
 import { issueOtp } from "@/lib/auth/otp.functions";
 import { getMyRolesAndHome } from "@/lib/auth/resolve-home.functions";
 import { sanitizeNext } from "@/lib/auth/redirect";
@@ -68,15 +56,17 @@ function LoginPage() {
   const issue = useServerFn(issueOtp);
   const resolveHome = useServerFn(getMyRolesAndHome);
 
+  const [tab, setTab] = useState<"email" | "mobile">("email");
   const [mobile, setMobile] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const nextParam = sanitizeNext(search.next);
   const bookingIntent = !!nextParam && (nextParam === "/book" || nextParam.startsWith("/book?"));
 
-  // If already signed in, bounce out immediately. Honor a stashed post-SSO next.
   useEffect(() => {
     let active = true;
     supabase.auth.getUser().then(({ data }) => {
@@ -97,20 +87,18 @@ function LoginPage() {
   async function handleSSO(provider: "google" | "apple") {
     setError(null);
     setBusy(true);
-    // Stash intended destination — the OAuth round-trip drops URL search params.
     if (typeof window !== "undefined" && nextParam) {
       sessionStorage.setItem("auth:next", nextParam);
     }
     const res = await lovable.auth.signInWithOAuth(provider, {
       redirect_uri: window.location.origin,
     });
-    if (res.redirected) return; // browser navigating to provider
+    if (res.redirected) return;
     if (res.error) {
       setBusy(false);
       setError(res.error.message || "تعذّر تسجيل الدخول عبر مزوّد الهوية.");
       return;
     }
-    // Popup/web_message flow: session already set — resolve home.
     const r = await resolveHome({});
     setBusy(false);
     navigate({ to: nextParam ?? r.home, replace: true });
@@ -143,6 +131,14 @@ function LoginPage() {
     e.preventDefault();
     setError(null);
     setBusy(true);
+    if (typeof window !== "undefined") {
+      try {
+        if (remember) localStorage.setItem("auth:remember-email", email);
+        else localStorage.removeItem("auth:remember-email");
+      } catch {
+        /* ignore */
+      }
+    }
     const { error: signErr } = await supabase.auth.signInWithPassword({ email, password });
     if (signErr) {
       setBusy(false);
@@ -154,153 +150,191 @@ function LoginPage() {
     navigate({ to: nextParam ?? r.home, replace: true });
   }
 
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("auth:remember-email");
+      if (saved) setEmail(saved);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   return (
-    <Card>
-      <CardHeader className="text-center">
-        <div className="mx-auto mb-2 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-          <ShieldCheck className="h-5 w-5 text-primary" aria-hidden />
-        </div>
-        <CardTitle>تسجيل الدخول</CardTitle>
-        <CardDescription>مجمع باعشن الطبي — دخول موحّد آمن</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {bookingIntent && (
-          <Alert className="mb-4 border-[color:var(--brand-gold-soft)] bg-[color:var(--brand-mist)]">
-            <AlertDescription className="text-[color:var(--brand-deep)] text-sm leading-6">
-              حجز المواعيد متاح لأعضاء المنصة فقط. سجّل الدخول أو{" "}
-              <Link
-                to="/auth/register"
-                search={{ next: nextParam ?? "/book" }}
-                className="font-semibold underline"
+    <div>
+      <h1 className="auth-title">مرحبًا بعودتك</h1>
+      <p className="auth-subtitle">مرحبًا بعودتك إلى حسابك في مجمع باعشن الطبي</p>
+
+      {bookingIntent && (
+        <Alert className="mt-4 border-[color:var(--brand-gold-soft)] bg-[color:var(--brand-mist)]">
+          <AlertDescription className="text-[color:var(--brand-deep)] text-sm leading-6">
+            حجز المواعيد متاح لأعضاء المنصة فقط. سجّل الدخول أو{" "}
+            <Link
+              to="/auth/register"
+              search={{ next: nextParam ?? "/book" }}
+              className="font-semibold underline"
+            >
+              أنشئ حسابًا
+            </Link>{" "}
+            للمتابعة.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {error && (
+        <Alert variant="destructive" className="mt-4">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <div className="auth-tabs" role="tablist" aria-label="طريقة الدخول">
+        <button
+          type="button"
+          role="tab"
+          className="auth-tab"
+          aria-selected={tab === "email"}
+          onClick={() => setTab("email")}
+        >
+          البريد الإلكتروني
+        </button>
+        <button
+          type="button"
+          role="tab"
+          className="auth-tab"
+          aria-selected={tab === "mobile"}
+          onClick={() => setTab("mobile")}
+        >
+          رقم الهاتف
+        </button>
+      </div>
+
+      {tab === "email" ? (
+        <form onSubmit={handleEmailSubmit} className="space-y-3">
+          <div>
+            <label className="auth-label" htmlFor="email">
+              البريد الإلكتروني
+              <span className="req">*</span>
+            </label>
+            <input
+              id="email"
+              className="auth-input"
+              type="email"
+              dir="ltr"
+              placeholder="اكتب عنوان بريدك الإلكتروني"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+          </div>
+          <div>
+            <label className="auth-label" htmlFor="password">
+              كلمة المرور
+              <span className="req">*</span>
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                className="auth-input pe-11"
+                type={showPassword ? "text" : "password"}
+                placeholder="اكتب كلمة المرور هنا"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="absolute top-1/2 -translate-y-1/2 end-3 text-muted-foreground"
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
               >
-                أنشئ حسابًا
-              </Link>{" "}
-              للمتابعة إلى صفحة الحجز.
-            </AlertDescription>
-          </Alert>
-        )}
-        {error && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {/* Single Sign-On */}
-        <div className="space-y-2 mb-4">
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full gap-2"
-            disabled={busy}
-            onClick={() => handleSSO("google")}
-            aria-label="تسجيل الدخول عبر Google"
-          >
-            <GoogleGlyph className="h-4 w-4" />
-            متابعة عبر Google
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full gap-2"
-            disabled={busy}
-            onClick={() => handleSSO("apple")}
-            aria-label="تسجيل الدخول عبر Apple"
-          >
-            <Apple className="h-4 w-4" />
-            متابعة عبر Apple
-          </Button>
-        </div>
-        <div className="relative mb-4">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
-          <div className="relative flex justify-center text-xs">
-            <span className="bg-card px-2 text-muted-foreground">أو</span>
+          <div className="auth-row">
+            <label className="inline-flex items-center gap-2 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="rounded border-border"
+              />
+              تذكرني
+            </label>
+            <Link to="/auth/recovery" className="font-semibold text-[color:var(--brand)] underline">
+              نسيت كلمة المرور؟
+            </Link>
           </div>
-        </div>
+          <button type="submit" className="auth-submit" disabled={busy}>
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            تسجيل الدخول
+          </button>
+        </form>
+      ) : (
+        <form onSubmit={handleMobileSubmit} className="space-y-3">
+          <div>
+            <label className="auth-label" htmlFor="mobile">
+              رقم الهاتف
+              <span className="req">*</span>
+            </label>
+            <div className="flex gap-2" dir="ltr">
+              <span className="inline-flex items-center rounded-xl border border-[color:var(--border)] bg-muted/40 px-3 text-sm font-semibold text-muted-foreground">
+                +966
+              </span>
+              <input
+                id="mobile"
+                className="auth-input"
+                type="tel"
+                inputMode="tel"
+                placeholder="5XXXXXXXX"
+                value={mobile}
+                onChange={(e) => setMobile(e.target.value)}
+                required
+                autoComplete="tel"
+              />
+            </div>
+          </div>
+          <p className="text-xs text-muted-foreground leading-5">
+            سنرسل رمز تحقق عبر واتساب لتأكيد هويتك بأمان.
+          </p>
+          <button type="submit" className="auth-submit" disabled={busy}>
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            إرسال رمز التحقق
+          </button>
+        </form>
+      )}
 
-        <Tabs defaultValue="mobile">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="mobile">جوال</TabsTrigger>
-            <TabsTrigger value="email">إيميل</TabsTrigger>
-            <TabsTrigger value="nafath" disabled>
-              نفاذ (قريبًا)
-            </TabsTrigger>
-          </TabsList>
+      <div className="auth-divider">أو</div>
 
-          <TabsContent value="mobile" className="mt-4">
-            <form onSubmit={handleMobileSubmit} className="space-y-3">
-              <div>
-                <Label htmlFor="mobile">رقم الجوال</Label>
-                <Input
-                  id="mobile"
-                  type="tel"
-                  inputMode="tel"
-                  dir="ltr"
-                  placeholder="05XXXXXXXX"
-                  value={mobile}
-                  onChange={(e) => setMobile(e.target.value)}
-                  required
-                  autoComplete="tel"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>
-                {busy && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                إرسال رمز التحقق عبر واتساب
-              </Button>
-            </form>
-          </TabsContent>
+      <div className="auth-sso">
+        <button
+          type="button"
+          className="auth-sso-btn"
+          disabled={busy}
+          onClick={() => handleSSO("google")}
+        >
+          <GoogleGlyph className="h-4 w-4" />
+          متابعة عبر Google
+        </button>
+        <button
+          type="button"
+          className="auth-sso-btn"
+          disabled={busy}
+          onClick={() => handleSSO("apple")}
+        >
+          <Apple className="h-4 w-4" />
+          متابعة عبر Apple
+        </button>
+      </div>
 
-          <TabsContent value="email" className="mt-4">
-            <form onSubmit={handleEmailSubmit} className="space-y-3">
-              <div>
-                <Label htmlFor="email">البريد الإلكتروني</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  dir="ltr"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
-              </div>
-              <div>
-                <Label htmlFor="password">كلمة المرور</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  autoComplete="current-password"
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={busy}>
-                {busy && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-                تسجيل الدخول
-              </Button>
-              <div className="text-sm text-center">
-                <Link to="/auth/recovery" className="text-primary underline">
-                  نسيت كلمة المرور؟
-                </Link>
-              </div>
-            </form>
-          </TabsContent>
-        </Tabs>
-
-        <div className="mt-6 pt-4 border-t text-center text-sm text-muted-foreground">
-          مستخدم جديد؟{" "}
-          <Link
-            to="/auth/register"
-            search={nextParam ? { next: nextParam } : undefined}
-            className="text-primary underline"
-          >
-            إنشاء حساب
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="auth-footer">
+        ليس لديك حساب؟{" "}
+        <Link to="/auth/register" search={nextParam ? { next: nextParam } : undefined}>
+          سجّل الآن
+        </Link>
+      </div>
+    </div>
   );
 }
 
