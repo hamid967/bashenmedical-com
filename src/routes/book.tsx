@@ -911,11 +911,11 @@ function BookPage() {
       : Math.min(state.step, maxReachableStep(state, patientValidation.ok, insuranceValidation.ok));
 
   const stepAnnounce =
-    state.step === 9
-      ? STEPS[8]
+    state.step === SUCCESS_STEP
+      ? STEPS[SUCCESS_STEP - 1]
       : t("a11y.stepAnnounce", "الخطوة {{current}} من {{total}}: {{title}}", {
           current: displayedStep,
-          total: 8,
+          total: STEPS.length,
           title: STEPS[displayedStep - 1] ?? "",
         });
 
@@ -946,11 +946,13 @@ function BookPage() {
             <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
               <div
                 className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${Math.round(((displayedStep - 1) / 7) * 100)}%` }}
+                style={{
+                  width: `${Math.round(((displayedStep - 1) / Math.max(STEPS.length - 1, 1)) * 100)}%`,
+                }}
               />
             </div>
             <div className="mt-1 text-[11px] text-muted-foreground text-center">
-              {t("page.stepOf", { current: displayedStep, total: 8 })}
+              {t("page.stepOf", { current: displayedStep, total: STEPS.length })}
             </div>
           </div>
         )}

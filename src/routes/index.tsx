@@ -45,6 +45,7 @@ const HOME_ESERVICES: {
   subAr: string;
   subEn: string;
   to: string;
+  search?: Record<string, string>;
   icon: React.ComponentType<{ className?: string }>;
 }[] = [
   {
@@ -69,18 +70,20 @@ const HOME_ESERVICES: {
     key: "lab",
     ar: "تقارير المختبر",
     en: "Lab Reports",
-    subAr: "نتائج التحاليل",
-    subEn: "View lab results",
-    to: "/my",
+    subAr: "من بوابة المريض بعد الدخول",
+    subEn: "Via patient portal after sign-in",
+    to: "/auth/login",
+    search: { next: "/my" },
     icon: FlaskConical,
   },
   {
     key: "radiology",
     ar: "تقارير الأشعة",
     en: "Radiology Reports",
-    subAr: "صور وتقارير الأشعة",
-    subEn: "Imaging & reports",
-    to: "/my",
+    subAr: "من بوابة المريض بعد الدخول",
+    subEn: "Via patient portal after sign-in",
+    to: "/auth/login",
+    search: { next: "/my" },
     icon: Scan,
   },
   {
@@ -300,6 +303,7 @@ function HomePage() {
                 <RevealItem key={s.key}>
                   <Link
                     to={s.to}
+                    search={s.search}
                     className="group flex h-full flex-col items-center gap-2 rounded-2xl border border-[color:var(--border)] bg-white/80 p-5 text-center transition hover:-translate-y-0.5 hover:border-[color:var(--brand-gold)]/45"
                   >
                     <span className="grid h-12 w-12 place-items-center rounded-2xl bg-[color:var(--brand-mist)] text-[color:var(--brand-deep)]">

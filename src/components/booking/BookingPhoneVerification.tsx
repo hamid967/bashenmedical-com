@@ -22,6 +22,8 @@ type Props = {
   verifiedPhone: string | null;
   onVerified: (challengeId: string, phone: string) => void;
   disabled?: boolean;
+  /** When the signed-in profile already verified this phone. */
+  profilePhoneVerified?: boolean;
 };
 
 export function BookingPhoneVerification({
@@ -30,6 +32,7 @@ export function BookingPhoneVerification({
   verifiedPhone,
   onVerified,
   disabled,
+  profilePhoneVerified,
 }: Props) {
   const { t } = useTranslation("booking");
   const issue = useServerFn(issueOtp);
@@ -42,6 +45,12 @@ export function BookingPhoneVerification({
   const [cooldownUntil, setCooldownUntil] = useState<number>(0);
   const [now, setNow] = useState<number>(() => Date.now());
 
+  useEffect(() => {
+    if (!profilePhoneVerified) return;
+    if (verifiedPhone === phone.trim() && challengeId) return;
+    onVerified("profile-verified", phone.trim());
+  }, [profilePhoneVerified, phone, verifiedPhone, challengeId, onVerified]);
+
   // Tick every second while a cooldown is active so the button label
   // reflects the remaining seconds. Stops as soon as the cooldown ends.
   useEffect(() => {
@@ -53,7 +62,8 @@ export function BookingPhoneVerification({
   const cooldownRemaining = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
   const cooldownActive = cooldownRemaining > 0;
 
-  const alreadyVerified = !!verifiedPhone && verifiedPhone === phone.trim();
+  const alreadyVerified =
+    (!!verifiedPhone && verifiedPhone === phone.trim()) || !!profilePhoneVerified;
 
   const [softBypass, setSoftBypass] = useState(false);
 
@@ -123,12 +133,16 @@ export function BookingPhoneVerification({
       <div className="mt-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 flex items-center gap-2">
         <ShieldCheck className="h-4 w-4" aria-hidden="true" />
         <span>
-          {softBypass
-            ? t("verification.softBypass", {
-                defaultValue:
-                  "خدمة الرسائل غير متاحة حاليًا — تم قبول رقم الجوال وسيتواصل معك فريقنا للتأكيد.",
+          {profilePhoneVerified
+            ? t("verification.profileVerified", {
+                defaultValue: "رقم الجوال موثّق في حسابك — يمكنك تأكيد الحجز مباشرة.",
               })
-            : t("verification.verified")}
+            : softBypass
+              ? t("verification.softBypass", {
+                  defaultValue:
+                    "خدمة الرسائل غير متاحة حاليًا — تم قبول رقم الجوال وسيتواصل معك فريقنا للتأكيد.",
+                })
+              : t("verification.verified")}
         </span>
       </div>
     );

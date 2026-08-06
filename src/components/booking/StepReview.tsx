@@ -1,11 +1,17 @@
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui-v3";
 import { SubmitErrorBanner } from "@/components/SubmitErrorBanner";
 import { BookingPhoneVerification } from "./BookingPhoneVerification";
 import type { BookingSubmitKind } from "@/lib/booking-submit";
+import { supabase } from "@/integrations/supabase/client";
 import { StepShell } from "./StepShell";
 import { formatArDate, type State } from "./types";
+
+function digitsOnly(v: string): string {
+  return (v.match(/\d/g) ?? []).join("");
+}
 
 export function StepReview({
   lang,
@@ -39,6 +45,31 @@ export function StepReview({
   onVerified: (challengeId: string, phone: string) => void;
 }) {
   const { t } = useTranslation("booking");
+  const [profilePhoneVerified, setProfilePhoneVerified] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data: auth } = await supabase.auth.getUser();
+      if (!auth.user || cancelled) return;
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("phone, verified_phone, phone_verified_at")
+        .eq("id", auth.user.id)
+        .maybeSingle();
+      if (cancelled || !profile?.phone_verified_at) return;
+      const a = digitsOnly(
+        (profile.verified_phone as string | null) || (profile.phone as string | null) || "",
+      ).slice(-9);
+      const b = digitsOnly(state.patient.phone).slice(-9);
+      if (a && b && a === b) setProfilePhoneVerified(true);
+      else setProfilePhoneVerified(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [state.patient.phone]);
+
   const branch = branches.find((b) => b.id === state.branchId);
   const spec = specialties.find((s) => s.id === state.specialtyId);
   const doc = doctors.find((d: any) => d.id === state.doctorId);
@@ -122,6 +153,7 @@ export function StepReview({
             verifiedPhone={state.verifiedPhone}
             onVerified={onVerified}
             disabled={submitting}
+            profilePhoneVerified={profilePhoneVerified}
           />
         )}
 
@@ -139,7 +171,8 @@ export function StepReview({
 
         {(() => {
           const phoneVerified =
-            !!state.verificationChallengeId && state.verifiedPhone === state.patient.phone.trim();
+            profilePhoneVerified ||
+            (!!state.verificationChallengeId && state.verifiedPhone === state.patient.phone.trim());
           return (
             <Button
               onClick={onSubmit}

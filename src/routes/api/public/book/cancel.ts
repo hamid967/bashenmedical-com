@@ -21,12 +21,18 @@ import { createFileRoute } from "@tanstack/react-router";
 import { riyadhTodayIso } from "@/lib/riyadh-date";
 import { z } from "zod";
 import { applyRateLimit } from "@/lib/v3/rate-limit-unified.server";
+import {
+  BOOKING_REF_RE,
+  baaHexPrefix,
+  isBmcRef,
+  normalizeBookingRef,
+} from "@/lib/booking/reference";
 
 const cancelSchema = z.object({
   reference: z
     .string()
     .trim()
-    .regex(/^BAA-[0-9A-F]{8}$/i, "المرجع غير صالح. الصيغة المتوقعة BAA-XXXXXXXX."),
+    .regex(BOOKING_REF_RE, "المرجع غير صالح. الصيغة المتوقعة BMC-… أو BAA-XXXXXXXX."),
   phone: z.string().trim().min(6, "رقم الهاتف قصير جدًا").max(32, "رقم الهاتف طويل جدًا"),
 });
 
@@ -63,31 +69,54 @@ export const Route = createFileRoute("/api/public/book/cancel")({
           });
         }
 
-        const refHex = parsed.data.reference.slice(4).toLowerCase();
+        const reference = normalizeBookingRef(parsed.data.reference);
 
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
-          // Look up by phone (narrow index) then match the reference prefix
-          // in-memory. PostgREST cannot `ilike` a uuid column directly, and a
-          // per-phone lookup is typically 1-few rows so this stays cheap.
-          const { data: candidates, error: readErr } = await supabaseAdmin
-            .from("appointments")
-            .select("id, status, appointment_date, appointment_time, patient_phone")
-            .eq("patient_phone", parsed.data.phone)
-            .order("created_at", { ascending: false })
-            .limit(50);
-          if (readErr) {
-            return json(500, {
-              ok: false,
-              kind: "server",
-              message: "تعذّر التحقّق من الحجز.",
-            });
-          }
+          let match: {
+            id: string;
+            status: string;
+            appointment_date: string;
+            appointment_time: string;
+            patient_phone: string | null;
+          } | null = null;
 
-          const match = (candidates ?? []).find((a) =>
-            String(a.id).replace(/-/g, "").toLowerCase().startsWith(refHex),
-          );
+          if (isBmcRef(reference)) {
+            const { data, error: readErr } = await supabaseAdmin
+              .from("appointments")
+              .select("id, status, appointment_date, appointment_time, patient_phone")
+              .eq("reference_number", reference)
+              .eq("patient_phone", parsed.data.phone)
+              .maybeSingle();
+            if (readErr) {
+              return json(500, {
+                ok: false,
+                kind: "server",
+                message: "تعذّر التحقّق من الحجز.",
+              });
+            }
+            match = data;
+          } else {
+            const refHex = baaHexPrefix(reference);
+            const { data: candidates, error: readErr } = await supabaseAdmin
+              .from("appointments")
+              .select("id, status, appointment_date, appointment_time, patient_phone")
+              .eq("patient_phone", parsed.data.phone)
+              .order("created_at", { ascending: false })
+              .limit(50);
+            if (readErr) {
+              return json(500, {
+                ok: false,
+                kind: "server",
+                message: "تعذّر التحقّق من الحجز.",
+              });
+            }
+            match =
+              (candidates ?? []).find((a) =>
+                String(a.id).replace(/-/g, "").toLowerCase().startsWith(refHex),
+              ) ?? null;
+          }
 
           if (!match) {
             return json(404, {

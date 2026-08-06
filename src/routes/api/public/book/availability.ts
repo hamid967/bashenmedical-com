@@ -187,7 +187,16 @@ export const Route = createFileRoute("/api/public/book/availability")({
               .eq("specialty_id", specialtyId!);
             if (branchId) q = q.eq("branch_id", branchId);
             const { data: docs, error } = await q;
-            if (error) return json(200, empty);
+            if (error) {
+              return json(503, {
+                ok: false,
+                code: "AVAILABILITY_QUERY_FAILED",
+                message: "تعذّر جلب الأطباء المتاحين.",
+                times: [],
+                booked: [],
+                doctors_considered: 0,
+              });
+            }
             candidateDoctorIds = (docs ?? []).map((d) => d.id as string);
           }
           if (candidateDoctorIds.length === 0) {
@@ -204,7 +213,16 @@ export const Route = createFileRoute("/api/public/book/availability")({
             .eq("weekday", weekday);
           if (branchId) availQ = availQ.eq("branch_id", branchId);
           const { data: availability, error: availErr } = await availQ;
-          if (availErr) return json(200, empty);
+          if (availErr) {
+            return json(503, {
+              ok: false,
+              code: "AVAILABILITY_QUERY_FAILED",
+              message: "تعذّر جلب جدول التوفر.",
+              times: [],
+              booked: [],
+              doctors_considered: 0,
+            });
+          }
 
           // 3) All-day leaves that cover this date for any candidate.
           const { data: leaves } = await supabaseAdmin
@@ -313,8 +331,19 @@ export const Route = createFileRoute("/api/public/book/availability")({
             });
           }
           return json(200, body, { ETag: etag });
-        } catch {
-          return json(200, empty);
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "unknown";
+          const isConfig = /SERVICE_ROLE|publishable|Missing Supabase/i.test(msg);
+          return json(isConfig ? 503 : 500, {
+            ok: false,
+            code: isConfig ? "SERVICE_MISCONFIGURED" : "AVAILABILITY_FAILED",
+            message: isConfig
+              ? "خدمة المواعيد غير مهيأة. راجع مفتاح الخدمة."
+              : "تعذّر جلب المواعيد المتاحة.",
+            times: [],
+            booked: [],
+            doctors_considered: 0,
+          });
         }
       },
     },

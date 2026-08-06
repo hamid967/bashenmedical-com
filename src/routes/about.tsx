@@ -119,19 +119,37 @@ function AboutPage() {
 
       <section className="container-app py-14 md:py-16 grid gap-10 md:grid-cols-2 items-start">
         <div className="space-y-6 text-[15px] leading-8 text-foreground/90">
-          {paragraphs.map((p) => {
-            const title = lang === "ar" ? p.title_ar : p.title_en;
-            const body = lang === "ar" ? p.body_ar : p.body_en;
-            if (!body) return null;
-            return (
-              <div key={p.id}>
-                {title && (
-                  <h2 className="text-lg font-bold mb-2 text-[color:var(--brand-deep)]">{title}</h2>
-                )}
-                <p>{body}</p>
-              </div>
-            );
-          })}
+          {paragraphs.length === 0 ||
+          paragraphs.every((p) => !(lang === "ar" ? p.body_ar : p.body_en)) ? (
+            <div className="space-y-4">
+              <p>
+                {lang === "ar"
+                  ? "مجمع باعشن الطبي منشأة صحية متكاملة في صبيا بمنطقة جازان، تقدم رعاية تخصصية معتمدة من CBAHI مع تجربة رقمية للحجز والمتابعة بعد التسجيل في المنصة."
+                  : "Baeshen Medical Complex is an integrated healthcare facility in Sabya, Jazan — CBAHI-accredited specialty care with a digital booking journey after platform registration."}
+              </p>
+              <p>
+                {lang === "ar"
+                  ? "نعمل بفريق استشاريين وإدارة تشغيلية وتقنية لتقديم رعاية آمنة وإنسانية لكل زيارة."
+                  : "Our consultants and operational leadership deliver safe, humane care at every visit."}
+              </p>
+            </div>
+          ) : (
+            paragraphs.map((p) => {
+              const title = lang === "ar" ? p.title_ar : p.title_en;
+              const body = lang === "ar" ? p.body_ar : p.body_en;
+              if (!body) return null;
+              return (
+                <div key={p.id}>
+                  {title && (
+                    <h2 className="text-lg font-bold mb-2 text-[color:var(--brand-deep)]">
+                      {title}
+                    </h2>
+                  )}
+                  <p>{body}</p>
+                </div>
+              );
+            })
+          )}
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">

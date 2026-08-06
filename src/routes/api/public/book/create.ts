@@ -242,53 +242,73 @@ export const Route = createFileRoute("/api/public/book/create")({
           },
         });
 
-        // Server-enforced phone verification: caller MUST have completed a
-        // WhatsApp OTP challenge with purpose='booking' matching the patient
-        // phone. Enforced independently of the UI so a direct API caller
-        // cannot bypass the gate.
+        // Server-enforced phone verification unless the member's profile
+        // already has a verified phone matching the booking phone.
         {
           const challengeId = parsed.data.verification_challenge_id;
-          if (!challengeId) {
-            return respond(400, {
-              ok: false,
-              kind: "validation",
-              code: "VERIFICATION_REQUIRED",
-              message: "يجب التحقق من رقم الجوال قبل تأكيد الحجز.",
-            });
-          }
+          const { normalizeSaudiMobile } = await import("@/lib/auth/otp.server");
+          const normalized = normalizeSaudiMobile(parsed.data.patient_phone);
+          let profileVerified = false;
           try {
             const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-            const { normalizeSaudiMobile } = await import("@/lib/auth/otp.server");
-            const normalized = normalizeSaudiMobile(parsed.data.patient_phone);
-            const { data: row } = await supabaseAdmin
-              .from("otp_challenges")
-              .select("id, destination, purpose, consumed_at")
-              .eq("id", challengeId)
+            const { data: profile } = await supabaseAdmin
+              .from("profiles")
+              .select("phone, verified_phone, phone_verified_at")
+              .eq("id", userId)
               .maybeSingle();
-            const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
-            const consumedAt = row?.consumed_at ? new Date(row.consumed_at).getTime() : 0;
-            const ok =
-              !!row &&
-              row.purpose === "booking" &&
-              !!row.consumed_at &&
-              consumedAt >= fifteenMinAgo &&
+            const profilePhone = normalizeSaudiMobile(
+              (profile?.verified_phone as string | null) || (profile?.phone as string | null) || "",
+            );
+            profileVerified =
+              !!profile?.phone_verified_at &&
               !!normalized &&
-              row.destination === normalized;
-            if (!ok) {
+              !!profilePhone &&
+              profilePhone === normalized;
+          } catch {
+            profileVerified = false;
+          }
+
+          if (!profileVerified) {
+            if (!challengeId) {
               return respond(400, {
                 ok: false,
                 kind: "validation",
                 code: "VERIFICATION_REQUIRED",
-                message: "انتهت صلاحية التحقق من الجوال. يرجى إعادة التحقق.",
+                message: "يجب التحقق من رقم الجوال قبل تأكيد الحجز.",
               });
             }
-          } catch {
-            return respond(500, {
-              ok: false,
-              kind: "db",
-              code: "VERIFICATION_CHECK_FAILED",
-              message: FRIENDLY_INSERT_MESSAGES.unknown,
-            });
+            try {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              const { data: row } = await supabaseAdmin
+                .from("otp_challenges")
+                .select("id, destination, purpose, consumed_at")
+                .eq("id", challengeId)
+                .maybeSingle();
+              const fifteenMinAgo = Date.now() - 15 * 60 * 1000;
+              const consumedAt = row?.consumed_at ? new Date(row.consumed_at).getTime() : 0;
+              const ok =
+                !!row &&
+                row.purpose === "booking" &&
+                !!row.consumed_at &&
+                consumedAt >= fifteenMinAgo &&
+                !!normalized &&
+                row.destination === normalized;
+              if (!ok) {
+                return respond(400, {
+                  ok: false,
+                  kind: "validation",
+                  code: "VERIFICATION_REQUIRED",
+                  message: "انتهت صلاحية التحقق من الجوال. يرجى إعادة التحقق.",
+                });
+              }
+            } catch {
+              return respond(500, {
+                ok: false,
+                kind: "db",
+                code: "VERIFICATION_CHECK_FAILED",
+                message: FRIENDLY_INSERT_MESSAGES.unknown,
+              });
+            }
           }
         }
 
@@ -421,19 +441,23 @@ export const Route = createFileRoute("/api/public/book/create")({
         const cleanEmail = (parsed.data.patient_email ?? "").trim().toLowerCase() || null;
         const insurancePatch = await buildInsurancePatch(supa, parsed.data);
 
-        // Link to the authenticated member's patient chart when one exists.
+        // Link / create the authenticated member's patient chart.
         // `appointments.patient_id` references `patients.id` (not auth.users).
         let patientChartId: string | null = null;
         try {
           const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-          const { data: chart } = await supabaseAdmin
-            .from("patients")
-            .select("id")
-            .eq("profile_id", userId)
-            .maybeSingle();
-          patientChartId = chart?.id ?? null;
-        } catch {
-          /* optional link — booking still proceeds for authenticated users */
+          const { ensurePatientChart } = await import("@/lib/patient/ensure-patient-chart.server");
+          patientChartId = await ensurePatientChart(supabaseAdmin as any, {
+            userId,
+            fullName: parsed.data.patient_name,
+            phone: parsed.data.patient_phone,
+            email: cleanEmail,
+            nationalId: parsed.data.national_id ?? null,
+            gender: parsed.data.gender ?? null,
+            branchId: parsed.data.branch_id ?? null,
+          });
+        } catch (err) {
+          console.error("[book/create] ensurePatientChart failed", err);
         }
 
         const payload: Record<string, unknown> = {
@@ -455,17 +479,18 @@ export const Route = createFileRoute("/api/public/book/create")({
           ...insurancePatch,
         };
 
-        // Atomic confirmation. Any 23505 from here means a real conflict
-        // (slot uidx or idempotency uidx) — never a partial-state failure.
-        // Cast: `confirm_appointment_booking` isn't in the generated Database
-        // type until types regenerate after this migration.
+        // Atomic confirmation via service-role (anon EXECUTE revoked).
         const rpcStart = Date.now();
         logBook("rpc.call");
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data: rows, error } = await (supa as any).rpc("confirm_appointment_booking", {
-          p_data: payload,
-          p_idempotency_key: idempotencyKey,
-        });
+        const { data: rows, error } = await (supabaseAdmin as any).rpc(
+          "confirm_appointment_booking",
+          {
+            p_data: payload,
+            p_idempotency_key: idempotencyKey,
+          },
+        );
         const rpcMs = Date.now() - rpcStart;
 
         if (error) {

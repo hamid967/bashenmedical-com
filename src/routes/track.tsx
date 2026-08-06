@@ -97,7 +97,10 @@ const schema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^BAA-[0-9A-F]{8}$/, "رقم الطلب يجب أن يكون بصيغة BAA-XXXXXXXX"),
+    .regex(
+      /^(BMC-\d{8}-\d{4}|BAA-[0-9A-F]{8})$/,
+      "رقم الطلب يجب أن يكون بصيغة BMC-… أو BAA-XXXXXXXX",
+    ),
   phone_last4: z
     .string()
     .trim()
