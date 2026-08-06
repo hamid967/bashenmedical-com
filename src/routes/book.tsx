@@ -408,6 +408,15 @@ function BookPage() {
     staleTime: 5 * 60_000,
   });
 
+  // Deep links often pass specialty slug (?specialty=internal-medicine).
+  // Normalize to UUID once specialties load so filters/holds stay consistent.
+  useEffect(() => {
+    if (!state.specialtyId || !specialties.length) return;
+    if (specialties.some((s: { id: string }) => s.id === state.specialtyId)) return;
+    const bySlug = specialties.find((s: { slug: string }) => s.slug === state.specialtyId);
+    if (bySlug) dispatch({ t: "set", p: { specialtyId: bySlug.id } });
+  }, [state.specialtyId, specialties]);
+
   // If the user picked a doctor via deep link, auto-fill branch & specialty.
   // Skip when the sentinel "any" is chosen — there's no concrete doctor row
   // to pull specialty/branch from.
